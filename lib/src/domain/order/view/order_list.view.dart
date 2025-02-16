@@ -1,9 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:get/get.dart';
-class OrderListView extends StatelessWidget {
+import 'package:hanigold_admin/src/domain/order/controller/order.controller.dart';
+
+class OrderListView extends GetView<OrderController> {
   const OrderListView({super.key});
 
   @override
@@ -11,7 +12,7 @@ class OrderListView extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         iconTheme: IconThemeData(color: AppColor.textColor),
-        title: Text('سفارشات',style: AppTextStyle.smallTitleText,),
+        title: Text('سفارشات', style: AppTextStyle.smallTitleText,),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -19,44 +20,54 @@ class OrderListView extends StatelessWidget {
             width: Get.width,
             height: Get.height,
             child: SingleChildScrollView(
-                    child: Column(
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
+                        Expanded(
+                          child: TextFormField(
 
-                                ),
-                              )
-                            ],
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: SizedBox(
-                            height: Get.height,
-                            child: GridView.builder(
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 1,
-                                  mainAxisExtent: 150
-                              ),
-                              itemCount: 10,
-                              itemBuilder: (context, index) {
-                                return Card(
-                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
-                                  color: AppColor.secondaryColor,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(15)),
-                                  elevation: 10,
-                                );
-                              },
-                            ),
-                          ),
-                        ),
+                        )
                       ],
                     ),
+                  ),
+
+                    /*if(controller.isLoading.value){
+                      return CircularProgressIndicator();
+                    }else if(controller.errorMessage.isNotEmpty){
+                      return Center(
+                        child: Text(controller.errorMessage.value),
+                      );
+                    }else {*/
+                       Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: SizedBox(
+                          height: Get.height,
+                          child: GridView.builder(
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 1,
+                                mainAxisExtent: 150
+                            ),
+                            itemCount: 10,
+                            itemBuilder: (context, index) {
+                              //var orders = controller.orderList[index];
+                              return Card(
+                                margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                                color: AppColor.secondaryColor,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15)),
+                                elevation: 10,
+                                child: Text('p'),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                ],
+              ),
             ),
           )
       ),

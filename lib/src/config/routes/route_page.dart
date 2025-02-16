@@ -20,7 +20,7 @@ class RoutePage{
     GetPage(name: '/splash', page: ()=>SplashView(),binding: SplashBindings()),
     GetPage(name: '/home', page: ()=>HomeView(),binding:HomeBindings()),
     GetPage(name: '/login', page: ()=>LoginView(),binding: AuthBindings()),
-    GetPage(name: '/orderList', page: ()=>OrderListView()),
+    GetPage(name: '/orderList', page: ()=>OrderListView(),binding: OrderBindings()),
     GetPage(name: '/product', page: ()=>ProductView()),
     GetPage(name: '/tools', page: ()=>ToolsView()),
     GetPage(name: '/users', page: ()=>UsersView()),
