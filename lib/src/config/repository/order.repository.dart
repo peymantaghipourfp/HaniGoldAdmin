@@ -13,9 +13,19 @@ class OrderRepository{
   }
   Future<List<OrderModel>> getOrderList() async{
     try{
-      final response=await orderDio.post('Order');
-      List<dynamic> data=response.data;
+      Map<String, dynamic> options = {
+        "options": {
+          "salesOrder": {
+            "orderBy": "SalesOrder.Id",
+            "orderByType": "asc",
+            "StartIndex": 1,
+            "ToIndex": 10000
+          }
+        }
+      };
+      final response=await orderDio.post('Order/get',data: options);
       if(response.statusCode==200) {
+        List<dynamic> data=response.data;
         return data.map((order) => OrderModel.fromJson(order)).toList();
       }else{
         throw ErrorException('خطا');
