@@ -5,27 +5,27 @@ import 'app_color.dart';
 
 class AppTextStyle{
   static const TextStyle smallTitleText=TextStyle(
-    fontSize: 22,
+    fontSize: 18,
     fontFamily: "IranSansB",
     color: AppColor.textColor,
   );
   static const TextStyle mediumTitleText=TextStyle(
-    fontSize: 24,
+    fontSize: 20,
     fontFamily: "IranSansB",
     color: AppColor.textColor,
   );
   static const TextStyle largeTitleText=TextStyle(
-    fontSize: 26,
+    fontSize: 22,
     fontFamily: "IranSansB",
     color: AppColor.textColor,
   );
   static const TextStyle bodyText=TextStyle(
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "IranSansR",
     color: AppColor.textColor,
   );
   static const TextStyle labelText=TextStyle(
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "IranSansR",
     color: AppColor.textColor,
   );

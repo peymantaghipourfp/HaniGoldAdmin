@@ -17,24 +17,25 @@ class LoginView extends GetView<AuthController> {
             width: Get.width,
             height: Get.height,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
+               /* Row(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
               Container(
               width: Get.width,
               height: Get.height * .38,
-              /*decoration: BoxDecoration(
+              decoration: BoxDecoration(
                   image: DecorationImage(
                       fit: BoxFit.contain,
                       image: Image
                           .asset('assets/images/logo.png')
                           .image),
-              ),*/
+              ),
             ),
             ],
-                ),
+                ),*/
                 Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Text('صفحه ورود',
@@ -45,7 +46,7 @@ class LoginView extends GetView<AuthController> {
                   child: Divider(color: AppColor.secondaryColor, height: 1,),
                 ),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
+                  padding: EdgeInsets.symmetric(horizontal: 25.0),
                   child: Form(
                     key: controller.formKey,
                     child: Column(
@@ -58,8 +59,7 @@ class LoginView extends GetView<AuthController> {
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: AppColor.textFieldColor,
-                                hintText: 'شماره موبایل',
-                                labelText: 'لطفا شماره موبایل خود را وارد کنید',
+                                hintText: 'لطفا شماره موبایل خود را وارد کنید',
                                 hintStyle: AppTextStyle.bodyText,
                                 labelStyle: AppTextStyle.labelText,
                                 border: OutlineInputBorder(
@@ -80,8 +80,7 @@ class LoginView extends GetView<AuthController> {
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: AppColor.textFieldColor,
-                                labelText: 'لطفا پسورد خود را وارد کنید',
-                                hintText: 'پسورد',
+                                hintText: 'لطفا پسورد خود را وارد کنید',
                                 hintStyle: AppTextStyle.bodyText,
                                 labelStyle: AppTextStyle.labelText,
                                 border: OutlineInputBorder(
@@ -101,9 +100,9 @@ class LoginView extends GetView<AuthController> {
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColor.secondaryColor,
-                minimumSize: Size(90, 55),
+                minimumSize: Size(150, 55),
                 shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
+                    borderRadius: BorderRadius.circular(15)),
                 elevation: 0,
               ),
               onPressed: (){

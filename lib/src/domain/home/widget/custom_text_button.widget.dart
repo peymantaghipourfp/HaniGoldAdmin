@@ -44,7 +44,7 @@ class _CustomTextButtonState extends State<CustomTextButton> {
             style: ButtonStyle(elevation: WidgetStateProperty.all(5),
               shape: WidgetStateProperty.all(RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(width: 2,color: AppColor.secondaryColor),
+                  side: BorderSide(width: 1,color: AppColor.secondaryColor),
               ),
               ),
               backgroundColor: WidgetStateProperty.resolveWith<Color>(
@@ -57,7 +57,7 @@ class _CustomTextButtonState extends State<CustomTextButton> {
               ),
             ),
               onPressed: widget.onPressed,
-              child: Text(widget.text,style: AppTextStyle.smallTitleText,textAlign: TextAlign.right,),
+              child: Text(widget.text,style: AppTextStyle.bodyText,textAlign: TextAlign.right,),
           ),
       ),
     );

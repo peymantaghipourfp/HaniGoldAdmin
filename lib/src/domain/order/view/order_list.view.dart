@@ -18,13 +18,45 @@ class OrderListView extends StatelessWidget {
           child: SizedBox(
             width: Get.width,
             height: Get.height,
-            child: Padding(
-                padding: EdgeInsets.all(16.0),
-              child: Column(
-                children: [
+            child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
 
-                ],
-              ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: SizedBox(
+                            height: Get.height,
+                            child: GridView.builder(
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 1,
+                                  mainAxisExtent: 150
+                              ),
+                              itemCount: 10,
+                              itemBuilder: (context, index) {
+                                return Card(
+                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 10),
+                                  color: AppColor.secondaryColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15)),
+                                  elevation: 10,
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
           )
       ),
