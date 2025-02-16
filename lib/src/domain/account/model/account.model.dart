@@ -1,7 +1,8 @@
+import 'package:meta/meta.dart';
 import 'dart:convert';
-
 import 'package:json_annotation/json_annotation.dart';
 
+import '../../order/model/order.model.dart';
 part 'account.model.g.dart';
 
 List<AccountModel> accountModelFromJson(String str) => List<AccountModel>.from(json.decode(str).map((x) => AccountModel.fromJson(x)));
@@ -103,7 +104,7 @@ enum Name {
   THE_2
 }
 
-/*final nameValues = EnumValues({
+final nameValues = EnumValues({
   "گروه ویژه": Name.EMPTY,
   "سکه": Name.FLUFFY,
   "گروه قیمت اول": Name.NAME,
@@ -112,16 +113,16 @@ enum Name {
   "ریال": Name.TENTACLED,
   "گروه 1    ": Name.THE_1,
   "گروه 2    ": Name.THE_2
-});*/
+});
 
 enum AccountModelAttribute {
   @JsonValue("cus")
   CUS
 }
 
-/*final accountModelAttributeValues = EnumValues({
+final accountModelAttributeValues = EnumValues({
   "cus": AccountModelAttribute.CUS
-});*/
+});
 
 @JsonSerializable()
 class Parent {

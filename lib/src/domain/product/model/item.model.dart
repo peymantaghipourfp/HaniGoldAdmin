@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../../account/model/account.model.dart';
+import '../../order/model/order.model.dart';
 
 part 'item.model.g.dart';
 
@@ -73,9 +74,9 @@ enum ItemModelAttribute {
   SYS
 }
 
-/*final itemModelAttributeValues = EnumValues({
+final itemModelAttributeValues = EnumValues({
   "sys": ItemModelAttribute.SYS
-});*/
+});
 
 @JsonSerializable()
 class ItemPrice {
