@@ -18,10 +18,10 @@ class OrderRepository{
       if(response.statusCode==200) {
         return data.map((order) => OrderModel.fromJson(order)).toList();
       }else{
-        throw Text('خطا');
+        throw ErrorException('خطا');
       }
     }catch(e){
-      rethrow;
+      throw ErrorException('خطا:$e');
     }
   }
 }

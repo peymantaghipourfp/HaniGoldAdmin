@@ -8,6 +8,7 @@ import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 enum PageState{loading,err,empty,list}
 class OrderController extends GetxController{
 
+  final OrderRepository orderRepository=OrderRepository();
   var orderList=<OrderModel>[].obs;
   var errorMessage=''.obs;
   var isLoading=true.obs;
@@ -20,8 +21,6 @@ class OrderController extends GetxController{
     pageState.value=PageState.err;
     errorMessage.value=message;
   }
-
-  final OrderRepository orderRepository=OrderRepository();
 
   @override
   void onInit() {
