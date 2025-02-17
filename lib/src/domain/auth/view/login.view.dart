@@ -6,7 +6,7 @@ import 'package:hanigold_admin/src/domain/auth/controller/auth.controller.dart';
 
 
 class LoginView extends GetView<AuthController> {
-  LoginView({super.key});
+  const LoginView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -66,9 +66,7 @@ class LoginView extends GetView<AuthController> {
                                     borderRadius: BorderRadius.circular(15)
                                 ),
                               ),
-                              validator: (value) {
-
-                              },
+                              //validator: (value) {},
                             ),
                           ),
                         ),
@@ -87,9 +85,7 @@ class LoginView extends GetView<AuthController> {
                                   borderRadius: BorderRadius.circular(15)
                                 ),
                               ),
-                              validator: (value) {
-
-                              },
+                              //validator: (value) {},
                             ),
                           ),
                         ),

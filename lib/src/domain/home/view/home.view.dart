@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
 import 'package:hanigold_admin/src/domain/home/widget/custom_text_button.widget.dart';
+import 'package:hanigold_admin/src/widget/custom_appbar.widget.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -12,14 +13,7 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.backGroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColor.backGroundColor,
-        title: Text('خانه',style: AppTextStyle.smallTitleText,),
-        centerTitle: true,
-        iconTheme: IconThemeData(
-          color: AppColor.textColor
-        ),
-      ),
+      appBar: CustomAppBar(title: 'خانه'),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(

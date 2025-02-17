@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hanigold_admin/src/config/const/app_text_style.dart';
-
-import '../../../config/const/app_color.dart';
+import '../../../widget/custom_appbar.widget.dart';
 
 class ToolsView extends StatelessWidget {
   const ToolsView({super.key});
@@ -9,14 +7,7 @@ class ToolsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColor.backGroundColor,
-        title: Text('تنظیمات',style: AppTextStyle.smallTitleText,),
-        centerTitle: true,
-        iconTheme: IconThemeData(
-            color: AppColor.textColor
-        ),
-      ),
+      appBar: CustomAppBar(title: 'تنظیمات'),
     );
   }
 }
