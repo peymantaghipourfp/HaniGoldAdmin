@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:hanigold_admin/src/config/repository/url/baseUrl.dart';
+import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import '../network/error/network.error.dart';
 
@@ -8,7 +7,7 @@ class OrderRepository{
   Dio orderDio=Dio();
 
   OrderRepository(){
-    orderDio.options.baseUrl="http://192.168.100.87:10000/api/";
+    orderDio.options.baseUrl=BaseUrl.baseUrl;
 
   }
   Future<List<OrderModel>> getOrderList() async{

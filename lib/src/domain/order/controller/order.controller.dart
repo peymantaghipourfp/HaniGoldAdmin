@@ -30,7 +30,7 @@ class OrderController extends GetxController{
   Future<void> fetchOrderList() async{
     try{
       isLoading.value=true;
-      //pageState.value=PageState.loading;
+      pageState.value=PageState.loading;
       var fetchedOrderList=await orderRepository.getOrderList();
       orderList.assignAll(fetchedOrderList);
     }catch(e){
