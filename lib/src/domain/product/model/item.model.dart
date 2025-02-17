@@ -1,10 +1,7 @@
-
-
-import 'dart:convert';
+import 'package:hanigold_admin/src/domain/product/model/item_group.model.dart';
+import 'package:hanigold_admin/src/domain/product/model/item_price.model.dart';
 import 'package:json_annotation/json_annotation.dart';
-
-import '../../account/model/account.model.dart';
-import '../../order/model/order.model.dart';
+import 'dart:convert';
 
 part 'item.model.g.dart';
 
@@ -12,39 +9,38 @@ List<ItemModel> itemModelFromJson(String str) => List<ItemModel>.from(json.decod
 
 String itemModelToJson(List<ItemModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-
 @JsonSerializable()
 class ItemModel {
   @JsonKey(name: "itemGroup")
-  final Group itemGroup;
+  final ItemGroupModel? itemGroup;
   @JsonKey(name: "itemPrice")
-  final ItemPrice itemPrice;
+  final ItemPriceModel? itemPrice;
   @JsonKey(name: "name")
-  final String name;
+  final String? name;
   @JsonKey(name: "sellStatus")
-  final int sellStatus;
+  final int? sellStatus;
   @JsonKey(name: "buyStatus")
-  final int buyStatus;
+  final int? buyStatus;
   @JsonKey(name: "maxSell")
-  final int maxSell;
+  final int? maxSell;
   @JsonKey(name: "maxBuy")
-  final int maxBuy;
+  final int? maxBuy;
   @JsonKey(name: "unit")
-  final int unit;
+  final int? unit;
   @JsonKey(name: "w750")
-  final double w750;
+  final double? w750;
   @JsonKey(name: "initBalance")
-  final int initBalance;
+  final int? initBalance;
   @JsonKey(name: "rowNum")
-  final int rowNum;
+  final int? rowNum;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "attribute")
-  final ItemModelAttribute attribute;
+  final String? attribute;
   @JsonKey(name: "recId")
-  final String recId;
+  final String? recId;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
   ItemModel({
     required this.itemGroup,
@@ -69,34 +65,3 @@ class ItemModel {
   Map<String, dynamic> toJson() => _$ItemModelToJson(this);
 }
 
-enum ItemModelAttribute {
-  @JsonValue("sys")
-  SYS
-}
-
-final itemModelAttributeValues = EnumValues({
-  "sys": ItemModelAttribute.SYS
-});
-
-@JsonSerializable()
-class ItemPrice {
-  @JsonKey(name: "price")
-  final double price;
-  @JsonKey(name: "differentPrice")
-  final double differentPrice;
-  @JsonKey(name: "createdOn")
-  final DateTime createdOn;
-  @JsonKey(name: "infos")
-  final List<dynamic> infos;
-
-  ItemPrice({
-    required this.price,
-    required this.differentPrice,
-    required this.createdOn,
-    required this.infos,
-  });
-
-  factory ItemPrice.fromJson(Map<String, dynamic> json) => _$ItemPriceFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ItemPriceToJson(this);
-}

@@ -1,10 +1,6 @@
 
-
-
-import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
-
-import 'item.model.dart';
+import 'dart:convert';
 
 part 'item_price.model.g.dart';
 
@@ -15,21 +11,21 @@ String itemPriceModelToJson(List<ItemPriceModel> data) => json.encode(List<dynam
 @JsonSerializable()
 class ItemPriceModel {
   @JsonKey(name: "itemId")
-  final int itemId;
+  final int? itemId;
   @JsonKey(name: "price")
-  final double price;
+  final double? price;
   @JsonKey(name: "differentPrice")
-  final double differentPrice;
+  final double? differentPrice;
   @JsonKey(name: "rowNum")
-  final int rowNum;
+  final int? rowNum;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "attribute")
-  final ItemModelAttribute attribute;
+  final String? attribute;
   @JsonKey(name: "recId")
-  final String recId;
+  final String? recId;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
   ItemPriceModel({
     required this.itemId,

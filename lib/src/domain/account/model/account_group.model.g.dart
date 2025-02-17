@@ -8,12 +8,12 @@ part of 'account_group.model.dart';
 
 AccountGroupModel _$AccountGroupModelFromJson(Map<String, dynamic> json) =>
     AccountGroupModel(
-      name: json['name'] as String,
-      rowNum: (json['rowNum'] as num).toInt(),
-      id: (json['id'] as num).toInt(),
-      attribute: $enumDecode(_$AccountModelAttributeEnumMap, json['attribute']),
-      recId: json['recId'] as String,
-      infos: json['infos'] as List<dynamic>,
+      name: json['name'] as String?,
+      rowNum: (json['rowNum'] as num?)?.toInt(),
+      id: (json['id'] as num?)?.toInt(),
+      attribute: json['attribute'] as String?,
+      recId: json['recId'] as String?,
+      infos: json['infos'] as List<dynamic>?,
     );
 
 Map<String, dynamic> _$AccountGroupModelToJson(AccountGroupModel instance) =>
@@ -21,11 +21,7 @@ Map<String, dynamic> _$AccountGroupModelToJson(AccountGroupModel instance) =>
       'name': instance.name,
       'rowNum': instance.rowNum,
       'id': instance.id,
-      'attribute': _$AccountModelAttributeEnumMap[instance.attribute]!,
+      'attribute': instance.attribute,
       'recId': instance.recId,
       'infos': instance.infos,
     };
-
-const _$AccountModelAttributeEnumMap = {
-  AccountModelAttribute.CUS: 'cus',
-};

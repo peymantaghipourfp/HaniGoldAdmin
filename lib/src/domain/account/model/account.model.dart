@@ -1,8 +1,10 @@
-import 'package:meta/meta.dart';
-import 'dart:convert';
-import 'package:json_annotation/json_annotation.dart';
 
-import '../../order/model/order.model.dart';
+import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
+import 'package:hanigold_admin/src/domain/account/model/account_item_group.model.dart';
+import 'package:hanigold_admin/src/domain/account/model/account_price_group.model.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'dart:convert';
+
 part 'account.model.g.dart';
 
 List<AccountModel> accountModelFromJson(String str) => List<AccountModel>.from(json.decode(str).map((x) => AccountModel.fromJson(x)));
@@ -12,35 +14,35 @@ String accountModelToJson(List<AccountModel> data) => json.encode(List<dynamic>.
 @JsonSerializable()
 class AccountModel {
   @JsonKey(name: "type")
-  final int type;
+  final int? type;
   @JsonKey(name: "code")
-  final String code;
+  final String? code;
   @JsonKey(name: "name")
-  final String name;
+  final String? name;
   @JsonKey(name: "parent")
-  final Parent parent;
+  final Parent? parent;
   @JsonKey(name: "accountGroup")
-  final Group accountGroup;
+  final AccountGroupModel? accountGroup;
   @JsonKey(name: "accountItemGroup")
-  final Group accountItemGroup;
+  final AccountItemGroupModel? accountItemGroup;
   @JsonKey(name: "accountPriceGroup")
-  final Group accountPriceGroup;
+  final AccountPriceGroupModel? accountPriceGroup;
   @JsonKey(name: "rowNum")
-  final int rowNum;
+  final int? rowNum;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "attribute")
-  final AccountModelAttribute attribute;
+  final String? attribute;
   @JsonKey(name: "tags")
-  final String tags;
+  final String? tags;
   @JsonKey(name: "recId")
-  final String recId;
+  final String? recId;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
   @JsonKey(name: "firstName")
-  final String firstName;
+  final String? firstName;
   @JsonKey(name: "lastName")
-  final String lastName;
+  final String? lastName;
 
   AccountModel({
     required this.type,
@@ -66,92 +68,23 @@ class AccountModel {
 }
 
 @JsonSerializable()
-class Group {
-  @JsonKey(name: "name")
-  final Name name;
-  @JsonKey(name: "id")
-  final int id;
-  @JsonKey(name: "infos")
-  final List<dynamic> infos;
-
-  Group({
-    required this.name,
-    required this.id,
-    required this.infos,
-  });
-
-  factory Group.fromJson(Map<String, dynamic> json) => _$GroupFromJson(json);
-
-  Map<String, dynamic> toJson() => _$GroupToJson(this);
-}
-
-enum Name {
-  @JsonValue("گروه ویژه")
-  EMPTY,
-  @JsonValue("سکه")
-  FLUFFY,
-  @JsonValue("گروه قیمت اول")
-  NAME,
-  @JsonValue("طلا")
-  PURPLE,
-  @JsonValue("ارز")
-  STICKY,
-  @JsonValue("ریال")
-  TENTACLED,
-  @JsonValue("گروه 1    ")
-  THE_1,
-  @JsonValue("گروه 2    ")
-  THE_2
-}
-
-final nameValues = EnumValues({
-  "گروه ویژه": Name.EMPTY,
-  "سکه": Name.FLUFFY,
-  "گروه قیمت اول": Name.NAME,
-  "طلا": Name.PURPLE,
-  "ارز": Name.STICKY,
-  "ریال": Name.TENTACLED,
-  "گروه 1    ": Name.THE_1,
-  "گروه 2    ": Name.THE_2
-});
-
-enum AccountModelAttribute {
-  @JsonValue("cus")
-  CUS
-}
-
-final accountModelAttributeValues = EnumValues({
-  "cus": AccountModelAttribute.CUS
-});
-
-@JsonSerializable()
 class Parent {
   @JsonKey(name: "accountGroup")
-  final AccountGroup accountGroup;
+  final ParentAccountGroup? accountGroup;
   @JsonKey(name: "accountItemGroup")
-  final AccountGroup accountItemGroup;
+  final ParentAccountGroup? accountItemGroup;
   @JsonKey(name: "accountPriceGroup")
-  final AccountGroup accountPriceGroup;
+  final ParentAccountGroup? accountPriceGroup;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
-  @JsonKey(name: "type")
-  final int type;
-  @JsonKey(name: "code")
-  final String code;
-  @JsonKey(name: "name")
-  final String name;
-  @JsonKey(name: "id")
-  final int id;
+  final List<dynamic>? infos;
+
 
   Parent({
     required this.accountGroup,
     required this.accountItemGroup,
     required this.accountPriceGroup,
     required this.infos,
-    required this.type,
-    required this.code,
-    required this.name,
-    required this.id,
+
   });
 
   factory Parent.fromJson(Map<String, dynamic> json) => _$ParentFromJson(json);
@@ -160,15 +93,17 @@ class Parent {
 }
 
 @JsonSerializable()
-class AccountGroup {
+class ParentAccountGroup {
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
-  AccountGroup({
+  ParentAccountGroup({
     required this.infos,
   });
 
-  factory AccountGroup.fromJson(Map<String, dynamic> json) => _$AccountGroupFromJson(json);
+  factory ParentAccountGroup.fromJson(Map<String, dynamic> json) => _$ParentAccountGroupFromJson(json);
 
-  Map<String, dynamic> toJson() => _$AccountGroupToJson(this);
+  Map<String, dynamic> toJson() => _$ParentAccountGroupToJson(this);
 }
+
+

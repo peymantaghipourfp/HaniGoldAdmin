@@ -1,7 +1,6 @@
 
-
-import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
+import 'dart:convert';
 
 part 'item_group.model.g.dart';
 
@@ -9,27 +8,26 @@ List<ItemGroupModel> itemGroupModelFromJson(String str) => List<ItemGroupModel>.
 
 String itemGroupModelToJson(List<ItemGroupModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
 
-
 @JsonSerializable()
 class ItemGroupModel {
   @JsonKey(name: "code")
-  final String code;
+  final String? code;
   @JsonKey(name: "name")
-  final String name;
+  final String? name;
   @JsonKey(name: "equivalent")
-  final String equivalent;
+  final String? equivalent;
   @JsonKey(name: "rowNum")
-  final int rowNum;
+  final int? rowNum;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "attribute")
-  final String attribute;
+  final String? attribute;
   @JsonKey(name: "description")
-  final String description;
+  final String? description;
   @JsonKey(name: "recId")
-  final String recId;
+  final String? recId;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
   ItemGroupModel({
     required this.code,

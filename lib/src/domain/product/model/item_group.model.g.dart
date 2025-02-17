@@ -8,15 +8,15 @@ part of 'item_group.model.dart';
 
 ItemGroupModel _$ItemGroupModelFromJson(Map<String, dynamic> json) =>
     ItemGroupModel(
-      code: json['code'] as String,
-      name: json['name'] as String,
-      equivalent: json['equivalent'] as String,
-      rowNum: (json['rowNum'] as num).toInt(),
-      id: (json['id'] as num).toInt(),
-      attribute: json['attribute'] as String,
-      description: json['description'] as String,
-      recId: json['recId'] as String,
-      infos: json['infos'] as List<dynamic>,
+      code: json['code'] as String?,
+      name: json['name'] as String?,
+      equivalent: json['equivalent'] as String?,
+      rowNum: (json['rowNum'] as num?)?.toInt(),
+      id: (json['id'] as num?)?.toInt(),
+      attribute: json['attribute'] as String?,
+      description: json['description'] as String?,
+      recId: json['recId'] as String?,
+      infos: json['infos'] as List<dynamic>?,
     );
 
 Map<String, dynamic> _$ItemGroupModelToJson(ItemGroupModel instance) =>

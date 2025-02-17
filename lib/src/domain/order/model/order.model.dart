@@ -1,7 +1,9 @@
 
-import 'dart:convert';
+import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
+import 'package:hanigold_admin/src/domain/product/model/item_price.model.dart';
 import 'package:json_annotation/json_annotation.dart';
-import '../../account/model/account.model.dart';
+import 'dart:convert';
 
 part 'order.model.g.dart';
 
@@ -12,36 +14,36 @@ String orderModelToJson(List<OrderModel> data) => json.encode(List<dynamic>.from
 @JsonSerializable()
 class OrderModel {
   @JsonKey(name: "date")
-  final DateTime date;
+  final DateTime? date;
   @JsonKey(name: "account")
-  final Parent account;
+  final AccountModel? account;
+  @JsonKey(name: "type")
+  final int? type;
   @JsonKey(name: "registered")
-  final int registered;
+  final int? registered;
   @JsonKey(name: "checked")
-  final int checked;
-  @JsonKey(name: "isDeleted")
-  final bool isDeleted;
+  final int? checked;
+  @JsonKey(name: "salesOrderDetails")
+  final List<SalesOrderDetail>? salesOrderDetails;
   @JsonKey(name: "rowNum")
-  final int rowNum;
+  final int? rowNum;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "attribute")
-  final AccountModelAttribute attribute;
-  @JsonKey(name: "recId")
-  final String recId;
+  final String? attribute;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
   OrderModel({
     required this.date,
     required this.account,
+    required this.type,
     required this.registered,
     required this.checked,
-    required this.isDeleted,
+    required this.salesOrderDetails,
     required this.rowNum,
     required this.id,
     required this.attribute,
-    required this.recId,
     required this.infos,
   });
 
@@ -49,15 +51,51 @@ class OrderModel {
 
   Map<String, dynamic> toJson() => _$OrderModelToJson(this);
 }
+@JsonSerializable()
+class SalesOrderDetail {
+  @JsonKey(name: "orderId")
+  final int? orderId;
+  @JsonKey(name: "item")
+  final ItemModel? item;
+  @JsonKey(name: "itemPrice")
+  final ItemPriceModel? itemPrice;
+  @JsonKey(name: "amount")
+  final int? amount;
+  @JsonKey(name: "price")
+  final double? price;
+  @JsonKey(name: "totalPrice")
+  final double? totalPrice;
+  @JsonKey(name: "type")
+  final int? type;
+  @JsonKey(name: "registered")
+  final int? registered;
+  @JsonKey(name: "checked")
+  final int? checked;
+  @JsonKey(name: "id")
+  final int? id;
+  @JsonKey(name: "attribute")
+  final String? attribute;
+  @JsonKey(name: "infos")
+  final List<dynamic>? infos;
 
-class EnumValues<T> {
-  Map<String, T> map;
-  late Map<T, String> reverseMap;
+  SalesOrderDetail({
+    required this.orderId,
+    required this.item,
+    required this.itemPrice,
+    required this.amount,
+    required this.price,
+    required this.totalPrice,
+    required this.type,
+    required this.registered,
+    required this.checked,
+    required this.id,
+    required this.attribute,
+    required this.infos,
+  });
 
-  EnumValues(this.map);
+  factory SalesOrderDetail.fromJson(Map<String, dynamic> json) => _$SalesOrderDetailFromJson(json);
 
-  Map<T, String> get reverse {
-    reverseMap = map.map((k, v) => MapEntry(v, k));
-    return reverseMap;
-  }
+  Map<String, dynamic> toJson() => _$SalesOrderDetailToJson(this);
 }
+
+

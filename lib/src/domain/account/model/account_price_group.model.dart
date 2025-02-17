@@ -1,7 +1,6 @@
 
-import 'dart:convert';
 import 'package:json_annotation/json_annotation.dart';
-import 'account.model.dart';
+import 'dart:convert';
 
 part 'account_price_group.model.g.dart';
 
@@ -12,17 +11,17 @@ String accountPriceGroupModelToJson(List<AccountPriceGroupModel> data) => json.e
 @JsonSerializable()
 class AccountPriceGroupModel {
   @JsonKey(name: "name")
-  final Name name;
+  final String? name;
   @JsonKey(name: "rowNum")
-  final int rowNum;
+  final int? rowNum;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "attribute")
-  final AccountModelAttribute attribute;
+  final String? attribute;
   @JsonKey(name: "recId")
-  final String recId;
+  final String? recId;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
   AccountPriceGroupModel({
     required this.name,
