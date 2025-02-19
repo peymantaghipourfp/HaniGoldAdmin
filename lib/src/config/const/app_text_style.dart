@@ -5,17 +5,17 @@ import 'app_color.dart';
 
 class AppTextStyle{
   static const TextStyle smallTitleText=TextStyle(
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "IranSansB",
     color: AppColor.textColor,
   );
   static const TextStyle mediumTitleText=TextStyle(
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "IranSansB",
     color: AppColor.textColor,
   );
   static const TextStyle largeTitleText=TextStyle(
-    fontSize: 22,
+    fontSize: 20,
     fontFamily: "IranSansB",
     color: AppColor.textColor,
   );
@@ -23,6 +23,34 @@ class AppTextStyle{
     fontSize: 14,
     fontFamily: "IranSansR",
     color: AppColor.textColor,
+  );
+  static const TextStyle bodyTextBold=TextStyle(
+    fontSize: 14,
+    fontFamily: "IranSansR",
+    color: AppColor.textColor,
+    fontWeight: FontWeight.bold
+  );
+  static const TextStyle madiumbodyText=TextStyle(
+    fontSize: 15,
+    fontFamily: "IranSansR",
+    color: AppColor.textColor,
+  );
+  static const TextStyle mediumBodyTextBold=TextStyle(
+      fontSize: 15,
+      fontFamily: "IranSansR",
+      color: AppColor.textColor,
+      fontWeight: FontWeight.bold
+  );
+  static const TextStyle largebodyText=TextStyle(
+    fontSize: 16,
+    fontFamily: "IranSansR",
+    color: AppColor.textColor,
+  );
+  static const TextStyle largeBodyTextBold=TextStyle(
+      fontSize: 16,
+      fontFamily: "IranSansR",
+      color: AppColor.textColor,
+      fontWeight: FontWeight.bold
   );
   static const TextStyle labelText=TextStyle(
     fontSize: 12,

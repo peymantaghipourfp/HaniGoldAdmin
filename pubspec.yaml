@@ -39,6 +39,8 @@ dependencies:
   get_storage: ^2.1.1
   json_annotation: ^4.9.0
   dropdown_button2: ^2.3.9
+  persian_number_utility: ^1.1.4
+  flutter_svg: ^2.0.17
 
 
 dev_dependencies:

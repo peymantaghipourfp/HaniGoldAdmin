@@ -15,16 +15,18 @@ String orderModelToJson(List<OrderModel> data) => json.encode(List<dynamic>.from
 class OrderModel {
   @JsonKey(name: "date")
   final DateTime? date;
+  @JsonKey(name: "limitDate")
+  final DateTime? limitDate;
   @JsonKey(name: "account")
   final AccountModel? account;
   @JsonKey(name: "type")
   final int? type;
-  @JsonKey(name: "registered")
-  final int? registered;
+  @JsonKey(name: "mode")
+  final int? mode;
   @JsonKey(name: "checked")
-  final int? checked;
-  @JsonKey(name: "salesOrderDetails")
-  final List<SalesOrderDetail>? salesOrderDetails;
+  final bool? checked;
+  @JsonKey(name: "orderDetails")
+  final List<OrderDetail>? orderDetails;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -36,11 +38,12 @@ class OrderModel {
 
   OrderModel({
     required this.date,
+    required this.limitDate,
     required this.account,
     required this.type,
-    required this.registered,
+    required this.mode,
     required this.checked,
-    required this.salesOrderDetails,
+    required this.orderDetails,
     required this.rowNum,
     required this.id,
     required this.attribute,
@@ -51,8 +54,9 @@ class OrderModel {
 
   Map<String, dynamic> toJson() => _$OrderModelToJson(this);
 }
+
 @JsonSerializable()
-class SalesOrderDetail {
+class OrderDetail {
   @JsonKey(name: "orderId")
   final int? orderId;
   @JsonKey(name: "item")
@@ -65,12 +69,6 @@ class SalesOrderDetail {
   final double? price;
   @JsonKey(name: "totalPrice")
   final double? totalPrice;
-  @JsonKey(name: "type")
-  final int? type;
-  @JsonKey(name: "registered")
-  final int? registered;
-  @JsonKey(name: "checked")
-  final int? checked;
   @JsonKey(name: "id")
   final int? id;
   @JsonKey(name: "attribute")
@@ -78,24 +76,21 @@ class SalesOrderDetail {
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
 
-  SalesOrderDetail({
+  OrderDetail({
     required this.orderId,
     required this.item,
     required this.itemPrice,
     required this.amount,
     required this.price,
     required this.totalPrice,
-    required this.type,
-    required this.registered,
-    required this.checked,
     required this.id,
     required this.attribute,
     required this.infos,
   });
 
-  factory SalesOrderDetail.fromJson(Map<String, dynamic> json) => _$SalesOrderDetailFromJson(json);
+  factory OrderDetail.fromJson(Map<String, dynamic> json) => _$OrderDetailFromJson(json);
 
-  Map<String, dynamic> toJson() => _$SalesOrderDetailToJson(this);
+  Map<String, dynamic> toJson() => _$OrderDetailToJson(this);
 }
 
 

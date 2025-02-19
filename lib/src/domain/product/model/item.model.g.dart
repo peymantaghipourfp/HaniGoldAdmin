@@ -13,6 +13,9 @@ ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
       itemPrice: json['itemPrice'] == null
           ? null
           : ItemPriceModel.fromJson(json['itemPrice'] as Map<String, dynamic>),
+      itemUnit: json['itemUnit'] == null
+          ? null
+          : ItemModel.fromJson(json['itemUnit'] as Map<String, dynamic>),
       name: json['name'] as String?,
       sellStatus: (json['sellStatus'] as num?)?.toInt(),
       buyStatus: (json['buyStatus'] as num?)?.toInt(),
@@ -31,6 +34,7 @@ ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
 Map<String, dynamic> _$ItemModelToJson(ItemModel instance) => <String, dynamic>{
       'itemGroup': instance.itemGroup,
       'itemPrice': instance.itemPrice,
+      'itemUnit': instance.itemUnit,
       'name': instance.name,
       'sellStatus': instance.sellStatus,
       'buyStatus': instance.buyStatus,

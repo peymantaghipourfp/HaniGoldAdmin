@@ -15,6 +15,8 @@ class ItemModel {
   final ItemGroupModel? itemGroup;
   @JsonKey(name: "itemPrice")
   final ItemPriceModel? itemPrice;
+  @JsonKey(name: "itemUnit")
+  final ItemModel? itemUnit;
   @JsonKey(name: "name")
   final String? name;
   @JsonKey(name: "sellStatus")
@@ -45,6 +47,7 @@ class ItemModel {
   ItemModel({
     required this.itemGroup,
     required this.itemPrice,
+    required this.itemUnit,
     required this.name,
     required this.sellStatus,
     required this.buyStatus,

@@ -14,7 +14,7 @@ class OrderRepository{
     try{
       Map<String, dynamic> options = {
         "options": {
-          "salesOrder": {
+          "order": {
             "orderBy": "SalesOrder.Id",
             "orderByType": "asc",
             "StartIndex": 1,
