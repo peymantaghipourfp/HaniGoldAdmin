@@ -17,14 +17,20 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
           : AccountModel.fromJson(json['account'] as Map<String, dynamic>),
       type: (json['type'] as num?)?.toInt(),
       mode: (json['mode'] as num?)?.toInt(),
+      item: json['item'] == null
+          ? null
+          : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
+      amount: (json['amount'] as num?)?.toInt(),
+      price: (json['price'] as num?)?.toDouble(),
+      differentPrice: (json['differentPrice'] as num?)?.toDouble(),
+      totalPrice: (json['totalPrice'] as num?)?.toDouble(),
       checked: json['checked'] as bool?,
-      orderDetails: (json['orderDetails'] as List<dynamic>?)
-          ?.map((e) => OrderDetail.fromJson(e as Map<String, dynamic>))
-          .toList(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
+      recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
+      limitPrice: (json['limitPrice'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
@@ -34,39 +40,16 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'account': instance.account,
       'type': instance.type,
       'mode': instance.mode,
+      'item': instance.item,
+      'amount': instance.amount,
+      'price': instance.price,
+      'differentPrice': instance.differentPrice,
+      'totalPrice': instance.totalPrice,
       'checked': instance.checked,
-      'orderDetails': instance.orderDetails,
       'rowNum': instance.rowNum,
       'id': instance.id,
       'attribute': instance.attribute,
+      'recId': instance.recId,
       'infos': instance.infos,
-    };
-
-OrderDetail _$OrderDetailFromJson(Map<String, dynamic> json) => OrderDetail(
-      orderId: (json['orderId'] as num?)?.toInt(),
-      item: json['item'] == null
-          ? null
-          : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
-      itemPrice: json['itemPrice'] == null
-          ? null
-          : ItemPriceModel.fromJson(json['itemPrice'] as Map<String, dynamic>),
-      amount: (json['amount'] as num?)?.toInt(),
-      price: (json['price'] as num?)?.toDouble(),
-      totalPrice: (json['totalPrice'] as num?)?.toDouble(),
-      id: (json['id'] as num?)?.toInt(),
-      attribute: json['attribute'] as String?,
-      infos: json['infos'] as List<dynamic>?,
-    );
-
-Map<String, dynamic> _$OrderDetailToJson(OrderDetail instance) =>
-    <String, dynamic>{
-      'orderId': instance.orderId,
-      'item': instance.item,
-      'itemPrice': instance.itemPrice,
-      'amount': instance.amount,
-      'price': instance.price,
-      'totalPrice': instance.totalPrice,
-      'id': instance.id,
-      'attribute': instance.attribute,
-      'infos': instance.infos,
+      'limitPrice': instance.limitPrice,
     };

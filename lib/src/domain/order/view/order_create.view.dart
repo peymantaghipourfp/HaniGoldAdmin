@@ -1,10 +1,13 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order_create.controller.dart';
+import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 
 class OrderCreateView extends StatelessWidget {
   OrderCreateView({super.key});
@@ -17,148 +20,299 @@ class OrderCreateView extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(title: 'ایجاد سفارش جدید'),
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'سفارش جدید',
-                    style: AppTextStyle.smallTitleText,
-                  ),
-                  ElevatedButton(
-                    style: ButtonStyle(
-                        elevation: WidgetStatePropertyAll(5),
-                        backgroundColor:
-                        WidgetStatePropertyAll(AppColor.buttonColor),
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10)))),
-                    onPressed: () {
-                      Get.back();
-                    },
-                    child: Text(
-                      'لیست سفارشات',
-                      style: AppTextStyle.labelText,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'سفارش جدید',
+                      style: AppTextStyle.smallTitleText,
                     ),
-                  ),
-                ],
-              ),
-              Divider(
-                height: 1,
-                color: AppColor.secondaryColor,
-              ),
-              Padding(
-                padding:
-                const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
-                child: Obx(() {
-                  return Form(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'خرید/فروش',
-                          style: AppTextStyle.labelText,
-                        ),
-                        DropdownButtonHideUnderline(
-                          child: DropdownButton2<String>(
-                            isExpanded: true,
-                            hint: Row(
-                              children: [
-                                Expanded(
-                                  child: Row(
-                                    children: [
-                                      Text(
-                                        "انتخاب کنید",
-                                        style: context.textTheme.bodyMedium!
-                                            .copyWith(
-                                            fontSize: 14,
-                                            color: AppColor.textColor),
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                            items: orderCreateController.orderTypeList
-                                .map((String item) {
-                              return DropdownMenuItem(
-                                  value: item,
-                                  child: Text(
-                                    item,
-                                    style: AppTextStyle.bodyText,
-                                  ));
-                            }).toList(),
-                            value: orderCreateController.selectedValue.value,
-                            onChanged: (String? newValue) {
-                              orderCreateController.changeSelectedValue(
-                                  newValue);
-                            },
-                            buttonStyleData: ButtonStyleData(
-                              padding: const EdgeInsets.only(
-                                  left: 10, right: 10),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(7),
-                                  color: AppColor.textFieldColor,
-                                  border: Border.all(
-                                      color: AppColor.secondaryColor,
-                                      width: 1)),
-                              elevation: 0,
-                            ),
-                            iconStyleData: IconStyleData(
-                              icon: const Icon(
-                                Icons.keyboard_arrow_down,
-                              ),
-                              iconSize: 23,
-                              iconEnabledColor: AppColor.textColor,
-                              iconDisabledColor: Colors.grey,
-                            ),
-                            dropdownStyleData: DropdownStyleData(
-                              maxHeight: 200,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(7),
-                                color: AppColor.textFieldColor,
-                              ),
-                              offset: const Offset(-0, 0),
-                              scrollbarTheme: ScrollbarThemeData(
-                                radius: const Radius.circular(7),
-                                thickness: WidgetStateProperty.all(6),
-                                thumbVisibility: WidgetStateProperty.all(true),
-                              ),
-                            ),
-                            menuItemStyleData: const MenuItemStyleData(
-                              height: 40,
-                              padding: EdgeInsets.only(left: 10, right: 10),
+                    ElevatedButton(
+                      style: ButtonStyle(
+                          elevation: WidgetStatePropertyAll(5),
+                          backgroundColor:
+                          WidgetStatePropertyAll(AppColor.buttonColor),
+                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)))),
+                      onPressed: () {
+                        Get.back();
+                      },
+                      child: Text(
+                        'لیست سفارشات',
+                        style: AppTextStyle.labelText,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  height: 1,
+                  color: AppColor.secondaryColor,
+                ),
+                Padding(
+                  padding:
+                  const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+                  child: Obx(() {
+                   /* List<String> uniqueItems = orderCreateController.itemList
+                        .map((item) => item.name ?? "")
+                        .where((name) => name.isNotEmpty)
+                        .toList();*/
+                    return Form(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // خرید/فروش
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'خرید/فروش',
+                              style: AppTextStyle.labelText,
                             ),
                           ),
-                        ),
-                        /*DropdownButtonFormField(
-                            alignment: Alignment.bottomCenter,
-                            menuMaxHeight: 200,
-                            isExpanded: true,
-                            hint: Text('انتخاب کنید',style: AppTextStyle.labelText.copyWith(color: Colors.grey),),
-                              decoration: InputDecoration(filled: true,fillColor: AppColor.textFieldColor),
-                              items: orderCreateController.options.map((String item){
-                                return DropdownMenuItem(
-                                  value: item,
-                                    child: Text(item));
-                              }).toList(),
-
-                              iconEnabledColor: AppColor.textColor,
-                              dropdownColor: AppColor.textFieldColor,
-                              style: AppTextStyle.bodyText,
+                          // خرید/فروش
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: CustomDropdownWidget(
+                                items: orderCreateController.orderTypeList,
+                                selectedValue: orderCreateController.selectedBuySell.value,
+                                onChanged: (String? newValue){
+                                  orderCreateController.changeSelectedBuySell(newValue);
+                                },
+                              backgroundColor: AppColor.textFieldColor,
+                              borderRadius: 7,
+                              borderColor: AppColor.secondaryColor,
+                              hideUnderline: true,
+                            ),
+                          ),
+                          // محصول
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'محصول',
+                              style: AppTextStyle.labelText,
+                            ),
+                          ),
+                          // محصول
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: CustomDropdownWidget(
+                              items: orderCreateController.itemList
+                                  .map((item) => item.name ?? "").toList(),
+                              selectedValue: orderCreateController.selectedItem.value,
                               onChanged: (String? newValue){
-                                orderCreateController.selectedValue=newValue;
+                                orderCreateController.changeSelectedItem(newValue);
                               },
-                          ),*/
-                      ],
-                    ),
-                  );
-                }),
-              ),
-            ],
+                              backgroundColor: AppColor.textFieldColor,
+                              borderRadius: 7,
+                              borderColor: AppColor.secondaryColor,
+                              hideUnderline: true,
+                            ),
+                          ),
+                          // کاربر
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'کاربر',
+                              style: AppTextStyle.labelText,
+                            ),
+                          ),
+                          // کاربر
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: CustomDropdownWidget(
+                              items: orderCreateController.accountList
+                                  .map((account)=>account.name ?? "").toList(),
+                              selectedValue: orderCreateController.selectedAccount.value,
+                              onChanged: (String? newValue){
+                                orderCreateController.changeSelectedAccount(newValue);
+                              },
+                              backgroundColor: AppColor.textFieldColor,
+                              borderRadius: 7,
+                              borderColor: AppColor.secondaryColor,
+                              hideUnderline: true,
+                            ),
+                          ),
+                          // قیمت
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'قیمت (ریال)',
+                              style: AppTextStyle.labelText,
+                            ),
+                          ),
+                          // قیمت
+                          Container(
+                            height: 50,
+                            padding: EdgeInsets.only(bottom: 5),
+                            child:
+                            TextFormField(
+                              controller: orderCreateController.priceController,
+                              style: AppTextStyle.labelText,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))],
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                filled: true,
+                                fillColor: AppColor.textFieldColor,
+                              ),
+                            ),
+                          ),
+                          // گرم/عدد
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'گرم/عدد',
+                              style: AppTextStyle.labelText,
+                            ),
+                          ),
+                          // گرم/عدد
+                          Container(
+                            height: 50,
+                            padding: EdgeInsets.only(bottom: 5),
+                            child:
+                            TextFormField(
+                              controller: orderCreateController.amountController,
+                              style: AppTextStyle.labelText,
+                              keyboardType: TextInputType.numberWithOptions(decimal: true),
+                              inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))],
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                filled: true,
+                                fillColor: AppColor.textFieldColor,
+                              ),
+                            ),
+                          ),
+                          // مبلغ کل
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'مبلغ کل (ریال)',
+                              style: AppTextStyle.labelText,
+                            ),
+                          ),
+                          // مبلغ کل
+                          Container(
+                            height: 50,
+                            padding: EdgeInsets.only(bottom: 5),
+                            child:
+                            TextFormField(
+                              controller: orderCreateController.totalPriceController,
+                              style: AppTextStyle.labelText,
+                              keyboardType: TextInputType.number,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                filled: true,
+                                fillColor: AppColor.textFieldColor,
+                              ),
+                            ),
+                          ),
+                          // تاریخ
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'تاریخ سفارش',
+                              style: AppTextStyle.labelText,
+                            ),
+                          ),
+                          // تاریخ
+                          Container(
+                            height: 50,
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: TextFormField(
+                              controller: orderCreateController.dateController,
+                              readOnly: true,
+                              style: AppTextStyle.labelText,
+                              decoration: InputDecoration(
+                                suffixIcon: Icon(Icons.calendar_today, color: AppColor.secondaryColor),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                filled: true,
+                                fillColor: AppColor.textFieldColor,
+                              ),
+                              onTap: () async {
+                                Jalali? pickedDate = await showPersianDatePicker(
+                                  context: context,
+                                  initialDate: Jalali.now(),
+                                  firstDate: Jalali(1400,1,1),
+                                  lastDate: Jalali(1450,12,29),
+                                  initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                  initialDatePickerMode: PersianDatePickerMode.day,
+                                  locale: Locale("fa","IR"),
+                                );
+                                if(pickedDate!=null){
+                                  orderCreateController.dateController.text =
+                                  "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+                                  //pickedDate.formatFullDate();
+                                }
+                              },
+                            ),
+                          ),
+                          // توضیحات
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child: Text(
+                              'توضیحات',
+                              style: AppTextStyle.labelText,
+                            ),
+                          ),
+                          // توضیحات
+                          Container(
+                            padding: EdgeInsets.only(bottom: 5),
+                            child:
+                            TextFormField(
+                              controller: orderCreateController.descriptionController,
+                              maxLines: 5,
+                              style: AppTextStyle.labelText,
+                              decoration: InputDecoration(
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                filled: true,
+                                fillColor: AppColor.textFieldColor,
+                              ),
+                            ),
+                          ),
+                          // دکمه ایجاد سفارش
+                          Row(mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton(
+                                style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(Get.width*.77,40)),
+                                    padding: WidgetStatePropertyAll(
+                                        EdgeInsets.symmetric(horizontal: 7)),
+                                    elevation: WidgetStatePropertyAll(5),
+                                    backgroundColor:
+                                    WidgetStatePropertyAll(AppColor.buttonColor),
+                                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10)))),
+                                onPressed: () {
+
+                                },
+                                child: Text(
+                                  'ایجاد سفارش ',
+                                  style: AppTextStyle.labelText,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
+                ),
+              ],
+            ),
           ),
         ),
       ),

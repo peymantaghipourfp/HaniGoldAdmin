@@ -9,7 +9,8 @@ import 'package:hanigold_admin/src/domain/auth/view/login.view.dart';
 import 'package:hanigold_admin/src/domain/home/view/home.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_create.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_list.view.dart';
-import 'package:hanigold_admin/src/domain/product/view/product.view.dart';
+import 'package:hanigold_admin/src/domain/product/view/item.view.dart';
+
 import 'package:hanigold_admin/src/domain/tools/view/tools.view.dart';
 import 'package:hanigold_admin/src/domain/users/view/users.view.dart';
 import '../../domain/splash/view/splash.view.dart';

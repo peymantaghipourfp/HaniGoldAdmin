@@ -40,6 +40,7 @@ class OrderController extends GetxController{
       orderList.assignAll(fetchedOrderList);
       filteredOrders.assignAll(fetchedOrderList);
       state.value=PageState.list;
+
       if(orderList.isEmpty){
         state.value=PageState.empty;
       }
@@ -57,7 +58,8 @@ class OrderController extends GetxController{
     }else{
       filteredOrders.value=orderList.where((order){
         return(order.account?.name?.contains(query) ?? false) ||
-            (order.orderDetails?.first.item?.name?.contains(query) ?? false) ||
+            (order.item?.name?.contains(query) ?? false) ||
+            (order.totalPrice?.toString().contains(query) ?? false)||
             (order.date?.toPersianDate(showTime: true,twoDigits: true,timeSeprator: '-').contains(query) ?? false );
       }).toList();
     }

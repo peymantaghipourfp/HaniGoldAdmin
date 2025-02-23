@@ -1,7 +1,7 @@
 
+
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
-import 'package:hanigold_admin/src/domain/product/model/item_price.model.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
@@ -23,18 +23,30 @@ class OrderModel {
   final int? type;
   @JsonKey(name: "mode")
   final int? mode;
+  @JsonKey(name: "item")
+  final ItemModel? item;
+  @JsonKey(name: "amount")
+  final int? amount;
+  @JsonKey(name: "price")
+  final double? price;
+  @JsonKey(name: "differentPrice")
+  final double? differentPrice;
+  @JsonKey(name: "totalPrice")
+  final double? totalPrice;
   @JsonKey(name: "checked")
   final bool? checked;
-  @JsonKey(name: "orderDetails")
-  final List<OrderDetail>? orderDetails;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
   final int? id;
   @JsonKey(name: "attribute")
   final String? attribute;
+  @JsonKey(name: "recId")
+  final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "limitPrice")
+  final double? limitPrice;
 
   OrderModel({
     required this.date,
@@ -42,55 +54,21 @@ class OrderModel {
     required this.account,
     required this.type,
     required this.mode,
+    required this.item,
+    required this.amount,
+    required this.price,
+    required this.differentPrice,
+    required this.totalPrice,
     required this.checked,
-    required this.orderDetails,
     required this.rowNum,
     required this.id,
     required this.attribute,
+    required this.recId,
     required this.infos,
+    required this.limitPrice,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => _$OrderModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$OrderModelToJson(this);
 }
-
-@JsonSerializable()
-class OrderDetail {
-  @JsonKey(name: "orderId")
-  final int? orderId;
-  @JsonKey(name: "item")
-  final ItemModel? item;
-  @JsonKey(name: "itemPrice")
-  final ItemPriceModel? itemPrice;
-  @JsonKey(name: "amount")
-  final int? amount;
-  @JsonKey(name: "price")
-  final double? price;
-  @JsonKey(name: "totalPrice")
-  final double? totalPrice;
-  @JsonKey(name: "id")
-  final int? id;
-  @JsonKey(name: "attribute")
-  final String? attribute;
-  @JsonKey(name: "infos")
-  final List<dynamic>? infos;
-
-  OrderDetail({
-    required this.orderId,
-    required this.item,
-    required this.itemPrice,
-    required this.amount,
-    required this.price,
-    required this.totalPrice,
-    required this.id,
-    required this.attribute,
-    required this.infos,
-  });
-
-  factory OrderDetail.fromJson(Map<String, dynamic> json) => _$OrderDetailFromJson(json);
-
-  Map<String, dynamic> toJson() => _$OrderDetailToJson(this);
-}
-
-

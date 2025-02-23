@@ -8,7 +8,10 @@ class ErrorException implements Exception{
 
   @override
   String toString() {
-    return "ErrorException :$message (statusCode: $statusCode)";
+    return
+      //handleError(statusCode);
+      "ErrorException :$message (statusCode: $statusCode)";
+
   }
 
   static String handleError(dynamic error){

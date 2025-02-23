@@ -10,17 +10,17 @@ String itemUnitModelToJson(List<ItemUnitModel> data) => json.encode(List<dynamic
 @JsonSerializable()
 class ItemUnitModel {
   @JsonKey(name: "name")
-  final String name;
+  final String? name;
   @JsonKey(name: "rowNum")
-  final int rowNum;
+  final int? rowNum;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "attribute")
-  final String attribute;
+  final String? attribute;
   @JsonKey(name: "recId")
-  final String recId;
+  final String? recId;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
   ItemUnitModel({
     required this.name,

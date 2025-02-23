@@ -48,7 +48,7 @@ class ErrPage extends StatelessWidget {
           ),
           if (callback != null)
             GestureDetector(onTap:callback, child: Text('تلاش مجدد',
-            style: AppTextStyle.madiumbodyText!.copyWith(color: Colors.blueAccent),))
+            style: AppTextStyle.madiumbodyText.copyWith(color: Colors.blueAccent),))
         ],
       ),
     );
