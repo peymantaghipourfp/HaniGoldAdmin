@@ -11,6 +11,7 @@ class CustomDropdownWidget extends StatelessWidget {
   final Color backgroundColor;
   final Color borderColor;
   final double borderRadius;
+  final bool showHintText;
 
   const CustomDropdownWidget({
     super.key,
@@ -21,6 +22,7 @@ class CustomDropdownWidget extends StatelessWidget {
     this.backgroundColor = Colors.white,
     this.borderColor = Colors.grey,
     this.borderRadius = 7.0,
+    this.showHintText=true,
   });
 
   @override

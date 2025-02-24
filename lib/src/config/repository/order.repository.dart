@@ -38,56 +38,60 @@ class OrderRepository{
   }
   Future<void> insertOrder({
     required String date,
-    required int customerId,
-    required String customerName,
+    required int accountId,
+    required String accountName,
+    required int type,
     required int itemId,
     required String itemName,
     required double price,
     required double amount,
+    required String? description,
 })async{
     try{
       Map<String, dynamic> orderData = {
         "date": date,
-        "customer": {
-          "name": customerName,
-          "id": customerId,
+        "limitDate": "2024-11-13T13:21:23",
+        "account": {
+          "code": "1",
+          "name": accountName,
+          "accountGroup": {
+            "infos": []
+          },
+          "accountItemGroup": {
+            "infos": []
+          },
+          "accountPriceGroup": {
+            "infos": []
+          },
+          "id": accountId,
           "infos": []
         },
-        "type": 0,
-        "registered": 0,
-        "checked": 1,
-        "isDeleted": false,
-        "salesOrderDetails": [
-          {
-            "stateMode": 1,
-            "item": {
-              "name": itemName,
-              "id": itemId,
-              "infos": []
-            },
-            "itemPrice": {
-              "price": price,
-              "differentPrice": 0,
-              "id": 20,
-              "infos": []
-            },
-            "amount": amount,
-            "price": price,
-            "totalPrice": price * amount,
-            "type": 1,
-            "registered": 0,
-            "checked": 1,
-            "isDeleted": false,
-            "rowNum": 1,
-            "id": 1,
-            "attribute": "cus",
-            "recId": "e6b8aab0-4651-4917-b724-3d4cdfe6238e",
+        "type": type,
+        "mode": 0,
+        "item": {
+          "itemGroup": {
             "infos": []
-          }
-        ],
+          },
+          "itemUnit": {
+            "name": "گرم",
+            "id": 1,
+            "infos": []
+          },
+          "name": itemName,
+          "id": itemId,
+          "infos": []
+        },
+        "amount": amount,
+        "price": price,
+        "differentPrice": 92340.3666,
+        "totalPrice": amount * price,
+        "checked": true,
         "rowNum": 1,
+        "id": 1,
         "attribute": "cus",
-        "infos": []
+        "recId": "25a39f5d-81c6-4362-b59b-3dc6123a9364",
+        "infos": [],
+        "description": description,
       };
       final response=await orderDio.post('Order/insert',data: orderData);
       if(response.statusCode==200){
@@ -98,6 +102,76 @@ class OrderRepository{
     }
     catch(e){
       throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<void> updateOrder({
+    required int orderId,
+    required String date,
+    required int accountId,
+    required String accountName,
+    required int type,
+    required int itemId,
+    required String itemName,
+    required double price,
+    required double amount,
+    required String? description,
+})async{
+    try{
+      Map<String, dynamic> orderData = {
+        "id": orderId,
+        "date": date,
+        "limitDate": "2024-11-13T13:21:23",
+        "account": {
+          "code": "1",
+          "name": accountName,
+          "accountGroup": {
+            "infos": []
+          },
+          "accountItemGroup": {
+            "infos": []
+          },
+          "accountPriceGroup": {
+            "infos": []
+          },
+          "id": accountId,
+          "infos": []
+        },
+        "type": type,
+        "mode": 0,
+        "item": {
+          "itemGroup": {
+            "infos": []
+          },
+          "itemUnit": {
+            "name": "گرم",
+            "id": 1,
+            "infos": []
+          },
+          "name": itemName,
+          "id": itemId,
+          "infos": []
+        },
+        "amount": amount,
+        "price": price,
+        "differentPrice": 92340.3666,
+        "totalPrice": amount * price,
+        "checked": true,
+        "rowNum": 1,
+        "attribute": "cus",
+        "recId": "25a39f5d-81c6-4362-b59b-3dc6123a9364",
+        "infos": [],
+        "description": description,
+      };
+      final response=await orderDio.put('Order/update',data: orderData );
+      if(response.statusCode==200){
+        print('ویرایش با موفقیت انجام شد');
+      }else{
+        throw ErrorException('خطا در ویرایش اطلاعات');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا در ویرایش اطلاعات:$e');
     }
   }
 }

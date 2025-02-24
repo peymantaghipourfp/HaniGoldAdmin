@@ -31,6 +31,7 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
       limitPrice: (json['limitPrice'] as num?)?.toDouble(),
+      description: json['description'] as String?,
     );
 
 Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
@@ -52,4 +53,5 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'recId': instance.recId,
       'infos': instance.infos,
       'limitPrice': instance.limitPrice,
+      'description': instance.description,
     };

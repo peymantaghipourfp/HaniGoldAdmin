@@ -1,13 +1,22 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/item.repository.dart';
+import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 
 
 enum PageState{loading,err,empty,list}
+
+class OrderTypeModel{
+  final int? id;
+  final String? name;
+  OrderTypeModel({this.id, this.name});
+}
+
 class OrderCreateController extends GetxController{
 
   final TextEditingController priceController=TextEditingController();
@@ -16,25 +25,31 @@ class OrderCreateController extends GetxController{
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
 
-  final List<String> orderTypeList=['فروش به کاربر','خرید از کاربر'];
+  final List<OrderTypeModel> orderTypeList=<OrderTypeModel>[].obs;
   final ItemRepository itemRepository=ItemRepository();
   final AccountRepository accountRepository=AccountRepository();
-  var itemList=<ItemModel>[].obs;
-  var accountList=<AccountModel>[].obs;
+  final OrderRepository orderRepository=OrderRepository();
+  final List<ItemModel> itemList=<ItemModel>[].obs;
+  final List<AccountModel> accountList=<AccountModel>[].obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
 
-  final RxnString selectedBuySell = RxnString();
-  final RxnString selectedItem=RxnString();
-  final RxnString selectedAccount = RxnString();
-  void changeSelectedBuySell(String? newValue) {
-    selectedBuySell.value = newValue;
+  final Rxn<OrderTypeModel> selectedBuySell = Rxn<OrderTypeModel>();
+  final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
+  final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
+
+  void changeSelectedBuySell(OrderTypeModel? newValue) {
+      selectedBuySell.value = newValue;
   }
-  void changeSelectedItem(String? newValue) {
+  void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
+    selectedBuySell.value?.id==0?
+    priceController.text=selectedItem.value!.price.toString():
+    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString();
+
   }
-  void changeSelectedAccount(String? newValue) {
+  void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
   }
   void updateTotalPrice(){
@@ -47,6 +62,10 @@ class OrderCreateController extends GetxController{
 
   @override
   void onInit() {
+    orderTypeList.addAll([
+      OrderTypeModel(id: 0,name: 'فروش به کاربر'),
+      OrderTypeModel(id: 1,name: 'خرید از کاربر'),
+    ]);
     fetchItemList();
     fetchAccountList();
     priceController.addListener(updateTotalPrice);
@@ -89,5 +108,59 @@ class OrderCreateController extends GetxController{
     }finally{
       isLoading.value=false;
     }
+  }
+
+  Future<void> insertOrder()async{
+    isLoading.value=true;
+    try{
+      await orderRepository.insertOrder(
+          date: dateController.text,
+          accountId: selectedAccount.value?.id ?? 0,
+          accountName: selectedAccount.value?.name ?? "",
+          type: selectedBuySell.value?.id ?? 0,
+          itemId: selectedItem.value?.id ?? 0,
+          itemName: selectedItem.value?.name ?? "",
+          price: double.parse(priceController.text),
+          amount: double.parse(amountController.text),
+        description: descriptionController.text,
+      );
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }finally{
+      isLoading.value=false;
+    }
+  }
+  Future<void> updateOrder({required int orderId}) async {
+    isLoading.value = true;
+    try {
+      await orderRepository.updateOrder(
+        orderId: orderId,
+        date: dateController.text,
+        accountId: selectedAccount.value?.id ?? 0,
+        accountName: selectedAccount.value?.name ?? "",
+        type: selectedBuySell.value?.id ?? 0,
+        itemId: selectedItem.value?.id ?? 0,
+        itemName: selectedItem.value?.name ?? "",
+        price: double.parse(priceController.text),
+        amount: double.parse(amountController.text),
+        description: descriptionController.text,
+      );
+    } catch (e) {
+      throw ErrorException('خطا در به‌روزرسانی سفارش: $e');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+   void clearList() {
+    dateController.clear();
+    priceController.clear();
+    amountController.clear();
+    descriptionController.clear();
+    totalPriceController.clear();
+    selectedBuySell.value=null;
+    selectedItem.value=null;
+    selectedAccount.value=null;
   }
 }

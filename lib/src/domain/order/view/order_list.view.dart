@@ -334,7 +334,7 @@ class OrderListView extends StatelessWidget {
                       //دکمه ادیت جزئیات سفارش
                       OutlinedButton(
                         onPressed: () {
-                          Get.offNamed('/orderCreate');
+                          Get.toNamed('/orderCreate');
                         },
                         style: ButtonStyle(
                           shape: WidgetStatePropertyAll(
