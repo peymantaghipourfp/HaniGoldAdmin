@@ -8,6 +8,8 @@ import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 
+import '../model/order.model.dart';
+
 
 enum PageState{loading,err,empty,list}
 
