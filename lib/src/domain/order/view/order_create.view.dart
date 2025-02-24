@@ -1,5 +1,4 @@
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
