@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../widget/custom_appbar.widget.dart';
 
-class ToolsView extends StatelessWidget {
-  const ToolsView({super.key});
+class WithdrawCreate extends StatelessWidget {
+  const WithdrawCreate({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'تنظیمات',onBackTap: ()=>Get.back(),),
+      appBar: CustomAppBar(title: 'ایجاد درخواست برداشت',
+      onBackTap: ()=>Get.back(),
+      ),
     );
   }
 }

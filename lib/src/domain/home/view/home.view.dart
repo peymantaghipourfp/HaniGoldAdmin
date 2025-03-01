@@ -13,17 +13,17 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.backGroundColor,
-      appBar: CustomAppBar(title: 'خانه'),
+      appBar: CustomAppBar(title: 'خانه', onBackTap: () => Get.back(),),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(
-            child: SizedBox(
-              width: Get.width,
-              height: Get.height,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child:
-                    ListView.separated(
+          child: SizedBox(
+            width: Get.width,
+            height: Get.height,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child:
+              /*ListView.separated(
                         itemBuilder: (context, index) {
                           final button=controller.homeListView[index];
                           return CustomTextButton(
@@ -35,49 +35,400 @@ class HomeView extends GetView<HomeController> {
                         separatorBuilder: (context, index) =>
                         Padding(
                           padding: const EdgeInsets.only(bottom: 10),
-                          /*child: Divider(
+                          child: Divider(
                             height: 2,
                             color: AppColor.secondaryColor,
-                          ),*/
+                          ),
                         ),
                         itemCount: controller.homeListView.length
-                    ),
-        /*                  Row(
-                      children: [
-                        TextButton(
-                          style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(AppColor.backGroundColor),
-                        ),
-                            onPressed: () {
-                            Get.toNamed('orderList');
-                            },
-                            child: Text('سفارشات',style: AppTextStyle.smallTitleText,),
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      height: 2,
-                      color: AppColor.secondaryColor,
-                    ),
-                    Row(
-                      children: [
-                        TextButton(
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStatePropertyAll(AppColor.backGroundColor),
-                          ),
-                          onPressed: () {
-
-                          },
-                          child: Text('محصولات',style: AppTextStyle.smallTitleText,),
-                        ),
-                      ],
-                    ),
-                    Divider(
-                      height: 2,
-                      color: AppColor.secondaryColor,
                     ),*/
-              ),
+              Obx(() {
+                return Column(
+                  children: [
+                    //سفارشات
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: Get.width * 0.90,
+                          padding: EdgeInsets.only(bottom: 7),
+                          child: TextButton(
+                            style: ButtonStyle(
+                              elevation: WidgetStateProperty.all(5),
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                      width: 1, color: AppColor.secondaryColor),
+                                ),
+                              ),
+                              backgroundColor:
+                              WidgetStatePropertyAll(AppColor.secondaryColor),
+                            ),
+                            onPressed: () {
+                              controller.toggleSubMenu('orders');
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      'سفارشات',
+                                      style: AppTextStyle.bodyText,
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ),
+                                Icon(color: AppColor.textColor,
+                                    controller.activeSubMenu.value=='orders'?
+                                    Icons.expand_more:
+                                    Icons.expand_less
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    //نمایش زیر مجموعه سفارشات
+                    controller.isSubMenuOpen('orders')
+                        ? Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(right: 20),
+                          child: ListTile(
+                            horizontalTitleGap: 5,minTileHeight: 10,
+                            title: Text(
+                              'سفارشات',
+                              style: AppTextStyle.bodyText,
+                            ),
+                            leading: Icon(Icons.circle_outlined,size: 15,
+                                color: AppColor.secondaryColor),
+                            onTap: () {
+                              Get.toNamed('/orderList');
+                            },
+                          ),
+                        ),
+
+                      ],
+                    )
+                        : const SizedBox(),
+                    //محصولات
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: Get.width * 0.90,
+                          padding: EdgeInsets.only(bottom: 7),
+                          child: TextButton(
+                            style: ButtonStyle(
+                              elevation: WidgetStateProperty.all(5),
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                      width: 1, color: AppColor.secondaryColor),
+                                ),
+                              ),
+                              backgroundColor:
+                              WidgetStatePropertyAll(AppColor.secondaryColor),
+                            ),
+                            onPressed: () {
+                              controller.toggleSubMenu('products');
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      'محصولات',
+                                      style: AppTextStyle.bodyText,
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ),
+                                Icon(color: AppColor.textColor,
+                                    controller.activeSubMenu.value=='products'?
+                                    Icons.expand_more:
+                                    Icons.expand_less
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    //نمایش زیر مجموعه محصولات
+                    controller.isSubMenuOpen('products')
+                        ? Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(right: 20),
+                          child: ListTile(
+                            horizontalTitleGap: 5,minTileHeight: 10,
+                            title: Text(
+                              'محصولات',
+                              style: AppTextStyle.bodyText,
+                            ),
+                            leading: Icon(Icons.circle_outlined,size: 15,
+                                color: AppColor.secondaryColor),
+                            onTap: () {
+                              Get.toNamed('/product');
+                            },
+                          ),
+                        ),
+
+                      ],
+                    )
+                        : const SizedBox(),
+                    //پنل ریالی
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: Get.width * 0.90,
+                          padding: EdgeInsets.only(bottom: 7),
+                          child: TextButton(
+                            style: ButtonStyle(
+                              elevation: WidgetStateProperty.all(5),
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                      width: 1, color: AppColor.secondaryColor),
+                                ),
+                              ),
+                              backgroundColor:
+                              WidgetStatePropertyAll(AppColor.secondaryColor),
+                            ),
+                            onPressed: () {
+                              controller.toggleSubMenu('rialPanel');
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      'پنل ریالی',
+                                      style: AppTextStyle.bodyText,
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ),
+                                Icon(color: AppColor.textColor,
+                                  controller.activeSubMenu.value=='rialPanel'?
+                                      Icons.expand_more:
+                                      Icons.expand_less
+                                ),
+                              ],
+                            ),
+                            
+                          ),
+                        ),
+                      ],
+                    ),
+                    // نمایش زیر مجموعه پنل ریالی
+                    controller.isSubMenuOpen('rialPanel')
+                        ? Column(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.only(right: 20),
+                                child: ListTile(
+                                  horizontalTitleGap: 5,minTileHeight: 10,
+                                  title: Text(
+                                    'واریزی‌ها',
+                                    style: AppTextStyle.bodyText,
+                                  ),
+                                  leading: Icon(Icons.circle_outlined,size: 15,
+                                      color: AppColor.secondaryColor),
+                                  onTap: () {
+                                    Get.toNamed('/depositsList');
+                                  },
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(right: 20),
+                                child: ListTile(
+                                  horizontalTitleGap: 5,minTileHeight: 10,
+                                  title: Text(
+                                    'لیست درخواست برداشت',
+                                    style: AppTextStyle.bodyText,
+                                  ),
+                                  leading: Icon(Icons.circle_outlined,size: 15,
+                                      color: AppColor.secondaryColor),
+                                  onTap: () {
+                                    Get.toNamed('/withdrawsList');
+                                  },
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(right: 20),
+                                child: ListTile(
+                                  horizontalTitleGap: 5,minTileHeight: 10,
+                                  title: Text(
+                                    'ایجاد درخواست برداشت',
+                                    style: AppTextStyle.bodyText,
+                                  ),
+                                  leading: Icon(Icons.circle_outlined,size: 15,
+                                      color: AppColor.secondaryColor),
+                                  onTap: () {
+                                    Get.toNamed('/withdrawCreate');
+                                  },
+                                ),
+                              ),
+                            ],
+                          )
+                        : const SizedBox(),
+                    //کاربران
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: Get.width * 0.90,
+                          padding: EdgeInsets.only(bottom: 7),
+                          child: TextButton(
+                            style: ButtonStyle(
+                              elevation: WidgetStateProperty.all(5),
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                      width: 1, color: AppColor.secondaryColor),
+                                ),
+                              ),
+                              backgroundColor:
+                              WidgetStatePropertyAll(AppColor.secondaryColor),
+                            ),
+                            onPressed: () {
+                              controller.toggleSubMenu('users');
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      'کاربران',
+                                      style: AppTextStyle.bodyText,
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ),
+                                Icon(color: AppColor.textColor,
+                                    controller.activeSubMenu.value=='users'?
+                                    Icons.expand_more:
+                                    Icons.expand_less
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    //نمایش زیرمجموعه کاربران
+                    controller.isSubMenuOpen('users')
+                        ? Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(right: 20),
+                          child: AnimatedSize(
+                            duration: Duration(milliseconds: 800),
+                            curve: Curves.easeInOut,
+                            child: ListTile(
+                              horizontalTitleGap: 5,minTileHeight: 10,
+                              title: Text(
+                                'کاربران',
+                                style: AppTextStyle.bodyText,
+                              ),
+                              leading: Icon(Icons.circle_outlined,size: 15,
+                                  color: AppColor.secondaryColor),
+                              onTap: () {
+                                Get.toNamed('/users');
+                              },
+                            ),
+                          ),
+                        ),
+
+                      ],
+                    )
+                        : const SizedBox(),
+                    //تنظیمات
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          width: Get.width * 0.90,
+                          padding: EdgeInsets.only(bottom: 7),
+                          child: TextButton(
+                            style: ButtonStyle(
+                              elevation: WidgetStateProperty.all(5),
+                              shape: WidgetStateProperty.all(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                  side: BorderSide(
+                                      width: 1, color: AppColor.secondaryColor),
+                                ),
+                              ),
+                              backgroundColor:
+                              WidgetStatePropertyAll(AppColor.secondaryColor),
+                            ),
+                            onPressed: () {
+                              controller.toggleSubMenu('tools');
+                            },
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Expanded(
+                                  child: Center(
+                                    child: Text(
+                                      'تنظیمات',
+                                      style: AppTextStyle.bodyText,
+                                      textAlign: TextAlign.right,
+                                    ),
+                                  ),
+                                ),
+                                Icon(color: AppColor.textColor,
+                                    controller.activeSubMenu.value=='tools'?
+                                    Icons.expand_more:
+                                    Icons.expand_less
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    //نمایش زیرمجموعه تنظیمات
+                    controller.isSubMenuOpen('tools')
+                        ? Column(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.only(right: 20),
+                          child: ListTile(
+                            horizontalTitleGap: 5,minTileHeight: 10,
+                            title: Text(
+                              'تنظیمات',
+                              style: AppTextStyle.bodyText,
+                            ),
+                            leading: Icon(Icons.circle_outlined,size: 15,
+                                color: AppColor.secondaryColor),
+                            onTap: () {
+                              Get.toNamed('/tools');
+                            },
+                          ),
+                        ),
+
+                      ],
+                    )
+                        : const SizedBox(),
+                  ],
+                );
+              }),
             ),
+          ),
         ),
       ),
     );
