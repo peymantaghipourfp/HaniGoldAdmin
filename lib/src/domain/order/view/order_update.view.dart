@@ -1,27 +1,28 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/order/controller/order_create.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../controller/order_update.controller.dart';
+import '../model/order.model.dart';
 
-class OrderCreateView extends StatelessWidget {
-  OrderCreateView({super.key});
+class OrderUpdateView extends StatelessWidget {
+  OrderUpdateView({super.key});
 
-  OrderCreateController orderCreateController =
-  Get.find<OrderCreateController>();
+  OrderUpdateController orderUpdateController =
+  Get.find<OrderUpdateController>();
+  final OrderModel order = Get.arguments as OrderModel;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'ایجاد سفارش جدید',onBackTap: () {
+      appBar: CustomAppBar(title: 'ویرایش سفارش',onBackTap: () {
         Get.back();
-        orderCreateController.clearList();
+        orderUpdateController.clearList();
       },),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -33,14 +34,13 @@ class OrderCreateView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'سفارش جدید',
+                      'ویرایش',
                       style: AppTextStyle.smallTitleText,
                     ),
                     Expanded(
                       child: GestureDetector(
                         onTap: (){
                           Get.back();
-                          orderCreateController.clearList();
                         },
                         child: SvgPicture.asset('assets/svg/order-list.svg',alignment: Alignment.centerLeft,
                           width: 20,
@@ -58,12 +58,11 @@ class OrderCreateView extends StatelessWidget {
                   padding:
                   const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                   child: Obx(() {
-                   /* List<String> uniqueItems = orderCreateController.itemList
+                    /* List<String> uniqueItems = orderUpdateController.itemList
                         .map((item) => item.name ?? "")
                         .where((name) => name.isNotEmpty)
                         .toList();*/
                     return Form(
-                      key: orderCreateController.formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -79,18 +78,12 @@ class OrderCreateView extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.only(bottom: 5),
                             child: CustomDropdownWidget(
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'نوع سفارش را انتخاب کنید';
-                                }
-                                return null;
+                              items:  orderUpdateController.orderTypeList.map((type)=>type.name ?? '').toList(),
+                              selectedValue: orderUpdateController.selectedBuySell.value?.name ?? '',
+                              onChanged: (String? newValue){
+                                var selectedBuySell=orderUpdateController.orderTypeList.firstWhere((type)=>type.name==newValue);
+                                orderUpdateController.changeSelectedBuySell(selectedBuySell);
                               },
-                                items:  orderCreateController.orderTypeList.map((type)=>type.name ?? '').toList(),
-                                selectedValue: orderCreateController.selectedBuySell.value?.name ?? '',
-                                onChanged: (String? newValue){
-                                  var selectedBuySell=orderCreateController.orderTypeList.firstWhere((type)=>type.name==newValue);
-                                  orderCreateController.changeSelectedBuySell(selectedBuySell);
-                                },
                               backgroundColor: AppColor.textFieldColor,
                               borderRadius: 7,
                               borderColor: AppColor.secondaryColor,
@@ -109,18 +102,12 @@ class OrderCreateView extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.only(bottom: 5),
                             child: CustomDropdownWidget(
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'محصول را انتخاب کنید';
-                                }
-                                return null;
-                              },
-                              items: orderCreateController.itemList
+                              items: orderUpdateController.itemList
                                   .map((item) => item.name ?? '').toList(),
-                              selectedValue: orderCreateController.selectedItem.value?.name,
+                              selectedValue: orderUpdateController.selectedItem.value?.name,
                               onChanged: (String? newValue){
-                                var selectedItem=orderCreateController.itemList.firstWhere((item)=>item.name==newValue);
-                                orderCreateController.changeSelectedItem(selectedItem);
+                                var selectedItem=orderUpdateController.itemList.firstWhere((item)=>item.name==newValue);
+                                orderUpdateController.changeSelectedItem(selectedItem);
                               },
                               backgroundColor: AppColor.textFieldColor,
                               borderRadius: 7,
@@ -140,18 +127,12 @@ class OrderCreateView extends StatelessWidget {
                           Container(
                             padding: EdgeInsets.only(bottom: 5),
                             child: CustomDropdownWidget(
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'کاربر را انتخاب کنید';
-                                }
-                                return null;
-                              },
-                              items: orderCreateController.accountList
+                              items: orderUpdateController.accountList
                                   .map((account)=>account.name ?? "").toList(),
-                              selectedValue: orderCreateController.selectedAccount.value?.name,
+                              selectedValue: orderUpdateController.selectedAccount.value?.name,
                               onChanged: (String? newValue){
-                                var selectedAccount=orderCreateController.accountList.firstWhere((account)=>account.name==newValue);
-                                orderCreateController.changeSelectedAccount(selectedAccount);
+                                var selectedAccount=orderUpdateController.accountList.firstWhere((account)=>account.name==newValue);
+                                orderUpdateController.changeSelectedAccount(selectedAccount);
                               },
                               backgroundColor: AppColor.textFieldColor,
                               borderRadius: 7,
@@ -173,7 +154,7 @@ class OrderCreateView extends StatelessWidget {
                             padding: EdgeInsets.only(bottom: 5),
                             child:
                             TextFormField(
-                              controller: orderCreateController.priceController,
+                              controller: orderUpdateController.priceController,
                               style: AppTextStyle.labelText,
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -196,33 +177,21 @@ class OrderCreateView extends StatelessWidget {
                           ),
                           // گرم/عدد
                           Container(
-                            //height: 50,
+                            height: 50,
                             padding: EdgeInsets.only(bottom: 5),
-                            child:
-                            IntrinsicHeight(
-                              child: TextFormField(
-                                validator: (value){
-                                  if(value==null || value.isEmpty){
-                                    return 'لطفا مقدار سفارش را وارد کنید';
-                                  }
-                                  return null;
-                                },
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
-                                controller: orderCreateController.amountController,
+                            child: TextFormField(
+                                controller: orderUpdateController.amountController,
                                 style: AppTextStyle.labelText,
                                 keyboardType: TextInputType.numberWithOptions(decimal: true),
                                 inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))],
                                 decoration: InputDecoration(
-                                  isDense: true,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   filled: true,
                                   fillColor: AppColor.textFieldColor,
-                                  errorMaxLines: 1,
                                 ),
                               ),
-                            ),
                           ),
                           // مبلغ کل
                           Container(
@@ -238,7 +207,7 @@ class OrderCreateView extends StatelessWidget {
                             padding: EdgeInsets.only(bottom: 5),
                             child:
                             TextFormField(
-                              controller: orderCreateController.totalPriceController,
+                              controller: orderUpdateController.totalPriceController,
                               style: AppTextStyle.labelText,
                               keyboardType: TextInputType.number,
                               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -261,27 +230,20 @@ class OrderCreateView extends StatelessWidget {
                           ),
                           // تاریخ
                           Container(
-                            //height: 50,
+                            height: 50,
                             padding: EdgeInsets.only(bottom: 5),
-                            child: IntrinsicHeight(
-                              child: TextFormField(
-                                validator: (value){
-                                  if(value==null || value.isEmpty){
-                                    return 'لطفا تاریخ را انتخاب کنید';
-                                  }
-                                  return null;
-                                },
-                                controller: orderCreateController.dateController,
+                            child: TextFormField(
+                                controller: orderUpdateController.dateController,
                                 readOnly: true,
                                 style: AppTextStyle.labelText,
                                 decoration: InputDecoration(
                                   suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                  isDense: true,
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                   filled: true,
                                   fillColor: AppColor.textFieldColor,
-                                  errorMaxLines: 1,
                                 ),
                                 onTap: () async {
                                   Jalali? pickedDate = await showPersianDatePicker(
@@ -295,13 +257,12 @@ class OrderCreateView extends StatelessWidget {
                                   );
 
                                   if(pickedDate!=null){
-                                    orderCreateController.dateController.text =
+                                    orderUpdateController.dateController.text =
                                     "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
 
                                   }
                                 },
                               ),
-                            ),
                           ),
                           // توضیحات
                           Container(
@@ -316,8 +277,8 @@ class OrderCreateView extends StatelessWidget {
                             padding: EdgeInsets.only(bottom: 5),
                             child:
                             TextFormField(
-                              controller: orderCreateController.descriptionController,
-                              maxLines: 4,
+                              controller: orderUpdateController.descriptionController,
+                              maxLines: 5,
                               style: AppTextStyle.labelText,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
@@ -332,7 +293,7 @@ class OrderCreateView extends StatelessWidget {
                           SizedBox(height: 20,),
                           Row(mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              orderCreateController.selectedBuySell.value?.name=='خرید از کاربر'?
+                              orderUpdateController.selectedBuySell.value?.name=='خرید از کاربر'?
                               ElevatedButton(
                                 style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(Get.width*.77,40)),
                                     padding: WidgetStatePropertyAll(
@@ -342,18 +303,17 @@ class OrderCreateView extends StatelessWidget {
                                     WidgetStatePropertyAll(AppColor.primaryColor),
                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10)))),
-                                onPressed: () async{if(orderCreateController.formKey.currentState!.validate()) {
-                                          await orderCreateController.insertOrder();
+                                onPressed: () async{
+                                  await orderUpdateController.updateOrder();
 
-                                }
                                 },
-                                child:orderCreateController.isLoading.value
+                                child:orderUpdateController.isLoading.value
                                     ?
                                 CircularProgressIndicator(
                                   valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
                                 ) :
                                 Text(
-                                  'ایجاد سفارش خرید',
+                                  'ویرایش سفارش خرید',
                                   style: AppTextStyle.labelText,
                                 ),
                               ) :
@@ -366,18 +326,17 @@ class OrderCreateView extends StatelessWidget {
                                     WidgetStatePropertyAll(AppColor.accentColor),
                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10)))),
-                                onPressed: () async {if(orderCreateController.formKey.currentState!.validate()) {
-                                  await orderCreateController.insertOrder();
+                                onPressed: () async {
+                                  await orderUpdateController.updateOrder();
 
-                                        }
-                                      },
-                                      child: orderCreateController.isLoading.value
-                                          ?
-                                      CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
-                                      ) :
+                                },
+                                child:orderUpdateController.isLoading.value
+                                    ?
+                                CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                ) :
                                 Text(
-                                  'ایجاد سفارش فروش',
+                                  'ویرایش سفارش فروش',
                                   style: AppTextStyle.labelText,
                                 ),
                               )

@@ -12,6 +12,8 @@ class CustomDropdownWidget extends StatelessWidget {
   final Color borderColor;
   final double borderRadius;
   final bool showHintText;
+  final String? Function(String?)? validator;
+  final Widget? searchField;
 
   const CustomDropdownWidget({
     super.key,
@@ -23,6 +25,8 @@ class CustomDropdownWidget extends StatelessWidget {
     this.borderColor = Colors.grey,
     this.borderRadius = 7.0,
     this.showHintText=true,
+    this.validator,
+    this.searchField
   });
 
   @override
@@ -87,10 +91,24 @@ class CustomDropdownWidget extends StatelessWidget {
         height: 40,
         padding: EdgeInsets.symmetric(horizontal: 10),
       ),
-    );
 
-    return hideUnderline
-        ? DropdownButtonHideUnderline(child: dropdown)
-        : dropdown;
+    );
+    final String? errorText =
+    validator != null ? validator!(selectedValue) : null;
+    return
+      Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        hideUnderline ? DropdownButtonHideUnderline(child: dropdown) : dropdown,
+        if (errorText != null && errorText.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 5),
+            child: Text(
+              errorText,
+              style: TextStyle(color: Colors.red, fontSize: 12),
+            ),
+          )
+      ],
+    );
   }
 }

@@ -17,7 +17,7 @@ class OrderRepository{
         "options": {
           "order": {
             "orderBy": "Orders.Id",
-            "orderByType": "asc",
+            "orderByType": "desc",
             "StartIndex": 1,
             "ToIndex": 1000
           }
@@ -36,7 +36,7 @@ class OrderRepository{
       throw ErrorException('خطا:$e');
     }
   }
-  Future<void> insertOrder({
+  Future<Map<String, dynamic>> insertOrder({
     required String date,
     required int accountId,
     required String accountName,
@@ -93,19 +93,21 @@ class OrderRepository{
         "infos": [],
         "description": description,
       };
-      final response=await orderDio.post('Order/insert',data: orderData);
-      if(response.statusCode==200){
+
+      var response=await orderDio.post('Order/insert',data: orderData);
+      /*if(response.statusCode==200){
         print('ثبت با موفقیت انجام شد');
       }else{
         throw ErrorException('خطا');
-      }
+      }*/
+      return response.data;
     }
     catch(e){
-      throw ErrorException('خطا:$e');
+      throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
 
-  Future<void> updateOrder({
+  Future<Map<String, dynamic>> updateOrder({
     required int orderId,
     required String date,
     required int accountId,
@@ -121,7 +123,7 @@ class OrderRepository{
       Map<String, dynamic> orderData = {
         "id": orderId,
         "date": date,
-        "limitDate": "2024-11-13T13:21:23",
+        "limitDate": null,
         "account": {
           "code": "1",
           "name": accountName,
@@ -163,12 +165,16 @@ class OrderRepository{
         "infos": [],
         "description": description,
       };
-      final response=await orderDio.put('Order/update',data: orderData );
-      if(response.statusCode==200){
-        print('ویرایش با موفقیت انجام شد');
-      }else{
-        throw ErrorException('خطا در ویرایش اطلاعات');
-      }
+      var response=await orderDio.put('Order/update',data: orderData );
+      print(response.data);
+      // if(response.statusCode==200){
+      //   print('ویرایش با موفقیت انجام شد');
+      //   print(response.data);
+      //   return response.data;
+      // }else{
+      //   throw ErrorException('خطا در ویرایش اطلاعات');
+      // }
+      return response.data;
     }
     catch(e){
       throw ErrorException('خطا در ویرایش اطلاعات:$e');

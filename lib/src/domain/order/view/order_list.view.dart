@@ -18,7 +18,9 @@ class OrderListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'سفارشات'),
+      appBar: CustomAppBar(title: 'سفارشات',
+        onBackTap: ()=>Get.back(),
+      ),
       body: SafeArea(
           child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -323,6 +325,9 @@ class OrderListView extends StatelessWidget {
                             color: AppColor.primaryColor)
                         : funcOrderDetail('', 'وضعیت:', "تایید نشده",
                             color: AppColor.accentColor),
+                    orders.type==1
+                        ? funcOrderDetail('', 'نوع سفارش:', "خرید",color: AppColor.primaryColor)
+                        : funcOrderDetail('', 'نوع سفارش:', "فروش",color: AppColor.accentColor)
                   ],
                 ),
                 Spacer(),
@@ -334,8 +339,8 @@ class OrderListView extends StatelessWidget {
                       //دکمه ادیت جزئیات سفارش
                       OutlinedButton(
                         onPressed: () {
-                          orderController.setOrderDetails(orders);
-                          Get.toNamed('/orderCreate');
+                          Get.back();
+                          Get.toNamed('/orderUpdate',arguments: orders);
                         },
                         style: ButtonStyle(
                           shape: WidgetStatePropertyAll(

@@ -9,6 +9,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final Color iconColor;
   final TextStyle titleTextStyle;
   final bool centerTitle;
+  final VoidCallback? onBackTap;
 
   // Constructor to accept customization options
   const CustomAppBar({
@@ -18,6 +19,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.iconColor = AppColor.textColor,
     this.titleTextStyle = AppTextStyle.smallTitleText,
     this.centerTitle = true,
+    this.onBackTap,
   }) : super(key: key);
 
   @override
@@ -30,6 +32,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         style: titleTextStyle,
       ),
       centerTitle: centerTitle,
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back, color: iconColor),
+        onPressed: onBackTap, // Default behavior if onBackTap is null
+      ),
     );
   }
 

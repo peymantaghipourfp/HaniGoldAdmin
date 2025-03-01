@@ -1,6 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/item.repository.dart';
@@ -8,7 +9,6 @@ import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 
-import '../../../config/const/app_color.dart';
 import '../model/order.model.dart';
 import 'order.controller.dart';
 
@@ -21,10 +21,7 @@ class OrderTypeModel{
   OrderTypeModel({this.id, this.name});
 }
 
-
-class OrderCreateController extends GetxController{
-
-  final formKey = GlobalKey<FormState>();
+class OrderUpdateController extends GetxController{
 
   final OrderController orderController=Get.find<OrderController>();
 
@@ -34,12 +31,17 @@ class OrderCreateController extends GetxController{
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
 
-  final List<OrderTypeModel> orderTypeList=<OrderTypeModel>[].obs;
   final ItemRepository itemRepository=ItemRepository();
   final AccountRepository accountRepository=AccountRepository();
   final OrderRepository orderRepository=OrderRepository();
+
+  final List<OrderTypeModel> orderTypeList=<OrderTypeModel>[
+    OrderTypeModel(id: 0, name: 'فروش به کاربر'),
+    OrderTypeModel(id: 1, name: 'خرید از کاربر'),
+  ];
   final List<ItemModel> itemList=<ItemModel>[].obs;
   final List<AccountModel> accountList=<AccountModel>[].obs;
+
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
@@ -48,8 +50,10 @@ class OrderCreateController extends GetxController{
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
 
+  final RxInt orderId=0.obs;
+
   void changeSelectedBuySell(OrderTypeModel? newValue) {
-      selectedBuySell.value = newValue;
+    selectedBuySell.value = newValue;
   }
   void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
@@ -70,15 +74,17 @@ class OrderCreateController extends GetxController{
 
 
   @override
-  void onInit() {
-    orderTypeList.addAll([
-      OrderTypeModel(id: 0,name: 'فروش به کاربر'),
-      OrderTypeModel(id: 1,name: 'خرید از کاربر'),
-    ]);
+  void onInit(){
     fetchItemList();
     fetchAccountList();
+    final OrderModel? existingOrder = Get.arguments as OrderModel?;
+    if (existingOrder != null) {
+      setOrderDetails(existingOrder);
+    }
     priceController.addListener(updateTotalPrice);
     amountController.addListener(updateTotalPrice);
+    DateTime now=DateTime.now();
+    dateController.text="${now.year.toString()}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     super.onInit();
   }
 
@@ -89,8 +95,14 @@ class OrderCreateController extends GetxController{
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
       state.value=PageState.list;
-      if(itemList.isEmpty){
-        state.value=PageState.empty;
+      final OrderModel? existingOrder = Get.arguments as OrderModel?;
+      if (existingOrder != null && existingOrder.item != null) {
+        final match = itemList.firstWhereOrNull(
+              (i) => i.id == existingOrder.item!.id,
+        );
+        if (match != null) {
+          selectedItem.value = match;
+        }
       }
     }
     catch(e){
@@ -107,8 +119,14 @@ class OrderCreateController extends GetxController{
       var fetchedAccountList=await accountRepository.getAccountList();
       accountList.assignAll(fetchedAccountList);
       state.value=PageState.list;
-      if(accountList.isEmpty){
-        state.value=PageState.empty;
+      final OrderModel? existingOrder = Get.arguments as OrderModel?;
+      if (existingOrder != null && existingOrder.account != null) {
+        final match = accountList.firstWhereOrNull(
+              (a) => a.id == existingOrder.account!.id,
+        );
+        if (match != null) {
+          selectedAccount.value = match;
+        }
       }
     }
     catch(e){
@@ -119,12 +137,16 @@ class OrderCreateController extends GetxController{
     }
   }
 
-  Future<OrderModel?> insertOrder()async{
 
+  Future<OrderModel?> updateOrder() async {
+    //print(priceController.text);
+    if(orderId.value==0){
+      return null;
+    }
     try {
       isLoading.value = true;
-
-      var response = await orderRepository.insertOrder(
+     var response = await orderRepository.updateOrder(
+        orderId: orderId.value,
         date: dateController.text,
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
@@ -135,29 +157,44 @@ class OrderCreateController extends GetxController{
         amount: double.parse(amountController.text),
         description: descriptionController.text,
       );
-      print(response);
-      if (response != null) {
-        Get.back();
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-            titleText: Text('موفقیت آمیز',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(
-                'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
-                style: TextStyle(color: AppColor.textColor)));
-        clearList();
-        orderController.fetchOrderList();
-      }
-    }
-    catch(e){
-      throw ErrorException('خطا:$e');
-    }finally{
-      isLoading.value=false;
+     if(response!= null){
+       Get.back();
+       Get.snackbar("موفقیت آمیز","ویرایش با موفقیت آنجام شد",
+           titleText: Text('موفقیت آمیز',
+             textAlign: TextAlign.center,
+             style: TextStyle(color: AppColor.textColor),),
+           messageText: Text('ویرایش با موفقیت آنجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+       clearList();
+       orderController.fetchOrderList();
+
+     }
+
+    } catch (e) {
+      throw ErrorException('خطا در به‌روزرسانی سفارش: $e');
+    } finally {
+      isLoading.value = false;
     }
     return null;
   }
 
-   void clearList() {
+  void setOrderDetails(OrderModel order) {
+    orderId.value=order.id ?? 0;
+    selectedBuySell.value = (order.type == 1)
+        ? OrderTypeModel(id: 1, name: 'خرید از کاربر')
+        : OrderTypeModel(id: 0, name: 'فروش به کاربر');
+    //selectedItem.value = itemList.firstWhereOrNull((item) => item.id == order.item?.id);
+    //selectedAccount.value = accountList.firstWhereOrNull((account) => account.id == order.account?.id);
+
+    dateController.text = order.date.toString() ?? '';
+    priceController.text = order.price?.toString() ?? '';
+    amountController.text = order.amount?.toString() ?? '';
+    totalPriceController.text = order.totalPrice?.toString() ?? '';
+    descriptionController.text = order.description ?? '';
+
+  }
+
+
+  void clearList() {
     dateController.clear();
     priceController.clear();
     amountController.clear();

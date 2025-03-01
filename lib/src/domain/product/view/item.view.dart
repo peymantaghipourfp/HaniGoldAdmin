@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../widget/custom_appbar.widget.dart';
 
 class ProductView extends StatelessWidget {
@@ -7,7 +8,7 @@ class ProductView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(title: 'محصولات'),
+      appBar: CustomAppBar(title: 'محصولات',onBackTap: ()=>Get.back(),),
     );
   }
 }
