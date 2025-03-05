@@ -22,7 +22,8 @@ class OrderCreateView extends StatelessWidget {
       appBar: CustomAppBar(title: 'ایجاد سفارش جدید',onBackTap: () {
         Get.back();
         orderCreateController.clearList();
-      },),
+      },
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -42,9 +43,9 @@ class OrderCreateView extends StatelessWidget {
                           Get.back();
                           orderCreateController.clearList();
                         },
-                        child: SvgPicture.asset('assets/svg/order-list.svg',alignment: Alignment.centerLeft,
-                          width: 20,
-                          height: 35,
+                        child: SvgPicture.asset('assets/svg/list.svg',alignment: Alignment.centerLeft,
+                          width: 18,
+                          height: 23,
                           colorFilter: ColorFilter.mode(AppColor.textColor, BlendMode.srcIn),),
                       ),
                     ),
@@ -52,7 +53,7 @@ class OrderCreateView extends StatelessWidget {
                 ),
                 Divider(
                   height: 1,
-                  color: AppColor.secondaryColor,
+                  color: AppColor.appBarColor,
                 ),
                 Padding(
                   padding:

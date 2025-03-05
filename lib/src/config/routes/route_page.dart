@@ -32,7 +32,7 @@ class RoutePage{
     GetPage(name: '/product', page: ()=>ProductView()),
     GetPage(name: '/tools', page: ()=>ToolsView()),
     GetPage(name: '/users', page: ()=>UsersView()),
-    GetPage(name: '/withdrawCreate', page: ()=>WithdrawCreate()),
+    GetPage(name: '/withdrawCreate', page: ()=>WithdrawCreate(),binding: WithdrawBindings()),
     GetPage(name: '/withdrawsList', page: ()=>WithdrawsList(),binding: WithdrawBindings()),
     GetPage(name: '/depositsList', page: ()=>DepositsList()),
     GetPage(name: '/wallet', page: ()=>WalletView()),

@@ -417,13 +417,10 @@ class OrderListView extends StatelessWidget {
                                   )));
                         },
                         style: ButtonStyle(
-                            backgroundColor:
-                                WidgetStatePropertyAll(AppColor.accentColor),
-                            shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
+                            backgroundColor: WidgetStatePropertyAll(AppColor.accentColor),
+                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4)))),
-                        child: Text(
-                          'رد',
+                        child: Text('رد',
                           style: AppTextStyle.bodyText,
                         ),
                       ),

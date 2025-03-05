@@ -42,9 +42,9 @@ class OrderUpdateView extends StatelessWidget {
                         onTap: (){
                           Get.back();
                         },
-                        child: SvgPicture.asset('assets/svg/order-list.svg',alignment: Alignment.centerLeft,
-                          width: 20,
-                          height: 35,
+                        child: SvgPicture.asset('assets/svg/list.svg',alignment: Alignment.centerLeft,
+                          width: 18,
+                          height: 23,
                           colorFilter: ColorFilter.mode(AppColor.textColor, BlendMode.srcIn),),
                       ),
                     ),
@@ -52,7 +52,7 @@ class OrderUpdateView extends StatelessWidget {
                 ),
                 Divider(
                   height: 1,
-                  color: AppColor.secondaryColor,
+                  color: AppColor.appBarColor,
                 ),
                 Padding(
                   padding:
