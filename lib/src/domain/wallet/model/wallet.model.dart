@@ -11,25 +11,28 @@ String walletModelToJson(List<WalletModel> data) => json.encode(List<dynamic>.fr
 
 @JsonSerializable()
 class WalletModel {
-  @JsonKey(name: "type")
-  final int? type;
   @JsonKey(name: "address")
   final String? address;
   @JsonKey(name: "account")
   final AccountModel? account;
   @JsonKey(name: "item")
   final ItemModel? item;
-  @JsonKey(name: "balance")
-  final int? balance;
+  @JsonKey(name: "rowNum")
+  final int? rowNum;
+  @JsonKey(name: "id")
+  final int? id;
+  @JsonKey(name: "attribute")
+  final String? attribute;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
 
   WalletModel({
-    required this.type,
     required this.address,
     required this.account,
     required this.item,
-    required this.balance,
+    required this.rowNum,
+    required this.id,
+    required this.attribute,
     required this.infos,
   });
 

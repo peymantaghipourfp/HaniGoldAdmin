@@ -13,7 +13,7 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.backGroundColor,
-      appBar: CustomAppBar(title: 'خانه', onBackTap: () => Get.back(),),
+      appBar: CustomAppBar(title: 'خانه', onBackTap: () => Get.toNamed('/login'),),
       body: Directionality(
         textDirection: TextDirection.rtl,
         child: SafeArea(

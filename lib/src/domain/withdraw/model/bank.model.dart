@@ -13,12 +13,8 @@ class BankModel {
   final String? name;
   @JsonKey(name: "icon")
   final String? icon;
-  @JsonKey(name: "rowNum")
-  final int? rowNum;
   @JsonKey(name: "id")
   final int? id;
-  @JsonKey(name: "attribute")
-  final String? attribute;
   @JsonKey(name: "recId")
   final String? recId;
   @JsonKey(name: "infos")
@@ -27,9 +23,7 @@ class BankModel {
   BankModel({
     required this.name,
     required this.icon,
-    required this.rowNum,
     required this.id,
-    required this.attribute,
     required this.recId,
     required this.infos,
   });

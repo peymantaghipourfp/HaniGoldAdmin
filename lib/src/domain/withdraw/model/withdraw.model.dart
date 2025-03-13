@@ -17,10 +17,20 @@ class WithdrawModel {
   final WalletModel? wallet;
   @JsonKey(name: "amount")
   final int? amount;
+  @JsonKey(name: "dividedAmount")
+  final int? dividedAmount;
+  @JsonKey(name: "notConfirmedAmount")
+  final int? notConfirmedAmount;
   @JsonKey(name: "undividedAmount")
   final int? undividedAmount;
+  @JsonKey(name: "paidAmount")
+  final int? paidAmount;
   @JsonKey(name: "requestDate")
   final DateTime? requestDate;
+  @JsonKey(name: "confirmDate")
+  final DateTime? confirmDate;
+  @JsonKey(name: "status")
+  final int? status;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -34,8 +44,13 @@ class WithdrawModel {
     required this.bankAccount,
     required this.wallet,
     required this.amount,
+    required this.dividedAmount,
+    required this.notConfirmedAmount,
     required this.undividedAmount,
+    required this.paidAmount,
     required this.requestDate,
+    required this.confirmDate,
+    required this.status,
     required this.rowNum,
     required this.id,
     required this.attribute,

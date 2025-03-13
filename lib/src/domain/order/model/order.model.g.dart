@@ -20,7 +20,7 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
       item: json['item'] == null
           ? null
           : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
-      amount: (json['amount'] as num?)?.toInt(),
+      amount: (json['amount'] as num?)?.toDouble(),
       price: (json['price'] as num?)?.toDouble(),
       differentPrice: (json['differentPrice'] as num?)?.toDouble(),
       totalPrice: (json['totalPrice'] as num?)?.toDouble(),

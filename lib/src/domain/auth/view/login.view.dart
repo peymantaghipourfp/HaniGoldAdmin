@@ -43,12 +43,11 @@ class LoginView extends GetView<AuthController> {
                 ),
                 Padding(
                   padding: const EdgeInsets.only(bottom: 1, left: 17, right: 17),
-                  child: Divider(color: AppColor.secondaryColor, height: 1,),
+                  child: Divider(color: AppColor.buttonColor, height: 1,),
                 ),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 25.0),
                   child: Form(
-                    key: controller.formKey,
                     child: Column(
                       children: [
                         Padding(
@@ -95,7 +94,7 @@ class LoginView extends GetView<AuthController> {
                 ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColor.secondaryColor,
+                backgroundColor: AppColor.buttonColor,
                 minimumSize: Size(150, 55),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15)),

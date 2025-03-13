@@ -26,7 +26,7 @@ class OrderModel {
   @JsonKey(name: "item")
   final ItemModel? item;
   @JsonKey(name: "amount")
-  final int? amount;
+  final double? amount;
   @JsonKey(name: "price")
   final double? price;
   @JsonKey(name: "differentPrice")

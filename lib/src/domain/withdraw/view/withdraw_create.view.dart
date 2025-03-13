@@ -3,14 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_create.controller.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_appbar.widget.dart';
 
-class WithdrawCreate extends StatelessWidget {
-  WithdrawCreate({super.key});
+class WithdrawCreateView extends StatefulWidget {
+  WithdrawCreateView({super.key});
 
+  @override
+  State<WithdrawCreateView> createState() => _WithdrawCreateState();
+}
+
+class _WithdrawCreateState extends State<WithdrawCreateView> {
   WithdrawCreateController withdrawCreateController = Get.find<WithdrawCreateController>();
 
   @override
@@ -91,7 +98,7 @@ class WithdrawCreate extends StatelessWidget {
                                 items: withdrawCreateController.accountList.map((account){
                                   return DropdownMenuItem(
                                     value: account,
-                                      child: Text(account.name.toString(),style: AppTextStyle.bodyText,));
+                                      child: Text(account.name ?? "",style: AppTextStyle.bodyText,));
                                 }).toList(),
                                 value: withdrawCreateController.selectedAccount.value,
                                 onChanged: (newValue){
@@ -164,12 +171,18 @@ class WithdrawCreate extends StatelessWidget {
                                 withdrawCreateController.bankAccountList.map((bankAccount){
                                   return DropdownMenuItem(
                                       value: bankAccount,
-                                      child: Text(bankAccount.bank!.name.toString(),style: AppTextStyle.bodyText,));
+                                      child: Row(
+                                        children: [
+                                          Image.network('${BaseUrl.baseUrl}Attachment/downloadAsync?fileName=${bankAccount.bank?.icon}',width: 22,height: 22,),
+                                          SizedBox(width: 10,),
+                                          Text(bankAccount.bank!.name ?? "",style: AppTextStyle.bodyText,),
+                                        ],
+                                      ));
                                 }).toList(),
                                 value: withdrawCreateController.selectedBankAccount.value,
                                 onChanged: (newValue){
                                   if(newValue!=null) {
-                                    withdrawCreateController.changeSelectedBank(newValue);
+                                    withdrawCreateController.changeSelectedBankAccount(newValue);
                                   }
                                 },
                                 buttonStyleData: ButtonStyleData(
@@ -216,6 +229,76 @@ class WithdrawCreate extends StatelessWidget {
                             ),
                             // نام بانک
                             Container(
+                              padding: EdgeInsets.only(bottom: 5),
+                              child: DropdownButton2(
+                                isExpanded: true,
+                                hint: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        "انتخاب کنید",
+                                        style: AppTextStyle.labelText.copyWith(
+                                          fontSize: 14,
+                                          color: AppColor.textColor,
+                                        ),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                items:
+                                withdrawCreateController.bankList.map((bank){
+                                  return DropdownMenuItem(
+                                      value: bank.id.toString(),
+                                      child: Row(
+                                        children: [
+                                          Image.network('${BaseUrl.baseUrl}Attachment/downloadAsync?fileName=${bank.icon}',width: 22,height: 22,),
+                                          SizedBox(width: 10,),
+                                          Text(bank.name ?? "",style: AppTextStyle.bodyText,),
+                                        ],
+                                      ));
+                                }).toList(),
+                                value: withdrawCreateController.selectedIndex,
+                                onChanged: (newValue){
+                                  setState(() {
+                                    withdrawCreateController.changeSelectedBank(newValue!);
+                                  });
+                                },
+                                buttonStyleData: ButtonStyleData(
+                                  padding: const EdgeInsets.symmetric(horizontal: 5),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(7),
+                                    color: AppColor.textFieldColor,
+                                    border: Border.all(color: AppColor.backGroundColor, width: 1),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                iconStyleData: IconStyleData(
+                                  icon: const Icon(Icons.keyboard_arrow_down),
+                                  iconSize: 23,
+                                  iconEnabledColor: AppColor.textColor,
+                                  iconDisabledColor: Colors.grey,
+                                ),
+                                dropdownStyleData: DropdownStyleData(
+                                  maxHeight: 200,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(7),
+                                    color: AppColor.textFieldColor,
+                                  ),
+                                  offset: const Offset(0, 0),
+                                  scrollbarTheme: ScrollbarThemeData(
+                                    radius: const Radius.circular(7),
+                                    thickness: WidgetStateProperty.all(6),
+                                    thumbVisibility: WidgetStateProperty.all(true),
+                                  ),
+                                ),
+                                menuItemStyleData: const MenuItemStyleData(
+                                  height: 40,
+                                  padding: EdgeInsets.symmetric(horizontal: 10),
+                                ),
+                              ),
+                            ),
+                            /*Container(
                               height: 50,
                               padding: EdgeInsets.only(bottom: 5),
                               child:
@@ -230,7 +313,7 @@ class WithdrawCreate extends StatelessWidget {
                                   fillColor: AppColor.textFieldColor,
                                 ),
                               ),
-                            ),
+                            ),*/
                             // نام صاحب حساب
                             Container(
                               padding: EdgeInsets.only(bottom: 3,top: 5),
@@ -273,7 +356,17 @@ class WithdrawCreate extends StatelessWidget {
                                 controller: withdrawCreateController.amountController,
                                 style: AppTextStyle.labelText,
                                 keyboardType: TextInputType.number,
-                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                onChanged: (value) {
+                                  // حذف کاماهای قبلی و فرمت جدید
+                                  String cleanedValue = value.replaceAll(',', '');
+                                  if (cleanedValue.isNotEmpty) {
+                                    withdrawCreateController.amountController.text =
+                                        cleanedValue.toPersianDigit().seRagham();
+                                    withdrawCreateController.amountController.selection =
+                                        TextSelection.collapsed(
+                                            offset: withdrawCreateController.amountController.text.length);
+                                  }
+                                },
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
@@ -399,6 +492,7 @@ class WithdrawCreate extends StatelessWidget {
                                           borderRadius: BorderRadius.circular(10)))),
                                   onPressed: () async{
                                     await withdrawCreateController.insertWithdraw();
+                                    withdrawCreateController.clearList();
                                   },
                                   child:withdrawCreateController.isLoading.value
                                       ?

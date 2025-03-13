@@ -7,7 +7,6 @@ part of 'wallet.model.dart';
 // **************************************************************************
 
 WalletModel _$WalletModelFromJson(Map<String, dynamic> json) => WalletModel(
-      type: (json['type'] as num?)?.toInt(),
       address: json['address'] as String?,
       account: json['account'] == null
           ? null
@@ -15,16 +14,19 @@ WalletModel _$WalletModelFromJson(Map<String, dynamic> json) => WalletModel(
       item: json['item'] == null
           ? null
           : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
-      balance: (json['balance'] as num?)?.toInt(),
+      rowNum: (json['rowNum'] as num?)?.toInt(),
+      id: (json['id'] as num?)?.toInt(),
+      attribute: json['attribute'] as String?,
       infos: json['infos'] as List<dynamic>?,
     );
 
 Map<String, dynamic> _$WalletModelToJson(WalletModel instance) =>
     <String, dynamic>{
-      'type': instance.type,
       'address': instance.address,
       'account': instance.account,
       'item': instance.item,
-      'balance': instance.balance,
+      'rowNum': instance.rowNum,
+      'id': instance.id,
+      'attribute': instance.attribute,
       'infos': instance.infos,
     };

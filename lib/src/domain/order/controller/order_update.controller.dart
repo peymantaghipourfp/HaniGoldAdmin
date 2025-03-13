@@ -8,6 +8,8 @@ import 'package:hanigold_admin/src/config/repository/item.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
 import '../model/order.model.dart';
 import 'order.controller.dart';
@@ -58,18 +60,18 @@ class OrderUpdateController extends GetxController{
   void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
     selectedBuySell.value?.id==0?
-    priceController.text=selectedItem.value!.price.toString():
-    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString();
+    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ','):
+    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
 
   }
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
   }
   void updateTotalPrice(){
-    double price=double.tryParse(priceController.text) ?? 0;
-    double amount=double.tryParse(amountController.text) ?? 0;
+    double price=double.tryParse(priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+    double amount=double.tryParse(amountController.text.toEnglishDigit()) ?? 0;
     double totalPrice= price * amount;
-    totalPriceController.text=totalPrice.toStringAsFixed(2);
+    totalPriceController.text=totalPrice.toStringAsFixed(2).seRagham().toPersianDigit();
   }
 
 
@@ -83,7 +85,7 @@ class OrderUpdateController extends GetxController{
     }
     priceController.addListener(updateTotalPrice);
     amountController.addListener(updateTotalPrice);
-    DateTime now=DateTime.now();
+    var now=Jalali.now();
     dateController.text="${now.year.toString()}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     super.onInit();
   }
@@ -153,8 +155,8 @@ class OrderUpdateController extends GetxController{
         type: selectedBuySell.value?.id ?? 0,
         itemId: selectedItem.value?.id ?? 0,
         itemName: selectedItem.value?.name ?? "",
-        price: double.parse(priceController.text),
-        amount: double.parse(amountController.text),
+        price: double.parse(priceController.text.replaceAll(',', '').toEnglishDigit()),
+        amount: double.parse(amountController.text.toEnglishDigit()),
         description: descriptionController.text,
       );
      if(response!= null){
@@ -186,9 +188,9 @@ class OrderUpdateController extends GetxController{
     //selectedAccount.value = accountList.firstWhereOrNull((account) => account.id == order.account?.id);
 
     dateController.text = order.date.toString() ?? '';
-    priceController.text = order.price?.toString() ?? '';
+    priceController.text = order.price?.toString().seRagham(separator: ',') ?? '';
     amountController.text = order.amount?.toString() ?? '';
-    totalPriceController.text = order.totalPrice?.toString() ?? '';
+    totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
 
   }

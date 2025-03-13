@@ -24,7 +24,7 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/get',data: options);
-
+      print(response);
       if(response.statusCode==200) {
         List<dynamic> data=response.data;
         return data.map((order) => OrderModel.fromJson(order)).toList();

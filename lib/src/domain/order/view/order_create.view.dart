@@ -7,11 +7,13 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order_create.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/custom_appbar.widget.dart';
 
 class OrderCreateView extends StatelessWidget {
   OrderCreateView({super.key});
+  final formKey = GlobalKey<FormState>();
 
   OrderCreateController orderCreateController =
   Get.find<OrderCreateController>();
@@ -64,7 +66,7 @@ class OrderCreateView extends StatelessWidget {
                         .where((name) => name.isNotEmpty)
                         .toList();*/
                     return Form(
-                      key: orderCreateController.formKey,
+                      key:formKey,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -177,7 +179,17 @@ class OrderCreateView extends StatelessWidget {
                               controller: orderCreateController.priceController,
                               style: AppTextStyle.labelText,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              onChanged: (value) {
+                                // حذف کاماهای قبلی و فرمت جدید
+                                String cleanedValue = value.replaceAll(',', '');
+                                if (cleanedValue.isNotEmpty) {
+                                  orderCreateController.priceController.text =
+                                      cleanedValue.toPersianDigit().seRagham();
+                                  orderCreateController.priceController.selection =
+                                      TextSelection.collapsed(
+                                          offset: orderCreateController.priceController.text.length);
+                                }
+                              },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -212,7 +224,24 @@ class OrderCreateView extends StatelessWidget {
                                 controller: orderCreateController.amountController,
                                 style: AppTextStyle.labelText,
                                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))],
+                                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                  TextInputFormatter.withFunction((oldValue, newValue) {
+                                    // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                    String newText = newValue.text
+                                        .replaceAll('٠', '0')
+                                        .replaceAll('١', '1')
+                                        .replaceAll('٢', '2')
+                                        .replaceAll('٣', '3')
+                                        .replaceAll('٤', '4')
+                                        .replaceAll('٥', '5')
+                                        .replaceAll('٦', '6')
+                                        .replaceAll('٧', '7')
+                                        .replaceAll('٨', '8')
+                                        .replaceAll('٩', '9');
+
+                                    return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                  }),
+                                ],
                                 decoration: InputDecoration(
                                   isDense: true,
                                   border: OutlineInputBorder(
@@ -343,7 +372,7 @@ class OrderCreateView extends StatelessWidget {
                                     WidgetStatePropertyAll(AppColor.primaryColor),
                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10)))),
-                                onPressed: () async{if(orderCreateController.formKey.currentState!.validate()) {
+                                onPressed: () async{if(formKey.currentState!.validate()) {
                                           await orderCreateController.insertOrder();
 
                                 }
@@ -367,7 +396,7 @@ class OrderCreateView extends StatelessWidget {
                                     WidgetStatePropertyAll(AppColor.accentColor),
                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10)))),
-                                onPressed: () async {if(orderCreateController.formKey.currentState!.validate()) {
+                                onPressed: () async {if(formKey.currentState!.validate()) {
                                   await orderCreateController.insertOrder();
 
                                         }

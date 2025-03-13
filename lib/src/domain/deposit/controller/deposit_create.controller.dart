@@ -1,55 +1,55 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/repository/bank.repository.dart';
-import 'package:hanigold_admin/src/config/repository/bank_account.repository.dart';
+import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
-import 'package:hanigold_admin/src/config/repository/withdraw.repository.dart';
-import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank_account_options.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank_account_req.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
+import 'package:hanigold_admin/src/domain/deposit/model/deposit_request.model.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
-import '../../../config/repository/account.repository.dart';
-import '../../account/model/account.model.dart';
-import '../model/bank_account.model.dart';
+import '../../../config/repository/bank.repository.dart';
+import '../../../config/repository/bank_account.repository.dart';
+import '../../wallet/model/wallet.model.dart';
+import '../../withdraw/controller/withdraw.controller.dart';
+import '../../withdraw/model/bank.model.dart';
+import '../../withdraw/model/bank_account.model.dart';
+import '../../withdraw/model/bank_account_options.model.dart';
+import '../../withdraw/model/bank_account_req.model.dart';
+import '../../withdraw/model/filter.model.dart';
+import '../../withdraw/model/predicate.model.dart';
 
 enum PageState{loading,err,empty,list}
 
-class WithdrawCreateController extends GetxController{
-  //final formKey = GlobalKey<FormState>();
+class DepositCreateController extends GetxController{
 
   final WithdrawController withdrawController=WithdrawController();
 
   final TextEditingController ownerNameController=TextEditingController();
+  final TextEditingController accountController=TextEditingController();
   final TextEditingController amountController=TextEditingController();
   final TextEditingController numberController=TextEditingController();
   final TextEditingController cardNumberController=TextEditingController();
   final TextEditingController shebaController=TextEditingController();
-  final TextEditingController descriptionController=TextEditingController();
+  final TextEditingController dateController=TextEditingController();
 
-  final AccountRepository accountRepository=AccountRepository();
+  final DepositRepository depositRepository=DepositRepository();
   final BankRepository bankRepository=BankRepository();
   final BankAccountRepository bankAccountRepository=BankAccountRepository();
-  final WithdrawRepository withdrawRepository=WithdrawRepository();
   final WalletRepository walletRepository=WalletRepository();
 
-  final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<BankModel> bankList=<BankModel>[].obs;
   final List<BankAccountModel> bankAccountList=<BankAccountModel>[].obs;
   WalletModel? walletList;
+
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
 
-
-  final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
+  late DepositRequestModel depositRequests;
   final Rxn<BankAccountModel> selectedBankAccount = Rxn<BankAccountModel>();
   final Rxn<BankModel> selectedBank = Rxn<BankModel>();
   Rx<int> selectedWalletId = Rx<int>(0);
@@ -58,14 +58,7 @@ class WithdrawCreateController extends GetxController{
   Rx<String> selectedBankName = Rx<String>("");
 
 
-
-  void changeSelectedAccount(AccountModel? newValue) {
-    selectedAccount.value = newValue;
-    getBankAccount(selectedAccount.value!.id ?? 0);
-    fetchWallet(newValue?.id ?? 0);
-  }
-
-   changeSelectedBank(String newValue){
+  changeSelectedBank(String newValue){
     selectedIndex=newValue;
     selectedBankId.value=int.parse(newValue);
     for(int i=0 ;i<bankList.length;i++){
@@ -81,10 +74,10 @@ class WithdrawCreateController extends GetxController{
   void changeSelectedBankAccount(BankAccountModel? newValue) {
     selectedBankAccount.value = newValue;
     selectedIndex=selectedBankAccount.value?.bank?.id.toString();
-    ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
     numberController.text=selectedBankAccount.value!.number.toString();
     cardNumberController.text=selectedBankAccount.value!.cardNumber.toString();
     shebaController.text=selectedBankAccount.value!.sheba.toString();
+    ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
 
     print(selectedBankAccount.value?.bank?.name);
     print(selectedBankAccount.value?.bank?.id);
@@ -93,29 +86,19 @@ class WithdrawCreateController extends GetxController{
 
   @override
   void onInit() {
-    fetchAccountList();
+    depositRequests=Get.arguments;
+    accountController.text=depositRequests.account?.name ?? "";
+    if(depositRequests.account?.id!=null){
+      getBankAccount(depositRequests.account!.id!);
+      fetchWallet(depositRequests.account!.id!);
+    }
     fetchBankList();
+
+    var now = Jalali.now();
+    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     super.onInit();
   }
 
-  // لیست کاربران
-  Future<void> fetchAccountList() async{
-    try{
-      state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList();
-      accountList.assignAll(fetchedAccountList);
-      state.value=PageState.list;
-      if(accountList.isEmpty){
-        state.value=PageState.empty;
-      }
-    }
-    catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
-      isLoading.value=false;
-    }
-  }
   //لیست بانک ها
   Future<void> fetchBankList() async{
     try{
@@ -144,22 +127,23 @@ class WithdrawCreateController extends GetxController{
             orderByType: "desc",
             startIndex: 1,
             toIndex: 1000,
-          predicate: [PredicateModel(
-              innerCondition: 0,
-              outerCondition: 0,
-              filters: [FilterModel(
-                  fieldName: "AccountId",
-                  filterValue: id.toString(),
-                  filterType: 4,
-                  refTable: "BankAccount"
-              )
-              ]
-          )
-          ]
+            predicate: [PredicateModel(
+                innerCondition: 0,
+                outerCondition: 0,
+                filters: [FilterModel(
+                    fieldName: "AccountId",
+                    filterValue: id.toString(),
+                    filterType: 4,
+                    refTable: "BankAccount"
+                )
+                ]
+            )
+            ]
         )
     );
     fetchBankAccountList();
   }
+
 
   // لیست بانک اکانت
   Future<void> fetchBankAccountList()async{
@@ -178,7 +162,7 @@ class WithdrawCreateController extends GetxController{
     }
   }
 
-Future<void> fetchWallet(int id)async{
+  Future<void> fetchWallet(int id)async{
     try{
       isLoading.value=true;
       var fetchedWalletList=await walletRepository.getWallet(id);
@@ -191,45 +175,39 @@ Future<void> fetchWallet(int id)async{
     }finally{
       isLoading.value=false;
     }
-}
+  }
 
-  // درج درخواست
-Future<WithdrawModel?> insertWithdraw()async{
-    try {
-      isLoading.value = true;
-      var response = await withdrawRepository.insertWithdraw(
-        walletId: selectedWalletId.value,
-          itemId: walletList?.item?.id ?? 0,
-          itemName: walletList?.item?.name ?? "",
-          accountId: selectedAccount.value?.id ?? 0,
-          accountName: selectedAccount.value?.name ?? "",
+  Future<DepositModel?> insertDeposit()async{
+    try{
+      isLoading.value=true;
+      var response=depositRepository.insertDeposit(
+          walletId: selectedWalletId.value,
+          depositRequestId: depositRequests.id,
           bankAccountId: selectedBankAccount.value?.id ?? 0,
+          amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
+          accountId: depositRequests.account?.id ?? 0,
+          accountName: depositRequests.account?.name ?? "",
           bankId: selectedBankId.value,
           bankName: selectedBankName.value,
           ownerName: ownerNameController.text,
-          amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
           number: numberController.text,
           cardNumber: cardNumberController.text,
           sheba: shebaController.text,
-          description: descriptionController.text,
-        date: DateTime.now().toIso8601String()
+          date: dateController.text
       );
-      //print(response);
-      if (response != null) {
-        Get.toNamed('/withdrawsList');
+      if(response!=null) {
         Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-            titleText: Text('موفقیت آمیز',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(
-                'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
-                style: TextStyle(color: AppColor.textColor)));
-        clearList();
-        withdrawController.fetchWithdrawList();
+          titleText: Text('موفقیت آمیز',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+          messageText: Text(
+              'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor)));
       }
-    }
+      withdrawController.fetchWithdrawList();
 
-    catch(e){
+      Get.offNamed('/withdrawsList');
+    }catch(e){
       throw ErrorException('خطا:$e');
     }finally{
       isLoading.value=false;
@@ -238,15 +216,17 @@ Future<WithdrawModel?> insertWithdraw()async{
   }
 
   void clearList(){
-
+    accountController.clear();
     ownerNameController.clear();
     amountController.clear();
     numberController.clear();
     cardNumberController.clear();
     shebaController.clear();
-    selectedAccount.value=null;
-    selectedBankAccount.value=null;
     bankAccountList.clear();
+    bankList.clear();
+    dateController.clear();
+    selectedBankAccount.value=null;
+
   }
 
 }

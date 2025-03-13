@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../controller/order_update.controller.dart';
@@ -157,7 +158,17 @@ class OrderUpdateView extends StatelessWidget {
                               controller: orderUpdateController.priceController,
                               style: AppTextStyle.labelText,
                               keyboardType: TextInputType.number,
-                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                              onChanged: (value) {
+                                // حذف کاماهای قبلی و فرمت جدید
+                                String cleanedValue = value.replaceAll(',', '');
+                                if (cleanedValue.isNotEmpty) {
+                                  orderUpdateController.priceController.text =
+                                      cleanedValue.toPersianDigit().seRagham();
+                                  orderUpdateController.priceController.selection =
+                                      TextSelection.collapsed(
+                                          offset: orderUpdateController.priceController.text.length);
+                                }
+                              },
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
@@ -183,7 +194,24 @@ class OrderUpdateView extends StatelessWidget {
                                 controller: orderUpdateController.amountController,
                                 style: AppTextStyle.labelText,
                                 keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$'))],
+                                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                  TextInputFormatter.withFunction((oldValue, newValue) {
+                                    // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                    String newText = newValue.text
+                                        .replaceAll('٠', '0')
+                                        .replaceAll('١', '1')
+                                        .replaceAll('٢', '2')
+                                        .replaceAll('٣', '3')
+                                        .replaceAll('٤', '4')
+                                        .replaceAll('٥', '5')
+                                        .replaceAll('٦', '6')
+                                        .replaceAll('٧', '7')
+                                        .replaceAll('٨', '8')
+                                        .replaceAll('٩', '9');
+
+                                    return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                  }),
+                                ],
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(10),
@@ -289,7 +317,7 @@ class OrderUpdateView extends StatelessWidget {
                               ),
                             ),
                           ),
-                          // دکمه ایجاد سفارش
+                          // دکمه آپدیت سفارش
                           SizedBox(height: 20,),
                           Row(mainAxisAlignment: MainAxisAlignment.center,
                             children: [

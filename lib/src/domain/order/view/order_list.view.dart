@@ -84,6 +84,7 @@ class OrderListView extends StatelessWidget {
                   ],
                 ),
               ),
+              // لیست سفارشات
               Obx(() {
                 if (orderController.state.value == PageState.loading) {
                   return Center(child: CircularProgressIndicator());
@@ -151,7 +152,7 @@ class OrderListView extends StatelessWidget {
                                   funcOrderDetail(
                                       'assets/svg/amount.svg',
                                       'مقدار سفارش:',
-                                      "${orders.amount?.toString() ?? "0"} ${orders.item?.itemUnit?.name ?? ""}"),
+                                      "${orders.amount?.toStringAsFixed(2) ?? 0.00} ${orders.item?.itemUnit?.name ?? ""}"),
                                   //قیمت سفارش
                                   funcOrderDetail(
                                     'assets/svg/amount-price.svg',
@@ -160,11 +161,12 @@ class OrderListView extends StatelessWidget {
                                         ? "${orders.price.toString().seRagham(separator: ',')} ریال"
                                         : "0",
                                   ),
-                                  //مبلغ کل
+                                  // مبلغ کل و نوع سفارش
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+                                      // مبلغ کل
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.start,
@@ -192,6 +194,8 @@ class OrderListView extends StatelessWidget {
                                           ),
                                         ],
                                       ),
+
+                                      // نوع سفارش
                                       Row(
                                         children: [
                                           SizedBox(
