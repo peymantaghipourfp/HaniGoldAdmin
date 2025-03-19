@@ -8,7 +8,7 @@ import 'package:hanigold_admin/src/config/repository/withdraw.repository.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank_account_options.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank_account_req.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
@@ -139,7 +139,7 @@ class WithdrawCreateController extends GetxController{
   BankAccountReqModel? bankAccountReqModel;
   getBankAccount(int id){
     bankAccountReqModel=BankAccountReqModel(
-        bankAccount: BankAccountOptionsModel(
+        bankAccount: OptionsModel(
             orderBy: "BankAccount.Id",
             orderByType: "desc",
             startIndex: 1,

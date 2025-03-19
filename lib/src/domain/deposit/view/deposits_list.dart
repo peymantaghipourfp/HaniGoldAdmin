@@ -30,13 +30,13 @@ class DepositsListView extends StatelessWidget {
               height: Get.height,
               child: Column(
                 children: [
-                  // لیست سفارشات
+                  // لیست واریزی ها
                   Obx(() {
                     if (depositController.state.value == PageState.loading) {
                       return Center(child: CircularProgressIndicator());
                     } else if (depositController.state.value == PageState.empty) {
                       return EmptyPage(
-                        title: 'سفارشی وجود ندارد',
+                        title: 'واریزی وجود ندارد',
                         callback: () {
                           depositController.fetchDepositList();
                         },
@@ -72,23 +72,43 @@ class DepositsListView extends StatelessWidget {
                                               children: [
 
                                                 //نام کاربر
-                                                Row(
+                                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
                                                   children: [
-                                                    Text(
-                                                      'نام کاربر',
-                                                      style:
-                                                          AppTextStyle.labelText,
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'نام کاربر: ',
+                                                          style:
+                                                              AppTextStyle.labelText,
+                                                        ),
+                                                        SizedBox(
+                                                          height: 2,
+                                                        ),
+                                                        Text(
+                                                          deposits.wallet?.account?.name ?? "",
+                                                          style:
+                                                              AppTextStyle.bodyText,
+                                                        ),
+                                                      ],
                                                     ),
-                                                    SizedBox(
-                                                      height: 2,
-                                                    ),
-                                                    Text(
-                                                      deposits.wallet?.account?.name ?? "",
-                                                      style:
-                                                          AppTextStyle.bodyText,
-                                                    ),
+                                                    Row(
+                                                      children: [
+                                                        Text('الصاق تصویر ',style: AppTextStyle.labelText,),
+                                                        InkWell(
+                                                          onTap: () =>
+                                                            depositController.pickImage(
+                                                                deposits.recId.toString(),
+                                                                "image",
+                                                                "Deposit"),
+                                                          child: SvgPicture.asset('assets/svg/camera.svg',
+                                                            width: 25,
+                                                            height: 25,
+                                                            colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),),
+                                                        )
+                                                      ],
+                                                    )
                                                   ],
                                                 ),
 
@@ -98,7 +118,7 @@ class DepositsListView extends StatelessWidget {
                                                       CrossAxisAlignment.center,
                                                   children: [
                                                     Text(
-                                                      'تاریخ درخواست',
+                                                      'تاریخ درخواست: ',
                                                       style:
                                                           AppTextStyle.labelText,
                                                     ),
@@ -133,26 +153,71 @@ class DepositsListView extends StatelessWidget {
                                                   height: 4,
                                                 ),
 
-                                                //مبلغ
-                                                Row(
+                                                // مبلغ و مشاهده درخواست
+                                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.center,
                                                   children: [
-                                                    Text(
-                                                      'مبلغ: ',
-                                                      style:
-                                                          AppTextStyle.labelText,
+
+                                                    // مبلغ
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'مبلغ: ',
+                                                          style:
+                                                              AppTextStyle.labelText,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 3,
+                                                        ),
+                                                        Text(
+                                                          "${deposits.amount == null ? 0 : deposits.amount.toString().seRagham(separator: ',')} ریال",
+                                                          style:
+                                                              AppTextStyle.bodyText,
+                                                        ),
+                                                      ],
                                                     ),
-                                                    SizedBox(
-                                                      width: 3,
-                                                    ),
-                                                    Text(
-                                                      "${deposits.amount == null ? 0 : deposits.amount.toString().seRagham(separator: ',')} ریال",
-                                                      style:
-                                                          AppTextStyle.bodyText,
+
+                                                    // آیکون مشاهده
+                                                    Row(
+                                                      children: [
+                                                        Text('مشاهده درخواست ',style: AppTextStyle.labelText.copyWith(color: AppColor.iconViewColor),),
+                                                        Container(
+                                                          width: 20,
+                                                          height: 20,
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              Get.toNamed('/depositRequestGetOne',arguments: deposits.depositRequest?.id);
+                                                            },
+                                                            child: SvgPicture.asset(
+                                                                'assets/svg/eye1.svg',
+                                                                colorFilter:
+                                                                ColorFilter.mode(
+                                                                  AppColor.iconViewColor,
+                                                                  BlendMode.srcIn,
+                                                                )),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ],
                                                 ),
+                                                SizedBox(height: 4,),
+                                                // دلیل رد
+                                                deposits.status==2 ?
+                                                Row(
+                                                  crossAxisAlignment: CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    Text('دلیل رد: ',
+                                                      style: AppTextStyle
+                                                          .labelText,),
+                                                    SizedBox(width: 3,),
+                                                    Text("`${deposits.reasonRejection?.name}`" ?? "",
+                                                      style: AppTextStyle
+                                                          .bodyText,),
+                                                  ],
+                                                ) : Text(""),
                                               ],
                                             ),
                                             SizedBox(
@@ -164,28 +229,7 @@ class DepositsListView extends StatelessWidget {
                                             SizedBox(
                                               height: 5,
                                             ),
-                                            // ردیف سوم آیکون ها
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                // آیکون مشاهده
-                                                Container(
-                                                  width: 20,
-                                                  height: 20,
-                                                  child: InkWell(
-                                                    onTap: () {},
-                                                    child: SvgPicture.asset(
-                                                        'assets/svg/eye1.svg',
-                                                        colorFilter:
-                                                            ColorFilter.mode(
-                                                          AppColor.iconViewColor,
-                                                          BlendMode.srcIn,
-                                                        )),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
+
                                             // تعیین وضعیت
                                             Row(
                                               mainAxisAlignment:
@@ -219,7 +263,30 @@ class DepositsListView extends StatelessWidget {
                                                     splashRadius: 10,
                                                     tooltip: 'تعیین وضعیت',
                                                     onSelected: (value) async {
-                                                      await depositController.updateStatusDeposit(deposits.id!, value);
+                                                      if(value==2){
+                                                        await depositController.showReasonRejectionDialog("Deposit");
+                                                        if (depositController.selectedReasonRejection.value == null) {
+                                                          return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                                                        }
+                                                        await depositController.updateStatusDeposit(
+                                                          deposits.id!,
+                                                          value,
+                                                          depositController.selectedReasonRejection.value!.id!,
+                                                        );
+                                                      }else {
+                                                        await depositController.updateStatusDeposit(
+                                                            deposits.id!,
+                                                            value, 0);
+                                                        /*switch (value) {
+                                                            case 1:
+                                                              withdrawController.updateStatusId(1);
+                                                              break;
+                                                            case 2:
+                                                              withdrawController.updateStatusId(2);
+                                                              break;
+
+                                                          }*/
+                                                      }
 
                                                     },
                                                     shape: const RoundedRectangleBorder(

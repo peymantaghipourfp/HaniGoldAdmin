@@ -2,7 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/deposit/model/deposit_request.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 
 import '../network/error/network.error.dart';
 

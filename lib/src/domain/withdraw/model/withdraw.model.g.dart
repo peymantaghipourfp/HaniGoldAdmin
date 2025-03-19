@@ -15,6 +15,10 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
       wallet: json['wallet'] == null
           ? null
           : WalletModel.fromJson(json['wallet'] as Map<String, dynamic>),
+      reasonRejection: json['reasonRejection'] == null
+          ? null
+          : ReasonRejectionModel.fromJson(
+              json['reasonRejection'] as Map<String, dynamic>),
       amount: (json['amount'] as num?)?.toInt(),
       dividedAmount: (json['dividedAmount'] as num?)?.toInt(),
       notConfirmedAmount: (json['notConfirmedAmount'] as num?)?.toInt(),
@@ -27,6 +31,12 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
           ? null
           : DateTime.parse(json['confirmDate'] as String),
       status: (json['status'] as num?)?.toInt(),
+      depositRequests: (json['depositRequests'] as List<dynamic>?)
+          ?.map((e) => DepositRequestModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      deposits: (json['deposits'] as List<dynamic>?)
+          ?.map((e) => DepositModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
@@ -37,6 +47,7 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
     <String, dynamic>{
       'bankAccount': instance.bankAccount,
       'wallet': instance.wallet,
+      'reasonRejection': instance.reasonRejection,
       'amount': instance.amount,
       'dividedAmount': instance.dividedAmount,
       'notConfirmedAmount': instance.notConfirmedAmount,
@@ -44,6 +55,9 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'paidAmount': instance.paidAmount,
       'requestDate': instance.requestDate?.toIso8601String(),
       'confirmDate': instance.confirmDate?.toIso8601String(),
+      'status': instance.status,
+      'depositRequests': instance.depositRequests,
+      'deposits': instance.deposits,
       'rowNum': instance.rowNum,
       'id': instance.id,
       'attribute': instance.attribute,

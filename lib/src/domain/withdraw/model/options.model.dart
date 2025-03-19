@@ -1,13 +1,13 @@
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 
-class BankAccountOptionsModel {
+class OptionsModel {
   final List<PredicateModel>? predicate;
   final String? orderBy;
   final String? orderByType;
   final int? startIndex;
   final int? toIndex;
 
-  BankAccountOptionsModel({
+  OptionsModel({
     required this.predicate,
     required this.orderBy,
     required this.orderByType,
@@ -15,7 +15,7 @@ class BankAccountOptionsModel {
     required this.toIndex,
   });
 
-  factory BankAccountOptionsModel.fromJson(Map<String, dynamic> json) => BankAccountOptionsModel(
+  factory OptionsModel.fromJson(Map<String, dynamic> json) => OptionsModel(
     predicate: List<PredicateModel>.from(json["Predicate"].map((x) => PredicateModel.fromJson(x))),
     orderBy: json["orderBy"],
     orderByType: json["orderByType"],

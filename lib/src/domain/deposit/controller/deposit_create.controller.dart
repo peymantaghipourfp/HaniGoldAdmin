@@ -5,7 +5,7 @@ import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
-import 'package:hanigold_admin/src/domain/deposit/model/deposit_request.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
@@ -17,7 +17,7 @@ import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/controller/withdraw.controller.dart';
 import '../../withdraw/model/bank.model.dart';
 import '../../withdraw/model/bank_account.model.dart';
-import '../../withdraw/model/bank_account_options.model.dart';
+import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/bank_account_req.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/predicate.model.dart';
@@ -122,7 +122,7 @@ class DepositCreateController extends GetxController{
   BankAccountReqModel? bankAccountReqModel;
   getBankAccount(int id){
     bankAccountReqModel=BankAccountReqModel(
-        bankAccount: BankAccountOptionsModel(
+        bankAccount: OptionsModel(
             orderBy: "BankAccount.Id",
             orderByType: "desc",
             startIndex: 1,

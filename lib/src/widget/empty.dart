@@ -26,12 +26,12 @@ class EmptyPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              SvgPicture.asset(
+              /*SvgPicture.asset(
                               'assets/svg/empty.svg',
                               width: 100,
                               height: 100,
                 colorFilter: ColorFilter.mode(AppColor.textColor, BlendMode.srcIn),
-                            ),
+                            ),*/
               const SizedBox(
                 height: 15,
               ),

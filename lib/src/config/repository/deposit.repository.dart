@@ -157,6 +157,7 @@ class DepositRepository{
   Future<Map<String , dynamic>> updateStatusDeposit({
     required int status,
     required int depositId,
+    int? reasonRejectionId,
   })async{
     try{
       Map<String,dynamic> depositData={
@@ -244,6 +245,9 @@ class DepositRepository{
         "amount": 1000000.000,
         "date": "2025-03-10T18:46:52",
         "status": status,
+        if (reasonRejectionId != null) "reasonRejection":{
+          "id": reasonRejectionId,
+        },
         "rowNum": 1,
         "id": depositId,
         "attribute": "cus",
@@ -253,6 +257,8 @@ class DepositRepository{
       print(depositData);
 
       var response=await depositDio.put('Deposit/updateStatus',data: depositData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
     }
     catch(e){

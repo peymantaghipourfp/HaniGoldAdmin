@@ -1,5 +1,7 @@
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
@@ -18,6 +20,8 @@ class DepositRequestModel {
   final AccountModel? account;
   @JsonKey(name: "item")
   final ItemModel? item;
+  @JsonKey(name: "reasonRejection")
+  final ReasonRejectionModel? reasonRejection;
   @JsonKey(name: "amount")
   final int? amount;
   @JsonKey(name: "paidAmount")
@@ -28,6 +32,8 @@ class DepositRequestModel {
   final int? status;
   @JsonKey(name: "date")
   final DateTime? date;
+  @JsonKey(name: "deposits")
+  final List<DepositModel>? deposits;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -43,11 +49,13 @@ class DepositRequestModel {
     required this.withdrawRequest,
     required this.account,
     required this.item,
+    required this.reasonRejection,
     required this.amount,
     required this.paidAmount,
     required this.notPaidAmount,
     required this.status,
     required this.date,
+    required this.deposits,
     required this.rowNum,
     required this.id,
     required this.attribute,

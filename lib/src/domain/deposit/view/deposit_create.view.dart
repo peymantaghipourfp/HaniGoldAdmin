@@ -122,12 +122,13 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                         child: Row(
                                           children: [
                                             Image.network('${BaseUrl
-                                                .baseUrl}Attachment/downloadAsync?fileName=${bankAccount
+                                                .baseUrl}Attachment/downloadResource?fileName=${bankAccount
                                                 .bank?.icon}', width: 22,
                                               height: 22,),
                                             SizedBox(width: 10,),
-                                            Text(bankAccount.bank!.name ?? "",
+                                            Text("${bankAccount.bank!.name} , " ?? "",
                                               style: AppTextStyle.bodyText,),
+                                            Text(bankAccount.ownerName ?? "",style: AppTextStyle.bodyText,),
                                           ],
                                         ));
                                   }).toList(),
@@ -213,7 +214,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                         child: Row(
                                           children: [
                                             Image.network('${BaseUrl
-                                                .baseUrl}Attachment/downloadAsync?fileName=${bank
+                                                .baseUrl}Attachment/downloadResource?fileName=${bank
                                                 .icon}', width: 22,
                                               height: 22,),
                                             SizedBox(width: 10,),

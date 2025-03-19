@@ -20,8 +20,10 @@ import 'package:hanigold_admin/src/domain/tools/view/tools.view.dart';
 import 'package:hanigold_admin/src/domain/users/view/users.view.dart';
 import 'package:hanigold_admin/src/domain/wallet/view/wallet.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_create.view.dart';
+import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_getOne.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraws_list.view.dart';
 import '../../domain/splash/view/splash.view.dart';
+import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
 
 class RoutePage{
   static List<GetPage> routePage=[
@@ -36,8 +38,10 @@ class RoutePage{
     GetPage(name: '/users', page: ()=>UsersView()),
     GetPage(name: '/withdrawCreate', page: ()=>WithdrawCreateView(),binding: WithdrawBindings()),
     GetPage(name: '/withdrawsList', page: ()=>WithdrawsListView(),binding: WithdrawBindings()),
+    GetPage(name: '/withdrawGetOne', page: ()=>WithdrawGetOneView(),binding: WithdrawBindings()),
     GetPage(name: '/depositsList', page: ()=>DepositsListView(),binding: DepositBindings()),
     GetPage(name: '/depositCreate', page: ()=>DepositCreateView(),binding: DepositBindings()),
+    GetPage(name: '/depositRequestGetOne', page: ()=>DepositRequestGetOneView(),binding: WithdrawBindings()),
     GetPage(name: '/wallet', page: ()=>WalletView()),
 
   ];

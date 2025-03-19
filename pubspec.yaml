@@ -44,6 +44,8 @@ dependencies:
   persian_datetime_picker: ^3.1.0
   flutter_localization: ^0.3.1
   flutter_lints: ^5.0.0
+  image_picker: ^1.1.2
+  permission_handler: ^11.4.0
 
 
 dev_dependencies:

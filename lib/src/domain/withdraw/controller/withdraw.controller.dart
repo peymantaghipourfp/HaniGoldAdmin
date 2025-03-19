@@ -3,13 +3,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit_request.repository.dart';
+import 'package:hanigold_admin/src/config/repository/reason_rejection.repository.dart';
 import 'package:hanigold_admin/src/config/repository/withdraw.repository.dart';
+import 'package:hanigold_admin/src/config/repository/withdraw_getOne.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/deposit/model/deposit_request.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_getOne.controller.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
+import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 
@@ -17,9 +26,11 @@ import '../../../config/repository/account.repository.dart';
 enum PageState{loading,err,empty,list}
 class WithdrawController extends GetxController{
 
+
   final AccountRepository accountRepository=AccountRepository();
   final WithdrawRepository withdrawRepository=WithdrawRepository();
   final DepositRequestRepository depositRequestRepository=DepositRequestRepository();
+  final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
 
   final TextEditingController amountController=TextEditingController();
   final TextEditingController requestAmountController=TextEditingController();
@@ -28,15 +39,19 @@ class WithdrawController extends GetxController{
   var depositRequestList=<DepositRequestModel>[].obs;
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<AccountModel> filterAccountList=<AccountModel>[].obs;
+  final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
 
   var errorMessage=''.obs;
   var isLoading=true.obs;
   RxBool isLoadingDepositRequestList=RxBool(true);
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateDR=Rx<PageState>(PageState.list);
+  Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   RxnInt expandedIndex = RxnInt();
 
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
+
+  final Rxn<ReasonRejectionModel> selectedReasonRejection = Rxn<ReasonRejectionModel>();
 
   void setError(String message){
     state.value=PageState.err;
@@ -46,6 +61,7 @@ class WithdrawController extends GetxController{
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
   }
+
 
   void toggleItemExpansion(int index) {
     if (expandedIndex.value==index) {
@@ -57,6 +73,7 @@ class WithdrawController extends GetxController{
   bool isItemExpanded(int index) {
     return expandedIndex.value==index;
   }
+
 
 
   @override
@@ -111,16 +128,110 @@ class WithdrawController extends GetxController{
     }
   }
 
+  // مدل آپشن ReasonRejection
+
+  ReasonRejectionReqModel? reasonRejectionReqModel;
+  getReasonRejection(String type){
+    reasonRejectionList.clear();
+    reasonRejectionReqModel=ReasonRejectionReqModel(
+        reasonrejection: OptionsModel(
+            predicate: [PredicateModel(
+                innerCondition: 0,
+                outerCondition: 0,
+                filters: [FilterModel(
+                    fieldName: "Type",
+                    filterValue: type,
+                    filterType: 4,
+                    refTable: "ReasonRejection"
+                )
+                ]
+            )
+            ],
+            orderBy: "ReasonRejection.Id",
+            orderByType: "asc",
+            startIndex: 1,
+            toIndex: 10000
+        )
+    );
+    fetchReasonRejectionList();
+  }
+
+  // لیست Reason Rejection
+  Future<void> fetchReasonRejectionList()async{
+    try{
+      stateRR.value=PageState.loading;
+      var fetchedReasonRejectionList=await reasonRejectionRepository.getReasonRejectionList(reasonRejectionReqModel!);
+      reasonRejectionList.addAll(fetchedReasonRejectionList);
+      stateRR.value=PageState.list;
+      if(reasonRejectionList.isEmpty){
+        stateRR.value=PageState.empty;
+      }
+    }
+    catch(e){
+      stateRR.value=PageState.err;
+      errorMessage.value=e.toString();
+    }
+  }
+
+  Future<void> showReasonRejectionDialog(String type) async {
+    getReasonRejection(type);
+    await Get.dialog(
+      AlertDialog(
+        backgroundColor: AppColor.backGroundColor,
+        title: Column(
+          children: [
+            Text('انتخاب دلیل رد',style: AppTextStyle.mediumTitleText,textAlign: TextAlign.center,),
+            SizedBox(height: 7,),
+            Divider(height: 1,color: AppColor.secondaryColor,)
+          ],
+        ),
+        content: Obx(() {
+          if (reasonRejectionList.isEmpty) {
+            return Center(child: CircularProgressIndicator());
+          }
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: reasonRejectionList.map((reason) {
+                return Card(
+                  color: AppColor.textFieldColor,
+                  child: ListTile(
+                    title: Text( reason.name ?? '',style: AppTextStyle.bodyTextBold,),
+                    onTap: () {
+                      selectedReasonRejection.value = reason ;
+                      Get.back();
+                    },
+                  ),
+                );
+              }).toList(),
+            ),
+          );
+        }),
+        actions: [
+          TextButton(
+            onPressed: () {
+              selectedReasonRejection.value = null;
+              Get.back();
+            },
+            child: Text('لغو',style: AppTextStyle.bodyText.copyWith(color: AppColor.secondary2Color,fontSize: 16,fontWeight: FontWeight.bold),),
+          ),
+        ],
+      ),
+    );
+  }
+
+
   // آپدیت وضعیت درخواست های برداشت (updateStatusWithdraw)
 
-  Future<WithdrawModel?> updateStatusWithdraw(int withdrawId,int status) async {
+  Future<WithdrawModel?> updateStatusWithdraw(int withdrawId,int status,int reasonRejectionId) async {
 
     try {
       isLoading.value = true;
+
       var response = await withdrawRepository.updateStatusWithdraw(
         status: status,
         withdrawId: withdrawId,
-
+        reasonRejectionId: status==2 ? reasonRejectionId : null,
       );
       if(response!= null){
         Get.snackbar("موفقیت آمیز","وضعیت درخواست برداشت با موفقیت تغییر کرد",
@@ -135,6 +246,7 @@ class WithdrawController extends GetxController{
       throw ErrorException('خطا در تغییر وضعیت: $e');
     } finally {
       isLoading.value = false;
+
     }
     return null;
   }
@@ -198,5 +310,6 @@ class WithdrawController extends GetxController{
     amountController.clear();
     requestAmountController.clear();
     selectedAccount.value=null;
+    selectedReasonRejection.value = null;
   }
 }

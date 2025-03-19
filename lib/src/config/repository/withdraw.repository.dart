@@ -1,6 +1,5 @@
 
 
-import 'dart:ffi';
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
@@ -134,6 +133,7 @@ class WithdrawRepository{
   Future<Map<String , dynamic>> updateStatusWithdraw({
     required int status,
     required int withdrawId,
+    int? reasonRejectionId,
   })async{
     try{
       Map<String,dynamic> withdrawData={
@@ -200,14 +200,20 @@ class WithdrawRepository{
         "undividedAmount": 2000000.000,
         "requestDate": "2025-03-10T12:48:23",
         "status": status,
+        if (reasonRejectionId != null) "reasonRejection":{
+      "id": reasonRejectionId,
+      },
         "rowNum": 1,
         "id": withdrawId,
         "attribute": "cus",
         "infos": []
       };
+
       print(withdrawData);
 
       var response=await withdrawDio.put('WithdrawRequest/updateStatus',data: withdrawData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
     }
     catch(e){

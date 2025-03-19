@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/view/deposit_request_create.view.dart';
 import 'package:hanigold_admin/src/widget/persian_separator_formatter.widget.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/custom_appbar.widget.dart';
@@ -230,6 +231,22 @@ class WithdrawsListView extends StatelessWidget {
                                                               .bodyText,),
                                                       ],
                                                     ),
+                                                    SizedBox(height: 4,),
+                                                    // دلیل رد
+                                                    withdraws.status==2 ?
+                                                    Row(
+                                                      crossAxisAlignment: CrossAxisAlignment
+                                                          .center,
+                                                      children: [
+                                                        Text('دلیل رد: ',
+                                                          style: AppTextStyle
+                                                              .labelText,),
+                                                        SizedBox(width: 3,),
+                                                        Text("`${withdraws.reasonRejection?.name}`" ?? "",
+                                                          style: AppTextStyle
+                                                              .bodyText,),
+                                                      ],
+                                                    ) : Text(""),
                                                   ],
                                                 ),
                                                 SizedBox(height: 4,),
@@ -243,70 +260,97 @@ class WithdrawsListView extends StatelessWidget {
                                                   children: [
 
                                                     // آیکون اضافه کردن درخواست deposit request
-                                                    Container(
-                                                      width: 25, height: 25,
-                                                      child: InkWell(
-                                                        onTap: () {
-                                                          insertDepositRequestBottomSheet(context,withdraws.id!);
-                                                          withdrawController.filterAccountListFunc(withdraws.wallet!.account!.id!.toInt());
-                                                        },
-                                                        child: SvgPicture.asset(
-                                                            'assets/svg/add.svg',
-                                                            colorFilter: ColorFilter
-                                                                .mode(AppColor
-                                                                .buttonColor,
-                                                              BlendMode.srcIn,)
-                                                        ),
-                                                      ),
-                                                    ),
+
+                                                       GestureDetector(
+                                                         onTap: () {
+
+                                                           showModalBottomSheet(
+                                                             enableDrag: true,
+                                                             context: context,
+                                                             backgroundColor: AppColor.backGroundColor,
+                                                             shape: RoundedRectangleBorder(
+                                                               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                                             ),
+                                                             builder: (context) {
+                                                               return InsertDepositRequestWidget(id: withdraws.id!);
+                                                             },
+                                                           ).whenComplete(() {
+                                                             withdrawController.clearList();
+                                                           }
+                                                           );
+                                                           withdrawController.filterAccountListFunc(withdraws.wallet!.account!.id!.toInt());
+                                                         },
+                                                         child: Row(
+                                                          children: [
+                                                            Text(' تقسیم',style: AppTextStyle.labelText.copyWith(color: AppColor.buttonColor),),
+                                                            SvgPicture.asset(
+                                                                  'assets/svg/add.svg',
+                                                                  colorFilter: ColorFilter
+                                                                      .mode(AppColor
+                                                                      .buttonColor,
+                                                                    BlendMode.srcIn,)
+                                                              ),
+                                                          ],
+                                                         ),
+                                                       ),
+
                                                     // آیکون حذف کردن
-                                                    Container(
-                                                      width: 20, height: 20,
-                                                      child: InkWell(
-                                                        onTap: () {
+                                                     Row(
+                                                        children: [
+                                                          Text(' حذف',style: AppTextStyle.labelText.copyWith(color: AppColor.accentColor),),
+                                                          InkWell(
+                                                            onTap: () {
 
-                                                        },
-                                                        child: SvgPicture.asset(
-                                                            'assets/svg/trash-bin.svg',
-                                                            colorFilter: ColorFilter
-                                                                .mode(AppColor
-                                                                .accentColor,
-                                                              BlendMode.srcIn,)
-                                                        ),
+                                                            },
+                                                            child: SvgPicture.asset(
+                                                                'assets/svg/trash-bin.svg',
+                                                                colorFilter: ColorFilter
+                                                                    .mode(AppColor
+                                                                    .accentColor,
+                                                                  BlendMode.srcIn,)
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ),
+
                                                     // آیکون مشاهده
-                                                    Container(
-                                                      width: 20, height: 20,
-                                                      child: InkWell(
-                                                        onTap: () {
-
-                                                        },
-                                                        child: SvgPicture.asset(
-                                                            'assets/svg/eye1.svg',
-                                                            colorFilter: ColorFilter
-                                                                .mode(AppColor
-                                                                .iconViewColor,
-                                                              BlendMode.srcIn,)
+                                                     GestureDetector(
+                                                       onTap: () {
+                                                         Get.toNamed('/withdrawGetOne',arguments: withdraws.id,);
+                                                         //print(withdraws.id);
+                                                       },
+                                                       child: Row(
+                                                          children: [
+                                                            Text(' مشاهده',style: AppTextStyle.labelText.copyWith(color: AppColor.iconViewColor),),
+                                                            SvgPicture.asset(
+                                                                  'assets/svg/eye1.svg',
+                                                                  colorFilter: ColorFilter
+                                                                      .mode(AppColor
+                                                                      .iconViewColor,
+                                                                    BlendMode.srcIn,)
+                                                              ),
+                                                          ],
                                                         ),
-                                                      ),
-                                                    ),
+                                                     ),
                                                     // آیکون ویرایش
-                                                    Container(
-                                                      width: 20, height: 20,
-                                                      child: InkWell(
-                                                        onTap: () {
+                                                     Row(
+                                                        children: [
+                                                          Text(' ویرایش',style: AppTextStyle.labelText.copyWith(color: AppColor.iconViewColor),),
+                                                          InkWell(
+                                                            onTap: () {
 
-                                                        },
-                                                        child: SvgPicture.asset(
-                                                            'assets/svg/edit.svg',
-                                                            colorFilter: ColorFilter
-                                                                .mode(AppColor
-                                                                .iconViewColor,
-                                                              BlendMode.srcIn,)
-                                                        ),
+                                                            },
+                                                            child: SvgPicture.asset(
+                                                                'assets/svg/edit.svg',
+                                                                colorFilter: ColorFilter
+                                                                    .mode(AppColor
+                                                                    .iconViewColor,
+                                                                  BlendMode.srcIn,)
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ),
-                                                    ),
+
                                                   ],
                                                 ),
 
@@ -360,8 +404,21 @@ class WithdrawsListView extends StatelessWidget {
                                                         splashRadius: 10,
                                                         tooltip: 'تعیین وضعیت',
                                                         onSelected: (value) async {
-                                                          await withdrawController.updateStatusWithdraw(withdraws.id!, value);
-                                                          /*switch (value) {
+                                                          if(value==2){
+                                                            await withdrawController.showReasonRejectionDialog("WithdrawRequest");
+                                                            if (withdrawController.selectedReasonRejection.value == null) {
+                                                              return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                                                            }
+                                                            await withdrawController.updateStatusWithdraw(
+                                                              withdraws.id!,
+                                                              value,
+                                                              withdrawController.selectedReasonRejection.value!.id!,
+                                                            );
+                                                          }else {
+                                                            await withdrawController.updateStatusWithdraw(
+                                                                withdraws.id!,
+                                                                value, 0);
+                                                            /*switch (value) {
                                                             case 1:
                                                               withdrawController.updateStatusId(1);
                                                               break;
@@ -370,6 +427,7 @@ class WithdrawsListView extends StatelessWidget {
                                                               break;
 
                                                           }*/
+                                                          }
                                                         },
                                                         shape: const RoundedRectangleBorder(
                                                           borderRadius: BorderRadius
@@ -444,6 +502,12 @@ class WithdrawsListView extends StatelessWidget {
                                                                 ),
                                                               ],
                                                             ),
+                                                            onTap: () async{
+
+                                                              /*if (withdrawController.selectedReasonRejection.value != null) {
+                                                                await withdrawController.updateStatusWithdraw(withdraws.id!, 2,withdrawController.selectedReasonRejection.value?.id ?? 0);
+                                                              }*/
+                                                            },
                                                           ),
                                                         ],
                                                         child: Text(
@@ -501,11 +565,26 @@ class WithdrawsListView extends StatelessWidget {
                                                           Container(
                                                             width: 25,
                                                             height: 25,
-                                                            child: InkWell(
+                                                            child: GestureDetector(
+
                                                               onTap: () {
-                                                                insertDepositRequestBottomSheet(context,withdraws.id!);
-                                                                withdrawController.filterAccountListFunc(withdraws.wallet!.account!.id!);
+                                                                showModalBottomSheet(
+                                                                  enableDrag: true,
+                                                                  context: context,
+                                                                  backgroundColor: AppColor.backGroundColor,
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                                                  ),
+                                                                  builder: (context) {
+                                                                    return InsertDepositRequestWidget(id: withdraws.id!);
+                                                                  },
+                                                                ).whenComplete(() {
+                                                                  withdrawController.clearList();
+                                                                }
+                                                                );
+                                                                withdrawController.filterAccountListFunc(withdraws.wallet!.account!.id!.toInt());
                                                               },
+
                                                               child: SvgPicture
                                                                   .asset(
                                                                   'assets/svg/add.svg',
@@ -669,6 +748,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                     .spaceBetween,
                                                                                 children: [
                                                                                   // آیکون اضافه کردن
+
                                                                                   Container(
                                                                                     width: 25,
                                                                                     height: 25,
@@ -712,9 +792,9 @@ class WithdrawsListView extends StatelessWidget {
                                                                                   Container(
                                                                                     width: 25,
                                                                                     height: 25,
-                                                                                    child: InkWell(
+                                                                                    child: GestureDetector(
                                                                                       onTap: () {
-
+                                                                                        Get.toNamed('/depositRequestGetOne',arguments: depositRequests.id);
                                                                                       },
                                                                                       child: SvgPicture
                                                                                           .asset(
@@ -794,7 +874,7 @@ class WithdrawsListView extends StatelessWidget {
   }
 
   // bottomSheet درج درخواست واریزی(deposit request)
-  void insertDepositRequestBottomSheet(BuildContext context,int id) {
+/*  void insertDepositRequestBottomSheet(BuildContext context,int id) {
     showModalBottomSheet(
 
       enableDrag: true,
@@ -998,7 +1078,7 @@ class WithdrawsListView extends StatelessWidget {
     ).whenComplete(() {
       withdrawController.clearList();
     },);
-  }
+  }*/
 
 }
 
