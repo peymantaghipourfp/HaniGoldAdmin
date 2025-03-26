@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -11,7 +12,22 @@ class LoginView extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        leading: TextButton(
+          onPressed: () async {
+            // خروج از اپلیکیشن
+            await FlutterExitApp.exitApp();
+          },
+          child: Text(
+            'خروج',
+            style: AppTextStyle.bodyText.copyWith(
+              color: Colors.red, fontSize: 14,fontWeight: FontWeight.bold
+            ),
+          ),
+        ),
+      ),
       backgroundColor: AppColor.backGroundColor,
+
       body: SafeArea(
           child: SizedBox(
             width: Get.width,

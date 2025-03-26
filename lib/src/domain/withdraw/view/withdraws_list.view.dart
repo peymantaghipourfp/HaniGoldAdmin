@@ -303,7 +303,7 @@ class WithdrawsListView extends StatelessWidget {
                                                        ),
 
                                                     // آیکون حذف کردن
-                                                     Row(
+                                                     /*Row(
                                                         children: [
                                                           Text(' حذف',style: AppTextStyle.labelText.copyWith(color: AppColor.accentColor),),
                                                           InkWell(
@@ -319,7 +319,7 @@ class WithdrawsListView extends StatelessWidget {
                                                             ),
                                                           ),
                                                         ],
-                                                      ),
+                                                      ),*/
 
                                                     // آیکون مشاهده
                                                      GestureDetector(
@@ -341,7 +341,7 @@ class WithdrawsListView extends StatelessWidget {
                                                         ),
                                                      ),
                                                     // آیکون ویرایش
-                                                     Row(
+                                                     /*Row(
                                                         children: [
                                                           Text(' ویرایش',style: AppTextStyle.labelText.copyWith(color: AppColor.iconViewColor),),
                                                           InkWell(
@@ -357,7 +357,7 @@ class WithdrawsListView extends StatelessWidget {
                                                             ),
                                                           ),
                                                         ],
-                                                      ),
+                                                      ),*/
 
                                                   ],
                                                 ),
@@ -911,7 +911,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                     ),
                                                                                   ),
                                                                                   // آیکون حذف کردن
-                                                                                  Container(
+                                                                                  /*Container(
                                                                                     width: 25,
                                                                                     height: 25,
                                                                                     child: InkWell(
@@ -929,7 +929,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                                 .srcIn,)
                                                                                       ),
                                                                                     ),
-                                                                                  ),
+                                                                                  ),*/
                                                                                   // آیکون مشاهده
                                                                                   Container(
                                                                                     width: 25,
@@ -951,7 +951,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                     ),
                                                                                   ),
                                                                                   // آیکون ویرایش
-                                                                                  Container(
+                                                                                  /*Container(
                                                                                     width: 25,
                                                                                     height: 25,
                                                                                     child: InkWell(
@@ -969,7 +969,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                                 .srcIn,)
                                                                                       ),
                                                                                     ),
-                                                                                  ),
+                                                                                  ),*/
                                                                                 ],
                                                                               )
                                                                             ],

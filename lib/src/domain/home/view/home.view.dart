@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -121,7 +122,7 @@ class HomeView extends GetView<HomeController> {
                     ),
 
                     //محصولات
-                    Row(
+                    /*Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
@@ -165,9 +166,9 @@ class HomeView extends GetView<HomeController> {
                           ),
                         ),
                       ],
-                    ),
+                    ),*/
                     //نمایش زیر مجموعه محصولات
-                    AnimatedSize(
+                    /*AnimatedSize(
                       duration: Duration(milliseconds: 350), // سرعت انیمیشن
                       curve: Curves.easeInOut, // نوع حرکت انیمیشن
                       child: controller.isSubMenuOpen('products')
@@ -179,21 +180,21 @@ class HomeView extends GetView<HomeController> {
                                     horizontalTitleGap: 5,
                                     minTileHeight: 10,
                                     title: Text(
-                                      'محصولات',
+                                      'بروزرسانی قیمت محصولات',
                                       style: AppTextStyle.bodyText,
                                     ),
                                     leading: Icon(Icons.circle,
                                         size: 15,
                                         color: AppColor.circleColor),
                                     onTap: () {
-                                      Get.toNamed('/product');
+                                      Get.toNamed('/productUpdatePrice');
                                     },
                                   ),
                                 ),
                               ],
                             )
                           : const SizedBox(),
-                    ),
+                    ),*/
                     //پنل ریالی
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -461,14 +462,24 @@ class HomeView extends GetView<HomeController> {
                                     horizontalTitleGap: 5,
                                     minTileHeight: 10,
                                     title: Text(
-                                      'تنظیمات',
-                                      style: AppTextStyle.bodyText,
+                                      'خروج از برنامه',
+                                      style: AppTextStyle.bodyText.copyWith(fontSize: 14),
                                     ),
                                     leading: Icon(Icons.circle,
                                         size: 15,
                                         color: AppColor.circleColor),
                                     onTap: () {
-                                      Get.toNamed('/tools');
+                                      Get.defaultDialog(
+                                          title:"خروج",
+                                          titleStyle: TextStyle(color: AppColor.textColor),
+                                          middleText: "آیا می خواهید از برنامه خارج شوید",
+                                          middleTextStyle: TextStyle(color: AppColor.textColor),
+                                          backgroundColor: AppColor.secondaryColor,
+                                        textCancel: "خیر",
+                                        onCancel: () => Get.toNamed('/home'),
+                                        textConfirm: "بله",
+                                        onConfirm: () =>  FlutterExitApp.exitApp()
+                                      );
                                     },
                                   ),
                                 ),

@@ -38,7 +38,6 @@ class OrderListView extends StatelessWidget {
                         height: 41,
                         child: TextFormField(
                           controller: orderController.searchController,
-                          onChanged: orderController.filterOrders,
                           style: AppTextStyle.labelText,
                           decoration: InputDecoration(
                             border: OutlineInputBorder(
@@ -48,14 +47,25 @@ class OrderListView extends StatelessWidget {
                             fillColor: AppColor.textFieldColor,
                             hintText: "جستجوی سفارش ... ",
                             hintStyle: AppTextStyle.labelText,
-                            prefixIcon: SvgPicture.asset(
-                              'assets/svg/search.svg',
-                              height: 15,
-                              width: 15,
-                              colorFilter: ColorFilter.mode(
-                                  AppColor.textColor, BlendMode.srcIn),
-                              fit: BoxFit.none,
+                            prefixIcon: IconButton(
+                                onPressed: ()async{
+                                  if (orderController.searchController.text.isNotEmpty) {
+                                    await orderController.searchAccounts(
+                                        orderController.searchController.text
+                                    );
+                                    showSearchResults(context);
+                                  }else {
+                                    orderController.clearSearch();
+                                  }
+                                },
+                                icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
                             ),
+                            suffixIcon: orderController.selectedAccountId.value > 0
+                                ? IconButton(
+                              onPressed: orderController.clearSearch,
+                              icon: Icon(Icons.close, color: AppColor.textColor),
+                            )
+                                : null,
                           ),
                         ),
                       ),
@@ -310,12 +320,16 @@ class OrderListView extends StatelessWidget {
                                 showTime: true,
                                 timeSeprator: '-') ??
                             "نامشخص"),
+                    SizedBox(height: 3,),
                     funcOrderDetail(
                         '', 'نام کاربر:', orders.account?.name ?? "نامشخص"),
+                    SizedBox(height: 3,),
                     funcOrderDetail(
                         '', 'محصول:', orders.item?.name ?? "نامشخص"),
+                    SizedBox(height: 3,),
                     funcOrderDetail('', 'مقدار سفارش:',
                         "${orders.amount?.toString() ?? "0"} ${orders.item?.itemUnit?.name ?? ""}"),
+                    SizedBox(height: 3,),
                     funcOrderDetail(
                       '',
                       'قیمت سفارش:',
@@ -323,6 +337,7 @@ class OrderListView extends StatelessWidget {
                           ? "${orders.price.toString().seRagham(separator: ',')} ریال"
                           : "0",
                     ),
+                    SizedBox(height: 3,),
                     funcOrderDetail(
                       '',
                       'مبلغ کل:',
@@ -330,13 +345,16 @@ class OrderListView extends StatelessWidget {
                           ? "${orders.totalPrice.toString().seRagham(separator: ',')} ریال"
                           : "0",
                     ),
+                    SizedBox(height: 3,),
                     funcOrderDetail('', 'شماره تماس:',
                         "${orders.account?.contactInfo ?? "0"} "),
+                    SizedBox(height: 3,),
                     orders.checked == true
                         ? funcOrderDetail('', 'وضعیت:', "تایید شده",
                             color: AppColor.primaryColor)
                         : funcOrderDetail('', 'وضعیت:', "تایید نشده",
                             color: AppColor.accentColor),
+                    SizedBox(height: 3,),
                     orders.type==1
                         ? funcOrderDetail('', 'نوع سفارش:', "خرید",color: AppColor.primaryColor)
                         : funcOrderDetail('', 'نوع سفارش:', "فروش",color: AppColor.accentColor)
@@ -371,7 +389,7 @@ class OrderListView extends StatelessWidget {
                         width: 5,
                       ),
                       //دکمه تایید سفارش در جزئیات
-                      ElevatedButton(
+                      /*ElevatedButton(
                         onPressed: () {
                           Get.defaultDialog(
                               backgroundColor: AppColor.backGroundColor,
@@ -402,12 +420,12 @@ class OrderListView extends StatelessWidget {
                           'تایید',
                           style: AppTextStyle.bodyText,
                         ),
-                      ),
+                      ),*/
                       SizedBox(
                         width: 5,
                       ),
                       //دکمه رد سفارش در جزئیات
-                      ElevatedButton(
+                      /*ElevatedButton(
                         onPressed: () {
                           Get.defaultDialog(
                               backgroundColor: AppColor.backGroundColor,
@@ -435,7 +453,7 @@ class OrderListView extends StatelessWidget {
                         child: Text('رد',
                           style: AppTextStyle.bodyText,
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                 ),
@@ -462,8 +480,38 @@ class OrderListView extends StatelessWidget {
         SizedBox(width: 7),
         Expanded(
             child: Text(value,
-                style: AppTextStyle.bodyText.copyWith(color: color))),
+                style: AppTextStyle.bodyText.copyWith(color: color,fontSize: 14))),
       ],
     );
   }
+
+  void showSearchResults(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(backgroundColor: AppColor.backGroundColor,
+        title: Text('انتخاب کنید',style: AppTextStyle.smallTitleText,),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: orderController.searchedAccounts.length,
+            itemBuilder: (context, index) {
+              final account = orderController.searchedAccounts[index];
+              return ListTile(
+                title: Text(account.name ?? '',style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
+                onTap: () => orderController.selectAccount(account),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('بستن',style: AppTextStyle.bodyText,),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

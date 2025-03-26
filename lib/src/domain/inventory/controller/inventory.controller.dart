@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
+import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../config/repository/upload.repository.dart';
+import '../../account/model/account.model.dart';
 
 enum PageState{loading,err,empty,list}
 class InventoryController extends GetxController{
@@ -21,6 +23,8 @@ class InventoryController extends GetxController{
 
   final UploadRepository uploadRepository=UploadRepository();
   final InventoryRepository inventoryRepository=InventoryRepository();
+  final AccountRepository accountRepository=AccountRepository();
+  final TextEditingController searchController=TextEditingController();
 
   var inventoryList=<InventoryModel>[].obs;
   var errorMessage=''.obs;
@@ -38,6 +42,14 @@ class InventoryController extends GetxController{
   RxInt currentImagePage = 0.obs;
 
   final RxMap<int , InventoryModel> getOneInventory=<int , InventoryModel>{}.obs;
+
+  RxInt selectedAccountId = 0.obs;
+  RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
+
+  void setError(String message){
+    state.value=PageState.err;
+    errorMessage.value=message;
+  }
 
   void toggleItemExpansion(int index) {
     if (expandedIndex.value==index) {
@@ -72,10 +84,61 @@ class InventoryController extends GetxController{
     });
   }
   Future<void> loadMore() async {
-    if (hasMore.value && !isLoading.value) {
-      currentPage++;
-      await fetchInventoryList();
+    if (hasMore.value && !isLoading.value && !isLoading.value) {
+      isLoading.value = true;
+      final nextPage = currentPage.value + 1;
+      try {
+        final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
+        final toIndex = nextPage * itemsPerPage.value;
+        var fetchedInventoryList = await inventoryRepository.getInventoryList(
+          startIndex: startIndex,
+          toIndex: toIndex,
+          accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        );
+        if (fetchedInventoryList.isNotEmpty) {
+          inventoryList.addAll(fetchedInventoryList);
+          currentPage.value = nextPage;
+          hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
+        } else {
+          hasMore.value = false;
+        }
+      } catch (e) {
+        hasMore.value = false; // توقف بارگذاری بیشتر در صورت خطا
+        errorMessage.value = "خطا در دریافت اطلاعات بیشتر: ${e.toString()}";
+      } finally {
+        isLoading.value = false;
+      }
     }
+  }
+
+  Future<void> searchAccounts(String name) async {
+    try {
+      if (name.isEmpty) {
+        searchedAccounts.clear();
+        return;
+      }
+
+      final accounts = await AccountRepository().searchAccountList(name);
+      searchedAccounts.assignAll(accounts);
+    } catch (e) {
+      setError("خطا در جستجوی کاربران: ${e.toString()}");
+    }
+  }
+
+  void selectAccount(AccountModel account) {
+    currentPage.value = 1;
+    selectedAccountId.value = account.id!;
+    searchController.text = account.name!;
+    Get.back(); // Close search dialog
+    fetchInventoryList();
+  }
+
+  void clearSearch() {
+    currentPage.value = 1;
+    selectedAccountId.value = 0;
+    searchController.clear();
+    searchedAccounts.clear();
+    fetchInventoryList();
   }
 
 
@@ -85,24 +148,28 @@ class InventoryController extends GetxController{
         inventoryList.clear();
       }
       isLoading.value = true;
-      state.value=PageState.loading;
+      //state.value=PageState.loading;
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedInventoryList=await inventoryRepository.getInventoryList(
           startIndex: startIndex,
-          toIndex: toIndex
+          toIndex: toIndex,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
       );
       hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
-      if (currentPage.value == 1) {
+
+      if (selectedAccountId.value == 0) {
         inventoryList.assignAll(fetchedInventoryList);
-      } else {
-        inventoryList.addAll(fetchedInventoryList);
+      }else {
+        if (currentPage.value == 1) {
+          inventoryList.assignAll(fetchedInventoryList);
+        } else {
+          inventoryList.addAll(fetchedInventoryList);
+        }
       }
+
       state.value = inventoryList.isEmpty ? PageState.empty : PageState.list;
 
-      if(inventoryList.isEmpty){
-        state.value=PageState.empty;
-      }
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -123,9 +190,6 @@ class InventoryController extends GetxController{
       }else{
         stateGetOne.value=PageState.empty;
       }
-      /*if(getOneWithdraw.value==null){
-        state.value=PageState.empty;
-      }*/
     }
     catch(e){
       stateGetOne.value=PageState.err;
@@ -133,7 +197,7 @@ class InventoryController extends GetxController{
     }
   }
 
-  Future<void> pickImage(String recordId, String type, String entityType) async {
+  Future<void> pickImage(String recordId, String type, String entityType,{required int inventoryId}) async {
     final source = await showDialog<ImageSource>(
       context: Get.context!,
       builder: (context) => AlertDialog(backgroundColor: AppColor.backGroundColor,
@@ -165,12 +229,12 @@ class InventoryController extends GetxController{
       }
 
       if (selectedImages.isNotEmpty) {
-        await uploadImages(recordId, type, entityType);
+        await uploadImages(recordId, type, entityType,inventoryId);
       }
     }
   }
 
-  Future<void> uploadImages(String recordId, String type, String entityType) async {
+  Future<void> uploadImages(String recordId, String type, String entityType,int inventoryId) async {
     if (selectedImages.isEmpty) return;
 
     isUploading.value = true;
@@ -194,6 +258,7 @@ class InventoryController extends GetxController{
 
       if (uploadStatuses.every((status) => status)) {
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+        await fetchGetOneInventory(inventoryId);
       }
     } finally {
       isUploading.value = false;

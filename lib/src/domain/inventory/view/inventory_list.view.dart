@@ -38,8 +38,7 @@ class InventoryListView extends StatelessWidget {
                           child: SizedBox(
                             height: 41,
                             child: TextFormField(
-                              /*controller: orderController.searchController,
-                              onChanged: orderController.filterOrders,*/
+                              controller: inventoryController.searchController,
                               style: AppTextStyle.labelText,
                               decoration: InputDecoration(
                                 border: OutlineInputBorder(
@@ -49,14 +48,25 @@ class InventoryListView extends StatelessWidget {
                                 fillColor: AppColor.textFieldColor,
                                 hintText: "جستجو ... ",
                                 hintStyle: AppTextStyle.labelText,
-                                prefixIcon: SvgPicture.asset(
-                                  'assets/svg/search.svg',
-                                  height: 15,
-                                  width: 15,
-                                  colorFilter: ColorFilter.mode(
-                                      AppColor.textColor, BlendMode.srcIn),
-                                  fit: BoxFit.none,
+                                prefixIcon: IconButton(
+                                    onPressed: ()async{
+                                      if (inventoryController.searchController.text.isNotEmpty) {
+                                        await inventoryController.searchAccounts(
+                                            inventoryController.searchController.text
+                                        );
+                                        showSearchResults(context);
+                                      }else {
+                                        inventoryController.clearSearch();
+                                      }
+                                    },
+                                    icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
                                 ),
+                                suffixIcon: inventoryController.selectedAccountId.value > 0
+                                    ? IconButton(
+                                  onPressed: inventoryController.clearSearch,
+                                  icon: Icon(Icons.close, color: AppColor.textColor),
+                                )
+                                    : null,
                               ),
                             ),
                           ),
@@ -139,7 +149,7 @@ class InventoryListView extends StatelessWidget {
                                                           .spaceBetween,
                                                       children: [
                                                         Text(
-                                                        inventories.date!.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-'),
+                                                        inventories.date!.toPersianDate(twoDigits: true, timeSeprator: '-'),
                                                           style:
                                                           AppTextStyle.bodyText,
                                                         ),
@@ -248,7 +258,7 @@ class InventoryListView extends StatelessWidget {
                                                                                       Text('الصاق تصویر  ',style: AppTextStyle.labelText,),
                                                                                       GestureDetector(
                                                                                         onTap: () =>
-                                                                                         inventoryController.pickImage(getOneInventories!.recId.toString(), "image", "Deposit"),
+                                                                                         inventoryController.pickImage(getOneInventories!.recId.toString(), "image", "Deposit",inventoryId: inventories.id!),
                                                                                           child: SvgPicture.asset('assets/svg/camera.svg',
                                                                                             width: 25,
                                                                                             height: 25,
@@ -459,7 +469,7 @@ class InventoryListView extends StatelessWidget {
                                                                                         ),
                                                                                       ),
                                                                                       //  آیکون ویرایش
-                                                                                      GestureDetector(
+                                                                                      /*GestureDetector(
                                                                                         onTap: () {
 
                                                                                         },
@@ -482,9 +492,9 @@ class InventoryListView extends StatelessWidget {
                                                                                               ),
                                                                                           ],
                                                                                         ),
-                                                                                      ),
+                                                                                      ),*/
                                                                                       // آیکون حذف
-                                                                                      GestureDetector(
+                                                                                      /*GestureDetector(
                                                                                         onTap: () {
 
                                                                                         },
@@ -507,7 +517,7 @@ class InventoryListView extends StatelessWidget {
                                                                                             ),
                                                                                           ],
                                                                                         ),
-                                                                                      ),
+                                                                                      ),*/
                                                                                     ],
                                                                                   )
                                                                                 ],
@@ -548,4 +558,33 @@ class InventoryListView extends StatelessWidget {
       ),
     );
   }
+
+   void showSearchResults(BuildContext context) {
+     showDialog(
+       context: context,
+       builder: (context) => AlertDialog(backgroundColor: AppColor.backGroundColor,
+         title: Text('انتخاب کنید',style: AppTextStyle.smallTitleText,),
+         content: SizedBox(
+           width: double.maxFinite,
+           child: ListView.builder(
+             shrinkWrap: true,
+             itemCount: inventoryController.searchedAccounts.length,
+             itemBuilder: (context, index) {
+               final account = inventoryController.searchedAccounts[index];
+               return ListTile(
+                 title: Text(account.name ?? '',style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
+                 onTap: () => inventoryController.selectAccount(account),
+               );
+             },
+           ),
+         ),
+         actions: [
+           TextButton(
+             onPressed: () => Get.back(),
+             child: Text('بستن',style: AppTextStyle.bodyText,),
+           ),
+         ],
+       ),
+     );
+   }
 }

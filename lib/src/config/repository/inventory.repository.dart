@@ -10,12 +10,28 @@ class InventoryRepository {
   Dio inventoryDio=Dio();
   InventoryRepository(){
     inventoryDio.options.baseUrl=BaseUrl.baseUrl;
+    inventoryDio.options.connectTimeout=Duration(seconds: 10);
   }
 
-  Future<List<InventoryModel>> getInventoryList({required int startIndex, required int toIndex})async{
+  Future<List<InventoryModel>> getInventoryList({required int startIndex, required int toIndex,int? accountId,})async{
     try{
       Map<String , dynamic> options={
         "options" : { "inventory" :{
+          if (accountId != null)
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "AccountId",
+                  "filterValue": accountId.toString(),
+                  "filterType": 4,
+                  "RefTable": "Inventory"
+                }
+              ]
+            }
+          ],
           "orderBy": "Inventory.Id",
           "orderByType": "desc",
           "StartIndex": startIndex,
