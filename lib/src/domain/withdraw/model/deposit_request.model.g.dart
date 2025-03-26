@@ -28,6 +28,9 @@ DepositRequestModel _$DepositRequestModelFromJson(Map<String, dynamic> json) =>
       status: (json['status'] as num?)?.toInt(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
+      confirmDate: json['confirmDate'] == null
+          ? null
+          : DateTime.parse(json['confirmDate'] as String),
       deposits: (json['deposits'] as List<dynamic>?)
           ?.map((e) => DepositModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -50,6 +53,7 @@ Map<String, dynamic> _$DepositRequestModelToJson(
       'notPaidAmount': instance.notPaidAmount,
       'status': instance.status,
       'date': instance.date?.toIso8601String(),
+      'confirmDate': instance.confirmDate?.toIso8601String(),
       'deposits': instance.deposits,
       'rowNum': instance.rowNum,
       'id': instance.id,

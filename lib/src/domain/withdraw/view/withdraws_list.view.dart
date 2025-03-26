@@ -48,10 +48,18 @@ class WithdrawsListView extends StatelessWidget {
                       child: SizedBox(
                         height: Get.height * 0.6,
                         child: ListView.builder(
+                          controller: withdrawController.scrollController,
                           shrinkWrap: true,
                           physics: BouncingScrollPhysics(),
-                          itemCount: withdrawController.withdrawList.length,
+                          itemCount: withdrawController.withdrawList.length+
+                              (withdrawController.hasMore.value ? 1 : 0),
                           itemBuilder: (context, index) {
+                            print(withdrawController.withdrawList.length);
+                            if (index >= withdrawController.withdrawList.length) {
+                              return withdrawController.hasMore.value
+                                  ? Center(child: CircularProgressIndicator())
+                                  : SizedBox.shrink();
+                            }
                             var withdraws = withdrawController
                                 .withdrawList[index];
                             return
@@ -107,7 +115,7 @@ class WithdrawsListView extends StatelessWidget {
                                                   ],
                                                 ),
                                                 SizedBox(height: 5,),
-                                                SizedBox(child: Divider(height: 1,color: AppColor.dividerColor,),width: 100,),
+                                                SizedBox(width: 100,child: Divider(height: 1,color: AppColor.dividerColor,),),
                                                 SizedBox(height: 8,),
 
                                                 // نام کاربر و نام دارنده حساب
@@ -418,16 +426,9 @@ class WithdrawsListView extends StatelessWidget {
                                                             await withdrawController.updateStatusWithdraw(
                                                                 withdraws.id!,
                                                                 value, 0);
-                                                            /*switch (value) {
-                                                            case 1:
-                                                              withdrawController.updateStatusId(1);
-                                                              break;
-                                                            case 2:
-                                                              withdrawController.updateStatusId(2);
-                                                              break;
 
-                                                          }*/
                                                           }
+                                                         withdrawController.fetchWithdrawList();
                                                         },
                                                         shape: const RoundedRectangleBorder(
                                                           borderRadius: BorderRadius
@@ -615,8 +616,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                         .depositRequestList[index];
                                                                     return ListTile(
                                                                       title: Card(
-                                                                        color: AppColor
-                                                                            .backGroundColor,
+                                                                        color: AppColor.backGroundColor,
                                                                         child: Padding(
                                                                           padding: const EdgeInsets
                                                                               .only(
@@ -627,6 +627,63 @@ class WithdrawsListView extends StatelessWidget {
                                                                           child: Column(
                                                                             children: [
 
+                                                                              // تاریخ و وضعیت
+                                                                              Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                children: [
+                                                                                  Row(
+                                                                                    children: [
+                                                                                      Text(
+                                                                                          'تاریخ:',
+                                                                                          style: AppTextStyle
+                                                                                              .bodyText),
+                                                                                      SizedBox(
+                                                                                        width: 4,),
+                                                                                      Text(
+                                                                                        depositRequests.status==0 ?
+                                                                                        depositRequests.date!.toPersianDate(
+                                                                                            showTime: true,
+                                                                                            twoDigits: true,
+                                                                                            timeSeprator: '-')
+                                                                                        : depositRequests.confirmDate!.toPersianDate(
+                                                                                            showTime: true,
+                                                                                            twoDigits: true,
+                                                                                            timeSeprator: '-'),
+                                                                                        style: AppTextStyle
+                                                                                            .bodyText,
+                                                                                      ),
+                                                                                    ],
+                                                                                  ),
+
+                                                                                  // وضعیت
+                                                                                  Card(
+                                                                                    shape: RoundedRectangleBorder(
+                                                                                      borderRadius: BorderRadius.circular(5),
+                                                                                    ),
+                                                                                    color: depositRequests.status == 2
+                                                                                        ? AppColor.accentColor
+                                                                                    : depositRequests.status ==1
+                                                                                        ? AppColor.primaryColor
+                                                                                        : AppColor.secondaryColor
+                                                                                    ,
+                                                                                    margin: EdgeInsets.symmetric(
+                                                                                        vertical: 0, horizontal: 5),
+                                                                                    child: Padding(
+                                                                                      padding: const EdgeInsets.all(2),
+                                                                                      child: Text(
+                                                                                          depositRequests.status == 2
+                                                                                              ? 'تایید نشده'
+                                                                                          : depositRequests.status == 1
+                                                                                              ? 'تایید شده'
+                                                                                          : 'نامشخص' ,
+                                                                                          style: AppTextStyle.labelText,
+                                                                                          textAlign: TextAlign.center),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 5,),
                                                                               // نام کاربر و مبلغ کل
                                                                               Row(
                                                                                 mainAxisAlignment: MainAxisAlignment
@@ -686,53 +743,138 @@ class WithdrawsListView extends StatelessWidget {
                                                                               SizedBox(
                                                                                 height: 4,),
 
-                                                                              // تاریخ و وضعیت
+                                                                              // دلیل رد
+                                                                              depositRequests.status==2 ?
                                                                               Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                crossAxisAlignment: CrossAxisAlignment
+                                                                                    .center,
                                                                                 children: [
-                                                                                  Row(
-                                                                                    children: [
-                                                                                      Text(
-                                                                                          'تاریخ:',
-                                                                                          style: AppTextStyle
-                                                                                              .bodyText),
-                                                                                      SizedBox(
-                                                                                        width: 4,),
-                                                                                      Text(
-                                                                                        depositRequests
-                                                                                            .date!
-                                                                                            .toPersianDate(
-                                                                                            showTime: true,
-                                                                                            twoDigits: true,
-                                                                                            timeSeprator: '-'),
-                                                                                        style: AppTextStyle
-                                                                                            .bodyText,
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-
-                                                                                  // وضعیت
-                                                                                  Card(
-                                                                                    shape: RoundedRectangleBorder(
-                                                                                        borderRadius: BorderRadius.circular(5),
-                                                                                    ),
-                                                                                    color: (depositRequests.status == 0)
-                                                                                        ? AppColor.accentColor
-                                                                                        : AppColor.primaryColor,
-                                                                                    margin: EdgeInsets.symmetric(
-                                                                                        vertical: 0, horizontal: 5),
-                                                                                    child: Padding(
-                                                                                      padding: const EdgeInsets.all(2),
-                                                                                      child: Text(
-                                                                                          (depositRequests.status == 0)
-                                                                                              ? 'تایید نشده'
-                                                                                              : 'تایید شده',
-                                                                                          style: AppTextStyle.labelText,
-                                                                                          textAlign: TextAlign.center),
-                                                                                    ),
-                                                                                  ),
+                                                                                  Text('دلیل رد: ',
+                                                                                    style: AppTextStyle
+                                                                                        .labelText,),
+                                                                                  SizedBox(width: 3,),
+                                                                                  Text("`${depositRequests.reasonRejection?.name}`" ?? "",
+                                                                                    style: AppTextStyle
+                                                                                        .bodyText,),
                                                                                 ],
+                                                                              ) : Text(""),
+                                                                              //  تعیین وضعیت
+                                                                              Container(alignment: Alignment.centerLeft,
+                                                                                padding: const EdgeInsets
+                                                                                    .symmetric(
+                                                                                    horizontal: 0,
+                                                                                    vertical: 0),
+                                                                                child: PopupMenuButton<
+                                                                                    int>(
+                                                                                  splashRadius: 10,
+                                                                                  tooltip: 'تعیین وضعیت',
+                                                                                  onSelected: (value) async {
+                                                                                    if(value==2){
+                                                                                      await withdrawController.showReasonRejectionDialog("DepositRequest");
+                                                                                      if (withdrawController.selectedReasonRejection.value == null) {
+                                                                                        return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                                                                                      }
+                                                                                      await withdrawController.updateStatusDepositRequest(
+                                                                                        depositRequests.id!,
+                                                                                        value,
+                                                                                        withdrawController.selectedReasonRejection.value!.id!,
+                                                                                      );
+                                                                                    }else {
+                                                                                      await withdrawController.updateStatusDepositRequest(
+                                                                                          depositRequests.id!,
+                                                                                          value, 0);
+                                                                                    }
+                                                                                    withdrawController.fetchDepositRequestList(withdraws.id!);
+                                                                                  },
+                                                                                  shape: const RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius
+                                                                                        .all(
+                                                                                        Radius.circular(
+                                                                                            10.0)),
+                                                                                  ),
+                                                                                  color: AppColor
+                                                                                      .backGroundColor,
+                                                                                  constraints: BoxConstraints(
+                                                                                    minWidth: 70,
+                                                                                    maxWidth: 70,
+                                                                                  ),
+                                                                                  position: PopupMenuPosition
+                                                                                      .under,
+                                                                                  offset: const Offset(
+                                                                                      0, 0),
+                                                                                  itemBuilder: (
+                                                                                      context) =>
+                                                                                  [
+                                                                                    PopupMenuItem<int>(
+                                                                                      labelTextStyle: WidgetStateProperty
+                                                                                          .all(
+                                                                                          AppTextStyle
+                                                                                              .madiumbodyText
+                                                                                      ),
+                                                                                      value: 1,
+                                                                                      child: Row(
+                                                                                        mainAxisAlignment: MainAxisAlignment
+                                                                                            .center,
+                                                                                        children: [
+                                                                                          withdrawController.isLoading.value
+                                                                                              ?
+                                                                                          CircularProgressIndicator(
+                                                                                            valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                                          ) :
+                                                                                          Text('تایید',
+                                                                                            style: AppTextStyle
+                                                                                                .madiumbodyText
+                                                                                                .copyWith(
+                                                                                                color: AppColor
+                                                                                                    .primaryColor,
+                                                                                                fontSize: 14),
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                    ),
+                                                                                    const PopupMenuDivider(),
+                                                                                    PopupMenuItem<int>(
+                                                                                      value: 2,
+                                                                                      labelTextStyle: WidgetStateProperty
+                                                                                          .all(
+                                                                                          AppTextStyle
+                                                                                              .madiumbodyText
+                                                                                      ),
+                                                                                      child: Row(
+                                                                                        mainAxisAlignment: MainAxisAlignment
+                                                                                            .center,
+                                                                                        children: [
+                                                                                          withdrawController.isLoading.value
+                                                                                              ?
+                                                                                          CircularProgressIndicator(
+                                                                                            valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                                          ) :
+                                                                                          Text('رد',
+                                                                                            style: AppTextStyle
+                                                                                                .madiumbodyText
+                                                                                                .copyWith(
+                                                                                                color: AppColor
+                                                                                                    .accentColor,
+                                                                                                fontSize: 14),
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                    ),
+                                                                                  ],
+                                                                                  child: Text(
+                                                                                    'تعیین وضعیت',
+                                                                                    style: AppTextStyle
+                                                                                        .bodyText
+                                                                                        .copyWith(
+                                                                                        decoration: TextDecoration
+                                                                                            .underline,
+                                                                                        decorationColor: AppColor
+                                                                                            .textColor
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
                                                                               ),
+
                                                                               SizedBox(
                                                                                 height: 4,),
                                                                               Divider(

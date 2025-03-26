@@ -101,16 +101,24 @@ class OrderListView extends StatelessWidget {
                   // لیست سفارشات
                   return Expanded(
                     child: GridView.builder(
+                      controller: orderController.scrollController,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 1, mainAxisExtent: 200),
-                      itemCount: orderController.filteredOrders.length,
+                      itemCount: orderController.orderList.length+
+                          (orderController.hasMore.value ? 1 : 0),
                       itemBuilder: (context, index) {
-                        if (index >= orderController.filteredOrders.length) {
+                        /*if (index >= orderController.filteredOrders.length) {
                           return SizedBox();
+                        }*/
+                        print(orderController.orderList.length);
+                        if (index >= orderController.orderList.length) {
+                          return orderController.hasMore.value
+                              ? Center(child: CircularProgressIndicator())
+                              : SizedBox.shrink();
                         }
 
-                        var orders = orderController.filteredOrders[index];
-                        return InkWell(
+                        var orders = orderController.orderList[index];
+                        return GestureDetector(
                           onTap: () {
                             showOrderDetailsSheet(context, orders);
                           },

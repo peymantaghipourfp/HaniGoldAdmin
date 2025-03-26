@@ -1,7 +1,7 @@
 
 
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/repository/url/deposit_request_getOne.repository.dart';
+import 'package:hanigold_admin/src/config/repository/deposit_request_getOne.repository.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 
 enum PageState{loading,err,empty,list}

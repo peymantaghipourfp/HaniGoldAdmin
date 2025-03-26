@@ -303,7 +303,7 @@ class HomeView extends GetView<HomeController> {
                             )
                           : const SizedBox(),
                     ),
-                    //کاربران
+                    //دریافت و پرداخت
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -324,7 +324,7 @@ class HomeView extends GetView<HomeController> {
                               WidgetStatePropertyAll(AppColor.secondaryColor),
                             ),
                             onPressed: () {
-                              controller.toggleSubMenu('users');
+                              controller.toggleSubMenu('inventory');
                             },
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -332,14 +332,14 @@ class HomeView extends GetView<HomeController> {
                                 Expanded(
                                   child: Center(
                                     child: Text(
-                                      'کاربران',
+                                      'دریافت و پرداخت',
                                       style: AppTextStyle.bodyText,
                                       textAlign: TextAlign.right,
                                     ),
                                   ),
                                 ),
                                 Icon(color: AppColor.textColor,
-                                    controller.activeSubMenu.value=='users'?
+                                    controller.activeSubMenu.value=='inventory'?
                                     Icons.expand_more:
                                     Icons.expand_less
                                 ),
@@ -349,11 +349,11 @@ class HomeView extends GetView<HomeController> {
                         ),
                       ],
                     ),
-                    //نمایش زیرمجموعه کاربران
+                    //نمایش زیرمجموعه دریافت و پرداخت
                     AnimatedSize(
                       duration: Duration(milliseconds: 350), // سرعت انیمیشن
                       curve: Curves.easeInOut, // نوع حرکت انیمیشن
-                      child: controller.isSubMenuOpen('users')
+                      child: controller.isSubMenuOpen('inventory')
                           ? Column(
                               children: [
                                 Container(
@@ -365,14 +365,35 @@ class HomeView extends GetView<HomeController> {
                                       horizontalTitleGap: 5,
                                       minTileHeight: 10,
                                       title: Text(
-                                        'کاربران',
+                                        'لیست دریافت و پرداخت',
                                         style: AppTextStyle.bodyText,
                                       ),
                                       leading: Icon(Icons.circle,
                                           size: 15,
                                           color: AppColor.circleColor),
                                       onTap: () {
-                                        Get.toNamed('/users');
+                                        Get.toNamed('/inventoryList');
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: AnimatedSize(
+                                    duration: Duration(milliseconds: 800),
+                                    curve: Curves.easeInOut,
+                                    child: ListTile(
+                                      horizontalTitleGap: 5,
+                                      minTileHeight: 10,
+                                      title: Text(
+                                        'دریافت و پرداخت جدید',
+                                        style: AppTextStyle.bodyText,
+                                      ),
+                                      leading: Icon(Icons.circle,
+                                          size: 15,
+                                          color: AppColor.circleColor),
+                                      onTap: () {
+                                        Get.toNamed('/inventoryCreate');
                                       },
                                     ),
                                   ),

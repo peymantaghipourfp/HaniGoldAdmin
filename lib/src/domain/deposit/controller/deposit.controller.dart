@@ -24,6 +24,10 @@ enum PageState{loading,err,empty,list}
 typedef XFile= dynamic;
 
 class DepositController extends GetxController{
+  RxInt currentPage = 1.obs;
+  RxInt itemsPerPage = 10.obs;
+  RxBool hasMore = true.obs;
+  ScrollController scrollController = ScrollController();
 
   final UploadRepository uploadRepository=UploadRepository();
   final DepositRepository depositRepository=DepositRepository();
@@ -45,9 +49,31 @@ class DepositController extends GetxController{
   @override
   void onInit() {
     fetchDepositList();
+    setupScrollListener();
     super.onInit();
   }
 
+  @override void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  void setupScrollListener() {
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200 &&
+          hasMore.value &&
+          !isLoading.value) {
+        loadMore();
+      }
+    });
+  }
+  Future<void> loadMore() async {
+    if (hasMore.value && !isLoading.value) {
+      currentPage++;
+      await fetchDepositList();
+    }
+  }
 
   Future<void> pickImage(String recordId, String type, String entityType) async {
 
@@ -88,14 +114,25 @@ class DepositController extends GetxController{
 
   Future<void> fetchDepositList() async{
     try{
-      state.value=PageState.loading;
-      var fetchedDepositList=await depositRepository.getDepositList();
-      depositList.assignAll(fetchedDepositList);
-      state.value=PageState.list;
 
-      if(depositList.isEmpty){
-        state.value=PageState.empty;
+      if (currentPage == 1) {
+        depositList.clear();
       }
+      isLoading.value = true;
+      state.value=PageState.loading;
+      final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
+      final toIndex = currentPage.value * itemsPerPage.value;
+      var fetchedDepositList=await depositRepository.getDepositList(
+          startIndex: startIndex,
+          toIndex: toIndex
+      );
+      hasMore.value = fetchedDepositList.length == itemsPerPage.value;
+      if (currentPage.value == 1) {
+        depositList.assignAll(fetchedDepositList);
+      } else {
+        depositList.addAll(fetchedDepositList);
+      }
+      state.value = depositList.isEmpty ? PageState.empty : PageState.list;
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -210,7 +247,7 @@ class DepositController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('وضعیت واریزی با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchDepositList();
+        //fetchDepositList();
       }
 
     } catch (e) {

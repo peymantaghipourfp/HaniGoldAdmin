@@ -165,7 +165,7 @@ class DepositCreateController extends GetxController{
   Future<void> fetchWallet(int id)async{
     try{
       isLoading.value=true;
-      var fetchedWalletList=await walletRepository.getWallet(id);
+      var fetchedWalletList=await walletRepository.getWalletCurrency(id);
       walletList=fetchedWalletList as WalletModel?;
       if (walletList!=null) {
         selectedWalletId.value = walletList?.id ?? 0;

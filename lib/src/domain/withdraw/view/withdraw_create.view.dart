@@ -18,6 +18,7 @@ class WithdrawCreateView extends StatefulWidget {
 }
 
 class _WithdrawCreateState extends State<WithdrawCreateView> {
+  final formKey = GlobalKey<FormState>();
   WithdrawCreateController withdrawCreateController = Get.find<WithdrawCreateController>();
 
   @override
@@ -65,7 +66,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                     const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
                     child: Obx(() {
                       return Form(
-                        //key: withdrawCreateController.formKey,
+                        key: formKey,
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // کاربر
@@ -79,7 +80,19 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                             // کاربر
                             Container(
                               padding: EdgeInsets.only(bottom: 5),
-                              child: DropdownButton2(
+                              child: DropdownButtonFormField2(
+                            validator: (value) {
+                              if (value == null) {
+                                return 'کاربر را انتخاب کنید';
+                              }
+                              return null;
+                            },
+                            decoration: InputDecoration(
+                                  isDense: true,
+                                  contentPadding: EdgeInsets.zero, // افزایش padding عمودی
+                                  border: InputBorder.none,
+                                ),
+
                                 isExpanded: true,
                                 hint: Row(
                                   children: [
@@ -105,8 +118,8 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                   if(newValue!=null) {
                                 withdrawCreateController.changeSelectedAccount(newValue);
                               }
-                            },
-                                buttonStyleData: ButtonStyleData(
+                             },
+                                buttonStyleData: ButtonStyleData(height: 43,
                                   padding: const EdgeInsets.symmetric(horizontal: 5),
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(7),
@@ -492,8 +505,9 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                       WidgetStatePropertyAll(AppColor.primaryColor),
                                       shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(10)))),
-                                  onPressed: () async{
+                                  onPressed: () async{if(formKey.currentState!.validate()){
                                     await withdrawCreateController.insertWithdraw();
+                                    }
                                     withdrawCreateController.clearList();
                                   },
                                   child:withdrawCreateController.isLoading.value

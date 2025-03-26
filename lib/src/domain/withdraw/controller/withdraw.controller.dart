@@ -26,6 +26,10 @@ import '../../../config/repository/account.repository.dart';
 enum PageState{loading,err,empty,list}
 class WithdrawController extends GetxController{
 
+  RxInt currentPage = 1.obs;
+  RxInt itemsPerPage = 10.obs;
+  RxBool hasMore = true.obs;
+  ScrollController scrollController = ScrollController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WithdrawRepository withdrawRepository=WithdrawRepository();
@@ -80,7 +84,29 @@ class WithdrawController extends GetxController{
   void onInit() {
     fetchWithdrawList();
     fetchAccountList();
+    setupScrollListener();
     super.onInit();
+  }
+  @override void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+
+  void setupScrollListener() {
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200 &&
+          hasMore.value &&
+          !isLoading.value) {
+        loadMore();
+      }
+    });
+  }
+  Future<void> loadMore() async {
+    if (hasMore.value && !isLoading.value) {
+      currentPage++;
+      await fetchWithdrawList();
+    }
   }
 
   // لیست کاربران
@@ -112,10 +138,24 @@ class WithdrawController extends GetxController{
   Future<void> fetchWithdrawList()async{
 
     try{
+      if (currentPage == 1) {
+        withdrawList.clear();
+      }
+      isLoading.value = true;
       state.value=PageState.loading;
-      var fetchedWithdrawList=await withdrawRepository.getWithdrawList();
-      withdrawList.assignAll(fetchedWithdrawList);
-      state.value=PageState.list;
+      final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
+      final toIndex = currentPage.value * itemsPerPage.value;
+      var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
+          startIndex: startIndex,
+          toIndex: toIndex
+      );
+      hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
+      if (currentPage.value == 1) {
+        withdrawList.assignAll(fetchedWithdrawList);
+      } else {
+        withdrawList.addAll(fetchedWithdrawList);
+      }
+      state.value = withdrawList.isEmpty ? PageState.empty : PageState.list;
       if(withdrawList.isEmpty){
         state.value=PageState.empty;
       }
@@ -239,7 +279,7 @@ class WithdrawController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('وضعیت درخواست برداشت با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchWithdrawList();
+        //fetchWithdrawList();
       }
 
     } catch (e) {
@@ -250,6 +290,34 @@ class WithdrawController extends GetxController{
     }
     return null;
   }
+
+  // آپدیت وضعیت درخواست های واریز (updateStatusِDepositRequest)
+  Future<DepositRequestModel?> updateStatusDepositRequest(int depositRequestId,int status,int reasonRejectionId) async {
+
+    try {
+      isLoading.value = true;
+      var response = await depositRequestRepository.updateStatusDepositRequest(
+        status: status,
+        depositRequestId: depositRequestId,
+        reasonRejectionId: status==2 ? reasonRejectionId : null,
+      );
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","وضعیت درخواست واریزی با موفقیت تغییر کرد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('وضعیت درخواست واریزی با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+
+      }
+
+    } catch (e) {
+      throw ErrorException('خطا در تغییر وضعیت: $e');
+    } finally {
+      isLoading.value = false;
+    }
+    return null;
+  }
+
   // لیست درخواست های واریز(depositRequest)
   Future<void> fetchDepositRequestList(int id)async{
 

@@ -85,8 +85,12 @@ class OrderUpdateController extends GetxController{
     }
     priceController.addListener(updateTotalPrice);
     amountController.addListener(updateTotalPrice);
-    var now=Jalali.now();
-    dateController.text="${now.year.toString()}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+
+    /*final now = DateTime.now();
+    final jalaliDate = Jalali.fromDateTime(now);
+    final formattedDate = "${jalaliDate.year}-${jalaliDate.month.toString().padLeft(2, '0')}-${jalaliDate.day.toString().padLeft(2, '0')}";
+    final formattedTime = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
+    dateController.text="$formattedDate $formattedTime";*/
     super.onInit();
   }
 
@@ -147,9 +151,33 @@ class OrderUpdateController extends GetxController{
     }
     try {
       isLoading.value = true;
+
+      final dateTimeParts = dateController.text.split(' ');
+      final datePart = dateTimeParts[0];
+      final timePart = dateTimeParts.length > 1 ? dateTimeParts[1] : "00:00";
+      final jalaliParts = datePart.split('-');
+      final jalaliDate = Jalali(
+        int.parse(jalaliParts[0]),
+        int.parse(jalaliParts[1]),
+        int.parse(jalaliParts[2]),
+      );
+      final gregorianDate = jalaliDate.toGregorian();
+      final timeParts = timePart.split(':');
+      final hour = int.parse(timeParts[0]);
+      final minute = int.parse(timeParts[1]);
+
+      final finalDateTime = DateTime(
+        gregorianDate.year,
+        gregorianDate.month,
+        gregorianDate.day,
+        hour,
+        minute,
+      );
+      final formattedDate = finalDateTime.toIso8601String();
+      //final formattedGregorianDate = "${gregorianDate.year}-${gregorianDate.month.toString().padLeft(2, '0')}-${gregorianDate.day.toString().padLeft(2, '0')}";
      var response = await orderRepository.updateOrder(
         orderId: orderId.value,
-        date: dateController.text,
+        date: formattedDate,
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
         type: selectedBuySell.value?.id ?? 0,

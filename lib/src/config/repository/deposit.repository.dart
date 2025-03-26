@@ -11,14 +11,14 @@ class DepositRepository{
     depositDio.options.baseUrl=BaseUrl.baseUrl;
   }
 
-  Future<List<DepositModel>> getDepositList()async{
+  Future<List<DepositModel>> getDepositList({required int startIndex, required int toIndex})async{
     try{
       Map<String, dynamic> options = {
         "options" : { "deposit" :{
           "orderBy": "deposit.Id",
           "orderByType": "desc",
-          "StartIndex": 1,
-          "ToIndex": 1000000
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
         }}
       };
       final response=await depositDio.post('Deposit/get',data: options);

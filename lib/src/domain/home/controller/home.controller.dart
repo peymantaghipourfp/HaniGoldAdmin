@@ -5,7 +5,7 @@ class HomeController extends GetxController{
   /*final List<Map<String,dynamic>> homeListView=[
     {'text':'سفارشات','route':'/orderList'},
     {'text':'محصولات','route':'/product'},
-    {'text':'کاربران','route':'/users'},
+    {'text':'کاربران','route':'/inventory'},
     {'text':'تنظیمات','route':'/tools'},
   ];*/
 

@@ -14,14 +14,14 @@ class WithdrawRepository{
     withdrawDio.options.baseUrl=BaseUrl.baseUrl;
 
   }
-  Future<List<WithdrawModel>> getWithdrawList()async{
+  Future<List<WithdrawModel>> getWithdrawList({required int startIndex, required int toIndex})async{
     try{
       Map<String , dynamic> options={
         "options" : { "withdrawrequest" :{
           "orderBy": "withdrawrequest.Id",
           "orderByType": "desc",
-          "StartIndex": 1,
-          "ToIndex": 10
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
         }
         }
       };
@@ -129,6 +129,7 @@ class WithdrawRepository{
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
+
 
   Future<Map<String , dynamic>> updateStatusWithdraw({
     required int status,

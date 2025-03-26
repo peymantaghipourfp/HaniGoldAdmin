@@ -1,5 +1,6 @@
 
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 
@@ -11,6 +12,11 @@ import '../model/withdraw.model.dart';
 
 enum PageState{loading,err,empty,list}
 class WithdrawGetOneController extends GetxController{
+
+  RxInt currentPage = 1.obs;
+  RxInt itemsPerPage = 10.obs;
+  RxBool hasMore = true.obs;
+  ScrollController scrollController = ScrollController();
 
   final WithdrawController withdrawController=Get.find<WithdrawController>();
 
@@ -33,7 +39,28 @@ class WithdrawGetOneController extends GetxController{
     print(id.value);
     fetchGetOneWithdraw(id.value);
     fetchWithdrawList();
+    setupScrollListener();
     super.onInit();
+  }
+  @override void onClose() {
+    scrollController.dispose();
+    super.onClose();
+  }
+  void setupScrollListener() {
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >=
+          scrollController.position.maxScrollExtent - 200 &&
+          hasMore.value &&
+          !isLoading.value) {
+        loadMore();
+      }
+    });
+  }
+  Future<void> loadMore() async {
+    if (hasMore.value && !isLoading.value) {
+      currentPage++;
+      await fetchWithdrawList();
+    }
   }
 
   Future<void> fetchGetOneWithdraw(int id)async{
@@ -68,13 +95,25 @@ class WithdrawGetOneController extends GetxController{
   Future<void> fetchWithdrawList()async{
 
     try{
+
+      isLoading.value = true;
       state.value=PageState.loading;
-      var fetchedWithdrawList=await withdrawRepository.getWithdrawList();
-      withdrawList.assignAll(fetchedWithdrawList);
-      state.value=PageState.list;
-      /*if(withdrawList.isEmpty){
+      final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
+      final toIndex = currentPage.value * itemsPerPage.value;
+      var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
+          startIndex: startIndex,
+          toIndex: toIndex
+      );
+      hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
+      if (currentPage.value == 1) {
+        withdrawList.assignAll(fetchedWithdrawList);
+      } else {
+        withdrawList.addAll(fetchedWithdrawList);
+      }
+      state.value = withdrawList.isEmpty ? PageState.empty : PageState.list;
+      if(withdrawList.isEmpty){
         state.value=PageState.empty;
-      }*/
+      }
     }
     catch(e){
       state.value=PageState.err;

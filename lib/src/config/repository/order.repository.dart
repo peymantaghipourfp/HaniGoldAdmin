@@ -11,15 +11,15 @@ class OrderRepository{
     orderDio.options.connectTimeout=Duration(seconds: 10);
 
   }
-  Future<List<OrderModel>> getOrderList() async{
+  Future<List<OrderModel>> getOrderList({required int startIndex, required int toIndex}) async{
     try{
       Map<String, dynamic> options = {
         "options": {
           "order": {
             "orderBy": "Orders.Id",
             "orderByType": "desc",
-            "StartIndex": 1,
-            "ToIndex": 1000
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
           }
         }
       };
@@ -36,6 +36,8 @@ class OrderRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+
   Future<Map<String, dynamic>> insertOrder({
     required String date,
     required int accountId,
@@ -50,7 +52,7 @@ class OrderRepository{
     try{
       Map<String, dynamic> orderData = {
         "date": date,
-        "limitDate": "2024-11-13T13:21:23",
+        "limitDate": null,
         "account": {
           "code": "1",
           "name": accountName,
