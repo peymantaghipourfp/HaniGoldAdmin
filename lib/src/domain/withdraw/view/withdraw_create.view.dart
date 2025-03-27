@@ -87,6 +87,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                               }
                               return null;
                             },
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
                             decoration: InputDecoration(
                                   isDense: true,
                                   contentPadding: EdgeInsets.zero, // افزایش padding عمودی

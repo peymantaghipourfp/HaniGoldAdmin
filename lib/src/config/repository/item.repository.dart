@@ -39,4 +39,27 @@ class ItemRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<Map<String , dynamic>> insertPriceItem({
+    required int itemId,
+    required double price,
+    required double differentPrice,
+  })async{
+    try{
+      Map<String, dynamic> itemData = {
+        "itemId": itemId,
+        "price": price,
+        "differentPrice": differentPrice,
+        "rowNum": 1,
+        "attribute": "sys",
+        "infos": []
+      };
+
+      var response=await itemDio.post('ItemPrice/insert',data: itemData);
+      return response.data;
+
+    }catch(e){
+      throw ErrorException('خطا در درج اطلاعات:$e');
+    }
+  }
 }

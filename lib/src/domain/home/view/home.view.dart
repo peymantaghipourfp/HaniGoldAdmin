@@ -116,13 +116,30 @@ class HomeView extends GetView<HomeController> {
                                     },
                                   ),
                                 ),
+                                /*Container(
+                                  padding: EdgeInsets.only(right: 20),
+                                  child: ListTile(
+                                    horizontalTitleGap: 5,
+                                    minTileHeight: 10,
+                                    title: Text(
+                                      'ایجاد سفارش جدید',
+                                      style: AppTextStyle.bodyText,
+                                    ),
+                                    leading: Icon(Icons.circle,
+                                        size: 15,
+                                        color: AppColor.circleColor),
+                                    onTap: () {
+                                      Get.toNamed('/orderCreate');
+                                    },
+                                  ),
+                                ),*/
                               ],
                             )
                           : SizedBox(),
                     ),
 
                     //محصولات
-                    /*Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
@@ -166,9 +183,9 @@ class HomeView extends GetView<HomeController> {
                           ),
                         ),
                       ],
-                    ),*/
+                    ),
                     //نمایش زیر مجموعه محصولات
-                    /*AnimatedSize(
+                    AnimatedSize(
                       duration: Duration(milliseconds: 350), // سرعت انیمیشن
                       curve: Curves.easeInOut, // نوع حرکت انیمیشن
                       child: controller.isSubMenuOpen('products')
@@ -194,7 +211,7 @@ class HomeView extends GetView<HomeController> {
                               ],
                             )
                           : const SizedBox(),
-                    ),*/
+                    ),
                     //پنل ریالی
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
