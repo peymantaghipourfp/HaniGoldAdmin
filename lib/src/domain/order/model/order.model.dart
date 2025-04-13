@@ -25,16 +25,16 @@ class OrderModel {
   final int? mode;
   @JsonKey(name: "item")
   final ItemModel? item;
-  @JsonKey(name: "amount")
-  final double? amount;
+  @JsonKey(name: "quantity")
+  final double? quantity;
   @JsonKey(name: "price")
   final double? price;
   @JsonKey(name: "differentPrice")
   final double? differentPrice;
   @JsonKey(name: "totalPrice")
   final double? totalPrice;
-  @JsonKey(name: "checked")
-  final bool? checked;
+  @JsonKey(name: "status")
+  final int? status;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -57,11 +57,11 @@ class OrderModel {
     required this.type,
     required this.mode,
     required this.item,
-    required this.amount,
+    required this.quantity,
     required this.price,
     required this.differentPrice,
     required this.totalPrice,
-    required this.checked,
+    required this.status,
     required this.rowNum,
     required this.id,
     required this.attribute,

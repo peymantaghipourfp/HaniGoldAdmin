@@ -10,18 +10,19 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../controller/deposit_update.controller.dart';
 
-class DepositCreateView extends StatefulWidget {
-  const DepositCreateView({super.key});
+class DepositUpdateView extends StatefulWidget {
+  const DepositUpdateView({super.key});
 
   @override
-  State<DepositCreateView> createState() => _DepositCreateViewState();
+  State<DepositUpdateView> createState() => _DepositUpdateViewState();
 }
 
-class _DepositCreateViewState extends State<DepositCreateView> {
+class _DepositUpdateViewState extends State<DepositUpdateView> {
 
-  final DepositCreateController depositCreateController = Get.find<
-      DepositCreateController>();
+  final DepositUpdateController depositUpdateController = Get.find<
+      DepositUpdateController>();
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +31,11 @@ class _DepositCreateViewState extends State<DepositCreateView> {
       appBar:isDesktop ? AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColor.textColor),
-          onPressed: () => Get.offNamed('/withdrawsList'), // Default behavior if onBackTap is null
+          onPressed: () => Get.back(), // Default behavior if onBackTap is null
         ),
       ) :
-      CustomAppBar(title: 'ثبت واریزی',
-        onBackTap: () => Get.offNamed('/withdrawsList'),
+      CustomAppBar(title: 'ویرایش واریزی',
+        onBackTap: () => Get.back(),
       ),
       body: SafeArea(
           child: SingleChildScrollView(
@@ -53,7 +54,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                       child: Row(
                         children: [
                           Text(
-                            'ثبت واریزی',
+                            'ویرایش واریزی',
                             style: AppTextStyle.smallTitleText,
                           ),
                         ],
@@ -101,7 +102,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                     padding: EdgeInsets.only(bottom: 5),
                                     child:
                                     TextFormField(
-                                      controller: depositCreateController
+                                      controller: depositUpdateController
                                           .accountController,
                                       style: AppTextStyle.bodyText,
                                       decoration: InputDecoration(
@@ -143,7 +144,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                       ],
                                     ),
                                     items:
-                                    depositCreateController.bankAccountList.map((
+                                    depositUpdateController.bankAccountList.map((
                                         bankAccount) {
                                       return DropdownMenuItem(
                                           value: bankAccount,
@@ -154,17 +155,17 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                   .bank?.icon}', width: 22,
                                                 height: 22,),
                                               SizedBox(width: 10,),
-                                              Text("${bankAccount.bank!.name} , " ?? "",
+                                              Text("${bankAccount.bank?.name} , " ?? "",
                                                 style: AppTextStyle.bodyText,),
                                               Text(bankAccount.ownerName ?? "",style: AppTextStyle.bodyText,),
                                             ],
                                           ));
                                     }).toList(),
-                                    value: depositCreateController
+                                    value: depositUpdateController
                                         .selectedBankAccount.value,
                                     onChanged: (newValue) {
                                       if (newValue != null) {
-                                        depositCreateController
+                                        depositUpdateController
                                             .changeSelectedBankAccount(newValue);
                                       }
                                     },
@@ -236,7 +237,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                       ],
                                     ),
                                     items:
-                                    depositCreateController.bankList.map((bank) {
+                                    depositUpdateController.bankList.map((bank) {
                                       return DropdownMenuItem(
                                           value: bank.id.toString(),
                                           child: Row(
@@ -251,10 +252,13 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                             ],
                                           ));
                                     }).toList(),
-                                    value: depositCreateController.selectedIndex,
+                                    value: depositUpdateController.bankList.isEmpty
+                                  ? null
+                                      : depositUpdateController.selectedIndex,
                                     onChanged: (newValue) {
+
                                       setState(() {
-                                        depositCreateController
+                                        depositUpdateController
                                             .changeSelectedBank(newValue!);
                                       });
                                     },
@@ -311,7 +315,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                   padding: EdgeInsets.only(bottom: 5),
                                   child:
                                   TextFormField(
-                                    controller: depositCreateController.ownerNameController,
+                                    controller: depositUpdateController.ownerNameController,
                                     style: AppTextStyle.bodyText,
                                     decoration: InputDecoration(
                                       border: OutlineInputBorder(
@@ -336,7 +340,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                   padding: EdgeInsets.only(bottom: 5),
                                   child:
                                   TextFormField(
-                                    controller: depositCreateController
+                                    controller: depositUpdateController
                                         .amountController,
                                     style: AppTextStyle.labelText,
                                     keyboardType: TextInputType.number,
@@ -344,11 +348,11 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                       // حذف کاماهای قبلی و فرمت جدید
                                       String cleanedValue = value.replaceAll(',', '');
                                       if (cleanedValue.isNotEmpty) {
-                                        depositCreateController.amountController.text =
+                                        depositUpdateController.amountController.text =
                                             cleanedValue.toPersianDigit().seRagham();
-                                        depositCreateController.amountController.selection =
+                                        depositUpdateController.amountController.selection =
                                             TextSelection.collapsed(
-                                                offset: depositCreateController.amountController.text.length);
+                                                offset: depositUpdateController.amountController.text.length);
                                       }
                                     },
                                     decoration: InputDecoration(
@@ -374,7 +378,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                   padding: EdgeInsets.only(bottom: 5),
                                   child:
                                   TextFormField(
-                                    controller: depositCreateController
+                                    controller: depositUpdateController
                                         .numberController,
                                     style: AppTextStyle.bodyText,
                                     decoration: InputDecoration(
@@ -400,7 +404,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                   padding: EdgeInsets.only(bottom: 5),
                                   child:
                                   TextFormField(
-                                    controller: depositCreateController
+                                    controller: depositUpdateController
                                         .cardNumberController,
                                     style: AppTextStyle.bodyText,
                                     decoration: InputDecoration(
@@ -426,7 +430,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                   padding: EdgeInsets.only(bottom: 5),
                                   child:
                                   TextFormField(
-                                    controller: depositCreateController
+                                    controller: depositUpdateController
                                         .shebaController,
                                     style: AppTextStyle.bodyText,
                                     decoration: InputDecoration(
@@ -458,7 +462,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                         }
                                         return null;
                                       },
-                                      controller: depositCreateController.dateController,
+                                      controller: depositUpdateController.dateController,
                                       readOnly: true,
                                       style: AppTextStyle.labelText,
                                       decoration: InputDecoration(
@@ -486,7 +490,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                           builder: (context, child) {
                                             return MediaQuery(
                                               data: MediaQuery.of(context).copyWith(
-                                                alwaysUse24HourFormat: true, // فعالسازی فرمت 24 ساعته
+                                                alwaysUse24HourFormat: true,
                                               ),
                                               child: child!,
                                             );
@@ -494,7 +498,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                         );
 
                                         if(pickedDate!=null){
-                                          depositCreateController.dateController.text =
+                                          depositUpdateController.dateController.text =
                                           "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${pickedTime?.hour.toString().padLeft(2, '0')}:${pickedTime?.minute.toString().padLeft(2, '0')}";
 
                                         }
@@ -504,40 +508,40 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                 ),
 
 
-                                // دکمه ایجاد درخواست
+                                // دکمه ویرایش درخواست
                                 SizedBox(height: 20,),
 
                                 SizedBox(width: double.infinity,
                                   height: 40,
                                   child: ElevatedButton(
-                                        style: ButtonStyle(
-                                            fixedSize: WidgetStatePropertyAll(
-                                                Size(Get.width * .77, 40)),
-                                            padding: WidgetStatePropertyAll(
-                                                EdgeInsets.symmetric(
-                                                    horizontal: 7)),
-                                            elevation: WidgetStatePropertyAll(5),
-                                            backgroundColor:
-                                            WidgetStatePropertyAll(
-                                                AppColor.primaryColor),
-                                            shape: WidgetStatePropertyAll(
-                                                RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius
-                                                        .circular(10)))),
-                                        onPressed: () async {
-                                          await depositCreateController.insertDeposit();
-                                          depositCreateController.clearList();
-                                        },
-                                        child:depositCreateController.isLoading.value
-                                            ?
-                                        CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
-                                        ) :
-                                        Text(
-                                          'ایجاد درخواست',
-                                          style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                        ),
-                                      ),
+                                    style: ButtonStyle(
+                                        fixedSize: WidgetStatePropertyAll(
+                                            Size(Get.width * .77, 40)),
+                                        padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                                horizontal: 7)),
+                                        elevation: WidgetStatePropertyAll(5),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(
+                                            AppColor.primaryColor),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                borderRadius: BorderRadius
+                                                    .circular(10)))),
+                                    onPressed: () async {
+                                      await depositUpdateController.updateDeposit();
+
+                                    },
+                                    child:depositUpdateController.isLoading.value
+                                        ?
+                                    CircularProgressIndicator(
+                                      valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                    ) :
+                                    Text(
+                                      'ویرایش درخواست',
+                                      style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                    ),
+                                  ),
                                 )
 
                               ],

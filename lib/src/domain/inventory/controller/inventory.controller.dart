@@ -11,6 +11,7 @@ import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/upload.repository.dart';
 import '../../account/model/account.model.dart';
 
@@ -19,6 +20,7 @@ class InventoryController extends GetxController{
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
+
   ScrollController scrollController = ScrollController();
 
   final UploadRepository uploadRepository=UploadRepository();
@@ -29,6 +31,7 @@ class InventoryController extends GetxController{
   var inventoryList=<InventoryModel>[].obs;
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  final isLoadingDelete=false.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateGetOne=Rx<PageState>(PageState.list);
   RxnInt expandedIndex = RxnInt();
@@ -84,7 +87,7 @@ class InventoryController extends GetxController{
     });
   }
   Future<void> loadMore() async {
-    if (hasMore.value && !isLoading.value && !isLoading.value) {
+    if (hasMore.value && !isLoading.value ) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
@@ -99,6 +102,14 @@ class InventoryController extends GetxController{
           inventoryList.addAll(fetchedInventoryList);
           currentPage.value = nextPage;
           hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (scrollController.hasClients &&
+                scrollController.position.maxScrollExtent == scrollController.position.pixels &&
+                hasMore.value &&
+                !isLoading.value) {
+              loadMore();
+            }
+          });
         } else {
           hasMore.value = false;
         }
@@ -170,6 +181,15 @@ class InventoryController extends GetxController{
 
       state.value = inventoryList.isEmpty ? PageState.empty : PageState.list;
 
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scrollController.hasClients &&
+            scrollController.position.pixels == 0 &&
+            hasMore.value &&
+            !isLoading.value) {
+          loadMore();
+        }
+      });
+
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -181,6 +201,7 @@ class InventoryController extends GetxController{
   Future<void> fetchGetOneInventory(int id)async{
     try {
       getOneInventory.remove(id);
+      isLoading.value=true;
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
       if(fetchedGetOneInventory!=null){
@@ -194,7 +215,49 @@ class InventoryController extends GetxController{
     catch(e){
       stateGetOne.value=PageState.err;
       errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
+    }finally{
+      isLoading.value=false;
     }
+  }
+
+  Future<List<dynamic>?> deleteInventory(int inventoryId,bool isDeleted)async{
+    try{
+      isLoadingDelete.value=true;
+      var response=await inventoryRepository.deleteInventory(isDeleted: isDeleted, inventoryId: inventoryId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","حذف دریافت/پرداخت با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('حذف دریافت/پرداخت با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchInventoryList();
+      }
+    }catch(e){
+      throw ErrorException('خطا در حذف دریافت/پرداخت: $e');
+    }finally {
+      isLoadingDelete.value=false;
+    }
+    return null;
+  }
+
+  Future<List<dynamic>?> updateDeleteInventory(int id,int inventoryDetailId,int stateMode)async{
+    try{
+      isLoading.value = true;
+      var response=await inventoryRepository.deleteInventoryDetail(id: id, inventoryDetailId: inventoryDetailId,stateMode: stateMode,);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","حذف با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('حذف با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchGetOneInventory(id);
+      }
+    }catch(e){
+      throw ErrorException('خطا در حذف: $e');
+    }finally {
+      isLoading.value = false;
+    }
+    return null;
   }
 
   Future<void> pickImage(String recordId, String type, String entityType,{required int inventoryId}) async {

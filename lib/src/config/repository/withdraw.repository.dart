@@ -14,16 +14,36 @@ class WithdrawRepository{
     withdrawDio.options.baseUrl=BaseUrl.baseUrl;
 
   }
-  Future<List<WithdrawModel>> getWithdrawList({required int startIndex, required int toIndex})async{
+  Future<List<WithdrawModel>> getWithdrawList({required int startIndex, required int toIndex,int? accountId,})async{
     try{
       Map<String , dynamic> options={
         "options" : { "withdrawrequest" :{
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if (accountId != null)
+                {
+                  "fieldName": "Id",
+                  "filterValue": accountId.toString(),
+                  "filterType": 4,
+                  "RefTable": "Account"
+                },
+                {
+                  "fieldName": "IsDeleted",
+                  "filterValue": "0",
+                  "filterType": 4,
+                  "RefTable": "WithdrawRequest"
+                }
+              ]
+            }
+          ],
           "orderBy": "withdrawrequest.Id",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
-        }
-        }
+        }}
       };
       final response=await withdrawDio.post('WithdrawRequest/get',data: options);
       print(response);
@@ -52,6 +72,7 @@ class WithdrawRepository{
     required String sheba,
     required String? description,
     required String date,
+    required int status,
 })async{
     try{
       Map<String,dynamic> withdrawData={
@@ -116,6 +137,7 @@ class WithdrawRepository{
         "requestDate": date,
         "rowNum": 1,
         "id": 1,
+        "status":status,
         "attribute": "cus",
         "infos": [],
         "description": description
@@ -127,6 +149,105 @@ class WithdrawRepository{
     }
     catch(e){
       throw ErrorException('خطا در درج اطلاعات:$e');
+    }
+  }
+
+  Future<Map<String , dynamic>> updateWithdraw({
+    required int withdrawId,
+    required int walletId,
+    required int itemId,
+    required String itemName,
+    required int accountId,
+    required String accountName,
+    required int bankAccountId,
+    required int bankId,
+    required String bankName,
+    required String ownerName,
+    required double amount,
+    required String number,
+    required String cardNumber,
+    required String sheba,
+    required String? description,
+    required String date,
+    required int status,
+  })async{
+    try{
+      Map<String,dynamic> withdrawData={
+        "bankAccount": {
+          "bank": {
+            "name": bankName,
+            "id": bankId,
+            "infos": []
+          },
+          "account": {
+            "accountGroup": {
+              "infos": []
+            },
+            "accountItemGroup": {
+              "infos": []
+            },
+            "accountPriceGroup": {
+              "infos": []
+            },
+            "infos": []
+          },
+          "number": number,
+          "ownerName": ownerName,
+          "cardNumber": cardNumber,
+          "sheba": sheba,
+          "id": bankAccountId,
+          "infos": []
+        },
+        "wallet": {
+          "address": "00000000-0000-0000-0000-000000000000",
+          "account": {
+            "code": "1",
+            "name": accountName,
+            "accountGroup": {
+              "infos": []
+            },
+            "accountItemGroup": {
+              "infos": []
+            },
+            "accountPriceGroup": {
+              "infos": []
+            },
+            "id": accountId,
+            "infos": []
+          },
+          "item": {
+            "itemGroup": {
+              "infos": []
+            },
+            "itemUnit": {
+              "infos": []
+            },
+            "name": itemName,
+            "id": itemId,
+            "infos": []
+          },
+          "id": walletId,
+          "infos": []
+        },
+        "amount": amount,
+        "undividedAmount": 100.000,
+        "requestDate": date,
+        "confirmDate": date,
+        "rowNum": 1,
+        "id": withdrawId,
+        "status":status,
+        "attribute": "cus",
+        "infos": [],
+        "description": description
+      };
+      print(withdrawData);
+
+      var response=await withdrawDio.put('WithdrawRequest/update',data: withdrawData);
+      print(response.data);
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در آپدیت اطلاعات:$e');
     }
   }
 
@@ -222,5 +343,26 @@ class WithdrawRepository{
     }
   }
 
+  Future<List< dynamic>> deleteWithdraw({
+    required bool isDeleted,
+    required int withdrawId,
+  })async{
+    try{
+      Map<String,dynamic> withdrawData={
+        "id": withdrawId,
+        "isDeleted" : isDeleted,
+      };
+
+      print(withdrawData);
+
+      var response=await withdrawDio.delete('WithdrawRequest/updateToIsDeleted',data: withdrawData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در حذف:$e');
+    }
+  }
 
 }

@@ -10,6 +10,8 @@ import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
+import '../../../config/const/app_color.dart';
+import '../../../config/network/error/network.error.dart';
 import '../../account/model/account.model.dart';
 
 
@@ -61,21 +63,22 @@ class OrderController extends GetxController{
   }
 
   Future<void> loadMore() async {
-    if (hasMore.value && !isLoading.value && !isLoading.value) {
+    if (hasMore.value && !isLoading.value) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
         final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
         final toIndex = nextPage * itemsPerPage.value;
-        var fetchedInventoryList = await orderRepository.getOrderList(
+        var fetchedOrderList = await orderRepository.getOrderList(
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
         );
-        if (fetchedInventoryList.isNotEmpty) {
-          orderList.addAll(fetchedInventoryList);
+        if (fetchedOrderList.isNotEmpty) {
+          orderList.addAll(fetchedOrderList);
           currentPage.value = nextPage;
-          hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
+          hasMore.value = fetchedOrderList.length == itemsPerPage.value;
+
         } else {
           hasMore.value = false;
         }
@@ -117,7 +120,7 @@ class OrderController extends GetxController{
         return;
       }
 
-      final accounts = await AccountRepository().searchAccountList(name);
+      final accounts = await accountRepository.searchAccountList(name);
       searchedAccounts.assignAll(accounts);
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");
@@ -169,6 +172,7 @@ class OrderController extends GetxController{
       }
 
       state.value = orderList.isEmpty ? PageState.empty : PageState.list;
+
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -177,5 +181,45 @@ class OrderController extends GetxController{
     }
   }
 
+  Future<OrderModel?> updateStatusOrder(int orderId,int status)async{
+    try{
+      isLoading.value = true;
+      var response=await orderRepository.updateStatusOrder(status: status, orderId: orderId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","وضعیت سفارش با موفقیت تغییر کرد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('وضعیت سفارش با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+      }
+    }catch(e){
+      throw ErrorException('خطا در تغییر وضعیت: $e');
+    }finally {
+      isLoading.value = false;
+
+    }
+    return null;
+  }
+
+  Future<List<dynamic>?> deleteOrder(int orderId,bool isDeleted)async{
+    try{
+      isLoading.value = true;
+      var response=await orderRepository.deleteOrder(isDeleted: isDeleted, orderId: orderId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","حذف سفارش با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('حذف سفارش با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchOrderList();
+      }
+    }catch(e){
+      throw ErrorException('خطا در حذف سفارش: $e');
+    }finally {
+      isLoading.value = false;
+
+    }
+    return null;
+  }
 
 }

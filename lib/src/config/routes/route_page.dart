@@ -14,6 +14,7 @@ import 'package:hanigold_admin/src/domain/deposit/view/deposit_create.view.dart'
 import 'package:hanigold_admin/src/domain/deposit/view/deposits_list.dart';
 import 'package:hanigold_admin/src/domain/home/view/home.view.dart';
 import 'package:hanigold_admin/src/domain/inventory/view/inventory_create.view.dart';
+import 'package:hanigold_admin/src/domain/inventory/view/inventory_detail_insert.view.dart';
 import 'package:hanigold_admin/src/domain/inventory/view/inventory_list.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_create.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_list.view.dart';
@@ -24,8 +25,10 @@ import 'package:hanigold_admin/src/domain/wallet/view/wallet.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_create.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_getOne.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraws_list.view.dart';
+import '../../domain/deposit/view/deposit_update.view.dart';
 import '../../domain/splash/view/splash.view.dart';
 import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
+import '../../domain/withdraw/view/withdraw_update.view.dart';
 
 class RoutePage{
   static List<GetPage> routePage=[
@@ -39,11 +42,14 @@ class RoutePage{
     GetPage(name: '/tools', page: ()=>ToolsView()),
     GetPage(name: '/inventoryCreate', page: ()=>InventoryCreateView(),binding: InventoryBindings()),
     GetPage(name: '/inventoryList', page: ()=>InventoryListView(),binding: InventoryBindings()),
+    GetPage(name: '/inventoryDetailInsert', page: ()=>InventoryDetailInsertView(),binding: InventoryBindings()),
     GetPage(name: '/withdrawCreate', page: ()=>WithdrawCreateView(),binding: WithdrawBindings()),
+    GetPage(name: '/withdrawUpdate', page: ()=>WithdrawUpdateView(),binding: WithdrawBindings()),
     GetPage(name: '/withdrawsList', page: ()=>WithdrawsListView(),binding: WithdrawBindings()),
     GetPage(name: '/withdrawGetOne', page: ()=>WithdrawGetOneView(),binding: WithdrawBindings()),
     GetPage(name: '/depositsList', page: ()=>DepositsListView(),binding: DepositBindings()),
     GetPage(name: '/depositCreate', page: ()=>DepositCreateView(),binding: DepositBindings()),
+    GetPage(name: '/depositUpdate', page: ()=>DepositUpdateView(),binding: DepositBindings()),
     GetPage(name: '/depositRequestGetOne', page: ()=>DepositRequestGetOneView(),binding: WithdrawBindings()),
     GetPage(name: '/wallet', page: ()=>WalletView()),
   ];

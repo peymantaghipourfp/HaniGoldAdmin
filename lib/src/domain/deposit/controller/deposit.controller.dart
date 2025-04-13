@@ -12,7 +12,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
+import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/reason_rejection.repository.dart';
+import '../../account/model/account.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/predicate.model.dart';
@@ -28,7 +30,9 @@ class DepositController extends GetxController{
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
+  final TextEditingController searchController=TextEditingController();
 
+  final AccountRepository accountRepository=AccountRepository();
   final UploadRepository uploadRepository=UploadRepository();
   final DepositRepository depositRepository=DepositRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
@@ -41,9 +45,17 @@ class DepositController extends GetxController{
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
   final Rxn<ReasonRejectionModel> selectedReasonRejection = Rxn<ReasonRejectionModel>();
 
+  RxInt selectedAccountId = 0.obs;
+  RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
+
   final ImagePicker _picker = ImagePicker();
   Rx<XFile?> selectedImage = Rx<XFile?>(null);
   RxBool isUploading = false.obs;
+
+  void setError(String message){
+    state.value=PageState.err;
+    errorMessage.value=message;
+  }
 
 
   @override
@@ -70,8 +82,30 @@ class DepositController extends GetxController{
   }
   Future<void> loadMore() async {
     if (hasMore.value && !isLoading.value) {
-      currentPage++;
-      await fetchDepositList();
+      isLoading.value = true;
+      final nextPage = currentPage.value + 1;
+      try {
+        final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
+        final toIndex = nextPage * itemsPerPage.value;
+        var fetchedDepositList = await depositRepository.getDepositList(
+          startIndex: startIndex,
+          toIndex: toIndex,
+          accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        );
+        if (fetchedDepositList.isNotEmpty) {
+          depositList.addAll(fetchedDepositList);
+          currentPage.value = nextPage;
+          hasMore.value = fetchedDepositList.length == itemsPerPage.value;
+
+        } else {
+          hasMore.value = false;
+        }
+      } catch (e) {
+        hasMore.value = false; // توقف بارگذاری بیشتر در صورت خطا
+        errorMessage.value = "خطا در دریافت اطلاعات بیشتر: ${e.toString()}";
+      } finally {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -112,6 +146,36 @@ class DepositController extends GetxController{
   }
 
 
+  Future<void> searchAccounts(String name) async {
+    try {
+      if (name.isEmpty) {
+        searchedAccounts.clear();
+        return;
+      }
+
+      final accounts = await accountRepository.searchAccountList(name);
+      searchedAccounts.assignAll(accounts);
+    } catch (e) {
+      setError("خطا در جستجوی کاربران: ${e.toString()}");
+    }
+  }
+
+  void selectAccount(AccountModel account) {
+    currentPage.value = 1;
+    selectedAccountId.value = account.id!;
+    searchController.text = account.name!;
+    Get.back(); // Close search dialog
+    fetchDepositList();
+  }
+
+  void clearSearch() {
+    currentPage.value = 1;
+    selectedAccountId.value = 0;
+    searchController.clear();
+    searchedAccounts.clear();
+    fetchDepositList();
+  }
+
   Future<void> fetchDepositList() async{
     try{
 
@@ -124,21 +188,50 @@ class DepositController extends GetxController{
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedDepositList=await depositRepository.getDepositList(
           startIndex: startIndex,
-          toIndex: toIndex
+          toIndex: toIndex,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
       );
       hasMore.value = fetchedDepositList.length == itemsPerPage.value;
-      if (currentPage.value == 1) {
+
+      if (selectedAccountId.value == 0) {
         depositList.assignAll(fetchedDepositList);
-      } else {
-        depositList.addAll(fetchedDepositList);
+      }else {
+        if (currentPage.value == 1) {
+          depositList.assignAll(fetchedDepositList);
+        } else {
+          depositList.addAll(fetchedDepositList);
+        }
       }
+
       state.value = depositList.isEmpty ? PageState.empty : PageState.list;
+
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
       isLoading.value=false;
     }
+  }
+
+
+  Future<List<dynamic>?> deleteDeposit(int depositId,bool isDeleted)async{
+    try{
+      isLoading.value = true;
+      var response=await depositRepository.deleteDeposit(isDeleted: isDeleted, depositId: depositId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","حذف واریزی با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('حذف واریزی با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchDepositList();
+      }
+    }catch(e){
+      throw ErrorException('خطا در حذف واریزی: $e');
+    }finally {
+      isLoading.value = false;
+    }
+    return null;
   }
 
   ReasonRejectionReqModel? reasonRejectionReqModel;

@@ -1,28 +1,32 @@
+
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_create.controller.dart';
+import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_update.controller.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 
-class WithdrawCreateView extends StatefulWidget {
-  WithdrawCreateView({super.key});
+class WithdrawUpdateView extends StatefulWidget {
+  const WithdrawUpdateView({super.key});
 
   @override
-  State<WithdrawCreateView> createState() => _WithdrawCreateState();
+  State<WithdrawUpdateView> createState() => _WithdrawUpdateViewState();
 }
 
-class _WithdrawCreateState extends State<WithdrawCreateView> {
-  final formKey = GlobalKey<FormState>();
-  WithdrawCreateController withdrawCreateController = Get.find<WithdrawCreateController>();
+class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
 
+  WithdrawUpdateController withdrawUpdateController=Get.find<WithdrawUpdateController>();
+  final WithdrawModel withdraw= Get.arguments as WithdrawModel;
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
@@ -32,8 +36,11 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
           icon: Icon(Icons.arrow_back, color: AppColor.textColor),
           onPressed: () => Get.back(), // Default behavior if onBackTap is null
         ),
-      ) : CustomAppBar(title: 'ایجاد درخواست برداشت',
-        onBackTap: () => Get.back(),
+      ) : CustomAppBar(title: 'ویرایش درخواست برداشت',
+        onBackTap: () {
+        Get.back();
+        withdrawUpdateController.clearList();
+        },
       ),
       body: SafeArea(
           child: SingleChildScrollView(
@@ -55,7 +62,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                           Padding(
                             padding: const EdgeInsets.only(right: 40),
                             child: Text(
-                              'ایجاد درخواست برداشت جدید',
+                              ' ویرایش ',
                               style: AppTextStyle.smallTitleText,
                             ),
                           ),
@@ -63,8 +70,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                           Expanded(
                             child: GestureDetector(
                                 onTap: (){
-                                  Get.toNamed('/withdrawsList');
-                                  withdrawCreateController.clearList();
+                                  Get.back();
                                 },
                                 child:Padding(
                                   padding: const EdgeInsets.only(right: 60),
@@ -85,38 +91,36 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                         ],
                       ),
                     )else
-                  ResponsiveRowColumnItem(
-                    rowFlex: 1,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'ایجاد درخواست جدید',
-                          style: AppTextStyle.smallTitleText,
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              Get.toNamed('/withdrawsList');
-                              withdrawCreateController.clearList();
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 200,left: 50),
-                              child: SvgPicture.asset('assets/svg/list.svg',
-                                alignment: Alignment.centerLeft,
-                                width: 18,
-                                height: 23,
-                                colorFilter: ColorFilter.mode(AppColor.textColor,
-                                    BlendMode.srcIn),),
+                    ResponsiveRowColumnItem(
+                      rowFlex: 1,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            ' ویرایش ',
+                            style: AppTextStyle.smallTitleText,
+                          ),
+                          Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                Get.back();
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 200,left: 50),
+                                child: SvgPicture.asset('assets/svg/list.svg',
+                                  alignment: Alignment.centerLeft,
+                                  width: 18,
+                                  height: 23,
+                                  colorFilter: ColorFilter.mode(AppColor.textColor,
+                                      BlendMode.srcIn),),
+                              ),
                             ),
                           ),
-                        ),
-                        //SizedBox(height: 3,),
-                      ],
+                          //SizedBox(height: 3,),
+                        ],
+                      ),
                     ),
-                  ),
-
-                  ResponsiveRowColumnItem(
+                    ResponsiveRowColumnItem(
                     child: isDesktop ? SizedBox( width: 480,
                       child: Divider(
                         height: 1,
@@ -129,8 +133,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                       ),
                     ),
                   ),
-
-                  ResponsiveRowColumnItem(
+                    ResponsiveRowColumnItem(
                     rowFlex: 1,
                     child: Container(
                       constraints: isDesktop ? BoxConstraints(maxWidth: 500) : BoxConstraints(maxWidth: 400),
@@ -139,7 +142,6 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                           : const EdgeInsets.symmetric(horizontal: 24),
                       child: Obx(() {
                         return Form(
-                          key: formKey,
                           child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               // کاربر
@@ -157,7 +159,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 CustomDropdownWidget(
 
                                   dropdownSearchData: DropdownSearchData<String>(
-                                    searchController: withdrawCreateController
+                                    searchController: withdrawUpdateController
                                         .searchController,
                                     searchInnerWidgetHeight: 50,
                                     searchInnerWidget: Container(
@@ -168,7 +170,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                         left: 15,
                                       ),
                                       child: TextFormField(style: AppTextStyle.bodyText,
-                                        controller: withdrawCreateController
+                                        controller: withdrawUpdateController
                                             .searchController,
                                         decoration: InputDecoration(
                                           isDense: true,
@@ -187,32 +189,15 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                       ),
                                     ),
                                   ),
-                                  value: withdrawCreateController.selectedAccount.value,
-                                  validator: (value) {
-                                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                                      return 'کاربر را انتخاب کنید';
-                                    }
-                                    return null;
-                                  },
+                                  value: withdrawUpdateController.selectedAccount.value?.name,
                                   showSearchBox: true,
-                                  items: [
-                                    'انتخاب کنید',
-                                    ...withdrawCreateController.searchedAccounts.map((account) => account.name ?? "")
-                                  ].toList(),
-                                  selectedValue: withdrawCreateController.selectedAccount.value?.name,
+                                  items:
+                                    withdrawUpdateController.searchedAccounts.map((account) => account.name ?? "").toList(),
+                                  selectedValue: withdrawUpdateController.selectedAccount.value?.name,
                                   onChanged: (String? newValue){
-                                    if (newValue == 'انتخاب کنید') {
-                                      withdrawCreateController.changeSelectedAccount(null);
-                                    } else {
-                                      var selectedAccount = withdrawCreateController.searchedAccounts
+                                      var selectedAccount = withdrawUpdateController.searchedAccounts
                                           .firstWhere((account) => account.name == newValue);
-                                      withdrawCreateController.changeSelectedAccount(selectedAccount);
-                                    }
-                                  },
-                                  onMenuStateChange: (isOpen) {
-                                    if (!isOpen) {
-                                      withdrawCreateController.resetAccountSearch();
-                                    }
+                                      withdrawUpdateController.changeSelectedAccount(selectedAccount);
                                   },
                                   backgroundColor: AppColor.textFieldColor,
                                   borderRadius: 7,
@@ -248,7 +233,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                     ],
                                   ),
                                   items:
-                                  withdrawCreateController.bankAccountList.map((bankAccount){
+                                  withdrawUpdateController.bankAccountList.map((bankAccount){
                                     return DropdownMenuItem(
                                         value: bankAccount,
                                         child: Row(
@@ -261,10 +246,10 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                           ],
                                         ));
                                   }).toList(),
-                                  value: withdrawCreateController.selectedBankAccount.value,
+                                  value: withdrawUpdateController.selectedBankAccount.value,
                                   onChanged: (newValue){
                                     if(newValue!=null) {
-                                      withdrawCreateController.changeSelectedBankAccount(newValue);
+                                      withdrawUpdateController.changeSelectedBankAccount(newValue);
                                     }
                                   },
                                   buttonStyleData: ButtonStyleData(
@@ -329,7 +314,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                     ],
                                   ),
                                   items:
-                                  withdrawCreateController.bankList.map((bank){
+                                  withdrawUpdateController.bankList.map((bank){
                                     return DropdownMenuItem(
                                         value: bank.id.toString(),
                                         child: Row(
@@ -340,10 +325,10 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                           ],
                                         ));
                                   }).toList(),
-                                  value: withdrawCreateController.selectedIndex,
+                                  value: withdrawUpdateController.selectedIndex,
                                   onChanged: (newValue){
                                     setState(() {
-                                      withdrawCreateController.changeSelectedBank(newValue!);
+                                      withdrawUpdateController.changeSelectedBank(newValue!);
                                     });
                                   },
                                   buttonStyleData: ButtonStyleData(
@@ -385,7 +370,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 padding: EdgeInsets.only(bottom: 5),
                                 child:
                                 TextFormField(
-                                  controller: withdrawCreateController.bankNameController,
+                                  controller: withdrawUpdateController.bankNameController,
                                   style: AppTextStyle.bodyText,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
@@ -410,7 +395,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 padding: EdgeInsets.only(bottom: 5),
                                 child:
                                 TextFormField(
-                                  controller: withdrawCreateController.ownerNameController,
+                                  controller: withdrawUpdateController.ownerNameController,
                                   style: AppTextStyle.bodyText,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
@@ -435,18 +420,18 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 padding: EdgeInsets.only(bottom: 5),
                                 child:
                                 TextFormField(
-                                  controller: withdrawCreateController.amountController,
+                                  controller: withdrawUpdateController.amountController,
                                   style: AppTextStyle.labelText,
                                   keyboardType: TextInputType.number,
                                   onChanged: (value) {
                                     // حذف کاماهای قبلی و فرمت جدید
                                     String cleanedValue = value.replaceAll(',', '');
                                     if (cleanedValue.isNotEmpty) {
-                                      withdrawCreateController.amountController.text =
+                                      withdrawUpdateController.amountController.text =
                                           cleanedValue.toPersianDigit().seRagham();
-                                      withdrawCreateController.amountController.selection =
+                                      withdrawUpdateController.amountController.selection =
                                           TextSelection.collapsed(
-                                              offset: withdrawCreateController.amountController.text.length);
+                                              offset: withdrawUpdateController.amountController.text.length);
                                     }
                                   },
                                   decoration: InputDecoration(
@@ -472,7 +457,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 padding: EdgeInsets.only(bottom: 5),
                                 child:
                                 TextFormField(
-                                  controller: withdrawCreateController.numberController,
+                                  controller: withdrawUpdateController.numberController,
                                   style: AppTextStyle.bodyText,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
@@ -497,7 +482,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 padding: EdgeInsets.only(bottom: 5),
                                 child:
                                 TextFormField(
-                                  controller: withdrawCreateController.cardNumberController,
+                                  controller: withdrawUpdateController.cardNumberController,
                                   style: AppTextStyle.bodyText,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
@@ -522,7 +507,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 padding: EdgeInsets.only(bottom: 5),
                                 child:
                                 TextFormField(
-                                  controller: withdrawCreateController.shebaController,
+                                  controller: withdrawUpdateController.shebaController,
                                   style: AppTextStyle.bodyText,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(
@@ -531,6 +516,62 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                     filled: true,
                                     fillColor: AppColor.textFieldColor,
                                   ),
+                                ),
+                              ),
+                              // تاریخ
+                              Container(
+                                padding: EdgeInsets.only(bottom: 3,top: 5),
+                                child: Text(
+                                  'تاریخ درخواست',
+                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                ),
+                              ),
+                              // تاریخ
+                              Container(
+                                height: 50,
+                                padding: EdgeInsets.only(bottom: 5),
+                                child: TextFormField(
+                                  controller: withdrawUpdateController.dateController,
+                                  readOnly: true,
+                                  style: AppTextStyle.labelText,
+                                  decoration: InputDecoration(
+                                    suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                    isDense: true,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    filled: true,
+                                    fillColor: AppColor.textFieldColor,
+                                  ),
+                                  onTap: () async {
+                                    Jalali? pickedDate = await showPersianDatePicker(
+                                      context: context,
+                                      initialDate: Jalali.now(),
+                                      firstDate: Jalali(1400,1,1),
+                                      lastDate: Jalali(1450,12,29),
+                                      initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                      initialDatePickerMode: PersianDatePickerMode.day,
+                                      locale: Locale("fa","IR"),
+                                    );
+                                    TimeOfDay? pickedTime = await showTimePicker(
+                                      context: context,
+                                      initialTime: TimeOfDay.now(),
+                                      builder: (context, child) {
+                                        return MediaQuery(
+                                          data: MediaQuery.of(context).copyWith(
+                                            alwaysUse24HourFormat: true, // فعالسازی فرمت 24 ساعته
+                                          ),
+                                          child: child!,
+                                        );
+                                      },
+                                    );
+
+                                    if(pickedDate!=null){
+                                      withdrawUpdateController.dateController.text =
+                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${pickedTime?.hour.toString().padLeft(2, '0')}:${pickedTime?.minute.toString().padLeft(2, '0')}";
+
+                                    }
+                                  },
                                 ),
                               ),
                               // توضیحات
@@ -546,7 +587,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 padding: EdgeInsets.only(bottom: 5),
                                 child:
                                 TextFormField(
-                                  controller: withdrawCreateController.descriptionController,
+                                  controller: withdrawUpdateController.descriptionController,
                                   maxLines: 3,
                                   style: AppTextStyle.labelText,
                                   decoration: InputDecoration(
@@ -559,38 +600,37 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 ),
                               ),
 
-                              // دکمه ایجاد درخواست
+                              // دکمه ویرایش درخواست
                               SizedBox(height: 20,),
 
-                                  SizedBox(width: double.infinity,
-                                    height: 40,
-                                    child: ElevatedButton(
-                                      style: ButtonStyle(
-                                          fixedSize: WidgetStatePropertyAll(
-                                              Size(Get.width * .77, 40)),
-                                          padding: WidgetStatePropertyAll(
-                                              EdgeInsets.symmetric(horizontal: 7)),
-                                          elevation: WidgetStatePropertyAll(5),
-                                          backgroundColor:
-                                          WidgetStatePropertyAll(AppColor.primaryColor),
-                                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10)))),
-                                      onPressed: () async{if(formKey.currentState!.validate()){
-                                        await withdrawCreateController.insertWithdraw();
-                                        }
-                                        withdrawCreateController.clearList();
-                                      },
-                                      child:withdrawCreateController.isLoading.value
-                                          ?
-                                      CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
-                                      ) :
-                                      Text(
-                                        'ایجاد درخواست',
-                                        style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                      ),
-                                    ),
-                                  )
+                              SizedBox(width: double.infinity,
+                                height: 40,
+                                child: ElevatedButton(
+                                  style: ButtonStyle(
+                                      fixedSize: WidgetStatePropertyAll(
+                                          Size(Get.width * .77, 40)),
+                                      padding: WidgetStatePropertyAll(
+                                          EdgeInsets.symmetric(horizontal: 7)),
+                                      elevation: WidgetStatePropertyAll(5),
+                                      backgroundColor:
+                                      WidgetStatePropertyAll(AppColor.primaryColor),
+                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10)))),
+                                  onPressed: () async{
+                                    await withdrawUpdateController.updateWithdraw();
+
+                                  },
+                                  child:withdrawUpdateController.isLoading.value
+                                      ?
+                                  CircularProgressIndicator(
+                                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                  ) :
+                                  Text(
+                                    'ویرایش درخواست',
+                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                  ),
+                                ),
+                              )
 
                             ],
                           ),

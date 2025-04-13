@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_getOne.controller.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -19,6 +20,7 @@ class DepositRequestGetOneView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: CustomAppBar(title: 'اطلاعات واریزی',
           onBackTap: ()=> Get.back()
@@ -310,34 +312,69 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                             context: context,
                                                             builder: (BuildContext context) {
                                                               return Dialog(
+                                                                clipBehavior: Clip.antiAlias,
                                                                 shape: RoundedRectangleBorder(
                                                                   borderRadius: BorderRadius.circular(10),
                                                                 ),
+                                                                insetPadding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
                                                                 child: Container(
+                                                                  constraints: BoxConstraints( // Add constraints for web
+                                                                    maxWidth: MediaQuery.of(context).size.width * 0.8,
+                                                                    maxHeight: MediaQuery.of(context).size.height * 0.7,
+                                                                  ),
                                                                   padding: EdgeInsets.all(8),
                                                                   child: Column(
-                                                                    mainAxisSize: MainAxisSize.min,
-                                                                    children: [
-                                                                      Image.network(
-                                                                        imageUrl,
-                                                                        loadingBuilder: (context, child, loadingProgress) {
-                                                                          if (loadingProgress == null) return child;
-                                                                          return Center(
-                                                                            child: CircularProgressIndicator(),
-                                                                          );
-                                                                        },
-                                                                        errorBuilder: (context, error, stackTrace) =>
-                                                                            Text('خطا در بارگذاری تصویر'),
-                                                                      ),
-                                                                      SizedBox(height: 10),
-                                                                      TextButton(
-                                                                        onPressed: () {
-                                                                          Get.back();
-                                                                        },
-                                                                        child: Text("بستن"),
-                                                                      ),
-                                                                    ],
-                                                                  ),
+                                                                      mainAxisSize: MainAxisSize.min,
+                                                                      children: [
+                                                                        InteractiveViewer(
+                                                                          panEnabled: true,
+                                                                          boundaryMargin: EdgeInsets.zero,
+                                                                          minScale: 0.5,
+                                                                          maxScale: 4,
+                                                                          child: ConstrainedBox(
+                                                                            constraints: BoxConstraints(
+                                                                              maxHeight: MediaQuery.of(context).size.height * 0.6,
+                                                                            ),
+                                                                            child: Image.network(
+                                                                              imageUrl,
+                                                                              fit: BoxFit.contain,
+                                                                              loadingBuilder: (context, child, loadingProgress) {
+                                                                                if (loadingProgress == null) return child;
+                                                                                return Center(
+                                                                                  child: CircularProgressIndicator(
+                                                                                    value: loadingProgress.expectedTotalBytes != null
+                                                                                        ? loadingProgress.cumulativeBytesLoaded /
+                                                                                        loadingProgress.expectedTotalBytes!
+                                                                                        : null,
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                              errorBuilder: (context, error, stackTrace) =>
+                                                                                  Column(
+                                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                                    children: [
+                                                                                      Icon(Icons.error_outline, color: Colors.red, size: 40),
+                                                                                      SizedBox(height: 10),
+                                                                                      Text('خطا در بارگذاری تصویر',
+                                                                                          style: AppTextStyle.bodyText),
+                                                                                    ],
+                                                                                  )
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(height: 10),
+                                                                        Padding(
+                                                                          padding: const EdgeInsets.only(top: 10),
+                                                                          child: TextButton(
+                                                                            onPressed: () {
+                                                                              Get.back();
+                                                                            },
+                                                                            child: Text("بستن"),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+
                                                                 ),
                                                               );
                                                             },

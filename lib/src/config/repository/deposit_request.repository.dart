@@ -124,6 +124,44 @@ class DepositRequestRepository{
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
+  Future<Map<String , dynamic>> updateDepositRequest({
+    required int? withdrawId,
+    required int? accountId,
+    required int? depositRequestId,
+    required double? amount,
+    required double? requestAmount,
+  })async{
+    try{
+      Map<String , dynamic> depositRequestData={
+        "withdrawRequest": {
+          "id": withdrawId,
+          "infos": []
+        },
+        "account": {
+          "name": "شرکت BI",
+          "contactInfo": "0993882350",
+          "id": accountId,
+          "infos": []
+        },
+        "amount": amount,
+        "requestAmount": requestAmount,
+        "paidAmount": 75.000,
+        "notPaidAmount": 0.000,
+        "status": 0,
+        "date": "2025-02-20T15:41:55",
+        "deposits": [],
+        "rowNum": 1,
+        "id": depositRequestId,
+        "attribute": "cus",
+        "recId": "23f235da-c565-4a43-9395-ac47d86e293a",
+        "infos": []
+      };
+      var response=await depositRequestDio.put('DepositRequest/update',data: depositRequestData);
+      return response.data;
+    }catch(e){
+      throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    }
+  }
 
   Future<Map<String , dynamic>> updateStatusDepositRequest({
     required int status,
@@ -466,6 +504,28 @@ class DepositRequestRepository{
     }
     catch(e){
       throw ErrorException('خطا در تغییر وضعیت:$e');
+    }
+  }
+
+  Future<List< dynamic>> deleteDepositRequest({
+    required bool isDeleted,
+    required int depositRequestId,
+  })async{
+    try{
+      Map<String,dynamic> depositRequestData={
+        "id": depositRequestId,
+        "isDeleted" : isDeleted,
+      };
+
+      print(depositRequestData);
+
+      var response=await depositRequestDio.delete('DepositRequest/updateToIsDeleted',data: depositRequestData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در حذف:$e');
     }
   }
 }

@@ -23,11 +23,13 @@ class DepositRequestModel {
   @JsonKey(name: "reasonRejection")
   final ReasonRejectionModel? reasonRejection;
   @JsonKey(name: "amount")
-  final int? amount;
+  final double? amount;
+  @JsonKey(name: "requestAmount")
+  final double? requestAmount;
   @JsonKey(name: "paidAmount")
-  final int? paidAmount;
+  final double? paidAmount;
   @JsonKey(name: "notPaidAmount")
-  final int? notPaidAmount;
+  final double? notPaidAmount;
   @JsonKey(name: "status")
   final int? status;
   @JsonKey(name: "date")
@@ -39,7 +41,7 @@ class DepositRequestModel {
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
-  final int? id;
+  late final int? id;
   @JsonKey(name: "attribute")
   final String? attribute;
   @JsonKey(name: "recId")
@@ -53,6 +55,7 @@ class DepositRequestModel {
     required this.item,
     required this.reasonRejection,
     required this.amount,
+    required this.requestAmount,
     required this.paidAmount,
     required this.notPaidAmount,
     required this.status,

@@ -16,15 +16,22 @@ class OrderRepository{
       Map<String, dynamic> options = {
         "options": {
           "order": {
-            if (accountId != null)
+
               "Predicate": [
                 {
                   "innerCondition": 0,
                   "outerCondition": 0,
                   "filters": [
+                    if (accountId != null)
                     {
                       "fieldName": "AccountId",
                       "filterValue": accountId.toString(),
+                      "filterType": 4,
+                      "RefTable": "Orders"
+                    },
+                    {
+                      "fieldName": "IsDeleted",
+                      "filterValue": "0",
                       "filterType": 4,
                       "RefTable": "Orders"
                     }
@@ -40,13 +47,9 @@ class OrderRepository{
       };
       final response=await orderDio.post('Order/get',data: options);
       print(response);
-      if(response.statusCode==200) {
         List<dynamic> data=response.data;
         return data.map((order) => OrderModel.fromJson(order)).toList();
 
-      }else{
-        throw ErrorException('خطا');
-      }
     }catch(e){
       throw ErrorException('خطا:$e');
     }
@@ -61,7 +64,7 @@ class OrderRepository{
     required int itemId,
     required String itemName,
     required double price,
-    required double amount,
+    required double quantity,
     required String? description,
 })async{
     try{
@@ -98,10 +101,10 @@ class OrderRepository{
           "id": itemId,
           "infos": []
         },
-        "amount": amount,
+        "quantity": quantity,
         "price": price,
         "differentPrice": 92340.3666,
-        "totalPrice": amount * price,
+        "totalPrice": quantity * price,
         "checked": true,
         "rowNum": 1,
         "id": 1,
@@ -133,7 +136,7 @@ class OrderRepository{
     required int itemId,
     required String itemName,
     required double price,
-    required double amount,
+    required double quantity,
     required String? description,
 })async{
     try{
@@ -171,10 +174,10 @@ class OrderRepository{
           "id": itemId,
           "infos": []
         },
-        "amount": amount,
+        "quantity": quantity,
         "price": price,
         "differentPrice": 92340.3666,
-        "totalPrice": amount * price,
+        "totalPrice": quantity * price,
         "checked": true,
         "rowNum": 1,
         "attribute": "cus",
@@ -195,6 +198,130 @@ class OrderRepository{
     }
     catch(e){
       throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    }
+  }
+
+  Future<Map<String , dynamic>> updateStatusOrder({
+    required int status,
+    required int orderId,
+  })async{
+    try{
+      Map<String,dynamic> orderData={
+        "date": "2023-12-11T18:40:19",
+        "limitDate": "2024-11-13T13:21:23",
+        "account": {
+          "code": "1",
+          "name": "پدیده ارتباطات",
+          "accountGroup": {
+            "infos": []
+          },
+          "accountItemGroup": {
+            "infos": []
+          },
+          "accountPriceGroup": {
+            "infos": []
+          },
+          "id": 1,
+          "infos": []
+        },
+        "type": 1,
+        "mode": 0,
+        "item": {
+          "itemGroup": {
+            "infos": []
+          },
+          "itemUnit": {
+            "name": "گرم",
+            "id": 1,
+            "infos": []
+          },
+          "name": "طلای آبشده",
+          "id": 1,
+          "infos": []
+        },
+        "quantity": 1.0000,
+        "price": 40827000.0000,
+        "differentPrice": 92340.3666,
+        "totalPrice": 40827000.0000,
+        "status": status,
+        "rowNum": 1,
+        "id": orderId,
+        "attribute": "cus",
+        "recId": "25a39f5d-81c6-4362-b59b-3dc6123a9364",
+        "infos": []
+      };
+
+      print(orderData);
+
+      var response=await orderDio.put('Order/updateStatus',data: orderData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در تغییر وضعیت:$e');
+    }
+  }
+
+  Future<List< dynamic>> deleteOrder({
+    required bool isDeleted,
+    required int orderId,
+  })async{
+    try{
+      Map<String,dynamic> orderData={
+        "date": "2025-04-07T14:44:29",
+        "account": {
+          "code": "1",
+          "name": "شرکت دیکام",
+          "accountGroup": {
+            "infos": []
+          },
+          "accountItemGroup": {
+            "infos": []
+          },
+          "accountPriceGroup": {
+            "infos": []
+          },
+          "id": 30,
+          "infos": []
+        },
+        "type": 0,
+        "mode": 0,
+        "item": {
+          "itemGroup": {
+            "infos": []
+          },
+          "itemUnit": {
+            "name": "گرم",
+            "id": 1,
+            "infos": []
+          },
+          "name": "طلای آبشده",
+          "id": 1,
+          "infos": []
+        },
+        "quantity": 2.0000,
+        "price": 46970000.0000,
+        "differentPrice": 92340.3666,
+        "totalPrice": 98637000.0000,
+        "status": 1,
+        "rowNum": 1,
+        "id": orderId,
+        "isDeleted" : isDeleted,
+        "attribute": "cus",
+        "recId": "47d0888e-a1bf-426b-9dff-e266228e0a51",
+        "infos": []
+      };
+
+      print(orderData);
+
+      var response=await orderDio.delete('Order/updateToIsDeleted',data: orderData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در حذف:$e');
     }
   }
 }

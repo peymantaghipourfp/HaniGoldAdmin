@@ -22,9 +22,10 @@ DepositRequestModel _$DepositRequestModelFromJson(Map<String, dynamic> json) =>
           ? null
           : ReasonRejectionModel.fromJson(
               json['reasonRejection'] as Map<String, dynamic>),
-      amount: (json['amount'] as num?)?.toInt(),
-      paidAmount: (json['paidAmount'] as num?)?.toInt(),
-      notPaidAmount: (json['notPaidAmount'] as num?)?.toInt(),
+      amount: (json['amount'] as num?)?.toDouble(),
+      requestAmount: (json['requestAmount'] as num?)?.toDouble(),
+      paidAmount: (json['paidAmount'] as num?)?.toDouble(),
+      notPaidAmount: (json['notPaidAmount'] as num?)?.toDouble(),
       status: (json['status'] as num?)?.toInt(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
@@ -49,6 +50,7 @@ Map<String, dynamic> _$DepositRequestModelToJson(
       'item': instance.item,
       'reasonRejection': instance.reasonRejection,
       'amount': instance.amount,
+      'requestAmount': instance.requestAmount,
       'paidAmount': instance.paidAmount,
       'notPaidAmount': instance.notPaidAmount,
       'status': instance.status,

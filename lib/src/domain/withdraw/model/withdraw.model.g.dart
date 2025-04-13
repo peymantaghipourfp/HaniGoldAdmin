@@ -19,11 +19,11 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
           ? null
           : ReasonRejectionModel.fromJson(
               json['reasonRejection'] as Map<String, dynamic>),
-      amount: (json['amount'] as num?)?.toInt(),
-      dividedAmount: (json['dividedAmount'] as num?)?.toInt(),
-      notConfirmedAmount: (json['notConfirmedAmount'] as num?)?.toInt(),
-      undividedAmount: (json['undividedAmount'] as num?)?.toInt(),
-      paidAmount: (json['paidAmount'] as num?)?.toInt(),
+      amount: (json['amount'] as num?)?.toDouble(),
+      dividedAmount: (json['dividedAmount'] as num?)?.toDouble(),
+      notConfirmedAmount: (json['notConfirmedAmount'] as num?)?.toDouble(),
+      undividedAmount: (json['undividedAmount'] as num?)?.toDouble(),
+      paidAmount: (json['paidAmount'] as num?)?.toDouble(),
       requestDate: json['requestDate'] == null
           ? null
           : DateTime.parse(json['requestDate'] as String),
@@ -39,8 +39,11 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
           .toList(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
+      depositRequestCount: (json['depositRequestCount'] as num?)?.toInt(),
+      depositCount: (json['depositCount'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
       infos: json['infos'] as List<dynamic>?,
+      description: json['description'] as String?,
     );
 
 Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
@@ -60,6 +63,9 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'deposits': instance.deposits,
       'rowNum': instance.rowNum,
       'id': instance.id,
+      'depositRequestCount': instance.depositRequestCount,
+      'depositCount': instance.depositCount,
       'attribute': instance.attribute,
       'infos': instance.infos,
+      'description': instance.description,
     };

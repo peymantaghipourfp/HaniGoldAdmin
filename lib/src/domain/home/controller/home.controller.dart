@@ -9,13 +9,13 @@ class HomeController extends GetxController{
     {'text':'تنظیمات','route':'/tools'},
   ];*/
 
-  var activeSubMenu = ''.obs; // نام منویی که باز است
+  var activeSubMenu = ''.obs; //
 
   void toggleSubMenu(String menuName) {
     if (activeSubMenu.value == menuName) {
-      activeSubMenu.value = ''; // اگر منو باز بود، بسته شود
+      activeSubMenu.value = ''; //
     } else {
-      activeSubMenu.value = menuName; // اگر منو بسته بود، باز شود
+      activeSubMenu.value = menuName; //
     }
   }
 

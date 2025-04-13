@@ -11,6 +11,8 @@ DepositModel _$DepositModelFromJson(Map<String, dynamic> json) => DepositModel(
           ? null
           : DepositRequestModel.fromJson(
               json['depositRequest'] as Map<String, dynamic>),
+      walletWithdraw: WalletWithdrawModel.fromJson(
+          json['walletWithdraw'] as Map<String, dynamic>),
       wallet: json['wallet'] == null
           ? null
           : WalletModel.fromJson(json['wallet'] as Map<String, dynamic>),
@@ -39,6 +41,7 @@ DepositModel _$DepositModelFromJson(Map<String, dynamic> json) => DepositModel(
 Map<String, dynamic> _$DepositModelToJson(DepositModel instance) =>
     <String, dynamic>{
       'depositRequest': instance.depositRequest,
+      'walletWithdraw': instance.walletWithdraw,
       'wallet': instance.wallet,
       'bankAccount': instance.bankAccount,
       'reasonRejection': instance.reasonRejection,

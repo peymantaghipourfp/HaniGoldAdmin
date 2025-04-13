@@ -1,5 +1,7 @@
 
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
@@ -29,8 +31,9 @@ class OrderCreateController extends GetxController{
 
   final OrderController orderController=Get.find<OrderController>();
 
+  final TextEditingController searchController = TextEditingController();
   final TextEditingController priceController=TextEditingController();
-  final TextEditingController amountController=TextEditingController();
+  final TextEditingController quantityController=TextEditingController();
   final TextEditingController totalPriceController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
@@ -48,15 +51,18 @@ class OrderCreateController extends GetxController{
   final Rxn<OrderTypeModel> selectedBuySell = Rxn<OrderTypeModel>();
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
+  RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
+  Timer? debounce;
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
       selectedBuySell.value = newValue;
   }
   void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
-    selectedBuySell.value?.id==0?
-    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ','):
-    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
+    selectedBuySell.value?.id==0 ?
+    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',')
+        :
+    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',');
 
   }
   void changeSelectedAccount(AccountModel? newValue) {
@@ -64,8 +70,8 @@ class OrderCreateController extends GetxController{
   }
   void updateTotalPrice(){
     double price=double.tryParse(priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
-    double amount=double.tryParse(amountController.text.toEnglishDigit()) ?? 0;
-    double totalPrice= price * amount;
+    double quantity=double.tryParse(quantityController.text.toEnglishDigit()) ?? 0;
+    double totalPrice= price * quantity;
     totalPriceController.text=totalPrice.toStringAsFixed(2).seRagham().toPersianDigit();
   }
 
@@ -73,17 +79,25 @@ class OrderCreateController extends GetxController{
   @override
   void onInit() {
     orderTypeList.addAll([
+      OrderTypeModel(id: null, name: 'انتخاب کنید'),
       OrderTypeModel(id: 0,name: 'فروش به کاربر'),
       OrderTypeModel(id: 1,name: 'خرید از کاربر'),
     ]);
+    searchController.addListener(onSearchChanged);
     fetchItemList();
     fetchAccountList();
     priceController.addListener(updateTotalPrice);
-    amountController.addListener(updateTotalPrice);
+    quantityController.addListener(updateTotalPrice);
 
     var now = Jalali.now();
     dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
     super.onInit();
+  }
+  @override
+  void onClose() {
+    debounce?.cancel();
+    searchController.dispose();
+    super.onClose();
   }
 
   // لیست محصولات
@@ -110,6 +124,7 @@ class OrderCreateController extends GetxController{
       state.value=PageState.loading;
       var fetchedAccountList=await accountRepository.getAccountList();
       accountList.assignAll(fetchedAccountList);
+      searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
       if(accountList.isEmpty){
         state.value=PageState.empty;
@@ -120,6 +135,30 @@ class OrderCreateController extends GetxController{
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
       isLoading.value=false;
+    }
+  }
+
+  void onSearchChanged(){
+    if (debounce?.isActive ?? false) debounce!.cancel();
+    debounce=Timer(const Duration(seconds: 4), () async {
+      await searchAccountList(searchController.text.trim());
+
+    });
+  }
+  Future<void> searchAccountList(String name) async {
+    try {
+      isLoading.value = true;
+      if (name.length>2) {
+        searchedAccounts.assignAll(accountList);
+      } else {
+        final results = await accountRepository.searchAccountList(name);
+        searchedAccounts.assignAll(results);
+        state.value=PageState.list;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در جستجوی کاربران');
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -136,7 +175,7 @@ class OrderCreateController extends GetxController{
         itemId: selectedItem.value?.id ?? 0,
         itemName: selectedItem.value?.name ?? "",
         price: double.parse(priceController.text.replaceAll(',', '').toEnglishDigit()),
-        amount: double.parse(amountController.text.toEnglishDigit()),
+        quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         description: descriptionController.text,
       );
       print(response);
@@ -164,11 +203,15 @@ class OrderCreateController extends GetxController{
    void clearList() {
     dateController.clear();
     priceController.clear();
-    amountController.clear();
+    quantityController.clear();
     descriptionController.clear();
     totalPriceController.clear();
     selectedBuySell.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
+  }
+  void resetAccountSearch() {
+    searchController.clear();
+    searchedAccounts.assignAll(accountList);
   }
 }

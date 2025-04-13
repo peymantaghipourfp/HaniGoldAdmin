@@ -1,5 +1,3 @@
-
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,39 +7,40 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../controller/withdraw.controller.dart';
+import '../model/deposit_request.model.dart';
 
-class InsertDepositRequestWidget extends StatelessWidget {
-  final int id;
+class UpdateDepositRequestWidget extends StatelessWidget {
+  final int withdrawId;
+  final DepositRequestModel depositRequest;
 
-  const InsertDepositRequestWidget({
+  const UpdateDepositRequestWidget({
     super.key,
-    required this.id,
+    required this.withdrawId,
+    required this.depositRequest,
   });
 
   @override
   Widget build(BuildContext context) {
-
     final withdrawController = Get.find<WithdrawController>();
-
+    withdrawController.setDepositRequestDetail(depositRequest);
 
     return Obx(() {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-
           Container(
             padding: EdgeInsets.only(right: 15, top: 5, bottom: 5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'ایجاد درخواست واریزی',
+                  'ویرایش درخواست واریزی',
                   style: AppTextStyle.smallTitleText,
                 ),
                 IconButton(
                   onPressed: () {
                     Get.back();
-                    withdrawController.clearList();// برای بستن BottomSheet
+                    withdrawController.clearList();
                   },
                   icon: Icon(Icons.close),
                   style: ButtonStyle(
@@ -52,7 +51,6 @@ class InsertDepositRequestWidget extends StatelessWidget {
             ),
           ),
           Divider(color: Colors.grey),
-
 
           Form(
             child: Padding(
@@ -74,10 +72,8 @@ class InsertDepositRequestWidget extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.only(bottom: 5),
                     child: CustomDropdownWidget(
-
                       dropdownSearchData: DropdownSearchData<String>(
-                        searchController: withdrawController
-                            .searchController,
+                        searchController: withdrawController.searchController,
                         searchInnerWidgetHeight: 50,
                         searchInnerWidget: Container(
                           height: 50,
@@ -86,9 +82,9 @@ class InsertDepositRequestWidget extends StatelessWidget {
                             right: 15,
                             left: 15,
                           ),
-                          child: TextFormField(style: AppTextStyle.bodyText,
-                            controller: withdrawController
-                                .searchController,
+                          child: TextFormField(
+                            style: AppTextStyle.bodyText,
+                            controller: withdrawController.searchController,
                             decoration: InputDecoration(
                               isDense: true,
                               contentPadding:
@@ -154,12 +150,10 @@ class InsertDepositRequestWidget extends StatelessWidget {
                     height: 50,
                     padding: EdgeInsets.only(bottom: 5),
                     child: TextFormField(
-                      controller:
-                      withdrawController.requestAmountController,
+                      controller: withdrawController.requestAmountController,
                       style: AppTextStyle.labelText,
                       keyboardType: TextInputType.number,
                       onChanged: (value) {
-                        // حذف کاماهای قبلی و فرمت جدید
                         String cleanedValue = value.replaceAll(',', '');
                         if (cleanedValue.isNotEmpty) {
                           withdrawController.requestAmountController.text =
@@ -189,7 +183,6 @@ class InsertDepositRequestWidget extends StatelessWidget {
             ),
           ),
 
-
           const Spacer(),
           Padding(
             padding: const EdgeInsets.only(bottom: 15),
@@ -213,7 +206,10 @@ class InsertDepositRequestWidget extends StatelessWidget {
                 ),
                 onPressed: () async {
 
-                  await withdrawController.insertDepositRequest(id);
+                    await withdrawController.updateDepositRequest(
+                      withdrawId,
+                      depositRequest.id!,
+                    );
                 },
                 child: withdrawController.isLoading.value
                     ? CircularProgressIndicator(
@@ -221,7 +217,7 @@ class InsertDepositRequestWidget extends StatelessWidget {
                   AlwaysStoppedAnimation<Color>(AppColor.textColor),
                 )
                     : Text(
-                  'ایجاد درخواست',
+                  'ویرایش درخواست',
                   style: AppTextStyle.bodyText,
                 ),
               ),

@@ -2,36 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 class CustomDropdownWidget extends StatelessWidget {
-  final List<String> items;
+  final dynamic value;
+  final bool showSearchBox;
+  final DropdownSearchData<String>? dropdownSearchData;
+  final List<String>? items;
   final String? selectedValue;
-  final ValueChanged<String?> onChanged;
+  final ValueChanged<String?>? onChanged;
   final bool hideUnderline;
   final Color backgroundColor;
   final Color borderColor;
   final double borderRadius;
   final bool showHintText;
   final String? Function(String?)? validator;
-  final Widget? searchField;
+  final Function(bool)? onMenuStateChange;
 
   const CustomDropdownWidget({
     super.key,
-    required this.items,
-    required this.selectedValue,
-    required this.onChanged,
+    this.value,
+    this.showSearchBox=false,
+    this.dropdownSearchData,
+    this.items,
+    this.selectedValue,
+    this.onChanged,
     this.hideUnderline = true,
     this.backgroundColor = Colors.white,
     this.borderColor = Colors.grey,
     this.borderRadius = 7.0,
     this.showHintText=true,
     this.validator,
-    this.searchField
+    this.onMenuStateChange
   });
 
   @override
   Widget build(BuildContext context) {
     Widget dropdown = DropdownButton2<String>(
+      onMenuStateChange: onMenuStateChange,
+      dropdownSearchData: showSearchBox ? dropdownSearchData : null,
       isExpanded: true,
       hint: Row(
         children: [
@@ -47,7 +56,7 @@ class CustomDropdownWidget extends StatelessWidget {
           ),
         ],
       ),
-      items: items.map((String item) {
+      items: items?.map((String item) {
         return DropdownMenuItem(
           value: item,
           child: Text(
@@ -56,7 +65,7 @@ class CustomDropdownWidget extends StatelessWidget {
           ),
         );
       }).toList(),
-      value: (selectedValue != null && items.contains(selectedValue)) ? selectedValue : null,
+      value: (selectedValue != null && items!.contains(selectedValue)) ? selectedValue : null,
       onChanged: onChanged,
 
       buttonStyleData: ButtonStyleData(

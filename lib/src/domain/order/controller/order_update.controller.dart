@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
@@ -27,8 +29,9 @@ class OrderUpdateController extends GetxController{
 
   final OrderController orderController=Get.find<OrderController>();
 
+  final TextEditingController searchController = TextEditingController();
   final TextEditingController priceController=TextEditingController();
-  final TextEditingController amountController=TextEditingController();
+  final TextEditingController quantityController=TextEditingController();
   final TextEditingController totalPriceController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
@@ -51,6 +54,8 @@ class OrderUpdateController extends GetxController{
   final Rxn<OrderTypeModel> selectedBuySell = Rxn<OrderTypeModel>();
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
+  RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
+  Timer? debounce;
 
   final RxInt orderId=0.obs;
 
@@ -59,9 +64,10 @@ class OrderUpdateController extends GetxController{
   }
   void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
-    selectedBuySell.value?.id==0?
-    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ','):
-    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
+    selectedBuySell.value?.id==0 ?
+    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',')
+    :
+    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',');
 
   }
   void changeSelectedAccount(AccountModel? newValue) {
@@ -69,14 +75,15 @@ class OrderUpdateController extends GetxController{
   }
   void updateTotalPrice(){
     double price=double.tryParse(priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
-    double amount=double.tryParse(amountController.text.toEnglishDigit()) ?? 0;
-    double totalPrice= price * amount;
+    double quantity=double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0;
+    double totalPrice= price * quantity;
     totalPriceController.text=totalPrice.toStringAsFixed(2).seRagham().toPersianDigit();
   }
 
 
   @override
   void onInit(){
+    searchController.addListener(onSearchChanged);
     fetchItemList();
     fetchAccountList();
     final OrderModel? existingOrder = Get.arguments as OrderModel?;
@@ -84,7 +91,7 @@ class OrderUpdateController extends GetxController{
       setOrderDetails(existingOrder);
     }
     priceController.addListener(updateTotalPrice);
-    amountController.addListener(updateTotalPrice);
+    quantityController.addListener(updateTotalPrice);
 
     /*final now = DateTime.now();
     final jalaliDate = Jalali.fromDateTime(now);
@@ -92,6 +99,12 @@ class OrderUpdateController extends GetxController{
     final formattedTime = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
     dateController.text="$formattedDate $formattedTime";*/
     super.onInit();
+  }
+  @override
+  void onClose() {
+    debounce?.cancel();
+    searchController.dispose();
+    super.onClose();
   }
 
   // لیست محصولات
@@ -124,6 +137,7 @@ class OrderUpdateController extends GetxController{
       state.value=PageState.loading;
       var fetchedAccountList=await accountRepository.getAccountList();
       accountList.assignAll(fetchedAccountList);
+      searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
       final OrderModel? existingOrder = Get.arguments as OrderModel?;
       if (existingOrder != null && existingOrder.account != null) {
@@ -140,6 +154,30 @@ class OrderUpdateController extends GetxController{
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
       isLoading.value=false;
+    }
+  }
+
+  void onSearchChanged(){
+    if (debounce?.isActive ?? false) debounce!.cancel();
+    debounce=Timer(const Duration(seconds: 4), () async {
+      await searchAccountList(searchController.text.trim());
+
+    });
+  }
+  Future<void> searchAccountList(String name) async {
+    try {
+      isLoading.value = true;
+      if (name.length>2) {
+        searchedAccounts.assignAll(accountList);
+      } else {
+        final results = await accountRepository.searchAccountList(name);
+        searchedAccounts.assignAll(results);
+        state.value=PageState.list;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در جستجوی کاربران');
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -184,9 +222,10 @@ class OrderUpdateController extends GetxController{
         itemId: selectedItem.value?.id ?? 0,
         itemName: selectedItem.value?.name ?? "",
         price: double.parse(priceController.text.replaceAll(',', '').toEnglishDigit()),
-        amount: double.parse(amountController.text.toEnglishDigit()),
+        quantity: double.parse(quantityController.text.toEnglishDigit()),
         description: descriptionController.text,
       );
+
      if(response!= null){
        Get.back();
        Get.snackbar("موفقیت آمیز","ویرایش با موفقیت آنجام شد",
@@ -217,7 +256,7 @@ class OrderUpdateController extends GetxController{
 
     dateController.text = order.date.toString() ?? '';
     priceController.text = order.price?.toString().seRagham(separator: ',') ?? '';
-    amountController.text = order.amount?.toString() ?? '';
+    quantityController.text = order.quantity?.toString() ?? '';
     totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
 
@@ -227,11 +266,15 @@ class OrderUpdateController extends GetxController{
   void clearList() {
     dateController.clear();
     priceController.clear();
-    amountController.clear();
+    quantityController.clear();
     descriptionController.clear();
     totalPriceController.clear();
     selectedBuySell.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
+  }
+  void resetAccountSearch() {
+    searchController.clear();
+    searchedAccounts.assignAll(accountList);
   }
 }

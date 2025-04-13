@@ -5,6 +5,8 @@ import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
+import '../../wallet/model/wallet_withdraw.model.dart';
+
 part 'deposit.model.g.dart';
 
 List<DepositModel> depositModelFromJson(String str) => List<DepositModel>.from(json.decode(str).map((x) => DepositModel.fromJson(x)));
@@ -15,6 +17,8 @@ String depositModelToJson(List<DepositModel> data) => json.encode(List<dynamic>.
 class DepositModel {
   @JsonKey(name: "depositRequest")
   final DepositRequestModel? depositRequest;
+  @JsonKey(name: "walletWithdraw")
+  final WalletWithdrawModel walletWithdraw;
   @JsonKey(name: "wallet")
   final WalletModel? wallet;
   @JsonKey(name: "bankAccount")
@@ -42,6 +46,7 @@ class DepositModel {
 
   DepositModel({
     required this.depositRequest,
+    required this.walletWithdraw,
     required this.wallet,
     required this.bankAccount,
     required this.reasonRejection,

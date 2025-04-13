@@ -58,10 +58,14 @@ InventoryDetail _$InventoryDetailFromJson(Map<String, dynamic> json) =>
       item: json['item'] == null
           ? null
           : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
+      laboratory: json['laboratory'] == null
+          ? null
+          : LaboratoryModel.fromJson(
+              json['laboratory'] as Map<String, dynamic>),
       itemUnit: json['itemUnit'] == null
           ? null
           : ItemUnitModel.fromJson(json['itemUnit'] as Map<String, dynamic>),
-      amount: (json['amount'] as num?)?.toDouble(),
+      quantity: (json['quantity'] as num?)?.toDouble(),
       impurity: (json['impurity'] as num?)?.toDouble(),
       weight750: (json['weight750'] as num?)?.toDouble(),
       carat: (json['carat'] as num?)?.toInt(),
@@ -92,8 +96,9 @@ Map<String, dynamic> _$InventoryDetailToJson(InventoryDetail instance) =>
       'inventoryId': instance.inventoryId,
       'wallet': instance.wallet,
       'item': instance.item,
+      'laboratory': instance.laboratory,
       'itemUnit': instance.itemUnit,
-      'amount': instance.amount,
+      'quantity': instance.quantity,
       'impurity': instance.impurity,
       'weight750': instance.weight750,
       'carat': instance.carat,

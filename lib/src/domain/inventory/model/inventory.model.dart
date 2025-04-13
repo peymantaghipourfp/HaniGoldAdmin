@@ -1,6 +1,7 @@
 
 
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/laboratory/model/laboratory.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item_unit.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
@@ -71,10 +72,12 @@ class InventoryDetail {
   final WalletModel? wallet;
   @JsonKey(name: "item")
   final ItemModel? item;
+  @JsonKey(name: "laboratory")
+  final LaboratoryModel? laboratory;
   @JsonKey(name: "itemUnit")
   final ItemUnitModel? itemUnit;
-  @JsonKey(name: "amount")
-  final double? amount;
+  @JsonKey(name: "quantity")
+  final double? quantity;
   @JsonKey(name: "impurity")
   final double? impurity;
   @JsonKey(name: "weight750")
@@ -114,8 +117,9 @@ class InventoryDetail {
      this.inventoryId,
      this.wallet,
      this.item,
+    this.laboratory,
     this.itemUnit,
-     this.amount,
+     this.quantity,
     this.impurity,
     this.weight750,
     this.carat,

@@ -38,6 +38,7 @@ class WithdrawController extends GetxController{
 
   final TextEditingController amountController=TextEditingController();
   final TextEditingController requestAmountController=TextEditingController();
+  final TextEditingController searchController=TextEditingController();
 
   var withdrawList=<WithdrawModel>[].obs;
   var depositRequestList=<DepositRequestModel>[].obs;
@@ -56,6 +57,9 @@ class WithdrawController extends GetxController{
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
 
   final Rxn<ReasonRejectionModel> selectedReasonRejection = Rxn<ReasonRejectionModel>();
+
+  RxInt selectedAccountId = 0.obs;
+  RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
 
   void setError(String message){
     state.value=PageState.err;
@@ -103,9 +107,38 @@ class WithdrawController extends GetxController{
     });
   }
   Future<void> loadMore() async {
-    if (hasMore.value && !isLoading.value) {
-      currentPage++;
-      await fetchWithdrawList();
+    if (!scrollController.hasClients || hasMore.value && !isLoading.value) {
+      isLoading.value = true;
+      final nextPage = currentPage.value + 1;
+      try {
+        final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
+        final toIndex = nextPage * itemsPerPage.value;
+        var fetchedWithdrawList = await withdrawRepository.getWithdrawList(
+          startIndex: startIndex,
+          toIndex: toIndex,
+          accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        );
+        if (fetchedWithdrawList.isNotEmpty) {
+          withdrawList.addAll(fetchedWithdrawList);
+          currentPage.value = nextPage;
+          hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (scrollController.hasClients &&
+                scrollController.position.maxScrollExtent == scrollController.position.pixels &&
+                hasMore.value &&
+                !isLoading.value) {
+              loadMore();
+            }
+          });
+        } else {
+          hasMore.value = false;
+        }
+      } catch (e) {
+        hasMore.value = false; // توقف بارگذاری بیشتر در صورت خطا
+        errorMessage.value = "خطا در دریافت اطلاعات بیشتر: ${e.toString()}";
+      } finally {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -115,6 +148,7 @@ class WithdrawController extends GetxController{
       state.value=PageState.loading;
       var fetchedAccountList=await accountRepository.getAccountList();
       accountList.assignAll(fetchedAccountList);
+      searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
       if(accountList.isEmpty){
         state.value=PageState.empty;
@@ -134,31 +168,78 @@ class WithdrawController extends GetxController{
     },).toList());
   }
 
+  Future<void> searchAccounts(String name) async {
+    try {
+      if (name.isEmpty) {
+        searchedAccounts.clear();
+        return;
+      }
+
+      final accounts = await AccountRepository().searchAccountList(name);
+      searchedAccounts.assignAll(accounts);
+
+    } catch (e) {
+      setError("خطا در جستجوی کاربران: ${e.toString()}");
+    }
+  }
+
+  void selectAccount(AccountModel account) {
+    currentPage.value = 1;
+    selectedAccountId.value = account.id!;
+    searchController.text = account.name!;
+    Get.back(); // Close search dialog
+    fetchWithdrawList();
+  }
+
+  void clearSearch() {
+    currentPage.value = 1;
+    selectedAccountId.value = 0;
+    searchController.clear();
+    searchedAccounts.clear();
+    fetchWithdrawList();
+  }
+
   //لیست درخواست های برداشت(withdrawRequest)
   Future<void> fetchWithdrawList()async{
 
     try{
-      if (currentPage == 1) {
+
         withdrawList.clear();
-      }
+
       isLoading.value = true;
       state.value=PageState.loading;
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
           startIndex: startIndex,
-          toIndex: toIndex
+          toIndex: toIndex,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
       );
       hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
-      if (currentPage.value == 1) {
+
+      if (selectedAccountId.value == 0) {
         withdrawList.assignAll(fetchedWithdrawList);
-      } else {
-        withdrawList.addAll(fetchedWithdrawList);
+
+      }else {
+        if (currentPage.value == 1) {
+          withdrawList.assignAll(fetchedWithdrawList);
+
+        } else {
+          withdrawList.addAll(fetchedWithdrawList);
+
+        }
       }
       state.value = withdrawList.isEmpty ? PageState.empty : PageState.list;
-      if(withdrawList.isEmpty){
-        state.value=PageState.empty;
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scrollController.hasClients &&
+            scrollController.position.pixels == 0 &&
+            hasMore.value &&
+            !isLoading.value) {
+          loadMore();
+        }
+      });
+      withdrawList.refresh();
+      update();
     }
     catch(e){
       state.value=PageState.err;
@@ -374,10 +455,98 @@ class WithdrawController extends GetxController{
     return null;
   }
 
+  Future<DepositRequestModel?> updateDepositRequest(int withdrawId,int depositRequestId)async{
+    try{
+      isLoading.value=true;
+      var response=await depositRequestRepository.updateDepositRequest(
+          withdrawId: withdrawId ,
+          accountId: selectedAccount.value?.id ?? 0,
+          amount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit()),
+          requestAmount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit()),
+          depositRequestId: depositRequestId,
+      );
+      print(response);
+      if(response!=null){
+        DepositRequestModel depositRequestResponse=DepositRequestModel.fromJson(response);
+        Get.back();
+        Get.snackbar(depositRequestResponse.infos!.first['title'], depositRequestResponse.infos!.first["description"],
+            titleText: Text(depositRequestResponse.infos!.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(
+                depositRequestResponse.infos!.first["description"], textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor)));
+        clearList();
+        fetchDepositRequestList(withdrawId);
+        fetchWithdrawList();
+        return depositRequestResponse;
+      }
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }finally{
+      isLoading.value=false;
+    }
+    return null;
+  }
+
+  void setDepositRequestDetail(DepositRequestModel depositRequest) {
+    selectedAccount.value = accountList.firstWhere(
+          (account) => account.id == depositRequest.account?.id,
+    );
+    requestAmountController.text = depositRequest.requestAmount?.toString() ?? '';
+  }
+
+  Future<List<dynamic>?> deleteWithdraw(int withdrawId,bool isDeleted)async{
+    try{
+      isLoading.value = true;
+      var response=await withdrawRepository.deleteWithdraw(isDeleted: isDeleted, withdrawId: withdrawId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","حذف درخواست برداشت با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('حذف درخواست برداشت با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchWithdrawList();
+      }
+    }catch(e){
+      throw ErrorException('خطا در حذف درخواست برداشت: $e');
+    }finally {
+      isLoading.value = false;
+
+    }
+    return null;
+  }
+
+  Future<List<dynamic>?> deleteDepositRequest(int depositRequestId,bool isDeleted)async{
+    try{
+      isLoading.value = true;
+      var response=await depositRequestRepository.deleteDepositRequest(isDeleted: isDeleted, depositRequestId: depositRequestId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","حذف درخواست واریزی با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('حذف درخواست واریزی با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchDepositRequestList(depositRequestId);
+        fetchWithdrawList();
+      }
+    }catch(e){
+      throw ErrorException('خطا در حذف درخواست واریزی: $e');
+    }finally {
+      isLoading.value = false;
+
+    }
+    return null;
+  }
+
   void clearList(){
     amountController.clear();
     requestAmountController.clear();
     selectedAccount.value=null;
     selectedReasonRejection.value = null;
+  }
+  void resetAccountSearch() {
+    searchController.clear();
+    searchedAccounts.assignAll(accountList);
   }
 }

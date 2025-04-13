@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/bank.repository.dart';
@@ -17,6 +19,7 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../model/bank_account.model.dart';
 
@@ -27,6 +30,7 @@ class WithdrawCreateController extends GetxController{
 
   final WithdrawController withdrawController=WithdrawController();
 
+  final TextEditingController searchController = TextEditingController();
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController amountController=TextEditingController();
   final TextEditingController numberController=TextEditingController();
@@ -56,13 +60,22 @@ class WithdrawCreateController extends GetxController{
   String? selectedIndex ;
   Rx<int> selectedBankId = Rx<int>(0);
   Rx<String> selectedBankName = Rx<String>("");
+  RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
+  Timer? debounce;
 
 
 
   void changeSelectedAccount(AccountModel? newValue) {
+    selectedBankAccount.value = null;
     selectedAccount.value = newValue;
-    getBankAccount(selectedAccount.value!.id ?? 0);
-    fetchWallet(newValue?.id ?? 0);
+    if (newValue != null) {
+      getBankAccount(newValue.id ?? 0);
+      fetchWallet(newValue.id ?? 0);
+    } else {
+      bankAccountList.clear();
+      selectedWalletId.value = 0;
+    }
+    update();
   }
 
    changeSelectedBank(String newValue){
@@ -93,9 +106,16 @@ class WithdrawCreateController extends GetxController{
 
   @override
   void onInit() {
+    searchController.addListener(onSearchChanged);
     fetchAccountList();
     fetchBankList();
     super.onInit();
+  }
+  @override
+  void onClose() {
+    debounce?.cancel();
+    searchController.dispose();
+    super.onClose();
   }
 
   // لیست کاربران
@@ -104,6 +124,7 @@ class WithdrawCreateController extends GetxController{
       state.value=PageState.loading;
       var fetchedAccountList=await accountRepository.getAccountList();
       accountList.assignAll(fetchedAccountList);
+      searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
       if(accountList.isEmpty){
         state.value=PageState.empty;
@@ -116,6 +137,32 @@ class WithdrawCreateController extends GetxController{
       isLoading.value=false;
     }
   }
+
+  void onSearchChanged(){
+    if (debounce?.isActive ?? false) debounce!.cancel();
+    debounce=Timer(const Duration(seconds: 4), () async {
+      await searchAccountList(searchController.text.trim());
+
+    });
+  }
+
+  Future<void> searchAccountList(String name) async {
+    try {
+      isLoading.value = true;
+      if (name.length>2) {
+        searchedAccounts.assignAll(accountList);
+      } else {
+        final results = await accountRepository.searchAccountList(name);
+        searchedAccounts.assignAll(results);
+        state.value=PageState.list;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در جستجوی کاربران');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   //لیست بانک ها
   Future<void> fetchBankList() async{
     try{
@@ -165,6 +212,7 @@ class WithdrawCreateController extends GetxController{
   Future<void> fetchBankAccountList()async{
     try{
       state.value=PageState.loading;
+      bankAccountList.clear();
       var fetchedBankAccountList=await bankAccountRepository.getBankAccountList(bankAccountReqModel!);
       bankAccountList.assignAll(fetchedBankAccountList);
       state.value=PageState.list;
@@ -212,7 +260,8 @@ Future<WithdrawModel?> insertWithdraw()async{
           cardNumber: cardNumberController.text,
           sheba: shebaController.text,
           description: descriptionController.text,
-        date: DateTime.now().toIso8601String()
+        date: DateTime.now().toIso8601String(),
+        status: 0,
       );
       //print(response);
       if (response != null) {
@@ -247,6 +296,10 @@ Future<WithdrawModel?> insertWithdraw()async{
     selectedAccount.value=null;
     selectedBankAccount.value=null;
     bankAccountList.clear();
+  }
+  void resetAccountSearch() {
+    searchController.clear();
+    searchedAccounts.assignAll(accountList);
   }
 
 }

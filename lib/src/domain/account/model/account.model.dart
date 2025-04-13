@@ -20,7 +20,7 @@ class AccountModel {
   @JsonKey(name: "contactInfo")
   final String? contactInfo;
   @JsonKey(name: "name")
-  final String? name;
+  late final String? name;
   @JsonKey(name: "parent")
   final Parent? parent;
   @JsonKey(name: "accountGroup")
@@ -32,7 +32,7 @@ class AccountModel {
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
-  final int? id;
+  late final int? id;
   @JsonKey(name: "attribute")
   final String? attribute;
   @JsonKey(name: "tags")
