@@ -73,7 +73,6 @@ class WithdrawCreateController extends GetxController{
       fetchWallet(newValue.id ?? 0);
     } else {
       bankAccountList.clear();
-      selectedWalletId.value = 0;
     }
     update();
   }

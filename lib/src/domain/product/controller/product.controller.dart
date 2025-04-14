@@ -23,6 +23,7 @@ class ProductController extends GetxController{
   var isLoading=true.obs;
 
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
+  final Rxn<ItemModel> getOneItem = Rxn<ItemModel>();
 
   void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
@@ -54,7 +55,24 @@ class ProductController extends GetxController{
     }
   }
 
-  Future<ItemModel?> insertItem()async{
+  Future<ItemModel?> fetchGetOneItem(int id)async{
+    try {
+      state.value=PageState.loading;
+      var fetchedGetOne = await itemRepository.getOneItem(id);
+
+      if (fetchedGetOne != null) {
+        getOneItem.value = fetchedGetOne;
+      }
+      state.value=PageState.list;
+      state.value=PageState.empty;
+    }
+    catch(e){
+      state.value=PageState.err;
+      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
+    }return null;
+  }
+
+  Future<ItemModel?> insertPriceItem()async{
     try{
       isLoading.value = true;
       var response=await itemRepository.insertPriceItem(
@@ -78,6 +96,7 @@ class ProductController extends GetxController{
     }finally{
       isLoading.value=false;
     }
+    return null;
   }
 
   void clearList() {

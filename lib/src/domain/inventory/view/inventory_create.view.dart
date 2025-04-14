@@ -63,11 +63,12 @@ class _InventoryCreateViewState extends State<InventoryCreateView> with TickerPr
                   ? ResponsiveRowColumnType.ROW
                   : ResponsiveRowColumnType.COLUMN,
               columnVerticalDirection: VerticalDirection.up,
-              rowCrossAxisAlignment: CrossAxisAlignment.center,
+              rowCrossAxisAlignment: CrossAxisAlignment.start,
               rowMainAxisAlignment: MainAxisAlignment.start,
               columnMainAxisAlignment: MainAxisAlignment.start,
               children: [
                  ResponsiveRowColumnItem(
+                   rowFlex: 1,
                    child: Expanded(
                      child: DefaultTabController(
                                   length: 2,

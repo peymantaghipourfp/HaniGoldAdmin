@@ -1023,7 +1023,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                                 height: 25,
                                                                                                 child: GestureDetector(
                                                                                                   onTap: () {
-                                                                                                    Get.offNamed('/depositCreate',arguments: depositRequests);
+                                                                                                    Get.offNamed('/depositCreate',arguments: depositRequests );
                                                                                                   },
                                                                                                   child: SvgPicture
                                                                                                       .asset(

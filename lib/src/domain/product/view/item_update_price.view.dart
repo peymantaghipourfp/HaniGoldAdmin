@@ -238,7 +238,7 @@ class ProductUpdatePriceView extends StatelessWidget {
                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10)))),
                                 onPressed: () async{if(formKey.currentState!.validate()){
-                                  await productController.insertItem().then((_){
+                                  await productController.insertPriceItem().then((_){
 
                                   });
                                 }

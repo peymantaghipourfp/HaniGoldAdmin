@@ -21,12 +21,12 @@ class ItemRepository{
           "orderBy": "Item.Id",
           "orderByType": "asc",
           "StartIndex": 1,
-          "ToIndex": 10
+          "ToIndex": 100
         }
         }
       };
       final response=await itemDio.post('Item/get',data: options);
-      //print(response);
+      print(response);
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((items)=>ItemModel.fromJson(items)).toList();
@@ -36,6 +36,18 @@ class ItemRepository{
       }
     }
     catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<ItemModel> getOneItem(int itemId)async{
+    try {
+      final response = await itemDio.get(
+          'Item/getOne', queryParameters: {'id': itemId});
+      print(response);
+      Map<String, dynamic> data=response.data;
+      return ItemModel.fromJson(data);
+    }catch(e){
       throw ErrorException('خطا:$e');
     }
   }

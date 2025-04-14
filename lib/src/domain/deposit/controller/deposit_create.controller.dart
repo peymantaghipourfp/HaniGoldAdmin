@@ -50,7 +50,7 @@ class DepositCreateController extends GetxController{
   var errorMessage=''.obs;
   var isLoading=true.obs;
 
-  late DepositModel deposit;
+  late DepositRequestModel depositRequest;
   final Rxn<BankAccountModel> selectedBankAccount = Rxn<BankAccountModel>();
   final Rxn<BankModel> selectedBank = Rxn<BankModel>();
   Rx<int> selectedWalletId = Rx<int>(0);
@@ -88,11 +88,11 @@ class DepositCreateController extends GetxController{
 
   @override
   void onInit() {
-    deposit=Get.arguments;
-    accountController.text=deposit.depositRequest?.account?.name ?? "";
-    if(deposit.depositRequest?.account?.id!=null){
-      getBankAccount(deposit.depositRequest!.account!.id!);
-      fetchWallet(deposit.depositRequest!.account!.id!);
+    depositRequest=Get.arguments;
+    accountController.text=depositRequest.account?.name ?? "";
+    if(depositRequest.account?.id!=null){
+      getBankAccount(depositRequest.account!.id!);
+      fetchWallet(depositRequest.account!.id!);
     }
     fetchBankList();
 
@@ -185,13 +185,13 @@ class DepositCreateController extends GetxController{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
       var response=depositRepository.insertDeposit(
-        walletWithdrawId: deposit.walletWithdraw.id ,
+        walletWithdrawId: depositRequest.withdrawRequest?.wallet?.id ?? 0 ,
           walletId: selectedWalletId.value,
-          depositRequestId: deposit.depositRequest?.id,
+          depositRequestId:depositRequest.id,
           bankAccountId: selectedBankAccount.value?.id ?? 0,
           amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
-          accountId: deposit.depositRequest?.account?.id ?? 0,
-          accountName: deposit.depositRequest?.account?.name ?? "",
+          accountId:depositRequest.account?.id ?? 0,
+          accountName: depositRequest.account?.name ?? "",
           bankId: selectedBankId.value,
           bankName: selectedBankName.value,
           ownerName: ownerNameController.text,
