@@ -2,6 +2,7 @@
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
+import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 
 import '../../domain/inventory/model/inventory.model.dart';
@@ -63,7 +64,7 @@ class InventoryRepository {
     required String accountName,
     required int type,
     required String? description,
-    required List<InventoryDetail>? details,
+    required List<InventoryDetailModel>? details,
       })async{
     try{
       Map<String, dynamic> inventoryData= {
@@ -105,7 +106,7 @@ class InventoryRepository {
           "weight750":detail.weight750,
           "carat":detail.carat,
           "receiptNumber":detail.receiptNumber,
-          "type": 1,
+          "type": type,
           "isDeleted": false,
           "rowNum": 1,
           "id": 1,
@@ -128,7 +129,8 @@ class InventoryRepository {
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
-  Future<Map<String, dynamic>> updateInventory({
+
+  Future<Map<String, dynamic>> insertDetailInventory({
     required int id,
     required String date,
     required int accountId,
@@ -224,7 +226,126 @@ class InventoryRepository {
             "receiptNumber": receiptNumber,
             "type": type,
             "stateMode":stateMode,
-            "isDeleted": true,
+            "isDeleted": false,
+            "rowNum": 1,
+            "attribute": "cus",
+            "recId": "8f96e0b1-93b2-4ff3-a263-d2037fd0495c",
+            "infos": []
+          }
+        ],
+        "rowNum": 1,
+        "id": id,
+        "attribute": "cus",
+        "infos": [],
+        "description": description,
+      };
+      var response=await inventoryDio.put('Inventory/update',data: inventoryData);
+      print(response);
+      return response.data;
+
+    }catch(e){
+      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    }
+  }
+  Future<Map<String, dynamic>> updateDetailInventory({
+    required int id,
+    required int inventoryDetailId,
+    required String date,
+    required int accountId,
+    required String accountName,
+    required int type,
+    required String? description,
+    required int walletId,
+    required int itemId,
+    required String itemName,
+    required double quantity,
+    required double impurity,
+    required double weight750,
+    required int carat,
+    required String receiptNumber,
+    required int stateMode,
+    required int laboratoryId,
+    required String laboratoryName,
+
+  })async{
+    try{
+      Map<String, dynamic> inventoryData= {
+        "date": date,
+        "account": {
+          "code": "1",
+          "name": accountName,
+          "accountGroup": {
+            "infos": []
+          },
+          "accountItemGroup": {
+            "infos": []
+          },
+          "accountPriceGroup": {
+            "infos": []
+          },
+          "id": accountId,
+          "infos": []
+        },
+        "type": type,
+        "isDeleted": false,
+        "inventoryDetails": [
+          {
+            "inventoryId": id,
+            "wallet": {
+              "address": "43314b3c-2980-4563-90ae-61edc6866126",
+              "account": {
+                "accountGroup": {
+                  "infos": []
+                },
+                "accountItemGroup": {
+                  "infos": []
+                },
+                "accountPriceGroup": {
+                  "infos": []
+                },
+                "infos": []
+              },
+              "item": {
+                "itemGroup": {
+                  "infos": []
+                },
+                "itemUnit": {
+                  "infos": []
+                },
+                "infos": []
+              },
+              "id": walletId,
+              "infos": []
+            },
+            "item": {
+              "itemGroup": {
+                "infos": []
+              },
+              "itemUnit": {
+                "infos": []
+              },
+              "name": itemName,
+              "id": itemId,
+              "infos": []
+            },
+            "itemUnit": {
+              "name": "گرم",
+              "id": 1,
+              "infos": []
+            },
+            "laboratory":{
+              "name":laboratoryName,
+              "id":laboratoryId,
+            },
+            "quantity": quantity,
+            "impurity": impurity,
+            "weight750": weight750,
+            "carat": carat,
+            "receiptNumber": receiptNumber,
+            "type": type,
+            "stateMode":stateMode,
+            "id": inventoryDetailId,
+            "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
             "recId": "8f96e0b1-93b2-4ff3-a263-d2037fd0495c",
@@ -304,7 +425,7 @@ class InventoryRepository {
           "id": 1,
           "infos": []
         },
-        "type": 0,
+        "type": 1,
         "isDeleted": false,
         "inventoryDetails": [
           {
@@ -356,7 +477,7 @@ class InventoryRepository {
             "weight750": 0,
             "carat": 0,
             "type": 1,
-            "isDeleted": false,
+            "isDeleted": true,
             "rowNum": 1,
             "id": inventoryDetailId,
             "stateMode":stateMode,

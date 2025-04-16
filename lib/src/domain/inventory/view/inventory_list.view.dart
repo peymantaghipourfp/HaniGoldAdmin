@@ -198,8 +198,7 @@ class InventoryListView extends StatelessWidget {
                               var inventories = inventoryController
                                   .inventoryList[index];
                               return Obx(() {
-                                bool isExpanded = inventoryController
-                                    .isItemExpanded(index);
+                                bool isExpanded = inventoryController.isItemExpanded(index);
                                 return Card(
                                   margin: EdgeInsets.all(isDesktop ? 12 : 8),
                                   color: AppColor.secondaryColor,
@@ -221,10 +220,7 @@ class InventoryListView extends StatelessWidget {
                                                     .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    inventories.date!
-                                                        .toPersianDate(
-                                                        twoDigits: true,
-                                                        timeSeprator: '-'),
+                                                    inventories.date?.toPersianDate(twoDigits: true, timeSeprator: '-',showTime: true) ?? '',
                                                     style:
                                                     AppTextStyle.bodyText,
                                                   ),
@@ -270,8 +266,7 @@ class InventoryListView extends StatelessWidget {
                                                     style: AppTextStyle
                                                         .labelText,),
                                                   SizedBox(height: 2,),
-                                                  Text(inventories.account!
-                                                      .name ?? "",
+                                                  Text(inventories.account?.name ?? "",
                                                     style: AppTextStyle
                                                         .bodyText,),
 
@@ -360,12 +355,8 @@ class InventoryListView extends StatelessWidget {
                                                 children: [
                                                   IconButton(
                                                     onPressed: () async {
-                                                      await inventoryController
-                                                          .fetchGetOneInventory(
-                                                          inventories.id!);
-                                                      inventoryController
-                                                          .toggleItemExpansion(
-                                                          index);
+                                                      await inventoryController.fetchGetOneInventory(inventories.id!);
+                                                      inventoryController.toggleItemExpansion(index);
                                                     },
                                                     icon: Icon(
                                                       isExpanded ? Icons
@@ -411,10 +402,7 @@ class InventoryListView extends StatelessWidget {
                                                     child: ListView.builder(
                                                       shrinkWrap: true,
                                                       physics: NeverScrollableScrollPhysics(),
-                                                      itemCount: inventoryController
-                                                          .getOneInventory[inventories
-                                                          .id]?.inventoryDetails
-                                                          ?.length,
+                                                      itemCount: inventoryController.getOneInventory[inventories.id]?.inventoryDetails?.length,
                                                       itemBuilder: (context,
                                                           index) {
                                                         var getOneInventories = inventoryController.getOneInventory[inventories.id]?.inventoryDetails?[index];
@@ -782,7 +770,7 @@ class InventoryListView extends StatelessWidget {
                                                                       //  آیکون ویرایش
                                                                       GestureDetector(
                                                                                             onTap: () {
-                                                    
+                                                                                              Get.toNamed('/inventoryDetailUpdate',arguments: getOneInventories);
                                                                                             },
                                                                                             child: Row(
                                                                                               children: [
@@ -805,6 +793,7 @@ class InventoryListView extends StatelessWidget {
                                                                                             ),
                                                                                           ),
                                                                       // آیکون حذف
+
                                                                       GestureDetector(
                                                                                             onTap: () {
                                                                                               Get.defaultDialog(
@@ -1463,6 +1452,7 @@ class InventoryListView extends StatelessWidget {
                                             ),
                                           ),
                                           // آیکون حذف
+
                                           GestureDetector(
                                             onTap: () {
                                               Get.defaultDialog(

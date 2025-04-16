@@ -298,14 +298,14 @@ class OrderListView extends StatelessWidget {
                                           funcOrderDetail(
                                               'assets/svg/amount.svg',
                                               'مقدار سفارش:',
-                                              "${orders.quantity?.toStringAsFixed(2) ?? 0.00} ${orders.item?.itemUnit?.name ?? ""}",
+                                              "${orders.quantity?.toString().seRagham(separator: ",")} ${orders.item?.itemUnit?.name ?? ""}",
                                             isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
                                           //قیمت سفارش
                                           funcOrderDetail(
                                             'assets/svg/amount-price.svg',
                                             'قیمت سفارش:',
                                             (orders.price != null)
-                                                ? "${orders.price.toString().seRagham(separator: ',')} ریال"
+                                                ? "${orders.price?.toInt().toString().seRagham(separator: ',')} ریال"
                                                 : "0",
                                               isDesktop: ResponsiveBreakpoints.of(context).isDesktop,
                                           ),
@@ -337,7 +337,7 @@ class OrderListView extends StatelessWidget {
                                                   ),
                                                   Text(
                                                     (orders.totalPrice != null)
-                                                        ? "${orders.totalPrice.toString().seRagham(separator: ',')} ریال"
+                                                        ? "${orders.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
                                                         : "0",
                                                     style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14, ),
                                                   ),
@@ -474,7 +474,7 @@ class OrderListView extends StatelessWidget {
                       '',
                       'قیمت سفارش:',
                       (orders.price != null)
-                          ? "${orders.price.toString().seRagham(separator: ',')} ریال"
+                          ? "${orders.price?.toInt().toString().seRagham(separator: ',')} ریال"
                           : "0",
                         isDesktop: ResponsiveBreakpoints.of(context).isDesktop,
                     ),
@@ -483,7 +483,7 @@ class OrderListView extends StatelessWidget {
                       '',
                       'مبلغ کل:',
                       (orders.totalPrice != null)
-                          ? "${orders.totalPrice.toString().seRagham(separator: ',')} ریال"
+                          ? "${orders.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
                           : "0",
                       isDesktop: ResponsiveBreakpoints.of(context).isDesktop,
                     ),

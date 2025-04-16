@@ -12,13 +12,13 @@ String walletWithdrawModelToJson(List<WalletWithdrawModel> data) => json.encode(
 @JsonSerializable()
 class WalletWithdrawModel {
   @JsonKey(name: "account")
-  final AccountModel account;
+  final AccountModel? account;
   @JsonKey(name: "item")
-  final ItemModel item;
+  final ItemModel? item;
   @JsonKey(name: "id")
-  final int id;
+  final int? id;
   @JsonKey(name: "infos")
-  final List<dynamic> infos;
+  final List<dynamic>? infos;
 
   WalletWithdrawModel({
     required this.account,

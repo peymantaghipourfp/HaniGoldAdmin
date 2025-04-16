@@ -29,6 +29,7 @@ class DepositRequestRepository{
 
   Future<Map<String , dynamic>> insertDepositRequest({
     required int? withdrawId,
+    required int? walletId,
     required int? accountId,
     required double? amount,
     required double? requestAmount,
@@ -55,6 +56,7 @@ class DepositRequestRepository{
             "infos": []
           },
           "wallet": {
+            "id":walletId,
             "account": {
               "accountGroup": {
                 "infos": []

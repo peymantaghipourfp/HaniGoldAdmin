@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_update.controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
+import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -21,7 +23,7 @@ class InventoryDetailUpdateView extends StatefulWidget {
 
 class _InventoryDetailUpdateViewState extends State<InventoryDetailUpdateView> with TickerProviderStateMixin {
   InventoryUpdateController inventoryUpdateController = Get.find<InventoryUpdateController>();
-
+  final InventoryDetailModel inventorDetail= Get.arguments as InventoryDetailModel;
 
   @override
   Widget build(BuildContext context) {
@@ -61,86 +63,6 @@ class _InventoryDetailUpdateViewState extends State<InventoryDetailUpdateView> w
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // کاربر
-                                Container(
-                                  padding: EdgeInsets.only(
-                                      bottom: 3, top: 5),
-                                  child: Text(
-                                    'کاربر',
-                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                  ),
-                                ),
-                                // کاربر
-                                Container(
-                                  padding: EdgeInsets.only(
-                                      bottom: 5),
-                                  child:
-                                  CustomDropdownWidget(
-
-                                    dropdownSearchData: DropdownSearchData<String>(
-                                      searchController: inventoryUpdateController
-                                          .searchController,
-                                      searchInnerWidgetHeight: 50,
-                                      searchInnerWidget: Container(
-                                        height: 50,
-                                        padding: const EdgeInsets.only(
-                                          top: 8,
-                                          right: 15,
-                                          left: 15,
-                                        ),
-                                        child: TextFormField(style: AppTextStyle.bodyText,
-                                          controller: inventoryUpdateController
-                                              .searchController,
-                                          decoration: InputDecoration(
-                                            isDense: true,
-                                            contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 8,
-                                            ),
-                                            hintText: 'جستجوی کاربر...',
-                                            hintStyle: AppTextStyle.labelText,
-                                            border: OutlineInputBorder(
-                                              borderRadius:
-                                              BorderRadius.circular(8),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    value: inventoryUpdateController.selectedAccount.value,
-                                    /*validator: (value) {
-                                                                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                                                                      return 'کاربر را انتخاب کنید';
-                                                                    }
-                                                                    return null;
-                                                                  },*/
-                                    showSearchBox: true,
-                                    items: [
-                                      'انتخاب کنید',
-                                      ...inventoryUpdateController.searchedAccounts.map((account) => account.name ?? "")
-                                    ].toList(),
-                                    selectedValue: inventoryUpdateController.selectedAccount.value?.name,
-                                    onChanged: (String? newValue){
-                                      if (newValue == 'انتخاب کنید') {
-                                        inventoryUpdateController.changeSelectedAccount(null);
-                                      } else {
-                                        var selectedAccount = inventoryUpdateController.searchedAccounts
-                                            .firstWhere((account) => account.name == newValue);
-                                        inventoryUpdateController.changeSelectedAccount(selectedAccount);
-                                      }
-                                    },
-                                    onMenuStateChange: (isOpen) {
-                                      if (!isOpen) {
-                                        inventoryUpdateController.resetAccountSearch();
-                                      }
-                                    },
-                                    backgroundColor: AppColor.textFieldColor,
-                                    borderRadius: 7,
-                                    borderColor: AppColor.secondaryColor,
-                                    hideUnderline: true,
-                                  ),
-                                ),
                                 // ولت اکانت
                                 Container(
                                   padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -559,21 +481,10 @@ class _InventoryDetailUpdateViewState extends State<InventoryDetailUpdateView> w
                                           initialDatePickerMode: PersianDatePickerMode.day,
                                           locale: Locale("fa","IR"),
                                         );
-                                        TimeOfDay? pickedTime = await showTimePicker(
-                                          context: context,
-                                          initialTime: TimeOfDay.now(),
-                                          builder: (context, child) {
-                                            return MediaQuery(
-                                              data: MediaQuery.of(context).copyWith(
-                                                alwaysUse24HourFormat: true,
-                                              ),
-                                              child: child!,
-                                            );
-                                          },
-                                        );
+                                        DateTime date=DateTime.now();
                                         if(pickedDate!=null){
                                           inventoryUpdateController.dateController.text =
-                                          "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${pickedTime?.hour.toString().padLeft(2, '0')}:${pickedTime?.minute.toString().padLeft(2, '0')}";
+                                          "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
                                         }
                                       },
                                     ),

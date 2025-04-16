@@ -18,7 +18,7 @@ class DepositModel {
   @JsonKey(name: "depositRequest")
   final DepositRequestModel? depositRequest;
   @JsonKey(name: "walletWithdraw")
-  final WalletWithdrawModel walletWithdraw;
+  final WalletWithdrawModel? walletWithdraw;
   @JsonKey(name: "wallet")
   final WalletModel? wallet;
   @JsonKey(name: "bankAccount")
@@ -29,6 +29,8 @@ class DepositModel {
   final int? amount;
   @JsonKey(name: "status")
   final int? status;
+  @JsonKey(name: "isDeleted")
+  final bool? isDeleted;
   @JsonKey(name: "attachments")
   final List<Attachment>? attachments;
   @JsonKey(name: "rowNum")
@@ -52,6 +54,7 @@ class DepositModel {
     required this.reasonRejection,
     required this.amount,
     required this.status,
+    required this.isDeleted,
     required this.attachments,
     required this.rowNum,
     required this.id,

@@ -553,22 +553,12 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                       initialDatePickerMode: PersianDatePickerMode.day,
                                       locale: Locale("fa","IR"),
                                     );
-                                    TimeOfDay? pickedTime = await showTimePicker(
-                                      context: context,
-                                      initialTime: TimeOfDay.now(),
-                                      builder: (context, child) {
-                                        return MediaQuery(
-                                          data: MediaQuery.of(context).copyWith(
-                                            alwaysUse24HourFormat: true, // فعالسازی فرمت 24 ساعته
-                                          ),
-                                          child: child!,
-                                        );
-                                      },
-                                    );
+
+                                    DateTime date=DateTime.now();
 
                                     if(pickedDate!=null){
                                       withdrawUpdateController.dateController.text =
-                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${pickedTime?.hour.toString().padLeft(2, '0')}:${pickedTime?.minute.toString().padLeft(2, '0')}";
+                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
 
                                     }
                                   },

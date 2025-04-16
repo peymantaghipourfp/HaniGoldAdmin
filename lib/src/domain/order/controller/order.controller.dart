@@ -191,6 +191,7 @@ class OrderController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('وضعیت سفارش با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchOrderList();
       }
     }catch(e){
       throw ErrorException('خطا در تغییر وضعیت: $e');

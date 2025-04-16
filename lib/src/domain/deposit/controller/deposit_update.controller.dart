@@ -241,6 +241,7 @@ class DepositUpdateController extends GetxController{
           date: gregorianDate,
           status: statusId.value
       );
+
       if(response!=null) {
         DepositModel depositResponse=DepositModel.fromJson(response);
         Get.back();
@@ -265,7 +266,7 @@ class DepositUpdateController extends GetxController{
 
   void setDepositDetail(DepositModel deposit){
     print(' بانک اکانت:${deposit.bankAccount?.id}');
-    walletWithdrawId.value=deposit.walletWithdraw.id;
+    walletWithdrawId.value=deposit.walletWithdraw?.id ?? 0;
     depositId.value=deposit.id ?? 0;
     selectedWalletId.value=deposit.wallet?.id ?? 0;
     depositRequests.value=deposit.depositRequest?.id ?? 0;
