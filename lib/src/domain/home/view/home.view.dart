@@ -472,6 +472,116 @@ class HomeView extends GetView<HomeController> {
                             : const SizedBox(),
                       ),
                     ),
+                    //دریافت و پرداخت
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: Row(
+                        children: [
+                          Container(
+                            constraints: isDesktop ? BoxConstraints(maxWidth: 550) : BoxConstraints(maxWidth: 350),
+                            padding: isDesktop
+                                ? const EdgeInsets.symmetric(horizontal: 80)
+                                : const EdgeInsets.only(right: 15),
+                            child: TextButton(
+                              style: ButtonStyle(
+                                elevation: WidgetStateProperty.all(5),
+                                shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide(
+                                        width: 1, color: AppColor.secondaryColor),
+                                  ),
+                                ),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.secondaryColor),
+                              ),
+                              onPressed: () {
+                                controller.toggleSubMenu('remittance');
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        'حواله',
+                                        style: AppTextStyle.bodyText,
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(color: AppColor.textColor,
+                                      controller.activeSubMenu.value=='remittance'?
+                                      Icons.expand_more:
+                                      Icons.expand_less
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    //نمایش زیرمجموعه دریافت و پرداخت
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: AnimatedSize(
+                        duration: Duration(milliseconds: 350), // سرعت انیمیشن
+                        curve: Curves.easeInOut, // نوع حرکت انیمیشن
+                        child: controller.isSubMenuOpen('remittance')
+                            ? Column(
+                          children: [
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: AnimatedSize(
+                                duration: Duration(milliseconds: 800),
+                                curve: Curves.easeInOut,
+                                child: ListTile(
+                                  horizontalTitleGap: 5,
+                                  minTileHeight: 10,
+                                  title: Text(
+                                    'لیست حواله',
+                                    style: AppTextStyle.bodyText,
+                                  ),
+                                  leading: Icon(Icons.circle,
+                                      size: 15,
+                                      color: AppColor.circleColor),
+                                  onTap: () {
+                                    Get.toNamed('/remittance');
+                                  },
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: AnimatedSize(
+                                duration: Duration(milliseconds: 800),
+                                curve: Curves.easeInOut,
+                                child: ListTile(
+                                  horizontalTitleGap: 5,
+                                  minTileHeight: 10,
+                                  title: Text(
+                                    'ایجاد حواله',
+                                    style: AppTextStyle.bodyText,
+                                  ),
+                                  leading: Icon(Icons.circle,
+                                      size: 15,
+                                      color: AppColor.circleColor),
+                                  onTap: () {
+                                    Get.toNamed('/insertRemittance');
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        )
+                            : const SizedBox(),
+                      ),
+                    ),
                     //تنظیمات
                     ResponsiveRowColumnItem(
                       rowFlex:1,

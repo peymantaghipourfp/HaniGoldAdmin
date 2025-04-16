@@ -7,6 +7,7 @@ import 'package:hanigold_admin/src/config/routes/bindings/home.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/inventory.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/order.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/product.bindings.dart';
+import 'package:hanigold_admin/src/config/routes/bindings/remittance.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/splash.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/withdraw.bindings.dart';
 import 'package:hanigold_admin/src/domain/auth/view/login.view.dart';
@@ -26,6 +27,8 @@ import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_create.view.dar
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_getOne.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraws_list.view.dart';
 import '../../domain/deposit/view/deposit_update.view.dart';
+import '../../domain/remittance/view/insert_remittance.view.dart';
+import '../../domain/remittance/view/remittance.view.dart';
 import '../../domain/splash/view/splash.view.dart';
 import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
 import '../../domain/withdraw/view/withdraw_update.view.dart';
@@ -52,5 +55,7 @@ class RoutePage{
     GetPage(name: '/depositUpdate', page: ()=>DepositUpdateView(),binding: DepositBindings()),
     GetPage(name: '/depositRequestGetOne', page: ()=>DepositRequestGetOneView(),binding: WithdrawBindings()),
     GetPage(name: '/wallet', page: ()=>WalletView()),
+    GetPage(name: '/remittance', page: ()=>RemittanceView(),binding: RemittanceBindings()),
+    GetPage(name: '/insertRemittance', page: ()=>InsertRemittanceView(),binding: RemittanceBindings()),
   ];
 }

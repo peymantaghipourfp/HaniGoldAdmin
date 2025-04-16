@@ -96,6 +96,23 @@ Widget buildDesktopLayout() {
                 ],
               ),
               _buildMenuButton(
+                title: 'حواله',
+                icon: Icons.inventory,
+                menuKey: 'remittance',
+                subItems: [
+                  _buildSubMenuItem(
+                    title: 'لیست حواله',
+                    icon: Icons.list_alt,
+                    route: '/remittance',
+                  ),
+                  _buildSubMenuItem(
+                    title: 'ایجاد حواله',
+                    icon: Icons.add_card,
+                    route: '/insertRemittance',
+                  ),
+                ],
+              ),
+              _buildMenuButton(
                 title: 'تنظیمات',
                 icon: Icons.settings,
                 menuKey: 'tools',
