@@ -12,10 +12,12 @@ import '../controller/withdraw.controller.dart';
 
 class InsertDepositRequestWidget extends StatelessWidget {
   final int id;
+  final int? walletId;
 
   const InsertDepositRequestWidget({
     super.key,
     required this.id,
+    this.walletId,
   });
 
   @override
@@ -213,7 +215,7 @@ class InsertDepositRequestWidget extends StatelessWidget {
                 ),
                 onPressed: () async {
 
-                  await withdrawController.insertDepositRequest(id);
+                  await withdrawController.insertDepositRequest(id,walletId!);
                 },
                 child: withdrawController.isLoading.value
                     ? CircularProgressIndicator(

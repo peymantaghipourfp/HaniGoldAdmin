@@ -8,10 +8,14 @@ part of 'wallet_withdraw.model.dart';
 
 WalletWithdrawModel _$WalletWithdrawModelFromJson(Map<String, dynamic> json) =>
     WalletWithdrawModel(
-      account: AccountModel.fromJson(json['account'] as Map<String, dynamic>),
-      item: ItemModel.fromJson(json['item'] as Map<String, dynamic>),
-      id: (json['id'] as num).toInt(),
-      infos: json['infos'] as List<dynamic>,
+      account: json['account'] == null
+          ? null
+          : AccountModel.fromJson(json['account'] as Map<String, dynamic>),
+      item: json['item'] == null
+          ? null
+          : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
+      id: (json['id'] as num?)?.toInt(),
+      infos: json['infos'] as List<dynamic>?,
     );
 
 Map<String, dynamic> _$WalletWithdrawModelToJson(

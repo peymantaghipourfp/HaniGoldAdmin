@@ -14,6 +14,7 @@ import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
+import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../model/order.model.dart';
 import 'order.controller.dart';
 
@@ -48,6 +49,9 @@ class OrderCreateController extends GetxController{
   var errorMessage=''.obs;
   var isLoading=true.obs;
 
+  var maxItemSell=0.obs;
+  var maxItemBuy=0.obs;
+  final Rxn<ItemModel> getOneItem=Rxn<ItemModel>();
   final Rxn<OrderTypeModel> selectedBuySell = Rxn<OrderTypeModel>();
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
@@ -63,7 +67,10 @@ class OrderCreateController extends GetxController{
     priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',')
         :
     priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',');
-
+    maxItemSell.value=newValue!.maxSell!;
+    maxItemBuy.value=newValue.maxBuy!;
+    print(maxItemSell.value);
+    print(maxItemBuy.value);
   }
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -90,7 +97,8 @@ class OrderCreateController extends GetxController{
     quantityController.addListener(updateTotalPrice);
 
     var now = Jalali.now();
-    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    DateTime date=DateTime.now();
+    dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     super.onInit();
   }
   @override
@@ -117,6 +125,23 @@ class OrderCreateController extends GetxController{
     }finally{
       isLoading.value=false;
     }
+  }
+
+  Future<ItemModel?> fetchGetOneItem(int id)async{
+    try {
+      state.value=PageState.loading;
+      var fetchedGetOne = await itemRepository.getOneItem(id);
+
+      if (fetchedGetOne != null) {
+        getOneItem.value = fetchedGetOne;
+      }
+      state.value=PageState.list;
+      state.value=PageState.empty;
+    }
+    catch(e){
+      state.value=PageState.err;
+      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
+    }return null;
   }
   // لیست کاربران
   Future<void> fetchAccountList() async{
@@ -166,9 +191,9 @@ class OrderCreateController extends GetxController{
 
     try {
       isLoading.value = true;
-
+      String gregorianDate = convertJalaliToGregorian(dateController.text);
       var response = await orderRepository.insertOrder(
-        date: dateController.text,
+        date: gregorianDate,
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
         type: selectedBuySell.value?.id ?? 0,

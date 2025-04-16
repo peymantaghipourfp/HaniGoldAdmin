@@ -237,7 +237,7 @@ class DepositsListView extends StatelessWidget {
                                                                   width: 3,
                                                                 ),
                                                                 Text(
-                                                                  "${deposits.amount == null ? 0 : deposits.amount.toString().seRagham(separator: ',')} ریال",
+                                                                  "${deposits.amount == null ? 0 : deposits.amount?.toInt().toString().seRagham(separator: ',')} ریال",
                                                                   style:
                                                                       AppTextStyle.bodyText,
                                                                 ),

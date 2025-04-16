@@ -16,6 +16,7 @@ import 'package:hanigold_admin/src/domain/deposit/view/deposits_list.dart';
 import 'package:hanigold_admin/src/domain/home/view/home.view.dart';
 import 'package:hanigold_admin/src/domain/inventory/view/inventory_create.view.dart';
 import 'package:hanigold_admin/src/domain/inventory/view/inventory_detail_insert.view.dart';
+import 'package:hanigold_admin/src/domain/inventory/view/inventory_detail_update.view.dart';
 import 'package:hanigold_admin/src/domain/inventory/view/inventory_list.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_create.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_list.view.dart';
@@ -46,6 +47,7 @@ class RoutePage{
     GetPage(name: '/inventoryCreate', page: ()=>InventoryCreateView(),binding: InventoryBindings()),
     GetPage(name: '/inventoryList', page: ()=>InventoryListView(),binding: InventoryBindings()),
     GetPage(name: '/inventoryDetailInsert', page: ()=>InventoryDetailInsertView(),binding: InventoryBindings()),
+    GetPage(name: '/inventoryDetailUpdate', page: ()=>InventoryDetailUpdateView(),binding: InventoryBindings()),
     GetPage(name: '/withdrawCreate', page: ()=>WithdrawCreateView(),binding: WithdrawBindings()),
     GetPage(name: '/withdrawUpdate', page: ()=>WithdrawUpdateView(),binding: WithdrawBindings()),
     GetPage(name: '/withdrawsList', page: ()=>WithdrawsListView(),binding: WithdrawBindings()),

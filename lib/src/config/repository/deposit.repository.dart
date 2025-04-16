@@ -38,7 +38,7 @@ class DepositRepository{
             }
           ],
           "orderBy": "deposit.Id",
-          "orderByType": "asc",
+          "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
         }}

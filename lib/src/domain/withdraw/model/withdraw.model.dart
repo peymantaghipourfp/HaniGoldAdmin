@@ -34,6 +34,8 @@ class WithdrawModel {
   final DateTime? requestDate;
   @JsonKey(name: "confirmDate")
   final DateTime? confirmDate;
+  @JsonKey(name: "isDeleted")
+  final bool? isDeleted;
   @JsonKey(name: "status")
   final int? status;
   @JsonKey(name: "depositRequests")
@@ -66,6 +68,7 @@ class WithdrawModel {
     required this.paidAmount,
     required this.requestDate,
     required this.confirmDate,
+    required this.isDeleted,
     required this.status,
     required this.depositRequests,
     required this.deposits,

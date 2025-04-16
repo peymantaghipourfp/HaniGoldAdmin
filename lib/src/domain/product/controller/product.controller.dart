@@ -14,6 +14,7 @@ class ProductController extends GetxController{
 
   final TextEditingController priceController=TextEditingController();
   final TextEditingController differentPriceController=TextEditingController();
+  final TextEditingController itemController=TextEditingController();
 
   final ItemRepository itemRepository=ItemRepository();
 
@@ -27,12 +28,19 @@ class ProductController extends GetxController{
 
   void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
+
+    if (newValue != null && newValue.id != null) {
+
+      fetchGetOneItem(newValue.id!);
+    }
   }
 
   @override
   void onInit() {
     fetchItemList();
-
+    if(getOneItem.value!=null) {
+      itemController.text = getOneItem.value!.name!;
+    }
     super.onInit();
   }
 

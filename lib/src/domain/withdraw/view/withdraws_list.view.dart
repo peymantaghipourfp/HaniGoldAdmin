@@ -276,7 +276,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                     style: AppTextStyle
                                                                         .labelText,),
                                                                   SizedBox(width: 3,),
-                                                                  Text("${withdraws.amount.toString().seRagham(separator: ',')} ریال",
+                                                                  Text("${withdraws.amount?.toInt().toString().seRagham(separator: ',')} ریال",
                                                                     style: AppTextStyle.bodyText,),
                                                                 ],
                                                               ),
@@ -287,7 +287,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                         .labelText,),
                                                                   SizedBox(width: 3,),
                                                                   Text("${withdraws.notConfirmedAmount==null? 0 :
-                                                                  withdraws.notConfirmedAmount.toString().seRagham(separator: ',')} ریال",
+                                                                  withdraws.notConfirmedAmount?.toInt().toString().seRagham(separator: ',')} ریال",
                                                                     style: AppTextStyle
                                                                         .bodyText,),
                                                                 ],
@@ -306,7 +306,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                     .labelText,),
                                                               SizedBox(width: 3,),
                                                               Text("${withdraws.undividedAmount==null ? 0 :
-                                                                  withdraws.undividedAmount.toString().seRagham(separator: ',')} ریال",
+                                                                  withdraws.undividedAmount?.toInt().toString().seRagham(separator: ',')} ریال",
                                                                 style: AppTextStyle
                                                                     .bodyText,),
                                                             ],
@@ -322,7 +322,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                 style: AppTextStyle
                                                                     .labelText,),
                                                               SizedBox(width: 3,),
-                                                              Text("${withdraws.paidAmount==null? 0 : withdraws.paidAmount.toString().seRagham(separator: ',')} ریال",
+                                                              Text("${withdraws.paidAmount==null? 0 : withdraws.paidAmount?.toInt().toString().seRagham(separator: ',')} ریال",
                                                                 style: AppTextStyle
                                                                     .bodyText,),
                                                             ],
@@ -367,7 +367,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                                                                    ),
                                                                    builder: (context) {
-                                                                     return InsertDepositRequestWidget(id: withdraws.id!);
+                                                                     return InsertDepositRequestWidget(id: withdraws.id!,walletId: withdraws.wallet!.id!,);
                                                                    },
                                                                  ).whenComplete(() {
                                                                    withdrawController.clearList();
@@ -835,7 +835,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                                     width: 4,),
                                                                                                   Text(
                                                                                                     "${depositRequests
-                                                                                                        .amount
+                                                                                                        .amount?.toInt()
                                                                                                         .toString()
                                                                                                         .seRagham(
                                                                                                         separator: ',')} ریال",
@@ -860,7 +860,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                                 width: 4,),
                                                                                               Text(
                                                                                                 "${depositRequests
-                                                                                                    .paidAmount
+                                                                                                    .paidAmount?.toInt()
                                                                                                     .toString()
                                                                                                     .seRagham(
                                                                                                     separator: ',')} ریال",
@@ -1428,7 +1428,7 @@ class WithdrawsListView extends StatelessWidget {
                                 borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                               ),
                               builder: (context) {
-                                return InsertDepositRequestWidget(id: withdraws.id!);
+                                return InsertDepositRequestWidget(id: withdraws.id!,walletId: withdraws.wallet?.id,);
                               },
                             ).whenComplete(() {
                               withdrawController.clearList();
@@ -1764,7 +1764,7 @@ class WithdrawsListView extends StatelessWidget {
                                         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                                       ),
                                       builder: (context) {
-                                        return InsertDepositRequestWidget(id: withdraws.id!);
+                                        return InsertDepositRequestWidget(id: withdraws.id!,walletId: withdraws.wallet?.id,);
                                       },
                                     ).whenComplete(() {
                                       withdrawController.clearList();

@@ -63,7 +63,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView> with TickerPr
                   ? ResponsiveRowColumnType.ROW
                   : ResponsiveRowColumnType.COLUMN,
               columnVerticalDirection: VerticalDirection.up,
-              rowCrossAxisAlignment: CrossAxisAlignment.start,
+              rowCrossAxisAlignment: CrossAxisAlignment.center,
               rowMainAxisAlignment: MainAxisAlignment.start,
               columnMainAxisAlignment: MainAxisAlignment.start,
               children: [
@@ -614,10 +614,10 @@ class _InventoryCreateViewState extends State<InventoryCreateView> with TickerPr
                                                                       initialDatePickerMode: PersianDatePickerMode.day,
                                                                       locale: Locale("fa","IR"),
                                                                     );
-
+                                                                    DateTime date=DateTime.now();
                                                                     if(pickedDate!=null){
                                                                       inventoryCreateController.dateController.text =
-                                                                      "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')} ";
+                                                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
                                                                     }
                                                                   },
                                                                 ),
@@ -1211,10 +1211,10 @@ class _InventoryCreateViewState extends State<InventoryCreateView> with TickerPr
                                                                       initialDatePickerMode: PersianDatePickerMode.day,
                                                                       locale: Locale("fa","IR"),
                                                                     );
-
+                                                                    DateTime date=DateTime.now();
                                                                     if(pickedDate!=null){
                                                                       inventoryCreateController.dateController.text =
-                                                                      "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                                                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
 
                                                                     }
                                                                   },

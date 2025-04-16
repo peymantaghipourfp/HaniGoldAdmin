@@ -142,7 +142,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                 children: [
                                   Text(
                                     'مبلغ کل: ${getDepositRequest.amount== null ? 0 :
-                                    getDepositRequest.amount.toString().seRagham(separator: ',') } ریال ',
+                                    getDepositRequest.amount?.toInt().toString().seRagham(separator: ',') } ریال ',
                                     style: AppTextStyle.bodyText,
                                   ),
                                 ],
@@ -161,7 +161,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                   ),
                                   Text(
                                     '${getDepositRequest.paidAmount==null ? 0 :
-                                    getDepositRequest.paidAmount.toString().seRagham(separator: ',')} ریال ',
+                                    getDepositRequest.paidAmount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                     style: AppTextStyle.bodyText.copyWith(
                                         color: AppColor.primaryColor),
                                   ),
@@ -297,7 +297,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                 child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                   children: [
                                                     Text(
-                                                      'مبلغ: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount.toString().seRagham(separator: ',')} ریال ',
+                                                      'مبلغ: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                       style:
                                                       AppTextStyle.bodyText,
                                                     ),

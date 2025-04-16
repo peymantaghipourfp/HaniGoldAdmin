@@ -422,11 +422,12 @@ class WithdrawController extends GetxController{
   }
 
   // درج درخواست های واریز(insert deposit request)
-  Future<DepositRequestModel?> insertDepositRequest(int id)async{
+  Future<DepositRequestModel?> insertDepositRequest(int id,int walletId)async{
     try{
       isLoading.value=true;
       var response=await depositRequestRepository.insertDepositRequest(
         withdrawId: id ,
+          walletId: walletId,
           accountId: selectedAccount.value?.id ?? 0,
           amount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit()),
           requestAmount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit())

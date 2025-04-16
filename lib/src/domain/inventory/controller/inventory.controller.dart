@@ -23,6 +23,7 @@ class InventoryController extends GetxController{
 
   ScrollController scrollController = ScrollController();
 
+
   final UploadRepository uploadRepository=UploadRepository();
   final InventoryRepository inventoryRepository=InventoryRepository();
   final AccountRepository accountRepository=AccountRepository();
@@ -200,7 +201,6 @@ class InventoryController extends GetxController{
 
   Future<void> fetchGetOneInventory(int id)async{
     try {
-      getOneInventory.remove(id);
       isLoading.value=true;
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
@@ -250,7 +250,7 @@ class InventoryController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchGetOneInventory(id);
+        fetchInventoryList();
       }
     }catch(e){
       throw ErrorException('خطا در حذف: $e');

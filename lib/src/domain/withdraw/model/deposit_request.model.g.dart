@@ -27,6 +27,7 @@ DepositRequestModel _$DepositRequestModelFromJson(Map<String, dynamic> json) =>
       paidAmount: (json['paidAmount'] as num?)?.toDouble(),
       notPaidAmount: (json['notPaidAmount'] as num?)?.toDouble(),
       status: (json['status'] as num?)?.toInt(),
+      isDeleted: json['isDeleted'] as bool?,
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
       confirmDate: json['confirmDate'] == null
@@ -54,6 +55,7 @@ Map<String, dynamic> _$DepositRequestModelToJson(
       'paidAmount': instance.paidAmount,
       'notPaidAmount': instance.notPaidAmount,
       'status': instance.status,
+      'isDeleted': instance.isDeleted,
       'date': instance.date?.toIso8601String(),
       'confirmDate': instance.confirmDate?.toIso8601String(),
       'deposits': instance.deposits,

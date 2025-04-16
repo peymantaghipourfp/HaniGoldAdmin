@@ -32,6 +32,8 @@ class DepositRequestModel {
   final double? notPaidAmount;
   @JsonKey(name: "status")
   final int? status;
+  @JsonKey(name: "isDeleted")
+  final bool? isDeleted;
   @JsonKey(name: "date")
   final DateTime? date;
   @JsonKey(name: "confirmDate")
@@ -59,6 +61,7 @@ class DepositRequestModel {
     required this.paidAmount,
     required this.notPaidAmount,
     required this.status,
+    required this.isDeleted,
     required this.date,
     required this.confirmDate,
     required this.deposits,

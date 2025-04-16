@@ -13,8 +13,14 @@ import '../../../config/const/app_color.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../account/model/account.model.dart';
 
-class OrderCreateView extends StatelessWidget {
+class OrderCreateView extends StatefulWidget {
   OrderCreateView({super.key});
+
+  @override
+  State<OrderCreateView> createState() => _OrderCreateViewState();
+}
+
+class _OrderCreateViewState extends State<OrderCreateView> {
   final formKey = GlobalKey<FormState>();
 
   OrderCreateController orderCreateController =
@@ -132,7 +138,6 @@ class OrderCreateView extends StatelessWidget {
                           ? const EdgeInsets.symmetric(horizontal: 40)
                           : const EdgeInsets.symmetric(horizontal: 24),
                       child: Obx(() {
-
                         return Form(
                           key:formKey,
                           child: Column(
@@ -340,51 +345,134 @@ class OrderCreateView extends StatelessWidget {
                                 ),
                               ),
                               // گرم/عدد
-                              Container(
-                                height: 50,
-                                padding: EdgeInsets.only(bottom: 5),
-                                child:
-                                IntrinsicHeight(
-                                  child: TextFormField(
-                                    validator: (value){
-                                      if(value==null || value.isEmpty){
-                                        return 'لطفا مقدار سفارش را وارد کنید';
-                                      }
-                                      return null;
-                                    },
-                                    autovalidateMode: AutovalidateMode.onUserInteraction,
-                                    controller: orderCreateController.quantityController,
-                                    style: AppTextStyle.labelText,
-                                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                      TextInputFormatter.withFunction((oldValue, newValue) {
-                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                        String newText = newValue.text
-                                            .replaceAll('٠', '0')
-                                            .replaceAll('١', '1')
-                                            .replaceAll('٢', '2')
-                                            .replaceAll('٣', '3')
-                                            .replaceAll('٤', '4')
-                                            .replaceAll('٥', '5')
-                                            .replaceAll('٦', '6')
-                                            .replaceAll('٧', '7')
-                                            .replaceAll('٨', '8')
-                                            .replaceAll('٩', '9');
+                              orderCreateController.selectedBuySell.value?.name=='فروش به کاربر' ?
+                              SizedBox(
+                                height: 70,
+                                child: Container(
+                                  padding: EdgeInsets.only(bottom: 5),
+                                  child:
+                                  IntrinsicHeight(
+                                    child: TextFormField(
+                                      validator: (value){
+                                        if(value==null || value.isEmpty){
+                                          return 'لطفا مقدار سفارش را وارد کنید';
+                                        }
+                                        return null;
+                                      },
+                                      onChanged: (value) {
+                                        setState(() {
+                                          int item=int.parse(value.replaceAll(" ", "").toEnglishDigit());
+                                          if(item>=orderCreateController.maxItemSell.value){
+                                            orderCreateController.quantityController.text=orderCreateController.maxItemSell.value.toString();
+                                            print(item);
+                                          }
+                                        });
+                                      },
+                                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                                      controller: orderCreateController.quantityController,
+                                      style: AppTextStyle.labelText,
+                                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                        TextInputFormatter.withFunction((oldValue, newValue) {
+                                          // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                          String newText = newValue.text
+                                              .replaceAll('٠', '0')
+                                              .replaceAll('١', '1')
+                                              .replaceAll('٢', '2')
+                                              .replaceAll('٣', '3')
+                                              .replaceAll('٤', '4')
+                                              .replaceAll('٥', '5')
+                                              .replaceAll('٦', '6')
+                                              .replaceAll('٧', '7')
+                                              .replaceAll('٨', '8')
+                                              .replaceAll('٩', '9');
 
-                                        return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
-                                      }),
-                                    ],
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
+                                          return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                        }),
+                                      ],
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        filled: true,
+                                        fillColor: AppColor.textFieldColor,
+                                        errorMaxLines: 1,
                                       ),
-                                      filled: true,
-                                      fillColor: AppColor.textFieldColor,
-                                      errorMaxLines: 1,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              : SizedBox(
+                                height: 70,
+                                child: Container(
+                                  padding: EdgeInsets.only(bottom: 5),
+                                  child:
+                                  IntrinsicHeight(
+                                    child: TextFormField(
+                                      validator: (value){
+                                        if(value==null || value.isEmpty){
+                                          return 'لطفا مقدار سفارش را وارد کنید';
+                                        }
+                                        return null;
+                                      },
+                                      onChanged: (value) {
+                                        setState(() {
+                                          int item=int.parse(value.replaceAll(" ", "").toEnglishDigit());
+                                          if(item>=orderCreateController.maxItemBuy.value){
+                                            orderCreateController.quantityController.text=orderCreateController.maxItemBuy.value.toString();
+                                            print(item);
+                                          }
+                                        });
+                                      },
+                                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                                      controller: orderCreateController.quantityController,
+                                      style: AppTextStyle.labelText,
+                                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                                      inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                        TextInputFormatter.withFunction((oldValue, newValue) {
+                                          // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                          String newText = newValue.text
+                                              .replaceAll('٠', '0')
+                                              .replaceAll('١', '1')
+                                              .replaceAll('٢', '2')
+                                              .replaceAll('٣', '3')
+                                              .replaceAll('٤', '4')
+                                              .replaceAll('٥', '5')
+                                              .replaceAll('٦', '6')
+                                              .replaceAll('٧', '7')
+                                              .replaceAll('٨', '8')
+                                              .replaceAll('٩', '9');
+
+                                          return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                        }),
+                                      ],
+                                      decoration: InputDecoration(
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        filled: true,
+                                        fillColor: AppColor.textFieldColor,
+                                        errorMaxLines: 1,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
+                              orderCreateController.selectedBuySell.value?.name=='فروش به کاربر' ?
+                              Row(
+                                children: [
+                                  Text(' حداکثر مقدار فروش برای این محصول: ',style: AppTextStyle.labelText,),
+                                  Text('${orderCreateController.maxItemSell.value}',style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor),)
+                                ],
+                              )
+                              :
+                              Row(
+                                children: [
+                                  Text(' حداکثر مقدار خرید برای این محصول: ',style: AppTextStyle.labelText,),
+                                  Text('${orderCreateController.maxItemBuy.value}',style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor),)
+                                ],
+                              ),
+                              SizedBox(height: 5,),
                               // مبلغ کل
                               Container(
                                 padding: EdgeInsets.only(bottom: 3,top: 5),
@@ -454,10 +542,11 @@ class OrderCreateView extends StatelessWidget {
                                         initialDatePickerMode: PersianDatePickerMode.day,
                                         locale: Locale("fa","IR"),
                                       );
+                                      DateTime date=DateTime.now();
 
                                       if(pickedDate!=null){
                                         orderCreateController.dateController.text =
-                                        "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+                                         "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
 
                                       }
                                     },

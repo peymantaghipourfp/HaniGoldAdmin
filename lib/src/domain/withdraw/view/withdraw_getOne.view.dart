@@ -46,7 +46,7 @@ class WithdrawGetOneView extends StatelessWidget {
                   else if (withdrawGetOneController.state.value == PageState.list) {
                     var getWithdraw = withdrawGetOneController.getOneWithdraw.value;
                     if (getWithdraw == null) {
-                      return Center(child: Text('اطلاعات درخواست برداشت یافت نشد'));
+                      return EmptyPage();
                     }
                     return Column(
                         children: [
@@ -158,7 +158,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                             children: [
                                               Text(
                                                 'مبلغ کل: ${getWithdraw.amount== null ? 0 :
-                                                    getWithdraw.amount.toString().seRagham(separator: ',') } ریال ',
+                                                    getWithdraw.amount?.toInt().toString().seRagham(separator: ',') } ریال ',
                                                 style: AppTextStyle.bodyText,
                                               ),
                                             ],
@@ -175,7 +175,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                               ),
                                               Text(
                                                 '${getWithdraw.undividedAmount==null ? 0 :
-                                                    getWithdraw.undividedAmount.toString().seRagham(separator: ',') } ریال ',
+                                                    getWithdraw.undividedAmount?.toInt().toString().seRagham(separator: ',') } ریال ',
                                                 style: AppTextStyle.bodyText.copyWith(
                                                     color: AppColor.accentColor),
                                               ),
@@ -189,7 +189,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                             children: [
                                               Text(
                                                 'مبلغ تقسیم شده: ${getWithdraw.dividedAmount==null ? 0 :
-                                                    getWithdraw.dividedAmount.toString().seRagham(separator: ',')} ریال ',
+                                                    getWithdraw.dividedAmount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                 style: AppTextStyle.bodyText,
                                               ),
                                             ],
@@ -207,7 +207,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                               ),
                                               Text(
                                                 '${getWithdraw.paidAmount==null ? 0 :
-                                                    getWithdraw.paidAmount.toString().seRagham(separator: ',')} ریال ',
+                                                    getWithdraw.paidAmount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                 style: AppTextStyle.bodyText.copyWith(
                                                     color: AppColor.primaryColor),
                                               ),
@@ -339,7 +339,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                                                                                     ),
                                                                                     builder: (context) {
-                                                                                      return InsertDepositRequestWidget(id: withdrawGetOneController.id.value);
+                                                                                      return InsertDepositRequestWidget(id: withdrawGetOneController.id.value,walletId:withdrawGetOneController.getOneWithdraw.value?.wallet?.id ,);
                                                                                     },
                                                                                   ).whenComplete((){
                                                                                     withdrawGetOneController.fetchGetOneWithdraw(withdrawGetOneController.id.value);
@@ -494,7 +494,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                             child: Row(
                                                                                               children: [
                                                                                                 Text(
-                                                                                                  'مبلغ کل: ${getOneDepositRequest?.amount == null ? 0 : getOneDepositRequest?.amount.toString().seRagham(separator: ',')} ریال ',
+                                                                                                  'مبلغ کل: ${getOneDepositRequest?.amount == null ? 0 : getOneDepositRequest?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                                                                   style:
                                                                                                   AppTextStyle.bodyText,
                                                                                                 ),
@@ -508,7 +508,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                               children: [
                                                                                                 Text(
-                                                                                                  'مبلغ واریز شده: ${getOneDepositRequest?.paidAmount == null ? 0 : getOneDepositRequest?.paidAmount.toString().seRagham(separator: ',')} ریال ',
+                                                                                                  'مبلغ واریز شده: ${getOneDepositRequest?.paidAmount == null ? 0 : getOneDepositRequest?.paidAmount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                                                                   style:
                                                                                                   AppTextStyle.bodyText,
                                                                                                 ),
@@ -709,7 +709,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                               children: [
                                                                                                 Text(
-                                                                                                  'مبلغ واریز شده: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount.toString().seRagham(separator: ',')} ریال ',
+                                                                                                  'مبلغ واریز شده: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                                                                   style:
                                                                                                   AppTextStyle.bodyText,
                                                                                                 ),

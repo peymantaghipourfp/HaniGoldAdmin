@@ -202,7 +202,8 @@ class DepositController extends GetxController{
           depositList.addAll(fetchedDepositList);
         }
       }
-
+      depositList.addAll(fetchedDepositList);
+      print(depositList.length);
       state.value = depositList.isEmpty ? PageState.empty : PageState.list;
 
     }catch(e){

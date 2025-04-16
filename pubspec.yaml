@@ -49,6 +49,7 @@ dependencies:
   flutter_exit_app: ^1.1.4
   responsive_framework: ^1.5.1
   shamsi_date: ^1.0.4
+  flutter_datetime_picker_plus: ^2.2.0
 
 
 dev_dependencies:

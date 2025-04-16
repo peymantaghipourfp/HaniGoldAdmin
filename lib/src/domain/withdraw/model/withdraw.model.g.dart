@@ -30,6 +30,7 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
       confirmDate: json['confirmDate'] == null
           ? null
           : DateTime.parse(json['confirmDate'] as String),
+      isDeleted: json['isDeleted'] as bool?,
       status: (json['status'] as num?)?.toInt(),
       depositRequests: (json['depositRequests'] as List<dynamic>?)
           ?.map((e) => DepositRequestModel.fromJson(e as Map<String, dynamic>))
@@ -58,6 +59,7 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'paidAmount': instance.paidAmount,
       'requestDate': instance.requestDate?.toIso8601String(),
       'confirmDate': instance.confirmDate?.toIso8601String(),
+      'isDeleted': instance.isDeleted,
       'status': instance.status,
       'depositRequests': instance.depositRequests,
       'deposits': instance.deposits,

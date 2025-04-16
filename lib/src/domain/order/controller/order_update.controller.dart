@@ -13,6 +13,7 @@ import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
+import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../model/order.model.dart';
 import 'order.controller.dart';
 
@@ -58,6 +59,8 @@ class OrderUpdateController extends GetxController{
   Timer? debounce;
 
   final RxInt orderId=0.obs;
+  var maxItemSell=0.obs;
+  var maxItemBuy=0.obs;
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
     selectedBuySell.value = newValue;
@@ -68,7 +71,8 @@ class OrderUpdateController extends GetxController{
     priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',')
     :
     priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',');
-
+    maxItemSell.value=newValue!.maxSell!;
+    maxItemBuy.value=newValue.maxBuy!;
   }
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -79,7 +83,6 @@ class OrderUpdateController extends GetxController{
     double totalPrice= price * quantity;
     totalPriceController.text=totalPrice.toStringAsFixed(2).seRagham().toPersianDigit();
   }
-
 
   @override
   void onInit(){
@@ -100,6 +103,7 @@ class OrderUpdateController extends GetxController{
     dateController.text="$formattedDate $formattedTime";*/
     super.onInit();
   }
+
   @override
   void onClose() {
     debounce?.cancel();
@@ -121,6 +125,8 @@ class OrderUpdateController extends GetxController{
         );
         if (match != null) {
           selectedItem.value = match;
+          maxItemSell.value=match.maxSell!;
+          maxItemBuy.value=match.maxBuy!;
         }
       }
     }
@@ -190,32 +196,10 @@ class OrderUpdateController extends GetxController{
     try {
       isLoading.value = true;
 
-      final dateTimeParts = dateController.text.split(' ');
-      final datePart = dateTimeParts[0];
-      final timePart = dateTimeParts.length > 1 ? dateTimeParts[1] : "00:00";
-      final jalaliParts = datePart.split('-');
-      final jalaliDate = Jalali(
-        int.parse(jalaliParts[0]),
-        int.parse(jalaliParts[1]),
-        int.parse(jalaliParts[2]),
-      );
-      final gregorianDate = jalaliDate.toGregorian();
-      final timeParts = timePart.split(':');
-      final hour = int.parse(timeParts[0]);
-      final minute = int.parse(timeParts[1]);
-
-      final finalDateTime = DateTime(
-        gregorianDate.year,
-        gregorianDate.month,
-        gregorianDate.day,
-        hour,
-        minute,
-      );
-      final formattedDate = finalDateTime.toIso8601String();
-      //final formattedGregorianDate = "${gregorianDate.year}-${gregorianDate.month.toString().padLeft(2, '0')}-${gregorianDate.day.toString().padLeft(2, '0')}";
+      String gregorianDate = convertJalaliToGregorian(dateController.text);
      var response = await orderRepository.updateOrder(
         orderId: orderId.value,
-        date: formattedDate,
+        date: gregorianDate,
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
         type: selectedBuySell.value?.id ?? 0,
@@ -254,7 +238,7 @@ class OrderUpdateController extends GetxController{
     //selectedItem.value = itemList.firstWhereOrNull((item) => item.id == order.item?.id);
     //selectedAccount.value = accountList.firstWhereOrNull((account) => account.id == order.account?.id);
 
-    dateController.text = order.date.toString() ?? '';
+    dateController.text = order.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '' ?? '';
     priceController.text = order.price?.toString().seRagham(separator: ',') ?? '';
     quantityController.text = order.quantity?.toString() ?? '';
     totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
