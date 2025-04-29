@@ -30,6 +30,7 @@ InventoryModel _$InventoryModelFromJson(Map<String, dynamic> json) =>
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
+      inventoryDetailsCount: (json['inventoryDetailsCount'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
@@ -47,4 +48,5 @@ Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
       'recId': instance.recId,
       'infos': instance.infos,
       'description': instance.description,
+      'inventoryDetailsCount':instance.inventoryDetailsCount
     };

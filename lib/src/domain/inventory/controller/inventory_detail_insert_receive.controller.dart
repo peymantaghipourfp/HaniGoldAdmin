@@ -27,7 +27,7 @@ import '../../withdraw/model/predicate.model.dart';
 
 enum PageState{loading,err,empty,list}
 
-class InventoryUpdateController extends GetxController{
+class InventoryDetailInsertController extends GetxController{
 
   final InventoryController inventoryController=Get.find<InventoryController>();
 
@@ -41,6 +41,7 @@ class InventoryUpdateController extends GetxController{
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
   final TextEditingController typeController=TextEditingController();
+  final TextEditingController accountController=TextEditingController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WalletRepository walletRepository=WalletRepository();
@@ -57,12 +58,9 @@ class InventoryUpdateController extends GetxController{
   var isLoading=true.obs;
 
   final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
-  var typeId=0.obs;
   var inventoryId=0.obs;
-  var inventoryDetailId=0.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<WalletModel> selectedWalletAccount=Rxn<WalletModel>();
-  final Rxn<WalletModel> selectedWalletAccount2=Rxn<WalletModel>();
   final Rxn<LaboratoryModel> selectedLaboratory=Rxn<LaboratoryModel>();
   RxInt selectedTabIndex = 0.obs;
   //final RxList<InventoryDetail> tempDetails = <InventoryDetail>[].obs;
@@ -90,23 +88,16 @@ class InventoryUpdateController extends GetxController{
     selectedLaboratory.value=newValue;
   }
 
-
   @override
   void onInit() async{
-    final InventoryDetailModel? inventoryDetail=Get.arguments;
-    if(inventoryDetail!=null) {
-      await fetchGetOneInventory(inventoryDetail.inventoryId!);
-      setInventoryDetail(inventoryDetail);
-      inventoryId.value=inventoryDetail.inventoryId ?? 0;
-      inventoryDetailId.value=inventoryDetail.id ?? 0;
-      typeId.value=inventoryDetail.type ?? 0;
-      accountId.value = inventoryDetail.wallet!.account!.id!;
-      accountName.value = inventoryDetail.wallet!.account!.name!;
-      selectedWalletAccount2.value=inventoryDetail.wallet;
-      getWalletAccount(accountId.value);
-      print(accountId.value);
-      print(inventoryDetail.wallet?.id);
 
+    final InventoryModel? inventory = Get.arguments;
+    if(inventory!=null){
+      inventoryId.value=inventory.id ?? 0;
+      dateController.text=inventory.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
+      accountId.value = inventory.account!.id!;
+      accountName.value = inventory.account!.name!;
+      getWalletAccount(accountId.value);
     }
 
     searchController.addListener(onSearchChanged);
@@ -120,18 +111,7 @@ class InventoryUpdateController extends GetxController{
     "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     super.onInit();
   }
-  @override
-  void onReady() async {
-    await fetchAccountList();
-    final InventoryDetailModel? inventoryDetail=Get.arguments;
 
-    if(inventoryDetail!=null){
-      inventoryId.value=inventoryDetail.inventoryId ?? 0;
-      typeId.value=inventoryDetail.type ?? 0;
-    }
-
-    super.onReady();
-  }
   @override
   void onClose() {
     debounce?.cancel();
@@ -184,7 +164,6 @@ class InventoryUpdateController extends GetxController{
       final results = await accountRepository.searchAccountList(name);
       searchedAccounts.assignAll(results);
       state.value = searchedAccounts.isEmpty ? PageState.empty : PageState.list;
-
     } catch (e) {
       Get.snackbar('خطا', 'خطا در جستجوی کاربران');
     } finally {
@@ -225,7 +204,6 @@ class InventoryUpdateController extends GetxController{
       var fetchedWalletAccountList=await walletRepository.getWalletList(walletAccountReqModel!);
       walletAccountList.assignAll(fetchedWalletAccountList);
       state.value=PageState.list;
-      //selectedWalletAccount.value=selectedWalletAccount2.value;
       if(walletAccountList.isEmpty){
         state.value=PageState.empty;
       }
@@ -234,7 +212,6 @@ class InventoryUpdateController extends GetxController{
       state.value=PageState.err;
       errorMessage.value=e.toString();
     }
-    //print(fetchWalletAccountList());
   }
 
   // لیست آزمایشگاه ها
@@ -291,7 +268,6 @@ class InventoryUpdateController extends GetxController{
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
       if(fetchedGetOneInventory!=null){
-        //setInventoryDetail(fetchedGetOneInventory as InventoryDetailModel);
         getOneInventory.value = fetchedGetOneInventory;
         stateGetOne.value=PageState.list;
       }else{
@@ -304,21 +280,18 @@ class InventoryUpdateController extends GetxController{
     }
   }
 
-  Future<InventoryModel?> updateInventoryDetail()async{
+  Future<InventoryModel?> insertInventoryDetail()async{
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
       print(inventoryId.value);
-      print(inventoryDetailId.value);
-      print(accountId.value);
       print(accountName.value);
-      var response=await inventoryRepository.updateDetailInventory(
+      var response=await inventoryRepository.insertDetailInventoryReceive(
         id: inventoryId.value,
-        inventoryDetailId: inventoryDetailId.value,
         date: gregorianDate,
         accountId: accountId.value,
         accountName: accountName.value,
-        type: typeId.value,
+        type: 1,
         description: descriptionController.text,
         walletId: selectedWalletAccount.value?.id ?? 0,
         itemId: selectedWalletAccount.value!.item?.id ?? 0,
@@ -328,7 +301,7 @@ class InventoryUpdateController extends GetxController{
         weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
         carat: int.tryParse(caratController.text.toEnglishDigit()) ?? 0,
         receiptNumber: receiptNumberController.text,
-        stateMode : 2,
+        stateMode : 1,
         laboratoryName: selectedLaboratory.value?.name ?? '',
         laboratoryId: selectedLaboratory.value?.id ?? 0,
 
@@ -336,12 +309,12 @@ class InventoryUpdateController extends GetxController{
       print(response);
       if (response != null) {
         Get.back();
-        Get.snackbar("موفقیت آمیز", "ویرایش با موفقیت آنجام شد",
+        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
           titleText: Text('موفقیت آمیز',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(
-            'ویرایش با موفقیت آنجام شد', textAlign: TextAlign.center,
+            'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
         Get.back();
@@ -354,23 +327,6 @@ class InventoryUpdateController extends GetxController{
     }
     return null;
   }
-
-  void setInventoryDetail(InventoryDetailModel inventoryDetail){
-    inventoryId.value=inventoryDetail.inventoryId ?? 0;
-    typeId.value=inventoryDetail.type ?? 0;
-    quantityController.text=inventoryDetail.quantity.toString() ?? '';
-    impurityController.text=inventoryDetail.impurity.toString() ?? '';
-    weight750Controller.text=inventoryDetail.weight750.toString() ?? '';
-    caratController.text=inventoryDetail.carat.toString() ?? '';
-    receiptNumberController.text=inventoryDetail.receiptNumber.toString() ?? '';
-    if(inventoryDetail.type==1){
-      selectedLaboratory.value=inventoryDetail.laboratory;
-    }
-
-  }
-
-
-
   void clearList() {
     dateController.clear();
     quantityController.clear();
@@ -383,8 +339,7 @@ class InventoryUpdateController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     var now = Jalali.now();
-    DateTime date=DateTime.now();
-    dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
   }
   void resetFieldsForTab(int tabIndex) {
     //dateController.clear();
@@ -398,8 +353,7 @@ class InventoryUpdateController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     var now = Jalali.now();
-    DateTime date=DateTime.now();
-    dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
   }
   void resetAccountSearch() {
     searchController.clear();

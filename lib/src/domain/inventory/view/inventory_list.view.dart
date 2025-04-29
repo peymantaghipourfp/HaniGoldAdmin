@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory.controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -130,52 +131,30 @@ class InventoryListView extends StatelessWidget {
                     return Expanded(
                         child:
                         isDesktop ?
-                        ListView.builder(
-                          shrinkWrap: true,
-                          controller: inventoryController.scrollController,
-                          physics: BouncingScrollPhysics(),
-                          itemCount: (inventoryController.inventoryList.length /
-                              3).ceil() +
-                              (inventoryController.hasMore.value ? 1 : 0),
-                          itemBuilder: (context, rowIndex) {
-                            print(inventoryController.inventoryList.length);
-                            if (rowIndex >=
-                                (inventoryController.inventoryList.length / 3)
-                                    .ceil()) {
-                              return inventoryController.hasMore.value
-                                  ? Center(child: CircularProgressIndicator())
-                                  : SizedBox.shrink();
-                            }
-                            if (rowIndex ==
-                                (inventoryController.inventoryList.length / 3)
-                                    .ceil() - 1 &&
-                                inventoryController.hasMore.value) {
-                              WidgetsBinding.instance.addPostFrameCallback((_) {
-                                if (inventoryController.scrollController
-                                    .hasClients &&
-                                    inventoryController.scrollController
-                                        .position.maxScrollExtent ==
-                                        inventoryController.scrollController
-                                            .position.pixels &&
-                                    !inventoryController.isLoading.value) {
-                                  inventoryController.loadMore();
-                                }
-                              });
-                            }
-                            return Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: List.generate(3, (colIndex) {
-                                final itemIndex = rowIndex * 3 + colIndex;
-                                if (itemIndex >=
-                                    inventoryController.inventoryList.length) {
-                                  return Expanded(child: SizedBox.shrink());
-                                }
-                                return Expanded(
-                                  child: buildListItem(context, itemIndex),
-                                );
-                              }),
-                            );
-                          },
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+
+                                    DataTable(
+                                      columns: buildDataColumns(),
+                                      rows: buildDataRows(context),
+                                      dataRowMaxHeight: 100,
+                                      //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                      //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                      headingRowHeight: 40,
+                                      columnSpacing: 25,
+                                      horizontalMargin: 6,
+                                    ),
+                                    buildPaginationControls(),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                          ],
                         )
                             :
                         SizedBox(
@@ -198,13 +177,14 @@ class InventoryListView extends StatelessWidget {
                               var inventories = inventoryController
                                   .inventoryList[index];
                               return Obx(() {
-                                bool isExpanded = inventoryController.isItemExpanded(index);
+                                bool isExpanded = inventoryController
+                                    .isItemExpanded(index);
                                 return Card(
-                                  margin: EdgeInsets.all(isDesktop ? 12 : 8),
+                                  margin: EdgeInsets.all(8),
                                   color: AppColor.secondaryColor,
                                   elevation: 10,
                                   child: Padding(
-                                    padding: EdgeInsets.all(isDesktop ? 16 : 8),
+                                    padding: EdgeInsets.all(8),
                                     child: Column(
                                       mainAxisAlignment: MainAxisAlignment
                                           .spaceEvenly,
@@ -220,7 +200,11 @@ class InventoryListView extends StatelessWidget {
                                                     .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    inventories.date?.toPersianDate(twoDigits: true, timeSeprator: '-',showTime: true) ?? '',
+                                                    inventories.date
+                                                        ?.toPersianDate(
+                                                        twoDigits: true,
+                                                        timeSeprator: '-',
+                                                        showTime: true) ?? '',
                                                     style:
                                                     AppTextStyle.bodyText,
                                                   ),
@@ -266,7 +250,8 @@ class InventoryListView extends StatelessWidget {
                                                     style: AppTextStyle
                                                         .labelText,),
                                                   SizedBox(height: 2,),
-                                                  Text(inventories.account?.name ?? "",
+                                                  Text(inventories.account
+                                                      ?.name ?? "",
                                                     style: AppTextStyle
                                                         .bodyText,),
 
@@ -283,7 +268,8 @@ class InventoryListView extends StatelessWidget {
                                                   GestureDetector(
                                                     onTap: () {
                                                       Get.offNamed(
-                                                        '/inventoryDetailInsert',arguments: inventories);
+                                                          '/inventoryDetailInsertReceive',
+                                                          arguments: inventories);
                                                     },
                                                     child: Row(
                                                       children: [
@@ -307,25 +293,33 @@ class InventoryListView extends StatelessWidget {
                                                   GestureDetector(
                                                     onTap: () {
                                                       Get.defaultDialog(
-                                                          backgroundColor: AppColor
-                                                              .backGroundColor,
-                                                          title: "حذف ",
-                                                          titleStyle: AppTextStyle
-                                                              .smallTitleText,
-                                                          middleText: "آیا از حذف مطمئن هستید؟",
-                                                          middleTextStyle: AppTextStyle
-                                                              .bodyText,
-                                                          confirm: ElevatedButton(
-                                                                style: ButtonStyle(
-                                                                    backgroundColor: WidgetStatePropertyAll(AppColor.primaryColor)),
-                                                                onPressed: () {
-                                                                  Get.back();
-                                                                  inventoryController.deleteInventory(inventories.id!, true);
-                                                                },
-                                                                child: Text(
-                                                                  'حذف', style: AppTextStyle.bodyText,
-                                                                )
-                                                          ),
+                                                        backgroundColor: AppColor
+                                                            .backGroundColor,
+                                                        title: "حذف ",
+                                                        titleStyle: AppTextStyle
+                                                            .smallTitleText,
+                                                        middleText: "آیا از حذف مطمئن هستید؟",
+                                                        middleTextStyle: AppTextStyle
+                                                            .bodyText,
+                                                        confirm: ElevatedButton(
+                                                            style: ButtonStyle(
+                                                                backgroundColor: WidgetStatePropertyAll(
+                                                                    AppColor
+                                                                        .primaryColor)),
+                                                            onPressed: () {
+                                                              Get.back();
+                                                              inventoryController
+                                                                  .deleteInventory(
+                                                                  inventories
+                                                                      .id!,
+                                                                  true);
+                                                            },
+                                                            child: Text(
+                                                              'حذف',
+                                                              style: AppTextStyle
+                                                                  .bodyText,
+                                                            )
+                                                        ),
                                                       );
                                                     },
                                                     child: Row(
@@ -355,8 +349,12 @@ class InventoryListView extends StatelessWidget {
                                                 children: [
                                                   IconButton(
                                                     onPressed: () async {
-                                                      await inventoryController.fetchGetOneInventory(inventories.id!);
-                                                      inventoryController.toggleItemExpansion(index);
+                                                      await inventoryController
+                                                          .fetchGetOneInventory(
+                                                          inventories.id!);
+                                                      inventoryController
+                                                          .toggleItemExpansion(
+                                                          index);
                                                     },
                                                     icon: Icon(
                                                       isExpanded ? Icons
@@ -390,461 +388,510 @@ class InventoryListView extends StatelessWidget {
                                                     .spaceEvenly,
                                                 children: [
                                                   SizedBox(height: 8,),
-                                                  Row(mainAxisAlignment: MainAxisAlignment.center,
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment
+                                                        .center,
                                                     children: [
-                                                  inventoryController.isLoading.value
-                                                      ?
-                                                  CircularProgressIndicator(
-                                                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
-                                                  )
-                                                      :
-                                                  Expanded(
-                                                    child: ListView.builder(
-                                                      shrinkWrap: true,
-                                                      physics: NeverScrollableScrollPhysics(),
-                                                      itemCount: inventoryController.getOneInventory[inventories.id]?.inventoryDetails?.length,
-                                                      itemBuilder: (context,
-                                                          index) {
-                                                        var getOneInventories = inventoryController.getOneInventory[inventories.id]?.inventoryDetails?[index];
-                                                        return ListTile(
-                                                          title: Card(
-                                                            color: AppColor
-                                                                .backGroundColor,
-                                                            child: Padding(
-                                                              padding: const EdgeInsets
-                                                                  .only(
-                                                                  top: 8,
-                                                                  left: 12,
-                                                                  right: 12,
-                                                                  bottom: 8),
-                                                              child: Column(
-                                                                children: [
-                                                                  Row(
-                                                                    mainAxisAlignment: MainAxisAlignment
-                                                                        .end,
-                                                                    children: [
-                                                                      Text(
-                                                                        'الصاق تصویر  ',
-                                                                        style: AppTextStyle
-                                                                            .labelText,),
-                                                                      GestureDetector(
-                                                                        onTap: () =>
-                                                                            inventoryController
-                                                                                .pickImage(
-                                                                                getOneInventories!
-                                                                                    .recId
-                                                                                    .toString(),
-                                                                                "image",
-                                                                                "Deposit",
-                                                                                inventoryId: inventories
-                                                                                    .id!),
-                                                                        child: SvgPicture
-                                                                            .asset(
-                                                                          'assets/svg/camera.svg',
-                                                                          width: 25,
-                                                                          height: 25,
-                                                                          colorFilter: ColorFilter
-                                                                              .mode(
-                                                                              AppColor
-                                                                                  .iconViewColor,
-                                                                              BlendMode
-                                                                                  .srcIn),),
-                                                    
-                                                                      ),
-                                                                      Obx(() {
-                                                                        if (inventoryController
-                                                                            .isUploading
-                                                                            .value) {
-                                                                          return CircularProgressIndicator();
-                                                                        }
-                                                                        return Wrap(
-                                                                          children: inventoryController
-                                                                              .selectedImages
-                                                                              .asMap()
-                                                                              .entries
-                                                                              .map((
-                                                                              entry) =>
-                                                                              Chip(
-                                                                                label: Text(
-                                                                                    'تصویر ${entry
-                                                                                        .key +
-                                                                                        1}'),
-                                                                                deleteIcon: inventoryController
-                                                                                    .uploadStatuses[entry
-                                                                                    .key]
-                                                                                    ? Icon(
-                                                                                    Icons
-                                                                                        .check)
-                                                                                    : Icon(
-                                                                                    Icons
-                                                                                        .close),
-                                                                                onDeleted: () {},
-                                                                              ))
-                                                                              .toList(),
-                                                                        );
-                                                                      }),
-                                                                    ],
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 10,),
-                                                                  // آیتم- مقدار
-                                                                  Row(
-                                                                    mainAxisAlignment: MainAxisAlignment
-                                                                        .spaceBetween,
+                                                      inventoryController
+                                                          .isLoading.value
+                                                          ?
+                                                      CircularProgressIndicator(
+                                                        valueColor: AlwaysStoppedAnimation<
+                                                            Color>(
+                                                            AppColor.textColor),
+                                                      )
+                                                          : inventoryController.getOneInventory[inventories.id]==null ?
+                                                            Text(
+                                                            'اطلاعاتی موجود نیست',
+                                                            style: AppTextStyle
+                                                                .labelText):
+                                                      Expanded(
+                                                        child: ListView.builder(
+                                                          shrinkWrap: true,
+                                                          physics: NeverScrollableScrollPhysics(),
+                                                          itemCount: inventoryController
+                                                              .getOneInventory[inventories
+                                                              .id]
+                                                              ?.inventoryDetails
+                                                              ?.length,
+                                                          itemBuilder: (context,
+                                                              index) {
+                                                            var getOneInventories = inventoryController
+                                                                .getOneInventory[inventories
+                                                                .id]
+                                                                ?.inventoryDetails?[index];
+                                                            return ListTile(
+                                                              title: Card(
+                                                                color: AppColor
+                                                                    .backGroundColor,
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                      .only(
+                                                                      top: 8,
+                                                                      left: 12,
+                                                                      right: 12,
+                                                                      bottom: 8),
+                                                                  child: Column(
                                                                     children: [
                                                                       Row(
+                                                                        mainAxisAlignment: MainAxisAlignment
+                                                                            .end,
                                                                         children: [
                                                                           Text(
-                                                                              ' آیتم: ',
-                                                                              style: AppTextStyle
-                                                                                  .labelText),
-                                                                          Text(
-                                                                              getOneInventories
-                                                                                  ?.item
-                                                                                  ?.name ??
-                                                                                  "",
-                                                                              style: AppTextStyle
-                                                                                  .bodyText),
-                                                                        ],
-                                                                      ),
-                                                                      SizedBox(
-                                                                        width: 4,),
-                                                                      Row(
-                                                                        children: [
-                                                                          Text(
-                                                                              ' مقدار: ',
-                                                                              style: AppTextStyle
-                                                                                  .bodyText
-                                                                          ),
-                                                                          Text(
-                                                                              '${getOneInventories
-                                                                                  ?.quantity ??
-                                                                                  0} ${getOneInventories
-                                                                                  ?.itemUnit
-                                                                                  ?.name ??
-                                                                                  ""}',
-                                                                              style: AppTextStyle
-                                                                                  .bodyText
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 8,),
-                                                                  // عیار - وزن750- ناخالصی
-                                                                  Row(
-                                                                    mainAxisAlignment: MainAxisAlignment
-                                                                        .spaceBetween,
-                                                                    children: [
-                                                                      Row(
-                                                                        children: [
-                                                                          Text(
-                                                                              ' عیار: ',
-                                                                              style: AppTextStyle
-                                                                                  .labelText),
-                                                                          Text(
-                                                                              '${getOneInventories
-                                                                                  ?.carat ??
-                                                                                  0}',
-                                                                              style: AppTextStyle
-                                                                                  .bodyText),
-                                                                        ],
-                                                                      ),
-                                                                      Row(
-                                                                        children: [
-                                                                          Text(
-                                                                              ' وزن 750: ',
-                                                                              style: AppTextStyle
-                                                                                  .labelText),
-                                                                          Text(
-                                                                              '${getOneInventories
-                                                                                  ?.weight750 ??
-                                                                                  0} گرم ',
-                                                                              style: AppTextStyle
-                                                                                  .bodyText),
-                                                                        ],
-                                                                      ),
-                                                                      Row(
-                                                                        children: [
-                                                                          Text(
-                                                                              '  ناخالصی: ',
-                                                                              style: AppTextStyle
-                                                                                  .labelText),
-                                                                          Text(
-                                                                              '${getOneInventories
-                                                                                  ?.impurity ??
-                                                                                  0} گرم ',
-                                                                              style: AppTextStyle
-                                                                                  .bodyText),
-                                                                        ],
-                                                                      ),
-                                                                    ],
-                                                                  ),
-                                                                  SizedBox(
-                                                                    height: 4,),
-                                                                  Divider(
-                                                                    height: 1,
-                                                                    color: AppColor
-                                                                        .secondaryColor,),
-                                                                  SizedBox(
-                                                                    height: 5,),
-                                                                  Row(
-                                                                    mainAxisAlignment: MainAxisAlignment
-                                                                        .spaceBetween,
-                                                                    children: [
-                                                                      // نمایش عکس
-                                                                      GestureDetector(
-                                                                        onTap: () {
-                                                                          if (getOneInventories
-                                                                              ?.attachments ==
-                                                                              null ||
-                                                                              getOneInventories!
-                                                                                  .attachments!
-                                                                                  .isEmpty) {
-                                                                            Get
-                                                                                .snackbar(
-                                                                                'پیغام',
-                                                                                'تصویری ثبت نشده است');
-                                                                            return;
-                                                                          }
-                                                    
-                                                                          showDialog(
-                                                                            context: context,
-                                                                            builder: (
-                                                                                BuildContext context) {
-                                                                              return Dialog(
-                                                                                backgroundColor: AppColor
-                                                                                    .backGroundColor,
-                                                                                shape: RoundedRectangleBorder(
-                                                                                  borderRadius: BorderRadius
-                                                                                      .circular(
-                                                                                      10),
-                                                                                ),
-                                                                                child: Container(
-                                                                                  padding: EdgeInsets
-                                                                                      .all(
-                                                                                      8),
-                                                                                  child: Column(
-                                                                                    mainAxisSize: MainAxisSize
-                                                                                        .min,
-                                                                                    children: [
-                                                                                      // نمایش اسلایدی عکس‌ها
-                                                                                      SizedBox(
-                                                                                        height: 300,
-                                                                                        child: PageView
-                                                                                            .builder(
-                                                                                          controller: inventoryController
-                                                                                              .pageController,
-                                                                                          itemCount: getOneInventories
-                                                                                              .attachments!
-                                                                                              .length,
-                                                                                          onPageChanged: (
-                                                                                              index) =>
-                                                                                          inventoryController
-                                                                                              .currentImagePage
-                                                                                              .value =
-                                                                                              index,
-                                                                                          itemBuilder: (
-                                                                                              context,
-                                                                                              index) {
-                                                                                            final attachment = getOneInventories
-                                                                                                .attachments![index];
-                                                                                            return Image
-                                                                                                .network(
-                                                                                              "${BaseUrl
-                                                                                                  .baseUrl}Attachment/downloadAttachment?fileName=${attachment
-                                                                                                  .guidId}",
-                                                                                              loadingBuilder: (
-                                                                                                  context,
-                                                                                                  child,
-                                                                                                  loadingProgress) {
-                                                                                                if (loadingProgress ==
-                                                                                                    null)
-                                                                                                  return child;
-                                                                                                return Center(
-                                                                                                  child: CircularProgressIndicator(),
-                                                                                                );
-                                                                                              },
-                                                                                              errorBuilder: (
-                                                                                                  context,
-                                                                                                  error,
-                                                                                                  stackTrace) =>
-                                                                                                  Icon(
-                                                                                                      Icons
-                                                                                                          .error,
-                                                                                                      color: Colors
-                                                                                                          .red),
-                                                                                              fit: BoxFit
-                                                                                                  .cover,
-                                                                                            );
-                                                                                          },
-                                                                                        ),
-                                                                                      ),
-                                                                                      SizedBox(
-                                                                                        height: 2,),
-                                                                                      // نمایش نقاط راهنما
-                                                                                      Obx(() =>
-                                                                                          Row(
-                                                                                            mainAxisAlignment: MainAxisAlignment
-                                                                                                .center,
-                                                                                            children: List
-                                                                                                .generate(
-                                                                                              getOneInventories
-                                                                                                  .attachments!
-                                                                                                  .length,
-                                                                                                  (
-                                                                                                  index) =>
-                                                                                                  Container(
-                                                                                                    width: 8,
-                                                                                                    height: 8,
-                                                                                                    margin: EdgeInsets
-                                                                                                        .symmetric(
-                                                                                                        horizontal: 4),
-                                                                                                    decoration: BoxDecoration(
-                                                                                                      shape: BoxShape
-                                                                                                          .circle,
-                                                                                                      color: inventoryController
-                                                                                                          .currentImagePage
-                                                                                                          .value ==
-                                                                                                          index
-                                                                                                          ? Colors
-                                                                                                          .blue
-                                                                                                          : Colors
-                                                                                                          .grey,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                            ),
-                                                                                          )),
-                                                    
-                                                                                      SizedBox(
-                                                                                          height: 10),
-                                                                                      TextButton(
-                                                                                        onPressed: () =>
-                                                                                            Get
-                                                                                                .back(),
-                                                                                        child: Text(
-                                                                                          "بستن",
-                                                                                          style: AppTextStyle
-                                                                                              .bodyText,),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                              );
-                                                                            },
-                                                                          );
-                                                                        },
-                                                                        child: Row(
-                                                                          children: [
-                                                                            Text(
-                                                                              'عکس‌ها (${getOneInventories
-                                                                                  ?.attachments
-                                                                                  ?.length ??
-                                                                                  0}) ',
-                                                                              style: AppTextStyle
-                                                                                  .bodyText
-                                                                                  .copyWith(
-                                                                                  color: AppColor
-                                                                                      .iconViewColor
-                                                                              ),
-                                                                            ),
-                                                                            SizedBox(
+                                                                            'الصاق تصویر  ',
+                                                                            style: AppTextStyle
+                                                                                .labelText,),
+                                                                          GestureDetector(
+                                                                            onTap: () =>
+                                                                                inventoryController
+                                                                                    .pickImage(
+                                                                                    getOneInventories!
+                                                                                        .recId
+                                                                                        .toString(),
+                                                                                    "image",
+                                                                                    "Deposit",
+                                                                                    inventoryId: inventories
+                                                                                        .id!),
+                                                                            child: SvgPicture
+                                                                                .asset(
+                                                                              'assets/svg/camera.svg',
                                                                               width: 25,
                                                                               height: 25,
-                                                                              child: SvgPicture
-                                                                                  .asset(
-                                                                                'assets/svg/picture.svg',
-                                                                                colorFilter: ColorFilter
-                                                                                    .mode(
+                                                                              colorFilter: ColorFilter
+                                                                                  .mode(
                                                                                   AppColor
                                                                                       .iconViewColor,
                                                                                   BlendMode
-                                                                                      .srcIn,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                      //  آیکون ویرایش
-                                                                      GestureDetector(
-                                                                                            onTap: () {
-                                                                                              Get.toNamed('/inventoryDetailUpdate',arguments: getOneInventories);
-                                                                                            },
-                                                                                            child: Row(
-                                                                                              children: [
-                                                                                                Text('ویرایش  ',style: AppTextStyle.bodyText.copyWith(color: AppColor.iconViewColor),),
-                                                                                                Container(
-                                                                                                  width: 25,
-                                                                                                  height: 25,
-                                                                                                    child: SvgPicture
-                                                                                                        .asset(
-                                                                                                        'assets/svg/edit.svg',
-                                                                                                        colorFilter: ColorFilter
-                                                                                                            .mode(
-                                                                                                          AppColor
-                                                                                                              .iconViewColor,
-                                                                                                          BlendMode
-                                                                                                              .srcIn,)
-                                                                                                    ),
-                                                                                                  ),
-                                                                                              ],
-                                                                                            ),
-                                                                                          ),
-                                                                      // آیکون حذف
+                                                                                      .srcIn),),
 
-                                                                      GestureDetector(
-                                                                                            onTap: () {
-                                                                                              Get.defaultDialog(
-                                                                                                  backgroundColor: AppColor.backGroundColor,
-                                                                                                  title: "حذف واریزی",
-                                                                                                  titleStyle: AppTextStyle.smallTitleText,
-                                                                                                  middleText: "آیا از حذف واریزی مطمئن هستید؟",
-                                                                                                  middleTextStyle: AppTextStyle.bodyText,
-                                                                                                  confirm: ElevatedButton(
-                                                                                                      style: ButtonStyle(
-                                                                                                          backgroundColor: WidgetStatePropertyAll(
-                                                                                                              AppColor.primaryColor)),
-                                                                                                      onPressed: () {
-                                                                                                        Get.back();
-                                                                                                        inventoryController.updateDeleteInventory(inventories.id!, getOneInventories!.id!, 3);
-                                                                                                      },
-                                                                                                      child: Text(
-                                                                                                        'حذف',
-                                                                                                        style: AppTextStyle.bodyText,
-                                                                                                      )));
-                                                                                            },
-                                                                                            child: Row(
+                                                                          ),
+                                                                          Obx(() {
+                                                                            if (inventoryController
+                                                                                .isUploading
+                                                                                .value) {
+                                                                              return CircularProgressIndicator();
+                                                                            }
+                                                                            return Wrap(
+                                                                              children: inventoryController
+                                                                                  .selectedImages
+                                                                                  .asMap()
+                                                                                  .entries
+                                                                                  .map((
+                                                                                  entry) =>
+                                                                                  Chip(
+                                                                                    label: Text(
+                                                                                        'تصویر ${entry
+                                                                                            .key +
+                                                                                            1}'),
+                                                                                    deleteIcon: inventoryController
+                                                                                        .uploadStatuses[entry
+                                                                                        .key]
+                                                                                        ? Icon(
+                                                                                        Icons
+                                                                                            .check)
+                                                                                        : Icon(
+                                                                                        Icons
+                                                                                            .close),
+                                                                                    onDeleted: () {},
+                                                                                  ))
+                                                                                  .toList(),
+                                                                            );
+                                                                          }),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height: 10,),
+                                                                      // آیتم- مقدار
+                                                                      Row(
+                                                                        mainAxisAlignment: MainAxisAlignment
+                                                                            .spaceBetween,
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                  ' آیتم: ',
+                                                                                  style: AppTextStyle
+                                                                                      .labelText),
+                                                                              Text(
+                                                                                  getOneInventories
+                                                                                      ?.item
+                                                                                      ?.name ??
+                                                                                      "",
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText),
+                                                                            ],
+                                                                          ),
+                                                                          SizedBox(
+                                                                            width: 4,),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                  ' مقدار: ',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText
+                                                                              ),
+                                                                              Text(
+                                                                                  '${getOneInventories
+                                                                                      ?.quantity ??
+                                                                                      0} ${getOneInventories
+                                                                                      ?.itemUnit
+                                                                                      ?.name ??
+                                                                                      ""}',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height: 8,),
+                                                                      // عیار - وزن750- ناخالصی
+                                                                      Row(
+                                                                        mainAxisAlignment: MainAxisAlignment
+                                                                            .spaceBetween,
+                                                                        children: [
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                  ' عیار: ',
+                                                                                  style: AppTextStyle
+                                                                                      .labelText),
+                                                                              Text(
+                                                                                  '${getOneInventories
+                                                                                      ?.carat ??
+                                                                                      0}',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText),
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                  ' وزن 750: ',
+                                                                                  style: AppTextStyle
+                                                                                      .labelText),
+                                                                              Text(
+                                                                                  '${getOneInventories
+                                                                                      ?.weight750 ??
+                                                                                      0} گرم ',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText),
+                                                                            ],
+                                                                          ),
+                                                                          Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                  '  ناخالصی: ',
+                                                                                  style: AppTextStyle
+                                                                                      .labelText),
+                                                                              Text(
+                                                                                  '${getOneInventories
+                                                                                      ?.impurity ??
+                                                                                      0} گرم ',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText),
+                                                                            ],
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height: 4,),
+                                                                      Divider(
+                                                                        height: 1,
+                                                                        color: AppColor
+                                                                            .secondaryColor,),
+                                                                      SizedBox(
+                                                                        height: 5,),
+                                                                      Row(
+                                                                        mainAxisAlignment: MainAxisAlignment
+                                                                            .spaceBetween,
+                                                                        children: [
+                                                                          // نمایش عکس
+                                                                          GestureDetector(
+                                                                            onTap: () {
+                                                                              if (getOneInventories
+                                                                                  ?.attachments ==
+                                                                                  null ||
+                                                                                  getOneInventories!
+                                                                                      .attachments!
+                                                                                      .isEmpty) {
+                                                                                Get
+                                                                                    .snackbar(
+                                                                                    'پیغام',
+                                                                                    'تصویری ثبت نشده است');
+                                                                                return;
+                                                                              }
+
+                                                                              showDialog(
+                                                                                context: context,
+                                                                                builder: (
+                                                                                    BuildContext context) {
+                                                                                  return Dialog(
+                                                                                    backgroundColor: AppColor
+                                                                                        .backGroundColor,
+                                                                                    shape: RoundedRectangleBorder(
+                                                                                      borderRadius: BorderRadius
+                                                                                          .circular(
+                                                                                          10),
+                                                                                    ),
+                                                                                    child: Container(
+                                                                                      padding: EdgeInsets
+                                                                                          .all(
+                                                                                          8),
+                                                                                      child: Column(
+                                                                                        mainAxisSize: MainAxisSize
+                                                                                            .min,
+                                                                                        children: [
+                                                                                          // نمایش اسلایدی عکس‌ها
+                                                                                          SizedBox(
+                                                                                            width: 500,
+                                                                                            height: 500,
+                                                                                            child: Stack(
                                                                                               children: [
-                                                                                                Text('حذف  ',style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor),),
-                                                                                                Container(
-                                                                                                  width: 25,
-                                                                                                  height: 25,
-                                                                                                  child: SvgPicture
-                                                                                                      .asset(
-                                                                                                      'assets/svg/trash-bin.svg',
-                                                                                                      colorFilter: ColorFilter
-                                                                                                          .mode(
-                                                                                                        AppColor
-                                                                                                            .accentColor,
-                                                                                                        BlendMode
-                                                                                                            .srcIn,)
-                                                                                                  ),
+                                                                                                PageView
+                                                                                                    .builder(
+                                                                                                  controller: inventoryController
+                                                                                                      .pageController,
+                                                                                                  itemCount: getOneInventories
+                                                                                                      .attachments!
+                                                                                                      .length,
+                                                                                                  onPageChanged: (
+                                                                                                      index) =>
+                                                                                                  inventoryController
+                                                                                                      .currentImagePage
+                                                                                                      .value =
+                                                                                                      index,
+                                                                                                  itemBuilder: (
+                                                                                                      context,
+                                                                                                      index) {
+                                                                                                    final attachment = getOneInventories
+                                                                                                        .attachments![index];
+                                                                                                    return Image
+                                                                                                        .network(
+                                                                                                      "${BaseUrl
+                                                                                                          .baseUrl}Attachment/downloadAttachment?fileName=${attachment
+                                                                                                          .guidId}",
+                                                                                                      loadingBuilder: (
+                                                                                                          context,
+                                                                                                          child,
+                                                                                                          loadingProgress) {
+                                                                                                        if (loadingProgress ==
+                                                                                                            null)
+                                                                                                          return child;
+                                                                                                        return Center(
+                                                                                                          child: CircularProgressIndicator(),
+                                                                                                        );
+                                                                                                      },
+                                                                                                      errorBuilder: (
+                                                                                                          context,
+                                                                                                          error,
+                                                                                                          stackTrace) =>
+                                                                                                          Icon(
+                                                                                                              Icons
+                                                                                                                  .error,
+                                                                                                              color: Colors
+                                                                                                                  .red),
+                                                                                                      fit: BoxFit
+                                                                                                          .cover,
+                                                                                                    );
+                                                                                                  },
                                                                                                 ),
                                                                                               ],
                                                                                             ),
                                                                                           ),
+                                                                                          SizedBox(
+                                                                                            height: 2,),
+                                                                                          // نمایش نقاط راهنما
+                                                                                          Obx(() =>
+                                                                                              Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment
+                                                                                                    .center,
+                                                                                                children: List
+                                                                                                    .generate(
+                                                                                                  getOneInventories
+                                                                                                      .attachments!
+                                                                                                      .length,
+                                                                                                      (
+                                                                                                      index) =>
+                                                                                                      Container(
+                                                                                                        width: 8,
+                                                                                                        height: 8,
+                                                                                                        margin: EdgeInsets
+                                                                                                            .symmetric(
+                                                                                                            horizontal: 4),
+                                                                                                        decoration: BoxDecoration(
+                                                                                                          shape: BoxShape
+                                                                                                              .circle,
+                                                                                                          color: inventoryController
+                                                                                                              .currentImagePage
+                                                                                                              .value ==
+                                                                                                              index
+                                                                                                              ? Colors
+                                                                                                              .blue
+                                                                                                              : Colors
+                                                                                                              .grey,
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                ),
+                                                                                              )),
+
+                                                                                          SizedBox(
+                                                                                              height: 10),
+                                                                                          TextButton(
+                                                                                            onPressed: () =>
+                                                                                                Get
+                                                                                                    .back(),
+                                                                                            child: Text(
+                                                                                              "بستن",
+                                                                                              style: AppTextStyle
+                                                                                                  .bodyText,),
+                                                                                          ),
+                                                                                        ],
+                                                                                      ),
+                                                                                    ),
+                                                                                  );
+                                                                                },
+                                                                              );
+                                                                            },
+                                                                            child: Row(
+                                                                              children: [
+                                                                                Text(
+                                                                                  'عکس‌ها (${getOneInventories
+                                                                                      ?.attachments
+                                                                                      ?.length ??
+                                                                                      0}) ',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText
+                                                                                      .copyWith(
+                                                                                      color: AppColor
+                                                                                          .iconViewColor
+                                                                                  ),
+                                                                                ),
+                                                                                SizedBox(
+                                                                                  width: 25,
+                                                                                  height: 25,
+                                                                                  child: SvgPicture
+                                                                                      .asset(
+                                                                                    'assets/svg/picture.svg',
+                                                                                    colorFilter: ColorFilter
+                                                                                        .mode(
+                                                                                      AppColor
+                                                                                          .iconViewColor,
+                                                                                      BlendMode
+                                                                                          .srcIn,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                          //  آیکون ویرایش
+                                                                          GestureDetector(
+                                                                            onTap: () {
+                                                                              Get
+                                                                                  .toNamed(
+                                                                                  '/inventoryDetailUpdateReceive',
+                                                                                  arguments: getOneInventories);
+                                                                            },
+                                                                            child: Row(
+                                                                              children: [
+                                                                                Text(
+                                                                                  'ویرایش  ',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText
+                                                                                      .copyWith(
+                                                                                      color: AppColor
+                                                                                          .iconViewColor),),
+                                                                                Container(
+                                                                                  width: 25,
+                                                                                  height: 25,
+                                                                                  child: SvgPicture
+                                                                                      .asset(
+                                                                                      'assets/svg/edit.svg',
+                                                                                      colorFilter: ColorFilter
+                                                                                          .mode(
+                                                                                        AppColor
+                                                                                            .iconViewColor,
+                                                                                        BlendMode
+                                                                                            .srcIn,)
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                          // آیکون حذف
+
+                                                                          GestureDetector(
+                                                                            onTap: () {
+                                                                              Get
+                                                                                  .defaultDialog(
+                                                                                  backgroundColor: AppColor
+                                                                                      .backGroundColor,
+                                                                                  title: "حذف واریزی",
+                                                                                  titleStyle: AppTextStyle
+                                                                                      .smallTitleText,
+                                                                                  middleText: "آیا از حذف واریزی مطمئن هستید؟",
+                                                                                  middleTextStyle: AppTextStyle
+                                                                                      .bodyText,
+                                                                                  confirm: ElevatedButton(
+                                                                                      style: ButtonStyle(
+                                                                                          backgroundColor: WidgetStatePropertyAll(
+                                                                                              AppColor
+                                                                                                  .primaryColor)),
+                                                                                      onPressed: () {
+                                                                                        Get
+                                                                                            .back();
+                                                                                        inventoryController
+                                                                                            .updateDeleteInventory(
+                                                                                            inventories
+                                                                                                .id!,
+                                                                                            getOneInventories!
+                                                                                                .id!,
+                                                                                            3);
+                                                                                      },
+                                                                                      child: Text(
+                                                                                        'حذف',
+                                                                                        style: AppTextStyle
+                                                                                            .bodyText,
+                                                                                      )));
+                                                                            },
+                                                                            child: Row(
+                                                                              children: [
+                                                                                Text(
+                                                                                  'حذف  ',
+                                                                                  style: AppTextStyle
+                                                                                      .bodyText
+                                                                                      .copyWith(
+                                                                                      color: AppColor
+                                                                                          .accentColor),),
+                                                                                Container(
+                                                                                  width: 25,
+                                                                                  height: 25,
+                                                                                  child: SvgPicture
+                                                                                      .asset(
+                                                                                      'assets/svg/trash-bin.svg',
+                                                                                      colorFilter: ColorFilter
+                                                                                          .mode(
+                                                                                        AppColor
+                                                                                            .accentColor,
+                                                                                        BlendMode
+                                                                                            .srcIn,)
+                                                                                  ),
+                                                                                ),
+                                                                              ],
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      )
                                                                     ],
-                                                                  )
-                                                                ],
+                                                                  ),
+                                                                ),
                                                               ),
-                                                            ),
-                                                          ),
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
+                                                            );
+                                                          },
+                                                        ),
+                                                      ),
                                                     ],
                                                   )
                                                 ],
@@ -998,7 +1045,8 @@ class InventoryListView extends StatelessWidget {
                         GestureDetector(
                           onTap: () {
                             Get.offNamed(
-                                '/inventoryDetailInsert',arguments: inventories);
+                                '/inventoryDetailInsertReceive',
+                                arguments: inventories);
                           },
                           child: Row(
                             children: [
@@ -1032,10 +1080,12 @@ class InventoryListView extends StatelessWidget {
                                   .bodyText,
                               confirm: ElevatedButton(
                                   style: ButtonStyle(
-                                      backgroundColor: WidgetStatePropertyAll(AppColor.primaryColor)),
+                                      backgroundColor: WidgetStatePropertyAll(
+                                          AppColor.primaryColor)),
                                   onPressed: () {
                                     Get.back();
-                                    inventoryController.deleteInventory(inventories.id!, true);
+                                    inventoryController.deleteInventory(
+                                        inventories.id!, true);
                                   },
                                   child: Text(
                                     'حذف', style: AppTextStyle.bodyText,
@@ -1429,11 +1479,16 @@ class InventoryListView extends StatelessWidget {
                                           //  آیکون ویرایش
                                           GestureDetector(
                                             onTap: () {
-
+                                              Get.toNamed(
+                                                  '/inventoryDetailUpdateReceive',
+                                                  arguments: getOneInventories);
                                             },
                                             child: Row(
                                               children: [
-                                                Text('ویرایش  ',style: AppTextStyle.bodyText.copyWith(color: AppColor.iconViewColor),),
+                                                Text('ویرایش  ',
+                                                  style: AppTextStyle.bodyText
+                                                      .copyWith(color: AppColor
+                                                      .iconViewColor),),
                                                 Container(
                                                   width: 25,
                                                   height: 25,
@@ -1456,27 +1511,39 @@ class InventoryListView extends StatelessWidget {
                                           GestureDetector(
                                             onTap: () {
                                               Get.defaultDialog(
-                                                  backgroundColor: AppColor.backGroundColor,
+                                                  backgroundColor: AppColor
+                                                      .backGroundColor,
                                                   title: "حذف واریزی",
-                                                  titleStyle: AppTextStyle.smallTitleText,
+                                                  titleStyle: AppTextStyle
+                                                      .smallTitleText,
                                                   middleText: "آیا از حذف واریزی مطمئن هستید؟",
-                                                  middleTextStyle: AppTextStyle.bodyText,
+                                                  middleTextStyle: AppTextStyle
+                                                      .bodyText,
                                                   confirm: ElevatedButton(
                                                       style: ButtonStyle(
                                                           backgroundColor: WidgetStatePropertyAll(
-                                                              AppColor.primaryColor)),
+                                                              AppColor
+                                                                  .primaryColor)),
                                                       onPressed: () {
                                                         Get.back();
-                                                        inventoryController.updateDeleteInventory(inventories.id!, getOneInventories!.id!, 3);
+                                                        inventoryController
+                                                            .updateDeleteInventory(
+                                                            inventories.id!,
+                                                            getOneInventories!
+                                                                .id!, 3);
                                                       },
                                                       child: Text(
                                                         'حذف',
-                                                        style: AppTextStyle.bodyText,
+                                                        style: AppTextStyle
+                                                            .bodyText,
                                                       )));
                                             },
                                             child: Row(
                                               children: [
-                                                Text('حذف  ',style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor),),
+                                                Text('حذف  ',
+                                                  style: AppTextStyle.bodyText
+                                                      .copyWith(color: AppColor
+                                                      .accentColor),),
                                                 Container(
                                                   width: 25,
                                                   height: 25,
@@ -1513,5 +1580,1322 @@ class InventoryListView extends StatelessWidget {
         ),
       );
     });
+  }
+
+  List<DataColumn> buildDataColumns() {
+    return [
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('تاریخ', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('نام ثبت کننده', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('محصول', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('مقدار', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('شرح', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('دریافت/پرداخت', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('الصاق تصاویر', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('نمایش تصاویر', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('عملیات', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('اطلاعات کامل', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+    ];
+  }
+
+  List<DataRow> buildDataRows(BuildContext context) {
+    return inventoryController.inventoryList.map((inventory) {
+      //print(" تسسسسسسسست ${inventory.inventoryDetails?.first.itemUnit?.name}");
+      return DataRow(
+        cells: [
+          // تاریخ
+          DataCell(
+              Center(
+                child: Text(
+                  inventory.date?.toPersianDate(showTime: true) ?? 'نامشخص',
+                  style: AppTextStyle.bodyText,
+                ),
+              )),
+          // نام ثبت کننده
+          DataCell(
+              Center(
+                child: Text(inventory.account?.name ?? "",
+                    style: AppTextStyle.bodyText),
+              )),
+          // محصول
+          DataCell(
+              Center(
+                child: Text(
+                  inventory.inventoryDetails?.isNotEmpty == true
+                      ? inventory.inventoryDetails!.first.item?.name ?? ""
+                      : "",
+                  style: AppTextStyle.bodyText,
+                ),
+              )
+          ),
+          // مقدار
+          DataCell(
+              Center(
+                child: Text(
+                    inventory.inventoryDetails?.first !=null
+                        ? '${inventory.inventoryDetails!.first.quantity ?? 0} ${inventory.inventoryDetails!.first.itemUnit?.name ?? ""}'
+                        : "",
+                    style: AppTextStyle.bodyText
+                ),
+              )
+          ),
+          // شرح
+          DataCell(
+              Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment
+                      .spaceBetween,
+                  children: [
+                    Card(
+                      color: AppColor.secondaryColor,
+                      child: Column(
+                        children: [
+                          Container(padding: EdgeInsets.all(3),
+                            child: Row(
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                        ' عیار: ',
+                                        style: AppTextStyle
+                                            .labelText),
+                                    Text(inventory.inventoryDetails?.first !=null ?
+                                        '${inventory.inventoryDetails?.first
+                                            .carat ?? 0}' : "",
+                                        style: AppTextStyle
+                                            .bodyText.copyWith(
+                                            color: AppColor.iconViewColor)),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                        ' وزن 750: ',
+                                        style: AppTextStyle
+                                            .labelText),
+                                    Text(inventory.inventoryDetails?.first !=null ?
+                                        '${inventory.inventoryDetails?.first
+                                            .weight750 ?? 0} گرم ' : "",
+                                        style: AppTextStyle
+                                            .bodyText.copyWith(
+                                            color: AppColor.iconViewColor)),
+                                  ],
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                        '  ناخالصی: ',
+                                        style: AppTextStyle
+                                            .labelText),
+                                    Text(inventory.inventoryDetails?.first !=null ?
+                                        '${inventory.inventoryDetails?.first
+                                            .impurity ?? 0} گرم ' : "",
+                                        style: AppTextStyle
+                                            .bodyText.copyWith(
+                                            color: AppColor.iconViewColor)),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(padding: EdgeInsets.all(3),
+                            child: Row(
+                              children: [
+                                Text(
+                                    ' آزمایشگاه: ',
+                                    style: AppTextStyle
+                                        .labelText),
+                                Text(inventory.inventoryDetails?.first !=null ?
+                                    inventory.inventoryDetails?.first.laboratory
+                                        ?.name ?? "" : "",
+                                    style: AppTextStyle
+                                        .bodyText.copyWith(
+                                        color: AppColor.iconViewColor)),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(padding: EdgeInsets.only(bottom: 20),
+                      child: Row(mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                              ' توضیحات: ',
+                              style: AppTextStyle
+                                  .labelText),
+                          Text(inventory.inventoryDetails?.first !=null ?
+                              inventory.inventoryDetails?.first.description ??
+                                  '' : "",
+                              style: AppTextStyle
+                                  .bodyText.copyWith(
+                                  color: AppColor.iconViewColor)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+          // دریافت/پرداخت
+          DataCell(
+              Center(
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius
+                        .circular(5),
+                  ),
+                  color: inventory.type == 1
+                      ? AppColor.primaryColor
+                      : AppColor.accentColor,
+                  margin: EdgeInsets
+                      .symmetric(
+                      vertical: 0,
+                      horizontal: 5),
+                  child: Padding(
+                    padding: const EdgeInsets
+                        .all(2),
+                    child: Text(
+                        inventory.type == 1
+                            ? 'دریافت'
+                            : 'پرداخت',
+                        style: AppTextStyle
+                            .labelText,
+                        textAlign: TextAlign
+                            .center),
+                  ),
+                ),
+              )),
+          // الصاق تصاویر
+          DataCell(
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    GestureDetector(
+                      onTap: () =>
+                          inventoryController.pickImageDesktop(
+                              inventory.inventoryDetails!.first.recId
+                                  .toString(), "image", "Deposit",
+                              inventoryId: inventory.id!),
+                      child: Container(
+                        constraints: BoxConstraints(maxWidth: 100),
+                        child: SvgPicture
+                            .asset(
+                          'assets/svg/camera.svg',
+                          width: 25,
+                          height: 25,
+                          colorFilter: ColorFilter
+                              .mode(
+                              AppColor
+                                  .iconViewColor,
+                              BlendMode
+                                  .srcIn),),
+                      ),
+
+                    ),
+                    Obx(() {
+                      if (inventoryController
+                          .isUploadingDesktop
+                          .value) {
+                        return CircularProgressIndicator();
+                      }
+                      return Wrap(
+                        children: inventoryController.selectedImagesDesktop
+                            .asMap()
+                            .entries
+                            .map((entry) =>
+                            Chip(label: Text(
+                                'تصویر ${entry.key + 1}'),
+                              deleteIcon: inventoryController
+                                  .uploadStatusesDesktop[entry.key]
+                                  ? Icon(Icons.check)
+                                  : Icon(Icons.close),
+                              onDeleted: () {},
+                            ))
+                            .toList(),
+                      );
+                    }),
+                  ],
+                ),
+              )),
+          // نمایش تصاویر
+          DataCell(
+            GestureDetector(
+              onTap: () {
+                if (inventory.inventoryDetails?.first.attachments == null ||
+                    inventory.inventoryDetails!.first.attachments!.isEmpty) {
+                  Get
+                      .snackbar(
+                      'پیغام',
+                      'تصویری ثبت نشده است');
+                  return;
+                }
+
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return Dialog(
+                      backgroundColor: AppColor
+                          .backGroundColor,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius
+                            .circular(
+                            10),
+                      ),
+                      child: Container(
+                        padding: EdgeInsets
+                            .all(
+                            8),
+                        child: Column(
+                          mainAxisSize: MainAxisSize
+                              .min,
+                          children: [
+                            // نمایش اسلایدی عکس‌ها
+                            SizedBox(
+                              width: 500,
+                              height: 500,
+                              child: Stack(
+                                children: [
+                                  PageView.builder(
+                                    controller: inventoryController
+                                        .pageController,
+                                    itemCount: inventory.inventoryDetails?.first
+                                        .attachments!.length,
+                                    onPageChanged: (index) =>
+                                    inventoryController
+                                        .currentImagePage
+                                        .value =
+                                        index,
+                                    itemBuilder: (context,
+                                        index) {
+                                      final attachment = inventory
+                                          .inventoryDetails
+                                          ?.first.attachments![index];
+                                      return Image
+                                          .network(
+                                        "${BaseUrl
+                                            .baseUrl}Attachment/downloadAttachment?fileName=${attachment
+                                            ?.guidId}",
+                                        loadingBuilder: (context,
+                                            child,
+                                            loadingProgress) {
+                                          if (loadingProgress ==
+                                              null)
+                                            return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        },
+                                        errorBuilder: (context,
+                                            error,
+                                            stackTrace) =>
+                                            Icon(
+                                                Icons
+                                                    .error,
+                                                color: Colors
+                                                    .red),
+                                        fit: BoxFit
+                                            .cover,
+                                      );
+                                    },
+                                  ),
+                                  SizedBox(
+                                    height: 2,),
+                                  Obx(() {
+                                    return Positioned(
+                                        left: 10,
+                                        top: 0,
+                                        bottom: 0,
+                                        child: Visibility(
+                                          visible: inventoryController
+                                              .currentImagePage.value > 0,
+                                          child: IconButton(
+                                            style: ButtonStyle(
+                                              backgroundColor: WidgetStateProperty
+                                                  .all(Colors.black54),
+                                              shape: WidgetStateProperty.all(
+                                                  CircleBorder()),
+                                              padding: WidgetStateProperty.all(
+                                                  EdgeInsets.all(8)),
+                                            ),
+                                            icon: Icon(Icons.chevron_left,
+                                              color: Colors.white,
+                                              size: 40,
+                                              shadows: [
+                                                Shadow(
+                                                  blurRadius: 10,
+                                                  color: Colors.black,
+                                                  offset: Offset(0, 0),
+                                                )
+                                              ],
+                                            ),
+                                            onPressed: () {
+                                              inventoryController.pageController
+                                                  .previousPage(
+                                                duration: Duration(
+                                                    milliseconds: 300),
+                                                curve: Curves.easeInOut,
+                                              );
+                                            },
+                                          ),
+                                        )
+                                    );
+                                  }),
+                                  Obx(() {
+                                    return Positioned(
+                                        right: 10,
+                                        top: 0,
+                                        bottom: 0,
+                                        child: Visibility(
+                                          visible: inventoryController
+                                              .currentImagePage.value <
+                                              (inventory.inventoryDetails?.first
+                                                  .attachments!.length ?? 1) -
+                                                  1,
+                                          child: IconButton(
+                                            style: ButtonStyle(
+                                              backgroundColor: WidgetStateProperty
+                                                  .all(Colors.black54),
+                                              shape: WidgetStateProperty.all(
+                                                  CircleBorder()),
+                                              padding: WidgetStateProperty.all(
+                                                  EdgeInsets.all(8)),
+                                            ),
+                                            icon: Icon(Icons.chevron_right,
+                                              color: Colors.white,
+                                              size: 40,
+                                              shadows: [
+                                                Shadow(
+                                                  blurRadius: 10,
+                                                  color: Colors.black,
+                                                  offset: Offset(0, 0),
+                                                ),
+                                              ],
+                                            ),
+                                            onPressed: () {
+                                              inventoryController.pageController
+                                                  .nextPage(
+                                                duration: Duration(
+                                                    milliseconds: 300),
+                                                curve: Curves.easeInOut,
+                                              );
+                                            },
+                                          ),
+                                        )
+                                    );
+                                  }),
+                                  SizedBox(
+                                    height: 2,),
+                                  // نمایش نقاط راهنما
+                                  Obx(() =>
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment
+                                            .center,
+                                        children: List
+                                            .generate(
+                                          inventory.inventoryDetails!.first
+                                              .attachments!.length,
+                                              (index) =>
+                                              Container(
+                                                width: 8,
+                                                height: 8,
+                                                margin: EdgeInsets
+                                                    .symmetric(
+                                                    horizontal: 4),
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape
+                                                      .circle,
+                                                  color: inventoryController
+                                                      .currentImagePage
+                                                      .value ==
+                                                      index
+                                                      ? Colors
+                                                      .blue
+                                                      : Colors
+                                                      .grey,
+                                                ),
+                                              ),
+                                        ),
+                                      )),
+                                  SizedBox(
+                                      height: 10),
+                                ],
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () =>
+                                  Get
+                                      .back(),
+                              child: Text(
+                                "بستن",
+                                style: AppTextStyle
+                                    .bodyText,),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              child: Row(
+                children: [
+                  Text(
+                    'عکس‌ها (${inventory.inventoryDetails?.first.attachments
+                        ?.length ?? 0}) ',
+                    style: AppTextStyle
+                        .bodyText
+                        .copyWith(
+                        color: AppColor
+                            .iconViewColor
+                    ),
+                  ),
+                  SizedBox(
+                    width: 25,
+                    height: 25,
+                    child: SvgPicture
+                        .asset(
+                      'assets/svg/picture.svg',
+                      colorFilter: ColorFilter
+                          .mode(
+                        AppColor
+                            .iconViewColor,
+                        BlendMode
+                            .srcIn,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // آیکون های عملیات
+          DataCell(
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  //آیکون اضافه
+                  GestureDetector(
+                    onTap: () {
+                      Get.offNamed(
+                          '/inventoryDetailInsertReceive', arguments: inventory);
+                    },
+                    child: Row(
+                      children: [
+                        Text(' اضافه',
+                          style: AppTextStyle
+                              .labelText
+                              .copyWith(
+                              color: AppColor
+                                  .buttonColor),),
+                        SvgPicture.asset(
+                            'assets/svg/add.svg',
+                            colorFilter: ColorFilter
+                                .mode(AppColor
+                                .buttonColor,
+                              BlendMode.srcIn,)
+                        ),
+                      ],
+                    ),
+                  ),
+                  //آیکون حذف
+                  GestureDetector(
+                    onTap: () {
+                      Get.defaultDialog(
+                        backgroundColor: AppColor
+                            .backGroundColor,
+                        title: "حذف ",
+                        titleStyle: AppTextStyle
+                            .smallTitleText,
+                        middleText: "آیا از حذف مطمئن هستید؟",
+                        middleTextStyle: AppTextStyle
+                            .bodyText,
+                        confirm: ElevatedButton(
+                            style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                    AppColor.primaryColor)),
+                            onPressed: () {
+                              Get.back();
+                              inventoryController.deleteInventory(
+                                  inventory.id!, true);
+                            },
+                            child: Text(
+                              'حذف', style: AppTextStyle.bodyText,
+                            )
+                        ),
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Text(' حذف',
+                          style: AppTextStyle
+                              .labelText
+                              .copyWith(
+                              color: AppColor
+                                  .accentColor),),
+                        SvgPicture.asset(
+                            'assets/svg/trash-bin.svg',
+                            colorFilter: ColorFilter
+                                .mode(AppColor
+                                .accentColor,
+                              BlendMode.srcIn,)
+                        ),
+                      ],
+                    ),
+                  ),
+                  // آیکون ویرایش
+                  GestureDetector(
+                    onTap: () {
+                      Get.toNamed('/inventoryDetailUpdateReceive',
+                          arguments: inventoryController.fetchGetOneInventory(
+                              inventory.id!));
+                    },
+                    child: Row(
+                      children: [
+                        Text('ویرایش  ', style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.iconViewColor),),
+                        Container(
+                          width: 25,
+                          height: 25,
+                          child: SvgPicture
+                              .asset(
+                              'assets/svg/edit.svg',
+                              colorFilter: ColorFilter
+                                  .mode(
+                                AppColor
+                                    .iconViewColor,
+                                BlendMode
+                                    .srcIn,)
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // نمایش کامل واریزی
+          DataCell(
+            Center(
+              child: inventory.inventoryDetailsCount == 1 ?
+              SizedBox(width: 100,)
+                  :
+              SizedBox(
+                width: 130,
+                child: TextButton(
+                  child: Text(
+                    'نمایش اطلاعات کامل', style: AppTextStyle.bodyText,),
+                  onPressed: () {
+                    showInventoryDetailsModal(inventory);
+                    inventoryController.fetchGetOneInventory(inventory.id!);
+                  },
+                ),
+              ),
+            ),
+          ),
+
+        ],
+      );
+    }).toList();
+  }
+
+  void showInventoryDetailsModal(InventoryModel inventory) {
+    Get.dialog(
+      Dialog(
+        backgroundColor: AppColor.backGroundColor,
+        insetPadding: EdgeInsets.all(20),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 800,
+            maxHeight: Get.height * 0.9,
+          ),
+          child: Column(
+            children: [
+              buildInventoryDetail(inventory),
+              Spacer(),
+              TextButton(
+                onPressed: () =>
+                    Get.back(),
+                child: Text("بستن", style: AppTextStyle.bodyText,),
+              ),
+              SizedBox(height: 15,),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+
+  Widget buildInventoryDetail(InventoryModel inventory) {
+    return Obx(() {
+      if (inventoryController.isLoading.value) {
+        return Center(child: CircularProgressIndicator());
+      }
+      return
+        inventoryController.isLoading.value ?
+        CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation<
+              Color>(
+              AppColor.textColor),
+        ) :
+        // لیست deposit request مربوط به هر درخواست برداشت
+        SizedBox(
+          height: Get.height * 0.8, // تعیین ارتفاع ثابت
+          width: Get.width * 0.8,
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: 12,),
+                Text('لیست دریافت/پرداخت', style: AppTextStyle.smallTitleText),
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: Get.height * 0.7,
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: inventoryController.getOneInventory[inventory.id]
+                        ?.inventoryDetails?.length,
+                    itemBuilder: (context,
+                        index) {
+                      var getOneInventories = inventoryController
+                          .getOneInventory[inventory.id]
+                          ?.inventoryDetails?[index];
+                      return ListTile(
+                        title: Card(
+                          color: AppColor
+                              .backGroundColor,
+                          child: Padding(
+                            padding: const EdgeInsets
+                                .only(
+                                top: 8,
+                                left: 12,
+                                right: 12,
+                                bottom: 8),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .end,
+                                  children: [
+                                    Text(
+                                      'الصاق تصویر  ',
+                                      style: AppTextStyle
+                                          .labelText,),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          inventoryController
+                                              .pickImageDesktop(
+                                              getOneInventories!
+                                                  .recId
+                                                  .toString(),
+                                              "image",
+                                              "Deposit",
+                                              inventoryId: inventory
+                                                  .id!),
+                                      child: SvgPicture
+                                          .asset(
+                                        'assets/svg/camera.svg',
+                                        width: 25,
+                                        height: 25,
+                                        colorFilter: ColorFilter
+                                            .mode(
+                                            AppColor
+                                                .iconViewColor,
+                                            BlendMode
+                                                .srcIn),),
+
+                                    ),
+                                    Obx(() {
+                                      if (inventoryController
+                                          .isUploadingDesktop
+                                          .value) {
+                                        return CircularProgressIndicator();
+                                      }
+                                      return Wrap(
+                                        children: inventoryController
+                                            .selectedImagesDesktop
+                                            .asMap()
+                                            .entries
+                                            .map((entry) =>
+                                            Chip(
+                                              label: Text(
+                                                  'تصویر ${entry
+                                                      .key +
+                                                      1}'),
+                                              deleteIcon: inventoryController
+                                                  .uploadStatusesDesktop[entry
+                                                  .key]
+                                                  ? Icon(
+                                                  Icons
+                                                      .check)
+                                                  : Icon(
+                                                  Icons
+                                                      .close),
+                                              onDeleted: () {},
+                                            ))
+                                            .toList(),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 10,),
+                                // آیتم- مقدار
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' آیتم: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            getOneInventories
+                                                ?.item
+                                                ?.name ??
+                                                "",
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: 4,),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' مقدار: ',
+                                            style: AppTextStyle
+                                                .bodyText
+                                        ),
+                                        Text(
+                                            '${getOneInventories
+                                                ?.quantity ??
+                                                0} ${getOneInventories
+                                                ?.itemUnit
+                                                ?.name ??
+                                                ""}',
+                                            style: AppTextStyle
+                                                .bodyText
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 8,),
+                                // عیار - وزن750- ناخالصی
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' عیار: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${getOneInventories
+                                                ?.carat ??
+                                                0}',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' وزن 750: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${getOneInventories
+                                                ?.weight750 ??
+                                                0} گرم ',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            '  ناخالصی: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${getOneInventories
+                                                ?.impurity ??
+                                                0} گرم ',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 4,),
+                                Divider(
+                                  height: 1,
+                                  color: AppColor
+                                      .secondaryColor,),
+                                SizedBox(
+                                  height: 5,),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    // نمایش عکس
+                                    GestureDetector(
+                                      onTap: () {
+                                        if (getOneInventories
+                                            ?.attachments ==
+                                            null ||
+                                            getOneInventories!
+                                                .attachments!
+                                                .isEmpty) {
+                                          Get
+                                              .snackbar(
+                                              'پیغام',
+                                              'تصویری ثبت نشده است');
+                                          return;
+                                        }
+                                        showDialog(
+                                          context: context,
+                                          builder: (BuildContext context) {
+                                            return Dialog(
+                                              backgroundColor: AppColor
+                                                  .backGroundColor,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius
+                                                    .circular(
+                                                    10),
+                                              ),
+                                              child: Container(
+                                                padding: EdgeInsets
+                                                    .all(
+                                                    8),
+                                                child: Column(
+                                                  mainAxisSize: MainAxisSize
+                                                      .min,
+                                                  children: [
+                                                    // نمایش اسلایدی عکس‌ها
+                                                    SizedBox(
+                                                      width: 500,
+                                                      height: 500,
+                                                      child: Stack(
+                                                        children: [
+                                                          PageView
+                                                              .builder(
+                                                            controller: inventoryController
+                                                                .pageController,
+                                                            itemCount: getOneInventories
+                                                                .attachments!
+                                                                .length,
+                                                            onPageChanged: (
+                                                                index) =>
+                                                            inventoryController
+                                                                .currentImagePage
+                                                                .value =
+                                                                index,
+                                                            itemBuilder: (
+                                                                context,
+                                                                index) {
+                                                              final attachment = getOneInventories
+                                                                  .attachments![index];
+                                                              return Image
+                                                                  .network(
+                                                                "${BaseUrl
+                                                                    .baseUrl}Attachment/downloadAttachment?fileName=${attachment
+                                                                    .guidId}",
+                                                                loadingBuilder: (
+                                                                    context,
+                                                                    child,
+                                                                    loadingProgress) {
+                                                                  if (loadingProgress ==
+                                                                      null)
+                                                                    return child;
+                                                                  return Center(
+                                                                    child: CircularProgressIndicator(),
+                                                                  );
+                                                                },
+                                                                errorBuilder: (
+                                                                    context,
+                                                                    error,
+                                                                    stackTrace) =>
+                                                                    Icon(
+                                                                        Icons
+                                                                            .error,
+                                                                        color: Colors
+                                                                            .red),
+                                                                fit: BoxFit
+                                                                    .cover,
+                                                              );
+                                                            },
+                                                          ),
+                                                          SizedBox(
+                                                            height: 2,),
+                                                          Obx(() {
+                                                            return Positioned(
+                                                                left: 10,
+                                                                top: 0,
+                                                                bottom: 0,
+                                                                child: Visibility(
+                                                                  visible: inventoryController
+                                                                      .currentImagePage
+                                                                      .value >
+                                                                      0,
+                                                                  child: IconButton(
+                                                                    style: ButtonStyle(
+                                                                      backgroundColor: WidgetStateProperty
+                                                                          .all(
+                                                                          Colors
+                                                                              .black54),
+                                                                      shape: WidgetStateProperty
+                                                                          .all(
+                                                                          CircleBorder()),
+                                                                      padding: WidgetStateProperty
+                                                                          .all(
+                                                                          EdgeInsets
+                                                                              .all(
+                                                                              8)),
+                                                                    ),
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .chevron_left,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      size: 40,
+                                                                      shadows: [
+                                                                        Shadow(
+                                                                          blurRadius: 10,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          offset: Offset(
+                                                                              0,
+                                                                              0),
+                                                                        )
+                                                                      ],
+                                                                    ),
+                                                                    onPressed: () {
+                                                                      inventoryController
+                                                                          .pageController
+                                                                          .previousPage(
+                                                                        duration: Duration(
+                                                                            milliseconds: 300),
+                                                                        curve: Curves
+                                                                            .easeInOut,
+                                                                      );
+                                                                    },
+                                                                  ),
+                                                                )
+                                                            );
+                                                          }),
+                                                          Obx(() {
+                                                            return Positioned(
+                                                                right: 10,
+                                                                top: 0,
+                                                                bottom: 0,
+                                                                child: Visibility(
+                                                                  visible: inventoryController
+                                                                      .currentImagePage
+                                                                      .value <
+                                                                      (getOneInventories
+                                                                          .attachments
+                                                                          ?.length ??
+                                                                          1) -
+                                                                          1,
+                                                                  child: IconButton(
+                                                                    style: ButtonStyle(
+                                                                      backgroundColor: WidgetStateProperty
+                                                                          .all(
+                                                                          Colors
+                                                                              .black54),
+                                                                      shape: WidgetStateProperty
+                                                                          .all(
+                                                                          CircleBorder()),
+                                                                      padding: WidgetStateProperty
+                                                                          .all(
+                                                                          EdgeInsets
+                                                                              .all(
+                                                                              8)),
+                                                                    ),
+                                                                    icon: Icon(
+                                                                      Icons
+                                                                          .chevron_right,
+                                                                      color: Colors
+                                                                          .white,
+                                                                      size: 40,
+                                                                      shadows: [
+                                                                        Shadow(
+                                                                          blurRadius: 10,
+                                                                          color: Colors
+                                                                              .black,
+                                                                          offset: Offset(
+                                                                              0,
+                                                                              0),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    onPressed: () {
+                                                                      inventoryController
+                                                                          .pageController
+                                                                          .nextPage(
+                                                                        duration: Duration(
+                                                                            milliseconds: 300),
+                                                                        curve: Curves
+                                                                            .easeInOut,
+                                                                      );
+                                                                    },
+                                                                  ),
+                                                                )
+                                                            );
+                                                          }),
+                                                          SizedBox(
+                                                            height: 2,),
+                                                          // نمایش نقاط راهنما
+                                                          Obx(() =>
+                                                              Row(
+                                                                mainAxisAlignment: MainAxisAlignment
+                                                                    .center,
+                                                                children: List
+                                                                    .generate(
+                                                                  getOneInventories
+                                                                      .attachments!
+                                                                      .length,
+                                                                      (index) =>
+                                                                      Container(
+                                                                        width: 8,
+                                                                        height: 8,
+                                                                        margin: EdgeInsets
+                                                                            .symmetric(
+                                                                            horizontal: 4),
+                                                                        decoration: BoxDecoration(
+                                                                          shape: BoxShape
+                                                                              .circle,
+                                                                          color: inventoryController
+                                                                              .currentImagePage
+                                                                              .value ==
+                                                                              index
+                                                                              ? Colors
+                                                                              .blue
+                                                                              : Colors
+                                                                              .grey,
+                                                                        ),
+                                                                      ),
+                                                                ),
+                                                              )),
+                                                          SizedBox(
+                                                              height: 10),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: () =>
+                                                          Get
+                                                              .back(),
+                                                      child: Text(
+                                                        "بستن",
+                                                        style: AppTextStyle
+                                                            .bodyText,),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        );
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'عکس‌ها (${getOneInventories
+                                                ?.attachments
+                                                ?.length ??
+                                                0}) ',
+                                            style: AppTextStyle
+                                                .bodyText
+                                                .copyWith(
+                                                color: AppColor
+                                                    .iconViewColor
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: 25,
+                                            height: 25,
+                                            child: SvgPicture
+                                                .asset(
+                                              'assets/svg/picture.svg',
+                                              colorFilter: ColorFilter
+                                                  .mode(
+                                                AppColor
+                                                    .iconViewColor,
+                                                BlendMode
+                                                    .srcIn,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    //  آیکون ویرایش
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.toNamed('/inventoryDetailUpdateReceive',
+                                            arguments: getOneInventories);
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Text('ویرایش  ',
+                                            style: AppTextStyle.bodyText
+                                                .copyWith(color: AppColor
+                                                .iconViewColor),),
+                                          Container(
+                                            width: 25,
+                                            height: 25,
+                                            child: SvgPicture
+                                                .asset(
+                                                'assets/svg/edit.svg',
+                                                colorFilter: ColorFilter
+                                                    .mode(
+                                                  AppColor
+                                                      .iconViewColor,
+                                                  BlendMode
+                                                      .srcIn,)
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    // آیکون حذف
+                                    GestureDetector(
+                                      onTap: () {
+                                        Get.defaultDialog(
+                                            backgroundColor: AppColor
+                                                .backGroundColor,
+                                            title: "حذف واریزی",
+                                            titleStyle: AppTextStyle
+                                                .smallTitleText,
+                                            middleText: "آیا از حذف واریزی مطمئن هستید؟",
+                                            middleTextStyle: AppTextStyle
+                                                .bodyText,
+                                            confirm: ElevatedButton(
+                                                style: ButtonStyle(
+                                                    backgroundColor: WidgetStatePropertyAll(
+                                                        AppColor.primaryColor)),
+                                                onPressed: () {
+                                                  Get.back();
+                                                  inventoryController
+                                                      .updateDeleteInventory(
+                                                      inventory.id!,
+                                                      getOneInventories!.id!,
+                                                      3);
+                                                },
+                                                child: Text(
+                                                  'حذف',
+                                                  style: AppTextStyle.bodyText,
+                                                )));
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Text('حذف  ',
+                                            style: AppTextStyle.bodyText
+                                                .copyWith(
+                                                color: AppColor.accentColor),),
+                                          Container(
+                                            width: 25,
+                                            height: 25,
+                                            child: SvgPicture
+                                                .asset(
+                                                'assets/svg/trash-bin.svg',
+                                                colorFilter: ColorFilter
+                                                    .mode(
+                                                  AppColor
+                                                      .accentColor,
+                                                  BlendMode
+                                                      .srcIn,)
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+        );
+    });
+  }
+
+  Widget buildPaginationControls() {
+    return Obx(() =>
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.chevron_left),
+                onPressed: inventoryController.currentPage.value > 1
+                    ? inventoryController.previousPage
+                    : null,
+              ),
+              Text(
+                'صفحه ${inventoryController.currentPage.value}',
+                style: AppTextStyle.bodyText,
+              ),
+              IconButton(
+                icon: Icon(Icons.chevron_right),
+                onPressed: inventoryController.hasMore.value
+                    ? inventoryController.nextPage
+                    : null,
+              ),
+            ],
+          ),
+        ));
   }
 }

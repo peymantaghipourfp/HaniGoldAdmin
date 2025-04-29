@@ -82,6 +82,26 @@ class WithdrawController extends GetxController{
     return expandedIndex.value==index;
   }
 
+  void goToPage(int page) {
+    if (page < 1) return;
+    currentPage.value = page;
+    fetchWithdrawList();
+  }
+
+  void nextPage() {
+    if (hasMore.value) {
+      currentPage.value++;
+      fetchWithdrawList();
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      fetchWithdrawList();
+    }
+  }
+
 
 
   @override
@@ -122,14 +142,7 @@ class WithdrawController extends GetxController{
           withdrawList.addAll(fetchedWithdrawList);
           currentPage.value = nextPage;
           hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (scrollController.hasClients &&
-                scrollController.position.maxScrollExtent == scrollController.position.pixels &&
-                hasMore.value &&
-                !isLoading.value) {
-              loadMore();
-            }
-          });
+
         } else {
           hasMore.value = false;
         }
@@ -230,14 +243,6 @@ class WithdrawController extends GetxController{
         }
       }
       state.value = withdrawList.isEmpty ? PageState.empty : PageState.list;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients &&
-            scrollController.position.pixels == 0 &&
-            hasMore.value &&
-            !isLoading.value) {
-          loadMore();
-        }
-      });
       withdrawList.refresh();
       update();
     }

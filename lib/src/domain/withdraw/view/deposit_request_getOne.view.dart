@@ -304,95 +304,103 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                     // نمایش عکس
                                                     GestureDetector(
                                                       onTap: () {
-                                                        int attachIndex=getOneDeposit!.attachments!.isNotEmpty ? 0 : -1;
-                                                        if (getOneDeposit.attachments != null && getOneDeposit.attachments!.isNotEmpty) {
-                                                          String imageUrl =
-                                                              "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${getOneDeposit.attachments?[attachIndex].guidId}";
-                                                          showDialog(
-                                                            context: context,
-                                                            builder: (BuildContext context) {
-                                                              return Dialog(
-                                                                clipBehavior: Clip.antiAlias,
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius.circular(10),
-                                                                ),
-                                                                insetPadding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                                                                child: Container(
-                                                                  constraints: BoxConstraints( // Add constraints for web
-                                                                    maxWidth: MediaQuery.of(context).size.width * 0.8,
-                                                                    maxHeight: MediaQuery.of(context).size.height * 0.7,
-                                                                  ),
-                                                                  padding: EdgeInsets.all(8),
-                                                                  child: Column(
-                                                                      mainAxisSize: MainAxisSize.min,
-                                                                      children: [
-                                                                        InteractiveViewer(
-                                                                          panEnabled: true,
-                                                                          boundaryMargin: EdgeInsets.zero,
-                                                                          minScale: 0.5,
-                                                                          maxScale: 4,
-                                                                          child: ConstrainedBox(
-                                                                            constraints: BoxConstraints(
-                                                                              maxHeight: MediaQuery.of(context).size.height * 0.6,
-                                                                            ),
-                                                                            child: Image.network(
-                                                                              imageUrl,
-                                                                              fit: BoxFit.contain,
-                                                                              loadingBuilder: (context, child, loadingProgress) {
-                                                                                if (loadingProgress == null) return child;
-                                                                                return Center(
-                                                                                  child: CircularProgressIndicator(
-                                                                                    value: loadingProgress.expectedTotalBytes != null
-                                                                                        ? loadingProgress.cumulativeBytesLoaded /
-                                                                                        loadingProgress.expectedTotalBytes!
-                                                                                        : null,
-                                                                                  ),
-                                                                                );
-                                                                              },
-                                                                              errorBuilder: (context, error, stackTrace) =>
-                                                                                  Column(
-                                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                                    children: [
-                                                                                      Icon(Icons.error_outline, color: Colors.red, size: 40),
-                                                                                      SizedBox(height: 10),
-                                                                                      Text('خطا در بارگذاری تصویر',
-                                                                                          style: AppTextStyle.bodyText),
-                                                                                    ],
-                                                                                  )
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        SizedBox(height: 10),
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.only(top: 10),
-                                                                          child: TextButton(
-                                                                            onPressed: () {
-                                                                              Get.back();
+                                                        if (getOneDeposit?.attachments == null ||
+                                                            getOneDeposit!.attachments!.isEmpty) {
+                                                          Get
+                                                              .snackbar(
+                                                              'پیغام',
+                                                              'تصویری ثبت نشده است');
+                                                          return;
+                                                        }
+
+                                                        showDialog(
+                                                          context: context,
+                                                          builder: (
+                                                              BuildContext context) {
+                                                            return Dialog(
+                                                              backgroundColor: AppColor.backGroundColor,
+                                                              shape: RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius.circular(10),
+                                                              ),
+                                                              child: Container(
+                                                                padding: EdgeInsets.all(8),
+                                                                child: Column(
+                                                                  mainAxisSize: MainAxisSize.min,
+                                                                  children: [
+                                                                    SizedBox(
+                                                                      width: 500,
+                                                                      height: 500,
+                                                                      child: PageView.builder(
+                                                                        itemCount: getOneDeposit.attachments!.length,
+                                                                        itemBuilder: (context, index) {
+                                                                          final attachment = getOneDeposit.attachments![index];
+                                                                          return Image.network(
+                                                                            "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
+                                                                            loadingBuilder: (context,
+                                                                                child,
+                                                                                loadingProgress) {
+                                                                              if (loadingProgress ==
+                                                                                  null) {
+                                                                                return child;
+                                                                              }
+                                                                              return Center(
+                                                                                child: CircularProgressIndicator(),
+                                                                              );
                                                                             },
-                                                                            child: Text("بستن"),
-                                                                          ),
-                                                                        ),
-                                                                      ],
+                                                                            errorBuilder: (context, error, stackTrace) =>
+                                                                                Icon(Icons.error,
+                                                                                    color: Colors.red),
+                                                                            fit: BoxFit.contain,
+                                                                          );
+                                                                        },
+                                                                      ),
                                                                     ),
 
+                                                                    SizedBox(
+                                                                        height: 10),
+                                                                    TextButton(
+                                                                      onPressed: () =>
+                                                                          Get
+                                                                              .back(),
+                                                                      child: Text(
+                                                                        "بستن",
+                                                                        style: AppTextStyle
+                                                                            .bodyText,),
+                                                                    ),
+                                                                  ],
                                                                 ),
-                                                              );
-                                                            },
-                                                          );
-                                                        }else {
-                                                          Get.snackbar('پیغام', 'تصویری ثبت نشده است');
-                                                        }
+                                                              ),
+                                                            );
+                                                          },
+                                                        );
                                                       },
                                                       child: Row(
                                                         children: [
-                                                          Text('عکس  ',style: AppTextStyle.bodyText.copyWith(color: AppColor.iconViewColor),),
-                                                          SizedBox(width: 25,height: 25,
-                                                            child: SvgPicture.asset(
-                                                                'assets/svg/picture.svg',
-                                                                colorFilter: ColorFilter
-                                                                    .mode(AppColor
+                                                          Text(
+                                                            'عکس‌ (${getOneDeposit
+                                                                ?.attachments
+                                                                ?.length ??
+                                                                0}) ',
+                                                            style: AppTextStyle
+                                                                .bodyText
+                                                                .copyWith(
+                                                                color: AppColor
+                                                                    .iconViewColor
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 25,
+                                                            height: 25,
+                                                            child: SvgPicture
+                                                                .asset(
+                                                              'assets/svg/picture.svg',
+                                                              colorFilter: ColorFilter
+                                                                  .mode(
+                                                                AppColor
                                                                     .iconViewColor,
-                                                                  BlendMode.srcIn,)
+                                                                BlendMode
+                                                                    .srcIn,
+                                                              ),
                                                             ),
                                                           ),
                                                         ],

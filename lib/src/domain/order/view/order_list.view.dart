@@ -6,6 +6,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order.controller.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
+import 'package:hanigold_admin/src/domain/product/view/item_update_price.view.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar.widget.dart';
 import 'package:hanigold_admin/src/widget/empty.dart';
 import 'package:hanigold_admin/src/widget/err_page.dart';
@@ -40,7 +41,8 @@ class OrderListView extends StatelessWidget {
                         children: [
                           //فیلد جستجو
                           Expanded(
-                            child: SizedBox(
+                            child:
+                            SizedBox(
                               height: 41,
                               child: TextFormField(
                                 controller: orderController.searchController,
@@ -222,164 +224,188 @@ class OrderListView extends StatelessWidget {
                 }
                 else if (orderController.state.value == PageState.list) {
                   // لیست سفارشات
-                  return Expanded(
-                    child: GridView.builder(
-                      controller: orderController.scrollController,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: isDesktop ? 3 : 1,
-                        mainAxisSpacing: 10,
-                        crossAxisSpacing: 10,
-                          mainAxisExtent: isDesktop ? 250 : 200,
-                      ),
-                      itemCount: orderController.orderList.length+
-                          (orderController.hasMore.value ? 1 : 0),
-                      itemBuilder: (context, index) {
-                        /*if (index >= orderController.filteredOrders.length) {
-                          return SizedBox();
-                        }*/
-                        print(orderController.orderList.length);
-                        if (index >= orderController.orderList.length) {
-                          return orderController.hasMore.value
-                              ? Center(child: CircularProgressIndicator())
-                              : SizedBox.shrink();
-                        }
-
-                        var orders = orderController.orderList[index];
-                        return GestureDetector(
-                          onTap: () {
-                            showOrderDetailsSheet(context, orders);
-                          },
-                          child: Card(
-                            margin: EdgeInsets.all(isDesktop ? 12 : 8),
-                            color: AppColor.secondaryColor,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(15)),
-                            elevation: 10,
-                            child: Padding(
-                              padding: EdgeInsets.all(isDesktop ? 16 : 8),
-
-                              child: ResponsiveRowColumn(
-                                layout: isDesktop
-                                    ? ResponsiveRowColumnType.ROW
-                                    : ResponsiveRowColumnType.COLUMN,
-                                rowCrossAxisAlignment: CrossAxisAlignment.start,
-                                rowMainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  ResponsiveRowColumnItem(
-                                    child: Expanded(
-                                      child: Column(
-                                        children: [
-                                          // تاریخ سفارش
-                                          funcOrderDetail(
-                                              'assets/svg/date.svg',
-                                              '',
-                                              orders.date?.toPersianDate(
-                                                      twoDigits: true,
-                                                      showTime: true,
-                                                      timeSeprator: '-') ??
-                                                  "نامشخص",
-                                            isDesktop: ResponsiveBreakpoints.of(context).isDesktop,
-                                          ),
-                                          Divider(
-                                            color: AppColor.backGroundColor,
-                                            height: 2,
-                                          ),
-                                          // نام کاربر
-                                          funcOrderDetail(
-                                              'assets/svg/user.svg',
-                                              'نام کاربر:',
-                                              orders.account?.name ?? "نامشخص",
-                                            isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
-                                          // محصول
-                                          funcOrderDetail('assets/svg/product.svg',
-                                              'محصول:', orders.item?.name ?? "نامشخص",
-                                            isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
-                                          //مقدار سفارش
-                                          funcOrderDetail(
-                                              'assets/svg/amount.svg',
-                                              'مقدار سفارش:',
-                                              "${orders.quantity?.toString().seRagham(separator: ",")} ${orders.item?.itemUnit?.name ?? ""}",
-                                            isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
-                                          //قیمت سفارش
-                                          funcOrderDetail(
-                                            'assets/svg/amount-price.svg',
-                                            'قیمت سفارش:',
-                                            (orders.price != null)
-                                                ? "${orders.price?.toInt().toString().seRagham(separator: ',')} ریال"
-                                                : "0",
-                                              isDesktop: ResponsiveBreakpoints.of(context).isDesktop,
-                                          ),
-                                          // مبلغ کل و نوع سفارش
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              // مبلغ کل
-                                              Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.start,
-                                                children: [
-                                                  SvgPicture.asset(
-                                                    'assets/svg/total-price.svg',
-                                                    colorFilter: ColorFilter.mode(
-                                                        AppColor.textFieldColor,
-                                                        BlendMode.srcIn),
-                                                    width: isDesktop?24:18,
-                                                    height: isDesktop?24:18,
-                                                  ),
-                                                  SizedBox(
-                                                    width: 10,
-                                                  ),
-                                                  Text(
-                                                    'مبلغ کل: ',
-                                                    style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14,
-                                                      fontWeight: FontWeight.bold, ),
-                                                  ),
-                                                  Text(
-                                                    (orders.totalPrice != null)
-                                                        ? "${orders.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
-                                                        : "0",
-                                                    style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14, ),
-                                                  ),
-                                                ],
-                                              ),
-
-                                              // نوع سفارش
-                                              Row(
-                                                children: [
-                                                  SizedBox(
-                                                    width: 50,
-                                                    height: 20,
-                                                    child: Card(
-                                                      color: (orders.type == 0)
-                                                          ? AppColor.accentColor
-                                                          : AppColor.primaryColor,
-                                                      margin: EdgeInsets.symmetric(
-                                                          vertical: 0, horizontal: 5),
-                                                      child: Text(
-                                                          (orders.type == 0)
-                                                              ? 'فروش'
-                                                              : 'خرید',
-                                                          style: TextStyle(
-                                                              color:
-                                                                  AppColor.textColor),
-                                                          textAlign: TextAlign.center),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  )
-                                ],
-                              ),
+                  return
+                    Expanded(
+                    child:
+                    isDesktop ?
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                DataTable(
+                                  columns: buildDataColumns(),
+                                  rows: buildDataRows(context),
+                                  dataRowMaxHeight: 100,
+                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                 //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                  headingRowHeight: 40,
+                                  horizontalMargin: 6,
+                                ),
+                                buildPaginationControls(),
+                              ],
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ],
+                    ) :
+
+                    Expanded(
+                      child: GridView.builder(
+                        controller: orderController.scrollController,
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 1,
+                          mainAxisSpacing: 10,
+                          crossAxisSpacing: 10,
+                            mainAxisExtent: 200,
+                        ),
+                        itemCount: orderController.orderList.length+
+                            (orderController.hasMore.value ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          /*if (index >= orderController.filteredOrders.length) {
+                            return SizedBox();
+                          }*/
+                          print(orderController.orderList.length);
+                          if (index >= orderController.orderList.length) {
+                            return orderController.hasMore.value
+                                ? Center(child: CircularProgressIndicator())
+                                : SizedBox.shrink();
+                          }
+                          var orders = orderController.orderList[index];
+                          return GestureDetector(
+                            onTap: () {
+                              showOrderDetailsSheet(context, orders);
+                            },
+                            child: Card(
+                              margin: EdgeInsets.all( 8),
+                              color: AppColor.secondaryColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(15)),
+                              elevation: 10,
+                              child: Padding(
+                                padding: EdgeInsets.all( 8),
+
+                                child: ResponsiveRowColumn(
+                                  layout: ResponsiveRowColumnType.COLUMN,
+                                  rowCrossAxisAlignment: CrossAxisAlignment.start,
+                                  rowMainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    ResponsiveRowColumnItem(
+                                      child: Expanded(
+                                        child: Column(
+                                          children: [
+                                            // تاریخ سفارش
+                                            funcOrderDetail(
+                                                'assets/svg/date.svg',
+                                                '',
+                                                orders.date?.toPersianDate(
+                                                        twoDigits: true,
+                                                        showTime: true,
+                                                        timeSeprator: '-') ??
+                                                    "نامشخص",
+
+                                            ),
+                                            Divider(
+                                              color: AppColor.backGroundColor,
+                                              height: 2,
+                                            ),
+                                            // نام کاربر
+                                            funcOrderDetail(
+                                                'assets/svg/user.svg',
+                                                'نام کاربر:',
+                                                orders.account?.name ?? "نامشخص",
+                                              ),
+                                            // محصول
+                                            funcOrderDetail('assets/svg/product.svg',
+                                                'محصول:', orders.item?.name ?? "نامشخص",
+                                             ),
+                                            //مقدار سفارش
+                                            funcOrderDetail(
+                                                'assets/svg/amount.svg',
+                                                'مقدار سفارش:',
+                                                "${orders.quantity?.toString().seRagham(separator: ",")} ${orders.item?.itemUnit?.name ?? ""}",
+                                              ),
+                                            //قیمت سفارش
+                                            funcOrderDetail(
+                                              'assets/svg/amount-price.svg',
+                                              'قیمت سفارش:',
+                                              (orders.price != null)
+                                                  ? "${orders.price?.toInt().toString().seRagham(separator: ',')} ریال"
+                                                  : "0",
+                                            ),
+                                            // مبلغ کل و نوع سفارش
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                // مبلغ کل
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  children: [
+                                                    SvgPicture.asset(
+                                                      'assets/svg/total-price.svg',
+                                                      colorFilter: ColorFilter.mode(
+                                                          AppColor.textFieldColor,
+                                                          BlendMode.srcIn),
+                                                      width: isDesktop?24:18,
+                                                      height: isDesktop?24:18,
+                                                    ),
+                                                    SizedBox(
+                                                      width: 10,
+                                                    ),
+                                                    Text(
+                                                      'مبلغ کل: ',
+                                                      style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14,
+                                                        fontWeight: FontWeight.bold, ),
+                                                    ),
+                                                    Text(
+                                                      (orders.totalPrice != null)
+                                                          ? "${orders.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
+                                                          : "0",
+                                                      style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14, ),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                                // نوع سفارش
+                                                Row(
+                                                  children: [
+                                                    SizedBox(
+                                                      width: 50,
+                                                      height: 20,
+                                                      child: Card(
+                                                        color: (orders.type == 0)
+                                                            ? AppColor.accentColor
+                                                            : AppColor.primaryColor,
+                                                        margin: EdgeInsets.symmetric(
+                                                            vertical: 0, horizontal: 5),
+                                                        child: Text(
+                                                            (orders.type == 0)
+                                                                ? 'فروش'
+                                                                : 'خرید',
+                                                            style: TextStyle(
+                                                                color:
+                                                                    AppColor.textColor),
+                                                            textAlign: TextAlign.center),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   );
                 }
@@ -400,7 +426,6 @@ class OrderListView extends StatelessWidget {
 
 // ButtonSheet جزئیات سفارش
   void showOrderDetailsSheet(BuildContext context, OrderModel orders) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     showModalBottomSheet(
       enableDrag: true,
       context: context,
@@ -456,19 +481,19 @@ class OrderListView extends StatelessWidget {
                                 showTime: true,
                                 timeSeprator: '-') ??
                             "نامشخص",
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
+                      ),
                     SizedBox(height: 3,),
                     funcOrderDetail(
                         '', 'نام کاربر:', orders.account?.name ?? "نامشخص",
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
+                      ),
                     SizedBox(height: 3,),
                     funcOrderDetail(
                         '', 'محصول:', orders.item?.name ?? "نامشخص",
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
+                      ),
                     SizedBox(height: 3,),
                     funcOrderDetail('', 'مقدار سفارش:',
                         "${orders.quantity?.toString() ?? "0"} ${orders.item?.itemUnit?.name ?? ""}",
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
+                      ),
                     SizedBox(height: 3,),
                     funcOrderDetail(
                       '',
@@ -476,7 +501,7 @@ class OrderListView extends StatelessWidget {
                       (orders.price != null)
                           ? "${orders.price?.toInt().toString().seRagham(separator: ',')} ریال"
                           : "0",
-                        isDesktop: ResponsiveBreakpoints.of(context).isDesktop,
+
                     ),
                     SizedBox(height: 3,),
                     funcOrderDetail(
@@ -485,26 +510,26 @@ class OrderListView extends StatelessWidget {
                       (orders.totalPrice != null)
                           ? "${orders.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
                           : "0",
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,
+
                     ),
                     SizedBox(height: 3,),
                     funcOrderDetail('', 'شماره تماس:',
                         "${orders.account?.contactInfo ?? "0"} ",
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
+                      ),
                     SizedBox(height: 3,),
                     orders.status == 1
                         ? funcOrderDetail('', 'وضعیت:', "تایید شده",
                             color: AppColor.primaryColor,
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,)
+                      )
                         : funcOrderDetail('', 'وضعیت:', "تایید نشده",
                             color: AppColor.accentColor,
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,),
+                      ),
                     SizedBox(height: 3,),
                     orders.type==1
                         ? funcOrderDetail('', 'نوع سفارش:', "خرید",color: AppColor.primaryColor,
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,)
+                      )
                         : funcOrderDetail('', 'نوع سفارش:', "فروش",color: AppColor.accentColor,
-                      isDesktop: ResponsiveBreakpoints.of(context).isDesktop,)
+                      )
                   ],
                 ),
                 Spacer(),
@@ -599,7 +624,6 @@ class OrderListView extends StatelessWidget {
                                     'تایید',
                                     style: AppTextStyle.bodyText,
                                   )));
-                          orderController.fetchOrderList();
                         },
                         style: ButtonStyle(
                             backgroundColor:
@@ -632,7 +656,7 @@ class OrderListView extends StatelessWidget {
                                           AppColor.accentColor)),
                                   onPressed: () {
                                     Get.back();
-                                    orderController.updateStatusOrder(orders.id!, 0);
+                                    orderController.updateStatusOrder(orders.id!, 2);
                                     orderController.fetchOrderList();
                                     Get.back();
                                   },
@@ -664,24 +688,24 @@ class OrderListView extends StatelessWidget {
 
 //
   Widget funcOrderDetail(String iconPath, String label, String value,
-      {Color color = AppColor.textColor,required bool isDesktop}) {
+      {Color color = AppColor.textColor,}) {
     return Row(
       children: [
         SvgPicture.asset(iconPath,
-            width: isDesktop ?24 :18,
-            height: isDesktop ?24 :18,
+            width:18,
+            height:18,
             colorFilter:
                 ColorFilter.mode(AppColor.textFieldColor, BlendMode.srcIn)),
-        SizedBox(width: isDesktop ? 16 : 8),
+        SizedBox(width:8),
         Text(label, style: AppTextStyle.labelText.copyWith(
-          fontSize: isDesktop ? 16 : 14,
+          fontSize:14,
           fontWeight: FontWeight.bold,
         ),
         ),
         SizedBox(width: 7),
         Expanded(
             child: Text(value,
-                style: AppTextStyle.bodyText.copyWith(color: color,fontSize: isDesktop ? 16 : 14))),
+                style: AppTextStyle.bodyText.copyWith(color: color,fontSize:14))),
       ],
     );
   }
@@ -715,4 +739,333 @@ class OrderListView extends StatelessWidget {
     );
   }
 
+  List<DataColumn> buildDataColumns() {
+    return [
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('نام کاربر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('موبایل', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('محصول', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مقدار', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('قیمت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مبلغ کل', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('خرید/فروش', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('وضعیت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('عملیات', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+    ];
+  }
+
+  List<DataRow> buildDataRows(BuildContext context) {
+    return orderController.orderList.map((order) {
+      return DataRow(
+
+        cells: [
+          // تاریخ
+          DataCell(
+              Center(
+                child: Text(
+                  order.date != null
+                      ? order.date?.toPersianDate(
+                      twoDigits: true,
+                      showTime: true,
+                      timeSeprator:
+                      '-') ?? ''
+                      : 'تاریخ نامشخص',
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              )),
+          // نام کاربر
+          DataCell(
+              Center(
+                child: Text(
+                  order.account?.name ?? "",
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              )),
+          // موبایل
+          DataCell(
+              Center(
+                child: Text(
+                  order.account?.contactInfo ?? "",
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              )),
+          // محصول
+          DataCell(
+              Center(
+                child: Text(
+                  order.item?.name ?? "",
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              )),
+          // مقدار
+          DataCell(
+              Center(
+                child: Text(
+                  "${order.quantity?.toString().seRagham(separator: ",")} ${order.item?.itemUnit?.name ?? ""}",
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              )),
+          // قیمت
+          DataCell(
+              Center(
+                child: Text(
+                  "${order.price == null ? 0 : order.price?.toInt().toString().seRagham(separator: ',')} ریال",
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              ),
+          ),
+          //مبلغ کل
+          DataCell(
+            Center(
+              child: Text(
+                (order.totalPrice != null)
+                    ? "${order.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
+                    : "0",
+                style: AppTextStyle.bodyText,
+              ),
+            ),
+          ),
+          // خرید/فروش
+          DataCell(
+            Center(
+              child: SizedBox(
+                width: 50,
+                height: 20,
+                child: Card(
+                  color: (order.type == 0)
+                      ? AppColor.accentColor
+                      : AppColor.primaryColor,
+                  margin: EdgeInsets.symmetric(
+                      vertical: 0, horizontal: 5),
+                  child: Text(
+                      (order.type == 0)
+                          ? 'فروش'
+                          : 'خرید',
+                      style: TextStyle(
+                          color:
+                          AppColor.textColor),
+                      textAlign: TextAlign.center),
+                ),
+              ),
+            ),
+          ),
+          // وضعیت
+          DataCell(
+            Center(
+              child: Column(
+                children: [
+                  SizedBox(height: 5,),
+                  Text(
+                    '${order.status == 0 ? 'نامشخص' : order.status == 1
+                        ? 'تایید شده'
+                        : 'تایید نشده'} ',
+                    style: AppTextStyle
+                        .bodyText.copyWith(
+                      color: order.status == 1
+                          ? AppColor.primaryColor
+                          : order.status == 2
+                          ? AppColor.accentColor
+                          : AppColor.textColor,
+                    ),
+                  ),
+                  SizedBox(height: 6,),
+                  //دکمه تایید سفارش در جزئیات
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.defaultDialog(
+                          backgroundColor: AppColor.backGroundColor,
+                          title: "تایید سفارش",
+                          titleStyle: AppTextStyle.smallTitleText,
+                          middleText: "آیا از تایید سفارش مطمئن هستید؟",
+                          middleTextStyle: AppTextStyle.bodyText,
+                          confirm: ElevatedButton(
+                              style: ButtonStyle(
+                                  backgroundColor: WidgetStatePropertyAll(
+                                      AppColor.primaryColor)),
+                              onPressed: () {
+                                orderController.updateStatusOrder(order.id!, 1);
+                                Get.back();
+                                orderController.fetchOrderList();
+                              },
+                              child: Text(
+                                'تایید',
+                                style: AppTextStyle.bodyText,
+                              )));
+                    },
+                    style: ButtonStyle(
+                        backgroundColor:
+                        WidgetStatePropertyAll(AppColor.primaryColor),
+                        shape: WidgetStatePropertyAll(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4)))),
+                    child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
+                      child: Text(
+                        'تایید',
+                        style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 2,
+                  ),
+                  //دکمه رد سفارش در جزئیات
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.defaultDialog(
+                          backgroundColor: AppColor.backGroundColor,
+                          title: "رد سفارش",
+                          titleStyle: AppTextStyle.smallTitleText,
+                          middleTextStyle: AppTextStyle.bodyText,
+                          middleText: "آیا از رد سفارش مطمئن هستید؟",
+                          confirm: ElevatedButton(
+                              style: ButtonStyle(
+                                  backgroundColor: WidgetStatePropertyAll(
+                                      AppColor.accentColor)),
+                              onPressed: () {
+                                orderController.updateStatusOrder(order.id!, 2);
+                                Get.back();
+                                orderController.fetchOrderList();
+
+                              },
+                              child: Text(
+                                'رد',
+                                style: AppTextStyle.bodyText,
+                              )));
+                    },
+                    style: ButtonStyle(
+                        backgroundColor: WidgetStatePropertyAll(AppColor.accentColor),
+                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4)))),
+                    child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
+                      child: Text('رد',
+                        style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // آیکون های عملیات
+          DataCell(
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  //دکمه حذف سفارش
+                  OutlinedButton(
+                    onPressed: () {
+                      Get.defaultDialog(
+                          backgroundColor: AppColor.backGroundColor,
+                          title: "حذف سفارش",
+                          titleStyle: AppTextStyle.smallTitleText,
+                          middleText: "آیا از حذف سفارش مطمئن هستید؟",
+                          middleTextStyle: AppTextStyle.bodyText,
+                          confirm: ElevatedButton(
+                              style: ButtonStyle(
+                                  backgroundColor: WidgetStatePropertyAll(
+                                      AppColor.primaryColor)),
+                              onPressed: () {
+                                Get.back();
+                                orderController.deleteOrder(order.id!, true);
+                                //orderController.fetchOrderList();
+                                Get.back();
+                              },
+                              child: Text(
+                                'حذف',
+                                style: AppTextStyle.bodyText,
+                              )));
+                      //orderController.fetchOrderList();
+                    },
+                    style: ButtonStyle(
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/svg/trash-bin.svg',
+                      colorFilter: ColorFilter.mode(
+                        AppColor.accentColor, BlendMode.srcIn,),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  //دکمه ادیت جزئیات سفارش
+                  OutlinedButton(
+                    onPressed: () {
+                      Get.back();
+                      Get.toNamed('/orderUpdate',arguments: order);
+                    },
+                    style: ButtonStyle(
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                    child: SvgPicture.asset(
+                      'assets/svg/edit.svg',
+                      colorFilter: ColorFilter.mode(
+                          AppColor.iconViewColor, BlendMode.srcIn),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }).toList();
+  }
+
+  Widget buildPaginationControls() {
+    return Obx(() => Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            icon: Icon(Icons.chevron_left),
+            onPressed: orderController.currentPage.value > 1
+                ? orderController.previousPage
+                : null,
+          ),
+          Text(
+            'صفحه ${orderController.currentPage.value}',
+            style: AppTextStyle.bodyText,
+          ),
+          IconButton(
+            icon: Icon(Icons.chevron_right),
+            onPressed: orderController.hasMore.value
+                ? orderController.nextPage
+                : null,
+          ),
+        ],
+      ),
+    ),
+
+    );
+  }
 }

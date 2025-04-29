@@ -147,12 +147,7 @@ class OrderUpdateController extends GetxController{
       state.value=PageState.list;
       final OrderModel? existingOrder = Get.arguments as OrderModel?;
       if (existingOrder != null && existingOrder.account != null) {
-        final match = accountList.firstWhereOrNull(
-              (a) => a.id == existingOrder.account!.id,
-        );
-        if (match != null) {
-          selectedAccount.value = match;
-        }
+        selectedAccount.value=existingOrder.account;
       }
     }
     catch(e){
@@ -243,6 +238,7 @@ class OrderUpdateController extends GetxController{
     quantityController.text = order.quantity?.toString() ?? '';
     totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
+
 
   }
 

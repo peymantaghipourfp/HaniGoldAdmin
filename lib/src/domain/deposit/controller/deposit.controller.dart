@@ -34,6 +34,7 @@ class DepositController extends GetxController{
 
   final AccountRepository accountRepository=AccountRepository();
   final UploadRepository uploadRepository=UploadRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
   final DepositRepository depositRepository=DepositRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
 
@@ -50,6 +51,7 @@ class DepositController extends GetxController{
 
   final ImagePicker _picker = ImagePicker();
   Rx<XFile?> selectedImage = Rx<XFile?>(null);
+  Rx<XFile?> selectedImageDesktop = Rx<XFile?>(null);
   RxBool isUploading = false.obs;
 
   void setError(String message){
@@ -69,6 +71,25 @@ class DepositController extends GetxController{
     scrollController.dispose();
     super.onClose();
   }
+  void goToPage(int page) {
+    if (page < 1) return;
+    currentPage.value = page;
+    fetchDepositList();
+  }
+
+  void nextPage() {
+    if (hasMore.value) {
+      currentPage.value++;
+      fetchDepositList();
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      fetchDepositList();
+    }
+  }
 
   void setupScrollListener() {
     scrollController.addListener(() {
@@ -81,7 +102,7 @@ class DepositController extends GetxController{
     });
   }
   Future<void> loadMore() async {
-    if (hasMore.value && !isLoading.value) {
+    if (!scrollController.hasClients || hasMore.value && !isLoading.value) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
@@ -124,19 +145,18 @@ class DepositController extends GetxController{
         }
         print("Imaggggge: ${selectedImage}");
   }
-
   Future<void> uploadImage(String recordId, String type, String entityType) async {
     if (selectedImage.value == null) return;
 
     isUploading.value = true;
-    bool success = await uploadRepository.uploadImage(
+    String success = await uploadRepository.uploadImage(
       imageFile: selectedImage.value!,
       recordId: recordId,
       type: type,
       entityType: entityType,
     );
 
-    if (success) {
+    if (success.isNotEmpty) {
       Get.snackbar("موفقیت‌آمیز", "تصویر با موفقیت آپلود شد");
     } else {
       Get.snackbar("خطا", "ارسال تصویر ناموفق بود");
@@ -145,6 +165,39 @@ class DepositController extends GetxController{
     isUploading.value = false;
   }
 
+  Future<void> pickImageDesktop(String recordId, String type, String entityType) async {
+
+      final galleryImage = await _picker.pickImage(source: ImageSource.gallery);
+      if(galleryImage!=null) {
+        selectedImageDesktop.value = galleryImage;
+        await uploadImageDesktop(
+            recordId,
+            type,
+            entityType);
+      }
+
+    print("Imaggggge: ${selectedImageDesktop}");
+  }
+
+  Future<void> uploadImageDesktop(String recordId, String type, String entityType) async {
+    if (selectedImageDesktop.value == null) return;
+    isUploading.value = true;
+    final bytes = await selectedImageDesktop.value.readAsBytes();
+      String success = await uploadRepositoryDesktop.uploadImageDesktop(
+        imageBytes: bytes,
+        fileName: selectedImageDesktop.value.name,
+        recordId: recordId,
+        type: type,
+        entityType: entityType,
+      );
+      if (success.isNotEmpty) {
+        Get.snackbar("موفقیت‌آمیز", "تصویر با موفقیت آپلود شد");
+      }else{
+        Get.snackbar("خطا", "ارسال تصویر ناموفق بود");
+      }
+      isUploading.value = false;
+
+  }
 
   Future<void> searchAccounts(String name) async {
     try {
@@ -179,9 +232,8 @@ class DepositController extends GetxController{
   Future<void> fetchDepositList() async{
     try{
 
-      if (currentPage == 1) {
         depositList.clear();
-      }
+
       isLoading.value = true;
       state.value=PageState.loading;
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
@@ -202,9 +254,10 @@ class DepositController extends GetxController{
           depositList.addAll(fetchedDepositList);
         }
       }
-      depositList.addAll(fetchedDepositList);
       print(depositList.length);
       state.value = depositList.isEmpty ? PageState.empty : PageState.list;
+        depositList.refresh();
+        update();
 
     }catch(e){
       state.value=PageState.err;

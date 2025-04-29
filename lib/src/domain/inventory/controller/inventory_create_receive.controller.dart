@@ -27,7 +27,7 @@ import '../../withdraw/model/predicate.model.dart';
 
 enum PageState{loading,err,empty,list}
 
-class InventoryCreateController extends GetxController{
+class InventoryCreateReceiveController extends GetxController{
 
   final InventoryController inventoryController=Get.find<InventoryController>();
 
@@ -40,7 +40,6 @@ class InventoryCreateController extends GetxController{
   final TextEditingController receiptNumberController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
-  final TextEditingController typeController=TextEditingController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WalletRepository walletRepository=WalletRepository();
@@ -58,7 +57,6 @@ class InventoryCreateController extends GetxController{
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<WalletModel> selectedWalletAccount=Rxn<WalletModel>();
   final Rxn<LaboratoryModel> selectedLaboratory=Rxn<LaboratoryModel>();
-  RxInt selectedTabIndex = 0.obs;
   final RxList<InventoryDetailModel> tempDetails = <InventoryDetailModel>[].obs;
   final RxBool isFinalizing = false.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
@@ -72,9 +70,25 @@ class InventoryCreateController extends GetxController{
     selectedWalletAccount.value = null;
     getWalletAccount(selectedAccount.value?.id ?? 0);
   }
-
+  void updateW750(){
+    if (selectedWalletAccount.value?.item?.itemUnit?.id == 2) {
+      int carat = int.parse(caratController.text.toEnglishDigit())?? 0;
+      double quantity = double.tryParse(quantityController.text.toEnglishDigit()) ?? 0;
+      double w750 = (carat * quantity)/750;
+      weight750Controller.text = w750.toString().toPersianDigit();
+    } else {
+      weight750Controller.clear();
+    }
+  }
   void changeSelectedWalletAccount(WalletModel? newValue) {
     selectedWalletAccount.value = newValue;
+    if (newValue?.item?.itemUnit?.id == 2) {
+    caratController.text = '750';
+    updateW750();
+    } else {
+      weight750Controller.clear();
+      caratController.clear();
+    }
 
     print(selectedWalletAccount.value?.item?.id);
     print(selectedWalletAccount.value?.item?.name);
@@ -87,6 +101,8 @@ class InventoryCreateController extends GetxController{
   void onInit() {
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
+    quantityController.addListener(updateW750);
+    caratController.addListener(updateW750);
     fetchAccountList();
     fetchWalletAccountList();
     fetchLaboratoryList();
@@ -259,7 +275,7 @@ class InventoryCreateController extends GetxController{
         wallet: selectedWalletAccount.value!,
         item: selectedWalletAccount.value!.item!,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
-        type: selectedTabIndex.value,
+        type: 1,
         impurity: double.tryParse(impurityController.text.toEnglishDigit()) ?? 0.0,
         weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
         carat: int.tryParse(caratController.text.toEnglishDigit()) ?? 0,
@@ -297,11 +313,11 @@ class InventoryCreateController extends GetxController{
       isFinalizing.value=true;
 
       String gregorianDate = convertJalaliToGregorian(dateController.text);
-      var response=await inventoryRepository.insertInventory(
+      var response=await inventoryRepository.insertInventoryReceive(
           date: gregorianDate,
           accountId: selectedAccount.value?.id ?? 0,
           accountName: selectedAccount.value?.name ?? "",
-          type: selectedTabIndex.value == 0 ? 1 : 0,
+          type: 1,
           description: descriptionController.text,
         details:tempDetails,
       );

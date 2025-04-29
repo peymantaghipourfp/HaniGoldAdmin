@@ -42,13 +42,32 @@ class OrderController extends GetxController{
 
   @override
   void onInit() {
-    super.onInit();
     fetchOrderList();
     setupScrollListener();
+    super.onInit();
   }
   @override void onClose() {
     scrollController.dispose();
     super.onClose();
+  }
+  void goToPage(int page) {
+    if (page < 1) return;
+    currentPage.value = page;
+    fetchOrderList();
+  }
+
+  void nextPage() {
+    if (hasMore.value) {
+      currentPage.value++;
+      fetchOrderList();
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      fetchOrderList();
+    }
   }
 
   void setupScrollListener() {
@@ -63,7 +82,7 @@ class OrderController extends GetxController{
   }
 
   Future<void> loadMore() async {
-    if (hasMore.value && !isLoading.value) {
+    if (!scrollController.hasClients ||hasMore.value && !isLoading.value) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
@@ -145,13 +164,11 @@ class OrderController extends GetxController{
 
 
 
-  Future<void> fetchOrderList() async{
+  Future<List<OrderModel>> fetchOrderList() async{
     try{
-      if (currentPage == 1) {
         orderList.clear();
-      }
-      isLoading.value = true;
-      //state.value=PageState.loading;
+
+      state.value=PageState.loading;
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedOrderList=await orderRepository.getOrderList(
@@ -172,12 +189,14 @@ class OrderController extends GetxController{
       }
 
       state.value = orderList.isEmpty ? PageState.empty : PageState.list;
-
+        orderList.refresh();
+        update();
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
       isLoading.value=false;
+      return orderList;
     }
   }
 

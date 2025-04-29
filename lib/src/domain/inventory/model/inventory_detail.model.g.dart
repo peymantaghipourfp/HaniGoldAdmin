@@ -26,6 +26,7 @@ InventoryDetailModel _$InventoryDetailModelFromJson(
       quantity: (json['quantity'] as num?)?.toDouble(),
       impurity: (json['impurity'] as num?)?.toDouble(),
       weight750: (json['weight750'] as num?)?.toDouble(),
+      quantityRemainded: (json['quantityRemainded'] as num?)?.toDouble(),
       carat: (json['carat'] as num?)?.toInt(),
       receiptNumber: json['receiptNumber'] as String?,
       price: (json['price'] as num?)?.toInt(),
@@ -47,6 +48,8 @@ InventoryDetailModel _$InventoryDetailModelFromJson(
           : DateTime.parse(json['modifiedOn'] as String),
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
+      description: json['description'] as String?,
+      inputItemId: (json['inputItemId'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$InventoryDetailModelToJson(
@@ -60,6 +63,7 @@ Map<String, dynamic> _$InventoryDetailModelToJson(
       'quantity': instance.quantity,
       'impurity': instance.impurity,
       'weight750': instance.weight750,
+      'quantityRemainded': instance.quantityRemainded,
       'carat': instance.carat,
       'receiptNumber': instance.receiptNumber,
       'price': instance.price,
@@ -75,6 +79,8 @@ Map<String, dynamic> _$InventoryDetailModelToJson(
       'modifiedOn': instance.modifiedOn?.toIso8601String(),
       'recId': instance.recId,
       'infos': instance.infos,
+      'description': instance.description,
+      'inputItemId': instance.inputItemId,
     };
 
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(

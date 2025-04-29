@@ -27,7 +27,7 @@ import '../../withdraw/model/predicate.model.dart';
 
 enum PageState{loading,err,empty,list}
 
-class InventoryDetailInsertController extends GetxController{
+class InventoryCreatePaymentController extends GetxController{
 
   final InventoryController inventoryController=Get.find<InventoryController>();
 
@@ -41,7 +41,6 @@ class InventoryDetailInsertController extends GetxController{
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
   final TextEditingController typeController=TextEditingController();
-  final TextEditingController accountController=TextEditingController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WalletRepository walletRepository=WalletRepository();
@@ -51,27 +50,25 @@ class InventoryDetailInsertController extends GetxController{
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<WalletModel> walletAccountList=<WalletModel>[].obs;
   final List<LaboratoryModel> laboratoryList=<LaboratoryModel>[].obs;
+  final List<InventoryDetailModel> forPaymentList=<InventoryDetailModel>[].obs;
 
-  Rx<PageState> stateGetOne=Rx<PageState>(PageState.list);
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
 
-  final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
-  var typeId=0.obs;
-  var inventoryId=0.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<WalletModel> selectedWalletAccount=Rxn<WalletModel>();
   final Rxn<LaboratoryModel> selectedLaboratory=Rxn<LaboratoryModel>();
-  RxInt selectedTabIndex = 0.obs;
-  //final RxList<InventoryDetail> tempDetails = <InventoryDetail>[].obs;
+  final Rxn<InventoryDetailModel> selectedInputItem=Rxn<InventoryDetailModel>();
+  final RxList<InventoryDetailModel> tempDetails = <InventoryDetailModel>[].obs;
+  final RxBool isFinalizing = false.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   Timer? debounce;
   RxList<LaboratoryModel> searchedLaboratories = <LaboratoryModel>[].obs;
   RxInt editingIndex = RxInt(-1);
   RxBool isEditing = false.obs;
-  var accountId=0.obs;
-  var accountName=''.obs;
+  final RxSet<int> selectedForPaymentId = RxSet<int>();
+  RxInt selectedLaboratoryId = RxInt(0);
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -81,6 +78,9 @@ class InventoryDetailInsertController extends GetxController{
 
   void changeSelectedWalletAccount(WalletModel? newValue) {
     selectedWalletAccount.value = newValue;
+    selectedLaboratoryId.value = 0;
+    searchLaboratoryController.clear();
+    fetchForPaymentList();
 
     print(selectedWalletAccount.value?.item?.id);
     print(selectedWalletAccount.value?.item?.name);
@@ -89,31 +89,33 @@ class InventoryDetailInsertController extends GetxController{
     selectedLaboratory.value=newValue;
   }
 
-  @override
-  void onInit() async{
+  void selectQuantity(double quantity){
+    quantityController.text=quantity.toString();
+    update();
+  }
 
-    final InventoryModel? inventory = Get.arguments;
-    if(inventory!=null){
-      inventoryId.value=inventory.id ?? 0;
-      typeId.value=inventory.type ?? 0;
-      dateController.text=inventory.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
-      accountId.value = inventory.account!.id!;
-      accountName.value = inventory.account!.name!;
-      getWalletAccount(accountId.value);
+  void updateTempDetailQuantity(int index, double newQuantity) {
+    if (index >= 0 && index < tempDetails.length) {
+      final oldDetail = tempDetails[index];
+      final newDetail = oldDetail.copyWith(quantity: newQuantity);
+      tempDetails[index] = newDetail;
     }
+  }
 
+
+
+  @override
+  void onInit() {
     searchController.addListener(onSearchChanged);
-    searchLaboratoryController.addListener(onSearchLaboratoryChanged);
     fetchAccountList();
     fetchWalletAccountList();
-    fetchLaboratoryList();
+    fetchForPaymentList();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text =
     "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     super.onInit();
   }
-
   @override
   void onClose() {
     debounce?.cancel();
@@ -217,101 +219,129 @@ class InventoryDetailInsertController extends GetxController{
   }
 
   // لیست آزمایشگاه ها
-  Future<void> fetchLaboratoryList()async{
-    try{
-      state.value=PageState.loading;
-      var fetchedLaboratoryList=await laboratoryRepository.getLaboratoryList();
-      laboratoryList.assignAll(fetchedLaboratoryList);
-      searchedLaboratories.assignAll(fetchedLaboratoryList);
-      state.value=PageState.list;
-      if(walletAccountList.isEmpty){
-        state.value=PageState.empty;
-      }
-    }
-    catch(e){
-      state.value=PageState.err;
-      errorMessage.value=e.toString();
-    }
-  }
-  void onSearchLaboratoryChanged(){
-    if (debounce?.isActive ?? false) debounce!.cancel();
-    debounce=Timer(const Duration(milliseconds: 500), () async {
-      final query = searchLaboratoryController.text.trim();
-      if (query.isEmpty) {
-        searchedLaboratories.assignAll(laboratoryList);
-        state.value = PageState.list;
-        return;
-      }
-      await searchLaboratoryList(query);
 
-    });
-  }
-  Future<void> searchLaboratoryList(String name) async {
+
+  Future<void> searchLaboratory(String name) async {
     try {
       isLoading.value = true;
       if (name.isEmpty) {
-        searchedLaboratories.assignAll(laboratoryList);
-        state.value = PageState.list;
-        return;
+        searchedLaboratories.clear();
       }
-      final results = await laboratoryRepository.searchLaboratoryList(name);
-      searchedLaboratories.assignAll(results);
-      state.value = searchedLaboratories.isEmpty ? PageState.empty : PageState.list;
+      final laboratory = await laboratoryRepository.searchLaboratoryList(name);
+      searchedLaboratories.assignAll(laboratory);
     } catch (e) {
       Get.snackbar('خطا', 'خطا در جستجوی آزمایشگاه');
     } finally {
       isLoading.value = false;
     }
   }
+  void selectLaboratory(LaboratoryModel laboratory) {
 
+    selectedLaboratoryId.value = laboratory.id!;
+    searchLaboratoryController.text = laboratory.name!;
+    Get.back(); // Close search dialog
+    fetchForPaymentList();
+  }
 
-  Future<void> fetchGetOneInventory(int id)async{
-    try {
-      stateGetOne.value=PageState.loading;
-      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
-      if(fetchedGetOneInventory!=null){
-        getOneInventory.value = fetchedGetOneInventory;
-        stateGetOne.value=PageState.list;
-      }else{
-        stateGetOne.value=PageState.empty;
+  void clearSearch() {
+
+    selectedLaboratoryId.value = 0;
+    searchLaboratoryController.clear();
+    searchedLaboratories.clear();
+    fetchForPaymentList();
+  }
+
+  // لیست دریافتی ها
+  Future<void> fetchForPaymentList()async{
+    try{
+      isLoading.value=true;
+      state.value=PageState.loading;
+      var fetchedForPaymentList=await inventoryRepository.getForPaymentlist(
+          itemId:selectedWalletAccount.value?.item?.id ?? 0,
+        laboratoryId: selectedLaboratoryId.value == 0
+            ? null :selectedLaboratoryId.value
+      );
+      forPaymentList.assignAll(fetchedForPaymentList);
+      state.value=PageState.list;
+      if(forPaymentList.isEmpty){
+        state.value=PageState.empty;
       }
     }
     catch(e){
-      stateGetOne.value=PageState.err;
-      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
+      state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      isLoading.value=false;
     }
   }
 
-  Future<InventoryModel?> insertInventoryDetail()async{
-    try{
-      isLoading.value=true;
-      String gregorianDate = convertJalaliToGregorian(dateController.text);
-      print(inventoryId.value);
-      print(accountName.value);
-      var response=await inventoryRepository.insertDetailInventory(
-        id: inventoryId.value,
-        date: gregorianDate,
-        accountId: accountId.value,
-        accountName: accountName.value,
-        type: typeId.value,
-        description: descriptionController.text,
-        walletId: selectedWalletAccount.value?.id ?? 0,
-        itemId: selectedWalletAccount.value!.item?.id ?? 0,
-        itemName: selectedWalletAccount.value?.item?.name ?? '',
+// لیست موقت فاکتور
+  Future<void> addToTempList() async {
+    try {
+      if (selectedAccount.value == null ||
+          selectedWalletAccount.value == null ||
+          quantityController.text.isEmpty) {
+        throw ErrorException('لطفا فیلدهای ضروری را پر کنید');
+      }
+
+      final newDetail = InventoryDetailModel(
+        wallet: selectedWalletAccount.value!,
+        item: selectedWalletAccount.value!.item!,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
+        type: 0,
         impurity: double.tryParse(impurityController.text.toEnglishDigit()) ?? 0.0,
         weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
         carat: int.tryParse(caratController.text.toEnglishDigit()) ?? 0,
         receiptNumber: receiptNumberController.text,
+        laboratory: selectedLaboratory.value,
         stateMode : 1,
-        laboratoryName: selectedLaboratory.value?.name ?? '',
-        laboratoryId: selectedLaboratory.value?.id ?? 0,
+        inputItemId: selectedInputItem.value?.id,
+      );
 
+      tempDetails.add(newDetail);
+      if (selectedInputItem.value?.id != null &&
+          !selectedForPaymentId.contains(selectedInputItem.value!.id)) {
+        selectedForPaymentId.add(selectedInputItem.value!.id!);
+      }
+      // ریست کردن فیلدها
+      /*quantityController.clear();
+      receiptNumberController.clear();
+      descriptionController.clear();
+      impurityController.clear();
+      weight750Controller.clear();
+      caratController.clear();
+      selectedWalletAccount.value = null;
+      selectedLaboratory.value=null;*/
+
+      Get.snackbar("موفق", "آیتم به لیست موقت اضافه شد");
+
+    } catch (e) {
+      throw ErrorException('خطا در افزودن آیتم: ${e.toString()}');
+    }
+  }
+
+  Future<InventoryModel?> submitFinalInventory()async{
+    try{
+      if (tempDetails.isEmpty) {
+        throw ErrorException('لیست آیتم‌ها خالی است');
+      }
+      isLoading.value=true;
+      isFinalizing.value=true;
+
+      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      var response=await inventoryRepository.insertInventoryPayment(
+        date: gregorianDate,
+        accountId: selectedAccount.value?.id ?? 0,
+        accountName: selectedAccount.value?.name ?? "",
+        type: 0,
+        description: descriptionController.text,
+        details:tempDetails,
       );
       print(response);
       if (response != null) {
         Get.back();
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
+        tempDetails.clear();
+        Get.snackbar("موفقیت آمیز", "ثبت نهایی انجام شد",
           titleText: Text('موفقیت آمیز',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
@@ -319,6 +349,7 @@ class InventoryDetailInsertController extends GetxController{
             'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
+        inventoryController.fetchInventoryList();
         Get.back();
         clearList();
       }
@@ -326,9 +357,11 @@ class InventoryDetailInsertController extends GetxController{
       throw ErrorException('خطا:$e');
     }finally{
       isLoading.value=false;
+      isFinalizing.value=false;
     }
     return null;
   }
+
   void clearList() {
     dateController.clear();
     quantityController.clear();
@@ -341,7 +374,8 @@ class InventoryDetailInsertController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     var now = Jalali.now();
-    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    DateTime date=DateTime.now();
+    dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
   }
   void resetFieldsForTab(int tabIndex) {
     //dateController.clear();
@@ -355,7 +389,16 @@ class InventoryDetailInsertController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     var now = Jalali.now();
-    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    DateTime date=DateTime.now();
+    dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+  }
+  void clearItemFields() {
+    quantityController.clear();
+    impurityController.clear();
+    weight750Controller.clear();
+    caratController.clear();
+    receiptNumberController.clear();
+    selectedLaboratory.value = null;
   }
   void resetAccountSearch() {
     searchController.clear();

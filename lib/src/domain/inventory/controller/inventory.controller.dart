@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -25,6 +26,7 @@ class InventoryController extends GetxController{
 
 
   final UploadRepository uploadRepository=UploadRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
   final InventoryRepository inventoryRepository=InventoryRepository();
   final AccountRepository accountRepository=AccountRepository();
   final TextEditingController searchController=TextEditingController();
@@ -38,12 +40,17 @@ class InventoryController extends GetxController{
   RxnInt expandedIndex = RxnInt();
 
   final ImagePicker _picker = ImagePicker();
-  RxList<File> selectedImages = RxList<File>();
+  RxList<File?> selectedImages = RxList<File?>();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
   RxList<bool> uploadStatuses = RxList<bool>();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploading = false.obs;
-
+  RxBool isUploadingDesktop = false.obs;
+  List<Uint8List> selectedImagesBytes = [];
+  List<String> selectedFileNames = [];
   final PageController pageController = PageController();
   RxInt currentImagePage = 0.obs;
+  RxBool showArrows = false.obs;
 
   final RxMap<int , InventoryModel> getOneInventory=<int , InventoryModel>{}.obs;
 
@@ -76,6 +83,25 @@ class InventoryController extends GetxController{
     scrollController.dispose();
     super.onClose();
   }
+  void goToPage(int page) {
+    if (page < 1) return;
+    currentPage.value = page;
+    fetchInventoryList();
+  }
+
+  void nextPage() {
+    if (hasMore.value) {
+      currentPage.value++;
+      fetchInventoryList();
+    }
+  }
+
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      fetchInventoryList();
+    }
+  }
 
   void setupScrollListener() {
     scrollController.addListener(() {
@@ -88,7 +114,7 @@ class InventoryController extends GetxController{
     });
   }
   Future<void> loadMore() async {
-    if (hasMore.value && !isLoading.value ) {
+    if (!scrollController.hasClients ||hasMore.value && !isLoading.value ) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
@@ -103,14 +129,6 @@ class InventoryController extends GetxController{
           inventoryList.addAll(fetchedInventoryList);
           currentPage.value = nextPage;
           hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (scrollController.hasClients &&
-                scrollController.position.maxScrollExtent == scrollController.position.pixels &&
-                hasMore.value &&
-                !isLoading.value) {
-              loadMore();
-            }
-          });
         } else {
           hasMore.value = false;
         }
@@ -156,11 +174,10 @@ class InventoryController extends GetxController{
 
   Future<void> fetchInventoryList()async{
     try{
-      if (currentPage == 1) {
         inventoryList.clear();
-      }
+
       isLoading.value = true;
-      //state.value=PageState.loading;
+      state.value=PageState.loading;
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedInventoryList=await inventoryRepository.getInventoryList(
@@ -181,16 +198,8 @@ class InventoryController extends GetxController{
       }
 
       state.value = inventoryList.isEmpty ? PageState.empty : PageState.list;
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients &&
-            scrollController.position.pixels == 0 &&
-            hasMore.value &&
-            !isLoading.value) {
-          loadMore();
-        }
-      });
-
+        inventoryList.refresh();
+        update();
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -198,6 +207,7 @@ class InventoryController extends GetxController{
       isLoading.value=false;
     }
   }
+
 
   Future<void> fetchGetOneInventory(int id)async{
     try {
@@ -306,14 +316,14 @@ class InventoryController extends GetxController{
     try {
       for (int i = 0; i < selectedImages.length; i++) {
         try {
-          bool success = await uploadRepository.uploadImage(
-            imageFile: selectedImages[i],
+          String success = await uploadRepository.uploadImage(
+            imageFile: selectedImages[i]!,
             recordId: recordId,
             type: type,
             entityType: entityType,
           );
 
-          uploadStatuses[i] = success;
+          uploadStatuses[i] = success as bool;
         } catch (e) {
           Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
         }
@@ -330,4 +340,112 @@ class InventoryController extends GetxController{
     }
   }
 
+
+  /*Future<void> pickImagesDesktop(String recordId, String type, String entityType,{required int inventoryId}) async {
+    final ImagePicker picker = ImagePicker();
+
+    try {
+      List<XFile>? pickedFiles = await picker.pickMultiImage();
+
+      if (pickedFiles != null && pickedFiles.isNotEmpty) {
+        for (XFile file in pickedFiles) {
+          Uint8List bytes = await file.readAsBytes();
+          selectedImagesBytes.add(bytes);
+          selectedFileNames.add(file.name);
+        }
+      }
+    } catch (e) {
+      print('خطا در انتخاب تصاویر: $e');
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }*/
+
+  /*Future<List<String>> uploadImagesDesktop({
+    required String recordId,
+    required String type,
+    required String entityType,
+    required int inventoryId,
+  }) async {
+    if (selectedImagesBytes.isEmpty) {
+      throw Exception('هیچ تصویری انتخاب نشده است');
+    }
+
+    List<Future<String>> uploadFutures = [];
+
+    for (int i = 0; i < selectedImagesBytes.length; i++) {
+      uploadFutures.add(
+        uploadRepositoryDesktop.uploadImageDesktop(
+          imageBytes: selectedImagesBytes[i],
+          fileName: selectedFileNames[i],
+          recordId: recordId,
+          type: type,
+          entityType: entityType,
+        ),
+      );
+    }
+
+    try {
+      final List<String> responses = await Future.wait(uploadFutures);
+      clearSelections();
+      return responses;
+    } catch (e) {
+      print('خطا در آپلود دسته‌ای: $e');
+      throw Exception('برخی از آپلودها با خطا مواجه شدند');
+    }
+  }
+
+  void clearSelections() {
+    selectedImagesBytes.clear();
+    selectedFileNames.clear();
+  }*/
+
+  Future<void> pickImageDesktop(String recordId, String type, String entityType,{required int inventoryId}) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images != null && images.isNotEmpty) {
+        selectedImagesDesktop.assignAll(images);
+        await uploadImagesDesktop(recordId, type, entityType, inventoryId);
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+
+  }
+
+  Future<void> uploadImagesDesktop(String recordId, String type, String entityType,int inventoryId) async {
+    if (selectedImagesDesktop.isEmpty) return;
+
+    isUploadingDesktop.value = true;
+    uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+
+    try {
+      for (int i = 0; i < selectedImagesDesktop.length; i++) {
+        final file = selectedImagesDesktop[i];
+        if(file!=null) {
+          try{
+            final bytes = await file.readAsBytes();
+            String success = await uploadRepositoryDesktop.uploadImageDesktop(
+              imageBytes: bytes,
+              fileName: file.name,
+              recordId: recordId,
+              type: type,
+              entityType: entityType,
+            );
+
+            uploadStatusesDesktop[i] = success.isNotEmpty;
+          }catch(e){
+            Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+          }
+        }
+      }
+      if (uploadStatusesDesktop.every((status) => status)) {
+        Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+        await fetchGetOneInventory(inventoryId);
+      }
+    } finally {
+      isUploadingDesktop.value = false;
+      selectedImagesDesktop.clear();
+      uploadStatusesDesktop.clear();
+    }
+  }
 }

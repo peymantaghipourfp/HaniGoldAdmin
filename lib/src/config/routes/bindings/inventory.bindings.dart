@@ -2,15 +2,17 @@
 
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory.controller.dart';
-import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create.controller.dart';
-import 'package:hanigold_admin/src/domain/inventory/controller/inventory_detail_insert.controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/controller/inventory_detail_insert_receive.controller.dart';
 
-import '../../../domain/inventory/controller/inventory_update.controller.dart';
+import '../../../domain/inventory/controller/inventory_create_payment.controller.dart';
+import '../../../domain/inventory/controller/inventory_update_receive.controller.dart';
 
 class InventoryBindings implements Bindings{
   @override
   void dependencies() {
-    Get.lazyPut(()=>InventoryCreateController());
+    Get.lazyPut(()=>InventoryCreateReceiveController());
+    Get.lazyPut(()=>InventoryCreatePaymentController());
     Get.lazyPut(()=>InventoryController());
     Get.lazyPut(()=>InventoryUpdateController());
     Get.lazyPut(()=>InventoryDetailInsertController());

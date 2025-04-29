@@ -716,60 +716,103 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                                 // نمایش عکس
                                                                                                 GestureDetector(
                                                                                                   onTap: () {
-                                                                                                    int attachIndex=getOneDeposit!.attachments!.isNotEmpty ? 0 : -1;
-                                                                                                    if (getOneDeposit.attachments != null && getOneDeposit.attachments!.isNotEmpty) {
-                                                                                                      String imageUrl =
-                                                                                                          "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${getOneDeposit.attachments?[attachIndex].guidId}";
-                                                                                                      showDialog(
-                                                                                                        context: context,
-                                                                                                        builder: (BuildContext context) {
-                                                                                                          return Dialog(
-                                                                                                            shape: RoundedRectangleBorder(
-                                                                                                              borderRadius: BorderRadius.circular(10),
-                                                                                                            ),
-                                                                                                            child: Container(
-                                                                                                              padding: EdgeInsets.all(8),
-                                                                                                              child: Column(
-                                                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                                                children: [
-                                                                                                                  Image.network(
-                                                                                                                    imageUrl,
-                                                                                                                    loadingBuilder: (context, child, loadingProgress) {
-                                                                                                                      if (loadingProgress == null) return child;
-                                                                                                                      return Center(
-                                                                                                                        child: CircularProgressIndicator(color: AppColor.secondaryColor,),
+                                                                                                    if (getOneDeposit?.attachments == null ||
+                                                                                                        getOneDeposit!.attachments!.isEmpty) {
+                                                                                                      Get
+                                                                                                          .snackbar(
+                                                                                                          'پیغام',
+                                                                                                          'تصویری ثبت نشده است');
+                                                                                                      return;
+                                                                                                    }
+
+                                                                                                    showDialog(
+                                                                                                      context: context,
+                                                                                                      builder: (
+                                                                                                          BuildContext context) {
+                                                                                                        return Dialog(
+                                                                                                          backgroundColor: AppColor.backGroundColor,
+                                                                                                          shape: RoundedRectangleBorder(
+                                                                                                            borderRadius: BorderRadius.circular(10),
+                                                                                                          ),
+                                                                                                          child: Container(
+                                                                                                            padding: EdgeInsets.all(8),
+                                                                                                            child: Column(
+                                                                                                              mainAxisSize: MainAxisSize.min,
+                                                                                                              children: [
+                                                                                                                SizedBox(
+                                                                                                                  width: 500,
+                                                                                                                  height: 500,
+                                                                                                                  child: PageView.builder(
+                                                                                                                    itemCount: getOneDeposit.attachments!.length,
+                                                                                                                    itemBuilder: (context, index) {
+                                                                                                                      final attachment = getOneDeposit.attachments![index];
+                                                                                                                      return Image.network(
+                                                                                                                        "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
+                                                                                                                        loadingBuilder: (context,
+                                                                                                                            child,
+                                                                                                                            loadingProgress) {
+                                                                                                                          if (loadingProgress ==
+                                                                                                                              null) {
+                                                                                                                            return child;
+                                                                                                                          }
+                                                                                                                          return Center(
+                                                                                                                            child: CircularProgressIndicator(),
+                                                                                                                          );
+                                                                                                                        },
+                                                                                                                        errorBuilder: (context, error, stackTrace) =>
+                                                                                                                            Icon(Icons.error,
+                                                                                                                                color: Colors.red),
+                                                                                                                        fit: BoxFit.contain,
                                                                                                                       );
                                                                                                                     },
-                                                                                                                    errorBuilder: (context, error, stackTrace) =>
-                                                                                                                        Text('خطا در بارگذاری تصویر'),
                                                                                                                   ),
-                                                                                                                  SizedBox(height: 10),
-                                                                                                                  TextButton(
-                                                                                                                    onPressed: () {
-                                                                                                                      Get.back();
-                                                                                                                    },
-                                                                                                                    child: Text("بستن"),
-                                                                                                                  ),
-                                                                                                                ],
-                                                                                                              ),
+                                                                                                                ),
+
+                                                                                                                SizedBox(
+                                                                                                                    height: 10),
+                                                                                                                TextButton(
+                                                                                                                  onPressed: () =>
+                                                                                                                      Get
+                                                                                                                          .back(),
+                                                                                                                  child: Text(
+                                                                                                                    "بستن",
+                                                                                                                    style: AppTextStyle
+                                                                                                                        .bodyText,),
+                                                                                                                ),
+                                                                                                              ],
                                                                                                             ),
-                                                                                                          );
-                                                                                                        },
-                                                                                                      );
-                                                                                                    }else {
-                                                                                                      Get.snackbar('پیغام', 'تصویری ثبت نشده است');
-                                                                                                    }
+                                                                                                          ),
+                                                                                                        );
+                                                                                                      },
+                                                                                                    );
                                                                                                   },
                                                                                                   child: Row(
                                                                                                     children: [
-                                                                                                      Text('عکس  ',style: AppTextStyle.bodyText.copyWith(color: AppColor.iconViewColor),),
-                                                                                                      SizedBox(width: 25,height: 25,
-                                                                                                        child: SvgPicture.asset(
-                                                                                                            'assets/svg/picture.svg',
-                                                                                                            colorFilter: ColorFilter
-                                                                                                                .mode(AppColor
+                                                                                                      Text(
+                                                                                                        'عکس (${getOneDeposit
+                                                                                                            ?.attachments
+                                                                                                            ?.length ??
+                                                                                                            0}) ',
+                                                                                                        style: AppTextStyle
+                                                                                                            .bodyText
+                                                                                                            .copyWith(
+                                                                                                            color: AppColor
+                                                                                                                .iconViewColor
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                      SizedBox(
+                                                                                                        width: 25,
+                                                                                                        height: 25,
+                                                                                                        child: SvgPicture
+                                                                                                            .asset(
+                                                                                                          'assets/svg/picture.svg',
+                                                                                                          colorFilter: ColorFilter
+                                                                                                              .mode(
+                                                                                                            AppColor
                                                                                                                 .iconViewColor,
-                                                                                                              BlendMode.srcIn,)
+                                                                                                            BlendMode
+                                                                                                                .srcIn,
+                                                                                                          ),
                                                                                                         ),
                                                                                                       ),
                                                                                                     ],

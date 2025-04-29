@@ -1,9 +1,10 @@
 
 
 import 'dart:io';
-
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
+import 'package:image_picker/image_picker.dart';
 
 class UploadRepository{
 
@@ -14,7 +15,7 @@ class UploadRepository{
 
   }
 
-  Future<bool> uploadImage({
+  Future<String> uploadImage({
     required File imageFile,
     required String recordId,
     required String type,
@@ -25,26 +26,65 @@ class UploadRepository{
 
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(imageFile.path, filename: fileName),
-        "recordId": recordId,
-        "type": type,
-        "entityType": entityType,
       });
       print(fileName);
       print(recordId);
       print(type);
       print(entityType);
-      final response = await uploadDio.get("Attachment/uploadAttachment", data: formData,
+      final response = await uploadDio.post("Attachment/uploadAttachment", data: formData,
         options: Options(headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": "multipart/form-data","recordId": recordId, "type": type, "entityType": entityType,
         },
       ),
       );
       print(response.data);
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
+        return response.data;
       } else {
         throw Exception("خطا در ارسال تصویر: ${response.statusMessage}");
       }
+  }
+}
+
+class UploadRepositoryDesktop{
+
+  final Dio uploadDio=Dio();
+
+  UploadRepositoryDesktop(){
+    uploadDio.options.baseUrl=BaseUrl.baseUrl;
+  }
+
+  Future<String> uploadImageDesktop({
+    required Uint8List imageBytes,
+    required String fileName,
+    required String recordId,
+    required String type,
+    required String entityType,
+  }) async {
+
+    final multipartFile = MultipartFile.fromBytes(
+      imageBytes,
+      filename: fileName,
+    );
+    FormData formData = FormData.fromMap({
+      "file": multipartFile,
+    });
+    print(fileName);
+    print(recordId);
+    print(type);
+    print(entityType);
+    final response = await uploadDio.post("Attachment/uploadAttachment", data: formData,
+      options: Options(headers: {
+        "Content-Type": "multipart/form-data","recordId": recordId, "type": type, "entityType": entityType,
+      },
+      ),
+    );
+    print(response.data);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data;
+    } else {
+      throw Exception("خطا در ارسال تصویر: ${response.statusMessage}");
+    }
 
   }
 }

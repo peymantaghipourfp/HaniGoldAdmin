@@ -154,6 +154,7 @@ class OrderCreateController extends GetxController{
       if(accountList.isEmpty){
         state.value=PageState.empty;
       }
+      print('تعداد :${accountList.length}');
     }
     catch(e){
       state.value=PageState.err;

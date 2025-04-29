@@ -32,6 +32,8 @@ class InventoryDetailModel {
   final double? impurity;
   @JsonKey(name: "weight750")
   final double? weight750;
+  @JsonKey(name: "quantityRemainded")
+  final double? quantityRemainded;
   @JsonKey(name: "carat")
   final int? carat;
   @JsonKey(name: "receiptNumber")
@@ -62,6 +64,10 @@ class InventoryDetailModel {
   final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "description")
+  final String? description;
+  @JsonKey(name: "inputItemId")
+  final int? inputItemId;
 
   InventoryDetailModel({
     this.inventoryId,
@@ -72,6 +78,7 @@ class InventoryDetailModel {
     this.quantity,
     this.impurity,
     this.weight750,
+    this.quantityRemainded,
     this.carat,
     this.receiptNumber,
     this.price,
@@ -87,7 +94,67 @@ class InventoryDetailModel {
     this.modifiedOn,
     this.recId,
     this.infos,
+    this.description,
+    this.inputItemId
   });
+
+  InventoryDetailModel copyWith({
+    int? inventoryId,
+    WalletModel? wallet,
+    ItemModel? item,
+    LaboratoryModel? laboratory,
+    ItemUnitModel? itemUnit,
+    double? quantity,
+    double? impurity,
+    double? weight750,
+    double? quantityRemainded,
+    int? carat,
+    String? receiptNumber,
+    int? price,
+    int? totalPrice,
+    int? type,
+    bool? isDeleted,
+    List<Attachment>? attachments,
+    int? rowNum,
+    int? id,
+    String? attribute,
+    int? stateMode,
+    DateTime? createdOn,
+    DateTime? modifiedOn,
+    String? recId,
+    List<dynamic>? infos,
+    String? description,
+    int? inputItemId,
+  }) {
+    return InventoryDetailModel(
+      inventoryId: inventoryId ?? this.inventoryId,
+      wallet: wallet ?? this.wallet,
+      item: item ?? this.item,
+      laboratory: laboratory ?? this.laboratory,
+      itemUnit: itemUnit ?? this.itemUnit,
+      quantity: quantity ?? this.quantity,
+      impurity: impurity ?? this.impurity,
+      weight750: weight750 ?? this.weight750,
+      quantityRemainded: quantityRemainded ?? this.quantityRemainded,
+      carat: carat ?? this.carat,
+      receiptNumber: receiptNumber ?? this.receiptNumber,
+      price: price ?? this.price,
+      totalPrice: totalPrice ?? this.totalPrice,
+      type: type ?? this.type,
+      isDeleted: isDeleted ?? this.isDeleted,
+      attachments: attachments ?? this.attachments,
+      rowNum: rowNum ?? this.rowNum,
+      id: id ?? this.id,
+      attribute: attribute ?? this.attribute,
+      stateMode: stateMode ?? this.stateMode,
+      createdOn: createdOn ?? this.createdOn,
+      modifiedOn: modifiedOn ?? this.modifiedOn,
+      recId: recId ?? this.recId,
+      infos: infos ?? this.infos,
+      description: description ?? this.description,
+      inputItemId: inputItemId ?? this.inputItemId,
+    );
+  }
 
   factory InventoryDetailModel.fromJson(Map<String, dynamic> json) => _$InventoryDetailModelFromJson(json);
 

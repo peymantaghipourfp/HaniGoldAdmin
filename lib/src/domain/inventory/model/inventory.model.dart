@@ -39,6 +39,8 @@ class InventoryModel {
   final List<dynamic>? infos;
   @JsonKey(name: "description")
   final String? description;
+  @JsonKey(name: "inventoryDetailsCount")
+  final int? inventoryDetailsCount;
 
   InventoryModel({
     required this.date,
@@ -54,6 +56,7 @@ class InventoryModel {
     required this.recId,
     required this.infos,
     required this.description,
+    required this.inventoryDetailsCount
   });
 
   factory InventoryModel.fromJson(Map<String, dynamic> json) => _$InventoryModelFromJson(json);

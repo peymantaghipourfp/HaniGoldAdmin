@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create.controller.dart';
-import 'package:hanigold_admin/src/domain/inventory/controller/inventory_update.controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/controller/inventory_update_receive.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -14,14 +14,14 @@ import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 
-class InventoryDetailUpdateView extends StatefulWidget {
-  const InventoryDetailUpdateView({super.key});
+class InventoryDetailUpdateReceiveView extends StatefulWidget {
+  const InventoryDetailUpdateReceiveView({super.key});
 
   @override
-  State<InventoryDetailUpdateView> createState() => _InventoryDetailUpdateViewState();
+  State<InventoryDetailUpdateReceiveView> createState() => _InventoryDetailUpdateReceiveViewState();
 }
 
-class _InventoryDetailUpdateViewState extends State<InventoryDetailUpdateView> with TickerProviderStateMixin {
+class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdateReceiveView> with TickerProviderStateMixin {
   InventoryUpdateController inventoryUpdateController = Get.find<InventoryUpdateController>();
   final InventoryDetailModel inventorDetail= Get.arguments as InventoryDetailModel;
 
