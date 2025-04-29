@@ -237,13 +237,11 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                   ],
                                 ),
                                 const Divider(height: 10.0,color: Colors.white,thickness: 0.2,),
-
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
-
                                         Text(
                                           'تراز کل',
                                           style: AppTextStyle.labelText.copyWith(fontSize: 14,
