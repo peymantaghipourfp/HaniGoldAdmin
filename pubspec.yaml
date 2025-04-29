@@ -51,6 +51,7 @@ dependencies:
   shamsi_date: ^1.0.4
   flutter_datetime_picker_plus: ^2.2.0
   data_table_2: ^2.6.0
+  pluto_grid: ^8.0.0
 
 
 dev_dependencies:
