@@ -94,8 +94,14 @@ class WithdrawCreateController extends GetxController{
     selectedBankAccount.value = newValue;
     selectedIndex=selectedBankAccount.value?.bank?.id.toString();
     ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
+
+    selectedBankAccount.value!.number==null ? "" :
     numberController.text=selectedBankAccount.value!.number.toString();
+
+    selectedBankAccount.value!.cardNumber==null ? "" :
     cardNumberController.text=selectedBankAccount.value!.cardNumber.toString();
+
+    selectedBankAccount.value!.sheba==null ? "" :
     shebaController.text=selectedBankAccount.value!.sheba.toString();
 
     print(selectedBankAccount.value?.bank?.name);
@@ -265,6 +271,7 @@ Future<WithdrawModel?> insertWithdraw()async{
       //print(response);
       if (response != null) {
         Get.toNamed('/withdrawsList');
+        withdrawController.fetchWithdrawList();
         Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
@@ -273,7 +280,6 @@ Future<WithdrawModel?> insertWithdraw()async{
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
         clearList();
-        withdrawController.fetchWithdrawList();
       }
     }
 
@@ -295,6 +301,7 @@ Future<WithdrawModel?> insertWithdraw()async{
     selectedAccount.value=null;
     selectedBankAccount.value=null;
     bankAccountList.clear();
+    bankList.clear();
   }
   void resetAccountSearch() {
     searchController.clear();

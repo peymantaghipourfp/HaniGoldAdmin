@@ -640,7 +640,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                           contentPadding: EdgeInsets.zero,
                           title: Card(
                             color:inventoryCreatePaymentController.selectedForPaymentId.contains(forPayment.id)
-                                ? Colors.green.withOpacity(0.3)
+                                ? AppColor.textFieldColor
                                 : AppColor.secondaryColor,
                             child: Padding(
                               padding: const EdgeInsets

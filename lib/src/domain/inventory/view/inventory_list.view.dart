@@ -400,7 +400,7 @@ class InventoryListView extends StatelessWidget {
                                                             Color>(
                                                             AppColor.textColor),
                                                       )
-                                                          : inventoryController.getOneInventory[inventories.id]==null ?
+                                                          : inventoryController.getOneInventory.value==null ?
                                                             Text(
                                                             'اطلاعاتی موجود نیست',
                                                             style: AppTextStyle
@@ -409,17 +409,10 @@ class InventoryListView extends StatelessWidget {
                                                         child: ListView.builder(
                                                           shrinkWrap: true,
                                                           physics: NeverScrollableScrollPhysics(),
-                                                          itemCount: inventoryController
-                                                              .getOneInventory[inventories
-                                                              .id]
-                                                              ?.inventoryDetails
-                                                              ?.length,
+                                                          itemCount: inventoryController.getOneInventory.value?.inventoryDetails?.length,
                                                           itemBuilder: (context,
                                                               index) {
-                                                            var getOneInventories = inventoryController
-                                                                .getOneInventory[inventories
-                                                                .id]
-                                                                ?.inventoryDetails?[index];
+                                                            var getOneInventories = inventoryController.getOneInventory.value?.inventoryDetails?[index];
                                                             return ListTile(
                                                               title: Card(
                                                                 color: AppColor
@@ -449,7 +442,7 @@ class InventoryListView extends StatelessWidget {
                                                                                         .recId
                                                                                         .toString(),
                                                                                     "image",
-                                                                                    "Deposit",
+                                                                                    "Inventory",
                                                                                     inventoryId: inventories
                                                                                         .id!),
                                                                             child: SvgPicture
@@ -692,8 +685,7 @@ class InventoryListView extends StatelessWidget {
                                                                                                                   .error,
                                                                                                               color: Colors
                                                                                                                   .red),
-                                                                                                      fit: BoxFit
-                                                                                                          .cover,
+                                                                                                      fit: BoxFit.contain,
                                                                                                     );
                                                                                                   },
                                                                                                 ),
@@ -789,10 +781,9 @@ class InventoryListView extends StatelessWidget {
                                                                           //  آیکون ویرایش
                                                                           GestureDetector(
                                                                             onTap: () {
-                                                                              Get
-                                                                                  .toNamed(
-                                                                                  '/inventoryDetailUpdateReceive',
-                                                                                  arguments: getOneInventories);
+                                                                              getOneInventories?.type==1 ?
+                                                                              Get.toNamed('/inventoryDetailUpdateReceive', arguments: getOneInventories):
+                                                                              Get.toNamed('/inventoryDetailUpdatePayment', arguments: getOneInventories);
                                                                             },
                                                                             child: Row(
                                                                               children: [
@@ -1044,9 +1035,9 @@ class InventoryListView extends StatelessWidget {
                         //آیکون اضافه
                         GestureDetector(
                           onTap: () {
-                            Get.offNamed(
-                                '/inventoryDetailInsertReceive',
-                                arguments: inventories);
+                            inventories.type==1 ?
+                            Get.offNamed('/inventoryDetailInsertReceive', arguments: inventories):
+                            Get.offNamed('/inventoryDetailInsertPayment', arguments: inventories);
                           },
                           child: Row(
                             children: [
@@ -1118,8 +1109,7 @@ class InventoryListView extends StatelessWidget {
                       children: [
                         IconButton(
                           onPressed: () async {
-                            await inventoryController.fetchGetOneInventory(
-                                inventories.id!);
+                            await inventoryController.fetchGetOneInventory(inventories.id!);
                             inventoryController.toggleItemExpansion(index);
                           },
                           icon: Icon(
@@ -1149,19 +1139,14 @@ class InventoryListView extends StatelessWidget {
                           .spaceEvenly,
                       children: [
                         SizedBox(height: 8,),
-                        inventoryController.getOneInventory[inventories.id] ==
-                            null ?
+                    inventoryController.getOneInventory.value==null ?
                         Center(child: CircularProgressIndicator()) :
                         ListView.builder(
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          itemCount: inventoryController
-                              .getOneInventory[inventories.id]?.inventoryDetails
-                              ?.length,
+                          itemCount: inventoryController.getOneInventory.value?.inventoryDetails?.length,
                           itemBuilder: (context, index) {
-                            var getOneInventories = inventoryController
-                                .getOneInventory[inventories.id]
-                                ?.inventoryDetails?[index];
+                            var getOneInventories = inventoryController.getOneInventory.value?.inventoryDetails?[index];
                             return ListTile(
                               title: Card(
                                 color: AppColor.backGroundColor,
@@ -1183,7 +1168,7 @@ class InventoryListView extends StatelessWidget {
                                                 inventoryController.pickImage(
                                                     getOneInventories!.recId
                                                         .toString(), "image",
-                                                    "Deposit",
+                                                    "Inventory",
                                                     inventoryId: inventories
                                                         .id!),
                                             child: SvgPicture.asset(
@@ -1394,8 +1379,7 @@ class InventoryListView extends StatelessWidget {
                                                                           .error,
                                                                           color: Colors
                                                                               .red),
-                                                                  fit: BoxFit
-                                                                      .cover,
+                                                                  fit: BoxFit.contain,
                                                                 );
                                                               },
                                                             ),
@@ -1479,9 +1463,10 @@ class InventoryListView extends StatelessWidget {
                                           //  آیکون ویرایش
                                           GestureDetector(
                                             onTap: () {
-                                              Get.toNamed(
-                                                  '/inventoryDetailUpdateReceive',
-                                                  arguments: getOneInventories);
+                                              getOneInventories?.type==1 ?
+                                              Get.toNamed('/inventoryDetailUpdateReceive', arguments: getOneInventories):
+                                              Get.toNamed('/inventoryDetailUpdatePayment', arguments: getOneInventories);
+
                                             },
                                             child: Row(
                                               children: [
@@ -1664,7 +1649,7 @@ class InventoryListView extends StatelessWidget {
                     inventory.inventoryDetails?.first !=null
                         ? '${inventory.inventoryDetails!.first.quantity ?? 0} ${inventory.inventoryDetails!.first.itemUnit?.name ?? ""}'
                         : "",
-                    style: AppTextStyle.bodyText
+                    style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor,fontWeight: FontWeight.bold)
                 ),
               )
           ),
@@ -1804,7 +1789,7 @@ class InventoryListView extends StatelessWidget {
                       onTap: () =>
                           inventoryController.pickImageDesktop(
                               inventory.inventoryDetails!.first.recId
-                                  .toString(), "image", "Deposit",
+                                  .toString(), "image", "Inventory",
                               inventoryId: inventory.id!),
                       child: Container(
                         constraints: BoxConstraints(maxWidth: 100),
@@ -1923,8 +1908,7 @@ class InventoryListView extends StatelessWidget {
                                                     .error,
                                                 color: Colors
                                                     .red),
-                                        fit: BoxFit
-                                            .cover,
+                                        fit: BoxFit.contain,
                                       );
                                     },
                                   ),
@@ -2107,8 +2091,9 @@ class InventoryListView extends StatelessWidget {
                   //آیکون اضافه
                   GestureDetector(
                     onTap: () {
-                      Get.offNamed(
-                          '/inventoryDetailInsertReceive', arguments: inventory);
+                      inventory.type==1 ?
+                      Get.offNamed('/inventoryDetailInsertReceive', arguments: inventory ) :
+                      Get.offNamed('/inventoryDetailInsertPayment', arguments: inventory );
                     },
                     child: Row(
                       children: [
@@ -2175,10 +2160,10 @@ class InventoryListView extends StatelessWidget {
                   ),
                   // آیکون ویرایش
                   GestureDetector(
-                    onTap: () {
-                      Get.toNamed('/inventoryDetailUpdateReceive',
-                          arguments: inventoryController.fetchGetOneInventory(
-                              inventory.id!));
+                    onTap: () async{
+
+                        inventoryController.fetchGetOneInventoryForUpdate(inventory.id ?? 0);
+
                     },
                     child: Row(
                       children: [
@@ -2257,7 +2242,6 @@ class InventoryListView extends StatelessWidget {
     );
   }
 
-
   Widget buildInventoryDetail(InventoryModel inventory) {
     return Obx(() {
       if (inventoryController.isLoading.value) {
@@ -2286,15 +2270,13 @@ class InventoryListView extends StatelessWidget {
                   child: ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
-                    itemCount: inventoryController.getOneInventory[inventory.id]
-                        ?.inventoryDetails?.length,
+                    itemCount: inventoryController.getOneInventory.value?.inventoryDetails?.length,
                     itemBuilder: (context,
                         index) {
-                      var getOneInventories = inventoryController
-                          .getOneInventory[inventory.id]
-                          ?.inventoryDetails?[index];
+                      var getOneInventories = inventoryController.getOneInventory.value?.inventoryDetails?[index];
                       return ListTile(
                         title: Card(
+                          elevation: 5,
                           color: AppColor
                               .backGroundColor,
                           child: Padding(
@@ -2322,7 +2304,7 @@ class InventoryListView extends StatelessWidget {
                                                   .recId
                                                   .toString(),
                                               "image",
-                                              "Deposit",
+                                              "Inventory",
                                               inventoryId: inventory
                                                   .id!),
                                       child: SvgPicture
@@ -2537,8 +2519,7 @@ class InventoryListView extends StatelessWidget {
                                                                 index) {
                                                               final attachment = getOneInventories
                                                                   .attachments![index];
-                                                              return Image
-                                                                  .network(
+                                                              return Image.network(
                                                                 "${BaseUrl
                                                                     .baseUrl}Attachment/downloadAttachment?fileName=${attachment
                                                                     .guidId}",
@@ -2547,8 +2528,9 @@ class InventoryListView extends StatelessWidget {
                                                                     child,
                                                                     loadingProgress) {
                                                                   if (loadingProgress ==
-                                                                      null)
+                                                                      null) {
                                                                     return child;
+                                                                  }
                                                                   return Center(
                                                                     child: CircularProgressIndicator(),
                                                                   );
@@ -2562,8 +2544,7 @@ class InventoryListView extends StatelessWidget {
                                                                             .error,
                                                                         color: Colors
                                                                             .red),
-                                                                fit: BoxFit
-                                                                    .cover,
+                                                                fit: BoxFit.contain,
                                                               );
                                                             },
                                                           ),
@@ -2631,14 +2612,7 @@ class InventoryListView extends StatelessWidget {
                                                                 top: 0,
                                                                 bottom: 0,
                                                                 child: Visibility(
-                                                                  visible: inventoryController
-                                                                      .currentImagePage
-                                                                      .value <
-                                                                      (getOneInventories
-                                                                          .attachments
-                                                                          ?.length ??
-                                                                          1) -
-                                                                          1,
+                                                                  visible: inventoryController.currentImagePage.value < (getOneInventories.attachments?.length ?? 1) - 1,
                                                                   child: IconButton(
                                                                     style: ButtonStyle(
                                                                       backgroundColor: WidgetStateProperty
@@ -2775,8 +2749,9 @@ class InventoryListView extends StatelessWidget {
                                     //  آیکون ویرایش
                                     GestureDetector(
                                       onTap: () {
-                                        Get.toNamed('/inventoryDetailUpdateReceive',
-                                            arguments: getOneInventories);
+                                        getOneInventories?.type==1 ?
+                                        Get.toNamed('/inventoryDetailUpdateReceive', arguments: getOneInventories):
+                                        Get.toNamed('/inventoryDetailUpdatePayment', arguments: getOneInventories);
                                       },
                                       child: Row(
                                         children: [

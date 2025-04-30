@@ -27,7 +27,7 @@ import '../../withdraw/model/predicate.model.dart';
 
 enum PageState{loading,err,empty,list}
 
-class InventoryUpdateController extends GetxController{
+class InventoryUpdateReceiveController extends GetxController{
 
   final InventoryController inventoryController=Get.find<InventoryController>();
 
@@ -64,7 +64,6 @@ class InventoryUpdateController extends GetxController{
   final Rxn<WalletModel> selectedWalletAccount2=Rxn<WalletModel>();
   final Rxn<LaboratoryModel> selectedLaboratory=Rxn<LaboratoryModel>();
   RxInt selectedTabIndex = 0.obs;
-  //final RxList<InventoryDetail> tempDetails = <InventoryDetail>[].obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   Timer? debounce;
   RxList<LaboratoryModel> searchedLaboratories = <LaboratoryModel>[].obs;
@@ -79,8 +78,17 @@ class InventoryUpdateController extends GetxController{
     getWalletAccount(selectedAccount.value?.id ?? 0);
   }
 
+  void updateW750(){
+      int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
+      double quantity = double.tryParse(quantityController.text=="" ? "0"  :  quantityController.text.toEnglishDigit()) ?? 0;
+      double w750 = (carat * quantity)/750;
+      weight750Controller.text = w750.toString().toPersianDigit();
+
+  }
+
   void changeSelectedWalletAccount(WalletModel? newValue) {
     selectedWalletAccount.value = newValue;
+      updateW750();
 
     print(selectedWalletAccount.value?.item?.id);
     print(selectedWalletAccount.value?.item?.name);
@@ -109,6 +117,8 @@ class InventoryUpdateController extends GetxController{
 
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
+    quantityController.addListener(updateW750);
+    caratController.addListener(updateW750);
     fetchAccountList();
     fetchWalletAccountList();
     fetchLaboratoryList();
@@ -222,7 +232,15 @@ class InventoryUpdateController extends GetxController{
       var fetchedWalletAccountList=await walletRepository.getWalletList(walletAccountReqModel!);
       walletAccountList.assignAll(fetchedWalletAccountList);
       state.value=PageState.list;
-      //selectedWalletAccount.value=selectedWalletAccount2.value;
+      final InventoryDetailModel? inventoryDetail = Get.arguments ;
+      if (inventoryDetail?.wallet != null) {
+        final walletMatch = walletAccountList.firstWhereOrNull(
+              (b) => b.id == inventoryDetail?.wallet?.id,
+        );
+        if (walletMatch != null) {
+          selectedWalletAccount.value = walletMatch;
+        }
+      }
       if(walletAccountList.isEmpty){
         state.value=PageState.empty;
       }
@@ -284,11 +302,11 @@ class InventoryUpdateController extends GetxController{
 
 
   Future<void> fetchGetOneInventory(int id)async{
+
     try {
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
       if(fetchedGetOneInventory!=null){
-        //setInventoryDetail(fetchedGetOneInventory as InventoryDetailModel);
         getOneInventory.value = fetchedGetOneInventory;
         stateGetOne.value=PageState.list;
       }else{
@@ -301,7 +319,7 @@ class InventoryUpdateController extends GetxController{
     }
   }
 
-  Future<InventoryModel?> updateInventoryDetail()async{
+  Future<InventoryModel?> updateInventoryDetailReceive()async{
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -332,6 +350,7 @@ class InventoryUpdateController extends GetxController{
       );
       print(response);
       if (response != null) {
+        inventoryController.fetchGetOneInventory(inventoryId.value);
         Get.back();
         Get.snackbar("موفقیت آمیز", "ویرایش با موفقیت آنجام شد",
           titleText: Text('موفقیت آمیز',
@@ -341,6 +360,7 @@ class InventoryUpdateController extends GetxController{
             'ویرایش با موفقیت آنجام شد', textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
+        inventoryController.fetchInventoryList();
         Get.back();
         clearList();
       }
@@ -359,10 +379,9 @@ class InventoryUpdateController extends GetxController{
     weight750Controller.text=inventoryDetail.weight750.toString() ?? '';
     caratController.text=inventoryDetail.carat.toString() ?? '';
     receiptNumberController.text=inventoryDetail.receiptNumber.toString() ?? '';
-    if(inventoryDetail.type==1){
-      selectedLaboratory.value=inventoryDetail.laboratory;
-    }
 
+    selectedLaboratory.value=inventoryDetail.laboratory;
+    //selectedWalletAccount.value=inventoryDetail.wallet;
   }
 
 

@@ -40,7 +40,6 @@ class InventoryCreatePaymentController extends GetxController{
   final TextEditingController receiptNumberController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
-  final TextEditingController typeController=TextEditingController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WalletRepository walletRepository=WalletRepository();
@@ -101,7 +100,6 @@ class InventoryCreatePaymentController extends GetxController{
       tempDetails[index] = newDetail;
     }
   }
-
 
 
   @override

@@ -248,6 +248,7 @@ class InventoryRepository {
       throw ErrorException('خطا در آپدیت اطلاعات:$e');
     }
   }
+
   Future<Map<String, dynamic>> updateDetailInventoryReceive({
     required int id,
     required int inventoryDetailId,
@@ -551,6 +552,7 @@ class InventoryRepository {
     }
   }
 
+
   Future<Map<String, dynamic>> insertInventoryPayment({
     required String date,
     required int accountId,
@@ -640,6 +642,7 @@ class InventoryRepository {
     required int carat,
     required String receiptNumber,
     required int stateMode,
+    required int inputItemId,
     required int laboratoryId,
     required String laboratoryName,
 
@@ -719,6 +722,7 @@ class InventoryRepository {
             "carat": carat,
             "receiptNumber": receiptNumber,
             "type": type,
+            "inputItemId":inputItemId,
             "stateMode":stateMode,
             "isDeleted": false,
             "rowNum": 1,
@@ -748,6 +752,7 @@ class InventoryRepository {
     required int accountId,
     required String accountName,
     required int type,
+    required int inputItemId,
     required String? description,
     required int walletId,
     required int itemId,
@@ -837,6 +842,7 @@ class InventoryRepository {
             "carat": carat,
             "receiptNumber": receiptNumber,
             "type": type,
+            "inputItemId":inputItemId,
             "stateMode":stateMode,
             "id": inventoryDetailId,
             "isDeleted": false,

@@ -95,8 +95,14 @@ class WithdrawUpdateController extends GetxController{
     selectedBankAccount.value = newValue;
     selectedIndex=selectedBankAccount.value?.bank?.id.toString();
     ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
+
+    selectedBankAccount.value!.number==null ? "" :
     numberController.text=selectedBankAccount.value!.number.toString();
+
+    selectedBankAccount.value!.cardNumber==null ? "" :
     cardNumberController.text=selectedBankAccount.value!.cardNumber.toString();
+
+    selectedBankAccount.value!.sheba==null ? "" :
     shebaController.text=selectedBankAccount.value!.sheba.toString();
 
     print(selectedBankAccount.value?.bank?.name);
@@ -293,13 +299,13 @@ class WithdrawUpdateController extends GetxController{
 
       if(response!= null){
         Get.back();
+        withdrawController.fetchWithdrawList();
         Get.snackbar("موفقیت آمیز","ویرایش با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('ویرایش با موفقیت آنجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         clearList();
-        withdrawController.fetchWithdrawList();
         withdrawController.withdrawList.refresh();
       }
     }catch(e){
@@ -315,9 +321,9 @@ class WithdrawUpdateController extends GetxController{
     withdrawId.value=withdraw.id ?? 0;
     ownerNameController.text=withdraw.bankAccount?.ownerName ?? '';
     amountController.text=withdraw.amount.toString().seRagham(separator:  ',') ?? '';
-    cardNumberController.text=withdraw.bankAccount?.cardNumber.toString() ?? '';
-    numberController.text=withdraw.bankAccount?.number.toString() ?? '';
-    shebaController.text=withdraw.bankAccount?.sheba.toString() ?? '';
+    cardNumberController.text=withdraw.bankAccount?.cardNumber==null ? "" : withdraw.bankAccount?.cardNumber.toString() ?? '';
+    numberController.text=withdraw.bankAccount?.number==null ? "" : withdraw.bankAccount?.number.toString() ?? '';
+    shebaController.text=withdraw.bankAccount?.sheba==null ? "" : withdraw.bankAccount?.sheba.toString() ?? '';
     descriptionController.text=withdraw.description ?? '';
     statusId.value=withdraw.status ?? 0;
     withdraw.confirmDate==null ?
@@ -335,6 +341,7 @@ class WithdrawUpdateController extends GetxController{
         fetchWallet(match.id!);
       }
     }
+
     if (withdraw.bankAccount?.bank != null) {
       selectedBankId.value = withdraw.bankAccount!.bank!.id!;
       selectedBankName.value = withdraw.bankAccount!.bank!.name!;

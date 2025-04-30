@@ -22,20 +22,21 @@ class InventoryDetailUpdateReceiveView extends StatefulWidget {
 }
 
 class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdateReceiveView> with TickerProviderStateMixin {
-  InventoryUpdateController inventoryUpdateController = Get.find<InventoryUpdateController>();
-  final InventoryDetailModel inventorDetail= Get.arguments as InventoryDetailModel;
+  InventoryUpdateReceiveController inventoryUpdateReceiveController = Get.find<InventoryUpdateReceiveController>();
+
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar:isDesktop ? AppBar(
+        title:Text('ویرایش دریافتی',style: AppTextStyle.smallTitleText,),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColor.textColor),
           onPressed: () => Get.back(), // Default behavior if onBackTap is null
         ),
       ) :
-      CustomAppBar(title: 'ویرایش دریافت و پرداخت ',
+      CustomAppBar(title: 'ویرایش دریافتی',
         onBackTap: () => Get.back(),
       ),
       body: SafeArea(
@@ -91,19 +92,19 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                       ],
                                     ),
                                     items:
-                                    inventoryUpdateController.walletAccountList.map((wallet){
+                                    inventoryUpdateReceiveController.walletAccountList.map((wallet){
                                       return DropdownMenuItem(
                                           value: wallet,
                                           child: Row(
                                             children: [
-                                              Text("${wallet.item?.name} , " ?? "",style: AppTextStyle.bodyText,),
+                                              Text("${wallet.item?.name}" ?? "",style: AppTextStyle.bodyText,),
                                             ],
                                           ));
                                     }).toList(),
-                                    value: inventoryUpdateController.selectedWalletAccount.value,
+                                    value: inventoryUpdateReceiveController.selectedWalletAccount.value,
                                     onChanged: (newValue){
                                       if(newValue!=null) {
-                                        inventoryUpdateController.changeSelectedWalletAccount(newValue);
+                                        inventoryUpdateReceiveController.changeSelectedWalletAccount(newValue);
                                       }
                                     },
                                     buttonStyleData: ButtonStyleData(
@@ -156,7 +157,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                   CustomDropdownWidget(
 
                                     dropdownSearchData: DropdownSearchData<String>(
-                                      searchController: inventoryUpdateController
+                                      searchController: inventoryUpdateReceiveController
                                           .searchLaboratoryController,
                                       searchInnerWidgetHeight: 50,
                                       searchInnerWidget: Container(
@@ -167,7 +168,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                           left: 15,
                                         ),
                                         child: TextFormField(style: AppTextStyle.bodyText,
-                                          controller: inventoryUpdateController
+                                          controller: inventoryUpdateReceiveController
                                               .searchLaboratoryController,
                                           decoration: InputDecoration(
                                             isDense: true,
@@ -186,7 +187,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                         ),
                                       ),
                                     ),
-                                    value: inventoryUpdateController.selectedLaboratory.value,
+                                    value: inventoryUpdateReceiveController.selectedLaboratory.value,
                                     /*validator: (value) {
                                                                     if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                                                                       return 'کاربر را انتخاب کنید';
@@ -196,21 +197,21 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                     showSearchBox: true,
                                     items: [
                                       'انتخاب کنید',
-                                      ...inventoryUpdateController.searchedLaboratories.map((laboratory) => laboratory.name ?? "")
+                                      ...inventoryUpdateReceiveController.searchedLaboratories.map((laboratory) => laboratory.name ?? "")
                                     ].toList(),
-                                    selectedValue: inventoryUpdateController.selectedLaboratory.value?.name,
+                                    selectedValue: inventoryUpdateReceiveController.selectedLaboratory.value?.name,
                                     onChanged: (String? newValue){
                                       if (newValue == 'انتخاب کنید') {
-                                        inventoryUpdateController.changeSelectedLaboratory(null);
+                                        inventoryUpdateReceiveController.changeSelectedLaboratory(null);
                                       } else {
-                                        var selectedLaboratory = inventoryUpdateController.searchedLaboratories
+                                        var selectedLaboratory = inventoryUpdateReceiveController.searchedLaboratories
                                             .firstWhere((laboratory) => laboratory.name == newValue);
-                                        inventoryUpdateController.changeSelectedLaboratory(selectedLaboratory);
+                                        inventoryUpdateReceiveController.changeSelectedLaboratory(selectedLaboratory);
                                       }
                                     },
                                     onMenuStateChange: (isOpen) {
                                       if (!isOpen) {
-                                        inventoryUpdateController.resetLaboratorySearch();
+                                        inventoryUpdateReceiveController.resetLaboratorySearch();
                                       }
                                     },
                                     backgroundColor: AppColor.textFieldColor,
@@ -235,7 +236,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                   IntrinsicHeight(
                                     child: TextFormField(
                                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                                      controller: inventoryUpdateController.quantityController,
+                                      controller: inventoryUpdateReceiveController.quantityController,
                                       style: AppTextStyle.labelText,
                                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                                       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -284,7 +285,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                   IntrinsicHeight(
                                     child: TextFormField(
                                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                                      controller: inventoryUpdateController.impurityController,
+                                      controller: inventoryUpdateReceiveController.impurityController,
                                       style: AppTextStyle.labelText,
                                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                                       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -333,7 +334,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                   IntrinsicHeight(
                                     child: TextFormField(
                                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                                      controller: inventoryUpdateController.weight750Controller,
+                                      controller: inventoryUpdateReceiveController.weight750Controller,
                                       style: AppTextStyle.labelText,
                                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                                       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -382,7 +383,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                   IntrinsicHeight(
                                     child: TextFormField(
                                       autovalidateMode: AutovalidateMode.onUserInteraction,
-                                      controller: inventoryUpdateController.caratController,
+                                      controller: inventoryUpdateReceiveController.caratController,
                                       style: AppTextStyle.labelText,
                                       keyboardType: TextInputType.numberWithOptions(decimal: true),
                                       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -428,7 +429,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                   padding: EdgeInsets.only(bottom: 5),
                                   child:
                                   TextFormField(
-                                    controller: inventoryUpdateController.receiptNumberController,
+                                    controller: inventoryUpdateReceiveController.receiptNumberController,
                                     style: AppTextStyle.labelText,
                                     decoration: InputDecoration(
                                       border: OutlineInputBorder(
@@ -459,7 +460,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                         }
                                         return null;
                                       },
-                                      controller: inventoryUpdateController.dateController,
+                                      controller: inventoryUpdateReceiveController.dateController,
                                       readOnly: true,
                                       style: AppTextStyle.labelText,
                                       decoration: InputDecoration(
@@ -483,7 +484,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                         );
                                         DateTime date=DateTime.now();
                                         if(pickedDate!=null){
-                                          inventoryUpdateController.dateController.text =
+                                          inventoryUpdateReceiveController.dateController.text =
                                           "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
                                         }
                                       },
@@ -503,7 +504,7 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                   padding: EdgeInsets.only(bottom: 5),
                                   child:
                                   TextFormField(
-                                    controller: inventoryUpdateController.descriptionController,
+                                    controller: inventoryUpdateReceiveController.descriptionController,
                                     maxLines: 4,
                                     style: AppTextStyle.labelText,
                                     decoration: InputDecoration(
@@ -532,15 +533,15 @@ class _InventoryDetailUpdateReceiveViewState extends State<InventoryDetailUpdate
                                         shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                             borderRadius: BorderRadius.circular(10)))),
                                     onPressed: () async{
-                                      inventoryUpdateController.updateInventoryDetail();
+                                      inventoryUpdateReceiveController.updateInventoryDetailReceive();
                                     },
-                                    child:inventoryUpdateController.isLoading.value
+                                    child:inventoryUpdateReceiveController.isLoading.value
                                         ?
                                     CircularProgressIndicator(
                                       valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
                                     ) :
                                     Text(
-                                      'ویرایش',
+                                      'ویرایش دریافتی',
                                       style: AppTextStyle.bodyText,
                                     ),
                                   ),

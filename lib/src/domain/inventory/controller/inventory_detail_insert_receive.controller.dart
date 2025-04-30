@@ -27,7 +27,7 @@ import '../../withdraw/model/predicate.model.dart';
 
 enum PageState{loading,err,empty,list}
 
-class InventoryDetailInsertController extends GetxController{
+class InventoryDetailInsertReceiveController extends GetxController{
 
   final InventoryController inventoryController=Get.find<InventoryController>();
 
@@ -78,9 +78,25 @@ class InventoryDetailInsertController extends GetxController{
     getWalletAccount(selectedAccount.value?.id ?? 0);
   }
 
+  void updateW750(){
+    if (selectedWalletAccount.value?.item?.itemUnit?.id == 2) {
+      int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
+      double quantity = double.tryParse(quantityController.text=="" ? "0" : quantityController.text.toEnglishDigit()) ?? 0;
+      double w750 = (carat * quantity)/750;
+      weight750Controller.text = w750.toString().toPersianDigit();
+    } else {
+      weight750Controller.clear();
+    }
+  }
   void changeSelectedWalletAccount(WalletModel? newValue) {
     selectedWalletAccount.value = newValue;
-
+    if (newValue?.item?.itemUnit?.id == 2) {
+      caratController.text = '750';
+      updateW750();
+    } else {
+      weight750Controller.clear();
+      caratController.clear();
+    }
     print(selectedWalletAccount.value?.item?.id);
     print(selectedWalletAccount.value?.item?.name);
   }
@@ -102,6 +118,8 @@ class InventoryDetailInsertController extends GetxController{
 
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
+    quantityController.addListener(updateW750);
+    caratController.addListener(updateW750);
     fetchAccountList();
     fetchWalletAccountList();
     fetchLaboratoryList();
@@ -280,7 +298,7 @@ class InventoryDetailInsertController extends GetxController{
     }
   }
 
-  Future<InventoryModel?> insertInventoryDetail()async{
+  Future<InventoryModel?> insertInventoryDetailReceive()async{
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -308,7 +326,8 @@ class InventoryDetailInsertController extends GetxController{
       );
       print(response);
       if (response != null) {
-        Get.back();
+        Get.toNamed('/inventoryList');
+        inventoryController.fetchInventoryList();
         Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
           titleText: Text('موفقیت آمیز',
             textAlign: TextAlign.center,
@@ -317,7 +336,6 @@ class InventoryDetailInsertController extends GetxController{
             'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
-        Get.back();
         clearList();
       }
     }catch(e){

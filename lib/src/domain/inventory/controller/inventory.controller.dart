@@ -52,7 +52,7 @@ class InventoryController extends GetxController{
   RxInt currentImagePage = 0.obs;
   RxBool showArrows = false.obs;
 
-  final RxMap<int , InventoryModel> getOneInventory=<int , InventoryModel>{}.obs;
+  Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
 
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
@@ -215,9 +215,34 @@ class InventoryController extends GetxController{
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
       if(fetchedGetOneInventory!=null){
-        getOneInventory[id] = fetchedGetOneInventory;
+        getOneInventory.value = fetchedGetOneInventory;
+       /* Get.toNamed('/inventoryDetailUpdateReceive',
+            arguments: fetchedGetOneInventory.inventoryDetails?.first);*/
         stateGetOne.value=PageState.list;
-        print('getOneInventories:  ${getOneInventory[id]?.inventoryDetails?.length}');
+       // print('getOneInventories:  ${getOneInventory[id]?.inventoryDetails?.length}');
+      }else{
+        stateGetOne.value=PageState.empty;
+      }
+    }
+    catch(e){
+      stateGetOne.value=PageState.err;
+      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
+    }finally{
+      isLoading.value=false;
+    }
+  }
+  Future<void> fetchGetOneInventoryForUpdate(int id)async{
+    try {
+      isLoading.value=true;
+      stateGetOne.value=PageState.loading;
+      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
+      if(fetchedGetOneInventory!=null){
+        getOneInventory.value = fetchedGetOneInventory;
+        getOneInventory.value?.type==0 ?
+         Get.toNamed('/inventoryDetailUpdatePayment', arguments: fetchedGetOneInventory.inventoryDetails?.first):
+         Get.toNamed('/inventoryDetailUpdateReceive', arguments: fetchedGetOneInventory.inventoryDetails?.first);
+        stateGetOne.value=PageState.list;
+        // print('getOneInventories:  ${getOneInventory[id]?.inventoryDetails?.length}');
       }else{
         stateGetOne.value=PageState.empty;
       }
@@ -255,11 +280,13 @@ class InventoryController extends GetxController{
       isLoading.value = true;
       var response=await inventoryRepository.deleteInventoryDetail(id: id, inventoryDetailId: inventoryDetailId,stateMode: stateMode,);
       if(response!= null){
+        Get.back();
         Get.snackbar("موفقیت آمیز","حذف با موفقیت انجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        Get.back();
         fetchInventoryList();
       }
     }catch(e){
@@ -331,7 +358,8 @@ class InventoryController extends GetxController{
 
       if (uploadStatuses.every((status) => status)) {
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
-        await fetchGetOneInventory(inventoryId);
+        await fetchInventoryList();
+       // await fetchGetOneInventory(inventoryId);
       }
     } finally {
       isUploading.value = false;
@@ -339,65 +367,6 @@ class InventoryController extends GetxController{
       uploadStatuses.clear();
     }
   }
-
-
-  /*Future<void> pickImagesDesktop(String recordId, String type, String entityType,{required int inventoryId}) async {
-    final ImagePicker picker = ImagePicker();
-
-    try {
-      List<XFile>? pickedFiles = await picker.pickMultiImage();
-
-      if (pickedFiles != null && pickedFiles.isNotEmpty) {
-        for (XFile file in pickedFiles) {
-          Uint8List bytes = await file.readAsBytes();
-          selectedImagesBytes.add(bytes);
-          selectedFileNames.add(file.name);
-        }
-      }
-    } catch (e) {
-      print('خطا در انتخاب تصاویر: $e');
-      throw Exception('خطا در انتخاب فایل‌ها');
-    }
-  }*/
-
-  /*Future<List<String>> uploadImagesDesktop({
-    required String recordId,
-    required String type,
-    required String entityType,
-    required int inventoryId,
-  }) async {
-    if (selectedImagesBytes.isEmpty) {
-      throw Exception('هیچ تصویری انتخاب نشده است');
-    }
-
-    List<Future<String>> uploadFutures = [];
-
-    for (int i = 0; i < selectedImagesBytes.length; i++) {
-      uploadFutures.add(
-        uploadRepositoryDesktop.uploadImageDesktop(
-          imageBytes: selectedImagesBytes[i],
-          fileName: selectedFileNames[i],
-          recordId: recordId,
-          type: type,
-          entityType: entityType,
-        ),
-      );
-    }
-
-    try {
-      final List<String> responses = await Future.wait(uploadFutures);
-      clearSelections();
-      return responses;
-    } catch (e) {
-      print('خطا در آپلود دسته‌ای: $e');
-      throw Exception('برخی از آپلودها با خطا مواجه شدند');
-    }
-  }
-
-  void clearSelections() {
-    selectedImagesBytes.clear();
-    selectedFileNames.clear();
-  }*/
 
   Future<void> pickImageDesktop(String recordId, String type, String entityType,{required int inventoryId}) async {
     try{
@@ -440,6 +409,7 @@ class InventoryController extends GetxController{
       }
       if (uploadStatusesDesktop.every((status) => status)) {
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+        fetchInventoryList();
         await fetchGetOneInventory(inventoryId);
       }
     } finally {

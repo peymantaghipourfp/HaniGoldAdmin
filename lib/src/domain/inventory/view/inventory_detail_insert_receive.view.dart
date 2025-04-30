@@ -21,7 +21,7 @@ class InventoryDetailInsertReceiveView extends StatefulWidget {
 }
 
 class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsertReceiveView> with TickerProviderStateMixin {
-  InventoryDetailInsertController inventoryDetailInsertController = Get.find<InventoryDetailInsertController>();
+  InventoryDetailInsertReceiveController inventoryDetailInsertReceiveController = Get.find<InventoryDetailInsertReceiveController>();
 
 
   @override
@@ -90,19 +90,19 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                         ],
                                                       ),
                                                       items:
-                                                      inventoryDetailInsertController.walletAccountList.map((wallet){
+                                                      inventoryDetailInsertReceiveController.walletAccountList.map((wallet){
                                                         return DropdownMenuItem(
                                                             value: wallet,
                                                             child: Row(
                                                               children: [
-                                                                Text("${wallet.item?.name} , " ?? "",style: AppTextStyle.bodyText,),
+                                                                Text("${wallet.item?.name}" ?? "",style: AppTextStyle.bodyText,),
                                                               ],
                                                             ));
                                                       }).toList(),
-                                                      value: inventoryDetailInsertController.selectedWalletAccount.value,
+                                                      value: inventoryDetailInsertReceiveController.selectedWalletAccount.value,
                                                       onChanged: (newValue){
                                                         if(newValue!=null) {
-                                                          inventoryDetailInsertController.changeSelectedWalletAccount(newValue);
+                                                          inventoryDetailInsertReceiveController.changeSelectedWalletAccount(newValue);
                                                         }
                                                       },
                                                       buttonStyleData: ButtonStyleData(
@@ -155,7 +155,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                     CustomDropdownWidget(
 
                                                       dropdownSearchData: DropdownSearchData<String>(
-                                                        searchController: inventoryDetailInsertController
+                                                        searchController: inventoryDetailInsertReceiveController
                                                             .searchLaboratoryController,
                                                         searchInnerWidgetHeight: 50,
                                                         searchInnerWidget: Container(
@@ -166,7 +166,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                             left: 15,
                                                           ),
                                                           child: TextFormField(style: AppTextStyle.bodyText,
-                                                            controller: inventoryDetailInsertController
+                                                            controller: inventoryDetailInsertReceiveController
                                                                 .searchLaboratoryController,
                                                             decoration: InputDecoration(
                                                               isDense: true,
@@ -185,7 +185,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                           ),
                                                         ),
                                                       ),
-                                                      value: inventoryDetailInsertController.selectedLaboratory.value,
+                                                      value: inventoryDetailInsertReceiveController.selectedLaboratory.value,
                                                       /*validator: (value) {
                                                                     if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                                                                       return 'کاربر را انتخاب کنید';
@@ -195,21 +195,21 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                       showSearchBox: true,
                                                       items: [
                                                         'انتخاب کنید',
-                                                        ...inventoryDetailInsertController.searchedLaboratories.map((laboratory) => laboratory.name ?? "")
+                                                        ...inventoryDetailInsertReceiveController.searchedLaboratories.map((laboratory) => laboratory.name ?? "")
                                                       ].toList(),
-                                                      selectedValue: inventoryDetailInsertController.selectedLaboratory.value?.name,
+                                                      selectedValue: inventoryDetailInsertReceiveController.selectedLaboratory.value?.name,
                                                       onChanged: (String? newValue){
                                                         if (newValue == 'انتخاب کنید') {
-                                                          inventoryDetailInsertController.changeSelectedLaboratory(null);
+                                                          inventoryDetailInsertReceiveController.changeSelectedLaboratory(null);
                                                         } else {
-                                                          var selectedLaboratory = inventoryDetailInsertController.searchedLaboratories
+                                                          var selectedLaboratory = inventoryDetailInsertReceiveController.searchedLaboratories
                                                               .firstWhere((laboratory) => laboratory.name == newValue);
-                                                          inventoryDetailInsertController.changeSelectedLaboratory(selectedLaboratory);
+                                                          inventoryDetailInsertReceiveController.changeSelectedLaboratory(selectedLaboratory);
                                                         }
                                                       },
                                                       onMenuStateChange: (isOpen) {
                                                         if (!isOpen) {
-                                                          inventoryDetailInsertController.resetLaboratorySearch();
+                                                          inventoryDetailInsertReceiveController.resetLaboratorySearch();
                                                         }
                                                       },
                                                       backgroundColor: AppColor.textFieldColor,
@@ -234,7 +234,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                     IntrinsicHeight(
                                                       child: TextFormField(
                                                         autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                        controller: inventoryDetailInsertController.quantityController,
+                                                        controller: inventoryDetailInsertReceiveController.quantityController,
                                                         style: AppTextStyle.labelText,
                                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -283,7 +283,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                     IntrinsicHeight(
                                                       child: TextFormField(
                                                         autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                        controller: inventoryDetailInsertController.impurityController,
+                                                        controller: inventoryDetailInsertReceiveController.impurityController,
                                                         style: AppTextStyle.labelText,
                                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -332,7 +332,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                     IntrinsicHeight(
                                                       child: TextFormField(
                                                         autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                        controller: inventoryDetailInsertController.weight750Controller,
+                                                        controller: inventoryDetailInsertReceiveController.weight750Controller,
                                                         style: AppTextStyle.labelText,
                                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -381,7 +381,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                     IntrinsicHeight(
                                                       child: TextFormField(
                                                         autovalidateMode: AutovalidateMode.onUserInteraction,
-                                                        controller: inventoryDetailInsertController.caratController,
+                                                        controller: inventoryDetailInsertReceiveController.caratController,
                                                         style: AppTextStyle.labelText,
                                                         keyboardType: TextInputType.numberWithOptions(decimal: true),
                                                         inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -427,7 +427,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                     padding: EdgeInsets.only(bottom: 5),
                                                     child:
                                                     TextFormField(
-                                                      controller: inventoryDetailInsertController.receiptNumberController,
+                                                      controller: inventoryDetailInsertReceiveController.receiptNumberController,
                                                       style: AppTextStyle.labelText,
                                                       decoration: InputDecoration(
                                                         border: OutlineInputBorder(
@@ -458,7 +458,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                           }
                                                           return null;
                                                         },
-                                                        controller: inventoryDetailInsertController.dateController,
+                                                        controller: inventoryDetailInsertReceiveController.dateController,
                                                         readOnly: true,
                                                         style: AppTextStyle.labelText,
                                                         decoration: InputDecoration(
@@ -482,7 +482,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                           );
                                                           DateTime date=DateTime.now();
                                                           if(pickedDate!=null){
-                                                            inventoryDetailInsertController.dateController.text =
+                                                            inventoryDetailInsertReceiveController.dateController.text =
                                                             "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
                                                           }
                                                         },
@@ -502,7 +502,7 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                     padding: EdgeInsets.only(bottom: 5),
                                                     child:
                                                     TextFormField(
-                                                      controller: inventoryDetailInsertController.descriptionController,
+                                                      controller: inventoryDetailInsertReceiveController.descriptionController,
                                                       maxLines: 4,
                                                       style: AppTextStyle.labelText,
                                                       decoration: InputDecoration(
@@ -531,9 +531,9 @@ class _InventoryDetailInsertReceiveViewState extends State<InventoryDetailInsert
                                                             shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                                                 borderRadius: BorderRadius.circular(10)))),
                                                         onPressed: () async{
-                                                          inventoryDetailInsertController.insertInventoryDetail();
+                                                         await inventoryDetailInsertReceiveController.insertInventoryDetailReceive();
                                                         },
-                                                        child:inventoryDetailInsertController.isLoading.value
+                                                        child:inventoryDetailInsertReceiveController.isLoading.value
                                                             ?
                                                         CircularProgressIndicator(
                                                           valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
