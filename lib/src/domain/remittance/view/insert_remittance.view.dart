@@ -8,6 +8,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../../widget/custom_dropdown.widget.dart';
 import '../controller/remittance.controller.dart';
 
 
@@ -523,7 +524,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                           shrinkWrap: true,
                           gridDelegate:
                           SliverGridDelegateWithFixedCrossAxisCount(
-                            childAspectRatio:isDesktop? 7: 5,
+                            childAspectRatio:isDesktop? 6.5: 5,
                             crossAxisCount:isDesktop? 2:1,
                             crossAxisSpacing: 5,
                             mainAxisSpacing: 5,
@@ -540,7 +541,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                 IntrinsicHeight(
                                   child: TextFormField(
                                     autovalidateMode: AutovalidateMode.onUserInteraction,
-                                    // controller: inventoryCreateController.impurityController,
+                                     controller: controller.namePayerController,
                                     style: AppTextStyle.labelText,
                                     keyboardType: TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -585,7 +586,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                 IntrinsicHeight(
                                   child: TextFormField(
                                     autovalidateMode: AutovalidateMode.onUserInteraction,
-                                    // controller: inventoryCreateController.impurityController,
+                                     controller: controller.mobilePayerController,
                                     style: AppTextStyle.labelText,
                                     keyboardType: TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -628,95 +629,77 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                 ),
                                 Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 0,vertical: 0),
-                                  height: 35,
-                                  width: Get.width ,
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton2<String>(
-                                      isExpanded: true,
-                                      hint: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  "-",
-                                                  style: context.textTheme.bodyMedium!.copyWith(fontSize: 14,color: AppColor.textColor),
-                                                  overflow: TextOverflow
-                                                      .ellipsis,
-                                                ),
+                                  padding: EdgeInsets.only(
+                                      bottom: 5),
+                                  child:
+                                  CustomDropdownWidget(
 
-                                              ],
+                                    dropdownSearchData: DropdownSearchData<String>(
+                                      searchController: controller
+                                          .searchControllerP,
+                                      searchInnerWidgetHeight: 50,
+                                      searchInnerWidget: Container(
+                                        height: 50,
+                                        padding: const EdgeInsets.only(
+                                          top: 8,
+                                          right: 15,
+                                          left: 15,
+                                        ),
+                                        child: TextFormField(style: AppTextStyle.bodyText,
+                                          controller: controller
+                                              .searchControllerP,
+                                          decoration: InputDecoration(
+                                            isDense: true,
+                                            contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 8,
+                                            ),
+                                            hintText: 'جستجوی کاربر...',
+                                            hintStyle: AppTextStyle.labelText,
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(8),
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                      items:controller.getList
-                                          .map((item) =>
-                                          DropdownMenuItem<String>(
-                                            value: item,
-                                            child: FittedBox(
-                                              fit: BoxFit.fitWidth,
-                                              child: Text(
-                                                item,
-                                                style: context.textTheme.labelMedium!.copyWith(fontSize: 13,color: AppColor.textColor),
-                                                overflow: TextOverflow
-                                                    .ellipsis,
-                                              ),
-                                            ),
-                                          ))
-                                          .toList(),
-                                      value:controller.indexGet,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          controller.get(value!);
-                                        });
-                                        // controller.getIndexPacking(value!);
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: 50,
-                                        width: 90,
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius
-                                                .circular(10),
-                                            color: AppColor.backGroundColor,
-                                            border: Border.all(color: AppColor.textColor,width: 1)
                                         ),
-                                        elevation: 0,
-                                      ),
-                                      iconStyleData:  IconStyleData(
-                                        icon: const Icon(
-                                          Icons.keyboard_arrow_down,
-                                        ),
-                                        iconSize: 23,
-                                        iconEnabledColor: AppColor.textColor,
-                                        iconDisabledColor: Colors.grey,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius
-                                              .circular(7),
-                                          color: AppColor.backGroundColor,
-                                        ),
-                                        offset: const Offset(-0, 0),
-                                        scrollbarTheme: ScrollbarThemeData(
-                                          radius: const Radius.circular(
-                                              7),
-                                          thickness: WidgetStateProperty
-                                              .all(6),
-                                          thumbVisibility: WidgetStateProperty
-                                              .all(true),
-                                        ),
-                                      ),
-                                      menuItemStyleData: const MenuItemStyleData(
-                                        height: 40,
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
                                       ),
                                     ),
+                                    value: controller.selectedAccountP.value,
+                                    /*validator: (value) {
+                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
+                      return 'کاربر را انتخاب کنید';
+                    }
+                    return null;
+                  },*/
+                                    showSearchBox: true,
+                                    items: [
+                                      'انتخاب کنید',
+                                      ...controller.searchedAccountsP.map((
+                                          account) => account.name ?? "")
+                                    ].toList(),
+                                    selectedValue: controller.selectedAccountP
+                                        .value?.name,
+                                    onChanged: (String? newValue) {
+                                      if (newValue == 'انتخاب کنید') {
+                                        controller.changeSelectedAccountP(null);
+                                      } else {
+                                        var selectedAccount = controller
+                                            .searchedAccountsP
+                                            .firstWhere((account) => account.name == newValue);
+                                        controller.changeSelectedAccountP(
+                                            selectedAccount);
+                                      }
+                                    },
+                                    onMenuStateChange: (isOpen) {
+                                      if (!isOpen) {
+                                        controller.resetAccountSearchP();
+                                      }
+                                    },
+                                    backgroundColor: AppColor.textFieldColor,
+                                    borderRadius: 7,
+                                    borderColor: AppColor.secondaryColor,
+                                    hideUnderline: true,
                                   ),
                                 ),
                               ],
@@ -730,99 +713,82 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                 ),
                                 Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 0,vertical: 0),
-                                  height: 35,
-                                  width: Get.width ,
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton2<String>(
-                                      isExpanded: true,
-                                      hint: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  "-",
-                                                  style: context.textTheme.bodyMedium!.copyWith(fontSize: 14,color: AppColor.textColor),
-                                                  overflow: TextOverflow
-                                                      .ellipsis,
-                                                ),
+                                  padding: EdgeInsets.only(
+                                      bottom: 5),
+                                  child:
+                                  CustomDropdownWidget(
 
-                                              ],
+                                    dropdownSearchData: DropdownSearchData<String>(
+                                      searchController: controller
+                                          .searchController,
+                                      searchInnerWidgetHeight: 50,
+                                      searchInnerWidget: Container(
+                                        height: 50,
+                                        padding: const EdgeInsets.only(
+                                          top: 8,
+                                          right: 15,
+                                          left: 15,
+                                        ),
+                                        child: TextFormField(style: AppTextStyle.bodyText,
+                                          controller: controller
+                                              .searchController,
+                                          decoration: InputDecoration(
+                                            isDense: true,
+                                            contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 10,
+                                              vertical: 8,
+                                            ),
+                                            hintText: 'جستجوی کاربر...',
+                                            hintStyle: AppTextStyle.labelText,
+                                            border: OutlineInputBorder(
+                                              borderRadius:
+                                              BorderRadius.circular(8),
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                      items:controller.getList
-                                          .map((item) =>
-                                          DropdownMenuItem<String>(
-                                            value: item,
-                                            child: FittedBox(
-                                              fit: BoxFit.fitWidth,
-                                              child: Text(
-                                                item,
-                                                style: context.textTheme.labelMedium!.copyWith(fontSize: 13,color: AppColor.textColor),
-                                                overflow: TextOverflow
-                                                    .ellipsis,
-                                              ),
-                                            ),
-                                          ))
-                                          .toList(),
-                                      value:controller.indexGet,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          controller.get(value!);
-                                        });
-                                        // controller.getIndexPacking(value!);
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: 50,
-                                        width: 90,
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius
-                                                .circular(10),
-                                            color: AppColor.backGroundColor,
-                                            border: Border.all(color: AppColor.textColor,width: 1)
                                         ),
-                                        elevation: 0,
-                                      ),
-                                      iconStyleData:  IconStyleData(
-                                        icon: const Icon(
-                                          Icons.keyboard_arrow_down,
-                                        ),
-                                        iconSize: 23,
-                                        iconEnabledColor: AppColor.textColor,
-                                        iconDisabledColor: Colors.grey,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius
-                                              .circular(7),
-                                          color: AppColor.backGroundColor,
-                                        ),
-                                        offset: const Offset(-0, 0),
-                                        scrollbarTheme: ScrollbarThemeData(
-                                          radius: const Radius.circular(
-                                              7),
-                                          thickness: WidgetStateProperty
-                                              .all(6),
-                                          thumbVisibility: WidgetStateProperty
-                                              .all(true),
-                                        ),
-                                      ),
-                                      menuItemStyleData: const MenuItemStyleData(
-                                        height: 40,
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
                                       ),
                                     ),
+                                    value: controller.selectedAccount.value,
+                                    /*validator: (value) {
+                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
+                      return 'کاربر را انتخاب کنید';
+                    }
+                    return null;
+                  },*/
+                                    showSearchBox: true,
+                                    items: [
+                                      'انتخاب کنید',
+                                      ...controller.searchedAccounts.map((
+                                          account) => account.name ?? "")
+                                    ].toList(),
+                                    selectedValue: controller.selectedAccount
+                                        .value?.name,
+                                    onChanged: (String? newValue) {
+                                      if (newValue == 'انتخاب کنید') {
+                                        controller.changeSelectedAccount(null);
+                                      } else {
+                                        var selectedAccount = controller
+                                            .searchedAccounts
+                                            .firstWhere((account) => account.name == newValue);
+                                        controller.changeSelectedAccount(
+                                            selectedAccount);
+                                      }
+                                    },
+                                    onMenuStateChange: (isOpen) {
+                                      if (!isOpen) {
+                                        controller.resetAccountSearch();
+                                      }
+                                    },
+                                    backgroundColor: AppColor.textFieldColor,
+                                    borderRadius: 7,
+                                    borderColor: AppColor.secondaryColor,
+                                    hideUnderline: true,
                                   ),
                                 ),
                               ],
                             ),
+
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -832,95 +798,32 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                 ),
                                 Container(
-                                  margin: const EdgeInsets.symmetric(horizontal: 0,vertical: 0),
-                                  height: 35,
-                                  width: Get.width ,
-                                  child: DropdownButtonHideUnderline(
-                                    child: DropdownButton2<String>(
-                                      isExpanded: true,
-                                      hint: Row(
-                                        children: [
-                                          Expanded(
-                                            child: Row(
-                                              children: [
-                                                Text(
-                                                  "-",
-                                                  style: context.textTheme.bodyMedium!.copyWith(fontSize: 14,color: AppColor.textColor),
-                                                  overflow: TextOverflow
-                                                      .ellipsis,
-                                                ),
-
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      items:controller.getList
-                                          .map((item) =>
-                                          DropdownMenuItem<String>(
-                                            value: item,
-                                            child: FittedBox(
-                                              fit: BoxFit.fitWidth,
-                                              child: Text(
-                                                item,
-                                                style: context.textTheme.labelMedium!.copyWith(fontSize: 13,color: AppColor.textColor),
-                                                overflow: TextOverflow
-                                                    .ellipsis,
-                                              ),
-                                            ),
-                                          ))
-                                          .toList(),
-                                      value:controller.indexGet,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          controller.get(value!);
-                                        });
-                                        // controller.getIndexPacking(value!);
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: 50,
-                                        width: 90,
-                                        padding: const EdgeInsets.only(
-                                            left: 10, right: 10),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius
-                                                .circular(10),
-                                            color: AppColor.backGroundColor,
-                                            border: Border.all(color: AppColor.textColor,width: 1)
-                                        ),
-                                        elevation: 0,
-                                      ),
-                                      iconStyleData:  IconStyleData(
-                                        icon: const Icon(
-                                          Icons.keyboard_arrow_down,
-                                        ),
-                                        iconSize: 23,
-                                        iconEnabledColor: AppColor.textColor,
-                                        iconDisabledColor: Colors.grey,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius
-                                              .circular(7),
-                                          color: AppColor.backGroundColor,
-                                        ),
-                                        offset: const Offset(-0, 0),
-                                        scrollbarTheme: ScrollbarThemeData(
-                                          radius: const Radius.circular(
-                                              7),
-                                          thickness: WidgetStateProperty
-                                              .all(6),
-                                          thumbVisibility: WidgetStateProperty
-                                              .all(true),
-                                        ),
-                                      ),
-                                      menuItemStyleData: const MenuItemStyleData(
-                                        height: 40,
-                                        padding: EdgeInsets.only(
-                                            left: 10, right: 10),
-                                      ),
-                                    ),
+                                  padding: EdgeInsets.only(bottom: 5),
+                                  child: CustomDropdownWidget(
+                                    validator: (value) {
+                                      if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
+                                        return 'محصول را انتخاب کنید';
+                                      }
+                                      return null;
+                                    },
+                                    items: [
+                                      'انتخاب کنید',
+                                      ...controller.itemList.map((item) => item.name ?? '')
+                                    ].toList(),
+                                    selectedValue: controller.selectedItem.value?.name,
+                                    onChanged: (String? newValue){
+                                      if (newValue == 'انتخاب کنید') {
+                                        controller.changeSelectedItem(null);
+                                      } else {
+                                        var selectedItem = controller.itemList
+                                            .firstWhere((item) => item.name == newValue);
+                                        controller.changeSelectedItem(selectedItem);
+                                      }
+                                    },
+                                    backgroundColor: AppColor.textFieldColor,
+                                    borderRadius: 7,
+                                    borderColor: AppColor.secondaryColor,
+                                    hideUnderline: true,
                                   ),
                                 ),
                               ],
@@ -929,7 +832,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'گرم',
+                                  'مقدار',
                                   style: AppTextStyle.labelText.copyWith(fontSize: 13,
                                       fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                 ),
@@ -937,8 +840,9 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                   child: TextFormField(
 
                                     autovalidateMode: AutovalidateMode.onUserInteraction,
-                                    // controller: inventoryCreateController.impurityController,
+                                     controller: controller.quantityPayerController,
                                     style: AppTextStyle.labelText,
+                                    textAlign: TextAlign.center,
                                     keyboardType: TextInputType.numberWithOptions(decimal: true),
                                     inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
                                       TextInputFormatter.withFunction((oldValue, newValue) {

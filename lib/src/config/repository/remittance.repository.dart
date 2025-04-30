@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
+import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 
 class RemittanceRepository{
 
@@ -11,23 +12,25 @@ class RemittanceRepository{
   RemittanceRepository(){
     accountDio.options.baseUrl=BaseUrl.baseUrl;
   }
-  Future<List<AccountModel>> getRemittanceList()async{
+  Future<List<RemittanceModel>> getRemittanceList()async{
     try{
       Map<String , dynamic> options={
         "options" : {
-          "account" :{
+          "remittance" :{
           "orderBy": "Remittance.Id",
           "orderByType": "asc",
           "StartIndex": 1,
-          "ToIndex": 20
+          "ToIndex": 2
         }
         }
       };
       final response=await accountDio.post('Remittance/get',data: options);
-      //print(response);
+      // print("url : Remittance/get" );
+      // print("request : $options" );
+      // print("response : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
-        return data.map((account)=>AccountModel.fromJson(account)).toList();
+        return data.map((account)=>RemittanceModel.fromJson(account)).toList();
       }else{
         throw ErrorException('خطا');
       }
@@ -37,58 +40,4 @@ class RemittanceRepository{
     }
   }
 
-  /*Future<List<AccountModel>> searchAccountList(AccountSearchReqModel? accountSearchReqModel)async{
-    try{
-
-      final response=await accountDio.post('Account/get',data: {'options':accountSearchReqModel});
-      //print(response);
-      if(response.statusCode==200){
-        List<dynamic> data=response.data;
-        return data.map((account)=>AccountModel.fromJson(account)).toList();
-      }else{
-        throw ErrorException('خطا');
-      }
-    }
-    catch(e){
-      throw ErrorException('خطا:$e');
-    }
-  }*/
-  Future<List<AccountModel>> searchAccountList(String name) async {
-    try {
-      Map<String, dynamic> options = {
-        "options": {
-          "account": {
-            "Predicate": [
-              {
-                "innerCondition": 0,
-                "outerCondition": 0,
-                "filters": [
-                  {
-                    "fieldName": "Name",
-                    "filterValue": name,
-                    "filterType": 0,
-                    "RefTable": "Account"
-                  }
-                ]
-              }
-            ],
-            "orderBy": "Account.Name",
-            "orderByType": "asc",
-            "StartIndex": 1,
-            "ToIndex": 1000000
-          }
-        }
-      };
-
-      final response = await accountDio.post('Account/get', data: options);
-      if (response.statusCode == 200) {
-        List<dynamic> data = response.data;
-        return data.map((account) => AccountModel.fromJson(account)).toList();
-      } else {
-        throw ErrorException('خطا در دریافت اطلاعات');
-      }
-    } catch (e) {
-      throw ErrorException('خطا: $e');
-    }
-  }
 }

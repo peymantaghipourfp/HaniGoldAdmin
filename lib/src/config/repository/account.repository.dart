@@ -91,4 +91,54 @@ class AccountRepository{
       throw ErrorException('خطا: $e');
     }
   }
+
+
+  Future<List<AccountModel>> searchAccountListNew(String name) async {
+    try {
+
+      Map<String, dynamic> options =name!=""? {
+        "options": {
+          "account": {
+            "Predicate": [
+              {
+                "innerCondition": 0,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Account"
+                  }
+                ]
+              }
+            ],
+            "orderBy": "Account.Name",
+            "orderByType": "asc",
+            "StartIndex": 1,
+            "ToIndex": 1000000
+          }
+        }
+      }:{
+        "options" : {
+          "account" :{
+            "orderBy": "Account.Name",
+            "orderByType": "asc",
+            "StartIndex": 1,
+            "ToIndex": 100000
+          }
+        }
+      };
+
+      final response = await accountDio.post('Account/get', data: options);
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((account) => AccountModel.fromJson(account)).toList();
+      } else {
+        throw ErrorException('خطا در دریافت اطلاعات');
+      }
+    } catch (e) {
+      throw ErrorException('خطا: $e');
+    }
+  }
 }

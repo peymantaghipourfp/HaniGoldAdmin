@@ -48,5 +48,5 @@ Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
       'recId': instance.recId,
       'infos': instance.infos,
       'description': instance.description,
-      'inventoryDetailsCount':instance.inventoryDetailsCount
+      'inventoryDetailsCount': instance.inventoryDetailsCount,
     };

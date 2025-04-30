@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -10,130 +13,19 @@ import '../controller/remittance.controller.dart';
 
 class RemittanceView extends GetView<RemittanceController> {
    RemittanceView({super.key});
-  final List<PlutoColumn> columns = <PlutoColumn>[
-    PlutoColumn(
-      title: 'ثبت کننده',
-      field: 'register',
-      type: PlutoColumnType.text(),
-      backgroundColor: AppColor.textFieldColor,
-    ),
-    PlutoColumn(
-      title: 'بدهکار',
-      field: 'Reciept',
-      type: PlutoColumnType.text(),
-      backgroundColor: AppColor.textFieldColor,
-    ),
-    PlutoColumn(
-      title: 'بستانکار',
-      field: 'Payer',
-      type: PlutoColumnType.text(),
-      backgroundColor: AppColor.textFieldColor,
-    ),
-    PlutoColumn(
-      title: 'محصول',
-      field: 'Product',
-      type: PlutoColumnType.text(),
-      backgroundColor: AppColor.textFieldColor,
-    ),
-    PlutoColumn(
-      title: 'مبلغ/مقدار',
-      field: 'Total',
-      type: PlutoColumnType.text(),
-      backgroundColor: AppColor.textFieldColor,
-    ),
-    PlutoColumn(
-      title: 'وضعیت',
-      field: 'Status',
-      backgroundColor: AppColor.textFieldColor,
-      type: PlutoColumnType.select(<String>[
-        'نامشخص',
-        'تایید نشده',
-        'تایید شده',
-      ]),
-    ),
-    PlutoColumn(
-      title: 'شرح',
-      field: 'Description',
-      type: PlutoColumnType.text(),
-      backgroundColor: AppColor.textFieldColor,
-    ),
-    PlutoColumn(
-      title: 'تاریخ ایجاد',
-      field: 'DateTime',
-      type: PlutoColumnType.date(),
-      backgroundColor: AppColor.textFieldColor,
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: const TextStyle(
-                debugLabel: 'blackCupertino bodySmall',
-                fontFamily: '.SF UI Text',
-                color: AppColor.textColor
-               ),
-          );
-        }
 
-    ),
-    // PlutoColumn(
-    //   title: 'salary',
-    //   field: 'salary',
-    //   type: PlutoColumnType.currency(),
-    //   footerRenderer: (rendererContext) {
-    //     return PlutoAggregateColumnFooter(
-    //       rendererContext: rendererContext,
-    //       formatAsCurrency: true,
-    //       type: PlutoAggregateColumnType.sum,
-    //       format: '#,###',
-    //       alignment: Alignment.center,
-    //       titleSpanBuilder: (text) {
-    //         return [
-    //           const TextSpan(
-    //             text: 'Sum',
-    //             style: TextStyle(color: Colors.red),
-    //           ),
-    //           const TextSpan(text: ' : '),
-    //           TextSpan(text: text),
-    //         ];
-    //       },
-    //     );
-    //   },
-    // ),
-  ];
 
-  final List<PlutoRow> rows = [
-    PlutoRow(
-      cells: {
-        'register': PlutoCell(value: 'جلیل نوری'),
-        'Reciept': PlutoCell(value: 'پیمان تقی پور'),
-        'Payer': PlutoCell(value: "محمود نصرالهی"),
-        'Product': PlutoCell(value: 'طلای آب شده'),
-        'Total': PlutoCell(value: "400 گرم"),
-        'Status': PlutoCell(value: "تایید شده"),
-        'Description': PlutoCell(value: "انتقال ار حساب ح به حساب ح داخلی"),
-        'DateTime': PlutoCell(value: '2021-01-01'),
-      },
-    ),
-  ];
-
-  /// columnGroups that can group columns can be omitted.
-  final List<PlutoColumnGroup> columnGroups = [
-    PlutoColumnGroup(title: 'Id', fields: ['id'], expandedColumn: true),
-    PlutoColumnGroup(title: 'User information', fields: ['name', 'age']),
-    PlutoColumnGroup(title: 'Status', children: [
-      PlutoColumnGroup(title: 'A', fields: ['role'], expandedColumn: true),
-      PlutoColumnGroup(title: 'Etc.', fields: ['joined', 'working_time']),
-    ]),
-  ];
-   late final PlutoGridStateManager stateManager;
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    return Scaffold(
+    return Obx(()=>Scaffold(
       appBar: CustomAppBar(
         title: 'لیست حواله', onBackTap: () => Get.back(),),
       body: SafeArea(
-        child: SizedBox(
+        child:controller.state.value==PageState.loading?
+        Center(
+          child: CircularProgressIndicator(),
+        ):controller.state.value==PageState.list?
+        SizedBox(
           child: Column(
             children: [
               //فیلد جستجو
@@ -171,19 +63,87 @@ class RemittanceView extends GetView<RemittanceController> {
 
                   child: PlutoGrid(
                     rowColorCallback: (rowColorContext) {
-                      return AppColor.textFieldColor;
+                      return AppColor.backGroundColor;
                     },
-                    columns: columns,
-                    rows: rows,
-                   // columnGroups: columnGroups,
+                    columns:controller.columns,
+                    // rows: [
+                    //   PlutoRow(
+                    //     cells: {
+                    //       'register': PlutoCell(value: ""),
+                    //       'Reciept': PlutoCell(value:""),
+                    //       'Payer': PlutoCell(value: ""),
+                    //       'Product': PlutoCell(value: ""),
+                    //       'Total': PlutoCell(value: ""),
+                    //       'Status': PlutoCell(value: "نامشخص"),
+                    //       'Description': PlutoCell(value: ""),
+                    //       'DateTime': PlutoCell(value: ""),
+                    //       'Action': PlutoCell(value: "گزینه 1"),
+                    //       // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
+                    //     },
+                    //   ),
+                    //   PlutoRow(
+                    //     cells: {
+                    //       'register': PlutoCell(value: ""),
+                    //       'Reciept': PlutoCell(value:""),
+                    //       'Payer': PlutoCell(value: ""),
+                    //       'Product': PlutoCell(value: ""),
+                    //       'Total': PlutoCell(value: ""),
+                    //       'Status': PlutoCell(value: "نامشخص"),
+                    //       'Description': PlutoCell(value: ""),
+                    //       'DateTime': PlutoCell(value: ""),
+                    //       'Action': PlutoCell(value: "گزینه 1"),
+                    //       // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
+                    //     },
+                    //   ),
+                    //   PlutoRow(
+                    //     cells: {
+                    //       'register': PlutoCell(value: ""),
+                    //       'Reciept': PlutoCell(value:""),
+                    //       'Payer': PlutoCell(value: ""),
+                    //       'Product': PlutoCell(value: ""),
+                    //       'Total': PlutoCell(value: ""),
+                    //       'Status': PlutoCell(value: "نامشخص"),
+                    //       'Description': PlutoCell(value: ""),
+                    //       'DateTime': PlutoCell(value: ""),
+                    //       'Action': PlutoCell(value: "گزینه 1"),
+                    //       // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
+                    //     },
+                    //   ),
+                    // ],
+
+                    rows: controller.remittanceList.map((e)=>
+                        PlutoRow(
+                          cells: {
+                            'register': PlutoCell(value: e.createdBy?.name),
+                            'Reciept': PlutoCell(value: e.walletReciept?.account?.name),
+                            'Payer': PlutoCell(value: e.walletPayer?.account?.name),
+                            'Product': PlutoCell(value: e.item?.name),
+                            'Total': PlutoCell(value:e.item?.itemUnit?.id==1? "${e.quantity} عدد ":e.item?.itemUnit?.id==2?"${e.quantity} گرم ":"${e.quantity} ریال "),
+                            'Status': PlutoCell(value: e.status==1?"تایید شده":e.status==0?"تایید نشده":"نامشخص"),
+                            'Description': PlutoCell(value: e.description??""),
+                            'DateTime': PlutoCell(value: e.date),
+                            'Action': PlutoCell(value: "گزینه 1"),
+                           // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
+                          },
+                        ),
+                    ).toList(),
+                    // columnGroups: columnGroups,
                     onLoaded: (PlutoGridOnLoadedEvent event) {
-                      stateManager = event.stateManager;
-                      stateManager.setShowColumnFilter(true);
+                      controller.setStateRemittance(event);
                     },
                     onChanged: (PlutoGridOnChangedEvent event) {
                       print(event);
                     },
-                    configuration: const PlutoGridConfiguration(),
+                    configuration:  PlutoGridConfiguration(
+                      style: PlutoGridStyleConfig(gridBackgroundColor: AppColor.appBarColor,
+                        columnTextStyle: AppTextStyle.labelText.copyWith(fontSize: 13,
+                          fontWeight: FontWeight.bold, ),activatedColor: AppColor.textFieldColor,
+                      ),
+                    ),
+
+
+
+
                   ),
                 ),
               ),
@@ -193,8 +153,17 @@ class RemittanceView extends GetView<RemittanceController> {
 
             ],
           ),
+        ):Center(
+          child:  Text(
+            'خطا در سمت سرور رخ داده',
+            style: AppTextStyle.labelText.copyWith(fontSize: 14,
+              fontWeight: FontWeight.bold, ),
+          ),
         ),
       ),
-    );
+    ));
   }
 }
+
+
+
