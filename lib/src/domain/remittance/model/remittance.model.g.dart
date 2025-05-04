@@ -30,8 +30,12 @@ RemittanceModel _$RemittanceModelFromJson(Map<String, dynamic> json) =>
           : UserModel.fromJson(json['createdBy'] as Map<String, dynamic>),
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
-      balancePayer: json['balancePayer'] as String?,
-      balanceReciept: json['balanceReciept'] as String?,
+      balancePayer:  (json['balancePayer'] as List<dynamic>?)
+        ?.map((e) => BalanceModel.fromJson(e as Map<String, dynamic>))
+        .toList(),
+          balanceReciept:(json['balanceReciept'] as List<dynamic>?)
+              ?.map((e) => BalanceModel.fromJson(e as Map<String, dynamic>))
+              .toList(),
       description: json['description'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,

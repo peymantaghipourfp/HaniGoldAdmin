@@ -10,9 +10,9 @@ BalanceModel balanceModelFromJson(String str) => BalanceModel.fromJson(json.deco
 String balanceModelToJson(BalanceModel data) => json.encode(data.toJson());
 
 class BalanceModel {
-  final double balance;
-  final String itemName;
-  final String unitName;
+  final dynamic balance;
+  final String? itemName;
+  final String? unitName;
 
   BalanceModel({
     required this.balance,
@@ -21,14 +21,14 @@ class BalanceModel {
   });
 
   factory BalanceModel.fromJson(Map<String, dynamic> json) => BalanceModel(
-    balance: json["Balance"]?.toDouble(),
-    itemName: json["ItemName"],
-    unitName: json["UnitName"],
+    balance: json["balance"],
+    itemName: json["itemName"],
+    unitName: json["unitName"],
   );
 
   Map<String, dynamic> toJson() => {
-    "Balance": balance,
-    "ItemName": itemName,
-    "UnitName": unitName,
+    "balance": balance,
+    "itemName": itemName,
+    "unitName": unitName,
   };
 }

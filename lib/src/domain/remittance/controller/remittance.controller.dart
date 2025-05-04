@@ -2,13 +2,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/repository/deposit_request.repository.dart';
-import 'package:hanigold_admin/src/config/repository/reason_rejection.repository.dart';
-import 'package:hanigold_admin/src/config/repository/withdraw.repository.dart';
-import 'package:hanigold_admin/src/config/repository/withdraw_getOne.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
@@ -21,10 +16,8 @@ import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.mo
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:pluto_grid/pluto_grid.dart';
-
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
@@ -117,11 +110,7 @@ class RemittanceController extends GetxController{
     update();
   }
 
-  setStateRemittance(PlutoGridOnLoadedEvent event){
-    stateManager = event.stateManager;
-    stateManager.setShowColumnFilter(true);
-    update();
-  }
+
 
   @override
   void onInit() {
@@ -171,7 +160,6 @@ Timer? debounceP;
      // state.value=PageState.loading;
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
-      itemList.removeWhere((e) => e.price==null,);
     //  state.value=PageState.list;
       if(itemList.isEmpty){
      //   state.value=PageState.empty;
@@ -184,7 +172,19 @@ Timer? debounceP;
 
     }
   }
+  void nextPage() {
+    if (hasMore.value) {
+      currentPage.value++;
+      fetchRemittanceList();
+    }
+  }
 
+  void previousPage() {
+    if (currentPage.value > 1) {
+      currentPage.value--;
+      fetchRemittanceList();
+    }
+  }
 
 
   // لیست حواله
@@ -195,9 +195,26 @@ Timer? debounceP;
       state.value=PageState.loading;
       var fetchedAccountList=await remittanceRepository.getRemittanceList();
       remittanceList.addAll(fetchedAccountList);
-      print(fetchedAccountList.first.balanceReciept);
       state.value=PageState.list;
-
+      // rows = remittanceList.map((e){
+      //   return PlutoRow(
+      //     cells: {
+      //       'register': PlutoCell(value: e.createdBy?.name),
+      //       'Reciept': PlutoCell(value: e.walletReciept?.account?.name),
+      //       'Payer': PlutoCell(value: e.walletPayer?.account?.name),
+      //       'Product': PlutoCell(value: e.item?.name),
+      //       'Total': PlutoCell(value:e.item?.itemUnit?.id==1? "${e.quantity} عدد ":e.item?.itemUnit?.id==2?"${e.quantity} گرم ":"${e.quantity} ریال "),
+      //       'Status': PlutoCell(value: e.status==1?"تایید شده":e.status==0?"تایید نشده":"نامشخص"),
+      //       'Description': PlutoCell(value: e.description??""),
+      //       'DateTime': PlutoCell(value: e.date),
+      //       'Action': PlutoCell(value: "گزینه 1"),
+      //       'BalanceC': PlutoCell(value: jsonDecode(e.balancePayer!).map((e){
+      //         return (e["UnitName"]=="ریال"?e["ItemName"]+e["Balance"].toString()+" ریال":"").toString().replaceAll(",", "");
+      //       }).toList()),
+      //     },
+      //   );
+      //
+      // }).toList();
       if(remittanceList.isEmpty){
         state.value=PageState.empty;
       }
@@ -230,6 +247,7 @@ Timer? debounceP;
     }
   }
 
+
   Future<void> fetchAccountListP(String name) async{
     try{
      // state.value=PageState.loading;
@@ -250,190 +268,7 @@ Timer? debounceP;
   }
 
 
-  List<PlutoColumn> columns = <PlutoColumn>[
-    PlutoColumn(
-        title: 'ثبت کننده',
-        readOnly: true,
-        field: 'register',
-        type: PlutoColumnType.text(),
-        backgroundColor: AppColor.textFieldColor,
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                fontWeight: FontWeight.bold,color: AppColor.textColor ),
-          );
-        }
-    ),
-    PlutoColumn(
-        title: 'بدهکار',
-        field: 'Reciept',
-        type: PlutoColumnType.text(),
-        readOnly: true,
-        backgroundColor: AppColor.textFieldColor,
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                fontWeight: FontWeight.bold,color: AppColor.accentColor ),
-          );
-        }
-    ),
-    PlutoColumn(
-        title: 'بستانکار',
-        field: 'Payer',
-        readOnly: true,
-        type: PlutoColumnType.text(),
-        backgroundColor: AppColor.textFieldColor,
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                fontWeight: FontWeight.bold,color: AppColor.primaryColor ),
-          );
-        }
-    ),
-    PlutoColumn(
-        title: 'محصول',
-        field: 'Product',
-        readOnly: true,
-        type: PlutoColumnType.text(),
-        backgroundColor: AppColor.textFieldColor,
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                fontWeight: FontWeight.bold,color: AppColor.iconViewColor ),
-          );
-        }
-    ),
-    PlutoColumn(
-        title: 'مبلغ/مقدار',
-        field: 'Total',
-        readOnly: true,
-        type: PlutoColumnType.text(),
-        backgroundColor: AppColor.textFieldColor,
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-              fontWeight: FontWeight.bold, ),
-          );
-        }
-    ),
-    PlutoColumn(
-        title: 'وضعیت',
-        field: 'Status',
-        readOnly: true,
-        backgroundColor: AppColor.textFieldColor,
-        type: PlutoColumnType.select(<String>[
-          'نامشخص',
-          'تایید نشده',
-          'تایید شده',
-        ]),
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color:rendererContext.cell.value! =="تایید شده"?AppColor.secondary2Color: AppColor.accentColor
 
-            ),
-          );
-        }
-    ),
-    PlutoColumn(
-        title: 'شرح',
-        field: 'Description',
-        readOnly: true,
-        type: PlutoColumnType.text(),
-        backgroundColor: AppColor.textFieldColor,
-
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 10,
-              fontWeight: FontWeight.normal, ),
-          );
-        }
-    ),
-    PlutoColumn(
-        title: 'تاریخ ایجاد',
-        field: 'DateTime',
-        readOnly: true,
-        type: PlutoColumnType.date(),
-        backgroundColor: AppColor.textFieldColor,
-        renderer: (rendererContext) {
-          return Text(
-            textAlign: TextAlign.right,
-            rendererContext.cell.value.toString(),
-            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-              fontWeight: FontWeight.bold, ),
-          );
-        }
-
-    ),
-     PlutoColumn(
-       title: 'Action',
-       field: 'Action',
-       type: PlutoColumnType.text(),
-       enableRowDrag: false,
-       enableDropToResize: false,
-       enableEditingMode: false,
-       width: 150,
-         renderer: (rendererContext) {
-           return Row(
-             mainAxisAlignment: MainAxisAlignment.center,
-             children: [
-               IconButton(
-                 icon: Icon(Icons.edit, color: Colors.blue),
-                 onPressed: () => print(rendererContext.row.type),
-               ),
-               IconButton(
-                 icon: Icon(Icons.delete, color: Colors.red),
-                 onPressed: () => print(rendererContext.row.type),
-               ),
-             ],
-           );
-         }
-     ),
-
-     // PlutoColumn(
-    //   title: 'salary',
-    //   field: 'salary',
-    //   type: PlutoColumnType.currency(),
-    //   footerRenderer: (rendererContext) {
-    //     return PlutoAggregateColumnFooter(
-    //       rendererContext: rendererContext,
-    //       formatAsCurrency: true,
-    //       type: PlutoAggregateColumnType.sum,
-    //       format: '#,###',
-    //       alignment: Alignment.center,
-    //       titleSpanBuilder: (text) {
-    //         return [
-    //           const TextSpan(
-    //             text: 'Sum',
-    //             style: TextStyle(color: Colors.red),
-    //           ),
-    //           const TextSpan(text: ' : '),
-    //           TextSpan(text: text),
-    //         ];
-    //       },
-    //     );
-    //   },
-    // ),
-  ];
-
-
-
-  late PlutoGridStateManager stateManager;
 
 
 }

@@ -1,169 +1,363 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:pluto_grid/pluto_grid.dart';
-import 'package:responsive_framework/responsive_framework.dart';
-
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../controller/remittance.controller.dart';
 
 class RemittanceView extends GetView<RemittanceController> {
-   RemittanceView({super.key});
-
+  const RemittanceView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Obx(()=>Scaffold(
-      appBar: CustomAppBar(
-        title: 'لیست حواله', onBackTap: () => Get.back(),),
-      body: SafeArea(
-        child:controller.state.value==PageState.loading?
-        Center(
-          child: CircularProgressIndicator(),
-        ):controller.state.value==PageState.list?
-        SizedBox(
-          child: Column(
-            children: [
-              //فیلد جستجو
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 15,vertical: 10),
-                height: 41,
-                child: TextFormField(
-                  controller: controller.searchController,
-                  style: AppTextStyle.labelText,
-                  textInputAction: TextInputAction.search,
-                  onFieldSubmitted: (value) async {
-                  },
-                  decoration: InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    filled: true,
-                    fillColor: AppColor.textFieldColor,
-                    hintText: "جستجو ... ",
-                    hintStyle: AppTextStyle.labelText,
-                    prefixIcon: IconButton(
-                        onPressed: () async {
-                        },
-                        icon: Icon(
-                          Icons.search, color: AppColor.textColor,
-                          size: 30,)
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(15),
-                  color: AppColor.secondaryColor,
-
-                  child: PlutoGrid(
-                    rowColorCallback: (rowColorContext) {
-                      return AppColor.backGroundColor;
-                    },
-                    columns:controller.columns,
-                    // rows: [
-                    //   PlutoRow(
-                    //     cells: {
-                    //       'register': PlutoCell(value: ""),
-                    //       'Reciept': PlutoCell(value:""),
-                    //       'Payer': PlutoCell(value: ""),
-                    //       'Product': PlutoCell(value: ""),
-                    //       'Total': PlutoCell(value: ""),
-                    //       'Status': PlutoCell(value: "نامشخص"),
-                    //       'Description': PlutoCell(value: ""),
-                    //       'DateTime': PlutoCell(value: ""),
-                    //       'Action': PlutoCell(value: "گزینه 1"),
-                    //       // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
-                    //     },
-                    //   ),
-                    //   PlutoRow(
-                    //     cells: {
-                    //       'register': PlutoCell(value: ""),
-                    //       'Reciept': PlutoCell(value:""),
-                    //       'Payer': PlutoCell(value: ""),
-                    //       'Product': PlutoCell(value: ""),
-                    //       'Total': PlutoCell(value: ""),
-                    //       'Status': PlutoCell(value: "نامشخص"),
-                    //       'Description': PlutoCell(value: ""),
-                    //       'DateTime': PlutoCell(value: ""),
-                    //       'Action': PlutoCell(value: "گزینه 1"),
-                    //       // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
-                    //     },
-                    //   ),
-                    //   PlutoRow(
-                    //     cells: {
-                    //       'register': PlutoCell(value: ""),
-                    //       'Reciept': PlutoCell(value:""),
-                    //       'Payer': PlutoCell(value: ""),
-                    //       'Product': PlutoCell(value: ""),
-                    //       'Total': PlutoCell(value: ""),
-                    //       'Status': PlutoCell(value: "نامشخص"),
-                    //       'Description': PlutoCell(value: ""),
-                    //       'DateTime': PlutoCell(value: ""),
-                    //       'Action': PlutoCell(value: "گزینه 1"),
-                    //       // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
-                    //     },
-                    //   ),
-                    // ],
-
-                    rows: controller.remittanceList.map((e)=>
-                        PlutoRow(
-                          cells: {
-                            'register': PlutoCell(value: e.createdBy?.name),
-                            'Reciept': PlutoCell(value: e.walletReciept?.account?.name),
-                            'Payer': PlutoCell(value: e.walletPayer?.account?.name),
-                            'Product': PlutoCell(value: e.item?.name),
-                            'Total': PlutoCell(value:e.item?.itemUnit?.id==1? "${e.quantity} عدد ":e.item?.itemUnit?.id==2?"${e.quantity} گرم ":"${e.quantity} ریال "),
-                            'Status': PlutoCell(value: e.status==1?"تایید شده":e.status==0?"تایید نشده":"نامشخص"),
-                            'Description': PlutoCell(value: e.description??""),
-                            'DateTime': PlutoCell(value: e.date),
-                            'Action': PlutoCell(value: "گزینه 1"),
-                           // 'BalanceC': PlutoCell(value: (jsonDecode(e.balancePayer!)as List).map((e)=>e["ItemName"]).toList()),
-                          },
+    return Obx(() => Scaffold(
+          appBar: CustomAppBar(
+            title: 'لیست حواله',
+            onBackTap: () => Get.back(),
+          ),
+          body: SafeArea(
+            child: controller.state.value == PageState.loading
+                ? Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : controller.state.value == PageState.list
+                    ? SizedBox(
+                        child: Column(
+                          children: [
+                            //فیلد جستجو
+                            Container(
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: 15, vertical: 10),
+                              height: 41,
+                              child: TextFormField(
+                                controller: controller.searchController,
+                                style: AppTextStyle.labelText,
+                                textInputAction: TextInputAction.search,
+                                onFieldSubmitted: (value) async {},
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  filled: true,
+                                  fillColor: AppColor.textFieldColor,
+                                  hintText: "جستجو ... ",
+                                  hintStyle: AppTextStyle.labelText,
+                                  prefixIcon: IconButton(
+                                      onPressed: () async {},
+                                      icon: Icon(
+                                        Icons.search,
+                                        color: AppColor.textColor,
+                                        size: 30,
+                                      )),
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Column(
+                                  children: [
+                                    DataTable(
+                                      columns: buildDataColumns(),
+                                      rows: buildDataRows(context),
+                                      dataRowMaxHeight: 100,
+                                      //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                      //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                      headingRowHeight: 60,
+                                      columnSpacing: 25,
+                                      horizontalMargin: 6,
+                                    ),
+                                    buildPaginationControls(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                    ).toList(),
-                    // columnGroups: columnGroups,
-                    onLoaded: (PlutoGridOnLoadedEvent event) {
-                      controller.setStateRemittance(event);
-                    },
-                    onChanged: (PlutoGridOnChangedEvent event) {
-                      print(event);
-                    },
-                    configuration:  PlutoGridConfiguration(
-                      style: PlutoGridStyleConfig(gridBackgroundColor: AppColor.appBarColor,
-                        columnTextStyle: AppTextStyle.labelText.copyWith(fontSize: 13,
-                          fontWeight: FontWeight.bold, ),activatedColor: AppColor.textFieldColor,
+                      )
+                    : Center(
+                        child: Text(
+                          'خطا در سمت سرور رخ داده',
+                          style: AppTextStyle.labelText.copyWith(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
+          ),
+        ));
+  }
 
+  List<DataColumn> buildDataColumns() {
+    return [
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('تاریخ', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('نام ثبت کننده', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Column(
+                children: [
+                  Text('بدهکار ', style: AppTextStyle.labelText.copyWith(color: AppColor.accentColor,fontSize: 12)),
+                  SvgPicture.asset('assets/svg/refresh.svg',height: 16,
+                      colorFilter: ColorFilter.mode(
+                        AppColor.textColor,
 
+                        BlendMode.srcIn,
+                      )),
+                  Text(' بستانکار', style: AppTextStyle.labelText.copyWith(color: AppColor.primaryColor,fontSize: 12)),
+                ],
+              )),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('محصول', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('مقدار', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('وضعیت', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('شرح', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('مانده ریالی', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('مانده طلایی', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('مانده سکه', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('عملیات', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),
+    ];
+  }
 
-
-                  ),
+  List<DataRow> buildDataRows(BuildContext context) {
+    return controller.remittanceList.map((remittance) {
+      //print(" تسسسسسسسست ${inventory.inventoryDetails?.first.itemUnit?.name}");
+      return DataRow(
+        cells: [
+          // تاریخ
+          DataCell(Center(
+            child: Text(
+              remittance.date?.toPersianDate(showTime: true) ?? 'نامشخص',
+              style: AppTextStyle.bodyText,
+            ),
+          )),
+          DataCell(Center(
+            child: Text(
+              remittance.createdBy?.name ?? 'نامشخص',
+              style: AppTextStyle.bodyText,
+            ),
+          )),
+          DataCell(Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  "${remittance.walletPayer?.account?.name ?? 'نامشخص'} ",
+                  style: AppTextStyle.bodyText,
                 ),
+                SvgPicture.asset('assets/svg/refresh.svg',height: 16,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+
+                      BlendMode.srcIn,
+                    )),
+                Text(
+                  " ${remittance.walletReciept?.account?.name ?? 'نامشخص'}",
+                  style: AppTextStyle.bodyText,
+                ),
+              ],
+            ),
+          )),
+          DataCell(Center(
+            child: Text(
+              remittance.item?.name ?? 'نامشخص',
+              style: AppTextStyle.bodyText.copyWith(color: AppColor.secondary2Color,fontWeight: FontWeight.w700,fontSize: 14),
+            ),
+          )),
+          DataCell(Center(
+            child: Text(
+              remittance.item?.itemUnit?.id == 1
+                  ? "${remittance.quantity} عدد "
+                  : remittance.item?.itemUnit?.id == 2
+                      ? "${remittance.quantity} گرم "
+                      : "${remittance.quantity.toString().seRagham()} ریال ",
+              style: AppTextStyle.bodyText,
+            ),
+          )),
+          DataCell(Center(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+              decoration: BoxDecoration(
+                  color:remittance.status == 1? AppColor.secondary2Color:remittance.status == 1?AppColor.accentColor:AppColor.textFieldColor,
+                borderRadius: BorderRadius.circular(7)
               ),
+              child: Text(
+                remittance.status == 1
+                    ? "تایید شده"
+                    : remittance.status == 0
+                        ? "تایید نشده"
+                        : "نامشخص",
+                style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor,fontSize: 12),
+              ),
+            ),
+          )),
+          DataCell(Center(
+            child: Text(
+              remittance.description ?? 'نامشخص',
+              style: AppTextStyle.bodyText,
+            ),
+          )),
+          DataCell(Center(
+            child:Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Column(
+                  children: remittance.balancePayer!.map((e)=>
+                      Container(
+                        child:e.unitName=="ریال"? Text(
+                          "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor),
+                        ):SizedBox(),
 
+                  )).toList(),
+                ),
+                Column(
+                  children: remittance.balanceReciept!.map((e)=>
+                      Container(
+                        child:e.unitName=="ریال"? Text(
+                          "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                        ):SizedBox(),
 
+                      )).toList(),
+                ),
+              ],
+            )
+          )),
+          DataCell(Center(
+              child:Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: remittance.balancePayer!.map((e)=>
+                        Container(
+                          child:e.unitName=="گرم"? Text(
+                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor),
+                          ):SizedBox(),
 
+                        )).toList(),
+                  ),
+                  Column(
+                    children: remittance.balanceReciept!.map((e)=>
+                        Container(
+                          child:e.unitName=="گرم"? Text(
+                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                          ):SizedBox(),
 
+                        )).toList(),
+                  ),
+                ],
+              )
+          )),
+          DataCell(Center(
+              child:Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Column(
+                    children: remittance.balancePayer!.map((e)=>
+                        Container(
+                          child:e.unitName=="عدد"? Text(
+                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor),
+                          ):SizedBox(),
+
+                        )).toList(),
+                  ),
+
+                  Column(
+                    children: remittance.balanceReciept!.map((e)=>
+                        Container(
+                          child:e.unitName=="عدد"? Text(
+                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                          ):SizedBox(),
+
+                        )).toList(),
+                  ),
+                ],
+              )
+          )),
+
+          DataCell(Center(
+              child: Row(
+            children: [
+              SvgPicture.asset('assets/svg/edit.svg',
+                  colorFilter: ColorFilter.mode(
+                    AppColor.iconViewColor,
+                    BlendMode.srcIn,
+                  )),
+              SvgPicture.asset('assets/svg/trash-bin.svg',
+                  colorFilter: ColorFilter.mode(
+                    AppColor.iconViewColor,
+                    BlendMode.srcIn,
+                  )),
+            ],
+          ))),
+        ],
+      );
+    }).toList();
+  }
+
+  Widget buildPaginationControls() {
+    return Obx(() => Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              IconButton(
+                icon: Icon(Icons.chevron_left),
+                onPressed: controller.currentPage.value > 1
+                    ? controller.previousPage
+                    : null,
+              ),
+              Text(
+                'صفحه ${controller.currentPage.value}',
+                style: AppTextStyle.bodyText,
+              ),
+              IconButton(
+                icon: Icon(Icons.chevron_right),
+                onPressed:
+                    controller.hasMore.value ? controller.nextPage : null,
+              ),
             ],
           ),
-        ):Center(
-          child:  Text(
-            'خطا در سمت سرور رخ داده',
-            style: AppTextStyle.labelText.copyWith(fontSize: 14,
-              fontWeight: FontWeight.bold, ),
-          ),
-        ),
-      ),
-    ));
+        ));
   }
 }
-
-
-

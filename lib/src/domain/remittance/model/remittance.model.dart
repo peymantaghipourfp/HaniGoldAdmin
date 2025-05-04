@@ -42,9 +42,9 @@ class RemittanceModel {
   @JsonKey(name: "attribute")
   final String? attribute;
   @JsonKey(name: "balancePayer")
-  final String? balancePayer;
+  final List<BalanceModel>? balancePayer;
   @JsonKey(name: "balanceReciept")
-  final String? balanceReciept;
+  final List<BalanceModel>? balanceReciept;
   @JsonKey(name: "description")
   final String? description;
   @JsonKey(name: "recId")
