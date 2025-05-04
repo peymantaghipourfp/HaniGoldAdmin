@@ -69,7 +69,7 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
         initialPrice1 = priceController1.text;
       } else {
         if (!isSubmitting) {
-          if (priceController1.text != initialPrice2 &&
+          if (priceController1.text != initialPrice1 &&
               (priceController1.text== '00' ||priceController1.text=='0' || priceController1.text.isEmpty)) {
             priceController1.text = '000';
           }

@@ -222,6 +222,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         );
         if (walletMatch != null) {
           selectedWalletAccount.value = walletMatch;
+          fetchForPaymentList();
         }
       }
       if(walletAccountList.isEmpty){

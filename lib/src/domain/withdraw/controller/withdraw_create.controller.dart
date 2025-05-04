@@ -28,7 +28,7 @@ enum PageState{loading,err,empty,list}
 class WithdrawCreateController extends GetxController{
   //final formKey = GlobalKey<FormState>();
 
-  final WithdrawController withdrawController=WithdrawController();
+  final WithdrawController withdrawController=Get.find<WithdrawController>();
 
   final TextEditingController searchController = TextEditingController();
   final TextEditingController ownerNameController=TextEditingController();
@@ -271,7 +271,6 @@ Future<WithdrawModel?> insertWithdraw()async{
       //print(response);
       if (response != null) {
         Get.toNamed('/withdrawsList');
-        withdrawController.fetchWithdrawList();
         Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
@@ -279,6 +278,7 @@ Future<WithdrawModel?> insertWithdraw()async{
             messageText: Text(
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
+        withdrawController.fetchWithdrawList();
         clearList();
       }
     }

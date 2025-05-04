@@ -171,6 +171,7 @@ Timer? debounceP;
      // state.value=PageState.loading;
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
+      itemList.removeWhere((e) => e.price==null,);
     //  state.value=PageState.list;
       if(itemList.isEmpty){
      //   state.value=PageState.empty;

@@ -214,9 +214,7 @@ class WithdrawController extends GetxController{
 
   //لیست درخواست های برداشت(withdrawRequest)
   Future<void> fetchWithdrawList()async{
-
     try{
-
         withdrawList.clear();
 
       isLoading.value = true;

@@ -4,6 +4,7 @@ class AppColor{
   static const Color textColor=Color(0xffffffff);
   static const Color appBarColor=Color(0xff333c4d);
   static const Color backGroundColor=Color(0xff36465f);
+  static const Color backGroundColor1=Color(0xff323e52);
   static const Color textFieldColor=Color(0xff5b6788);
   static const Color primaryColor=Color(0xff1bc06e);
   static const Color secondaryColor=Color(0xFF2D3541);

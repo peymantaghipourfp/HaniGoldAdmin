@@ -28,7 +28,7 @@ import '../model/predicate.model.dart';
 enum PageState{loading,err,empty,list}
 class WithdrawUpdateController extends GetxController{
 
-  final WithdrawController withdrawController=WithdrawController();
+  final WithdrawController withdrawController=Get.find<WithdrawController>();
 
   final TextEditingController searchController = TextEditingController();
   final TextEditingController ownerNameController=TextEditingController();
@@ -299,12 +299,12 @@ class WithdrawUpdateController extends GetxController{
 
       if(response!= null){
         Get.back();
-        withdrawController.fetchWithdrawList();
         Get.snackbar("موفقیت آمیز","ویرایش با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('ویرایش با موفقیت آنجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        withdrawController.fetchWithdrawList();
         clearList();
         withdrawController.withdrawList.refresh();
       }

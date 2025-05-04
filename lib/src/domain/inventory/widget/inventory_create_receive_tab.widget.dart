@@ -661,64 +661,68 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                 Row(mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // دکمه ثبت
-                    ElevatedButton(
-                      style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                          isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                          isDesktop ? 50 : 40
-                      ),),
-                          padding: WidgetStatePropertyAll(
-                            EdgeInsets.symmetric(
-                                horizontal: isDesktop ? 20 : 7
-                            ),),
-                          elevation: WidgetStatePropertyAll(5),
-                          backgroundColor:
-                          WidgetStatePropertyAll(AppColor.buttonColor),
-                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)))),
-                      onPressed: () async {
-                        inventoryCreateReceiveController.addToTempList();
-                      },
-                      child: inventoryCreateReceiveController.isLoading.value
-                          ?
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColor.textColor),
-                      ) :
-                      Text(
-                        'ثبت موقت',
-                        style: AppTextStyle.bodyText,
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
+                            isDesktop ? Get.width * 0.12 : Get.width * 0.3,
+                            isDesktop ? 50 : 40
+                        ),),
+                            padding: WidgetStatePropertyAll(
+                              EdgeInsets.symmetric(
+                                  horizontal: isDesktop ? 20 : 7
+                              ),),
+                            elevation: WidgetStatePropertyAll(5),
+                            backgroundColor:
+                            WidgetStatePropertyAll(AppColor.buttonColor),
+                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)))),
+                        onPressed: () async {
+                          inventoryCreateReceiveController.addToTempList();
+                        },
+                        child: inventoryCreateReceiveController.isLoading.value
+                            ?
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColor.textColor),
+                        ) :
+                        Text(
+                          'ثبت موقت',
+                          style: AppTextStyle.bodyText,
+                        ),
                       ),
                     ),
 
                     SizedBox(width: 10,),
                     // دکمه ثبت نهایی
-                    ElevatedButton(
-                      style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                          isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                          isDesktop ? 50 : 40
-                      ),
-                      ),
-                          padding: WidgetStatePropertyAll(
-                            EdgeInsets.symmetric(
-                                horizontal: isDesktop ? 20 : 7
-                            ),),
-                          elevation: WidgetStatePropertyAll(5),
-                          backgroundColor:
-                          WidgetStatePropertyAll(AppColor.primaryColor),
-                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)))),
-                      onPressed: () async {
-                        inventoryCreateReceiveController.submitFinalInventory();
-                      },
-                      child: inventoryCreateReceiveController.isFinalizing.value
-                          ?
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColor.textColor),
-                      ) :
-                      Text(
-                        'ثبت نهایی',
-                        style: AppTextStyle.bodyText,
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
+                            isDesktop ? Get.width * 0.12 : Get.width * 0.3,
+                            isDesktop ? 50 : 40
+                        ),
+                        ),
+                            padding: WidgetStatePropertyAll(
+                              EdgeInsets.symmetric(
+                                  horizontal: isDesktop ? 20 : 7
+                              ),),
+                            elevation: WidgetStatePropertyAll(5),
+                            backgroundColor:
+                            WidgetStatePropertyAll(AppColor.primaryColor),
+                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)))),
+                        onPressed: () async {
+                          inventoryCreateReceiveController.submitFinalInventory();
+                        },
+                        child: inventoryCreateReceiveController.isFinalizing.value
+                            ?
+                        CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColor.textColor),
+                        ) :
+                        Text(
+                          'ثبت نهایی',
+                          style: AppTextStyle.bodyText,
+                        ),
                       ),
                     )
                   ],

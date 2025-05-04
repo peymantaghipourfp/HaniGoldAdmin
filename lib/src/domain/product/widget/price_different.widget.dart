@@ -34,9 +34,9 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
   late FocusNode focusNode2;
   late FocusNode focusNode3;
 
-  String initialPrice1 = '';
-  String initialPrice2 = '';
-  String initialPrice3 = '';
+  String initialDifferentPrice1 = '';
+  String initialDifferentPrice2 = '';
+  String initialDifferentPrice3 = '';
 
   ProductController productController=Get.find<ProductController>();
   bool isLoading=false;
@@ -59,10 +59,10 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
   void setupFocusListeners() {
     focusNode1.addListener(() {
       if (focusNode1.hasFocus) {
-        initialPrice1 = differentPriceController1.text;
+        initialDifferentPrice1 = differentPriceController1.text;
       } else {
         if (!isSubmitting) {
-          if (differentPriceController1.text != initialPrice2 &&
+          if (differentPriceController1.text != initialDifferentPrice1 &&
           (differentPriceController1.text== '00' ||differentPriceController1.text=='0' || differentPriceController1.text.isEmpty)) {
             differentPriceController1.text = '000';
           }
@@ -71,10 +71,10 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
     });
     focusNode2.addListener(() {
       if (focusNode2.hasFocus) {
-        initialPrice2 = differentPriceController2.text;
+        initialDifferentPrice2 = differentPriceController2.text;
       } else {
         if (!isSubmitting) {
-          if (differentPriceController2.text != initialPrice2 &&
+          if (differentPriceController2.text != initialDifferentPrice2 &&
               (differentPriceController2.text== '00' ||differentPriceController2.text=='0' || differentPriceController2.text.isEmpty)) {
             differentPriceController2.text = '000';
           }
@@ -84,10 +84,10 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
 
     focusNode3.addListener(() {
       if (focusNode3.hasFocus) {
-        initialPrice3 = differentPriceController3.text;
+        initialDifferentPrice3 = differentPriceController3.text;
       } else {
         if (!isSubmitting) {
-          if (differentPriceController3.text != initialPrice3 &&
+          if (differentPriceController3.text != initialDifferentPrice3 &&
               (differentPriceController3.text== '00' ||differentPriceController3.text=='0' || differentPriceController3.text.isEmpty)) {
             differentPriceController3.text = '000';
           }
@@ -104,14 +104,14 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
     super.dispose();
   }
 
-  Future<void> submitPrice() async {
+  Future<void> submitDifferentPrice() async {
     if (isSubmitting || isLoading) return;
 
     isSubmitting = true;
     setState(() => isLoading = true);
 
     try {
-      await productController.insertPriceItem(
+      await productController.insertDifferentPriceItem(
         widget.id,
         double.parse(
           ("${differentPriceController3.text}${differentPriceController2.text}"
@@ -144,7 +144,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
                 WidgetStatePropertyAll(AppColor.primaryColor),
                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)))),
-            onPressed: submitPrice,
+            onPressed: submitDifferentPrice,
             child: Text(
               'تایید',
               style: AppTextStyle.labelText,
@@ -161,7 +161,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
             controller: differentPriceController1,
             focusNode: focusNode1,
             style: AppTextStyle.labelText,
-            onFieldSubmitted: (value) => submitPrice(),
+            onFieldSubmitted: (value) => submitDifferentPrice(),
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
@@ -182,7 +182,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
             controller: differentPriceController2,
             focusNode: focusNode2,
             style: AppTextStyle.labelText,
-            onFieldSubmitted: (value) => submitPrice(),
+            onFieldSubmitted: (value) => submitDifferentPrice(),
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
@@ -203,7 +203,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
             controller: differentPriceController3,
             focusNode: focusNode3,
             style: AppTextStyle.labelText,
-            onFieldSubmitted: (value) => submitPrice(),
+            onFieldSubmitted: (value) => submitDifferentPrice(),
             keyboardType: TextInputType.number,
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(

@@ -167,7 +167,7 @@ class OrderController extends GetxController{
   Future<List<OrderModel>> fetchOrderList() async{
     try{
         orderList.clear();
-
+        isLoading.value=true;
       state.value=PageState.loading;
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
       final toIndex = currentPage.value * itemsPerPage.value;
@@ -205,11 +205,12 @@ class OrderController extends GetxController{
       isLoading.value = true;
       var response=await orderRepository.updateStatusOrder(status: status, orderId: orderId);
       if(response!= null){
-        Get.snackbar("موفقیت آمیز","وضعیت سفارش با موفقیت تغییر کرد",
-            titleText: Text('موفقیت آمیز',
+        OrderModel orderResponse=OrderModel.fromJson(response);
+        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
+            titleText: Text(orderResponse.infos!.first['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text('وضعیت سفارش با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            messageText: Text(orderResponse.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         fetchOrderList();
       }
     }catch(e){

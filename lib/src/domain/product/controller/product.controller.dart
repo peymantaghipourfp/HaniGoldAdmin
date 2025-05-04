@@ -124,7 +124,34 @@ class ProductController extends GetxController{
       var response=await itemRepository.insertPriceItem(
           itemId: id ,
           price: price,
-          differentPrice: different,
+        differentPrice: different,
+      );
+      print(response);
+      if (response != null) {
+        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(
+                'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor)));
+        clearList();
+      }
+      return false;
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }finally{
+      isLoading.value=false;
+    }
+  }
+
+  Future<bool> insertDifferentPriceItem(int id, double different, double price )async{
+    try{
+      isLoading.value = true;
+      var response=await itemRepository.insertDifferentPriceItem(
+        itemId: id ,
+        differentPrice: different,
+        price: price,
       );
       print(response);
       if (response != null) {

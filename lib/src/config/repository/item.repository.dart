@@ -1,6 +1,7 @@
 
 
 import 'package:dio/dio.dart';
+import 'package:get/get_utils/get_utils.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
@@ -39,7 +40,6 @@ class ItemRepository{
       throw ErrorException('خطا:$e');
     }
   }
-
   Future<ItemModel> getOneItem(int itemId)async{
     try {
       final response = await itemDio.get(
@@ -62,6 +62,28 @@ class ItemRepository{
         "itemId": itemId,
         "price": price,
         "differentPrice": differentPrice,
+        "rowNum": 1,
+        "attribute": "sys",
+        "infos": []
+      };
+
+      var response=await itemDio.post('ItemPrice/insert',data: itemData);
+      return response.data;
+
+    }catch(e){
+      throw ErrorException('خطا در درج اطلاعات:$e');
+    }
+  }
+  Future<Map<String , dynamic>> insertDifferentPriceItem({
+    required int itemId,
+    required double differentPrice,
+    required double price,
+  })async{
+    try{
+      Map<String, dynamic> itemData = {
+        "itemId": itemId,
+        "differentPrice": differentPrice,
+        "price": price,
         "rowNum": 1,
         "attribute": "sys",
         "infos": []

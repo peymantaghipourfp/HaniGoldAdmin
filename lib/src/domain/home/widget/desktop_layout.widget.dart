@@ -42,6 +42,11 @@ Widget buildDesktopLayout() {
                     icon: Icons.list_alt,
                     route: '/orderList',
                   ),
+                  _buildSubMenuItem(
+                    title: 'ایجاد سفارش جدید',
+                    icon: Icons.add_shopping_cart,
+                    route: '/orderCreate',
+                  ),
                 ],
               ),
               _buildMenuButton(

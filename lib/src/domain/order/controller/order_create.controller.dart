@@ -62,11 +62,13 @@ class OrderCreateController extends GetxController{
       selectedBuySell.value = newValue;
   }
   void changeSelectedItem(ItemModel? newValue) {
+    clearListChangeItem();
     selectedItem.value = newValue;
-    selectedBuySell.value?.id==0 ?
-    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',')
-        :
-    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',');
+
+    selectedBuySell.value?.id==1 ?
+    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',') :
+    priceController.text=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
+
     maxItemSell.value=newValue!.maxSell!;
     maxItemBuy.value=newValue.maxBuy!;
     print(maxItemSell.value);
@@ -76,26 +78,29 @@ class OrderCreateController extends GetxController{
     selectedAccount.value = newValue;
   }
   void updateTotalPrice(){
-    double price=double.tryParse(priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
-    double quantity=double.tryParse(quantityController.text.toEnglishDigit()) ?? 0;
+    double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+    double quantity=double.tryParse(quantityController.text==""? "0" :quantityController.text.toEnglishDigit()) ?? 0;
     double totalPrice= price * quantity;
-    totalPriceController.text=totalPrice.toStringAsFixed(2).seRagham().toPersianDigit();
+    totalPriceController.text=totalPrice.toString().toPersianDigit().seRagham();
   }
 
+  void updateQuantity(){
+    double totalPrice=double.tryParse(totalPriceController.text ==""?"0" : totalPriceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+    double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+    double quantity=totalPrice / price;
+    quantityController.text=quantity.toString();
+  }
 
   @override
   void onInit() {
     orderTypeList.addAll([
-      OrderTypeModel(id: null, name: 'انتخاب کنید'),
-      OrderTypeModel(id: 0,name: 'فروش به کاربر'),
-      OrderTypeModel(id: 1,name: 'خرید از کاربر'),
+      OrderTypeModel(id:null, name: 'انتخاب کنید'),
+      OrderTypeModel(id:0,name: 'فروش به کاربر'),
+      OrderTypeModel(id:1,name: 'خرید از کاربر'),
     ]);
     searchController.addListener(onSearchChanged);
     fetchItemList();
     fetchAccountList();
-    priceController.addListener(updateTotalPrice);
-    quantityController.addListener(updateTotalPrice);
-
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
@@ -114,10 +119,12 @@ class OrderCreateController extends GetxController{
       state.value=PageState.loading;
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
+      itemList.removeWhere((e) => e.price==null,);
       state.value=PageState.list;
       if(itemList.isEmpty){
         state.value=PageState.empty;
       }
+      print("itemList${itemList.length}");
     }
     catch(e){
       state.value=PageState.err;
@@ -206,16 +213,17 @@ class OrderCreateController extends GetxController{
       );
       print(response);
       if (response != null) {
-        Get.back();
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-            titleText: Text('موفقیت آمیز',
+        OrderModel orderResponse=OrderModel.fromJson(response);
+        Get.toNamed('/orderList');
+        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
+            titleText: Text(orderResponse.infos!.first['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(
-                'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+                orderResponse.infos!.first["description"] , textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
-        clearList();
         orderController.fetchOrderList();
+        clearList();
       }
     }
     catch(e){
@@ -235,6 +243,13 @@ class OrderCreateController extends GetxController{
     selectedBuySell.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
+  }
+  void clearListChangeItem() {
+    priceController.clear();
+    quantityController.clear();
+    descriptionController.clear();
+    totalPriceController.clear();
+    selectedItem.value=null;
   }
   void resetAccountSearch() {
     searchController.clear();

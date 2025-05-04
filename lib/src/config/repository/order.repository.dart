@@ -8,7 +8,7 @@ class OrderRepository{
 
   OrderRepository(){
     orderDio.options.baseUrl=BaseUrl.baseUrl;
-    orderDio.options.connectTimeout=Duration(seconds: 10);
+    orderDio.options.connectTimeout=Duration(seconds: 30);
 
   }
   Future<List<OrderModel>> getOrderList({required int startIndex, required int toIndex,int? accountId,}) async{

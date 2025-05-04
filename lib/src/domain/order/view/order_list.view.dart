@@ -7,7 +7,9 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order.controller.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:hanigold_admin/src/domain/product/view/item_update_price.view.dart';
+import 'package:hanigold_admin/src/widget/background_image_total.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar.widget.dart';
+import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:hanigold_admin/src/widget/empty.dart';
 import 'package:hanigold_admin/src/widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -22,29 +24,120 @@ class OrderListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
-      appBar: CustomAppBar(title: 'سفارشات',
+      appBar: isDesktop ? 
+      CustomAppbar1(title: 'سفارشات',onBackTap: () => Get.back(),)
+          :
+      CustomAppBar(title: 'سفارشات',
         onBackTap: ()=>Get.back(),
       ),
-      body: SafeArea(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SizedBox(
-          width: Get.width,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: LayoutBuilder(
-                  builder: (BuildContext context, BoxConstraints constraints) {
-                    if(isDesktop) {
-                      return Row(
-                        children: [
-                          //فیلد جستجو
-                          Expanded(
-                            child:
-                            SizedBox(
-                              height: 41,
-                              child: TextFormField(
+      body: Stack(
+        children: [
+          BackgroundImageTotal(),
+          SafeArea(
+              child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: Get.width,
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: LayoutBuilder(
+                      builder: (BuildContext context, BoxConstraints constraints) {
+                        if(isDesktop) {
+                          return Row(
+                            children: [
+                              //فیلد جستجو
+                              Expanded(
+                                child:
+                                SizedBox(
+                                  height: 41,
+                                  child: TextFormField(
+                                    controller: orderController.searchController,
+                                    style: AppTextStyle.labelText,
+                                    textInputAction: TextInputAction.search,
+                                    onFieldSubmitted: (value) async {
+                                      if (value.isNotEmpty) {
+                                        await orderController.searchAccounts(value);
+                                        showSearchResults(context);
+                                      } else {
+                                        orderController.clearSearch();
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      contentPadding: EdgeInsets.symmetric(
+                                        vertical: isDesktop ? 16 : 12,
+                                        horizontal: 16,
+                                      ),
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      filled: true,
+                                      fillColor: AppColor.textFieldColor,
+                                      hintText: "جستجوی سفارش ... ",
+                                      hintStyle: AppTextStyle.labelText,
+                                      prefixIcon: IconButton(
+                                          onPressed: () async {
+                                            if (orderController.searchController
+                                                .text.isNotEmpty) {
+                                              await orderController.searchAccounts(
+                                                  orderController.searchController
+                                                      .text
+                                              );
+                                              showSearchResults(context);
+                                            } else {
+                                              orderController.clearSearch();
+                                            }
+                                          },
+                                          icon: Icon(
+                                            Icons.search, color: AppColor.textColor,
+                                            size: 30,)
+                                      ),
+                                      suffixIcon: orderController.selectedAccountId
+                                          .value > 0
+                                          ? IconButton(
+                                        onPressed: orderController.clearSearch,
+                                        icon: Icon(
+                                            Icons.close, color: AppColor.textColor),
+                                      )
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                width: 16,
+                              ),
+                              //دکمه ایجاد سفارش جدید
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                    padding: WidgetStatePropertyAll(
+                                      EdgeInsets.symmetric(
+                                        horizontal: isDesktop ? 24 : 16,
+                                      ),
+                                    ),
+                                    elevation: WidgetStatePropertyAll(5),
+                                    backgroundColor:
+                                    WidgetStatePropertyAll(AppColor.buttonColor),
+                                    shape: WidgetStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                10)))),
+                                onPressed: () {
+                                  Get.toNamed('/orderCreate');
+                                },
+                                child: Text(
+                                  'ایجاد سفارش جدید',
+                                  style: AppTextStyle.labelText,
+                                ),
+                              ),
+
+                            ],
+                          );
+                        }else{
+                          return Column(
+                            children: [
+                              TextFormField(
                                 controller: orderController.searchController,
                                 style: AppTextStyle.labelText,
                                 textInputAction: TextInputAction.search,
@@ -95,332 +188,250 @@ class OrderListView extends StatelessWidget {
                                       : null,
                                 ),
                               ),
-                            ),
-                          ),
-                          SizedBox(
-                            width: 16,
-                          ),
-                          //دکمه ایجاد سفارش جدید
-                          ElevatedButton(
-                            style: ButtonStyle(
-                                padding: WidgetStatePropertyAll(
-                                  EdgeInsets.symmetric(
-                                    horizontal: isDesktop ? 24 : 16,
-                                  ),
+                              SizedBox(height: 12),
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                    padding: WidgetStatePropertyAll(
+                                      EdgeInsets.symmetric(
+                                        horizontal: isDesktop ? 24 : 16,
+                                      ),
+                                    ),
+                                    elevation: WidgetStatePropertyAll(5),
+                                    backgroundColor:
+                                    WidgetStatePropertyAll(AppColor.buttonColor),
+                                    shape: WidgetStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                                10)))),
+                                onPressed: () {
+                                  Get.toNamed('/orderCreate');
+                                },
+                                child: Text(
+                                  'ایجاد سفارش جدید',
+                                  style: AppTextStyle.labelText,
                                 ),
-                                elevation: WidgetStatePropertyAll(5),
-                                backgroundColor:
-                                WidgetStatePropertyAll(AppColor.buttonColor),
-                                shape: WidgetStatePropertyAll(
-                                    RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            10)))),
-                            onPressed: () {
-                              Get.toNamed('/orderCreate');
-                            },
-                            child: Text(
-                              'ایجاد سفارش جدید',
-                              style: AppTextStyle.labelText,
-                            ),
-                          ),
-
-                        ],
-                      );
-                    }else{
-                      return Column(
-                        children: [
-                          TextFormField(
-                            controller: orderController.searchController,
-                            style: AppTextStyle.labelText,
-                            textInputAction: TextInputAction.search,
-                            onFieldSubmitted: (value) async {
-                              if (value.isNotEmpty) {
-                                await orderController.searchAccounts(value);
-                                showSearchResults(context);
-                              } else {
-                                orderController.clearSearch();
-                              }
-                            },
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: isDesktop ? 16 : 12,
-                                horizontal: 16,
                               ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              filled: true,
-                              fillColor: AppColor.textFieldColor,
-                              hintText: "جستجوی سفارش ... ",
-                              hintStyle: AppTextStyle.labelText,
-                              prefixIcon: IconButton(
-                                  onPressed: () async {
-                                    if (orderController.searchController
-                                        .text.isNotEmpty) {
-                                      await orderController.searchAccounts(
-                                          orderController.searchController
-                                              .text
-                                      );
-                                      showSearchResults(context);
-                                    } else {
-                                      orderController.clearSearch();
-                                    }
-                                  },
-                                  icon: Icon(
-                                    Icons.search, color: AppColor.textColor,
-                                    size: 30,)
-                              ),
-                              suffixIcon: orderController.selectedAccountId
-                                  .value > 0
-                                  ? IconButton(
-                                onPressed: orderController.clearSearch,
-                                icon: Icon(
-                                    Icons.close, color: AppColor.textColor),
-                              )
-                                  : null,
-                            ),
-                          ),
-                          SizedBox(height: 12),
-                          ElevatedButton(
-                            style: ButtonStyle(
-                                padding: WidgetStatePropertyAll(
-                                  EdgeInsets.symmetric(
-                                    horizontal: isDesktop ? 24 : 16,
-                                  ),
-                                ),
-                                elevation: WidgetStatePropertyAll(5),
-                                backgroundColor:
-                                WidgetStatePropertyAll(AppColor.buttonColor),
-                                shape: WidgetStatePropertyAll(
-                                    RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            10)))),
-                            onPressed: () {
-                              Get.toNamed('/orderCreate');
-                            },
-                            child: Text(
-                              'ایجاد سفارش جدید',
-                              style: AppTextStyle.labelText,
-                            ),
-                          ),
-                        ],
+                            ],
+                          );
+                        }
+                      }
+                    ),
+                  ),
+                  // لیست سفارشات
+                  Obx(() {
+                    if (orderController.state.value == PageState.loading) {
+                      return Center(child: CircularProgressIndicator());
+                    }
+                    else if (orderController.state.value == PageState.empty) {
+                      return EmptyPage(
+                        title: 'سفارشی وجود ندارد',
+                        callback: () {
+                          orderController.fetchOrderList();
+                        },
                       );
                     }
-                  }
-                ),
-              ),
-              // لیست سفارشات
-              Obx(() {
-                if (orderController.state.value == PageState.loading) {
-                  return Center(child: CircularProgressIndicator());
-                }
-                else if (orderController.state.value == PageState.empty) {
-                  return EmptyPage(
-                    title: 'سفارشی وجود ندارد',
-                    callback: () {
-                      orderController.fetchOrderList();
-                    },
-                  );
-                }
-                else if (orderController.state.value == PageState.list) {
-                  // لیست سفارشات
-                  return
-                    Expanded(
-                    child:
-                    isDesktop ?
-                    Row(
-                      children: [
+                    else if (orderController.state.value == PageState.list) {
+                      // لیست سفارشات
+                      return
                         Expanded(
-                          child: SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                DataTable(
-                                  columns: buildDataColumns(),
-                                  rows: buildDataRows(context),
-                                  dataRowMaxHeight: 100,
-                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                 //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                  headingRowHeight: 40,
-                                  horizontalMargin: 6,
-                                ),
-                                buildPaginationControls(),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ) :
-
-                    Expanded(
-                      child: GridView.builder(
-                        controller: orderController.scrollController,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 1,
-                          mainAxisSpacing: 10,
-                          crossAxisSpacing: 10,
-                            mainAxisExtent: 200,
-                        ),
-                        itemCount: orderController.orderList.length+
-                            (orderController.hasMore.value ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          /*if (index >= orderController.filteredOrders.length) {
-                            return SizedBox();
-                          }*/
-                          print(orderController.orderList.length);
-                          if (index >= orderController.orderList.length) {
-                            return orderController.hasMore.value
-                                ? Center(child: CircularProgressIndicator())
-                                : SizedBox.shrink();
-                          }
-                          var orders = orderController.orderList[index];
-                          return GestureDetector(
-                            onTap: () {
-                              showOrderDetailsSheet(context, orders);
-                            },
-                            child: Card(
-                              margin: EdgeInsets.all( 8),
-                              color: AppColor.secondaryColor,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15)),
-                              elevation: 10,
-                              child: Padding(
-                                padding: EdgeInsets.all( 8),
-
-                                child: ResponsiveRowColumn(
-                                  layout: ResponsiveRowColumnType.COLUMN,
-                                  rowCrossAxisAlignment: CrossAxisAlignment.start,
-                                  rowMainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        child:
+                        isDesktop ?
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SingleChildScrollView(
+                                child: Column(
                                   children: [
-                                    ResponsiveRowColumnItem(
-                                      child: Expanded(
-                                        child: Column(
-                                          children: [
-                                            // تاریخ سفارش
-                                            funcOrderDetail(
-                                                'assets/svg/date.svg',
-                                                '',
-                                                orders.date?.toPersianDate(
-                                                        twoDigits: true,
-                                                        showTime: true,
-                                                        timeSeprator: '-') ??
-                                                    "نامشخص",
+                                    DataTable(
+                                      columns: buildDataColumns(),
+                                      rows: buildDataRows(context),
+                                      dataRowMaxHeight: 100,
+                                      //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                     //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                      headingRowHeight: 40,
+                                      horizontalMargin: 6,
+                                    ),
+                                    buildPaginationControls(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ) :
 
-                                            ),
-                                            Divider(
-                                              color: AppColor.backGroundColor,
-                                              height: 2,
-                                            ),
-                                            // نام کاربر
-                                            funcOrderDetail(
-                                                'assets/svg/user.svg',
-                                                'نام کاربر:',
-                                                orders.account?.name ?? "نامشخص",
-                                              ),
-                                            // محصول
-                                            funcOrderDetail('assets/svg/product.svg',
-                                                'محصول:', orders.item?.name ?? "نامشخص",
-                                             ),
-                                            //مقدار سفارش
-                                            funcOrderDetail(
-                                                'assets/svg/amount.svg',
-                                                'مقدار سفارش:',
-                                                "${orders.quantity?.toString().seRagham(separator: ",")} ${orders.item?.itemUnit?.name ?? ""}",
-                                              ),
-                                            //قیمت سفارش
-                                            funcOrderDetail(
-                                              'assets/svg/amount-price.svg',
-                                              'قیمت سفارش:',
-                                              (orders.price != null)
-                                                  ? "${orders.price?.toInt().toString().seRagham(separator: ',')} ریال"
-                                                  : "0",
-                                            ),
-                                            // مبلغ کل و نوع سفارش
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceBetween,
+                        Expanded(
+                          child: GridView.builder(
+                            controller: orderController.scrollController,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 1,
+                              mainAxisSpacing: 10,
+                              crossAxisSpacing: 10,
+                                mainAxisExtent: 200,
+                            ),
+                            itemCount: orderController.orderList.length+
+                                (orderController.hasMore.value ? 1 : 0),
+                            itemBuilder: (context, index) {
+                              /*if (index >= orderController.filteredOrders.length) {
+                                return SizedBox();
+                              }*/
+                              print(orderController.orderList.length);
+                              if (index >= orderController.orderList.length) {
+                                return orderController.hasMore.value
+                                    ? Center(child: CircularProgressIndicator())
+                                    : SizedBox.shrink();
+                              }
+                              var orders = orderController.orderList[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  showOrderDetailsSheet(context, orders);
+                                },
+                                child: Card(
+                                  margin: EdgeInsets.all( 8),
+                                  color: AppColor.secondaryColor,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(15)),
+                                  elevation: 10,
+                                  child: Padding(
+                                    padding: EdgeInsets.all( 8),
+
+                                    child: ResponsiveRowColumn(
+                                      layout: ResponsiveRowColumnType.COLUMN,
+                                      rowCrossAxisAlignment: CrossAxisAlignment.start,
+                                      rowMainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        ResponsiveRowColumnItem(
+                                          child: Expanded(
+                                            child: Column(
                                               children: [
-                                                // مبلغ کل
+                                                // تاریخ سفارش
+                                                funcOrderDetail(
+                                                    'assets/svg/date.svg',
+                                                    '',
+                                                    orders.date?.toPersianDate(
+                                                            twoDigits: true,
+                                                            showTime: true,
+                                                            timeSeprator: '-') ??
+                                                        "نامشخص",
+
+                                                ),
+                                                Divider(
+                                                  color: AppColor.backGroundColor,
+                                                  height: 2,
+                                                ),
+                                                // نام کاربر
+                                                funcOrderDetail(
+                                                    'assets/svg/user.svg',
+                                                    'نام کاربر:',
+                                                    orders.account?.name ?? "نامشخص",
+                                                  ),
+                                                // محصول
+                                                funcOrderDetail('assets/svg/product.svg',
+                                                    'محصول:', orders.item?.name ?? "نامشخص",
+                                                 ),
+                                                //مقدار سفارش
+                                                funcOrderDetail(
+                                                    'assets/svg/amount.svg',
+                                                    'مقدار سفارش:',
+                                                    "${orders.quantity?.toString().seRagham(separator: ",")} ${orders.item?.itemUnit?.name ?? ""}",
+                                                  ),
+                                                //قیمت سفارش
+                                                funcOrderDetail(
+                                                  'assets/svg/amount-price.svg',
+                                                  'قیمت سفارش:',
+                                                  (orders.price != null)
+                                                      ? "${orders.price?.toInt().toString().seRagham(separator: ',')} ریال"
+                                                      : "0",
+                                                ),
+                                                // مبلغ کل و نوع سفارش
                                                 Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment.start,
+                                                      MainAxisAlignment.spaceBetween,
                                                   children: [
-                                                    SvgPicture.asset(
-                                                      'assets/svg/total-price.svg',
-                                                      colorFilter: ColorFilter.mode(
-                                                          AppColor.textFieldColor,
-                                                          BlendMode.srcIn),
-                                                      width: isDesktop?24:18,
-                                                      height: isDesktop?24:18,
+                                                    // مبلغ کل
+                                                    Row(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment.start,
+                                                      children: [
+                                                        SvgPicture.asset(
+                                                          'assets/svg/total-price.svg',
+                                                          colorFilter: ColorFilter.mode(
+                                                              AppColor.textFieldColor,
+                                                              BlendMode.srcIn),
+                                                          width: isDesktop?24:18,
+                                                          height: isDesktop?24:18,
+                                                        ),
+                                                        SizedBox(
+                                                          width: 10,
+                                                        ),
+                                                        Text(
+                                                          'مبلغ کل: ',
+                                                          style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14,
+                                                            fontWeight: FontWeight.bold, ),
+                                                        ),
+                                                        Text(
+                                                          (orders.totalPrice != null)
+                                                              ? "${orders.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
+                                                              : "0",
+                                                          style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14, ),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    SizedBox(
-                                                      width: 10,
-                                                    ),
-                                                    Text(
-                                                      'مبلغ کل: ',
-                                                      style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14,
-                                                        fontWeight: FontWeight.bold, ),
-                                                    ),
-                                                    Text(
-                                                      (orders.totalPrice != null)
-                                                          ? "${orders.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
-                                                          : "0",
-                                                      style: AppTextStyle.labelText.copyWith(fontSize:isDesktop ? 16 : 14, ),
-                                                    ),
-                                                  ],
-                                                ),
 
-                                                // نوع سفارش
-                                                Row(
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 50,
-                                                      height: 20,
-                                                      child: Card(
-                                                        color: (orders.type == 0)
-                                                            ? AppColor.accentColor
-                                                            : AppColor.primaryColor,
-                                                        margin: EdgeInsets.symmetric(
-                                                            vertical: 0, horizontal: 5),
-                                                        child: Text(
-                                                            (orders.type == 0)
-                                                                ? 'فروش'
-                                                                : 'خرید',
-                                                            style: TextStyle(
-                                                                color:
-                                                                    AppColor.textColor),
-                                                            textAlign: TextAlign.center),
-                                                      ),
+                                                    // نوع سفارش
+                                                    Row(
+                                                      children: [
+                                                        SizedBox(
+                                                          width: 50,
+                                                          height: 20,
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                              borderRadius: BorderRadius.circular(7),
+                                                              color: (orders.type == 0)
+                                                                  ? AppColor.accentColor
+                                                                  : AppColor.secondary2Color,
+                                                            ),
+                                                            padding: EdgeInsets.symmetric(horizontal: 10,vertical: 1),
+
+                                                            child: Text(
+                                                                (orders.type == 0)
+                                                                    ? 'فروش'
+                                                                    : 'خرید',
+                                                                style: TextStyle(color: AppColor.textColor , fontSize: 11),
+                                                                textAlign: TextAlign.center),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   ],
                                                 ),
                                               ],
                                             ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ],
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  );
-                }
-                return ErrPage(
-                  callback: () {
-                    orderController.fetchOrderList();
-                  },
-                  title: "خطا در دریافت سفارشات",
-                  des: 'برای دریافت سفارشات مجددا تلاش کنید',
-                );
-              }),
-            ],
-          ),
-        ),
-      )),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    }
+                    return ErrPage(
+                      callback: () {
+                        orderController.fetchOrderList();
+                      },
+                      title: "خطا در دریافت سفارشات",
+                      des: 'برای دریافت سفارشات مجددا تلاش کنید',
+                    );
+                  }),
+                ],
+              ),
+            ),
+          )),
+        ],
+      ),
     );
   }
 
@@ -526,7 +537,7 @@ class OrderListView extends StatelessWidget {
                       ),
                     SizedBox(height: 3,),
                     orders.type==1
-                        ? funcOrderDetail('', 'نوع سفارش:', "خرید",color: AppColor.primaryColor,
+                        ? funcOrderDetail('', 'نوع سفارش:', "خرید",color: AppColor.secondary2Color,
                       )
                         : funcOrderDetail('', 'نوع سفارش:', "فروش",color: AppColor.accentColor,
                       )
@@ -844,24 +855,21 @@ class OrderListView extends StatelessWidget {
           // خرید/فروش
           DataCell(
             Center(
-              child: SizedBox(
-                width: 50,
-                height: 20,
-                child: Card(
+              child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(7),
                   color: (order.type == 0)
                       ? AppColor.accentColor
-                      : AppColor.primaryColor,
-                  margin: EdgeInsets.symmetric(
-                      vertical: 0, horizontal: 5),
-                  child: Text(
-                      (order.type == 0)
-                          ? 'فروش'
-                          : 'خرید',
-                      style: TextStyle(
-                          color:
-                          AppColor.textColor),
-                      textAlign: TextAlign.center),
+                      : AppColor.secondary2Color,
                 ),
+                padding: EdgeInsets.symmetric(horizontal: 10,vertical: 5),
+                
+                child: Text(
+                    (order.type == 0)
+                        ? 'فروش'
+                        : 'خرید',
+                    style: TextStyle(color: AppColor.textColor , fontSize: 11),
+                    textAlign: TextAlign.center),
               ),
             ),
           ),
