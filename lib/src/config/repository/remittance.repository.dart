@@ -20,7 +20,7 @@ class RemittanceRepository{
           "orderBy": "Remittance.Id",
           "orderByType": "asc",
           "StartIndex": 1,
-          "ToIndex": 2
+          "ToIndex": 20
         }
         }
       };
