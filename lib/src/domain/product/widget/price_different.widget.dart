@@ -114,8 +114,11 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
       await productController.insertDifferentPriceItem(
         widget.id,
         double.parse(
-          ("${differentPriceController3.text}${differentPriceController2.text}"
-              "${differentPriceController1.text}")
+          (
+              "${differentPriceController3.text.length==1 ? '00${differentPriceController3.text}':differentPriceController3.text.length==2 ? '0${differentPriceController3.text}':differentPriceController3.text}"
+              "${differentPriceController2.text.length==1 ? '00${differentPriceController2.text}':differentPriceController2.text.length==2 ? '0${differentPriceController2.text}':differentPriceController2.text}"
+              "${differentPriceController1.text.length==1 ? '00${differentPriceController1.text}':differentPriceController1.text.length==2 ? '0${differentPriceController1.text}':differentPriceController1.text}"
+          )
               .toEnglishDigit(),
         ),
         widget.price,
@@ -134,7 +137,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
         isLoading ?
         CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
-        SizedBox(height: 29,width: 50,
+        SizedBox(height: 26,width: 43,
           child: ElevatedButton(
             style: ButtonStyle(
                 padding: WidgetStatePropertyAll(
@@ -154,8 +157,8 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
         ),
         SizedBox(width: 3,),
         SizedBox(
-          height: 30,
-          width: 50,
+          height: 28,
+          width: 45,
           child: TextFormField(
             maxLength: 3,
             controller: differentPriceController1,
@@ -171,12 +174,14 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
               filled: true,
               fillColor: AppColor.textFieldColor,
               counterText: '',
+              hoverColor: AppColor.backGroundColor,
+              isDense: true,
             ),
           ),
         ),
         SizedBox(
-          height: 30,
-          width: 50,
+          height: 28,
+          width: 45,
           child: TextFormField(
             maxLength: 3,
             controller: differentPriceController2,
@@ -192,12 +197,14 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
               filled: true,
               fillColor: AppColor.textFieldColor,
               counterText: '',
+              hoverColor: AppColor.backGroundColor,
+              isDense: true,
             ),
           ),
         ),
         SizedBox(
-          height: 30,
-          width: 50,
+          height: 28,
+          width: 45,
           child: TextFormField(
             maxLength: 3,
             controller: differentPriceController3,
@@ -213,6 +220,8 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
               filled: true,
               fillColor: AppColor.textFieldColor,
               counterText: '',
+              hoverColor: AppColor.backGroundColor,
+              isDense: true,
             ),
           ),
         ),

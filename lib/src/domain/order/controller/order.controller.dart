@@ -177,6 +177,7 @@ class OrderController extends GetxController{
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
       );
       hasMore.value = fetchedOrderList.length == itemsPerPage.value;
+      //print("بالانس: ${orderList.first.balances}");
 
       if (selectedAccountId.value == 0) {
         orderList.assignAll(fetchedOrderList);
@@ -200,17 +201,17 @@ class OrderController extends GetxController{
     }
   }
 
-  Future<OrderModel?> updateStatusOrder(int orderId,int status)async{
+  Future<List<dynamic>?> updateStatusOrder(int orderId,int status)async{
     try{
       isLoading.value = true;
       var response=await orderRepository.updateStatusOrder(status: status, orderId: orderId);
       if(response!= null){
-        OrderModel orderResponse=OrderModel.fromJson(response);
-        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
-            titleText: Text(orderResponse.infos!.first['title'],
+       // OrderModel orderResponse=OrderModel.fromJson(response);
+        Get.snackbar(response.first['title'], response.first["description"],
+            titleText: Text(response.first['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(orderResponse.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            messageText: Text(response.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         fetchOrderList();
       }
     }catch(e){

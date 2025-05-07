@@ -85,10 +85,17 @@ class DepositUpdateController extends GetxController{
   void changeSelectedBankAccount(BankAccountModel? newValue) {
     selectedBankAccount.value = newValue;
     selectedIndex=selectedBankAccount.value?.bank?.id.toString();
-    numberController.text=selectedBankAccount.value!.number.toString();
-    cardNumberController.text=selectedBankAccount.value!.cardNumber.toString();
-    shebaController.text=selectedBankAccount.value!.sheba.toString();
     ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
+
+    selectedBankAccount.value!.number==null ? "" :
+    numberController.text=selectedBankAccount.value!.number.toString();
+
+    selectedBankAccount.value!.cardNumber==null ? "" :
+    cardNumberController.text=selectedBankAccount.value!.cardNumber.toString();
+
+    selectedBankAccount.value!.sheba==null ? "" :
+    shebaController.text=selectedBankAccount.value!.sheba.toString();
+
 
     print(selectedBankAccount.value?.bank?.name);
     print(selectedBankAccount.value?.bank?.id);
@@ -97,26 +104,33 @@ class DepositUpdateController extends GetxController{
 
   @override
   void onInit() async{
-    depositId.value=Get.arguments as int;
+    /*DepositModel existingDeposit=Get.arguments ;
+    if(existingDeposit.id!=null){
+      depositId.value=existingDeposit.id ?? 0;
+    }
     await fetchGetOneDeposit(depositId.value);
-    if(getOneDeposit.value!=null){
-      final deposit=getOneDeposit.value;
-      setDepositDetail(deposit!);
-    if(deposit.wallet?.account?.id!=null) {
-      accountController.text=deposit.wallet?.account?.name ?? "";
-     await getBankAccount(deposit.wallet!.account!.id!);
-     await fetchBankAccountList();
-     await fetchWallet(deposit.wallet!.account!.id!);
-      if (deposit.bankAccount != null) {
-        var matchingAccount = bankAccountList.firstWhere(
-              (account) => account.id == deposit.bankAccount!.id,
-        );
-        if (matchingAccount.id != null) {
-          selectedBankAccount.value = matchingAccount;
+      setDepositDetail(existingDeposit);*/
+      print("deposssssssssit : ${depositId.value}");
+      depositId.value=Get.arguments as int;
+      await fetchGetOneDeposit(depositId.value);
+      if(getOneDeposit.value!=null){
+        final deposit=getOneDeposit.value;
+        setDepositDetail(deposit!);
+        if(deposit.wallet?.account?.id!=null) {
+          accountController.text=deposit.wallet?.account?.name ?? "";
+          await getBankAccount(deposit.wallet!.account!.id!);
+          await fetchBankAccountList();
+          await fetchWallet(deposit.wallet!.account!.id!);
+          if (deposit.bankAccount != null) {
+            var matchingAccount = bankAccountList.firstWhere(
+                  (account) => account.id == deposit.bankAccount!.id,
+            );
+            if (matchingAccount.id != null) {
+              selectedBankAccount.value = matchingAccount;
+            }
+          }
         }
       }
-    }
-    }
     await fetchBankList();
 
     super.onInit();
@@ -243,14 +257,13 @@ class DepositUpdateController extends GetxController{
       );
 
       if(response!=null) {
-        DepositModel depositResponse=DepositModel.fromJson(response);
         Get.back();
-        Get.snackbar(depositResponse.infos?.first['title'], depositResponse.infos!.first["description"],
-            titleText: Text('موفقیت آمیز',
+        Get.snackbar(response.infos?.first.title?? "", response.infos?.first.description ?? "",
+            titleText: Text(response.infos?.first.title?? "",
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(
-                'ویرایش با موفقیت آنجام شد', textAlign: TextAlign.center,
+                response.infos?.first.description ?? "", textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
         depositController.fetchDepositList();
       }
@@ -266,6 +279,7 @@ class DepositUpdateController extends GetxController{
 
   void setDepositDetail(DepositModel deposit){
     print(' بانک اکانت:${deposit.bankAccount?.id}');
+    print(' اکانت:${deposit.wallet!.account!.id!}');
     walletWithdrawId.value=deposit.walletWithdraw?.id ?? 0;
     depositId.value=deposit.id ?? 0;
     selectedWalletId.value=deposit.wallet?.id ?? 0;
@@ -279,6 +293,18 @@ class DepositUpdateController extends GetxController{
     accountController.text=deposit.wallet?.account?.name ?? '';
     statusId.value=deposit.status ?? 0;
 
+    if(deposit.wallet?.account!=null){
+
+      if (deposit.bankAccount != null) {
+        final bankAccountMatch = bankAccountList.firstWhereOrNull(
+              (b) => b.id == deposit.bankAccount?.id,
+        );
+        if (bankAccountMatch != null) {
+          selectedBankAccount.value = bankAccountMatch;
+        }
+      }
+
+    }
     if (deposit.bankAccount?.bank != null) {
       selectedBankId.value = deposit.bankAccount?.bank?.id ?? 0;
       selectedBankName.value = deposit.bankAccount?.bank?.name ?? '';
@@ -301,21 +327,5 @@ class DepositUpdateController extends GetxController{
     selectedBankAccount.value=null;
 
   }
-
-  /*String convertJalaliToGregorian(String jalaliDate) {
-    try {
-      List<String> parts = jalaliDate.split('-');
-      int year = int.parse(parts[0]);
-      int month = int.parse(parts[1]);
-      int day = int.parse(parts[2]);
-
-      Jalali jalali = Jalali(year, month, day);
-      Gregorian gregorian = jalali.toGregorian();
-
-      return "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
-    } catch (e) {
-      throw Exception("خطا در تبدیل تاریخ: $e");
-    }
-  }*/
 
 }

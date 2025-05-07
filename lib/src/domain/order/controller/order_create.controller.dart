@@ -60,12 +60,15 @@ class OrderCreateController extends GetxController{
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
       selectedBuySell.value = newValue;
+      selectedBuySell.value?.id==0 ?
+      priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',') :
+      priceController.text=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
+
   }
   void changeSelectedItem(ItemModel? newValue) {
     clearListChangeItem();
     selectedItem.value = newValue;
-
-    selectedBuySell.value?.id==1 ?
+    selectedBuySell.value?.id==0 ?
     priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',') :
     priceController.text=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
 

@@ -124,6 +124,7 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
     focusNode4.dispose();
     super.dispose();
   }
+
   Future<void> submitPrice() async {
     if (isSubmitting || isLoading) return;
     isSubmitting = true;
@@ -132,14 +133,20 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
       await productController.insertPriceItem(
         widget.id,
         double.parse(
-          ("${priceController4.text}${priceController3.text}"
-              "${priceController2.text}${priceController1.text}")
-              .toEnglishDigit(),
+          (
+              "${priceController4.text.length==1 ? '00${priceController4.text}':priceController4.text.length==2 ? '0${priceController4.text}':priceController4.text}"
+              "${priceController3.text.length==1 ? '00${priceController3.text}':priceController3.text.length==2 ? '0${priceController3.text}':priceController3.text}"
+              "${priceController2.text.length==1 ? '00${priceController2.text}':priceController2.text.length==2 ? '0${priceController2.text}':priceController2.text}"
+              "${priceController1.text.length==1 ? '00${priceController1.text}':priceController1.text.length==2 ? '0${priceController1.text}':priceController1.text}"
+          ).toEnglishDigit(),
         ),
         widget.different,
       );
+      //productController.clearList();
     } finally {
-      setState(() => isLoading = false);
+      setState(() {
+        isLoading = false;
+      });
       isSubmitting = false;
       FocusScope.of(context).unfocus();
     }
@@ -152,7 +159,7 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
           isLoading ?
           CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
-          SizedBox(height: 29,width: 50,
+          SizedBox(height: 27,width: 45,
             child: ElevatedButton(
               style: ButtonStyle(
                   padding: WidgetStatePropertyAll(
@@ -168,13 +175,12 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
                 style: AppTextStyle.labelText,
               ),
 
-
             ),
           ),
           SizedBox(width: 3,),
           SizedBox(
-            height: 30,
-            width: 50,
+            height: 28,
+            width: 45,
             child: TextFormField(
               maxLength: 3,
               controller: priceController1,
@@ -191,12 +197,14 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
                 filled: true,
                 fillColor: AppColor.textFieldColor,
                 counterText: '',
+                hoverColor: AppColor.backGroundColor,
+                isDense: true,
               ),
             ),
           ),
           SizedBox(
-            height: 30,
-            width: 50,
+            height: 28,
+            width: 45,
             child: TextFormField(
               maxLength: 3,
               controller: priceController2,
@@ -211,12 +219,14 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
                 filled: true,
                 fillColor: AppColor.textFieldColor,
                 counterText: '',
+                hoverColor: AppColor.backGroundColor,
+                isDense: true,
               ),
             ),
           ),
           SizedBox(
-            height: 30,
-            width: 50,
+            height: 28,
+            width: 45,
             child: TextFormField(
               maxLength: 3,
               controller: priceController3,
@@ -231,12 +241,14 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
                 filled: true,
                 fillColor: AppColor.textFieldColor,
                 counterText: '',
+                hoverColor: AppColor.backGroundColor,
+                isDense: true,
               ),
             ),
           ),
           SizedBox(
-            height: 30,
-            width: 50,
+            height: 28,
+            width: 45,
             child: TextFormField(
               maxLength: 3,
               controller: priceController4,
@@ -251,6 +263,8 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
                 filled: true,
                 fillColor: AppColor.textFieldColor,
                 counterText: '',
+                hoverColor: AppColor.backGroundColor,
+                isDense: true,
               ),
             ),
           ),

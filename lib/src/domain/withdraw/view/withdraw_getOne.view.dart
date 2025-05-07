@@ -296,7 +296,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                             labelStyle: AppTextStyle.bodyText,
                                             labelColor: AppColor.textColor,
                                             dividerColor: AppColor.backGroundColor,
-                                            overlayColor: WidgetStatePropertyAll(AppColor.textColor),
+                                            overlayColor: WidgetStatePropertyAll(AppColor.backGroundColor1),
                                             unselectedLabelColor: AppColor.textColor.withAlpha(120),
                                             indicatorColor: AppColor.primaryColor,
                                             tabs: [

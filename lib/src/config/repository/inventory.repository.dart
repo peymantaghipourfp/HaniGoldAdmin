@@ -29,19 +29,18 @@ class InventoryRepository {
                   "fieldName": "AccountId",
                   "filterValue": accountId.toString(),
                   "filterType": 4,
-                  "RefTable": "Inventory"
+                  "RefTable": "JoinedData"
                 },
                 {
                   "fieldName": "IsDeleted",
                   "filterValue": "0",
                   "filterType": 4,
-                  "RefTable": "Inventory"
+                  "RefTable": "JoinedData"
                 }
               ]
             }
           ],
-
-          "orderBy": "Inventory.Id",
+          "orderBy": "JoinedData.Id",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex

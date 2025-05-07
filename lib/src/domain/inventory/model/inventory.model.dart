@@ -41,6 +41,8 @@ class InventoryModel {
   final String? description;
   @JsonKey(name: "inventoryDetailsCount")
   final int? inventoryDetailsCount;
+  @JsonKey(name: "balances")
+  final List<Balance>? balances;
 
   InventoryModel({
     required this.date,
@@ -56,10 +58,31 @@ class InventoryModel {
     required this.recId,
     required this.infos,
     required this.description,
-    required this.inventoryDetailsCount
+    required this.inventoryDetailsCount,
+    required this.balances,
   });
 
   factory InventoryModel.fromJson(Map<String, dynamic> json) => _$InventoryModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$InventoryModelToJson(this);
+}
+
+@JsonSerializable()
+class Balance {
+  @JsonKey(name: "balance")
+  final double? balance;
+  @JsonKey(name: "itemName")
+  final String? itemName;
+  @JsonKey(name: "unitName")
+  final String? unitName;
+
+  Balance({
+    required this.balance,
+    required this.itemName,
+    required this.unitName,
+  });
+
+  factory Balance.fromJson(Map<String, dynamic> json) => _$BalanceFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BalanceToJson(this);
 }

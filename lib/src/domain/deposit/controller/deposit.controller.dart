@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
@@ -380,7 +381,7 @@ class DepositController extends GetxController{
   }
 
   Future<DepositModel?> updateStatusDeposit(int depositId,int status,int reasonRejectionId) async {
-
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoading.value = true;
       var response = await depositRepository.updateStatusDeposit(
@@ -389,6 +390,7 @@ class DepositController extends GetxController{
         reasonRejectionId: status==2 ? reasonRejectionId : null,
       );
       if(response!= null){
+        EasyLoading.dismiss();
         Get.snackbar("موفقیت آمیز","وضعیت واریزی با موفقیت تغییر کرد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
@@ -402,6 +404,7 @@ class DepositController extends GetxController{
     } finally {
       isLoading.value = false;
     }
+
     return null;
   }
 }

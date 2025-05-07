@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/deposit/controller/deposit_create.controller.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -132,36 +133,245 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                   ),
                                   ResponsiveRowColumnItem(
                                     rowFlex: 1,
-                                    child: Container(
-                                      constraints: isDesktop ? BoxConstraints(maxWidth: 500) : BoxConstraints(maxWidth: 400),
-                                      padding: isDesktop
-                                          ? const EdgeInsets.symmetric(horizontal: 40)
-                                          : const EdgeInsets.symmetric(horizontal: 24),
-                                      child:
-                                      Obx(() {
-                                        return Form(
-                                          //key: withdrawCreateController.formKey,
-                                          child: Column(crossAxisAlignment: CrossAxisAlignment
-                                              .start,
-                                            children: [
-                                              // کاربر
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3, top: 5),
-                                                child: Text(
-                                                  'کاربر',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                    child: SingleChildScrollView(
+                                      physics: BouncingScrollPhysics(),
+                                      child: Container(
+                                        constraints: isDesktop ? BoxConstraints(maxWidth: 500) : BoxConstraints(maxWidth: 400),
+                                        padding: isDesktop
+                                            ? const EdgeInsets.symmetric(horizontal: 40)
+                                            : const EdgeInsets.symmetric(horizontal: 24),
+                                        child:
+                                        Obx(() {
+                                          return Form(
+                                            //key: withdrawCreateController.formKey,
+                                            child: Column(crossAxisAlignment: CrossAxisAlignment
+                                                .start,
+                                              children: [
+                                                // کاربر
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'کاربر',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                  ),
                                                 ),
-                                              ),
-                                              // کاربر
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child: Container(
+                                                // کاربر
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child: Container(
+                                                    height: 50,
+                                                    padding: EdgeInsets.only(bottom: 5),
+                                                    child:
+                                                    TextFormField(
+                                                      controller: depositUpdateController
+                                                          .accountController,
+                                                      style: AppTextStyle.bodyText,
+                                                      decoration: InputDecoration(
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(10),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor.textFieldColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                // بانک اکانت
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'حساب بانک',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                  ),
+                                                ),
+                                                // بانک اکانت
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child: DropdownButton2(
+                                                    isExpanded: true,
+                                                    hint: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            "انتخاب کنید",
+                                                            style: AppTextStyle.labelText
+                                                                .copyWith(
+                                                              fontSize: 14,
+                                                              color: AppColor.textColor,
+                                                            ),
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    items:
+                                                    depositUpdateController.bankAccountList.map((
+                                                        bankAccount) {
+                                                      return DropdownMenuItem(
+                                                          value: bankAccount,
+                                                          child: Row(
+                                                            children: [
+                                                              Text("${bankAccount.bank?.name}" ?? "",
+                                                                style: AppTextStyle.bodyText,),
+                                                              Text(bankAccount.ownerName ?? "",style: AppTextStyle.bodyText,),
+                                                            ],
+                                                          ));
+                                                    }).toList(),
+                                                    value: depositUpdateController.selectedBankAccount.value,
+                                                    onChanged: (newValue) {
+                                                      if (newValue != null) {
+                                                        depositUpdateController.changeSelectedBankAccount(newValue);
+                                                      }
+                                                    },
+                                                    buttonStyleData: ButtonStyleData(
+                                                      padding: const EdgeInsets.symmetric(
+                                                          horizontal: 5),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(7),
+                                                        color: AppColor.textFieldColor,
+                                                        border: Border.all(
+                                                            color: AppColor.backGroundColor,
+                                                            width: 1),
+                                                      ),
+                                                      elevation: 0,
+                                                    ),
+                                                    iconStyleData: IconStyleData(
+                                                      icon: const Icon(Icons.keyboard_arrow_down),
+                                                      iconSize: 23,
+                                                      iconEnabledColor: AppColor.textColor,
+                                                      iconDisabledColor: Colors.grey,
+                                                    ),
+                                                    dropdownStyleData: DropdownStyleData(
+                                                      maxHeight: 200,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(7),
+                                                        color: AppColor.textFieldColor,
+                                                      ),
+                                                      offset: const Offset(0, 0),
+                                                      scrollbarTheme: ScrollbarThemeData(
+                                                        radius: const Radius.circular(7),
+                                                        thickness: WidgetStateProperty.all(6),
+                                                        thumbVisibility: WidgetStateProperty.all(
+                                                            true),
+                                                      ),
+                                                    ),
+                                                    menuItemStyleData: const MenuItemStyleData(
+                                                      height: 40,
+                                                      padding: EdgeInsets.symmetric(
+                                                          horizontal: 10),
+                                                    ),
+                                                  ),
+                                                ),
+                                                // نام بانک
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'نام بانک',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                  ),
+                                                ),
+                                                // نام بانک
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child: DropdownButton2(
+                                                    isExpanded: true,
+                                                    hint: Row(
+                                                      children: [
+                                                        Expanded(
+                                                          child: Text(
+                                                            "انتخاب کنید",
+                                                            style: AppTextStyle.labelText
+                                                                .copyWith(
+                                                              fontSize: 14,
+                                                              color: AppColor.textColor,
+                                                            ),
+                                                            overflow: TextOverflow.ellipsis,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    items:
+                                                    depositUpdateController.bankList.map((bank) {
+                                                      return DropdownMenuItem(
+                                                          value: bank.id.toString(),
+                                                          child: Row(
+                                                            children: [
+                                                              bank.icon!=null ?
+                                                              Image.network('${BaseUrl
+                                                                  .baseUrl}Attachment/downloadResource?fileName=${bank
+                                                                  .icon}', width: 22,
+                                                                height: 22,)
+                                                              : SvgPicture.asset('assets/svg/bank.svg',width: 22,height: 22,),
+                                                              SizedBox(width: 10,),
+                                                              Text(bank.name ?? "",
+                                                                style: AppTextStyle.bodyText,),
+                                                            ],
+                                                          ));
+                                                    }).toList(),
+                                                    value: depositUpdateController.bankList.isEmpty
+                                                  ? null
+                                                      : depositUpdateController.selectedIndex,
+                                                    onChanged: (newValue) {
+
+                                                      setState(() {
+                                                        depositUpdateController
+                                                            .changeSelectedBank(newValue!);
+                                                      });
+                                                    },
+                                                    buttonStyleData: ButtonStyleData(
+                                                      padding: const EdgeInsets.symmetric(
+                                                          horizontal: 5),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(7),
+                                                        color: AppColor.textFieldColor,
+                                                        border: Border.all(
+                                                            color: AppColor.backGroundColor,
+                                                            width: 1),
+                                                      ),
+                                                      elevation: 0,
+                                                    ),
+                                                    iconStyleData: IconStyleData(
+                                                      icon: const Icon(Icons.keyboard_arrow_down),
+                                                      iconSize: 23,
+                                                      iconEnabledColor: AppColor.textColor,
+                                                      iconDisabledColor: Colors.grey,
+                                                    ),
+                                                    dropdownStyleData: DropdownStyleData(
+                                                      maxHeight: 200,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(7),
+                                                        color: AppColor.textFieldColor,
+                                                      ),
+                                                      offset: const Offset(0, 0),
+                                                      scrollbarTheme: ScrollbarThemeData(
+                                                        radius: const Radius.circular(7),
+                                                        thickness: WidgetStateProperty.all(6),
+                                                        thumbVisibility: WidgetStateProperty.all(
+                                                            true),
+                                                      ),
+                                                    ),
+                                                    menuItemStyleData: const MenuItemStyleData(
+                                                      height: 40,
+                                                      padding: EdgeInsets.symmetric(
+                                                          horizontal: 10),
+                                                    ),
+                                                  ),
+                                                ),
+                                                // نام صاحب حساب
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3,top: 5),
+                                                  child: Text(
+                                                    'نام صاحب حساب',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                  ),
+                                                ),
+                                                // نام صاحب حساب
+                                                Container(
                                                   height: 50,
                                                   padding: EdgeInsets.only(bottom: 5),
                                                   child:
                                                   TextFormField(
-                                                    controller: depositUpdateController
-                                                        .accountController,
+                                                    controller: depositUpdateController.ownerNameController,
                                                     style: AppTextStyle.bodyText,
                                                     decoration: InputDecoration(
                                                       border: OutlineInputBorder(
@@ -172,429 +382,218 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                     ),
                                                   ),
                                                 ),
-                                              ),
-                                              // بانک اکانت
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3, top: 5),
-                                                child: Text(
-                                                  'حساب بانک',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              // بانک اکانت
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child: DropdownButton2(
-                                                  isExpanded: true,
-                                                  hint: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          "انتخاب کنید",
-                                                          style: AppTextStyle.labelText
-                                                              .copyWith(
-                                                            fontSize: 14,
-                                                            color: AppColor.textColor,
-                                                          ),
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  items:
-                                                  depositUpdateController.bankAccountList.map((
-                                                      bankAccount) {
-                                                    return DropdownMenuItem(
-                                                        value: bankAccount,
-                                                        child: Row(
-                                                          children: [
-                                                            Image.network('${BaseUrl
-                                                                .baseUrl}Attachment/downloadResource?fileName=${bankAccount
-                                                                .bank?.icon}', width: 22,
-                                                              height: 22,),
-                                                            SizedBox(width: 10,),
-                                                            Text("${bankAccount.bank?.name} , " ?? "",
-                                                              style: AppTextStyle.bodyText,),
-                                                            Text(bankAccount.ownerName ?? "",style: AppTextStyle.bodyText,),
-                                                          ],
-                                                        ));
-                                                  }).toList(),
-                                                  value: depositUpdateController
-                                                      .selectedBankAccount.value,
-                                                  onChanged: (newValue) {
-                                                    if (newValue != null) {
-                                                      depositUpdateController
-                                                          .changeSelectedBankAccount(newValue);
-                                                    }
-                                                  },
-                                                  buttonStyleData: ButtonStyleData(
-                                                    padding: const EdgeInsets.symmetric(
-                                                        horizontal: 5),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(7),
-                                                      color: AppColor.textFieldColor,
-                                                      border: Border.all(
-                                                          color: AppColor.backGroundColor,
-                                                          width: 1),
-                                                    ),
-                                                    elevation: 0,
-                                                  ),
-                                                  iconStyleData: IconStyleData(
-                                                    icon: const Icon(Icons.keyboard_arrow_down),
-                                                    iconSize: 23,
-                                                    iconEnabledColor: AppColor.textColor,
-                                                    iconDisabledColor: Colors.grey,
-                                                  ),
-                                                  dropdownStyleData: DropdownStyleData(
-                                                    maxHeight: 200,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(7),
-                                                      color: AppColor.textFieldColor,
-                                                    ),
-                                                    offset: const Offset(0, 0),
-                                                    scrollbarTheme: ScrollbarThemeData(
-                                                      radius: const Radius.circular(7),
-                                                      thickness: WidgetStateProperty.all(6),
-                                                      thumbVisibility: WidgetStateProperty.all(
-                                                          true),
-                                                    ),
-                                                  ),
-                                                  menuItemStyleData: const MenuItemStyleData(
-                                                    height: 40,
-                                                    padding: EdgeInsets.symmetric(
-                                                        horizontal: 10),
+                                                // مبلغ
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'مبلغ (ریال)',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
                                                   ),
                                                 ),
-                                              ),
-                                              // نام بانک
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3, top: 5),
-                                                child: Text(
-                                                  'نام بانک',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              // نام بانک
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child: DropdownButton2(
-                                                  isExpanded: true,
-                                                  hint: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          "انتخاب کنید",
-                                                          style: AppTextStyle.labelText
-                                                              .copyWith(
-                                                            fontSize: 14,
-                                                            color: AppColor.textColor,
-                                                          ),
-                                                          overflow: TextOverflow.ellipsis,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  items:
-                                                  depositUpdateController.bankList.map((bank) {
-                                                    return DropdownMenuItem(
-                                                        value: bank.id.toString(),
-                                                        child: Row(
-                                                          children: [
-                                                            Image.network('${BaseUrl
-                                                                .baseUrl}Attachment/downloadResource?fileName=${bank
-                                                                .icon}', width: 22,
-                                                              height: 22,),
-                                                            SizedBox(width: 10,),
-                                                            Text(bank.name ?? "",
-                                                              style: AppTextStyle.bodyText,),
-                                                          ],
-                                                        ));
-                                                  }).toList(),
-                                                  value: depositUpdateController.bankList.isEmpty
-                                                ? null
-                                                    : depositUpdateController.selectedIndex,
-                                                  onChanged: (newValue) {
-
-                                                    setState(() {
-                                                      depositUpdateController
-                                                          .changeSelectedBank(newValue!);
-                                                    });
-                                                  },
-                                                  buttonStyleData: ButtonStyleData(
-                                                    padding: const EdgeInsets.symmetric(
-                                                        horizontal: 5),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(7),
-                                                      color: AppColor.textFieldColor,
-                                                      border: Border.all(
-                                                          color: AppColor.backGroundColor,
-                                                          width: 1),
-                                                    ),
-                                                    elevation: 0,
-                                                  ),
-                                                  iconStyleData: IconStyleData(
-                                                    icon: const Icon(Icons.keyboard_arrow_down),
-                                                    iconSize: 23,
-                                                    iconEnabledColor: AppColor.textColor,
-                                                    iconDisabledColor: Colors.grey,
-                                                  ),
-                                                  dropdownStyleData: DropdownStyleData(
-                                                    maxHeight: 200,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(7),
-                                                      color: AppColor.textFieldColor,
-                                                    ),
-                                                    offset: const Offset(0, 0),
-                                                    scrollbarTheme: ScrollbarThemeData(
-                                                      radius: const Radius.circular(7),
-                                                      thickness: WidgetStateProperty.all(6),
-                                                      thumbVisibility: WidgetStateProperty.all(
-                                                          true),
-                                                    ),
-                                                  ),
-                                                  menuItemStyleData: const MenuItemStyleData(
-                                                    height: 40,
-                                                    padding: EdgeInsets.symmetric(
-                                                        horizontal: 10),
-                                                  ),
-                                                ),
-                                              ),
-                                              // نام صاحب حساب
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3,top: 5),
-                                                child: Text(
-                                                  'نام صاحب حساب',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              // نام صاحب حساب
-                                              Container(
-                                                height: 50,
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child:
-                                                TextFormField(
-                                                  controller: depositUpdateController.ownerNameController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(10),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              // مبلغ
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3, top: 5),
-                                                child: Text(
-                                                  'مبلغ (ریال)',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              // مبلغ
-                                              Container(
-                                                height: 50,
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child:
-                                                TextFormField(
-                                                  controller: depositUpdateController
-                                                      .amountController,
-                                                  style: AppTextStyle.labelText,
-                                                  keyboardType: TextInputType.number,
-                                                  onChanged: (value) {
-                                                    // حذف کاماهای قبلی و فرمت جدید
-                                                    String cleanedValue = value.replaceAll(',', '');
-                                                    if (cleanedValue.isNotEmpty) {
-                                                      depositUpdateController.amountController.text =
-                                                          cleanedValue.toPersianDigit().seRagham();
-                                                      depositUpdateController.amountController.selection =
-                                                          TextSelection.collapsed(
-                                                              offset: depositUpdateController.amountController.text.length);
-                                                    }
-                                                  },
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(10),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              //شماره کارت
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3, top: 5),
-                                                child: Text(
-                                                  'شماره کارت',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              // شماره کارت
-                                              Container(
-                                                height: 50,
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child:
-                                                TextFormField(
-                                                  controller: depositUpdateController
-                                                      .numberController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(10),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              //شماره حساب
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3, top: 5),
-                                                child: Text(
-                                                  'شماره حساب',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              //شماره حساب
-                                              Container(
-                                                height: 50,
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child:
-                                                TextFormField(
-                                                  controller: depositUpdateController
-                                                      .cardNumberController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(10),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              //شماره شبا
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3, top: 5),
-                                                child: Text(
-                                                  'شماره شبا',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              //شماره شبا
-                                              Container(
-                                                height: 50,
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child:
-                                                TextFormField(
-                                                  controller: depositUpdateController
-                                                      .shebaController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius.circular(10),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                  ),
-                                                ),
-                                              ),
-                                              // تاریخ
-                                              Container(
-                                                padding: EdgeInsets.only(bottom: 3,top: 5),
-                                                child: Text(
-                                                  'تاریخ سفارش',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ),
-                                              // تاریخ
-                                              Container(
-                                                //height: 50,
-                                                padding: EdgeInsets.only(bottom: 5),
-                                                child: IntrinsicHeight(
-                                                  child: TextFormField(
-                                                    validator: (value){
-                                                      if(value==null || value.isEmpty){
-                                                        return 'لطفا تاریخ را انتخاب کنید';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    controller: depositUpdateController.dateController,
-                                                    readOnly: true,
+                                                // مبلغ
+                                                Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child:
+                                                  TextFormField(
+                                                    controller: depositUpdateController
+                                                        .amountController,
                                                     style: AppTextStyle.labelText,
+                                                    keyboardType: TextInputType.number,
+                                                    onChanged: (value) {
+                                                      // حذف کاماهای قبلی و فرمت جدید
+                                                      String cleanedValue = value.replaceAll(',', '');
+                                                      if (cleanedValue.isNotEmpty) {
+                                                        depositUpdateController.amountController.text =
+                                                            cleanedValue.toPersianDigit().seRagham();
+                                                        depositUpdateController.amountController.selection =
+                                                            TextSelection.collapsed(
+                                                                offset: depositUpdateController.amountController.text.length);
+                                                      }
+                                                    },
                                                     decoration: InputDecoration(
-                                                      suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
                                                       border: OutlineInputBorder(
                                                         borderRadius: BorderRadius.circular(10),
                                                       ),
                                                       filled: true,
                                                       fillColor: AppColor.textFieldColor,
-                                                      errorMaxLines: 1,
                                                     ),
-                                                    onTap: () async {
-                                                      Jalali? pickedDate = await showPersianDatePicker(
-                                                        context: context,
-                                                        initialDate: Jalali.now(),
-                                                        firstDate: Jalali(1400,1,1),
-                                                        lastDate: Jalali(1450,12,29),
-                                                        initialEntryMode: PersianDatePickerEntryMode.calendar,
-                                                        initialDatePickerMode: PersianDatePickerMode.day,
-                                                        locale: Locale("fa","IR"),
-                                                      );
-                                                      DateTime date=DateTime.now();
-
-                                                      if(pickedDate!=null){
-                                                        depositUpdateController.dateController.text =
-                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
-
-                                                      }
-                                                    },
                                                   ),
                                                 ),
-                                              ),
-
-
-                                              // دکمه ویرایش درخواست
-                                              SizedBox(height: 20,),
-
-                                              SizedBox(width: double.infinity,
-                                                height: 40,
-                                                child: ElevatedButton(
-                                                  style: ButtonStyle(
-                                                      fixedSize: WidgetStatePropertyAll(
-                                                          Size(Get.width * .77, 40)),
-                                                      padding: WidgetStatePropertyAll(
-                                                          EdgeInsets.symmetric(
-                                                              horizontal: 7)),
-                                                      elevation: WidgetStatePropertyAll(5),
-                                                      backgroundColor:
-                                                      WidgetStatePropertyAll(
-                                                          AppColor.primaryColor),
-                                                      shape: WidgetStatePropertyAll(
-                                                          RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius
-                                                                  .circular(10)))),
-                                                  onPressed: () async {
-                                                    await depositUpdateController.updateDeposit();
-
-                                                  },
-                                                  child:depositUpdateController.isLoading.value
-                                                      ?
-                                                  CircularProgressIndicator(
-                                                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
-                                                  ) :
-                                                  Text(
-                                                    'ویرایش درخواست',
+                                                //شماره کارت
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'شماره کارت',
                                                     style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
                                                   ),
                                                 ),
-                                              )
+                                                // شماره کارت
+                                                Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child:
+                                                  TextFormField(
+                                                    controller: depositUpdateController
+                                                        .numberController,
+                                                    style: AppTextStyle.bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor.textFieldColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                //شماره حساب
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'شماره حساب',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                  ),
+                                                ),
+                                                //شماره حساب
+                                                Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child:
+                                                  TextFormField(
+                                                    controller: depositUpdateController
+                                                        .cardNumberController,
+                                                    style: AppTextStyle.bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor.textFieldColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                //شماره شبا
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'شماره شبا',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                  ),
+                                                ),
+                                                //شماره شبا
+                                                Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child:
+                                                  TextFormField(
+                                                    controller: depositUpdateController
+                                                        .shebaController,
+                                                    style: AppTextStyle.bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor.textFieldColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                // تاریخ
+                                                Container(
+                                                  padding: EdgeInsets.only(bottom: 3,top: 5),
+                                                  child: Text(
+                                                    'تاریخ سفارش',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                  ),
+                                                ),
+                                                // تاریخ
+                                                Container(
+                                                  //height: 50,
+                                                  padding: EdgeInsets.only(bottom: 5),
+                                                  child: IntrinsicHeight(
+                                                    child: TextFormField(
+                                                      validator: (value){
+                                                        if(value==null || value.isEmpty){
+                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      controller: depositUpdateController.dateController,
+                                                      readOnly: true,
+                                                      style: AppTextStyle.labelText,
+                                                      decoration: InputDecoration(
+                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(10),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor.textFieldColor,
+                                                        errorMaxLines: 1,
+                                                      ),
+                                                      onTap: () async {
+                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                          context: context,
+                                                          initialDate: Jalali.now(),
+                                                          firstDate: Jalali(1400,1,1),
+                                                          lastDate: Jalali(1450,12,29),
+                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                          locale: Locale("fa","IR"),
+                                                        );
+                                                        DateTime date=DateTime.now();
 
-                                            ],
-                                          ),
-                                        );
-                                      }),
+                                                        if(pickedDate!=null){
+                                                          depositUpdateController.dateController.text =
+                                                          "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+
+                                                        }
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
+
+
+                                                // دکمه ویرایش درخواست
+                                                SizedBox(height: 20,),
+
+                                                SizedBox(width: double.infinity,
+                                                  height: 40,
+                                                  child: ElevatedButton(
+                                                    style: ButtonStyle(
+                                                        fixedSize: WidgetStatePropertyAll(
+                                                            Size(Get.width * .77, 40)),
+                                                        padding: WidgetStatePropertyAll(
+                                                            EdgeInsets.symmetric(
+                                                                horizontal: 7)),
+                                                        elevation: WidgetStatePropertyAll(5),
+                                                        backgroundColor:
+                                                        WidgetStatePropertyAll(
+                                                            AppColor.primaryColor),
+                                                        shape: WidgetStatePropertyAll(
+                                                            RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius
+                                                                    .circular(10)))),
+                                                    onPressed: () async {
+                                                      await depositUpdateController.updateDeposit();
+
+                                                    },
+                                                    child:depositUpdateController.isLoading.value
+                                                        ?
+                                                    CircularProgressIndicator(
+                                                      valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                    ) :
+                                                    Text(
+                                                      'ویرایش درخواست',
+                                                      style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                    ),
+                                                  ),
+                                                )
+
+                                              ],
+                                            ),
+                                          );
+                                        }),
+                                      ),
                                     ),
                                   ),
                                 ],

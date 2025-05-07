@@ -53,7 +53,7 @@ class DepositRepository{
     }
   }
 
-  Future<Map<String , dynamic>> insertDeposit({
+  Future<DepositModel> insertDeposit({
     required int walletId,
     required int? depositRequestId,
     required int? bankAccountId,
@@ -173,13 +173,13 @@ class DepositRepository{
         "infos": []
       };
       var response=await depositDio.post('Deposit/insert',data: depositData);
-      return response.data;
+      return DepositModel.fromJson(response.data) ;
     }catch(e){
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
 
-  Future<Map<String , dynamic>> updateDeposit({
+  Future<DepositModel> updateDeposit({
     required int depositId,
     required int walletId,
     required int? depositRequestId,
@@ -300,7 +300,7 @@ class DepositRepository{
         "infos": []
       };
       var response=await depositDio.put('Deposit/update',data: depositData);
-      return response.data;
+      return DepositModel.fromJson(response.data) ;
 
     }catch(e){
       throw ErrorException('خطا در ویرایش اطلاعات:$e');

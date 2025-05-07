@@ -1,3 +1,4 @@
+import 'package:hanigold_admin/src/domain/order/model/info.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank_account.model.dart';
@@ -42,7 +43,7 @@ class DepositModel {
   @JsonKey(name: "recId")
   final String? recId;
   @JsonKey(name: "infos")
-  final List<dynamic>? infos;
+  final List<InfoModel>? infos;
   @JsonKey(name: "date")
   final DateTime? date;
 

@@ -35,6 +35,8 @@ class OrderModel {
   final double? totalPrice;
   @JsonKey(name: "status")
   final int? status;
+  @JsonKey(name: "balances")
+  final List<Balance>? balances;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -62,6 +64,7 @@ class OrderModel {
     required this.differentPrice,
     required this.totalPrice,
     required this.status,
+    required this.balances,
     required this.rowNum,
     required this.id,
     required this.attribute,
@@ -74,4 +77,24 @@ class OrderModel {
   factory OrderModel.fromJson(Map<String, dynamic> json) => _$OrderModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$OrderModelToJson(this);
+}
+
+@JsonSerializable()
+class Balance {
+  @JsonKey(name: "balance")
+  final double? balance;
+  @JsonKey(name: "itemName")
+  final String? itemName;
+  @JsonKey(name: "unitName")
+  final String? unitName;
+
+  Balance({
+    required this.balance,
+    required this.itemName,
+    required this.unitName,
+  });
+
+  factory Balance.fromJson(Map<String, dynamic> json) => _$BalanceFromJson(json);
+
+  Map<String, dynamic> toJson() => _$BalanceToJson(this);
 }

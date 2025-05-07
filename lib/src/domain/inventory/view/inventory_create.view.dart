@@ -119,7 +119,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView> with TickerPr
                                                         labelColor: AppColor.textColor,
                                                         dividerColor: AppColor.backGroundColor,
                                                         overlayColor: WidgetStatePropertyAll(
-                                                            AppColor.textColor),
+                                                            AppColor.backGroundColor1),
                                                         unselectedLabelColor: AppColor.textColor.withAlpha(
                                                             120),
                                                         indicatorColor: AppColor.primaryColor,

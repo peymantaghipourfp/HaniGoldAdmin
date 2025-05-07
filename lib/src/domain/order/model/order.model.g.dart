@@ -25,6 +25,9 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
       differentPrice: (json['differentPrice'] as num?)?.toDouble(),
       totalPrice: (json['totalPrice'] as num?)?.toDouble(),
       status: (json['status'] as num?)?.toInt(),
+      balances: (json['balances'] as List<dynamic>?)
+          ?.map((e) => Balance.fromJson(e as Map<String, dynamic>))
+          .toList(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
@@ -47,6 +50,7 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'differentPrice': instance.differentPrice,
       'totalPrice': instance.totalPrice,
       'status': instance.status,
+      'balances': instance.balances,
       'rowNum': instance.rowNum,
       'id': instance.id,
       'attribute': instance.attribute,
@@ -54,4 +58,16 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'infos': instance.infos,
       'limitPrice': instance.limitPrice,
       'description': instance.description,
+    };
+
+Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(
+      balance: (json['balance'] as num?)?.toDouble(),
+      itemName: json['itemName'] as String?,
+      unitName: json['unitName'] as String?,
+    );
+
+Map<String, dynamic> _$BalanceToJson(Balance instance) => <String, dynamic>{
+      'balance': instance.balance,
+      'itemName': instance.itemName,
+      'unitName': instance.unitName,
     };

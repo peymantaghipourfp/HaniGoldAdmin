@@ -31,6 +31,7 @@ class ProductController extends GetxController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=false.obs;
+  bool isLoadingActive=false;
 
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   final Rxn<ItemModel> getOneItem = Rxn<ItemModel>();
@@ -46,7 +47,7 @@ class ProductController extends GetxController{
 
   @override
   void onInit() {
-
+    fetchActiveItemList();
     /*if(getOneItem.value!=null) {
       itemController.text = getOneItem.value!.name!;
     }*/
@@ -61,9 +62,6 @@ class ProductController extends GetxController{
       itemList.assignAll(fetchedItemList);
       activeItemList.assignAll(
         fetchedItemList.where((item) => item.status == true).toList(),
-      );
-      inactiveItemList.assignAll(
-        fetchedItemList.where((item) => item.status == false).toList(),
       );
       state.value=PageState.list;
       if(itemList.isEmpty){
@@ -135,7 +133,9 @@ class ProductController extends GetxController{
             messageText: Text(
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
+        activeItemList.clear();
         clearList();
+        fetchActiveItemList();
       }
       return false;
     }catch(e){
@@ -162,7 +162,10 @@ class ProductController extends GetxController{
             messageText: Text(
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
+        activeItemList.clear();
         clearList();
+        fetchActiveItemList();
+
       }
       return false;
     }catch(e){

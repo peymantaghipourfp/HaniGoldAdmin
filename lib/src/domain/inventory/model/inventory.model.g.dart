@@ -31,6 +31,9 @@ InventoryModel _$InventoryModelFromJson(Map<String, dynamic> json) =>
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
       inventoryDetailsCount: (json['inventoryDetailsCount'] as num?)?.toInt(),
+      balances: (json['balances'] as List<dynamic>?)
+          ?.map((e) => Balance.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
@@ -49,4 +52,17 @@ Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
       'infos': instance.infos,
       'description': instance.description,
       'inventoryDetailsCount': instance.inventoryDetailsCount,
+      'balances': instance.balances,
+    };
+
+Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(
+      balance: (json['balance'] as num?)?.toDouble(),
+      itemName: json['itemName'] as String?,
+      unitName: json['unitName'] as String?,
+    );
+
+Map<String, dynamic> _$BalanceToJson(Balance instance) => <String, dynamic>{
+      'balance': instance.balance,
+      'itemName': instance.itemName,
+      'unitName': instance.unitName,
     };

@@ -233,30 +233,32 @@ class OrderListView extends StatelessWidget {
                     else if (orderController.state.value == PageState.list) {
                       // لیست سفارشات
                       return
-                        Expanded(
-                        child:
                         isDesktop ?
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  children: [
-                                    DataTable(
-                                      columns: buildDataColumns(),
-                                      rows: buildDataRows(context),
-                                      dataRowMaxHeight: 100,
-                                      //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                     //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                      headingRowHeight: 40,
-                                      horizontalMargin: 6,
-                                    ),
-                                    buildPaginationControls(),
-                                  ],
+                        Expanded(
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      DataTable(
+                                        columns: buildDataColumns(),
+                                        rows: buildDataRows(context),
+                                        dataRowMaxHeight: double.infinity,
+                                        //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                       //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                        headingRowHeight: 40,
+                                        columnSpacing: 30,
+                                        horizontalMargin: 5,
+                                      ),
+                                      buildPaginationControls(),
+                                    ],
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
-                          ],
+                          ),
                         ) :
 
                         Expanded(
@@ -415,8 +417,7 @@ class OrderListView extends StatelessWidget {
                               );
                             },
                           ),
-                        ),
-                      );
+                        );
                     }
                     return ErrPage(
                       callback: () {
@@ -772,24 +773,24 @@ class OrderListView extends StatelessWidget {
           child: Text('وضعیت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('عملیات', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده سکه', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده ریالی', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده طلایی', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
     ];
   }
 
   List<DataRow> buildDataRows(BuildContext context) {
     return orderController.orderList.map((order) {
       return DataRow(
-
         cells: [
           // تاریخ
           DataCell(
               Center(
                 child: Text(
-                  order.date != null
-                      ? order.date?.toPersianDate(
-                      twoDigits: true,
-                      showTime: true,
-                      timeSeprator:
-                      '-') ?? ''
+                  order.date != null ? order.date?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? ''
                       : 'تاریخ نامشخص',
                   style:
                   AppTextStyle.bodyText,
@@ -875,98 +876,101 @@ class OrderListView extends StatelessWidget {
           ),
           // وضعیت
           DataCell(
-            Center(
-              child: Column(
-                children: [
-                  SizedBox(height: 5,),
-                  Text(
-                    '${order.status == 0 ? 'نامشخص' : order.status == 1
-                        ? 'تایید شده'
-                        : 'تایید نشده'} ',
-                    style: AppTextStyle
-                        .bodyText.copyWith(
-                      color: order.status == 1
-                          ? AppColor.primaryColor
-                          : order.status == 2
-                          ? AppColor.accentColor
-                          : AppColor.textColor,
-                    ),
-                  ),
-                  SizedBox(height: 6,),
-                  //دکمه تایید سفارش در جزئیات
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.defaultDialog(
-                          backgroundColor: AppColor.backGroundColor,
-                          title: "تایید سفارش",
-                          titleStyle: AppTextStyle.smallTitleText,
-                          middleText: "آیا از تایید سفارش مطمئن هستید؟",
-                          middleTextStyle: AppTextStyle.bodyText,
-                          confirm: ElevatedButton(
-                              style: ButtonStyle(
-                                  backgroundColor: WidgetStatePropertyAll(
-                                      AppColor.primaryColor)),
-                              onPressed: () {
-                                orderController.updateStatusOrder(order.id!, 1);
-                                Get.back();
-                                orderController.fetchOrderList();
-                              },
-                              child: Text(
-                                'تایید',
-                                style: AppTextStyle.bodyText,
-                              )));
-                    },
-                    style: ButtonStyle(
-                        backgroundColor:
-                        WidgetStatePropertyAll(AppColor.primaryColor),
-                        shape: WidgetStatePropertyAll(
-                            RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(4)))),
-                    child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
-                      child: Text(
-                        'تایید',
-                        style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Center(
+                child: Column(
+                  children: [
+                    SizedBox(height: 5,),
+                    Text(
+                      '${order.status == 0 ? 'نامشخص' : order.status == 1
+                          ? 'تایید شده'
+                          : 'تایید نشده'} ',
+                      style: AppTextStyle
+                          .bodyText.copyWith(
+                        color: order.status == 1
+                            ? AppColor.primaryColor
+                            : order.status == 2
+                            ? AppColor.accentColor
+                            : AppColor.textColor,
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 2,
-                  ),
-                  //دکمه رد سفارش در جزئیات
-                  ElevatedButton(
-                    onPressed: () {
-                      Get.defaultDialog(
-                          backgroundColor: AppColor.backGroundColor,
-                          title: "رد سفارش",
-                          titleStyle: AppTextStyle.smallTitleText,
-                          middleTextStyle: AppTextStyle.bodyText,
-                          middleText: "آیا از رد سفارش مطمئن هستید؟",
-                          confirm: ElevatedButton(
-                              style: ButtonStyle(
-                                  backgroundColor: WidgetStatePropertyAll(
-                                      AppColor.accentColor)),
-                              onPressed: () {
-                                orderController.updateStatusOrder(order.id!, 2);
-                                Get.back();
-                                orderController.fetchOrderList();
+                    SizedBox(height: 6,),
+                    //دکمه تایید سفارش در جزئیات
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.defaultDialog(
+                            backgroundColor: AppColor.backGroundColor,
+                            title: "تایید سفارش",
+                            titleStyle: AppTextStyle.smallTitleText,
+                            middleText: "آیا از تایید سفارش مطمئن هستید؟",
+                            middleTextStyle: AppTextStyle.bodyText,
+                            confirm: ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                        AppColor.primaryColor)),
+                                onPressed: () {
+                                  orderController.updateStatusOrder(order.id!, 1);
+                                  Get.back();
+                                  orderController.fetchOrderList();
+                                },
+                                child: Text(
+                                  'تایید',
+                                  style: AppTextStyle.bodyText,
+                                )));
+                      },
+                      style: ButtonStyle(
+                          backgroundColor:
+                          WidgetStatePropertyAll(AppColor.primaryColor),
+                          shape: WidgetStatePropertyAll(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(4)))),
+                      child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
+                        child: Text(
+                          'تایید',
+                          style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 2,
+                    ),
+                    //دکمه رد سفارش در جزئیات
+                    ElevatedButton(
+                      onPressed: () {
+                        Get.defaultDialog(
+                            backgroundColor: AppColor.backGroundColor,
+                            title: "رد سفارش",
+                            titleStyle: AppTextStyle.smallTitleText,
+                            middleTextStyle: AppTextStyle.bodyText,
+                            middleText: "آیا از رد سفارش مطمئن هستید؟",
+                            confirm: ElevatedButton(
+                                style: ButtonStyle(
+                                    backgroundColor: WidgetStatePropertyAll(
+                                        AppColor.accentColor)),
+                                onPressed: () {
+                                  orderController.updateStatusOrder(order.id!, 2);
+                                  Get.back();
+                                  orderController.fetchOrderList();
 
-                              },
-                              child: Text(
-                                'رد',
-                                style: AppTextStyle.bodyText,
-                              )));
-                    },
-                    style: ButtonStyle(
-                        backgroundColor: WidgetStatePropertyAll(AppColor.accentColor),
-                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4)))),
-                    child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
-                      child: Text('رد',
-                        style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                                },
+                                child: Text(
+                                  'رد',
+                                  style: AppTextStyle.bodyText,
+                                )));
+                      },
+                      style: ButtonStyle(
+                          backgroundColor: WidgetStatePropertyAll(AppColor.accentColor),
+                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4)))),
+                      child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
+                        child: Text('رد',
+                          style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -1042,6 +1046,138 @@ class OrderListView extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+          // مانده سکه
+          DataCell(
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 5),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    order.balances!=null ?
+                    Column(
+                      children: order.balances!.map((e)=>
+                          Row(
+                            children: [
+                              Container(
+                                padding: EdgeInsets.only(left: 2),
+                                child: e.unitName=="عدد"? Text( "${e.balance}",style:e.balance!>0 ?
+                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                textDirection: TextDirection.ltr,
+                                ):SizedBox(),
+                              ),
+                              Container(
+                                padding: EdgeInsets.only(left: 2),
+                                child: e.unitName=="عدد"? Text( "${e.unitName}",style:e.balance!>0 ?
+                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                  textDirection: TextDirection.ltr,
+                                ):SizedBox(),
+                              ),
+                              Container(
+                                child: e.unitName=="عدد"? Text( "${e.itemName}",style:e.balance!>0 ?
+                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                  textDirection: TextDirection.ltr,
+                                ):SizedBox(),
+                              ),
+                            ],
+                          )).toList()
+                    ) : SizedBox.shrink(),
+                  ],
+                ),
+              ),
+            )
+          ),
+          // مانده ریالی
+          DataCell(
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      order.balances!=null ?
+                           Column(
+                             children: order.balances!.map((e)=>
+                               Row(
+                                 children: [
+                                   Container(
+                                     padding: EdgeInsets.only(left: 2),
+                                     child: e.unitName=="ریال"? Text( "${e.balance?.toInt().toString().seRagham(separator: ',')}",style:e.balance!>0 ?
+                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                       textDirection: TextDirection.ltr,
+                                     ):SizedBox(),
+                                   ),
+                                   Container(
+                                     padding: EdgeInsets.only(left: 2),
+                                     child: e.unitName=="ریال"? Text( "${e.unitName}",style:e.balance!>0 ?
+                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                       textDirection: TextDirection.ltr,
+                                     ):SizedBox(),
+                                   ),
+                                   Container(
+                                     child: e.unitName=="ریال"? Text( "${e.itemName}",style:e.balance!>0 ?
+                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                       textDirection: TextDirection.ltr,
+                                     ):SizedBox(),
+                                   ),
+                                 ],
+                           )).toList(),
+                        ) : SizedBox.shrink(),
+                  ],
+                ),
+              ),
+              ),
+          ),
+          // مانده طلایی
+          DataCell(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 5),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children:[
+                  order.balances !=null ?
+                    Column(
+                      children:  order.balances!.map((e)=>
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.only(left: 2),
+                              child: e.unitName=="گرم"? Text( "${e.balance}",style:e.balance!>0 ?
+                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                textDirection: TextDirection.ltr,
+                              ):SizedBox(),
+                            ),
+                            Container(
+                              padding: EdgeInsets.only(left: 2),
+                              child: e.unitName=="گرم"? Text( "${e.unitName}",style:e.balance!>0 ?
+                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                textDirection: TextDirection.ltr,
+                              ):SizedBox(),
+                            ),
+                            Container(
+                              child: e.unitName=="گرم"? Text( "${e.itemName}",style:e.balance!>0 ?
+                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                textDirection: TextDirection.ltr,
+                              ):SizedBox(),
+                            ),
+                          ],
+                        )).toList()
+                    ) : SizedBox.shrink(),
+                      ],
+              ),
+            ),
+          )
           ),
         ],
       );

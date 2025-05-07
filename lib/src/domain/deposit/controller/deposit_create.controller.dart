@@ -88,7 +88,7 @@ class DepositCreateController extends GetxController{
 
   @override
   void onInit() {
-    depositRequest=Get.arguments;
+    DepositRequestModel depositRequest=Get.arguments;
     accountController.text=depositRequest.account?.name ?? "";
     if(depositRequest.account?.id!=null){
       getBankAccount(depositRequest.account!.id!);
@@ -184,7 +184,7 @@ class DepositCreateController extends GetxController{
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
-      var response=depositRepository.insertDeposit(
+      DepositModel response=await  depositRepository.insertDeposit(
         walletWithdrawId: depositRequest.withdrawRequest?.wallet?.id ?? 0 ,
           walletId: selectedWalletId.value,
           depositRequestId:depositRequest.id,
@@ -201,13 +201,13 @@ class DepositCreateController extends GetxController{
           date: gregorianDate,
           status: 0,
       );
-      if(response!=null) {
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-          titleText: Text('موفقیت آمیز',
+      if(response.id!=null) {
+        Get.snackbar(response.infos?.first.title ?? "", response.infos?.first.description ?? "",
+          titleText: Text(response.infos?.first.title ?? "",
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(
-              'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+              response.infos?.first.description ?? "", textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor)));
       }
       withdrawController.fetchWithdrawList();

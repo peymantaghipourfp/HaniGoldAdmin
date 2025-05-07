@@ -36,7 +36,9 @@ DepositModel _$DepositModelFromJson(Map<String, dynamic> json) => DepositModel(
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
       recId: json['recId'] as String?,
-      infos: json['infos'] as List<dynamic>?,
+      infos: (json['infos'] as List<dynamic>?)
+          ?.map((e) => InfoModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
     );

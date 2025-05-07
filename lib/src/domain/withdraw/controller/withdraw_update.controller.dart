@@ -118,19 +118,19 @@ class WithdrawUpdateController extends GetxController{
     if (existingWithdraw != null) {
       withdrawId.value = existingWithdraw.id ?? 0;
     }
-
     super.onInit();
   }
+
   @override
   void onReady() async {
     await fetchAccountList();
     final WithdrawModel? existingWithdraw = Get.arguments as WithdrawModel?;
     if (existingWithdraw != null) {
-
       setWithdrawDetails(existingWithdraw);
     }
     super.onReady();
   }
+
   @override
   void onClose() {
     debounce?.cancel();
