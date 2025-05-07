@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -18,7 +20,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return GetMaterialApp(
+      scrollBehavior: const MaterialScrollBehavior().copyWith(
+        dragDevices:{ PointerDeviceKind.touch},
+      ),
       builder: (context, child) => ResponsiveBreakpoints.builder(
         child: child!,
         breakpoints: [

@@ -14,13 +14,16 @@ import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:pluto_grid/pluto_grid.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
+import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../product/model/item.model.dart';
 import '../model/remittance.model.dart';
 
@@ -45,11 +48,13 @@ class RemittanceController extends GetxController{
   final TextEditingController namePayerController=TextEditingController();
   final TextEditingController mobilePayerController=TextEditingController();
   final TextEditingController quantityPayerController=TextEditingController();
+  final TextEditingController descController=TextEditingController();
   RxList<String> getList = RxList([]);
   RxList<RemittanceModel> remittanceList = RxList([]);
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<ItemModel> itemList=<ItemModel>[].obs;
   final List<AccountModel> accountListP=<AccountModel>[].obs;
+
   var errorMessage=''.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<AccountModel> selectedAccountP = Rxn<AccountModel>();
@@ -58,6 +63,7 @@ class RemittanceController extends GetxController{
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   BalanceModel? balanceModel;
   String? indexAccountPayerGet;
+  var isLoading=false.obs;
   var namePayer="".obs;
   var mobilePayer="".obs;
   getAccountPayer(String index){
@@ -80,6 +86,7 @@ class RemittanceController extends GetxController{
   }
 
 
+
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
     // selectedWalletAccount.value = null;
@@ -87,6 +94,7 @@ class RemittanceController extends GetxController{
   }
   void changeSelectedAccountP(AccountModel? newValue) {
     selectedAccountP.value = newValue;
+    namePayerController.text=newValue?.name??"";
     // selectedWalletAccount.value = null;
     // getWalletAccount(selectedAccount.value?.id ?? 0);
   }
@@ -117,7 +125,9 @@ class RemittanceController extends GetxController{
     searchController.addListener(onSearchChanged);
     searchControllerP.addListener(onSearchChangedP);
     fetchRemittanceList();
-
+    var now = Jalali.now();
+    DateTime date=DateTime.now();
+    dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     fetchItemList();
     fetchAccountList("");
     super.onInit();
@@ -196,25 +206,6 @@ Timer? debounceP;
       var fetchedAccountList=await remittanceRepository.getRemittanceList();
       remittanceList.addAll(fetchedAccountList);
       state.value=PageState.list;
-      // rows = remittanceList.map((e){
-      //   return PlutoRow(
-      //     cells: {
-      //       'register': PlutoCell(value: e.createdBy?.name),
-      //       'Reciept': PlutoCell(value: e.walletReciept?.account?.name),
-      //       'Payer': PlutoCell(value: e.walletPayer?.account?.name),
-      //       'Product': PlutoCell(value: e.item?.name),
-      //       'Total': PlutoCell(value:e.item?.itemUnit?.id==1? "${e.quantity} عدد ":e.item?.itemUnit?.id==2?"${e.quantity} گرم ":"${e.quantity} ریال "),
-      //       'Status': PlutoCell(value: e.status==1?"تایید شده":e.status==0?"تایید نشده":"نامشخص"),
-      //       'Description': PlutoCell(value: e.description??""),
-      //       'DateTime': PlutoCell(value: e.date),
-      //       'Action': PlutoCell(value: "گزینه 1"),
-      //       'BalanceC': PlutoCell(value: jsonDecode(e.balancePayer!).map((e){
-      //         return (e["UnitName"]=="ریال"?e["ItemName"]+e["Balance"].toString()+" ریال":"").toString().replaceAll(",", "");
-      //       }).toList()),
-      //     },
-      //   );
-      //
-      // }).toList();
       if(remittanceList.isEmpty){
         state.value=PageState.empty;
       }
@@ -268,6 +259,36 @@ Timer? debounceP;
   }
 
 
+  Future<RemittanceModel?> insertRemittance() async {
+    try {
+      isLoading.value = true;
+      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      RemittanceModel response = await remittanceRepository.insertRemittance(
+        date: gregorianDate,
+        itemId: selectedItem.value?.id ?? 0,
+        quantity: double.parse(quantityPayerController.text.toEnglishDigit()),
+        description: descController.text,
+        accountIdPayer: selectedAccount.value?.id??0,
+        accountNamePayer: selectedAccount.value?.name??"",
+        accountIdReciept: selectedAccountP.value?.id??0,
+        accountNameReciept: selectedAccountP.value?.name??"",
+      );
+        Get.toNamed('/remittance');
+        Get.snackbar(response.infos!.first['title'], response.infos!.first["description"],
+            titleText: Text(response.infos!.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+
+        fetchRemittanceList();
+
+    } catch (e) {
+      throw ErrorException('خطا در ایجاد حواله: $e');
+    } finally {
+      isLoading.value = false;
+    }
+    return null;
+  }
 
 
 

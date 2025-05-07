@@ -82,6 +82,17 @@ Widget buildDesktopLayout() {
                     route: '/withdrawCreate',
                   ),
                 ],
+              ), _buildMenuButton(
+                title: 'کاربران',
+                icon: Icons.people_rounded,
+                menuKey: 'users',
+                subItems: [
+                  _buildSubMenuItem(
+                    title: 'مانده کاربران',
+                    icon: Icons.perm_contact_cal_outlined,
+                    route: '/userInfoTransaction',
+                  ),
+                ],
               ),
               _buildMenuButton(
                 title: 'دریافت و پرداخت',

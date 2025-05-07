@@ -33,8 +33,10 @@ import '../../domain/inventory/view/inventory_detail_update_payment.view.dart';
 import '../../domain/remittance/view/insert_remittance.view.dart';
 import '../../domain/remittance/view/remittance.view.dart';
 import '../../domain/splash/view/splash.view.dart';
+import '../../domain/users/view/user_info_transaction.view.dart';
 import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
 import '../../domain/withdraw/view/withdraw_update.view.dart';
+import 'bindings/user_info_transaction.bindings.dart';
 
 class RoutePage{
   static List<GetPage> routePage=[
@@ -63,5 +65,6 @@ class RoutePage{
     GetPage(name: '/wallet', page: ()=>WalletView()),
     GetPage(name: '/remittance', page: ()=>RemittanceView(),binding: RemittanceBindings()),
     GetPage(name: '/insertRemittance', page: ()=>InsertRemittanceView(),binding: RemittanceBindings()),
+    GetPage(name: '/userInfoTransaction', page: ()=>UserInfoTransactionView(),binding: UserInfoTransactionBindings()),
   ];
 }

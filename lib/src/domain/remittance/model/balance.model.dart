@@ -10,7 +10,7 @@ BalanceModel balanceModelFromJson(String str) => BalanceModel.fromJson(json.deco
 String balanceModelToJson(BalanceModel data) => json.encode(data.toJson());
 
 class BalanceModel {
-  final dynamic balance;
+  final double? balance;
   final String? itemName;
   final String? unitName;
 

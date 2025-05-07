@@ -24,6 +24,7 @@ class RemittanceView extends GetView<RemittanceController> {
                   )
                 : controller.state.value == PageState.list
                     ? SizedBox(
+                      height: Get.height,width: Get.width,
                         child: Column(
                           children: [
                             //فیلد جستجو
@@ -56,19 +57,29 @@ class RemittanceView extends GetView<RemittanceController> {
                             ),
                             Expanded(
                               child: SingleChildScrollView(
-                                child: Column(
+                                scrollDirection: Axis.horizontal,
+                                controller: controller.scrollController,
+                                physics: ClampingScrollPhysics(),
+                                child: Row(
                                   children: [
-                                    DataTable(
-                                      columns: buildDataColumns(),
-                                      rows: buildDataRows(context),
-                                      dataRowMaxHeight: 100,
-                                      //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                      //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                      headingRowHeight: 60,
-                                      columnSpacing: 25,
-                                      horizontalMargin: 6,
+                                    SingleChildScrollView(
+                                      child: Column(
+                                        children: [
+                                          DataTable(
+                                            columns: buildDataColumns(),
+                                            dividerThickness: 1,
+                                            rows: buildDataRows(context),
+                                            dataRowMaxHeight: 90,
+                                            //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                            //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                            headingRowHeight: 60,
+                                            columnSpacing: 25,
+                                            horizontalMargin: 6,
+                                          ),
+                                          buildPaginationControls(),
+                                        ],
+                                      ),
                                     ),
-                                    buildPaginationControls(),
                                   ],
                                 ),
                               ),
@@ -94,68 +105,82 @@ class RemittanceView extends GetView<RemittanceController> {
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('تاریخ', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('تاریخ',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('نام ثبت کننده', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('نام ثبت کننده',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
               child: Column(
                 children: [
-                  Text('بدهکار ', style: AppTextStyle.labelText.copyWith(color: AppColor.accentColor,fontSize: 12)),
-                  SvgPicture.asset('assets/svg/refresh.svg',height: 16,
+                  Text('بدهکار ',
+                      style: AppTextStyle.labelText
+                          .copyWith(color: AppColor.accentColor, fontSize: 12)),
+                  SvgPicture.asset('assets/svg/refresh.svg',
+                      height: 16,
                       colorFilter: ColorFilter.mode(
                         AppColor.textColor,
-
                         BlendMode.srcIn,
                       )),
-                  Text(' بستانکار', style: AppTextStyle.labelText.copyWith(color: AppColor.primaryColor,fontSize: 12)),
+                  Text(' بستانکار',
+                      style: AppTextStyle.labelText.copyWith(
+                          color: AppColor.primaryColor, fontSize: 12)),
                 ],
               )),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('محصول', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('محصول',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('مقدار', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('مقدار',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('وضعیت', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('وضعیت',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('شرح', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('شرح',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('مانده ریالی', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('مانده ریالی',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('مانده طلایی', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('مانده طلایی',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('مانده سکه', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('مانده سکه',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('عملیات', style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+              child: Text('عملیات',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
     ];
   }
@@ -170,6 +195,7 @@ class RemittanceView extends GetView<RemittanceController> {
             child: Text(
               remittance.date?.toPersianDate(showTime: true) ?? 'نامشخص',
               style: AppTextStyle.bodyText,
+              textDirection: TextDirection.ltr,
             ),
           )),
           DataCell(Center(
@@ -182,27 +208,28 @@ class RemittanceView extends GetView<RemittanceController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  "${remittance.walletPayer?.account?.name ?? 'نامشخص'} ",
-                  style: AppTextStyle.bodyText,
-                ),
-                SvgPicture.asset('assets/svg/refresh.svg',height: 16,
+                Text("${remittance.walletPayer?.account?.name ?? 'نامشخص'} ",
+                    style: AppTextStyle.bodyText
+                        .copyWith(color: AppColor.accentColor, fontSize: 12)),
+                SvgPicture.asset('assets/svg/refresh.svg',
+                    height: 16,
                     colorFilter: ColorFilter.mode(
                       AppColor.textColor,
-
                       BlendMode.srcIn,
                     )),
-                Text(
-                  " ${remittance.walletReciept?.account?.name ?? 'نامشخص'}",
-                  style: AppTextStyle.bodyText,
-                ),
+                Text(" ${remittance.walletReciept?.account?.name ?? 'نامشخص'}",
+                    style: AppTextStyle.bodyText
+                        .copyWith(color: AppColor.primaryColor, fontSize: 12)),
               ],
             ),
           )),
           DataCell(Center(
             child: Text(
               remittance.item?.name ?? 'نامشخص',
-              style: AppTextStyle.bodyText.copyWith(color: AppColor.secondary2Color,fontWeight: FontWeight.w700,fontSize: 14),
+              style: AppTextStyle.bodyText.copyWith(
+                  color: AppColor.secondary2Color,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14),
             ),
           )),
           DataCell(Center(
@@ -217,117 +244,366 @@ class RemittanceView extends GetView<RemittanceController> {
           )),
           DataCell(Center(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
               decoration: BoxDecoration(
-                  color:remittance.status == 1? AppColor.secondary2Color:remittance.status == 1?AppColor.accentColor:AppColor.textFieldColor,
-                borderRadius: BorderRadius.circular(7)
-              ),
+                  color: remittance.status == 1
+                      ? AppColor.secondary2Color
+                      : remittance.status == 1
+                          ? AppColor.accentColor
+                          : AppColor.textFieldColor,
+                  borderRadius: BorderRadius.circular(7)),
               child: Text(
                 remittance.status == 1
                     ? "تایید شده"
                     : remittance.status == 0
                         ? "تایید نشده"
                         : "نامشخص",
-                style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor,fontSize: 12),
+                style: AppTextStyle.bodyText
+                    .copyWith(color: AppColor.textColor, fontSize: 12),
               ),
             ),
           )),
           DataCell(Center(
-            child: Text(
-              remittance.description ?? 'نامشخص',
-              style: AppTextStyle.bodyText,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      " از : ",
+                      style: AppTextStyle.bodyText
+                          .copyWith(color: AppColor.textColor, fontSize: 10),
+                    ),
+                    Text(
+                      " ${remittance.walletPayer?.account?.name??"نامشخص"}",
+                      style: AppTextStyle.bodyText
+                          .copyWith(color: AppColor.accentColor, fontSize: 10),
+                    ),
+                    Text(
+                      " به : ",
+                      style: AppTextStyle.bodyText
+                          .copyWith(color: AppColor.textColor, fontSize: 10),
+                    ),
+                    Text(
+                      " ${remittance.walletReciept?.account?.name??"نامشخص"}",
+                      style: AppTextStyle.bodyText
+                          .copyWith(color: AppColor.primaryColor, fontSize: 10),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      remittance.item?.itemUnit?.id == 1
+                          ? "${remittance.quantity} عدد "
+                          : remittance.item?.itemUnit?.id == 2
+                              ? "${remittance.quantity} گرم "
+                              : "${remittance.quantity.toString().seRagham()} ریال ",
+                      style: AppTextStyle.bodyText.copyWith(
+                          color: AppColor.textColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10),
+                    ),
+                    Text(
+                      "  ",
+                      style: AppTextStyle.bodyText.copyWith(
+                          color: AppColor.secondary2Color,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10),
+                    ),
+                    Text(
+                      remittance.item?.name ?? 'نامشخص',
+                      style: AppTextStyle.bodyText.copyWith(
+                          color: AppColor.secondary2Color,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'توضیحات : ',
+                      style: AppTextStyle.bodyText.copyWith(
+                          color: AppColor.textColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10),
+                    ),
+                    Text(remittance.description ?? 'نامشخص',
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.textColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10)),
+                  ],
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      remittance.date?.toPersianDate(showTime: true) ??
+                          'نامشخص',
+                      style: AppTextStyle.bodyText.copyWith(
+                          color: AppColor.iconViewColor,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 10),
+                      textDirection: TextDirection.ltr,
+                    ),
+                  ],
+                ),
+              ],
             ),
           )),
           DataCell(Center(
-            child:Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Column(
-                  children: remittance.balancePayer!.map((e)=>
-                      Container(
-                        child:e.unitName=="ریال"? Text(
-                          "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor),
-                        ):SizedBox(),
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              remittance.balancePayer==null?SizedBox() :Column(
+                children: remittance.balancePayer!
+                    .map((e) => Container(
+                          child: e.unitName == "ریال"
+                              ? Row(
+                                  children: [
+                                    Text(
+                                      " ${e.itemName} ",
+                                      style: AppTextStyle.bodyText.copyWith(
+                                          fontSize: 12,
+                                          color: AppColor.accentColor),
+                                    ),
+                                    Text(
+                                      e.balance.toString(),
+                                      style: AppTextStyle.bodyText.copyWith(
+                                          fontSize: 12,
+                                          color: AppColor.accentColor),
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                    Text(
+                                      " ${e.unitName} ",
+                                      style: AppTextStyle.bodyText.copyWith(
+                                          fontSize: 12,
+                                          color: AppColor.accentColor),
+                                    //  textDirection: TextDirection.ltr,
+                                    ),
 
-                  )).toList(),
-                ),
-                Column(
-                  children: remittance.balanceReciept!.map((e)=>
-                      Container(
-                        child:e.unitName=="ریال"? Text(
-                          "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
-                        ):SizedBox(),
+                                  ],
+                                )
+                              : SizedBox(),
+                        ))
+                    .toList(),
+              ),
+              remittance.balanceReciept==null?SizedBox() : Column(
+                children: remittance.balanceReciept!
+                    .map((e) => Container(
+                  child: e.unitName == "ریال"
+                      ? Row(
+                    children: [
+                      Text(
+                        " ${e.itemName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                      ),
+                      Text(
+                        e.balance.toString(),
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                        textDirection: TextDirection.ltr,
+                      ),
+                      Text(
+                        " ${e.unitName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                        //  textDirection: TextDirection.ltr,
+                      ),
 
-                      )).toList(),
-                ),
-              ],
-            )
-          )),
+                    ],
+                  )
+                      : SizedBox(),
+                ))
+                    .toList(),
+              ),
+            ],
+          ))),
           DataCell(Center(
-              child:Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: remittance.balancePayer!.map((e)=>
-                        Container(
-                          child:e.unitName=="گرم"? Text(
-                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor),
-                          ):SizedBox(),
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              remittance.balancePayer==null?SizedBox() : Column(
+                children: remittance.balancePayer!
+                    .map((e) => Container(
+                  child: e.unitName == "گرم"
+                      ? Row(
+                    children: [
+                      Text(
+                        " ${e.itemName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.accentColor),
+                      ),
+                      Text(
+                        e.balance.toString(),
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.accentColor),
+                        textDirection: TextDirection.ltr,
+                      ),
+                      Text(
+                        " ${e.unitName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.accentColor),
+                        //  textDirection: TextDirection.ltr,
+                      ),
 
-                        )).toList(),
-                  ),
-                  Column(
-                    children: remittance.balanceReciept!.map((e)=>
-                        Container(
-                          child:e.unitName=="گرم"? Text(
-                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
-                          ):SizedBox(),
+                    ],
+                  )
+                      : SizedBox(),
+                ))
+                    .toList(),
+              ),
+              remittance.balanceReciept==null?SizedBox() :  Column(
+                children: remittance.balanceReciept!
+                    .map((e) => Container(
+                  child: e.unitName == "گرم"
+                      ? Row(
+                    children: [
+                      Text(
+                        " ${e.itemName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                      ),
+                      Text(
+                        e.balance.toString(),
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                        textDirection: TextDirection.ltr,
+                      ),
+                      Text(
+                        " ${e.unitName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                        //  textDirection: TextDirection.ltr,
+                      ),
 
-                        )).toList(),
-                  ),
-                ],
-              )
-          )),
+                    ],
+                  )
+                      : SizedBox(),
+                ))
+                    .toList(),
+              ),
+            ],
+          ))),
           DataCell(Center(
-              child:Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Column(
-                    children: remittance.balancePayer!.map((e)=>
-                        Container(
-                          child:e.unitName=="عدد"? Text(
-                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor),
-                          ):SizedBox(),
+              child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              remittance.balancePayer==null?SizedBox() :  Column(
+                children: remittance.balancePayer!
+                    .map((e) => Container(
+                  child: e.unitName == "عدد"
+                      ? Row(
+                    children: [
+                      Text(
+                        " ${e.itemName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.accentColor),
+                      ),
+                      Text(
+                        e.balance.toString(),
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.accentColor),
+                        textDirection: TextDirection.ltr,
+                      ),
+                      Text(
+                        " ${e.unitName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.accentColor),
+                        //  textDirection: TextDirection.ltr,
+                      ),
 
-                        )).toList(),
-                  ),
+                    ],
+                  )
+                      : SizedBox(),
+                ))
+                    .toList(),
+              ),
+              remittance.balanceReciept==null?SizedBox() : Column(
+                children: remittance.balanceReciept!
+                    .map((e) => Container(
+                  child: e.unitName == "عدد"
+                      ? Row(
+                    children: [
+                      Text(
+                        " ${e.itemName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                      ),
+                      Text(
+                        e.balance.toString(),
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                        textDirection: TextDirection.ltr,
+                      ),
+                      Text(
+                        " ${e.unitName} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            fontSize: 12,
+                            color: AppColor.primaryColor),
+                        //  textDirection: TextDirection.ltr,
+                      ),
 
-                  Column(
-                    children: remittance.balanceReciept!.map((e)=>
-                        Container(
-                          child:e.unitName=="عدد"? Text(
-                            "${e.itemName} ${e.balance} ${e.unitName}",style:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
-                          ):SizedBox(),
-
-                        )).toList(),
-                  ),
-                ],
-              )
-          )),
+                    ],
+                  )
+                      : SizedBox(),
+                ))
+                    .toList(),
+              ),
+            ],
+          ))),
 
           DataCell(Center(
               child: Row(
             children: [
+              SizedBox(
+                width: 20,
+              ),
               SvgPicture.asset('assets/svg/edit.svg',
                   colorFilter: ColorFilter.mode(
                     AppColor.iconViewColor,
                     BlendMode.srcIn,
                   )),
+              SizedBox(
+                width: 30,
+              ),
               SvgPicture.asset('assets/svg/trash-bin.svg',
                   colorFilter: ColorFilter.mode(
-                    AppColor.iconViewColor,
+                    AppColor.accentColor,
                     BlendMode.srcIn,
                   )),
+              SizedBox(
+                width: 20,
+              ),
             ],
           ))),
         ],
