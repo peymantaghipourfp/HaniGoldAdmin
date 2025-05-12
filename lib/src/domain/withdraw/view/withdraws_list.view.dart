@@ -27,7 +27,7 @@ class WithdrawsListView extends StatelessWidget {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: CustomAppbar1(title: 'لیست درخواست های برداشت',
-        onBackTap: () => Get.back(),
+        onBackTap: () => Get.offNamed('/home'),
       ),
       body: Stack(
         children: [
@@ -146,6 +146,8 @@ class WithdrawsListView extends StatelessWidget {
                                                    columns: buildDataColumns(),
                                                    rows: buildDataRows(context),
                                                    dataRowMaxHeight: double.infinity,
+                                                   dividerThickness: 0.3,
+                                                   border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
                                                    //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                                    headingRowHeight: 40,
@@ -529,10 +531,7 @@ class WithdrawsListView extends StatelessWidget {
                                                     // آیکون مشاهده
                                                     GestureDetector(
                                                       onTap: () {
-                                                        Get.toNamed(
-                                                          '/withdrawGetOne',
-                                                          arguments: withdraws
-                                                              .id,);
+                                                        Get.toNamed('/withdrawGetOne', parameters:{"id":withdraws.id.toString()});
                                                         //print(withdraws.id);
                                                       },
                                                       child: Row(
@@ -718,7 +717,7 @@ class WithdrawsListView extends StatelessWidget {
                                                         itemBuilder: (
                                                             context) =>
                                                         [
-                                                          PopupMenuItem<int>(
+                                                          PopupMenuItem<int>(height: 18,
                                                             labelTextStyle: WidgetStateProperty
                                                                 .all(
                                                                 AppTextStyle
@@ -751,7 +750,7 @@ class WithdrawsListView extends StatelessWidget {
                                                             ),
                                                           ),
                                                           const PopupMenuDivider(),
-                                                          PopupMenuItem<int>(
+                                                          PopupMenuItem<int>(height: 18,
                                                             value: 2,
                                                             labelTextStyle: WidgetStateProperty
                                                                 .all(
@@ -1172,7 +1171,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                               context) =>
                                                                           [
                                                                             PopupMenuItem<
-                                                                                int>(
+                                                                                int>(height: 18,
                                                                               labelTextStyle: WidgetStateProperty
                                                                                   .all(
                                                                                   AppTextStyle
@@ -1208,7 +1207,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                             ),
                                                                             const PopupMenuDivider(),
                                                                             PopupMenuItem<
-                                                                                int>(
+                                                                                int>(height: 18,
                                                                               value: 2,
                                                                               labelTextStyle: WidgetStateProperty
                                                                                   .all(
@@ -1367,11 +1366,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                             height: 25,
                                                                             child: GestureDetector(
                                                                               onTap: () {
-                                                                                Get
-                                                                                    .toNamed(
-                                                                                    '/depositRequestGetOne',
-                                                                                    arguments: depositRequests
-                                                                                        .id);
+                                                                                Get.toNamed('/depositRequestGetOne', parameters:{"id":depositRequests.id.toString()});
                                                                               },
                                                                               child: SvgPicture
                                                                                   .asset(
@@ -1407,6 +1402,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                                     textCancel: 'بستن',
                                                                                   );
                                                                                 } else {
+                                                                                  withdrawController.setDepositRequestDetail(depositRequests);
                                                                                   showModalBottomSheet(
                                                                                     enableDrag: true,
                                                                                     context: context,
@@ -1689,7 +1685,7 @@ class WithdrawsListView extends StatelessWidget {
                       itemBuilder: (
                           context) =>
                       [
-                        PopupMenuItem<int>(
+                        PopupMenuItem<int>(height: 18,
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
@@ -1722,7 +1718,7 @@ class WithdrawsListView extends StatelessWidget {
                           ),
                         ),
                         const PopupMenuDivider(),
-                        PopupMenuItem<int>(
+                        PopupMenuItem<int>(height: 18,
                           value: 2,
                           labelTextStyle: WidgetStateProperty
                               .all(
@@ -1812,13 +1808,15 @@ class WithdrawsListView extends StatelessWidget {
           ),
           // آیکون های عملیات
           DataCell(
-            Center(
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   // آیکون تقسیم
                   GestureDetector(
                     onTap: () {
+                      withdrawController.balanceList.clear();
                       showModalBottomSheet(
                         enableDrag: true,
                         context: context,
@@ -1853,12 +1851,12 @@ class WithdrawsListView extends StatelessWidget {
                       children: [
                         Text(' تقسیم',
                           style: AppTextStyle
-                              .labelText
+                              .bodyText
                               .copyWith(
                               color: AppColor
                                   .buttonColor),),
                         SvgPicture.asset(
-                            'assets/svg/add.svg',width: 20,height: 20,
+                            'assets/svg/add.svg',width: 25,height: 25,
                             colorFilter: ColorFilter
                                 .mode(AppColor
                                 .buttonColor,
@@ -1871,11 +1869,7 @@ class WithdrawsListView extends StatelessWidget {
                   // آیکون حذف کردن
                   GestureDetector(
                     onTap: () {
-                      if (withdraw
-                          .depositRequestCount !=
-                          0 || withdraw
-                          .depositCount !=
-                          0) {
+                      if (withdraw.depositRequestCount != 0 || withdraw.depositCount != 0) {
                         Get.defaultDialog(
                           title: 'هشدار',
                           middleText: 'به دلیل داشتن زیر مجموعه قابل حذف نیست',
@@ -1903,14 +1897,8 @@ class WithdrawsListView extends StatelessWidget {
                                         AppColor
                                             .primaryColor)),
                                 onPressed: () {
-                                  Get
-                                      .back();
-                                  withdrawController
-                                      .deleteWithdraw(
-                                      withdraw
-                                          .id!,
-                                      true);
-                                  //withdrawController.fetchWithdrawList();
+                                  Get.back();
+                                  withdrawController.deleteWithdraw(withdraw.id!, true);
                                 },
                                 child: Text(
                                   'حذف',
@@ -1924,13 +1912,13 @@ class WithdrawsListView extends StatelessWidget {
                       children: [
                         Text(' حذف',
                           style: AppTextStyle
-                              .labelText
+                              .bodyText
                               .copyWith(
                               color: AppColor
                                   .accentColor),),
                         SvgPicture
                             .asset(
-                            'assets/svg/trash-bin.svg',width: 20,height: 20,
+                            'assets/svg/trash-bin.svg',width: 25,height: 25,
                             colorFilter: ColorFilter
                                 .mode(AppColor
                                 .accentColor,
@@ -1944,22 +1932,19 @@ class WithdrawsListView extends StatelessWidget {
                   // آیکون مشاهده
                   GestureDetector(
                     onTap: () {
-                      Get.toNamed(
-                        '/withdrawGetOne',
-                        arguments: withdraw
-                            .id,);
+                      Get.toNamed('/withdrawGetOne', parameters:{"id":withdraw.id.toString()});
                       //print(withdraws.id);
                     },
                     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(' مشاهده',
                           style: AppTextStyle
-                              .labelText
+                              .bodyText
                               .copyWith(
                               color: AppColor
                                   .iconViewColor),),
                         SvgPicture.asset(
-                            'assets/svg/eye1.svg',width: 20,height: 20,
+                            'assets/svg/eye1.svg',width: 25,height: 25,
                             colorFilter: ColorFilter
                                 .mode(AppColor
                                 .iconViewColor,
@@ -1998,13 +1983,13 @@ class WithdrawsListView extends StatelessWidget {
                       children: [
                         Text(' ویرایش',
                           style: AppTextStyle
-                              .labelText
+                              .bodyText
                               .copyWith(
                               color: AppColor
                                   .iconViewColor),),
                         SvgPicture
                             .asset(
-                            'assets/svg/edit.svg',width: 20,height: 20,
+                            'assets/svg/edit.svg',width: 25,height: 25,
                             colorFilter: ColorFilter
                                 .mode(AppColor
                                 .iconViewColor,
@@ -2040,7 +2025,8 @@ class WithdrawsListView extends StatelessWidget {
   Widget buildDepositRequestsTable(WithdrawModel withdraw) {
     return Obx(() {
       if (withdrawController.isLoadingDepositRequestList.value) {
-        return Center(child: CircularProgressIndicator());
+        return SizedBox(width: 300,
+            child: Center(child: CircularProgressIndicator()));
       }
       return
           withdrawController
@@ -2337,7 +2323,7 @@ class WithdrawsListView extends StatelessWidget {
                                         context) =>
                                     [
                                       PopupMenuItem<
-                                          int>(
+                                          int>(height: 18,
                                         labelTextStyle: WidgetStateProperty
                                             .all(
                                             AppTextStyle
@@ -2373,7 +2359,7 @@ class WithdrawsListView extends StatelessWidget {
                                       ),
                                       const PopupMenuDivider(),
                                       PopupMenuItem<
-                                          int>(
+                                          int>(height: 18,
                                         value: 2,
                                         labelTextStyle: WidgetStateProperty
                                             .all(
@@ -2442,8 +2428,7 @@ class WithdrawsListView extends StatelessWidget {
                                       height: 25,
                                       child: GestureDetector(
                                         onTap: () {
-                                          Get
-                                              .offNamed(
+                                          Get.toNamed(
                                               '/depositCreate',
                                               arguments: depositRequests);
                                         },
@@ -2465,9 +2450,7 @@ class WithdrawsListView extends StatelessWidget {
                                       height: 25,
                                       child: GestureDetector(
                                         onTap: () {
-                                          if (withdraw
-                                              .depositCount !=
-                                              0) {
+                                          if (depositRequests.depositCount != 0) {
                                             Get
                                                 .defaultDialog(
                                               title: 'هشدار',
@@ -2532,11 +2515,7 @@ class WithdrawsListView extends StatelessWidget {
                                       height: 25,
                                       child: GestureDetector(
                                         onTap: () {
-                                          Get
-                                              .toNamed(
-                                              '/depositRequestGetOne',
-                                              arguments: depositRequests
-                                                  .id);
+                                          Get.toNamed('/depositRequestGetOne', parameters:{"id":depositRequests.id.toString()});
                                         },
                                         child: SvgPicture
                                             .asset(
@@ -2556,7 +2535,7 @@ class WithdrawsListView extends StatelessWidget {
                                       height: 25,
                                       child: GestureDetector(
                                         onTap: () {
-                                          if (withdraw
+                                          if (depositRequests
                                               .depositCount !=
                                               0) {
                                             Get
@@ -2572,6 +2551,7 @@ class WithdrawsListView extends StatelessWidget {
                                               textCancel: 'بستن',
                                             );
                                           } else {
+                                            withdrawController.setDepositRequestDetail(depositRequests);
                                             showModalBottomSheet(
                                               enableDrag: true,
                                               context: context,

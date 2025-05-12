@@ -233,6 +233,7 @@ class OrderController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف سفارش با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        Get.back();
         fetchOrderList();
       }
     }catch(e){

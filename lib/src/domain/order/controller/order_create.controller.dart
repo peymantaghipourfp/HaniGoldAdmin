@@ -14,7 +14,9 @@ import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
+import '../../users/model/balance_item.model.dart';
 import '../model/order.model.dart';
 import 'order.controller.dart';
 
@@ -43,11 +45,14 @@ class OrderCreateController extends GetxController{
   final ItemRepository itemRepository=ItemRepository();
   final AccountRepository accountRepository=AccountRepository();
   final OrderRepository orderRepository=OrderRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   final List<ItemModel> itemList=<ItemModel>[].obs;
   final List<AccountModel> accountList=<AccountModel>[].obs;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingBalance=true.obs;
 
   var maxItemSell=0.obs;
   var maxItemBuy=0.obs;
@@ -79,6 +84,8 @@ class OrderCreateController extends GetxController{
   }
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
+    getBalanceList(newValue?.id ?? 0);
+    isLoadingBalance.value=false;
   }
   void updateTotalPrice(){
     double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
@@ -199,7 +206,6 @@ class OrderCreateController extends GetxController{
   }
 
   Future<OrderModel?> insertOrder()async{
-
     try {
       isLoading.value = true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -226,6 +232,7 @@ class OrderCreateController extends GetxController{
                 orderResponse.infos!.first["description"] , textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
         orderController.fetchOrderList();
+        balanceList.clear();
         clearList();
       }
     }
@@ -235,6 +242,29 @@ class OrderCreateController extends GetxController{
       isLoading.value=false;
     }
     return null;
+  }
+
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    isLoadingBalance.value=false;
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+     balanceList.removeWhere((r)=>r.balance==0);
+      state.value=PageState.list;
+      isLoadingBalance.value=true;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
+    }
   }
 
    void clearList() {

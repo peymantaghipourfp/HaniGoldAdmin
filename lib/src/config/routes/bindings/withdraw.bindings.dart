@@ -1,5 +1,6 @@
 
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/deposit/controller/deposit.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_getOne.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_create.controller.dart';
@@ -14,6 +15,7 @@ class WithdrawBindings implements Bindings{
     Get.lazyPut(()=>WithdrawUpdateController());
     Get.lazyPut(()=>WithdrawGetOneController());
     Get.lazyPut(()=>DepositRequestGetOneController());
+    Get.lazyPut(()=>DepositController());
   }
 
 }

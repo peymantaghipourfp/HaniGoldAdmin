@@ -2,6 +2,7 @@
 
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory.controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_layout.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_detail_insert_receive.controller.dart';
 
@@ -20,6 +21,7 @@ class InventoryBindings implements Bindings{
     Get.lazyPut(()=>InventoryDetailInsertReceiveController());
     Get.lazyPut(()=>InventoryDetailInsertPaymentController());
     Get.lazyPut(()=>InventoryDetailUpdatePaymentController());
+    Get.lazyPut(()=>InventoryCreateLayoutController());
   }
 
 }

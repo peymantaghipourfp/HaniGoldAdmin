@@ -10,9 +10,12 @@ import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../controller/inventory_create_receive.controller.dart';
 
+typedef SelectCallBack = Function(int id);
+
 class InventoryCreateReceiveTabWidget extends StatefulWidget {
-  InventoryCreateReceiveTabWidget({
-    super.key,
+  final SelectCallBack callBack;
+  const InventoryCreateReceiveTabWidget({
+    super.key, required this.callBack,
 
   });
 
@@ -33,7 +36,6 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
             horizontal: isDesktop ? 40 : 20,
             vertical: isDesktop ? 30 : 20
         ),
-
         child: Obx(() {
           return Form(
             child: Column(
@@ -111,6 +113,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                             .firstWhere((account) => account.name == newValue);
                         inventoryCreateReceiveController.changeSelectedAccount(
                             selectedAccount);
+                        widget.callBack(selectedAccount.id!);
                       }
                     },
                     onMenuStateChange: (isOpen) {

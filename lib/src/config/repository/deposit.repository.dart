@@ -59,7 +59,7 @@ class DepositRepository{
     required int? bankAccountId,
     required double? amount,
     required int accountId,
-    required String accountName,
+    //required String accountName,
     required int bankId,
     required String bankName,
     required String ownerName,
@@ -113,7 +113,7 @@ class DepositRepository{
         },
         "wallet": {
           "account": {
-            "name": accountName,
+            "name": '',
             "accountGroup": {
               "infos": []
             },

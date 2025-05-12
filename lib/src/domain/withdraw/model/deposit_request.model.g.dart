@@ -41,6 +41,7 @@ DepositRequestModel _$DepositRequestModelFromJson(Map<String, dynamic> json) =>
       attribute: json['attribute'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
+      depositCount: (json['depositCount'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$DepositRequestModelToJson(
@@ -64,4 +65,5 @@ Map<String, dynamic> _$DepositRequestModelToJson(
       'attribute': instance.attribute,
       'recId': instance.recId,
       'infos': instance.infos,
+      'depositCount': instance.depositCount,
     };

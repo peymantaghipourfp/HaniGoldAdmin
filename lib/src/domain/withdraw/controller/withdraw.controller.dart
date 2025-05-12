@@ -21,6 +21,8 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
+import '../../users/model/balance_item.model.dart';
 
 
 enum PageState{loading,err,empty,list}
@@ -35,6 +37,7 @@ class WithdrawController extends GetxController{
   final WithdrawRepository withdrawRepository=WithdrawRepository();
   final DepositRequestRepository depositRequestRepository=DepositRequestRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final TextEditingController amountController=TextEditingController();
   final TextEditingController requestAmountController=TextEditingController();
@@ -45,6 +48,7 @@ class WithdrawController extends GetxController{
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<AccountModel> filterAccountList=<AccountModel>[].obs;
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
 
   var errorMessage=''.obs;
   var isLoading=true.obs;
@@ -53,6 +57,7 @@ class WithdrawController extends GetxController{
   Rx<PageState> stateDR=Rx<PageState>(PageState.list);
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   RxnInt expandedIndex = RxnInt();
+  var isLoadingBalance=true.obs;
 
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
 
@@ -68,6 +73,8 @@ class WithdrawController extends GetxController{
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
+    getBalanceList(newValue?.id ?? 0);
+    isLoadingBalance.value=false;
   }
 
 
@@ -101,7 +108,6 @@ class WithdrawController extends GetxController{
       fetchWithdrawList();
     }
   }
-
 
 
   @override
@@ -493,11 +499,13 @@ class WithdrawController extends GetxController{
     return null;
   }
 
-  void setDepositRequestDetail(DepositRequestModel depositRequest) {
+  void setDepositRequestDetail(DepositRequestModel depositRequest)async {
     selectedAccount.value = accountList.firstWhere(
           (account) => account.id == depositRequest.account?.id,
     );
+   await getBalanceList(depositRequest.account?.id ?? 0);
     requestAmountController.text = depositRequest.requestAmount?.toString() ?? '';
+    print("accountIdddd: ${depositRequest.account?.id}");
   }
 
   Future<List<dynamic>?> deleteWithdraw(int withdrawId,bool isDeleted)async{
@@ -541,6 +549,28 @@ class WithdrawController extends GetxController{
 
     }
     return null;
+  }
+
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      isLoadingBalance.value=true;
+      state.value=PageState.list;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
+    }
   }
 
   void clearList(){

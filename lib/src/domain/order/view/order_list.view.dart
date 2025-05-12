@@ -25,10 +25,10 @@ class OrderListView extends StatelessWidget {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: isDesktop ? 
-      CustomAppbar1(title: 'سفارشات',onBackTap: () => Get.back(),)
+      CustomAppbar1(title: 'سفارشات',onBackTap: () => Get.offNamed('/home'),)
           :
       CustomAppBar(title: 'سفارشات',
-        onBackTap: ()=>Get.back(),
+        onBackTap: ()=>Get.offNamed('/home'),
       ),
       body: Stack(
         children: [
@@ -246,6 +246,8 @@ class OrderListView extends StatelessWidget {
                                         columns: buildDataColumns(),
                                         rows: buildDataRows(context),
                                         dataRowMaxHeight: double.infinity,
+                                        dividerThickness: 0.3,
+                                        border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
                                         //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                        //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                         headingRowHeight: 40,
@@ -897,78 +899,84 @@ class OrderListView extends StatelessWidget {
                     ),
                     SizedBox(height: 6,),
                     //دکمه تایید سفارش در جزئیات
-                    ElevatedButton(
-                      onPressed: () {
-                        Get.defaultDialog(
-                            backgroundColor: AppColor.backGroundColor,
-                            title: "تایید سفارش",
-                            titleStyle: AppTextStyle.smallTitleText,
-                            middleText: "آیا از تایید سفارش مطمئن هستید؟",
-                            middleTextStyle: AppTextStyle.bodyText,
-                            confirm: ElevatedButton(
-                                style: ButtonStyle(
-                                    backgroundColor: WidgetStatePropertyAll(
-                                        AppColor.primaryColor)),
-                                onPressed: () {
-                                  orderController.updateStatusOrder(order.id!, 1);
-                                  Get.back();
-                                  orderController.fetchOrderList();
-                                },
-                                child: Text(
-                                  'تایید',
-                                  style: AppTextStyle.bodyText,
-                                )));
-                      },
-                      style: ButtonStyle(
-                          backgroundColor:
-                          WidgetStatePropertyAll(AppColor.primaryColor),
-                          shape: WidgetStatePropertyAll(
-                              RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4)))),
-                      child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
-                        child: Text(
-                          'تایید',
-                          style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                     GestureDetector(
+                        onTap:  () {
+                          Get.defaultDialog(
+                              backgroundColor: AppColor.backGroundColor,
+                              title: "تایید سفارش",
+                              titleStyle: AppTextStyle.smallTitleText,
+                              middleText: "آیا از تایید سفارش مطمئن هستید؟",
+                              middleTextStyle: AppTextStyle.bodyText,
+                              confirm: ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                          AppColor.primaryColor)),
+                                  onPressed: () {
+                                    orderController.updateStatusOrder(order.id!, 1);
+                                    Get.back();
+                                    orderController.fetchOrderList();
+                                  },
+                                  child: Text(
+                                    'تایید',
+                                    style: AppTextStyle.labelText,
+                                  )));
+                        },
+                        child: Container(
+                          height: 24,
+                          width: 37,
+                          alignment: Alignment(0, 0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                            color: AppColor.primaryColor
+                          ),
+                          child: Text(
+                            'تایید',
+                            style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
+
                     SizedBox(
-                      height: 2,
+                      height: 3,
                     ),
                     //دکمه رد سفارش در جزئیات
-                    ElevatedButton(
-                      onPressed: () {
-                        Get.defaultDialog(
-                            backgroundColor: AppColor.backGroundColor,
-                            title: "رد سفارش",
-                            titleStyle: AppTextStyle.smallTitleText,
-                            middleTextStyle: AppTextStyle.bodyText,
-                            middleText: "آیا از رد سفارش مطمئن هستید؟",
-                            confirm: ElevatedButton(
-                                style: ButtonStyle(
-                                    backgroundColor: WidgetStatePropertyAll(
-                                        AppColor.accentColor)),
-                                onPressed: () {
-                                  orderController.updateStatusOrder(order.id!, 2);
-                                  Get.back();
-                                  orderController.fetchOrderList();
+                    GestureDetector(
+                        onTap: () {
+                          Get.defaultDialog(
+                              backgroundColor: AppColor.backGroundColor,
+                              title: "رد سفارش",
+                              titleStyle: AppTextStyle.smallTitleText,
+                              middleTextStyle: AppTextStyle.bodyText,
+                              middleText: "آیا از رد سفارش مطمئن هستید؟",
+                              confirm: ElevatedButton(
+                                  style: ButtonStyle(
+                                      backgroundColor: WidgetStatePropertyAll(
+                                          AppColor.accentColor)),
+                                  onPressed: () {
+                                    orderController.updateStatusOrder(order.id!, 2);
+                                    Get.back();
+                                    orderController.fetchOrderList();
 
-                                },
-                                child: Text(
-                                  'رد',
-                                  style: AppTextStyle.bodyText,
-                                )));
-                      },
-                      style: ButtonStyle(
-                          backgroundColor: WidgetStatePropertyAll(AppColor.accentColor),
-                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4)))),
-                      child: Container(height: 23,width: 25,alignment: Alignment(0, 0),
-                        child: Text('رد',
-                          style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                                  },
+                                  child: Text(
+                                    'رد',
+                                    style: AppTextStyle.bodyText,
+                                  )));
+                        },
+                        child: Container(
+                          height: 24,
+                          width: 37,
+                          alignment: Alignment(0, 0),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: AppColor.accentColor
+                          ),
+                          child: Text('رد',
+                            style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
+
                   ],
                 ),
               ),
@@ -994,9 +1002,7 @@ class OrderListView extends StatelessWidget {
                                   backgroundColor: WidgetStatePropertyAll(
                                       AppColor.primaryColor)),
                               onPressed: () {
-                                Get.back();
                                 orderController.deleteOrder(order.id!, true);
-                                //orderController.fetchOrderList();
                                 Get.back();
                               },
                               child: Text(
@@ -1020,6 +1026,7 @@ class OrderListView extends StatelessWidget {
                   ),
                   SizedBox(
                     width: 5,
+                    height: 3,
                   ),
                   //دکمه ادیت جزئیات سفارش
                   OutlinedButton(

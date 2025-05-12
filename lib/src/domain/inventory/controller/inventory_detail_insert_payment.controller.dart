@@ -16,10 +16,12 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../../laboratory/model/laboratory.model.dart';
+import '../../users/model/balance_item.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
@@ -47,16 +49,19 @@ class InventoryDetailInsertPaymentController extends GetxController{
   final WalletRepository walletRepository=WalletRepository();
   final InventoryRepository inventoryRepository=InventoryRepository();
   final LaboratoryRepository laboratoryRepository=LaboratoryRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<WalletModel> walletAccountList=<WalletModel>[].obs;
   final List<LaboratoryModel> laboratoryList=<LaboratoryModel>[].obs;
   final List<InventoryDetailModel> forPaymentList=<InventoryDetailModel>[].obs;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
 
   Rx<PageState> stateGetOne=Rx<PageState>(PageState.list);
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingBalance=true.obs;
 
   final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
   var inventoryId=0.obs;
@@ -107,6 +112,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
       accountId.value = inventory.account!.id!;
       accountName.value = inventory.account!.name!;
       getWalletAccount(accountId.value);
+      getBalanceList(accountId.value);
     }
 
     searchController.addListener(onSearchChanged);
@@ -346,6 +352,29 @@ class InventoryDetailInsertPaymentController extends GetxController{
     }
     return null;
   }
+
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      isLoadingBalance.value=true;
+      state.value=PageState.list;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
+    }
+  }
+
   void clearList() {
     dateController.clear();
     quantityController.clear();

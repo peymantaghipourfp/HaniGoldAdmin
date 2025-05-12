@@ -56,6 +56,22 @@ class InventoryController extends GetxController{
 
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
+  RxBool isDateSort = true.obs;
+
+  void sortByDate(bool desc ) {
+    isDateSort.value = desc;
+    final list = List<InventoryModel>.from(inventoryList);
+    list.sort((a, b) {
+      if (a.date == null && b.date == null) return 0;
+      if (a.date == null) return -1;
+      if (b.date == null) return 1;
+      return desc
+          ? b.date!.compareTo(a.date!)
+          : a.date!.compareTo(b.date!);
+
+    });
+    inventoryList.assignAll(list);
+  }
 
   void setError(String message){
     state.value=PageState.err;
@@ -275,10 +291,67 @@ class InventoryController extends GetxController{
     return null;
   }
 
-  Future<List<dynamic>?> updateDeleteInventory(int id,int inventoryDetailId,int stateMode)async{
+  Future<List<dynamic>?> updateDeleteInventoryReceive(
+      int id,
+      int inventoryDetailId,
+      int stateMode,
+      int type,
+      int accountId,
+      int walletId,
+      int itemId,
+      double quantity,
+      )async{
     try{
       isLoading.value = true;
-      var response=await inventoryRepository.deleteInventoryDetail(id: id, inventoryDetailId: inventoryDetailId,stateMode: stateMode,);
+      var response=await inventoryRepository.deleteInventoryDetail(
+          id: id,
+          inventoryDetailId: inventoryDetailId,
+          stateMode: stateMode,
+          type:1,
+          accountId: accountId,
+          walletId: walletId,
+          itemId: itemId,
+          quantity: quantity
+      );
+      if(response!= null){
+        Get.back();
+        Get.snackbar("موفقیت آمیز","حذف با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('حذف با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        Get.back();
+        fetchInventoryList();
+      }
+    }catch(e){
+      throw ErrorException('خطا در حذف: $e');
+    }finally {
+      isLoading.value = false;
+    }
+    return null;
+  }
+  Future<List<dynamic>?> updateDeleteInventoryPayment(
+      int id,
+      int inventoryDetailId,
+      int stateMode,
+      int type,
+      int accountId,
+      int walletId,
+      int itemId,
+      double quantity,
+      )async{
+    try{
+      isLoading.value = true;
+      var response=await inventoryRepository.deleteInventoryDetail(
+          id: id,
+          inventoryDetailId: inventoryDetailId,
+          stateMode: stateMode,
+          type:0 ,
+          accountId: accountId,
+        walletId: walletId,
+        itemId: itemId,
+        quantity: quantity
+      );
       if(response!= null){
         Get.back();
         Get.snackbar("موفقیت آمیز","حذف با موفقیت انجام شد",

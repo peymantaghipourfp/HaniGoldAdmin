@@ -35,7 +35,7 @@ class WithdrawGetOneController extends GetxController{
 
   @override
   void onInit() {
-    id.value=(Get.arguments ?? 0) as int;
+    id.value=(int.parse(Get.parameters["id"]!));
     print(id.value);
     fetchGetOneWithdraw(id.value);
     fetchWithdrawList();

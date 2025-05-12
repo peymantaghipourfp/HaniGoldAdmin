@@ -13,10 +13,11 @@ import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../controller/inventory_create_receive.controller.dart';
 import 'item_temp_detail.widget.dart';
-
+typedef SelectCallBack = Function(int id);
 class InventoryCreatePaymentTabWidget extends StatefulWidget {
+  final SelectCallBack callBack;
   InventoryCreatePaymentTabWidget({
-    super.key,
+    super.key, required this.callBack,
 
   });
 
@@ -115,6 +116,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                             .firstWhere((account) => account.name == newValue);
                         inventoryCreatePaymentController.changeSelectedAccount(
                             selectedAccount);
+                        widget.callBack(selectedAccount.id!);
                       }
                     },
                     onMenuStateChange: (isOpen) {

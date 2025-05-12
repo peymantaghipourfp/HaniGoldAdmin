@@ -6,6 +6,7 @@ import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/deposit/controller/deposit.controller.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_getOne.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -14,7 +15,9 @@ import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/bank.repository.dart';
 import '../../../config/repository/bank_account.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
+import '../../users/model/balance_item.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/controller/withdraw.controller.dart';
 import '../../withdraw/model/bank.model.dart';
@@ -29,7 +32,8 @@ enum PageState{loading,err,empty,list}
 class DepositUpdateController extends GetxController{
 
   final WithdrawController withdrawController=WithdrawController();
-  final DepositController depositController=DepositController();
+  final DepositController depositController=Get.find<DepositController>();
+  final DepositRequestGetOneController depositRequestGetOneController=Get.find<DepositRequestGetOneController>();
 
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController accountController=TextEditingController();
@@ -43,10 +47,12 @@ class DepositUpdateController extends GetxController{
   final BankRepository bankRepository=BankRepository();
   final BankAccountRepository bankAccountRepository=BankAccountRepository();
   final WalletRepository walletRepository=WalletRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final RxList<BankModel> bankList=<BankModel>[].obs;
   final RxList<BankAccountModel> bankAccountList=<BankAccountModel>[].obs;
   WalletModel? walletList;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
 
   final RxInt statusId=0.obs;
   var depositId=0.obs;
@@ -58,6 +64,7 @@ class DepositUpdateController extends GetxController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingBalance=true.obs;
 
   final Rxn<DepositModel> deposit = Rxn<DepositModel>();
   //final Rxn<DepositRequestModel> depositRequests=Rxn<DepositRequestModel>();
@@ -104,14 +111,8 @@ class DepositUpdateController extends GetxController{
 
   @override
   void onInit() async{
-    /*DepositModel existingDeposit=Get.arguments ;
-    if(existingDeposit.id!=null){
-      depositId.value=existingDeposit.id ?? 0;
-    }
-    await fetchGetOneDeposit(depositId.value);
-      setDepositDetail(existingDeposit);*/
       print("deposssssssssit : ${depositId.value}");
-      depositId.value=Get.arguments as int;
+      depositId.value=int.parse(Get.parameters["id"]!);
       await fetchGetOneDeposit(depositId.value);
       if(getOneDeposit.value!=null){
         final deposit=getOneDeposit.value;
@@ -121,6 +122,7 @@ class DepositUpdateController extends GetxController{
           await getBankAccount(deposit.wallet!.account!.id!);
           await fetchBankAccountList();
           await fetchWallet(deposit.wallet!.account!.id!);
+          await getBalanceList(deposit.wallet!.account!.id!);
           if (deposit.bankAccount != null) {
             var matchingAccount = bankAccountList.firstWhere(
                   (account) => account.id == deposit.bankAccount!.id,
@@ -265,10 +267,12 @@ class DepositUpdateController extends GetxController{
             messageText: Text(
                 response.infos?.first.description ?? "", textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
+        depositRequestGetOneController.fetchGetOneDepositRequest(depositId.value);
         depositController.fetchDepositList();
+        balanceList.clear();
       }
 
-      Get.offNamed('/depositList');
+      //Get.offNamed('/depositList');
     }catch(e){
       throw ErrorException('خطا:$e');
     }finally{
@@ -311,6 +315,28 @@ class DepositUpdateController extends GetxController{
       selectedIndex = deposit.bankAccount?.bank?.id.toString();
     }else{
       selectedIndex=null;
+    }
+  }
+
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      isLoadingBalance.value=true;
+      state.value=PageState.list;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
     }
   }
 

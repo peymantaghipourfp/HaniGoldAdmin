@@ -13,7 +13,9 @@ import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
+import '../../users/model/balance_item.model.dart';
 import '../model/order.model.dart';
 import 'order.controller.dart';
 
@@ -40,6 +42,7 @@ class OrderUpdateController extends GetxController{
   final ItemRepository itemRepository=ItemRepository();
   final AccountRepository accountRepository=AccountRepository();
   final OrderRepository orderRepository=OrderRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final List<OrderTypeModel> orderTypeList=<OrderTypeModel>[
     OrderTypeModel(id: 0, name: 'فروش به کاربر'),
@@ -47,10 +50,12 @@ class OrderUpdateController extends GetxController{
   ];
   final List<ItemModel> itemList=<ItemModel>[].obs;
   final List<AccountModel> accountList=<AccountModel>[].obs;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
 
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingBalance=true.obs;
 
   final Rxn<OrderTypeModel> selectedBuySell = Rxn<OrderTypeModel>();
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
@@ -82,6 +87,8 @@ class OrderUpdateController extends GetxController{
   }
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
+    getBalanceList(newValue?.id ?? 0);
+    isLoadingBalance.value=false;
   }
   void updateTotalPrice(){
     double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
@@ -105,6 +112,7 @@ class OrderUpdateController extends GetxController{
     final OrderModel? existingOrder = Get.arguments as OrderModel?;
     if (existingOrder != null) {
       setOrderDetails(existingOrder);
+      getBalanceList(existingOrder.account?.id ?? 0);
     }
     /*final now = DateTime.now();
     final jalaliDate = Jalali.fromDateTime(now);
@@ -159,6 +167,7 @@ class OrderUpdateController extends GetxController{
       final OrderModel? existingOrder = Get.arguments as OrderModel?;
       if (existingOrder != null && existingOrder.account != null) {
         selectedAccount.value=existingOrder.account;
+
       }
     }
     catch(e){
@@ -218,13 +227,14 @@ class OrderUpdateController extends GetxController{
 
      if(response!= null){
        OrderModel orderResponse=OrderModel.fromJson(response);
-       Get.toNamed('/orderList');
+       Get.back();
        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
            titleText: Text(orderResponse.infos!.first['title'],
              textAlign: TextAlign.center,
              style: TextStyle(color: AppColor.textColor),),
            messageText: Text(orderResponse.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
        orderController.fetchOrderList();
+       balanceList.clear();
        clearList();
      }
 
@@ -249,8 +259,29 @@ class OrderUpdateController extends GetxController{
     quantityController.text = order.quantity?.toString() ?? '';
     totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
+    isLoadingBalance.value=true;
+  }
 
-
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      isLoadingBalance.value=true;
+      state.value=PageState.list;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
+    }
   }
 
 

@@ -26,7 +26,7 @@ class InventoryListView extends StatelessWidget {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: CustomAppbar1(title: 'لیست دریافت/پرداخت',
-        onBackTap: () => Get.toNamed('/home'),
+        onBackTap: () => Get.offNamed('/home'),
       ),
       body: Stack(
         children: [
@@ -148,6 +148,8 @@ class InventoryListView extends StatelessWidget {
                                         columns: buildDataColumns(),
                                         rows: buildDataRows(context),
                                         dataRowMaxHeight: double.infinity,
+                                        dividerThickness: 0.3,
+                                        border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
                                         //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                         //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                         headingRowHeight: 40,
@@ -836,15 +838,24 @@ class InventoryListView extends StatelessWidget {
                                                                                               AppColor
                                                                                                   .primaryColor)),
                                                                                       onPressed: () {
-                                                                                        Get
-                                                                                            .back();
-                                                                                        inventoryController
-                                                                                            .updateDeleteInventory(
-                                                                                            inventories
-                                                                                                .id!,
-                                                                                            getOneInventories!
-                                                                                                .id!,
-                                                                                            3);
+                                                                                        Get.back();
+                                                                                        getOneInventories?.type==1 ?
+                                                                                        inventoryController.updateDeleteInventoryReceive(
+                                                                                            inventories.id!,
+                                                                                            getOneInventories!.id!, 3,0,
+                                                                                            inventories.account!.id!,
+                                                                                          getOneInventories.wallet!.id!,
+                                                                                            getOneInventories.item!.id!,
+                                                                                          getOneInventories.quantity!,
+                                                                                        )
+                                                                                            : inventoryController.updateDeleteInventoryPayment(
+                                                                                            inventories.id!,
+                                                                                            getOneInventories!.id!, 3,1,
+                                                                                            inventories.account!.id!,
+                                                                                          getOneInventories.wallet!.id!,
+                                                                                          getOneInventories.item!.id!,
+                                                                                          getOneInventories.quantity!,
+                                                                                        );
                                                                                       },
                                                                                       child: Text(
                                                                                         'حذف',
@@ -1517,11 +1528,23 @@ class InventoryListView extends StatelessWidget {
                                                                   .primaryColor)),
                                                       onPressed: () {
                                                         Get.back();
-                                                        inventoryController
-                                                            .updateDeleteInventory(
+                                                        getOneInventories?.type==1 ?
+                                                        inventoryController.updateDeleteInventoryReceive(
                                                             inventories.id!,
-                                                            getOneInventories!
-                                                                .id!, 3);
+                                                            getOneInventories!.id!, 3,0,
+                                                            inventories.account!.id!,
+                                                          getOneInventories.wallet!.id!,
+                                                          getOneInventories.item!.id!,
+                                                          getOneInventories.quantity!,
+                                                        )
+                                                            : inventoryController.updateDeleteInventoryPayment(
+                                                            inventories.id!,
+                                                            getOneInventories!.id!, 3,1,
+                                                            inventories.account!.id!,
+                                                          getOneInventories.wallet!.id!,
+                                                          getOneInventories.item!.id!,
+                                                          getOneInventories.quantity!,
+                                                        );
                                                       },
                                                       child: Text(
                                                         'حذف',
@@ -1576,9 +1599,13 @@ class InventoryListView extends StatelessWidget {
   List<DataColumn> buildDataColumns() {
     return [
       DataColumn(
+          onSort: (columnIndex, desc) {
+            inventoryController.sortByDate(desc);
+          },
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('تاریخ', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center
+      ),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('نام ثبت کننده', style: AppTextStyle.labelText)),
@@ -1673,10 +1700,11 @@ class InventoryListView extends StatelessWidget {
                       .spaceBetween,
                   children: [
                     Card(
-                      color: AppColor.secondaryColor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                      color: AppColor.textColor,
                       child: Column(
                         children: [
-                          Container(padding: EdgeInsets.all(3),
+                          Container(padding: EdgeInsets.all(2),
                             child: Row(
                               children: [
                                 Row(
@@ -1684,7 +1712,7 @@ class InventoryListView extends StatelessWidget {
                                     Text(
                                         ' عیار: ',
                                         style: AppTextStyle
-                                            .labelText),
+                                            .labelText.copyWith(color: AppColor.appBarColor,fontWeight: FontWeight.bold)),
                                     Text(inventory.inventoryDetails?.first !=null ?
                                         '${inventory.inventoryDetails?.first
                                             .carat ?? 0}' : "",
@@ -1698,7 +1726,7 @@ class InventoryListView extends StatelessWidget {
                                     Text(
                                         ' وزن 750: ',
                                         style: AppTextStyle
-                                            .labelText),
+                                            .labelText.copyWith(color: AppColor.appBarColor,fontWeight: FontWeight.bold)),
                                     Text(inventory.inventoryDetails?.first !=null ?
                                         '${inventory.inventoryDetails?.first
                                             .weight750 ?? 0} گرم ' : "",
@@ -1712,7 +1740,7 @@ class InventoryListView extends StatelessWidget {
                                     Text(
                                         '  ناخالصی: ',
                                         style: AppTextStyle
-                                            .labelText),
+                                            .labelText.copyWith(color: AppColor.appBarColor,fontWeight: FontWeight.bold)),
                                     Text(inventory.inventoryDetails?.first !=null ?
                                         '${inventory.inventoryDetails?.first
                                             .impurity ?? 0} گرم ' : "",
@@ -1724,13 +1752,13 @@ class InventoryListView extends StatelessWidget {
                               ],
                             ),
                           ),
-                          Container(padding: EdgeInsets.all(3),
+                          Container(padding: EdgeInsets.all(2),
                             child: Row(
                               children: [
                                 Text(
                                     ' آزمایشگاه: ',
                                     style: AppTextStyle
-                                        .labelText),
+                                        .labelText.copyWith(color: AppColor.appBarColor,fontWeight: FontWeight.bold)),
                                 Text(inventory.inventoryDetails?.first !=null ?
                                     inventory.inventoryDetails?.first.laboratory
                                         ?.name ?? "" : "",
@@ -1743,7 +1771,7 @@ class InventoryListView extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Container(padding: EdgeInsets.only(bottom: 20),
+                    Container(padding: EdgeInsets.only(bottom: 10),
                       child: Row(mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
@@ -1779,7 +1807,7 @@ class InventoryListView extends StatelessWidget {
                       horizontal: 5),
                   child: Padding(
                     padding: const EdgeInsets
-                        .all(2),
+                        .all(4),
                     child: Text(
                         inventory.type == 1
                             ? 'دریافت'
@@ -2065,19 +2093,9 @@ class InventoryListView extends StatelessWidget {
               },
               child: Row(
                 children: [
-                  Text(
-                    'عکس‌ها (${inventory.inventoryDetails?.first.attachments
-                        ?.length ?? 0}) ',
-                    style: AppTextStyle
-                        .bodyText
-                        .copyWith(
-                        color: AppColor
-                            .iconViewColor
-                    ),
-                  ),
                   SizedBox(
-                    width: 25,
-                    height: 25,
+                    width: 20,
+                    height: 20,
                     child: SvgPicture
                         .asset(
                       'assets/svg/picture.svg',
@@ -2088,6 +2106,17 @@ class InventoryListView extends StatelessWidget {
                         BlendMode
                             .srcIn,
                       ),
+                    ),
+                  ),
+                  SizedBox(width: 2,),
+                  Text(
+                    'عکس‌ها (${inventory.inventoryDetails?.first.attachments
+                        ?.length ?? 0}) ',
+                    style: AppTextStyle
+                        .bodyText
+                        .copyWith(
+                        color: AppColor
+                            .iconViewColor
                     ),
                   ),
                 ],
@@ -2109,12 +2138,6 @@ class InventoryListView extends StatelessWidget {
                     },
                     child: Row(
                       children: [
-                        Text(' اضافه',
-                          style: AppTextStyle
-                              .labelText
-                              .copyWith(
-                              color: AppColor
-                                  .buttonColor),),
                         SvgPicture.asset(
                             'assets/svg/add.svg',
                             colorFilter: ColorFilter
@@ -2122,6 +2145,12 @@ class InventoryListView extends StatelessWidget {
                                 .buttonColor,
                               BlendMode.srcIn,)
                         ),
+                        Text(' اضافه',
+                          style: AppTextStyle
+                              .labelText
+                              .copyWith(
+                              color: AppColor
+                                  .buttonColor),),
                       ],
                     ),
                   ),
@@ -2154,12 +2183,6 @@ class InventoryListView extends StatelessWidget {
                     },
                     child: Row(
                       children: [
-                        Text(' حذف',
-                          style: AppTextStyle
-                              .labelText
-                              .copyWith(
-                              color: AppColor
-                                  .accentColor),),
                         SvgPicture.asset(
                             'assets/svg/trash-bin.svg',
                             colorFilter: ColorFilter
@@ -2167,6 +2190,12 @@ class InventoryListView extends StatelessWidget {
                                 .accentColor,
                               BlendMode.srcIn,)
                         ),
+                        Text(' حذف',
+                          style: AppTextStyle
+                              .labelText
+                              .copyWith(
+                              color: AppColor
+                                  .accentColor),),
                       ],
                     ),
                   ),
@@ -2179,8 +2208,6 @@ class InventoryListView extends StatelessWidget {
                     },
                     child: Row(
                       children: [
-                        Text('ویرایش  ', style: AppTextStyle.bodyText.copyWith(
-                            color: AppColor.iconViewColor),),
                         Container(
                           width: 25,
                           height: 25,
@@ -2195,6 +2222,8 @@ class InventoryListView extends StatelessWidget {
                                     .srcIn,)
                           ),
                         ),
+                        Text('ویرایش  ', style: AppTextStyle.labelText.copyWith(
+                            color: AppColor.iconViewColor),),
                       ],
                     ),
                   ),
@@ -2349,7 +2378,6 @@ class InventoryListView extends StatelessWidget {
                 ),
               )
           ),
-
         ],
       );
     }).toList();
@@ -2928,10 +2956,10 @@ class InventoryListView extends StatelessWidget {
                                         Get.defaultDialog(
                                             backgroundColor: AppColor
                                                 .backGroundColor,
-                                            title: "حذف واریزی",
+                                            title: "حذف",
                                             titleStyle: AppTextStyle
                                                 .smallTitleText,
-                                            middleText: "آیا از حذف واریزی مطمئن هستید؟",
+                                            middleText: "آیا از حذف مطمئن هستید؟",
                                             middleTextStyle: AppTextStyle
                                                 .bodyText,
                                             confirm: ElevatedButton(
@@ -2940,11 +2968,23 @@ class InventoryListView extends StatelessWidget {
                                                         AppColor.primaryColor)),
                                                 onPressed: () {
                                                   Get.back();
-                                                  inventoryController
-                                                      .updateDeleteInventory(
+                                                  getOneInventories?.type==1 ?
+                                                  inventoryController.updateDeleteInventoryReceive(
                                                       inventory.id!,
-                                                      getOneInventories!.id!,
-                                                      3);
+                                                      getOneInventories!.id!, 3 ,1,
+                                                      inventory.account!.id!,
+                                                    getOneInventories.wallet!.id!,
+                                                    getOneInventories.item!.id!,
+                                                    getOneInventories.quantity!,
+                                                  )
+                                                      : inventoryController.updateDeleteInventoryPayment(
+                                                      inventory.id!,
+                                                      getOneInventories!.id!, 3 ,0,
+                                                      inventory.account!.id!,
+                                                    getOneInventories.wallet!.id!,
+                                                    getOneInventories.item!.id!,
+                                                    getOneInventories.quantity!,
+                                                  );
                                                 },
                                                 child: Text(
                                                   'حذف',

@@ -13,10 +13,12 @@ import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/bank.repository.dart';
 import '../../../config/repository/bank_account.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
 import '../../../config/repository/withdraw.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
+import '../../users/model/balance_item.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../model/bank.model.dart';
 import '../model/bank_account.model.dart';
@@ -44,14 +46,17 @@ class WithdrawUpdateController extends GetxController{
   final BankAccountRepository bankAccountRepository=BankAccountRepository();
   final WithdrawRepository withdrawRepository=WithdrawRepository();
   final WalletRepository walletRepository=WalletRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<BankModel> bankList=<BankModel>[].obs;
   final List<BankAccountModel> bankAccountList=<BankAccountModel>[].obs;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   WalletModel? walletList;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingBalance=true.obs;
 
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<BankAccountModel> selectedBankAccount = Rxn<BankAccountModel>();
@@ -75,6 +80,8 @@ class WithdrawUpdateController extends GetxController{
       bankAccountList.clear();
       selectedWalletId.value = 0;
     }
+    getBalanceList(newValue?.id ?? 0);
+    isLoadingBalance.value=false;
     update();
   }
 
@@ -117,6 +124,7 @@ class WithdrawUpdateController extends GetxController{
     final WithdrawModel? existingWithdraw = Get.arguments as WithdrawModel?;
     if (existingWithdraw != null) {
       withdrawId.value = existingWithdraw.id ?? 0;
+      getBalanceList(existingWithdraw.wallet?.account?.id ?? 0);
     }
     super.onInit();
   }
@@ -229,18 +237,13 @@ class WithdrawUpdateController extends GetxController{
   // لیست بانک اکانت
   Future<void> fetchBankAccountList()async{
     try{
+      bankAccountList.clear();
       state.value=PageState.loading;
       var fetchedBankAccountList=await bankAccountRepository.getBankAccountList(bankAccountReqModel!);
       bankAccountList.assignAll(fetchedBankAccountList);
 
-      final WithdrawModel? existingWithdraw = Get.arguments as WithdrawModel?;
-      if (existingWithdraw != null && existingWithdraw.bankAccount != null) {
-        final match = bankAccountList.firstWhereOrNull(
-              (a) => a.id == existingWithdraw.bankAccount?.id,
-        );
-        if (match != null) {
-          selectedBankAccount.value = match;
-        }
+      if (bankAccountList.isNotEmpty){
+        selectedBankAccount.value=bankAccountList.first;
       }
 
       state.value=PageState.list;
@@ -305,6 +308,7 @@ class WithdrawUpdateController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('ویرایش با موفقیت آنجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         withdrawController.fetchWithdrawList();
+        balanceList.clear();
         clearList();
         withdrawController.withdrawList.refresh();
       }
@@ -332,14 +336,15 @@ class WithdrawUpdateController extends GetxController{
 
 
     if (withdraw.wallet?.account != null) {
-      final match = accountList.firstWhereOrNull(
-            (a) => a.id == withdraw.wallet!.account!.id,
-      );
-      if (match != null) {
-        selectedAccount.value = match;
-        getBankAccount(match.id!);
-        fetchWallet(match.id!);
-      }
+      // final match = accountList.firstWhereOrNull(
+      //       (a) => a.id == withdraw.wallet!.account!.id,
+      // );
+    //  if (match != null) {
+
+        getBankAccount(withdraw.wallet?.account !.id??0);
+        selectedAccount.value = withdraw.wallet?.account !;
+        fetchWallet(withdraw.wallet?.account !.id??0);
+      //}
     }
 
     if (withdraw.bankAccount?.bank != null) {
@@ -355,6 +360,28 @@ class WithdrawUpdateController extends GetxController{
       if (bankAccountMatch != null) {
         selectedBankAccount.value = bankAccountMatch;
       }
+    }
+  }
+
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      isLoadingBalance.value=true;
+      state.value=PageState.list;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
     }
   }
 

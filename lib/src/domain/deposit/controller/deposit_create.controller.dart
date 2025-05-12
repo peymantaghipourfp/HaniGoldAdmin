@@ -13,7 +13,9 @@ import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/bank.repository.dart';
 import '../../../config/repository/bank_account.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
+import '../../users/model/balance_item.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/controller/withdraw.controller.dart';
 import '../../withdraw/model/bank.model.dart';
@@ -27,7 +29,7 @@ enum PageState{loading,err,empty,list}
 
 class DepositCreateController extends GetxController{
 
-  final WithdrawController withdrawController=WithdrawController();
+  final WithdrawController withdrawController=Get.find<WithdrawController>();
 
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController accountController=TextEditingController();
@@ -41,16 +43,19 @@ class DepositCreateController extends GetxController{
   final BankRepository bankRepository=BankRepository();
   final BankAccountRepository bankAccountRepository=BankAccountRepository();
   final WalletRepository walletRepository=WalletRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final List<BankModel> bankList=<BankModel>[].obs;
   final List<BankAccountModel> bankAccountList=<BankAccountModel>[].obs;
   WalletModel? walletList;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
 
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingBalance=true.obs;
 
-  late DepositRequestModel depositRequest;
+  //late DepositRequestModel depositRequest;
   final Rxn<BankAccountModel> selectedBankAccount = Rxn<BankAccountModel>();
   final Rxn<BankModel> selectedBank = Rxn<BankModel>();
   Rx<int> selectedWalletId = Rx<int>(0);
@@ -91,9 +96,11 @@ class DepositCreateController extends GetxController{
     DepositRequestModel depositRequest=Get.arguments;
     accountController.text=depositRequest.account?.name ?? "";
     if(depositRequest.account?.id!=null){
-      getBankAccount(depositRequest.account!.id!);
-      fetchWallet(depositRequest.account!.id!);
+      getBankAccount(depositRequest.account?.id ?? 0);
+      fetchWallet(depositRequest.account?.id ?? 0);
+      getBalanceList(depositRequest.account?.id ?? 0);
     }
+    print('accountIddddd: ${depositRequest.account?.id}');
     fetchBankList();
 
     var now = Jalali.now();
@@ -184,41 +191,65 @@ class DepositCreateController extends GetxController{
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
+      DepositRequestModel depositRequest=Get.arguments;
       DepositModel response=await  depositRepository.insertDeposit(
         walletWithdrawId: depositRequest.withdrawRequest?.wallet?.id ?? 0 ,
-          walletId: selectedWalletId.value,
-          depositRequestId:depositRequest.id,
-          bankAccountId: selectedBankAccount.value?.id ?? 0,
-          amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
-          accountId:depositRequest.account?.id ?? 0,
-          accountName: depositRequest.account?.name ?? "",
-          bankId: selectedBankId.value,
-          bankName: selectedBankName.value,
-          ownerName: ownerNameController.text,
-          number: numberController.text,
-          cardNumber: cardNumberController.text,
-          sheba: shebaController.text,
-          date: gregorianDate,
-          status: 0,
+        walletId: selectedWalletId.value,
+        depositRequestId:depositRequest.id,
+        bankAccountId: selectedBankAccount.value?.id ?? 0,
+        amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
+        accountId:depositRequest.account?.id ?? 0,
+        //accountName: depositRequest.account?.name ?? "",
+        bankId: selectedBankId.value,
+        bankName: selectedBankName.value,
+        ownerName: ownerNameController.text,
+        number: numberController.text,
+        cardNumber: cardNumberController.text,
+        sheba: shebaController.text,
+        date: gregorianDate,
+        status: 0,
       );
       if(response.id!=null) {
+        Get.back();
         Get.snackbar(response.infos?.first.title ?? "", response.infos?.first.description ?? "",
-          titleText: Text(response.infos?.first.title ?? "",
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColor.textColor),),
-          messageText: Text(
-              response.infos?.first.description ?? "", textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor)));
+            titleText: Text(response.infos?.first.title ?? "",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(
+                response.infos?.first.description ?? "", textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor)));
       }
       withdrawController.fetchWithdrawList();
-
-      Get.offNamed('/withdrawsList');
+      withdrawController.withdrawList.refresh();
+      withdrawController.fetchDepositRequestList(depositRequest.withdrawRequest?.id ?? 0);
     }catch(e){
       throw ErrorException('خطا:$e');
     }finally{
       isLoading.value=false;
     }
     return null;
+  }
+
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      isLoadingBalance.value=true;
+      state.value=PageState.list;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
+    }
   }
 
   void clearList(){

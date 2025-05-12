@@ -19,8 +19,10 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
+import '../../users/model/balance_item.model.dart';
 import '../model/bank_account.model.dart';
 
 enum PageState{loading,err,empty,list}
@@ -43,14 +45,17 @@ class WithdrawCreateController extends GetxController{
   final BankAccountRepository bankAccountRepository=BankAccountRepository();
   final WithdrawRepository withdrawRepository=WithdrawRepository();
   final WalletRepository walletRepository=WalletRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<BankModel> bankList=<BankModel>[].obs;
   final List<BankAccountModel> bankAccountList=<BankAccountModel>[].obs;
+  final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   WalletModel? walletList;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingBalance=true.obs;
 
 
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
@@ -74,6 +79,9 @@ class WithdrawCreateController extends GetxController{
     } else {
       bankAccountList.clear();
     }
+    getBalanceList(newValue?.id ?? 0);
+    fetchBankList();
+    isLoadingBalance.value=false;
     update();
   }
 
@@ -279,16 +287,38 @@ Future<WithdrawModel?> insertWithdraw()async{
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
         withdrawController.fetchWithdrawList();
+        balanceList.clear();
         clearList();
       }
     }
-
     catch(e){
       throw ErrorException('خطا:$e');
     }finally{
       isLoading.value=false;
     }
     return null;
+  }
+
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageState.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      isLoadingBalance.value=true;
+      state.value=PageState.list;
+      if(balanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
+    }
   }
 
   void clearList(){

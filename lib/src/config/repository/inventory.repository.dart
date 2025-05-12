@@ -405,7 +405,12 @@ class InventoryRepository {
   Future<Map<String, dynamic>> deleteInventoryDetail({
     required int id,
     required int inventoryDetailId,
+    required int accountId,
+    required int itemId,
+    required int walletId,
+    required double quantity,
     required int stateMode,
+    required int type,
 
   })async{
     try{
@@ -413,7 +418,7 @@ class InventoryRepository {
         "date": "2025-04-13T18:13:00",
         "account": {
           "code": "1",
-          "name": "پدیده ارتباطات",
+          "name": "",
           "accountGroup": {
             "infos": []
           },
@@ -423,10 +428,10 @@ class InventoryRepository {
           "accountPriceGroup": {
             "infos": []
           },
-          "id": 1,
+          "id": accountId,
           "infos": []
         },
-        "type": 1,
+        "type": type,
         "isDeleted": false,
         "inventoryDetails": [
           {
@@ -454,7 +459,7 @@ class InventoryRepository {
                 },
                 "infos": []
               },
-              "id": 3,
+              "id": walletId,
               "infos": []
             },
             "item": {
@@ -464,8 +469,8 @@ class InventoryRepository {
               "itemUnit": {
                 "infos": []
               },
-              "name": "ربع سکه بانکی",
-              "id": 4,
+              "name": "",
+              "id": itemId,
               "infos": []
             },
             "itemUnit": {
@@ -473,11 +478,11 @@ class InventoryRepository {
               "id": 2,
               "infos": []
             },
-            "quantity": 3.0000,
+            "quantity": quantity,
             "impurity": 0.0000,
             "weight750": 0,
             "carat": 0,
-            "type": 1,
+            "type": type,
             "isDeleted": true,
             "rowNum": 1,
             "id": inventoryDetailId,

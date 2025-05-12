@@ -50,6 +50,8 @@ class DepositRequestModel {
   final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "depositCount")
+  final int? depositCount;
 
   DepositRequestModel({
     required this.withdrawRequest,
@@ -70,6 +72,7 @@ class DepositRequestModel {
     required this.attribute,
     required this.recId,
     required this.infos,
+    required this.depositCount,
   });
 
   factory DepositRequestModel.fromJson(Map<String, dynamic> json) => _$DepositRequestModelFromJson(json);

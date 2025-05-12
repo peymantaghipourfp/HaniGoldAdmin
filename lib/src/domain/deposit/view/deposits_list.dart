@@ -23,7 +23,7 @@ class DepositsListView extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppbar1(
         title: 'واریزی ها',
-        onBackTap: () => Get.back(),
+        onBackTap: () => Get.offNamed('/home'),
       ),
       body: Stack(
         children: [
@@ -121,6 +121,8 @@ class DepositsListView extends StatelessWidget {
                                                   columns: buildDataColumns(),
                                                   rows: buildDataRows(context),
                                                   dataRowMaxHeight: double.infinity,
+                                                  dividerThickness: 0.3,
+                                                  border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
                                                   //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                                   //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                                   headingRowHeight: 40,
@@ -279,7 +281,7 @@ class DepositsListView extends StatelessWidget {
                                                                 // آیکون مشاهده
                                                                 GestureDetector(
                                                                   onTap: () {
-                                                                    Get.toNamed('/depositRequestGetOne',arguments: deposits.depositRequest?.id);
+                                                                    Get.toNamed('/depositRequestGetOne',parameters:{"id":deposits.depositRequest!.id.toString()});
                                                                   },
                                                                   child: Row(
                                                                     children: [
@@ -398,7 +400,7 @@ class DepositsListView extends StatelessWidget {
                                                                 itemBuilder: (
                                                                     context) =>
                                                                 [
-                                                                  PopupMenuItem<int>(
+                                                                  PopupMenuItem<int>(height: 20,
                                                                     labelTextStyle: WidgetStateProperty
                                                                         .all(
                                                                         AppTextStyle
@@ -426,7 +428,7 @@ class DepositsListView extends StatelessWidget {
                                                                     ),
                                                                   ),
                                                                   const PopupMenuDivider(),
-                                                                  PopupMenuItem<int>(
+                                                                  PopupMenuItem<int>(height: 20,
                                                                     value: 2,
                                                                     labelTextStyle: WidgetStateProperty
                                                                         .all(
@@ -491,7 +493,7 @@ class DepositsListView extends StatelessWidget {
                                                                     textCancel: 'بستن',
                                                                   );
                                                                 }else {
-                                                                  Get.toNamed('/depositUpdate', arguments: deposits.id);
+                                                                  Get.toNamed('/depositUpdate', parameters:{"id":deposits.id.toString()});
                                                                 }
                                                               },
                                                               child: Row(
@@ -695,7 +697,7 @@ class DepositsListView extends StatelessWidget {
               Center(
                 child: GestureDetector(
                   onTap: () {
-                    Get.toNamed('/depositRequestGetOne',arguments: deposit.depositRequest?.id);
+                    Get.toNamed('/depositRequestGetOne',parameters:{"id":deposit.depositRequest!.id.toString()});
                   },
                   child: Row(
                     children: [
@@ -772,8 +774,8 @@ class DepositsListView extends StatelessWidget {
                       color: AppColor
                           .backGroundColor,
                       constraints: BoxConstraints(
-                        minWidth: 70,
-                        maxWidth: 70,
+                        minWidth: 60,
+                        maxWidth: 60,
                       ),
                       position: PopupMenuPosition
                           .under,
@@ -782,7 +784,7 @@ class DepositsListView extends StatelessWidget {
                       itemBuilder: (
                           context) =>
                       [
-                        PopupMenuItem<int>(
+                        PopupMenuItem<int>(height: 18,
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
@@ -800,17 +802,17 @@ class DepositsListView extends StatelessWidget {
                               ) :
                               Text('تایید',
                                 style: AppTextStyle
-                                    .madiumbodyText
+                                    .bodyText
                                     .copyWith(
                                     color: AppColor
                                         .primaryColor,
-                                    fontSize: 14),
+                                    fontSize: 12),
                               ),
                             ],
                           ),
                         ),
                         const PopupMenuDivider(),
-                        PopupMenuItem<int>(
+                        PopupMenuItem<int>(height: 18,
                           value: 2,
                           labelTextStyle: WidgetStateProperty
                               .all(
@@ -828,11 +830,11 @@ class DepositsListView extends StatelessWidget {
                               ) :
                               Text('رد',
                                 style: AppTextStyle
-                                    .madiumbodyText
+                                    .bodyText
                                     .copyWith(
                                     color: AppColor
                                         .accentColor,
-                                    fontSize: 14),
+                                    fontSize: 12),
                               ),
                             ],
                           ),
@@ -907,7 +909,7 @@ class DepositsListView extends StatelessWidget {
                           textCancel: 'بستن',
                         );
                       }else {
-                        Get.toNamed('/depositUpdate', arguments: deposit.id);
+                        Get.toNamed('/depositUpdate', parameters:{"id":deposit.id.toString()});
                       }
                     },
                     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
