@@ -7,8 +7,11 @@ import 'package:hanigold_admin/src/domain/account/model/account_search_req.model
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 
+import '../../domain/inventory/model/inventory.model.dart';
 import '../../domain/users/model/balance_item.model.dart';
 import '../../domain/users/model/header_info_user_transaction.model.dart';
+import '../../domain/users/model/list_transaction_info_item.model.dart';
+import '../../domain/users/model/transaction_info_item.model.dart';
 
 class UserInfoTransactionRepository{
 
@@ -56,6 +59,90 @@ class UserInfoTransactionRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<List<TransactionInfoItemModel>> getTransactionInfoList({required int startIndex, required int toIndex,required String accountId,})async{
+    try{
+      Map<String , dynamic> options={
+        "options" : { "transaction" :{
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "AccountId",
+                  "filterValue": accountId,
+                  "filterType": 4,
+                  "RefTable": "at"
+                }
+              ]
+            }
+          ],
+          "orderBy": "at.Date",
+          "orderByType": "DESC",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      };
+      final response=await userInfoTransactionDio.post('Transaction/get',data: options);
+      print(response);
+      List<dynamic> data=response.data;
+      return data.map((transaction)=>TransactionInfoItemModel.fromJson(transaction)).toList();
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<List<ListTransactionInfoItemModel>> getListTransactionInfoList({required int startIndex, required int toIndex,required String name})async{
+    try{
+      Map<String , dynamic> options=
+          name!=""?
+      {
+        "options" : { "transaction" :{
+             "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "accountName",
+                  "filterValue": name,
+                  "filterType": 0,
+                  "RefTable": "AccountValues"
+                }
+              ]
+            }
+          ],
+          "orderBy": "AccountValues.CurrencyValue",
+          "orderByType": "DESC",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      }:
+          {
+            "options" : { "transaction" :{
+              "orderBy": "AccountValues.CurrencyValue",
+              "orderByType": "DESC",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          }
+      ;
+      final response=await userInfoTransactionDio.post('Transaction/getWalletBalance',data: options);
+      print(response);
+      List<dynamic> data=response.data;
+      return data.map((transaction)=>ListTransactionInfoItemModel.fromJson(transaction)).toList();
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+
+
   // Future<RemittanceModel> insertRemittance({
   //   required String date,
   //   required int accountIdPayer,

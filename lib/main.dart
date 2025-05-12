@@ -18,6 +18,7 @@ void main() async{
   configLoading();
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 

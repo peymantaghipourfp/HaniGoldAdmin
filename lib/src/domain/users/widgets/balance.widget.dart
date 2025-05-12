@@ -26,7 +26,7 @@ class _BalanceWidgetState extends State<BalanceWidget> {
       constraints: BoxConstraints(
         // maxHeight: controller.isOpenMore.value?300:120,
       ),
-      padding: EdgeInsets.symmetric(horizontal: 10,vertical: 15),
+      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 15),
       decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: AppColor.secondaryColor

@@ -12,11 +12,11 @@ import '../model/list_transaction_info_item.model.dart';
 import '../model/transaction_info_item.model.dart';
 
 
-enum PageState{loading,err,empty,list}
+enum PageStateDe{loading,err,empty,list}
 
-class UserInfoTransactionController extends GetxController{
+class UserInfoDetailTransactionController extends GetxController{
 
-  Rx<PageState> state=Rx<PageState>(PageState.list);
+  Rx<PageStateDe> state=Rx<PageStateDe>(PageStateDe.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 7.obs;
@@ -29,7 +29,6 @@ class UserInfoTransactionController extends GetxController{
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
    RxList<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   RxList<TransactionInfoItemModel> transactionInfoList=<TransactionInfoItemModel>[].obs;
-  RxList<ListTransactionInfoItemModel> listTransactionInfo=<ListTransactionInfoItemModel>[].obs;
   BalanceModel? balanceModel;
   String? indexAccountPayerGet;
   var isLoading=false.obs;
@@ -62,16 +61,12 @@ class UserInfoTransactionController extends GetxController{
   @override
   void onInit() {
     super.onInit();
-    getListTransactionInfo();
+    print(int.parse(Get.parameters['accountId']!));
+    id.value=int.parse(Get.parameters['accountId']!);
+    getHeaderTransaction(int.parse(Get.parameters['accountId']!));
+    getTransactionInfoList(id.value.toString());
 
   }
-
-  void goToPage(int page) {
-    if (page < 1) return;
-    currentPage.value = page;
-    getListTransactionInfo();
-  }
-
   void nextPage() {
     if (hasMore.value) {
       currentPageIndex.value++;
@@ -79,7 +74,7 @@ class UserInfoTransactionController extends GetxController{
       itemsPerPage.value+=7;
       print(currentPage.value);
       print(itemsPerPage.value);
-      getListTransactionInfo();
+      getTransactionInfoList(id.value.toString());
 
     }
   }
@@ -91,29 +86,71 @@ class UserInfoTransactionController extends GetxController{
       itemsPerPage.value-=7;
       print(currentPage.value);
       print(itemsPerPage.value);
-      getListTransactionInfo();
+      getTransactionInfoList(id.value.toString());
     }
   }
 
 
 
-    // لیست مانده کاربران
-  Future<void> getListTransactionInfo() async{
-    print("getListTransactionInfo : ");
-    listTransactionInfo.clear();
+  // هدر مانده کاربر
+  Future<void> getHeaderTransaction(int id) async{
+    print("getHeaderTransaction : $id");
     try{
-      state.value=PageState.loading;
-      var response=await userInfoTransactionRepository.getListTransactionInfoList( startIndex: currentPage.value, toIndex: itemsPerPage.value, name: searchController.text,);
-      state.value=PageState.list;
-      listTransactionInfo.addAll(response);
-      if(listTransactionInfo.isEmpty){
-        state.value=PageState.empty;
+      state.value=PageStateDe.loading;
+      var response=await userInfoTransactionRepository.getHeaderUserInfoTransaction(id);
+      headerInfoUserTransactionModel=response;
+     state.value=PageStateDe.list;
+      getBalanceList(id);
+      if(headerInfoUserTransactionModel==null){
+        state.value=PageStateDe.empty;
       }
       update();
     }
     catch(e){
-      state.value=PageState.err;
+     // state.value=PageState.err;
     }finally{
     }
   }
+  // لیست بالانس
+  Future<void> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    balanceList.clear();
+    try{
+      state.value=PageStateDe.loading;
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+      balanceList.addAll(response);
+      balanceList.removeWhere((r)=>r.balance==0);
+      state.value=PageStateDe.list;
+      // if(balanceList.isEmpty){
+      //   state.value=PageState.empty;
+      // }
+      update();
+    }
+    catch(e){
+      //state.value=PageState.err;
+    }finally{
+    }
+  }
+
+  // لیست تراکنش های کاربر
+  Future<void> getTransactionInfoList(String id) async {
+    print("getTransactionInfoList : 1");
+    isOpenMore.value = false;
+    transactionInfoList.clear();
+    try {
+      // state.value=PageStateDe.loading;
+      var response = await userInfoTransactionRepository.getTransactionInfoList(
+          startIndex: currentPage.value,
+          toIndex: itemsPerPage.value,
+          accountId: id);
+      transactionInfoList.addAll(response);
+     //  state.value=PageStateDe.list;
+      isOpenMore.value = true;
+      update();
+    }
+    catch (e) {
+      state.value = PageStateDe.err;
+    } finally {}
+  }
+
 }

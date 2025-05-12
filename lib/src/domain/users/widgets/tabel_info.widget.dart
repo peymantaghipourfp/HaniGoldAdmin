@@ -338,11 +338,49 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
                   border: Border.all(color: AppColor.textColor,width: 0.3),
                   color: AppColor.backGroundColor
               ),
-              child:  SvgPicture.asset('assets/svg/list.svg',height: 16,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.textColor,
-                    BlendMode.srcIn,
-                  )),
+              child:  GestureDetector(
+                onTap: (){
+                  Get.defaultDialog(
+                    confirm: Column(
+                      children: widget.list.map((e)=>e.groupName=="طلا"? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            e.itemName??"",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ), Text(
+                            "${e.transactionCount??0} عدد",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ),
+                        ],
+                      ):SizedBox()).toList(),
+                    ),
+                    middleText: " ${widget.title} نوع طلا ",
+                    middleTextStyle: context
+                        .textTheme.bodyMedium!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 13),
+                    title: "جزییات",
+                    titleStyle: context
+                        .textTheme.titleSmall!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 14),
+                    backgroundColor: AppColor.textColor,
+                    radius: 7,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+
+
+                  );
+                },
+                child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+                      BlendMode.srcIn,
+                    )),
+              ),
             ),
             Container(
               alignment: Alignment.center,
@@ -351,13 +389,52 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(1),
                   border: Border.all(color: AppColor.textColor,width: 0.3),
+
                   color: AppColor.backGroundColor1
               ),
-              child: SvgPicture.asset('assets/svg/list.svg',height: 16,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.textColor,
-                    BlendMode.srcIn,
-                  )),
+              child: GestureDetector(
+                onTap: (){
+                  Get.defaultDialog(
+                    confirm: Column(
+                      children: widget.list.map((e)=>e.groupName=="سکه"? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            e.itemName??"",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ), Text(
+                            "${e.transactionCount??0} عدد",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ),
+                        ],
+                      ):SizedBox()).toList(),
+                    ),
+                    middleText: " ${widget.title} نوع سکه ",
+                    middleTextStyle: context
+                        .textTheme.bodyMedium!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 13),
+                    title: "جزییات",
+                    titleStyle: context
+                        .textTheme.titleSmall!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 14),
+                    backgroundColor: AppColor.textColor,
+                    radius: 7,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+
+
+                  );
+                },
+                child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+                      BlendMode.srcIn,
+                    )),
+              ),
             ),
             Container(
               alignment: Alignment.center,
@@ -368,11 +445,49 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
                   border: Border.all(color: AppColor.textColor,width: 0.3),
                   color: AppColor.backGroundColor
               ),
-              child:SvgPicture.asset('assets/svg/list.svg',height: 16,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.textColor,
-                    BlendMode.srcIn,
-                  )),
+              child:GestureDetector(
+                onTap: (){
+                  Get.defaultDialog(
+                    confirm: Column(
+                      children: widget.list.map((e)=>e.groupName=="ریال"? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            e.itemName??"",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ), Text(
+                            "${e.transactionCount??0} عدد",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ),
+                        ],
+                      ):SizedBox()).toList(),
+                    ),
+                    middleText: " ${widget.title} نوع ریال ",
+                    middleTextStyle: context
+                        .textTheme.bodyMedium!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 13),
+                    title: "جزییات",
+                    titleStyle: context
+                        .textTheme.titleSmall!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 14),
+                    backgroundColor: AppColor.textColor,
+                    radius: 7,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+
+
+                  );
+                },
+                child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+                      BlendMode.srcIn,
+                    )),
+              ),
             ),
             Container(
               alignment: Alignment.center,
@@ -383,11 +498,49 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
                   border: Border.all(color: AppColor.textColor,width: 0.3),
                   color: AppColor.backGroundColor1
               ),
-              child: SvgPicture.asset('assets/svg/list.svg',height: 16,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.textColor,
-                    BlendMode.srcIn,
-                  )),
+              child: GestureDetector(
+                onTap: (){
+                  Get.defaultDialog(
+                    confirm: Column(
+                      children: widget.list.map((e)=>e.groupName=="ارز"? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            e.itemName??"",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ), Text(
+                            "${e.transactionCount??0} عدد",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ),
+                        ],
+                      ):SizedBox()).toList(),
+                    ),
+                    middleText: " ${widget.title} نوع ارز ",
+                    middleTextStyle: context
+                        .textTheme.bodyMedium!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 13),
+                    title: "جزییات",
+                    titleStyle: context
+                        .textTheme.titleSmall!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 14),
+                    backgroundColor: AppColor.textColor,
+                    radius: 7,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+
+
+                  );
+                },
+                child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+                      BlendMode.srcIn,
+                    )),
+              ),
             ),
             Container(
               alignment: Alignment.center,
@@ -398,11 +551,49 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
                   border: Border.all(color: AppColor.textColor,width: 0.3),
                   color: AppColor.backGroundColor
               ),
-              child: SvgPicture.asset('assets/svg/list.svg',height: 16,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.textColor,
-                    BlendMode.srcIn,
-                  )),
+              child: GestureDetector(
+                onTap: (){
+                  Get.defaultDialog(
+                    confirm: Column(
+                      children: widget.list.map((e)=> Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            e.itemName??"",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ), Text(
+                            "${e.transactionCount??0} عدد",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ),
+                        ],
+                      )).toList(),
+                    ),
+                    middleText: " کل ${widget.title} ",
+                    middleTextStyle: context
+                        .textTheme.bodyMedium!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 13),
+                    title: "جزییات",
+                    titleStyle: context
+                        .textTheme.titleSmall!
+                        .copyWith(
+                        color: AppColor.backGroundColor,
+                        fontSize: 14),
+                    backgroundColor: AppColor.textColor,
+                    radius: 7,
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 20),
+
+
+                  );
+                },
+                child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+                      BlendMode.srcIn,
+                    )),
+              ),
             ),
 
           ],

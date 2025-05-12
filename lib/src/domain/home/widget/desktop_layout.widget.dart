@@ -82,7 +82,20 @@ Widget buildDesktopLayout() {
                     route: '/withdrawCreate',
                   ),
                 ],
-              ), _buildMenuButton(
+              ),
+              _buildMenuButton(
+                title: 'تراز معاملاتی',
+                icon: Icons.balance,
+                menuKey: 'balance',
+                subItems: [
+                  _buildSubMenuItem(
+                    title: 'تراز معاملاتی',
+                    icon: Icons.scale,
+                    route: '/tradingBalance',
+                  ),
+                ],
+              ),
+              _buildMenuButton(
                 title: 'کاربران',
                 icon: Icons.people_rounded,
                 menuKey: 'users',
@@ -90,7 +103,7 @@ Widget buildDesktopLayout() {
                   _buildSubMenuItem(
                     title: 'مانده کاربران',
                     icon: Icons.perm_contact_cal_outlined,
-                    route: '/userInfoTransaction',
+                    route: '/listUserInfoTransaction',
                   ),
                 ],
               ),

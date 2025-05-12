@@ -67,8 +67,9 @@ class RemittanceView extends GetView<RemittanceController> {
                                         children: [
                                           DataTable(
                                             columns: buildDataColumns(),
-                                            dividerThickness: 1,
+                                            dividerThickness: 0.3,
                                             rows: buildDataRows(context),
+                                            border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
                                             dataRowMaxHeight: 90,
                                             //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                             //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),

@@ -27,15 +27,19 @@ import 'package:hanigold_admin/src/domain/wallet/view/wallet.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_create.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_getOne.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraws_list.view.dart';
+import '../../domain/balance/view/trading_balance.view.dart';
 import '../../domain/deposit/view/deposit_update.view.dart';
 import '../../domain/inventory/view/inventory_detail_insert_payment.view.dart';
 import '../../domain/inventory/view/inventory_detail_update_payment.view.dart';
 import '../../domain/remittance/view/insert_remittance.view.dart';
 import '../../domain/remittance/view/remittance.view.dart';
 import '../../domain/splash/view/splash.view.dart';
+import '../../domain/users/view/list_user_info_transaction.view.dart';
 import '../../domain/users/view/user_info_transaction.view.dart';
 import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
 import '../../domain/withdraw/view/withdraw_update.view.dart';
+import 'bindings/trading_balance.bindings.dart';
+import 'bindings/user_info_detail_transaction.bindings.dart';
 import 'bindings/user_info_transaction.bindings.dart';
 
 class RoutePage{
@@ -65,6 +69,8 @@ class RoutePage{
     GetPage(name: '/wallet', page: ()=>WalletView()),
     GetPage(name: '/remittance', page: ()=>RemittanceView(),binding: RemittanceBindings()),
     GetPage(name: '/insertRemittance', page: ()=>InsertRemittanceView(),binding: RemittanceBindings()),
-    GetPage(name: '/userInfoTransaction', page: ()=>UserInfoTransactionView(),binding: UserInfoTransactionBindings()),
+    GetPage(name: '/userInfoTransaction', page: ()=>UserInfoTransactionView(),binding: UserInfoDetailTransactionBindings()),
+    GetPage(name: '/listUserInfoTransaction', page: ()=>ListUserInfoTransactionView(),binding: UserInfoTransactionBindings()),
+    GetPage(name: '/tradingBalance', page: ()=>TradingBalanceView(),binding: TradingBalanceBindings()),
   ];
 }
