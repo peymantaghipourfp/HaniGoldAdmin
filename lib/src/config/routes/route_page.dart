@@ -23,6 +23,7 @@ import 'package:hanigold_admin/src/domain/order/view/order_list.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_update.view.dart';
 import 'package:hanigold_admin/src/domain/product/view/item_update_price.view.dart';
 import 'package:hanigold_admin/src/domain/tools/view/tools.view.dart';
+import 'package:hanigold_admin/src/domain/users/view/list_user.view.dart';
 import 'package:hanigold_admin/src/domain/wallet/view/wallet.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_create.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_getOne.view.dart';
@@ -41,6 +42,7 @@ import '../../domain/withdraw/view/withdraw_update.view.dart';
 import 'bindings/trading_balance.bindings.dart';
 import 'bindings/user_info_detail_transaction.bindings.dart';
 import 'bindings/user_info_transaction.bindings.dart';
+import 'bindings/user_list.bindings.dart';
 
 class RoutePage{
   static List<GetPage> routePage=[
@@ -72,5 +74,6 @@ class RoutePage{
     GetPage(name: '/userInfoTransaction', page: ()=>UserInfoTransactionView(),binding: UserInfoDetailTransactionBindings()),
     GetPage(name: '/listUserInfoTransaction', page: ()=>ListUserInfoTransactionView(),binding: UserInfoTransactionBindings()),
     GetPage(name: '/tradingBalance', page: ()=>TradingBalanceView(),binding: TradingBalanceBindings()),
+    GetPage(name: '/userList', page: ()=>UserListView(),binding: UserListBindings()),
   ];
 }

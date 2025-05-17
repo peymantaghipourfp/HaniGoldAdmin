@@ -105,6 +105,11 @@ Widget buildDesktopLayout() {
                     icon: Icons.perm_contact_cal_outlined,
                     route: '/listUserInfoTransaction',
                   ),
+                  _buildSubMenuItem(
+                    title: 'لیست کاربران',
+                    icon: Icons.list_alt,
+                    route: '/userList',
+                  ),
                 ],
               ),
               _buildMenuButton(

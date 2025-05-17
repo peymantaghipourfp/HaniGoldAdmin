@@ -19,7 +19,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
     return Obx(()=>Scaffold(
       appBar: CustomAppBar(
         title: 'مانده کاربران',
-        onBackTap: () => Get.back(),
+        onBackTap: () => Get.toNamed("/home"),
       ),
       body:Stack(
         children: [

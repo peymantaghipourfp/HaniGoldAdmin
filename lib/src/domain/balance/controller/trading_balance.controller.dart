@@ -1,7 +1,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../config/repository/trading_balance.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
+import '../model/balance_trading.model.dart';
 
 
 
@@ -16,9 +18,10 @@ class TradingBalanceController extends GetxController{
   RxBool hasMore = true.obs;
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;
-  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  TradingBalanceRepository tradingBalanceRepository=TradingBalanceRepository();
   ScrollController scrollController = ScrollController();
   final TextEditingController searchController=TextEditingController();
+  final List<BalanceTradingModel> tradingBalanceList=<BalanceTradingModel>[].obs;
   var isLoading=false.obs;
   var namePayer="".obs;
   var mobilePayer="".obs;
@@ -30,29 +33,30 @@ class TradingBalanceController extends GetxController{
   @override
   void onInit() {
     super.onInit();
+    getListTransactionInfo();
 
 
   }
 
 
 
-  //   // لیست مانده کاربران
-  // Future<void> getListTransactionInfo() async{
-  //   print("getListTransactionInfo : ");
-  //   listTransactionInfo.clear();
-  //   try{
-  //     state.value=PageState.loading;
-  //     var response=await userInfoTransactionRepository.getListTransactionInfoList( startIndex: currentPage.value, toIndex: itemsPerPage.value, name: searchController.text,);
-  //     state.value=PageState.list;
-  //     listTransactionInfo.addAll(response);
-  //     if(listTransactionInfo.isEmpty){
-  //       state.value=PageState.empty;
-  //     }
-  //     update();
-  //   }
-  //   catch(e){
-  //     state.value=PageState.err;
-  //   }finally{
-  //   }
-  // }
+    // لیست مانده کاربران
+  Future<void> getListTransactionInfo() async{
+    print("getListTransactionInfo : ");
+    tradingBalanceList.clear();
+    try{
+      state.value=PageStateBalance.loading;
+      var response=await tradingBalanceRepository.getTradingBalanceList( );
+      state.value=PageStateBalance.list;
+      tradingBalanceList.addAll(response);
+      if(tradingBalanceList.isEmpty){
+        state.value=PageStateBalance.empty;
+      }
+      update();
+    }
+    catch(e){
+      state.value=PageStateBalance.err;
+    }finally{
+    }
+  }
 }

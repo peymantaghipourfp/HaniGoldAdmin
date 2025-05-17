@@ -33,6 +33,8 @@ class AccountModel {
   final int? rowNum;
   @JsonKey(name: "id")
   late final int? id;
+  @JsonKey(name: "status")
+  late final int? status;
   @JsonKey(name: "attribute")
   final String? attribute;
   @JsonKey(name: "tags")
@@ -57,6 +59,7 @@ class AccountModel {
     required this.accountPriceGroup,
     required this.rowNum,
     required this.id,
+    required this.status,
     required this.attribute,
     required this.tags,
     required this.recId,
