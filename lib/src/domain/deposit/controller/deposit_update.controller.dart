@@ -42,6 +42,7 @@ class DepositUpdateController extends GetxController{
   final TextEditingController cardNumberController=TextEditingController();
   final TextEditingController shebaController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
+  final TextEditingController trackingNumberController=TextEditingController();
 
   final DepositRepository depositRepository=DepositRepository();
   final BankRepository bankRepository=BankRepository();
@@ -76,7 +77,7 @@ class DepositUpdateController extends GetxController{
   Rx<String> selectedBankName = Rx<String>("");
 
 
-  changeSelectedBank(String newValue){
+  /*changeSelectedBank(String newValue){
     selectedIndex=newValue;
     selectedBankId.value=int.parse(newValue);
     for(int i=0 ;i<bankList.length;i++){
@@ -87,9 +88,9 @@ class DepositUpdateController extends GetxController{
     update();
     print(selectedBankName.value);
     print( selectedBankId.value);
-  }
+  }*/
 
-  void changeSelectedBankAccount(BankAccountModel? newValue) {
+  /*void changeSelectedBankAccount(BankAccountModel? newValue) {
     selectedBankAccount.value = newValue;
     selectedIndex=selectedBankAccount.value?.bank?.id.toString();
     ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
@@ -107,22 +108,23 @@ class DepositUpdateController extends GetxController{
     print(selectedBankAccount.value?.bank?.name);
     print(selectedBankAccount.value?.bank?.id);
     print(selectedIndex);
-  }
+  }*/
 
   @override
   void onInit() async{
-      print("deposssssssssit : ${depositId.value}");
       depositId.value=int.parse(Get.parameters["id"]!);
+      print("deposssssssssit : ${depositId.value}");
       await fetchGetOneDeposit(depositId.value);
       if(getOneDeposit.value!=null){
         final deposit=getOneDeposit.value;
         setDepositDetail(deposit!);
         if(deposit.wallet?.account?.id!=null) {
           accountController.text=deposit.wallet?.account?.name ?? "";
-          await getBankAccount(deposit.wallet!.account!.id!);
-          await fetchBankAccountList();
           await fetchWallet(deposit.wallet!.account!.id!);
           await getBalanceList(deposit.wallet!.account!.id!);
+          /*await getBankAccount(deposit.wallet!.account!.id!);
+          await fetchBankAccountList();
+
           if (deposit.bankAccount != null) {
             var matchingAccount = bankAccountList.firstWhere(
                   (account) => account.id == deposit.bankAccount!.id,
@@ -130,11 +132,10 @@ class DepositUpdateController extends GetxController{
             if (matchingAccount.id != null) {
               selectedBankAccount.value = matchingAccount;
             }
-          }
+          }*/
         }
       }
-    await fetchBankList();
-
+    //await fetchBankList();
     super.onInit();
   }
 
@@ -224,7 +225,7 @@ class DepositUpdateController extends GetxController{
       if (fetchedGetOne != null) {
         setDepositDetail(fetchedGetOne);
         getOneDeposit.value = fetchedGetOne;
-        await fetchBankAccountList();
+        //await fetchBankAccountList();
       }
         state.value=PageState.list;
         state.value=PageState.empty;
@@ -244,18 +245,19 @@ class DepositUpdateController extends GetxController{
         depositId: depositId.value,
           walletId: selectedWalletId.value,
           depositRequestId: depositRequests.value,
-          bankAccountId: selectedBankAccount.value?.id ?? 0,
+          //bankAccountId: selectedBankAccount.value?.id ?? 0,
           amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
           accountId: deposit.value?.wallet?.account?.id ?? 0,
           accountName: deposit.value?.wallet?.account?.name ?? "",
-          bankId: selectedBankId.value,
-          bankName: selectedBankName.value,
-          ownerName: ownerNameController.text,
-          number: numberController.text,
-          cardNumber: cardNumberController.text,
-          sheba: shebaController.text,
+          // bankId: selectedBankId.value,
+          // bankName: selectedBankName.value,
+          // ownerName: ownerNameController.text,
+          // number: numberController.text,
+          // cardNumber: cardNumberController.text,
+          // sheba: shebaController.text,
           date: gregorianDate,
-          status: statusId.value
+          status: statusId.value,
+          trackingNumber: trackingNumberController.text,
       );
 
       if(response!=null) {
@@ -289,16 +291,16 @@ class DepositUpdateController extends GetxController{
     selectedWalletId.value=deposit.wallet?.id ?? 0;
     depositRequests.value=deposit.depositRequest?.id ?? 0;
     amountController.text=deposit.amount.toString().seRagham(separator:  ',') ?? '';
-    ownerNameController.text=deposit.bankAccount?.ownerName ?? '';
-    numberController.text=deposit.bankAccount?.number.toString() ?? '';
-    cardNumberController.text=deposit.bankAccount?.cardNumber.toString() ?? '';
-    shebaController.text=deposit.bankAccount?.sheba.toString() ?? '';
+    // ownerNameController.text=deposit.bankAccount?.ownerName ?? '';
+    // numberController.text=deposit.bankAccount?.number.toString() ?? '';
+    // cardNumberController.text=deposit.bankAccount?.cardNumber.toString() ?? '';
+    // shebaController.text=deposit.bankAccount?.sheba.toString() ?? '';
     dateController.text=deposit.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
     accountController.text=deposit.wallet?.account?.name ?? '';
+    trackingNumberController.text=deposit.trackingNumber ?? '';
     statusId.value=deposit.status ?? 0;
 
-    if(deposit.wallet?.account!=null){
-
+    /*if(deposit.wallet?.account!=null){
       if (deposit.bankAccount != null) {
         final bankAccountMatch = bankAccountList.firstWhereOrNull(
               (b) => b.id == deposit.bankAccount?.id,
@@ -307,15 +309,14 @@ class DepositUpdateController extends GetxController{
           selectedBankAccount.value = bankAccountMatch;
         }
       }
-
-    }
-    if (deposit.bankAccount?.bank != null) {
+    }*/
+    /*if (deposit.bankAccount?.bank != null) {
       selectedBankId.value = deposit.bankAccount?.bank?.id ?? 0;
       selectedBankName.value = deposit.bankAccount?.bank?.name ?? '';
       selectedIndex = deposit.bankAccount?.bank?.id.toString();
     }else{
       selectedIndex=null;
-    }
+    }*/
   }
 
   // لیست بالانس

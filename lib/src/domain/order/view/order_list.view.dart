@@ -756,6 +756,8 @@ class OrderListView extends StatelessWidget {
   List<DataColumn> buildDataColumns() {
     return [
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('نام کاربر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
@@ -788,6 +790,14 @@ class OrderListView extends StatelessWidget {
     return orderController.orderList.map((order) {
       return DataRow(
         cells: [
+          // ردیف
+          DataCell(
+              Center(
+                child: Text("${order.rowNum}",
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              )),
           // تاریخ
           DataCell(
               Center(

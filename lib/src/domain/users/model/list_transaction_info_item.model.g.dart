@@ -12,9 +12,9 @@ ListTransactionInfoItemModel _$ListTransactionInfoItemModelFromJson(
       accountId: (json['accountId'] as num).toInt(),
       accountName: json['accountName'] as String,
       currencyValue: (json['currencyValue'] as num).toDouble(),
-      rowNum: (json['rowNum'] as num).toInt(),
+      rowNum: (json['coinValue'] as num).toInt(),
       goldValue: (json['goldValue'] as num).toDouble(),
-      coinValue: (json['coinValue'] as num).toDouble(),
+      coinValue: (json['rowNum'] as num).toDouble(),
       balances: (json['balances'] as List<dynamic>)
           .map((e) => BalanceModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -27,7 +27,7 @@ Map<String, dynamic> _$ListTransactionInfoItemModelToJson(
       'accountName': instance.accountName,
       'currencyValue': instance.currencyValue,
       'goldValue': instance.goldValue,
-      'coinValue': instance.coinValue,
-      'rowNum': instance.rowNum,
+      'coinValue': instance.rowNum,
+      'rowNum': instance.coinValue,
       'balances': instance.balances,
     };

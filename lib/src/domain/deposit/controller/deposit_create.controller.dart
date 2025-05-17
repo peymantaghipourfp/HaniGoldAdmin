@@ -38,6 +38,7 @@ class DepositCreateController extends GetxController{
   final TextEditingController cardNumberController=TextEditingController();
   final TextEditingController shebaController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
+  final TextEditingController trackingNumberController=TextEditingController();
 
   final DepositRepository depositRepository=DepositRepository();
   final BankRepository bankRepository=BankRepository();
@@ -196,18 +197,19 @@ class DepositCreateController extends GetxController{
         walletWithdrawId: depositRequest.withdrawRequest?.wallet?.id ?? 0 ,
         walletId: selectedWalletId.value,
         depositRequestId:depositRequest.id,
-        bankAccountId: selectedBankAccount.value?.id ?? 0,
+        //bankAccountId: selectedBankAccount.value?.id ?? 0,
         amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
         accountId:depositRequest.account?.id ?? 0,
         //accountName: depositRequest.account?.name ?? "",
-        bankId: selectedBankId.value,
-        bankName: selectedBankName.value,
-        ownerName: ownerNameController.text,
-        number: numberController.text,
-        cardNumber: cardNumberController.text,
-        sheba: shebaController.text,
+        // bankId: selectedBankId.value,
+        // bankName: selectedBankName.value,
+        // ownerName: ownerNameController.text,
+        // number: numberController.text,
+        // cardNumber: cardNumberController.text,
+        // sheba: shebaController.text,
         date: gregorianDate,
-        status: 0,
+        trackingNumber: trackingNumberController.text,
+        status: 1,
       );
       if(response.id!=null) {
         Get.back();

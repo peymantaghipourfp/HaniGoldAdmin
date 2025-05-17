@@ -1,7 +1,7 @@
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank_account.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
@@ -14,12 +14,14 @@ String withdrawModelToJson(List<WithdrawModel> data) => json.encode(List<dynamic
 
 @JsonSerializable()
 class WithdrawModel {
-  @JsonKey(name: "bankAccount")
-  final BankAccountModel? bankAccount;
   @JsonKey(name: "wallet")
   final WalletModel? wallet;
+  @JsonKey(name: "bank")
+  final BankModel? bank;
   @JsonKey(name: "reasonRejection")
   final ReasonRejectionModel? reasonRejection;
+  @JsonKey(name: "ownerName")
+  final String? ownerName;
   @JsonKey(name: "amount")
   final double? amount;
   @JsonKey(name: "dividedAmount")
@@ -30,10 +32,18 @@ class WithdrawModel {
   final double? undividedAmount;
   @JsonKey(name: "paidAmount")
   final double? paidAmount;
+  @JsonKey(name: "totalAmountPerDay")
+  final double? totalAmountPerDay;
+  @JsonKey(name: "totalPaidAmountPerDay")
+  final double? totalPaidAmountPerDay;
   @JsonKey(name: "requestDate")
   final DateTime? requestDate;
   @JsonKey(name: "confirmDate")
   final DateTime? confirmDate;
+  @JsonKey(name: "datePersianToString")
+  final String? datePersianToString;
+  @JsonKey(name: "dateMiladiToString")
+  final String? dateMiladiToString;
   @JsonKey(name: "isDeleted")
   final bool? isDeleted;
   @JsonKey(name: "status")
@@ -42,6 +52,12 @@ class WithdrawModel {
   final List<DepositRequestModel>? depositRequests;
   @JsonKey(name: "deposits")
   final List<DepositModel>? deposits;
+  @JsonKey(name: "number")
+  final String? number;
+  @JsonKey(name: "cardNumber")
+  final String? cardNumber;
+  @JsonKey(name: "sheba")
+  final String? sheba;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -58,20 +74,28 @@ class WithdrawModel {
   final String? description;
 
   WithdrawModel({
-    required this.bankAccount,
+    required this.bank,
     required this.wallet,
     required this.reasonRejection,
+    required this.ownerName,
     required this.amount,
     required this.dividedAmount,
     required this.notConfirmedAmount,
     required this.undividedAmount,
     required this.paidAmount,
+    required this.totalAmountPerDay,
+    required this.totalPaidAmountPerDay,
     required this.requestDate,
     required this.confirmDate,
+    required this.datePersianToString,
+    required this.dateMiladiToString,
     required this.isDeleted,
     required this.status,
     required this.depositRequests,
     required this.deposits,
+    required this.number,
+    required this.cardNumber,
+    required this.sheba,
     required this.rowNum,
     required this.id,
     required this.depositRequestCount,

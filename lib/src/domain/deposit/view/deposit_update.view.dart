@@ -186,7 +186,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                   ),
                                                 ),
                                                 // بانک اکانت
-                                                Container(
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 3, top: 5),
                                                   child: Text(
@@ -197,9 +197,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                             ? 12
                                                             : 10),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // بانک اکانت
-                                                Container(
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
                                                   child: DropdownButton2(
@@ -307,9 +307,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                           horizontal: 10),
                                                     ),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // نام بانک
-                                                Container(
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 3, top: 5),
                                                   child: Text(
@@ -320,9 +320,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                             ? 12
                                                             : 10),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // نام بانک
-                                                Container(
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
                                                   child: DropdownButton2(
@@ -439,9 +439,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                           horizontal: 10),
                                                     ),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // نام صاحب حساب
-                                                Container(
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 3, top: 5),
                                                   child: Text(
@@ -452,9 +452,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                             ? 12
                                                             : 10),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // نام صاحب حساب
-                                                Container(
+                                                /*Container(
                                                   height: 50,
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
@@ -474,7 +474,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                           .textFieldColor,
                                                     ),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // مبلغ
                                                 Container(
                                                   padding: EdgeInsets.only(
@@ -535,8 +535,42 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                     ),
                                                   ),
                                                 ),
-                                                //شماره کارت
+                                                //کد رهگیری
                                                 Container(
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'کد رهگیری',
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(
+                                                        fontSize: isDesktop
+                                                            ? 12
+                                                            : 10),
+                                                  ),
+                                                ),
+                                                // کد رهگیری
+                                                Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 5),
+                                                  child:
+                                                  TextFormField(
+                                                    controller: depositUpdateController.trackingNumberController,
+                                                    style: AppTextStyle
+                                                        .bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                //شماره کارت
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 3, top: 5),
                                                   child: Text(
@@ -547,9 +581,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                             ? 12
                                                             : 10),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // شماره کارت
-                                                Container(
+                                                /*Container(
                                                   height: 50,
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
@@ -569,9 +603,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                           .textFieldColor,
                                                     ),
                                                   ),
-                                                ),
+                                                ),*/
                                                 //شماره حساب
-                                                Container(
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 3, top: 5),
                                                   child: Text(
@@ -582,9 +616,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                             ? 12
                                                             : 10),
                                                   ),
-                                                ),
+                                                ),*/
                                                 //شماره حساب
-                                                Container(
+                                                /*Container(
                                                   height: 50,
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
@@ -604,9 +638,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                           .textFieldColor,
                                                     ),
                                                   ),
-                                                ),
+                                                ),*/
                                                 //شماره شبا
-                                                Container(
+                                                /*Container(
                                                   padding: EdgeInsets.only(
                                                       bottom: 3, top: 5),
                                                   child: Text(
@@ -617,9 +651,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                             ? 12
                                                             : 10),
                                                   ),
-                                                ),
+                                                ),*/
                                                 //شماره شبا
-                                                Container(
+                                                /*Container(
                                                   height: 50,
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
@@ -639,7 +673,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                           .textFieldColor,
                                                     ),
                                                   ),
-                                                ),
+                                                ),*/
                                                 // تاریخ
                                                 Container(
                                                   padding: EdgeInsets.only(

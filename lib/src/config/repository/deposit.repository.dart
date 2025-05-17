@@ -56,19 +56,20 @@ class DepositRepository{
   Future<DepositModel> insertDeposit({
     required int walletId,
     required int? depositRequestId,
-    required int? bankAccountId,
+    //required int? bankAccountId,
     required double? amount,
     required int accountId,
     //required String accountName,
-    required int bankId,
-    required String bankName,
-    required String ownerName,
-    required String number,
-    required String cardNumber,
-    required String sheba,
+    // required int bankId,
+    // required String bankName,
+    // required String ownerName,
+    // required String number,
+    // required String cardNumber,
+    //required String sheba,
     required String date,
     required int status,
     required int walletWithdrawId,
+    required String trackingNumber,
 
   })async{
     try{
@@ -140,8 +141,8 @@ class DepositRepository{
         },
         "bankAccount": {
           "bank": {
-            "name": bankName,
-            "id": bankId,
+            "name": '',
+            "id": '',
             "infos": []
           },
           "account": {
@@ -156,14 +157,15 @@ class DepositRepository{
             },
             "infos": []
           },
-          "number": number,
-          "ownerName": ownerName,
-          "cardNumber": cardNumber,
-          "sheba": sheba,
-          "id": bankAccountId,
+          "number": '',
+          "ownerName": '',
+          "cardNumber": '',
+          "sheba": '',
+          "id": '',
           "infos": []
         },
         "amount": amount,
+        "trackingNumber":trackingNumber,
         "date": date,
         "status": status,
         "rowNum": 1,
@@ -183,19 +185,20 @@ class DepositRepository{
     required int depositId,
     required int walletId,
     required int? depositRequestId,
-    required int? bankAccountId,
+    //required int? bankAccountId,
     required double? amount,
     required int accountId,
     required String accountName,
-    required int bankId,
-    required String bankName,
-    required String ownerName,
-    required String number,
-    required String cardNumber,
-    required String sheba,
+    // required int bankId,
+    // required String bankName,
+    // required String ownerName,
+    // required String number,
+    // required String cardNumber,
+    // required String sheba,
     required String date,
     required int status,
     required int walletWithdrawId,
+    required String trackingNumber,
 
   })async{
     try{
@@ -267,8 +270,8 @@ class DepositRepository{
         },
         "bankAccount": {
           "bank": {
-            "name": bankName,
-            "id": bankId,
+            "name": '',
+            "id": '',
             "infos": []
           },
           "account": {
@@ -283,14 +286,15 @@ class DepositRepository{
             },
             "infos": []
           },
-          "number": number,
-          "ownerName": ownerName,
-          "cardNumber": cardNumber,
-          "sheba": sheba,
-          "id": bankAccountId,
+          "number": '',
+          "ownerName": '',
+          "cardNumber": '',
+          "sheba": '',
+          "id": '',
           "infos": []
         },
         "amount": amount,
+        "trackingNumber":trackingNumber,
         "date": date,
         "status": status,
         "rowNum": 1,

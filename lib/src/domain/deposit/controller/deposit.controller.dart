@@ -28,7 +28,7 @@ typedef XFile= dynamic;
 
 class DepositController extends GetxController{
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 20.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
   final TextEditingController searchController=TextEditingController();

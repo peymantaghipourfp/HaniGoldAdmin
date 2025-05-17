@@ -128,14 +128,14 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                               ),
                                               DataColumn2(
                                                 size: ColumnSize.L,
-                                                label: Text(
-                                                  'تفاوت قیمت فروش',
+                                                label: Text('قیمت فروش',
                                                   style: AppTextStyle
                                                       .smallTitleText,),
                                               ),
                                               DataColumn2(
                                                 size: ColumnSize.L,
-                                                label: Text('قیمت فروش',
+                                                label: Text(
+                                                  'تفاوت قیمت فروش',
                                                   style: AppTextStyle
                                                       .smallTitleText,),
                                               ),
@@ -169,67 +169,6 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                         (((productController.activeItemList[index].price?.toDouble() ?? 0)-(productController.activeItemList[index].differentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
                                                         style: AppTextStyle.bodyText,
                                                       ),
-                                                    ),
-                                                    //different
-                                                    DataCell(
-                                                          () {
-                                                        String differentPrice = productController
-                                                            .activeItemList[index]
-                                                            .differentPrice
-                                                            .toString()
-                                                            .replaceAll(
-                                                            RegExp(
-                                                                r'[^0-9]'),
-                                                            '');
-                                                        List<
-                                                            String> parts = [
-                                                        ];
-                                                        String remaining = differentPrice;
-                                                        int count = 0;
-                                                        while (remaining
-                                                            .isNotEmpty &&
-                                                            count < 3) {
-                                                          int end = remaining
-                                                              .length;
-                                                          int start = end -
-                                                              3;
-                                                          if (start < 0)
-                                                            start = 0;
-                                                          String part = remaining
-                                                              .substring(
-                                                              start, end);
-                                                          parts.add(part);
-                                                          remaining =
-                                                              remaining
-                                                                  .substring(
-                                                                  0,
-                                                                  start);
-                                                          count++;
-                                                        }
-                                                        String differentPrice1 = parts
-                                                            .isNotEmpty
-                                                            ? parts[0]
-                                                            : '';
-                                                        String differentPrice2 = parts
-                                                            .length >= 2
-                                                            ? parts[1]
-                                                            : '';
-                                                        String differentPrice3 = parts
-                                                            .length >= 3
-                                                            ? parts[2]
-                                                            : '';
-                                                        return PriceDifferentWidget(
-                                                          differentPrice1: differentPrice1,
-                                                          differentPrice2: differentPrice2,
-                                                          differentPrice3: differentPrice3,
-                                                          price: productController
-                                                              .activeItemList[index]
-                                                              .price ?? 0,
-                                                          id: productController
-                                                              .activeItemList[index]
-                                                              .id!,
-                                                        );
-                                                      }(),
                                                     ),
                                                     // price
                                                     DataCell(
@@ -296,6 +235,67 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                         );
                                                       }(),
                                                     ),
+                                                    //different
+                                                    DataCell(
+                                                          () {
+                                                        String differentPrice = productController
+                                                            .activeItemList[index]
+                                                            .differentPrice
+                                                            .toString()
+                                                            .replaceAll(
+                                                            RegExp(
+                                                                r'[^0-9]'),
+                                                            '');
+                                                        List<
+                                                            String> parts = [
+                                                        ];
+                                                        String remaining = differentPrice;
+                                                        int count = 0;
+                                                        while (remaining
+                                                            .isNotEmpty &&
+                                                            count < 3) {
+                                                          int end = remaining
+                                                              .length;
+                                                          int start = end -
+                                                              3;
+                                                          if (start < 0)
+                                                            start = 0;
+                                                          String part = remaining
+                                                              .substring(
+                                                              start, end);
+                                                          parts.add(part);
+                                                          remaining =
+                                                              remaining
+                                                                  .substring(
+                                                                  0,
+                                                                  start);
+                                                          count++;
+                                                        }
+                                                        String differentPrice1 = parts
+                                                            .isNotEmpty
+                                                            ? parts[0]
+                                                            : '';
+                                                        String differentPrice2 = parts
+                                                            .length >= 2
+                                                            ? parts[1]
+                                                            : '';
+                                                        String differentPrice3 = parts
+                                                            .length >= 3
+                                                            ? parts[2]
+                                                            : '';
+                                                        return PriceDifferentWidget(
+                                                          differentPrice1: differentPrice1,
+                                                          differentPrice2: differentPrice2,
+                                                          differentPrice3: differentPrice3,
+                                                          price: productController
+                                                              .activeItemList[index]
+                                                              .price ?? 0,
+                                                          id: productController
+                                                              .activeItemList[index]
+                                                              .id!,
+                                                        );
+                                                      }(),
+                                                    ),
                                                     // status
                                                     DataCell(
                                                       Card(
@@ -355,13 +355,13 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                   ),
                                                   DataColumn2(
                                                     size: ColumnSize.L,
-                                                    label: Text('تفاوت قیمت فروش',
+                                                    label: Text('قیمت فروش',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                   ),
                                                   DataColumn2(
                                                     size: ColumnSize.L,
-                                                    label: Text('قیمت فروش',
+                                                    label: Text('تفاوت قیمت فروش',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                   ),
@@ -397,62 +397,6 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                                 .bodyTextBold,
                                                           ),
                                                         ),
-                                                        //different
-                                                        DataCell(
-                                                              () {
-                                                            String differentPrice = productController.inactiveItemList[index]
-                                                                .differentPrice
-                                                                .toString()
-                                                                .replaceAll(
-                                                                RegExp(
-                                                                    r'[^0-9]'),
-                                                                '');
-                                                            List<String> parts = [
-                                                            ];
-                                                            String remaining = differentPrice;
-                                                            int count = 0;
-                                                            while (remaining
-                                                                .isNotEmpty &&
-                                                                count < 3) {
-                                                              int end = remaining
-                                                                  .length;
-                                                              int start = end - 3;
-                                                              if (start < 0)
-                                                                start = 0;
-                                                              String part = remaining
-                                                                  .substring(
-                                                                  start, end);
-                                                              parts.add(part);
-                                                              remaining =
-                                                                  remaining
-                                                                      .substring(
-                                                                      0, start);
-                                                              count++;
-                                                            }
-                                                            String differentPrice1 = parts
-                                                                .isNotEmpty
-                                                                ? parts[0]
-                                                                : '';
-                                                            String differentPrice2 = parts
-                                                                .length >= 2
-                                                                ? parts[1]
-                                                                : '';
-                                                            String differentPrice3 = parts
-                                                                .length >= 3
-                                                                ? parts[2]
-                                                                : '';
-                                                            return PriceDifferentWidget(
-                                                              differentPrice1: differentPrice1,
-                                                              differentPrice2: differentPrice2,
-                                                              differentPrice3: differentPrice3,
-                                                              price: productController.inactiveItemList[index]
-                                                                  .price ?? 0,
-                                                              id: productController.inactiveItemList[index]
-                                                                  .id!,
-                                                            );
-                                                          }(),
-                                                        ),
-
                                                         // price
                                                         DataCell(
                                                               () {
@@ -512,6 +456,62 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                             );
                                                           }(),
                                                         ),
+                                                        //different
+                                                        DataCell(
+                                                              () {
+                                                            String differentPrice = productController.inactiveItemList[index]
+                                                                .differentPrice
+                                                                .toString()
+                                                                .replaceAll(
+                                                                RegExp(
+                                                                    r'[^0-9]'),
+                                                                '');
+                                                            List<String> parts = [
+                                                            ];
+                                                            String remaining = differentPrice;
+                                                            int count = 0;
+                                                            while (remaining
+                                                                .isNotEmpty &&
+                                                                count < 3) {
+                                                              int end = remaining
+                                                                  .length;
+                                                              int start = end - 3;
+                                                              if (start < 0)
+                                                                start = 0;
+                                                              String part = remaining
+                                                                  .substring(
+                                                                  start, end);
+                                                              parts.add(part);
+                                                              remaining =
+                                                                  remaining
+                                                                      .substring(
+                                                                      0, start);
+                                                              count++;
+                                                            }
+                                                            String differentPrice1 = parts
+                                                                .isNotEmpty
+                                                                ? parts[0]
+                                                                : '';
+                                                            String differentPrice2 = parts
+                                                                .length >= 2
+                                                                ? parts[1]
+                                                                : '';
+                                                            String differentPrice3 = parts
+                                                                .length >= 3
+                                                                ? parts[2]
+                                                                : '';
+                                                            return PriceDifferentWidget(
+                                                              differentPrice1: differentPrice1,
+                                                              differentPrice2: differentPrice2,
+                                                              differentPrice3: differentPrice3,
+                                                              price: productController.inactiveItemList[index]
+                                                                  .price ?? 0,
+                                                              id: productController.inactiveItemList[index]
+                                                                  .id!,
+                                                            );
+                                                          }(),
+                                                        ),
+
                                                         // status
                                                         DataCell(
                                                           Card(

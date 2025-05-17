@@ -268,7 +268,7 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                 ),
                                               ),
                                               // بانک اکانت
-                                              Container(
+                                              /*Container(
                                                 padding: EdgeInsets.only(
                                                     bottom: 3, top: 5),
                                                 child: Text(
@@ -279,9 +279,9 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                           ? 12
                                                           : 10),
                                                 ),
-                                              ),
+                                              ),*/
                                               // بانک اکانت
-                                              Container(
+                                              /*Container(
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child: DropdownButton2(
@@ -386,7 +386,7 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                         horizontal: 10),
                                                   ),
                                                 ),
-                                              ),
+                                              ),*/
                                               // نام بانک
                                               Container(
                                                 padding: EdgeInsets.only(

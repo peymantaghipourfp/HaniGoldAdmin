@@ -62,7 +62,7 @@ class WithdrawRepository{
     required String itemName,
     required int accountId,
     required String accountName,
-    required int bankAccountId,
+    //required int bankAccountId,
     required int bankId,
     required String bankName,
     required String ownerName,
@@ -76,31 +76,6 @@ class WithdrawRepository{
 })async{
     try{
       Map<String,dynamic> withdrawData={
-        "bankAccount": {
-          "bank": {
-            "name": bankName,
-            "id": bankId,
-            "infos": []
-          },
-          "account": {
-            "accountGroup": {
-              "infos": []
-            },
-            "accountItemGroup": {
-              "infos": []
-            },
-            "accountPriceGroup": {
-              "infos": []
-            },
-            "infos": []
-          },
-          "number": number,
-          "ownerName": ownerName,
-          "cardNumber": cardNumber,
-          "sheba": sheba,
-          "id": bankAccountId,
-          "infos": []
-        },
         "wallet": {
           "address": "00000000-0000-0000-0000-000000000000",
           "account": {
@@ -132,6 +107,15 @@ class WithdrawRepository{
           "id": walletId,
           "infos": []
         },
+        "bank": {
+          "name": bankName,
+          "id": bankId,
+          "infos": []
+        },
+        "ownerName": ownerName,
+        "number": number,
+        "cardNumber": cardNumber,
+        "sheba": sheba,
         "amount": amount,
         "undividedAmount": 100.000,
         "requestDate": date,
@@ -159,7 +143,7 @@ class WithdrawRepository{
     required String itemName,
     required int accountId,
     required String accountName,
-    required int bankAccountId,
+    //required int bankAccountId,
     required int bankId,
     required String bankName,
     required String ownerName,
@@ -173,29 +157,9 @@ class WithdrawRepository{
   })async{
     try{
       Map<String,dynamic> withdrawData={
-        "bankAccount": {
-          "bank": {
-            "name": bankName,
-            "id": bankId,
-            "infos": []
-          },
-          "account": {
-            "accountGroup": {
-              "infos": []
-            },
-            "accountItemGroup": {
-              "infos": []
-            },
-            "accountPriceGroup": {
-              "infos": []
-            },
-            "infos": []
-          },
-          "number": number,
-          "ownerName": ownerName,
-          "cardNumber": cardNumber,
-          "sheba": sheba,
-          "id": bankAccountId,
+        "bank": {
+          "name": bankName,
+          "id": bankId,
           "infos": []
         },
         "wallet": {
@@ -229,6 +193,10 @@ class WithdrawRepository{
           "id": walletId,
           "infos": []
         },
+        "ownerName": ownerName,
+        "number": number,
+        "cardNumber": cardNumber,
+        "sheba": sheba,
         "amount": amount,
         "undividedAmount": 100.000,
         "requestDate": date,
@@ -259,30 +227,10 @@ class WithdrawRepository{
   })async{
     try{
       Map<String,dynamic> withdrawData={
-        "bankAccount": {
-          "bank": {
-            "name": "بانک رسالت",
-            "icon": "b30a774a-a9ae-4919-975a-c359fa47ac64",
-            "id": 1,
-            "infos": []
-          },
-          "account": {
-            "accountGroup": {
-              "infos": []
-            },
-            "accountItemGroup": {
-              "infos": []
-            },
-            "accountPriceGroup": {
-              "infos": []
-            },
-            "infos": []
-          },
-          "number": "1111111",
-          "ownerName": "رضا",
-          "cardNumber": "100",
-          "sheba": "999999999",
-          "id": 4,
+        "bank": {
+          "name": "",
+          "icon": "",
+          "id": 0,
           "infos": []
         },
         "wallet": {

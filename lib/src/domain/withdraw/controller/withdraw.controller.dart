@@ -29,7 +29,7 @@ enum PageState{loading,err,empty,list}
 class WithdrawController extends GetxController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 15.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
 

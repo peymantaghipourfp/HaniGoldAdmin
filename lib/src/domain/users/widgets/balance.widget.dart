@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/model/balance_item.model.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
@@ -66,7 +67,7 @@ class _BalanceWidgetState extends State<BalanceWidget> {
                 Row(
                   children: [
                     Text(
-                      "${e.balance??0.0}",
+                      "${e.balance??0.0}".seRagham(),
                       style: AppTextStyle.labelText.copyWith(fontSize: 14,
                           fontWeight: FontWeight.normal,color:e.balance!>0?AppColor.primaryColor: AppColor.accentColor ),textDirection: TextDirection.ltr,
                     ),

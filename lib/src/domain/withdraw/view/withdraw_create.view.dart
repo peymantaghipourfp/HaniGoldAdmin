@@ -290,7 +290,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                 ),
                                               ),
                                               // بانک اکانت
-                                              Container(
+                                              /*Container(
                                                 padding: EdgeInsets.only(
                                                     bottom: 3, top: 5),
                                                 child: Text(
@@ -301,9 +301,9 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                           ? 12
                                                           : 10),
                                                 ),
-                                              ),
+                                              ),*/
                                               // بانک اکانت
-                                              Container(
+                                              /*Container(
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child: DropdownButton2(
@@ -354,9 +354,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                       .value,
                                                   onChanged: (newValue) {
                                                     if (newValue != null) {
-                                                      withdrawCreateController
-                                                          .changeSelectedBankAccount(
-                                                          newValue);
+                                                      withdrawCreateController.changeSelectedBankAccount(newValue);
                                                     }
                                                   },
                                                   buttonStyleData: ButtonStyleData(
@@ -409,7 +407,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                         horizontal: 10),
                                                   ),
                                                 ),
-                                              ),
+                                              ),*/
                                               // نام بانک
                                               Container(
                                                 padding: EdgeInsets.only(

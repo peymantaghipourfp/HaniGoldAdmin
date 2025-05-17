@@ -136,7 +136,6 @@ class DepositsListView extends StatelessWidget {
                                       ),
                                     ),
                                   ) :
-
                                   Expanded(
                                     child: GridView.builder(
                                         controller: depositController.scrollController,
@@ -144,7 +143,7 @@ class DepositsListView extends StatelessWidget {
                                         crossAxisCount:  1,
                                         mainAxisSpacing: 10,
                                         crossAxisSpacing: 10,
-                                        mainAxisExtent:  250,
+                                        mainAxisExtent:  180,
                                       ),
                                         itemCount: depositController.depositList.length +
                                       (depositController.hasMore.value ? 1 : 0),
@@ -157,23 +156,45 @@ class DepositsListView extends StatelessWidget {
                                           }
                                           var deposits = depositController.depositList[index];
                                           return Card(
-                                            margin: EdgeInsets.all( 8),
+                                            //margin: EdgeInsets.all( 8),
                                             color: AppColor.secondaryColor,
                                             elevation: 10,
                                             child: Padding(
                                               padding: EdgeInsets.all( 8),
                                               child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.spaceEvenly,
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                 children: [
                                                   ListTile(
                                                     title: Column(
                                                       children: [
                                                         Column(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment.spaceBetween,
+                                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                           children: [
-
+                                                            //تاریخ درخواست
+                                                            Row(mainAxisAlignment: MainAxisAlignment.center,
+                                                              children: [
+                                                                Text(
+                                                                  'تاریخ درخواست: ',
+                                                                  style:
+                                                                  AppTextStyle.labelText,
+                                                                ),
+                                                                SizedBox(
+                                                                  height: 2,
+                                                                ),
+                                                                Text(
+                                                                  deposits.date != null
+                                                                      ? deposits.date!
+                                                                      .toPersianDate(
+                                                                      twoDigits: true,
+                                                                      showTime: true,
+                                                                      timeSeprator:
+                                                                      '-')
+                                                                      : 'تاریخ نامشخص',
+                                                                  style:
+                                                                  AppTextStyle.bodyText,
+                                                                ),
+                                                              ],
+                                                            ),
                                                             //نام کاربر
                                                             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                               crossAxisAlignment:
@@ -212,38 +233,9 @@ class DepositsListView extends StatelessWidget {
                                                               ],
                                                             ),
 
-                                                            //تاریخ درخواست
-                                                            Row(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment.center,
-                                                              children: [
-                                                                Text(
-                                                                  'تاریخ درخواست: ',
-                                                                  style:
-                                                                      AppTextStyle.labelText,
-                                                                ),
-                                                                SizedBox(
-                                                                  height: 2,
-                                                                ),
-                                                                Text(
-                                                                  deposits.date != null
-                                                                      ? deposits.date!
-                                                                          .toPersianDate(
-                                                                              twoDigits: true,
-                                                                              showTime: true,
-                                                                              timeSeprator:
-                                                                                  '-')
-                                                                      : 'تاریخ نامشخص',
-                                                                  style:
-                                                                      AppTextStyle.bodyText,
-                                                                ),
-                                                              ],
-                                                            ),
                                                           ],
                                                         ),
-                                                        SizedBox(
-                                                          height: 6,
-                                                        ),
+                                                        SizedBox(height: 6,),
                                                         //  ردیف دوم
                                                         Column(
                                                           mainAxisAlignment:
@@ -252,7 +244,6 @@ class DepositsListView extends StatelessWidget {
                                                             SizedBox(
                                                               height: 4,
                                                             ),
-
                                                             // مبلغ و مشاهده درخواست
                                                             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                               crossAxisAlignment:
@@ -305,7 +296,7 @@ class DepositsListView extends StatelessWidget {
                                                             ),
                                                             SizedBox(height: 4,),
                                                             // دلیل رد
-                                                            deposits.status==2 ?
+                                                            /*deposits.status==2 ?
                                                             Row(
                                                               crossAxisAlignment: CrossAxisAlignment
                                                                   .center,
@@ -318,11 +309,23 @@ class DepositsListView extends StatelessWidget {
                                                                   style: AppTextStyle
                                                                       .bodyText,),
                                                               ],
-                                                            ) : Text(""),
+                                                            ) : Text(""),*/
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 6,),
+                                                        // کد رهگیری
+                                                        Row(
+                                                          children: [
+                                                            Text('کد رهگیری: ', style: AppTextStyle.labelText,
+                                                            ),
+                                                            SizedBox(width: 3,),
+                                                            Text("${deposits.trackingNumber ?? 0}",
+                                                              style: AppTextStyle.bodyText,
+                                                            ),
                                                           ],
                                                         ),
                                                         SizedBox(
-                                                          height: 4,
+                                                          height: 5,
                                                         ),
                                                         Divider(
                                                           height: 1,
@@ -332,7 +335,7 @@ class DepositsListView extends StatelessWidget {
                                                         ),
 
                                                         // تعیین وضعیت
-                                                        Row(
+                                                        /*Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment.spaceBetween,
                                                           children: [
@@ -471,16 +474,14 @@ class DepositsListView extends StatelessWidget {
                                                             ),
                                                           ],
                                                         ),
-                                                        SizedBox(
-                                                          height: 8,
-                                                        ),
+                                                        SizedBox(height: 8,),*/
                                                         Row(mainAxisAlignment: MainAxisAlignment
                                                             .spaceBetween,
                                                           children: [
                                                             // آیکون ویرایش
                                                             GestureDetector(
                                                               onTap: () {
-                                                                if (deposits.status==1){
+                                                                /*if (deposits.status==1){
                                                                   Get.defaultDialog(
                                                                     title: 'هشدار',
                                                                     middleText: 'به دلیل تایید واریزی قابل ویرایش نیست',
@@ -492,9 +493,9 @@ class DepositsListView extends StatelessWidget {
                                                                         .backGroundColor,
                                                                     textCancel: 'بستن',
                                                                   );
-                                                                }else {
+                                                                }else {*/
                                                                   Get.toNamed('/depositUpdate', parameters:{"id":deposits.id.toString()});
-                                                                }
+                                                                //}
                                                               },
                                                               child: Row(
                                                                 children: [
@@ -512,7 +513,7 @@ class DepositsListView extends StatelessWidget {
                                                             // آیکون حذف کردن
                                                             GestureDetector(
                                                               onTap: () {
-                                                                if (deposits.status==1){
+                                                                /*if (deposits.status==1){
                                                                   Get.defaultDialog(
                                                                     title: 'هشدار',
                                                                     middleText: 'به دلیل تایید واریزی قابل حذف نیست',
@@ -524,7 +525,7 @@ class DepositsListView extends StatelessWidget {
                                                                         .backGroundColor,
                                                                     textCancel: 'بستن',
                                                                   );
-                                                                }else {
+                                                                }else {*/
                                                                   Get.defaultDialog(
                                                                       backgroundColor: AppColor.backGroundColor,
                                                                       title: "حذف واریزی",
@@ -544,7 +545,7 @@ class DepositsListView extends StatelessWidget {
                                                                             'حذف',
                                                                             style: AppTextStyle.bodyText,
                                                                           )));
-                                                                }
+                                                                //}
                                                               },
                                                               child: Row(
                                                                 children: [
@@ -627,6 +628,8 @@ class DepositsListView extends StatelessWidget {
   List<DataColumn> buildDataColumns() {
     return [
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('نام کاربر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
@@ -634,6 +637,8 @@ class DepositsListView extends StatelessWidget {
           child: Text('بابت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('مبلغ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('کد رهگیری', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('مشاهده در خواست', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -650,6 +655,14 @@ class DepositsListView extends StatelessWidget {
       return DataRow(
 
         cells: [
+          // ردیف
+          DataCell(
+              Center(
+                child: Text(
+                  "${deposit.rowNum}",
+                  style: AppTextStyle.labelText,
+                ),
+              )),
           // تاریخ
           DataCell(
               Center(
@@ -688,6 +701,15 @@ class DepositsListView extends StatelessWidget {
               Center(
                 child: Text(
                   "${deposit.amount == null ? 0 : deposit.amount?.toInt().toString().seRagham(separator: ',')} ریال",
+                  style:
+                  AppTextStyle.bodyText,
+                ),
+              )),
+          // کد رهگیری
+          DataCell(
+              Center(
+                child: Text(
+                  deposit.trackingNumber ?? "",
                   style:
                   AppTextStyle.bodyText,
                 ),
@@ -737,7 +759,7 @@ class DepositsListView extends StatelessWidget {
                           : AppColor.textColor,
                     ),
                   ),
-                  SizedBox(height: 6,),
+                  /*SizedBox(height: 6,),
                   Container(
                     padding: const EdgeInsets
                         .symmetric(
@@ -869,7 +891,7 @@ class DepositsListView extends StatelessWidget {
                         style: AppTextStyle
                             .labelText,),
                     ],
-                  ) : Text(""),
+                  ) : Text(""),*/
                 ],
               ),
             ),
@@ -896,7 +918,7 @@ class DepositsListView extends StatelessWidget {
                   // آیکون ویرایش
                   GestureDetector(
                     onTap: () {
-                      if (deposit.status==1){
+                      /*if (deposit.status==1){
                         Get.defaultDialog(
                           title: 'هشدار',
                           middleText: 'به دلیل تایید واریزی قابل ویرایش نیست',
@@ -908,9 +930,10 @@ class DepositsListView extends StatelessWidget {
                               .backGroundColor,
                           textCancel: 'بستن',
                         );
-                      }else {
+                      }else {*/
                         Get.toNamed('/depositUpdate', parameters:{"id":deposit.id.toString()});
-                      }
+                        print("depositId:::::${deposit.id}");
+                      //}
                     },
                     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -928,7 +951,7 @@ class DepositsListView extends StatelessWidget {
                   // آیکون حذف کردن
                   GestureDetector(
                     onTap: () {
-                      if (deposit.status==1){
+                      /*if (deposit.status==1){
                         Get.defaultDialog(
                           title: 'هشدار',
                           middleText: 'به دلیل تایید واریزی قابل حذف نیست',
@@ -940,7 +963,7 @@ class DepositsListView extends StatelessWidget {
                               .backGroundColor,
                           textCancel: 'بستن',
                         );
-                      }else {
+                      }else {*/
                         Get.defaultDialog(
                             backgroundColor: AppColor.backGroundColor,
                             title: "حذف واریزی",
@@ -960,7 +983,7 @@ class DepositsListView extends StatelessWidget {
                                   'حذف',
                                   style: AppTextStyle.bodyText,
                                 )));
-                      }
+                      //}
                     },
                     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [

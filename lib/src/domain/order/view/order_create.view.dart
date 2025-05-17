@@ -904,9 +904,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                             ),
                                             // دکمه ایجاد سفارش
                                             SizedBox(height: 20,),
-                                            orderCreateController
-                                                .selectedBuySell.value?.name ==
-                                                'خرید از کاربر' ?
+                                            orderCreateController.selectedBuySell.value?.name == 'خرید از کاربر' ?
                                             SizedBox(width: double.infinity,
                                               height: 40,
                                               child: ElevatedButton(
@@ -924,28 +922,109 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                             borderRadius: BorderRadius
                                                                 .circular(
                                                                 10)))),
-                                                onPressed: () async {
-                                                  if (formKey.currentState!
-                                                      .validate()) {
-                                                    await orderCreateController
-                                                        .insertOrder();
-                                                  }
+                                                onPressed: (){
+                                                    if(formKey.currentState!.validate()) {
+                                                      Get.defaultDialog(
+                                                          backgroundColor: AppColor.backGroundColor,
+                                                          title: "ایجاد سفارش خرید",
+                                                          titleStyle: AppTextStyle.smallTitleText,
+                                                          middleText: "آیا از ایجاد سفارش مطمئن هستید؟",
+                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                          content: Card(
+                                                            color: AppColor.backGroundColor,
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Column(
+                                                                children: [
+                                                                  Text('جزئیات خرید ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  SizedBox(height: 2,),
+                                                                  Divider(height: 1,color: AppColor.dividerColor,),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.quantityController.text, style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('قیمت خرید: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          confirm: ElevatedButton(
+                                                              style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
+                                                                  AppColor.primaryColor)),
+                                                              onPressed: () async {
+                                                                  await orderCreateController.insertOrder();
+                                                              },
+                                                              child: Text('ایجاد', style: AppTextStyle.bodyText,),
+                                                          ),
+                                                        cancel: ElevatedButton(
+                                                          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
+                                                              AppColor.accentColor)),
+                                                          onPressed: ()  {
+                                                            Get.back();
+                                                          },
+                                                          child: Text(
+                                                            'لغو',
+                                                            style: AppTextStyle.bodyText,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }
                                                 },
-                                                child: orderCreateController
-                                                    .isLoading.value
+                                                child: orderCreateController.isLoading.value
                                                     ?
                                                 CircularProgressIndicator(
                                                   valueColor: AlwaysStoppedAnimation<
-                                                      Color>(AppColor
-                                                      .textColor),
+                                                      Color>(AppColor.textColor),
                                                 ) :
                                                 Text(
                                                     'ایجاد سفارش خرید',
-                                                    style: AppTextStyle
-                                                        .labelText.copyWith(
-                                                        fontSize: isDesktop
-                                                            ? 12
-                                                            : 10)
+                                                    style: AppTextStyle.labelText.copyWith(
+                                                        fontSize: isDesktop ? 12 : 10)
                                                 ),
                                               ),
                                             ) :
@@ -959,18 +1038,106 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                     elevation: WidgetStatePropertyAll(
                                                         5),
                                                     backgroundColor:
-                                                    WidgetStatePropertyAll(
-                                                        AppColor.accentColor),
+                                                    WidgetStatePropertyAll(AppColor.accentColor),
                                                     shape: WidgetStatePropertyAll(
                                                         RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius
-                                                                .circular(
-                                                                10)))),
-                                                onPressed: () async {
-                                                  if (formKey.currentState!
-                                                      .validate()) {
-                                                    await orderCreateController
-                                                        .insertOrder();
+                                                            borderRadius: BorderRadius.circular(10)))),
+                                                onPressed: () {
+                                                  if(formKey.currentState!.validate())
+                                                  {
+                                                    Get.defaultDialog(
+                                                        backgroundColor: AppColor.backGroundColor,
+                                                        title: "ایجاد سفارش فروش",
+                                                        titleStyle: AppTextStyle.smallTitleText,
+                                                        middleText: "آیا از ایجاد سفارش مطمئن هستید؟",
+                                                        middleTextStyle: AppTextStyle.bodyText,
+                                                      content: Card(
+                                                        color: AppColor.backGroundColor,
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: Column(
+                                                            children: [
+                                                              Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                              SizedBox(height: 2,),
+                                                              Divider(height: 1,color: AppColor.dividerColor,),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderCreateController.quantityController.text, style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                        confirm: ElevatedButton(
+                                                            style: ButtonStyle(
+                                                                backgroundColor: WidgetStatePropertyAll(
+                                                                    AppColor.primaryColor)),
+                                                            onPressed: () async {
+                                                                await orderCreateController.insertOrder();
+                                                            },
+                                                            child: Text(
+                                                              'ایجاد',
+                                                              style: AppTextStyle
+                                                                  .bodyText,
+                                                            ),
+                                                        ),
+                                                      cancel: ElevatedButton(
+                                                        style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
+                                                        onPressed: ()  {
+                                                          Get.back();
+                                                        },
+                                                        child: Text(
+                                                          'لغو',
+                                                          style: AppTextStyle.bodyText,
+                                                        ),
+                                                      ),
+                                                    );
                                                   }
                                                 },
                                                 child: orderCreateController
@@ -978,16 +1145,12 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                     ?
                                                 CircularProgressIndicator(
                                                   valueColor: AlwaysStoppedAnimation<
-                                                      Color>(AppColor
-                                                      .textColor),
+                                                      Color>(AppColor.textColor),
                                                 ) :
                                                 Text(
                                                   'ایجاد سفارش فروش',
                                                   style: AppTextStyle.labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop
-                                                          ? 12
-                                                          : 10),
+                                                      .copyWith(fontSize: isDesktop ? 12 : 10),
                                                 ),
                                               ),
                                             )

@@ -41,6 +41,7 @@ DepositModel _$DepositModelFromJson(Map<String, dynamic> json) => DepositModel(
           .toList(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
+      trackingNumber: json['trackingNumber'] as String?,
     );
 
 Map<String, dynamic> _$DepositModelToJson(DepositModel instance) =>
@@ -60,6 +61,7 @@ Map<String, dynamic> _$DepositModelToJson(DepositModel instance) =>
       'recId': instance.recId,
       'infos': instance.infos,
       'date': instance.date?.toIso8601String(),
+      'trackingNumber': instance.trackingNumber,
     };
 
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(

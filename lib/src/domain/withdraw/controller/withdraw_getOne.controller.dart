@@ -1,14 +1,21 @@
 
 
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/withdraw.repository.dart';
 import '../../../config/repository/withdraw_getOne.repository.dart';
 import '../../account/model/account.model.dart';
 import '../model/withdraw.model.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:path/path.dart' as path;
 
 enum PageState{loading,err,empty,list}
 class WithdrawGetOneController extends GetxController{
@@ -120,6 +127,50 @@ class WithdrawGetOneController extends GetxController{
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
       isLoading.value=false;
+    }
+  }
+
+  void downloadImage(String guidId) async {
+    if (kIsWeb){
+      final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+      final anchor = html.AnchorElement(href: url)
+        ..download = "image_$guidId"
+        ..style.display = 'none';
+
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+    }else{
+      try {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) return;
+
+        final dio = Dio();
+        final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access downloads directory');
+        }
+        String fileExtension = path.extension(guidId);
+        if(fileExtension.isEmpty) fileExtension = '.png';
+        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+        final savePath = path.join(downloadsDir.path, fileName);
+        /*final dir = await getApplicationDocumentsDirectory();
+        final path = '${dir.path}/images_$guidId.png';*/
+        await dio.download(url, savePath);
+        print(savePath);
+        Get.snackbar(
+          'موفقیت',
+          'تصویر با موفقیت ذخیره شد',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'خطا',
+          'خطا در دانلود تصویر: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
     }
   }
 

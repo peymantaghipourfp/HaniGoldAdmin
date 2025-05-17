@@ -46,6 +46,8 @@ class DepositModel {
   final List<InfoModel>? infos;
   @JsonKey(name: "date")
   final DateTime? date;
+  @JsonKey(name: "trackingNumber")
+  final String? trackingNumber;
 
   DepositModel({
     required this.depositRequest,
@@ -63,6 +65,7 @@ class DepositModel {
     required this.recId,
     required this.infos,
     required this.date,
+    required this.trackingNumber,
   });
 
   factory DepositModel.fromJson(Map<String, dynamic> json) => _$DepositModelFromJson(json);

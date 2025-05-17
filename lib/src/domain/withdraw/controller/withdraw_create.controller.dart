@@ -71,17 +71,19 @@ class WithdrawCreateController extends GetxController{
 
 
   void changeSelectedAccount(AccountModel? newValue) {
-    selectedBankAccount.value = null;
+    //selectedBankAccount.value = null;
     selectedAccount.value = newValue;
-    if (newValue != null) {
+    fetchWallet(newValue?.id ?? 0);
+    /*if (newValue != null) {
       getBankAccount(newValue.id ?? 0);
       fetchWallet(newValue.id ?? 0);
     } else {
       bankAccountList.clear();
-    }
+    }*/
     getBalanceList(newValue?.id ?? 0);
-    fetchBankList();
     isLoadingBalance.value=false;
+    bankList.clear();
+    fetchBankList();
     update();
   }
 
@@ -98,7 +100,7 @@ class WithdrawCreateController extends GetxController{
     print( selectedBankId.value);
   }
 
-  void changeSelectedBankAccount(BankAccountModel? newValue) {
+  /*void changeSelectedBankAccount(BankAccountModel? newValue) {
     selectedBankAccount.value = newValue;
     selectedIndex=selectedBankAccount.value?.bank?.id.toString();
     ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
@@ -115,7 +117,7 @@ class WithdrawCreateController extends GetxController{
     print(selectedBankAccount.value?.bank?.name);
     print(selectedBankAccount.value?.bank?.id);
     print(selectedIndex);
-  }
+  }*/
 
   @override
   void onInit() {
@@ -179,6 +181,7 @@ class WithdrawCreateController extends GetxController{
   //لیست بانک ها
   Future<void> fetchBankList() async{
     try{
+      bankList.clear();
       state.value=PageState.loading;
       var fetchedBankList=await bankRepository.getBankList();
       bankList.assignAll(fetchedBankList);
@@ -196,7 +199,7 @@ class WithdrawCreateController extends GetxController{
   }
 
   // مدل آپشن بانک اکانت
-  BankAccountReqModel? bankAccountReqModel;
+  /*BankAccountReqModel? bankAccountReqModel;
   getBankAccount(int id){
     bankAccountReqModel=BankAccountReqModel(
         bankAccount: OptionsModel(
@@ -219,10 +222,10 @@ class WithdrawCreateController extends GetxController{
         )
     );
     fetchBankAccountList();
-  }
+  }*/
 
   // لیست بانک اکانت
-  Future<void> fetchBankAccountList()async{
+  /*Future<void> fetchBankAccountList()async{
     try{
       state.value=PageState.loading;
       bankAccountList.clear();
@@ -237,7 +240,7 @@ class WithdrawCreateController extends GetxController{
       state.value=PageState.err;
       errorMessage.value=e.toString();
     }
-  }
+  }*/
 
 Future<void> fetchWallet(int id)async{
     try{
@@ -264,7 +267,7 @@ Future<WithdrawModel?> insertWithdraw()async{
           itemName: walletList?.item?.name ?? "",
           accountId: selectedAccount.value?.id ?? 0,
           accountName: selectedAccount.value?.name ?? "",
-          bankAccountId: selectedBankAccount.value?.id ?? 0,
+          //bankAccountId: selectedBankAccount.value?.id ?? 0,
           bankId: selectedBankId.value,
           bankName: selectedBankName.value,
           ownerName: ownerNameController.text,
@@ -329,9 +332,10 @@ Future<WithdrawModel?> insertWithdraw()async{
     cardNumberController.clear();
     shebaController.clear();
     selectedAccount.value=null;
-    selectedBankAccount.value=null;
+    //selectedBankAccount.value=null;
     bankAccountList.clear();
     bankList.clear();
+    descriptionController.clear();
   }
   void resetAccountSearch() {
     searchController.clear();
