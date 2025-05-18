@@ -30,6 +30,8 @@ AccountModel _$AccountModelFromJson(Map<String, dynamic> json) => AccountModel(
       id: (json['id'] as num?)?.toInt(),
       status: (json['status'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
+      startDate:
+      json['startDate'] == null ? null : DateTime.parse(json['startDate'] as String),
       tags: json['tags'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
@@ -51,6 +53,7 @@ Map<String, dynamic> _$AccountModelToJson(AccountModel instance) =>
       'id': instance.id,
       'status': instance.status,
       'attribute': instance.attribute,
+      'createdOn': instance.startDate,
       'tags': instance.tags,
       'recId': instance.recId,
       'infos': instance.infos,

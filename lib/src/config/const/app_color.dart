@@ -15,5 +15,6 @@ class AppColor{
   static const Color circularLoadingColor=Color(0xffdedad0);
   static const Color dividerColor=Color(0xffe3c477);
   static const Color secondary2Color=Color(0xff499fa2);
+  static const Color secondary3Color=Color(0xff40b6ca);
 
 }

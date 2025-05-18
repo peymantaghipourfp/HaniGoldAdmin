@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/repository/url/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
@@ -22,10 +23,11 @@ class UserListController extends GetxController{
   Rx<PageStateUser> state=Rx<PageStateUser>(PageStateUser.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 7.obs;
+  RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;
+  DataPagerController dataPagerController=DataPagerController();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   UserRepository userRepository=UserRepository();
   ScrollController scrollController = ScrollController();
@@ -45,11 +47,11 @@ class UserListController extends GetxController{
 
 
   onSortColum(int columnIndex, bool ascending) {
-    if (columnIndex == 0) {
+    if (columnIndex > 0) {
       if (ascending) {
-      //  accountList.sort((a, b) => a.toWallet!.account!.name!.toString().compareTo(b.toWallet!.account!.name!.toString()));
+        accountList.sort((a, b) => a.name!.toString().compareTo(b.name!.toString()));
       } else {
-      //  transactionInfoList.sort((a, b) => b.toWallet!.account!.name!.toString().compareTo(a.toWallet!.account!.name!.toString()));
+        accountList.sort((a, b) => b.name!.toString().compareTo(a.name!.toString()));
       }
     }
 
@@ -92,6 +94,12 @@ class UserListController extends GetxController{
     }
   }
 
+  void isChangePage(int index){
+       currentPage.value=index*10-10;
+       itemsPerPage.value=index*10;
+    getUserList();
+  }
+
 
 
   // لیست کاربران
@@ -100,16 +108,17 @@ class UserListController extends GetxController{
     isOpenMore.value = false;
     accountList.clear();
     try {
-      // state.value=PageStateDe.loading;
+       state.value=PageStateUser.loading;
       var response = await userRepository.getUserList(
           startIndex: currentPage.value,
           toIndex: itemsPerPage.value,
           );
       accountList.addAll(response.accounts??[]);
       paginated=response.paginated;
-      print(paginated?.totalCount??0);
-     //  state.value=PageStateDe.list;
+    //  print(paginated?.totalCount??0);
+       state.value=PageStateUser.list;
       isOpenMore.value = true;
+
       update();
     }
     catch (e) {

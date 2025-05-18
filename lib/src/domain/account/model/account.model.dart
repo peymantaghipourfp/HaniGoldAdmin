@@ -37,6 +37,8 @@ class AccountModel {
   late final int? status;
   @JsonKey(name: "attribute")
   final String? attribute;
+  @JsonKey(name: "startDate")
+  final DateTime? startDate;
   @JsonKey(name: "tags")
   final String? tags;
   @JsonKey(name: "recId")
@@ -61,6 +63,7 @@ class AccountModel {
     required this.id,
     required this.status,
     required this.attribute,
+    required this.startDate,
     required this.tags,
     required this.recId,
     required this.infos,

@@ -56,6 +56,7 @@ dependencies:
   path_provider: ^2.1.5
   universal_html: ^2.2.4
   path: ^1.9.0
+  syncfusion_flutter_datagrid:
 
 
 dev_dependencies:
