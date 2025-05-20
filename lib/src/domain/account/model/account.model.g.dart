@@ -9,6 +9,7 @@ part of 'account.model.dart';
 AccountModel _$AccountModelFromJson(Map<String, dynamic> json) => AccountModel(
       type: (json['type'] as num?)?.toInt(),
       code: json['code'] as String?,
+      hasDeposit: json['hasDeposit'] as bool?,
       contactInfo: json['contactInfo'] as String?,
       name: json['name'] as String?,
       parent: json['parent'] == null
@@ -30,8 +31,9 @@ AccountModel _$AccountModelFromJson(Map<String, dynamic> json) => AccountModel(
       id: (json['id'] as num?)?.toInt(),
       status: (json['status'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
-      startDate:
-      json['startDate'] == null ? null : DateTime.parse(json['startDate'] as String),
+      startDate: json['startDate'] == null
+          ? null
+          : DateTime.parse(json['startDate'] as String),
       tags: json['tags'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
@@ -43,6 +45,7 @@ Map<String, dynamic> _$AccountModelToJson(AccountModel instance) =>
     <String, dynamic>{
       'type': instance.type,
       'code': instance.code,
+      'hasDeposit': instance.hasDeposit,
       'contactInfo': instance.contactInfo,
       'name': instance.name,
       'parent': instance.parent,
@@ -53,7 +56,7 @@ Map<String, dynamic> _$AccountModelToJson(AccountModel instance) =>
       'id': instance.id,
       'status': instance.status,
       'attribute': instance.attribute,
-      'createdOn': instance.startDate,
+      'startDate': instance.startDate?.toIso8601String(),
       'tags': instance.tags,
       'recId': instance.recId,
       'infos': instance.infos,

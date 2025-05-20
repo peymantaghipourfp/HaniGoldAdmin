@@ -3,14 +3,13 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/pager_widget.dart';
 import '../controller/user_list.controller.dart';
-import 'package:syncfusion_flutter_core/theme.dart';
+
 class UserListView extends GetView<UserListController> {
    UserListView({super.key});
 

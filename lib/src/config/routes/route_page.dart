@@ -23,6 +23,7 @@ import 'package:hanigold_admin/src/domain/order/view/order_list.view.dart';
 import 'package:hanigold_admin/src/domain/order/view/order_update.view.dart';
 import 'package:hanigold_admin/src/domain/product/view/item_update_price.view.dart';
 import 'package:hanigold_admin/src/domain/tools/view/tools.view.dart';
+import 'package:hanigold_admin/src/domain/users/view/insert_user.view.dart';
 import 'package:hanigold_admin/src/domain/users/view/list_user.view.dart';
 import 'package:hanigold_admin/src/domain/wallet/view/wallet.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_create.view.dart';
@@ -32,6 +33,7 @@ import '../../domain/balance/view/trading_balance.view.dart';
 import '../../domain/deposit/view/deposit_update.view.dart';
 import '../../domain/inventory/view/inventory_detail_insert_payment.view.dart';
 import '../../domain/inventory/view/inventory_detail_update_payment.view.dart';
+import '../../domain/laboratory/view/laboratory.view.dart';
 import '../../domain/remittance/view/insert_remittance.view.dart';
 import '../../domain/remittance/view/remittance.view.dart';
 import '../../domain/splash/view/splash.view.dart';
@@ -39,6 +41,8 @@ import '../../domain/users/view/list_user_info_transaction.view.dart';
 import '../../domain/users/view/user_info_transaction.view.dart';
 import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
 import '../../domain/withdraw/view/withdraw_update.view.dart';
+import 'bindings/insert_user.bindings.dart';
+import 'bindings/laboratory.bindings.dart';
 import 'bindings/trading_balance.bindings.dart';
 import 'bindings/user_info_detail_transaction.bindings.dart';
 import 'bindings/user_info_transaction.bindings.dart';
@@ -75,5 +79,7 @@ class RoutePage{
     GetPage(name: '/listUserInfoTransaction', page: ()=>ListUserInfoTransactionView(),binding: UserInfoTransactionBindings()),
     GetPage(name: '/tradingBalance', page: ()=>TradingBalanceView(),binding: TradingBalanceBindings()),
     GetPage(name: '/userList', page: ()=>UserListView(),binding: UserListBindings()),
+    GetPage(name: '/insertUser', page: ()=>InsertUserView(),binding: InsertUserBindings()),
+    GetPage(name: '/laboratory', page: ()=>LaboratoryView(),binding: LaboratoryBindings()),
   ];
 }

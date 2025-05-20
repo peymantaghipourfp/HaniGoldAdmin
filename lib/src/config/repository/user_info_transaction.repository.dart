@@ -6,11 +6,13 @@ import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
+import 'package:hanigold_admin/src/domain/users/model/city_item.model.dart';
 
 import '../../domain/inventory/model/inventory.model.dart';
 import '../../domain/users/model/balance_item.model.dart';
 import '../../domain/users/model/header_info_user_transaction.model.dart';
 import '../../domain/users/model/list_transaction_info_item.model.dart';
+import '../../domain/users/model/state_item.model.dart';
 import '../../domain/users/model/transaction_info_item.model.dart';
 
 class UserInfoTransactionRepository{

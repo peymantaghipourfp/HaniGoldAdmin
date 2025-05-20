@@ -17,6 +17,8 @@ class AccountModel {
   final int? type;
   @JsonKey(name: "code")
   final String? code;
+  @JsonKey(name: "hasDeposit")
+  final bool? hasDeposit;
   @JsonKey(name: "contactInfo")
   final String? contactInfo;
   @JsonKey(name: "name")
@@ -53,6 +55,7 @@ class AccountModel {
   AccountModel({
     required this.type,
     required this.code,
+    required this.hasDeposit,
     required this.contactInfo,
     required this.name,
     required this.parent,

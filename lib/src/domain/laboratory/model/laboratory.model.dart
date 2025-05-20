@@ -1,16 +1,27 @@
+// To parse this JSON data, do
+//
+//     final laboratoryModel = laboratoryModelFromJson(jsonString);
+
+import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
 part 'laboratory.model.g.dart';
 
-List<LaboratoryModel> laboratoryModelFromJson(String str) => List<LaboratoryModel>.from(json.decode(str).map((x) => LaboratoryModel.fromJson(x)));
+LaboratoryModel laboratoryModelFromJson(String str) => LaboratoryModel.fromJson(json.decode(str));
 
-String laboratoryModelToJson(List<LaboratoryModel> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+String laboratoryModelToJson(LaboratoryModel data) => json.encode(data.toJson());
 
 @JsonSerializable()
 class LaboratoryModel {
   @JsonKey(name: "name")
   final String? name;
+  @JsonKey(name: "address")
+  final String? address;
+  @JsonKey(name: "phone")
+  final String? phone;
+  @JsonKey(name: "createdOn")
+  final DateTime? createdOn;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -24,6 +35,9 @@ class LaboratoryModel {
 
   LaboratoryModel({
     required this.name,
+    required this.address,
+    required this.phone,
+    required this.createdOn,
     required this.rowNum,
     required this.id,
     required this.attribute,

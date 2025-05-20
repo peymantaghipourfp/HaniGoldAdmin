@@ -110,6 +110,11 @@ Widget buildDesktopLayout() {
                     icon: Icons.list_alt,
                     route: '/userList',
                   ),
+                  _buildSubMenuItem(
+                    title: 'افزودن کاربر جدید',
+                    icon: Icons.list_alt,
+                    route: '/insertUser',
+                  ),
                 ],
               ),
               _buildMenuButton(
@@ -143,6 +148,18 @@ Widget buildDesktopLayout() {
                     title: 'ایجاد حواله',
                     icon: Icons.add_card,
                     route: '/insertRemittance',
+                  ),
+                ],
+              ),
+              _buildMenuButton(
+                title: 'آزمایشگاه',
+                icon: Icons.biotech_sharp,
+                menuKey: 'laboratory',
+                subItems: [
+                  _buildSubMenuItem(
+                    title: 'لیست آزمایشگاه',
+                    icon: Icons.badge_outlined,
+                    route: '/laboratory',
                   ),
                 ],
               ),

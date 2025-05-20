@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import '../../../config/repository/url/user.repository.dart';
+import '../../../config/repository/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
 import '../model/balance_item.model.dart';

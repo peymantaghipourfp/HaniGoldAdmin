@@ -563,6 +563,39 @@ class HomeView extends GetView<HomeController> {
                             : const SizedBox(),
                       ),
                     ),
+                    // نمایش زیر مجموعه کاربران
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: AnimatedSize(
+                        duration: Duration(milliseconds: 350), // سرعت انیمیشن
+                        curve: Curves.easeInOut, // نوع حرکت انیمیشن
+                        child: controller.isSubMenuOpen('users')
+                            ? Column(
+                          children: [
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'افزودن کاربر جدید',
+                                  style: AppTextStyle.bodyText,
+                                ),
+                                leading: Icon(Icons.circle,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/insertUser');
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                            : const SizedBox(),
+                      ),
+                    ),
                     //دریافت و پرداخت
                     ResponsiveRowColumnItem(
                       rowFlex:1,
@@ -783,6 +816,91 @@ class HomeView extends GetView<HomeController> {
                             : const SizedBox(),
                       ),
                     ),
+
+                    //آزمایشگاه
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: Row(
+                        children: [
+                          Container(
+                            constraints: isDesktop ? BoxConstraints(maxWidth: 550) : BoxConstraints(maxWidth: 350),
+                            padding: isDesktop
+                                ? const EdgeInsets.symmetric(horizontal: 80)
+                                : const EdgeInsets.only(right: 15),
+                            child: TextButton(
+                              style: ButtonStyle(
+                                elevation: WidgetStateProperty.all(5),
+                                shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide(
+                                        width: 1, color: AppColor.secondaryColor),
+                                  ),
+                                ),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.secondaryColor),
+                              ),
+                              onPressed: () {
+                                controller.toggleSubMenu('laboratory');
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        'آزمایشگاه',
+                                        style: AppTextStyle.bodyText,
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(color: AppColor.textColor,
+                                      controller.activeSubMenu.value=='laboratory'?
+                                      Icons.expand_more:
+                                      Icons.expand_less
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    //نمایش زیرمجموعه آزمایشگاه
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: AnimatedSize(
+                        duration: Duration(milliseconds: 350), // سرعت انیمیشن
+                        curve: Curves.easeInOut, // نوع حرکت انیمیشن
+                        child: controller.isSubMenuOpen('laboratory')
+                            ? Column(
+                                children: [
+                                  Container(
+                                    padding: isDesktop
+                                        ? const EdgeInsets.symmetric(horizontal: 80)
+                                        : const EdgeInsets.symmetric(horizontal: 24),
+                                    child: ListTile(
+                                      horizontalTitleGap: 5,
+                                      minTileHeight: 10,
+                                      title: Text(
+                                        'لیست آزمایشگاه',
+                                        style: AppTextStyle.bodyText.copyWith(fontSize: 14),
+                                      ),
+                                      leading: Icon(Icons.circle,
+                                          size: 15,
+                                          color: AppColor.circleColor),
+                                      onTap: () {
+                                        Get.toNamed('/laboratory');
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : const SizedBox(),
+                      ),
+                    ),
+
                     //تنظیمات
                     ResponsiveRowColumnItem(
                       rowFlex:1,
@@ -841,38 +959,38 @@ class HomeView extends GetView<HomeController> {
                         curve: Curves.easeInOut, // نوع حرکت انیمیشن
                         child: controller.isSubMenuOpen('tools')
                             ? Column(
-                                children: [
-                                  Container(
-                                    padding: isDesktop
-                                        ? const EdgeInsets.symmetric(horizontal: 80)
-                                        : const EdgeInsets.symmetric(horizontal: 24),
-                                    child: ListTile(
-                                      horizontalTitleGap: 5,
-                                      minTileHeight: 10,
-                                      title: Text(
-                                        'خروج از برنامه',
-                                        style: AppTextStyle.bodyText.copyWith(fontSize: 14),
-                                      ),
-                                      leading: Icon(Icons.circle,
-                                          size: 15,
-                                          color: AppColor.circleColor),
-                                      onTap: () {
-                                        Get.defaultDialog(
-                                            title:"خروج",
-                                            titleStyle: TextStyle(color: AppColor.textColor),
-                                            middleText: "آیا می خواهید از برنامه خارج شوید",
-                                            middleTextStyle: TextStyle(color: AppColor.textColor),
-                                            backgroundColor: AppColor.secondaryColor,
-                                          textCancel: "خیر",
-                                          onCancel: () => Get.toNamed('/home'),
-                                          textConfirm: "بله",
-                                          onConfirm: () =>  FlutterExitApp.exitApp()
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              )
+                          children: [
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'خروج از برنامه',
+                                  style: AppTextStyle.bodyText.copyWith(fontSize: 14),
+                                ),
+                                leading: Icon(Icons.circle,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.defaultDialog(
+                                      title:"خروج",
+                                      titleStyle: TextStyle(color: AppColor.textColor),
+                                      middleText: "آیا می خواهید از برنامه خارج شوید",
+                                      middleTextStyle: TextStyle(color: AppColor.textColor),
+                                      backgroundColor: AppColor.secondaryColor,
+                                      textCancel: "خیر",
+                                      onCancel: () => Get.toNamed('/home'),
+                                      textConfirm: "بله",
+                                      onConfirm: () =>  FlutterExitApp.exitApp()
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        )
                             : const SizedBox(),
                       ),
                     ),

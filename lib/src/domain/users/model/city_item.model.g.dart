@@ -1,19 +1,17 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'laboratory.model.dart';
+part of 'city_item.model.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-LaboratoryModel _$LaboratoryModelFromJson(Map<String, dynamic> json) =>
-    LaboratoryModel(
+CityItemModel _$CityItemModelFromJson(Map<String, dynamic> json) =>
+    CityItemModel(
       name: json['name'] as String?,
-      address: json['address'] as String?,
-      phone: json['phone'] as String?,
-          createdOn: json['createdOn'] == null
+      state: json['state'] == null
           ? null
-          : DateTime.parse(json['createdOn'] as String),
+          : StateItemModel.fromJson(json['state'] as Map<String, dynamic>),
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
@@ -21,12 +19,10 @@ LaboratoryModel _$LaboratoryModelFromJson(Map<String, dynamic> json) =>
       infos: json['infos'] as List<dynamic>?,
     );
 
-Map<String, dynamic> _$LaboratoryModelToJson(LaboratoryModel instance) =>
+Map<String, dynamic> _$CityItemModelToJson(CityItemModel instance) =>
     <String, dynamic>{
       'name': instance.name,
-      'address': instance.address,
-      'phone': instance.phone,
-      'createdOn': instance.createdOn?.toIso8601String(),
+      'state': instance.state,
       'rowNum': instance.rowNum,
       'id': instance.id,
       'attribute': instance.attribute,
