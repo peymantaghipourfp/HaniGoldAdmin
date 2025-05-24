@@ -1,6 +1,7 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:hanigold_admin/src/domain/product/widget/price_different.widget.dart';
@@ -42,7 +43,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/bgHaniGold.png'),
-                  fit: BoxFit.fill,
+                  fit: BoxFit.contain,
                   opacity: 0.06,
                 ),
               ),
@@ -55,7 +56,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 width: Get.width,
                 height: Get.height,
                 child: Card(
-                  color: AppColor.secondaryColor,
+                  color: AppColor.secondaryColor.withOpacity(0.8),
                   elevation: 5,
                   child: Padding(
                     padding: EdgeInsets.all(20),
@@ -88,11 +89,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                           ),
                           Obx(() {
                             if (productController.state.value == PageState.loading) {
+                              EasyLoading.show(status: 'لطفا منتظر بمانید...');
                             return Center(
                             child: CircularProgressIndicator());
                             } else
-                            if (productController.state.value ==
-                            PageState.empty) {
+                            if (productController.state.value == PageState.empty) {
+                              EasyLoading.dismiss();
                             return EmptyPage(
                             title: 'درخواستی وجود ندارد',
                             callback: () {
@@ -101,8 +103,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                             },
                             );
                             } else
-                            if (productController.state.value ==
-                            PageState.list) {
+                            if (productController.state.value == PageState.list) {
+                              EasyLoading.dismiss();
                               return isDesktop ?
                                 Expanded(
                                 child: Container(
@@ -905,6 +907,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                       ),
                                   );
                             }
+                            EasyLoading.dismiss();
                             return ErrPage(
                               callback: () {
                                 productController

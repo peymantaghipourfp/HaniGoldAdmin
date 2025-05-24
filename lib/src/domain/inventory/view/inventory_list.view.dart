@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory.controller.dart';
@@ -122,9 +123,11 @@ class InventoryListView extends StatelessWidget {
                     ),
                     Obx(() {
                       if (inventoryController.state.value == PageState.loading) {
+                        EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
                         return Center(child: CircularProgressIndicator());
                       } else
                       if (inventoryController.state.value == PageState.empty) {
+                        EasyLoading.dismiss();
                         return EmptyPage(
                           title: 'دریافت/پرداختی وجود ندارد',
                           callback: () {
@@ -133,6 +136,7 @@ class InventoryListView extends StatelessWidget {
                         );
                       } else
                       if (inventoryController.state.value == PageState.list) {
+                        EasyLoading.dismiss();
                         return
                           isDesktop ?
                         Expanded(
@@ -914,6 +918,7 @@ class InventoryListView extends StatelessWidget {
                           ),
                         );
                       }
+                      EasyLoading.dismiss();
                       return ErrPage(
                         callback: () {
                           inventoryController.fetchInventoryList();
@@ -1598,9 +1603,12 @@ class InventoryListView extends StatelessWidget {
 
   List<DataColumn> buildDataColumns() {
     return [
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(
           onSort: (columnIndex, desc) {
-            inventoryController.sortByDate(desc);
+            inventoryController.sortByDate(columnIndex, desc);
+            inventoryController.setSort(columnIndex,desc);
           },
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('تاریخ', style: AppTextStyle.labelText)),
@@ -1656,6 +1664,33 @@ class InventoryListView extends StatelessWidget {
       //print(" تسسسسسسسست ${inventory.inventoryDetails?.first.itemUnit?.name}");
       return DataRow(
         cells: [
+          // ردیف
+          DataCell(
+              Center(
+                child: Row(
+                  children: [
+                    Checkbox(
+                      value: inventory.registered ?? false,
+                      onChanged: (value) async{
+                        if (value != null) {
+                          //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                          await inventoryController.updateRegistered(
+                              inventory.id!,
+                              value
+                          );
+                        }
+                        inventoryController.fetchInventoryList();
+                        //EasyLoading.dismiss();
+                      },
+                    ),
+                    SizedBox(width: 5,),
+                    Text(
+                      "${inventory.rowNum}",
+                      style: AppTextStyle.labelText,
+                    ),
+                  ],
+                ),
+              )),
           // تاریخ
           DataCell(
               Center(

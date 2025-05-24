@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -24,12 +25,7 @@ class OrderListView extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
-      appBar: isDesktop ? 
-      CustomAppbar1(title: 'سفارشات',onBackTap: () => Get.offNamed('/home'),)
-          :
-      CustomAppBar(title: 'سفارشات',
-        onBackTap: ()=>Get.offNamed('/home'),
-      ),
+      appBar: CustomAppbar1(title: 'سفارشات',onBackTap: () => Get.offNamed('/home'),),
       body: Stack(
         children: [
           BackgroundImageTotal(),
@@ -220,9 +216,11 @@ class OrderListView extends StatelessWidget {
                   // لیست سفارشات
                   Obx(() {
                     if (orderController.state.value == PageState.loading) {
+                      EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
                       return Center(child: CircularProgressIndicator());
                     }
                     else if (orderController.state.value == PageState.empty) {
+                      EasyLoading.dismiss();
                       return EmptyPage(
                         title: 'سفارشی وجود ندارد',
                         callback: () {
@@ -231,6 +229,7 @@ class OrderListView extends StatelessWidget {
                       );
                     }
                     else if (orderController.state.value == PageState.list) {
+                      EasyLoading.dismiss();
                       // لیست سفارشات
                       return
                         isDesktop ?
@@ -421,6 +420,7 @@ class OrderListView extends StatelessWidget {
                           ),
                         );
                     }
+                    EasyLoading.dismiss();
                     return ErrPage(
                       callback: () {
                         orderController.fetchOrderList();
@@ -761,8 +761,8 @@ class OrderListView extends StatelessWidget {
           child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('نام کاربر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('موبایل', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('موبایل', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('محصول', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -793,9 +793,30 @@ class OrderListView extends StatelessWidget {
           // ردیف
           DataCell(
               Center(
-                child: Text("${order.rowNum}",
-                  style:
-                  AppTextStyle.bodyText,
+                child:
+                Row(
+                  children: [
+                    // رجیستر
+                    Checkbox(
+                      value: order.registered ?? false,
+                      onChanged: (value) async{
+                        if (value != null) {
+                          //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                          await orderController.updateRegistered(
+                              order.id!,
+                              value
+                          );
+                        }
+                        orderController.fetchOrderList();
+                        //EasyLoading.dismiss();
+                      },
+                    ),
+                    SizedBox(width: 5,),
+                    Text("${order.rowNum}",
+                      style:
+                      AppTextStyle.bodyText,
+                    ),
+                  ],
                 ),
               )),
           // تاریخ
@@ -818,14 +839,14 @@ class OrderListView extends StatelessWidget {
                 ),
               )),
           // موبایل
-          DataCell(
+          /*DataCell(
               Center(
                 child: Text(
                   order.account?.contactInfo ?? "",
                   style:
                   AppTextStyle.bodyText,
                 ),
-              )),
+              )),*/
           // محصول
           DataCell(
               Center(
@@ -1080,23 +1101,23 @@ class OrderListView extends StatelessWidget {
                               Container(
                                 padding: EdgeInsets.only(left: 2),
                                 child: e.unitName=="عدد"? Text( "${e.balance}",style:e.balance!>0 ?
-                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
-                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor,fontWeight: FontWeight.bold),
                                 textDirection: TextDirection.ltr,
                                 ):SizedBox(),
                               ),
                               Container(
                                 padding: EdgeInsets.only(left: 2),
                                 child: e.unitName=="عدد"? Text( "${e.unitName}",style:e.balance!>0 ?
-                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
-                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
                                   textDirection: TextDirection.ltr,
                                 ):SizedBox(),
                               ),
                               Container(
                                 child: e.unitName=="عدد"? Text( "${e.itemName}",style:e.balance!>0 ?
-                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
-                                AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
                                   textDirection: TextDirection.ltr,
                                 ):SizedBox(),
                               ),
@@ -1124,23 +1145,23 @@ class OrderListView extends StatelessWidget {
                                    Container(
                                      padding: EdgeInsets.only(left: 2),
                                      child: e.unitName=="ریال"? Text( "${e.balance?.toInt().toString().seRagham(separator: ',')}",style:e.balance!>0 ?
-                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
-                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor,fontWeight: FontWeight.bold),
                                        textDirection: TextDirection.ltr,
                                      ):SizedBox(),
                                    ),
                                    Container(
                                      padding: EdgeInsets.only(left: 2),
                                      child: e.unitName=="ریال"? Text( "${e.unitName}",style:e.balance!>0 ?
-                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
-                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
                                        textDirection: TextDirection.ltr,
                                      ):SizedBox(),
                                    ),
                                    Container(
                                      child: e.unitName=="ریال"? Text( "${e.itemName}",style:e.balance!>0 ?
-                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
-                                     AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
                                        textDirection: TextDirection.ltr,
                                      ):SizedBox(),
                                    ),
@@ -1168,23 +1189,23 @@ class OrderListView extends StatelessWidget {
                             Container(
                               padding: EdgeInsets.only(left: 2),
                               child: e.unitName=="گرم"? Text( "${e.balance}",style:e.balance!>0 ?
-                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
-                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor,fontWeight: FontWeight.bold),
                                 textDirection: TextDirection.ltr,
                               ):SizedBox(),
                             ),
                             Container(
                               padding: EdgeInsets.only(left: 2),
                               child: e.unitName=="گرم"? Text( "${e.unitName}",style:e.balance!>0 ?
-                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
-                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
                                 textDirection: TextDirection.ltr,
                               ):SizedBox(),
                             ),
                             Container(
                               child: e.unitName=="گرم"? Text( "${e.itemName}",style:e.balance!>0 ?
-                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor) :
-                              AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor),
+                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
                                 textDirection: TextDirection.ltr,
                               ):SizedBox(),
                             ),

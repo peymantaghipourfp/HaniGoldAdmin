@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -45,9 +46,11 @@ class WithdrawGetOneView extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child:  Obx(() {
                           if (withdrawGetOneController.state.value == PageState.loading) {
+                            EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
                             return Center(child: CircularProgressIndicator());
                           }
                           else if (withdrawGetOneController.state.value == PageState.empty) {
+                            EasyLoading.dismiss();
                             return EmptyPage(
                               title: 'درخواستی وجود ندارد',
                               callback: () {
@@ -56,6 +59,7 @@ class WithdrawGetOneView extends StatelessWidget {
                             );
                           }
                           else if (withdrawGetOneController.state.value == PageState.list) {
+                            EasyLoading.dismiss();
                             var getWithdraw = withdrawGetOneController.getOneWithdraw.value;
                             if (getWithdraw == null) {
                               return EmptyPage();
@@ -559,6 +563,20 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                               child: Row(
                                                                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                                 children: [
+                                                                                                  Checkbox(
+                                                                                                    value: getOneDeposit?.registered ?? false,
+                                                                                                    onChanged: (value) async{
+                                                                                                      if (value != null) {
+                                                                                                        //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                                                                                                        await withdrawGetOneController.updateRegistered(
+                                                                                                            getOneDeposit!.id!,
+                                                                                                            value
+                                                                                                        );
+                                                                                                      }
+                                                                                                      //depositController.fetchDepositList();
+                                                                                                      //EasyLoading.dismiss();
+                                                                                                    },
+                                                                                                  ),
                                                                                                   // نام کاربر
                                                                                                   Expanded(
                                                                                                     child: SizedBox(
@@ -765,6 +783,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                 ),
                               );
                           }
+                          EasyLoading.dismiss();
                           return ErrPage(
                           callback: () {
                           withdrawGetOneController.fetchGetOneWithdraw(withdrawGetOneController.id.value);

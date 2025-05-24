@@ -24,4 +24,24 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
       throw ErrorException('خطا:$e');
     }
 }
+  Future<List< dynamic>> updateRegistered({
+    required bool registered,
+    required int depositId,
+  })async{
+    try{
+      Map<String,dynamic> depositData={
+        "registered": registered,
+        "id": depositId,
+      };
+      print(depositData);
+
+      var response=await withdrawGetOneDio.put('Deposit/updateRegistered',data: depositData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در ریجیستر:$e');
+    }
+  }
 }

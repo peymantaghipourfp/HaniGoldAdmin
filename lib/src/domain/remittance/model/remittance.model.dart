@@ -51,6 +51,10 @@ class RemittanceModel {
   final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "registered")
+  final bool? registered;
+  @JsonKey(name: "rowNum")
+  final int? rowNum;
 
   RemittanceModel( {
     required this.date,
@@ -69,6 +73,8 @@ class RemittanceModel {
     required this.description,
     required this.recId,
     required this.infos,
+    required this.registered,
+    required this.rowNum,
   });
 
   factory RemittanceModel.fromJson(Map<String, dynamic> json) => _$RemittanceModelFromJson(json);

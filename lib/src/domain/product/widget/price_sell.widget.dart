@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -129,6 +130,7 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
     if (isSubmitting || isLoading) return;
     isSubmitting = true;
     setState(() => isLoading = true);
+    //EasyLoading.show(status: 'منتظر بمانید...');
     try {
       await productController.insertPriceItem(
         widget.id,
@@ -148,6 +150,7 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
         isLoading = false;
       });
       isSubmitting = false;
+      //EasyLoading.dismiss();
       FocusScope.of(context).unfocus();
     }
   }

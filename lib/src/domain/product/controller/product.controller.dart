@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
@@ -57,6 +58,7 @@ class ProductController extends GetxController{
   // لیست محصولات
   Future<List<ItemModel>> fetchActiveItemList() async{
     try{
+      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
       state.value=PageState.loading;
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
@@ -64,6 +66,7 @@ class ProductController extends GetxController{
         fetchedItemList.where((item) => item.status == true).toList(),
       );
       state.value=PageState.list;
+      //EasyLoading.dismiss();
       if(itemList.isEmpty){
         state.value=PageState.empty;
       }
@@ -78,6 +81,7 @@ class ProductController extends GetxController{
   }
   Future<List<ItemModel>> fetchInactiveItemList() async{
     try{
+      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
       state.value=PageState.loading;
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
@@ -85,6 +89,7 @@ class ProductController extends GetxController{
         fetchedItemList.where((item) => item.status == false).toList(),
       );
       state.value=PageState.list;
+      //EasyLoading.dismiss();
       if(itemList.isEmpty){
         state.value=PageState.empty;
       }

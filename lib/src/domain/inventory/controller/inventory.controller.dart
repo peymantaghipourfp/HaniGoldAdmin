@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -34,6 +35,7 @@ class InventoryController extends GetxController{
   var inventoryList=<InventoryModel>[].obs;
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingRegister=true.obs;
   final isLoadingDelete=false.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateGetOne=Rx<PageState>(PageState.list);
@@ -57,20 +59,28 @@ class InventoryController extends GetxController{
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   RxBool isDateSort = true.obs;
+  var sortIndex = 0.obs;
 
-  void sortByDate(bool desc ) {
-    isDateSort.value = desc;
+  void sortByDate(int columnIndex,bool desc ) {
     final list = List<InventoryModel>.from(inventoryList);
-    list.sort((a, b) {
-      if (a.date == null && b.date == null) return 0;
-      if (a.date == null) return -1;
-      if (b.date == null) return 1;
-      return desc
-          ? b.date!.compareTo(a.date!)
-          : a.date!.compareTo(b.date!);
-
-    });
+   // if (columnIndex > 0) {
+      isDateSort.value = desc;
+      list.sort((a, b) {
+        if (a.date == null && b.date == null) return 0;
+        if (a.date == null) return -1;
+        if (b.date == null) return 1;
+        return desc
+            ? b.date!.compareTo(a.date!)
+            : a.date!.compareTo(b.date!);
+      });
+   // }
     inventoryList.assignAll(list);
+    update();
+  }
+  setSort(int index,bool val){
+    isDateSort.value= val;
+    sortIndex.value= index;
+    update();
   }
 
   void setError(String message){
@@ -190,8 +200,8 @@ class InventoryController extends GetxController{
 
   Future<void> fetchInventoryList()async{
     try{
+      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
         inventoryList.clear();
-
       isLoading.value = true;
       state.value=PageState.loading;
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
@@ -214,6 +224,7 @@ class InventoryController extends GetxController{
       }
 
       state.value = inventoryList.isEmpty ? PageState.empty : PageState.list;
+      //EasyLoading.dismiss();
         inventoryList.refresh();
         update();
     }catch(e){
@@ -490,5 +501,32 @@ class InventoryController extends GetxController{
       selectedImagesDesktop.clear();
       uploadStatusesDesktop.clear();
     }
+  }
+
+  Future<List<dynamic>?> updateRegistered(int inventoryId,bool registered) async {
+    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingRegister.value = true;
+      var response = await inventoryRepository.updateRegistered(
+        inventoryId: inventoryId,
+        registered: registered,
+      );
+      if(response!= null){
+        //EasyLoading.dismiss();
+        Get.snackbar(response.first['title'],response.first["description"],
+            titleText: Text(response.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchInventoryList();
+      }
+
+    } catch (e) {
+      throw ErrorException('خطا در ریجیستر: $e');
+    } finally {
+      isLoading.value = false;
+    }
+
+    return null;
   }
 }

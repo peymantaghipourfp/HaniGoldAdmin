@@ -25,4 +25,5 @@ class DepositRequestGetOneRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
 }

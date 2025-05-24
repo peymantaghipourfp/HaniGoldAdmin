@@ -2,6 +2,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit_request_getOne.repository.dart';
 import 'package:hanigold_admin/src/domain/deposit/controller/deposit.controller.dart';
@@ -28,6 +29,7 @@ class DepositRequestGetOneController extends GetxController{
   final Rxn<DepositRequestModel> getOneDepositRequest = Rxn<DepositRequestModel>();
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var isLoading=true.obs;
+  var isLoadingRegister=true.obs;
   var errorMessage=''.obs;
 
   @override
@@ -40,10 +42,12 @@ class DepositRequestGetOneController extends GetxController{
   Future<void> fetchGetOneDepositRequest(int id)async{
     try {
       state.value=PageState.loading;
+      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
       var fetchedGetOneDepositRequest = await depositRequestGetOneRepository.getOneDepositRequest(id);
       if(fetchedGetOneDepositRequest!=null){
         getOneDepositRequest.value = fetchedGetOneDepositRequest;
         state.value=PageState.list;
+        //EasyLoading.dismiss();
         print('deposits:  ${getOneDepositRequest.value?.deposits?.length}');
       }else{
         state.value=PageState.empty;
@@ -74,6 +78,34 @@ class DepositRequestGetOneController extends GetxController{
     }finally {
       isLoading.value = false;
     }
+    return null;
+  }
+
+  Future<List<dynamic>?> updateRegistered(int depositId,bool registered) async {
+    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingRegister.value = true;
+      var response = await depositRepository.updateRegistered(
+        depositId: depositId,
+        registered: registered,
+      );
+      if(response!= null){
+        //EasyLoading.dismiss();
+        Get.snackbar(response.first['title'],response.first["description"],
+            titleText: Text(response.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        depositController.fetchDepositList();
+        fetchGetOneDepositRequest(id.value);
+      }
+
+    } catch (e) {
+      throw ErrorException('خطا در ریجیستر: $e');
+    } finally {
+      isLoading.value = false;
+    }
+
     return null;
   }
 

@@ -1,6 +1,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_getOne.controller.dart';
@@ -46,11 +47,11 @@ class DepositRequestGetOneView extends StatelessWidget {
                     child: Obx(() {
                       var getDepositRequest =
                           depositRequestGetOneController.getOneDepositRequest.value;
-                      if (depositRequestGetOneController.state.value ==
-                          PageState.loading) {
+                      if (depositRequestGetOneController.state.value == PageState.loading) {
+                        EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
                         return Center(child: CircularProgressIndicator());
-                      } else if (depositRequestGetOneController.state.value ==
-                          PageState.empty) {
+                      } else if (depositRequestGetOneController.state.value == PageState.empty) {
+                        EasyLoading.dismiss();
                         return EmptyPage(
                           title: 'واریزی وجود ندارد',
                           callback: () {
@@ -58,9 +59,8 @@ class DepositRequestGetOneView extends StatelessWidget {
                                 depositRequestGetOneController.id.value);
                           },
                         );
-                      } else if (depositRequestGetOneController.state.value ==
-                          PageState.list) {
-
+                      } else if (depositRequestGetOneController.state.value == PageState.list) {
+                        EasyLoading.dismiss();
                         if (getDepositRequest == null) {
                           return Center(child: Text('اطلاعات واریزی یافت نشد'));
                         }
@@ -252,6 +252,19 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                               top: 2, bottom: 2),
                                                           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                             children: [
+                                                              Checkbox(
+                                                                value: getOneDeposit?.registered ?? false,
+                                                                onChanged: (value) async{
+                                                                  if (value != null) {
+                                                                    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                                                                    await depositRequestGetOneController.updateRegistered(
+                                                                        getOneDeposit!.id!,
+                                                                        value
+                                                                    );
+                                                                  }
+                                                                  //EasyLoading.dismiss();
+                                                                },
+                                                              ),
                                                               Text(
                                                                 'مبلغ: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                                 style:
@@ -528,6 +541,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                     ),
                           );
                       }
+                      EasyLoading.dismiss();
                       return ErrPage(
                         callback: () {
                           depositRequestGetOneController.fetchGetOneDepositRequest(getDepositRequest?.id ?? 0);

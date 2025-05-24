@@ -1,8 +1,13 @@
 
 
+import 'dart:core';
 import 'dart:io';
-
+import 'dart:typed_data';
+import 'package:excel/excel.dart';
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -10,7 +15,9 @@ import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/upload.repository.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
@@ -21,6 +28,10 @@ import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/predicate.model.dart';
 import '../../withdraw/model/reason_rejection.model.dart';
 import '../../withdraw/model/reason_rejection_req.model.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 enum PageState{loading,err,empty,list}
 
@@ -42,6 +53,7 @@ class DepositController extends GetxController{
   var depositList=<DepositModel>[].obs;
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingRegister=true.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
@@ -237,6 +249,7 @@ class DepositController extends GetxController{
 
       isLoading.value = true;
       state.value=PageState.loading;
+        //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedDepositList=await depositRepository.getDepositList(
@@ -257,6 +270,7 @@ class DepositController extends GetxController{
       }
       print(depositList.length);
       state.value = depositList.isEmpty ? PageState.empty : PageState.list;
+      //EasyLoading.dismiss();
         depositList.refresh();
         update();
 
@@ -381,7 +395,6 @@ class DepositController extends GetxController{
   }
 
   Future<DepositModel?> updateStatusDeposit(int depositId,int status,int reasonRejectionId) async {
-    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoading.value = true;
       var response = await depositRepository.updateStatusDeposit(
@@ -390,7 +403,6 @@ class DepositController extends GetxController{
         reasonRejectionId: status==2 ? reasonRejectionId : null,
       );
       if(response!= null){
-        EasyLoading.dismiss();
         Get.snackbar("موفقیت آمیز","وضعیت واریزی با موفقیت تغییر کرد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
@@ -406,5 +418,264 @@ class DepositController extends GetxController{
     }
 
     return null;
+  }
+
+  Future<List<dynamic>?> updateRegistered(int depositId,bool registered) async {
+    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingRegister.value = true;
+      var response = await depositRepository.updateRegistered(
+        depositId: depositId,
+        registered: registered,
+      );
+      if(response!= null){
+        //EasyLoading.dismiss();
+        Get.snackbar(response.first['title'],response.first["description"],
+            titleText: Text(response.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchDepositList();
+      }
+
+    } catch (e) {
+      throw ErrorException('خطا در ریجیستر: $e');
+    } finally {
+      isLoading.value = false;
+    }
+
+    return null;
+  }
+
+  // خروجی اکسل
+  Future<void> exportToExcel() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      final excel = Excel.createExcel();
+      final sheet = excel['واریزی ها'];
+
+      sheet.appendRow([
+        TextCellValue('ردیف'),
+        TextCellValue('تاریخ درخواست'),
+        TextCellValue('نام کاربر'),
+        TextCellValue('بابت'),
+        TextCellValue('مبلغ (ریال)'),
+        TextCellValue('کد رهگیری'),
+        TextCellValue('وضعیت'),
+      ]);
+      EasyLoading.show(status: 'دریافت فایل اکسل...');
+      final allDeposits = await depositRepository.getDepositList(
+        startIndex: 1,
+        toIndex: 5000,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+      );
+
+      for (var deposit in allDeposits) {
+        sheet.appendRow([
+          TextCellValue(deposit.rowNum.toString()),
+          TextCellValue(deposit.date?.toPersianDate(twoDigits: true) ?? ''),
+          TextCellValue(deposit.wallet?.account?.name ?? ''),
+          TextCellValue(deposit.walletWithdraw?.account?.name ?? ''),
+          DoubleCellValue(double.parse(deposit.amount?.toString() ?? '')),
+          TextCellValue(deposit.trackingNumber ?? ''),
+          TextCellValue(getStatusText(deposit.status ?? 0 )),
+        ]);
+      }
+
+      final fileBytes = excel.encode();
+      if (fileBytes == null) throw Exception('خطا در دریافت فایل');
+      final uint8List = Uint8List.fromList(fileBytes);
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'deposits_${DateTime.now().millisecondsSinceEpoch}.xlsx')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      }else {
+        final output = await getDownloadsDirectory();
+        final filePath = '${output?.path}/deposits_${DateTime
+            .now()
+            .millisecondsSinceEpoch}.xlsx';
+        final fileBytes = excel.encode();
+        if (fileBytes != null) {
+          await File(filePath).writeAsBytes(uint8List);
+
+          await FileSaver.instance.saveFile(
+            name: 'deposits',
+            bytes: uint8List,
+            ext: 'xlsx',
+            mimeType: MimeType.microsoftExcel,
+          );
+        }
+      }
+      Get.snackbar('موفق', 'فایل اکسل با موفقیت دریافت شد');
+      EasyLoading.dismiss();
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در دریافت فایل اکسل: ${e.toString()}');
+      print(e.toString());
+    }
+  }
+
+  String getStatusText(int status) {
+    switch (status) {
+      case 0:
+        return 'نامشخص';
+      case 1:
+        return 'تایید شده';
+      case 2:
+        return 'تایید نشده';
+      default:
+        return 'نامعتبر';
+    }
+  }
+
+  // خروجی pdf
+  Future<void> exportToPdf() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      EasyLoading.show(status: 'دریافت فایل PDF...');
+
+      // دریافت داده‌ها
+      final allDeposits = await depositRepository.getDepositList(
+        startIndex: 1,
+        toIndex: 5000,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+      );
+      const itemsPerPage = 15;
+      final totalPages = (allDeposits.length / itemsPerPage).ceil();
+
+      final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+      final ttf = pw.Font.ttf(fontData);
+
+      final pdf = pw.Document();
+      for (int page = 0; page < totalPages; page++){
+        final start = page * itemsPerPage;
+        final end = (page + 1) * itemsPerPage;
+        final currentDeposits = allDeposits.sublist(
+          start,
+          end > allDeposits.length ? allDeposits.length : end,
+        );
+        pdf.addPage(
+          pw.Page(
+            pageFormat: PdfPageFormat.a4,
+            theme: pw.ThemeData.withFont(
+              base: ttf,
+            ),
+            build: (pw.Context context) {
+              return pw.Directionality(
+                textDirection: pw.TextDirection.rtl,
+                child: pw.Table(
+                  border: pw.TableBorder.all(),
+                  columnWidths: {
+                    0: pw.FlexColumnWidth(2),
+                    1: pw.FlexColumnWidth(3),
+                    2: pw.FlexColumnWidth(3),
+                    3: pw.FlexColumnWidth(3),
+                    4: pw.FlexColumnWidth(3),
+                    5: pw.FlexColumnWidth(2.5),
+                    6: pw.FlexColumnWidth(1.5),
+                  },
+                  children: [
+                    // هدر جدول
+                    pw.TableRow(
+                      decoration: pw.BoxDecoration(color: PdfColors.grey300),
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: pw.Text('وضعیت', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10) ),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: pw.Text('کد رهگیری', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: pw.Text('مبلغ (ریال)', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: pw.Text('بابت', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: pw.Text('نام کاربر', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: pw.Text('تاریخ درخواست', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(8.0),
+                          child: pw.Text('ردیف', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+                        ),
+                      ],
+                    ),
+                    // داده‌ها
+                    for (var deposit in currentDeposits)
+                      pw.TableRow(
+                        children: [
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(8.0),
+                            child: pw.Text(getStatusText(deposit.status ?? 0),style: pw.TextStyle(fontSize: 9)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(8.0),
+                            child: pw.Text(deposit.trackingNumber ?? '',style: pw.TextStyle(fontSize: 9)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(8.0),
+                            child: pw.Text(deposit.amount?.toString().seRagham(separator: ',') ?? '',style: pw.TextStyle(fontSize: 9)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(8.0),
+                            child: pw.Text(deposit.walletWithdraw?.account?.name ?? '',style: pw.TextStyle(fontSize: 9)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(8.0),
+                            child: pw.Text(deposit.wallet?.account?.name ?? '',style: pw.TextStyle(fontSize: 9)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(8.0),
+                            child: pw.Text(deposit.date?.toPersianDate(twoDigits: true) ?? '',style: pw.TextStyle(fontSize: 9)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(8.0),
+                            child: pw.Text(deposit.rowNum.toString(),textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 9)),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      }
+
+      final bytes = await pdf.save();
+
+      if (kIsWeb) {
+        final blob = html.Blob([bytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: url)
+          ..download = 'deposits_${DateTime.now().millisecondsSinceEpoch}.pdf'
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: 'deposits.pdf',
+        );
+      }
+
+      EasyLoading.dismiss();
+      Get.snackbar('موفق', 'فایل PDF با موفقیت دریافت شد');
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar('خطا', 'خطا در دریافت فایل PDF: ${e.toString()}');
+      print(e.toString());
+    }
   }
 }

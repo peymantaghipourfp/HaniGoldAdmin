@@ -64,6 +64,7 @@ class RemittanceController extends GetxController{
   BalanceModel? balanceModel;
   String? indexAccountPayerGet;
   var isLoading=false.obs;
+  var isLoadingRegister=false.obs;
   var namePayer="".obs;
   var mobilePayer="".obs;
   getAccountPayer(String index){
@@ -290,6 +291,30 @@ Timer? debounceP;
     return null;
   }
 
+  Future<List<dynamic>?> updateRegistered(int remittanceId,bool registered) async {
+    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingRegister.value = true;
+      var response = await remittanceRepository.updateRegistered(
+        remittanceId: remittanceId,
+        registered: registered,
+      );
+      if(response!= null){
+        //EasyLoading.dismiss();
+        Get.snackbar(response.first['title'],response.first["description"],
+            titleText: Text(response.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchRemittanceList();
+      }
 
+    } catch (e) {
+      throw ErrorException('خطا در ریجیستر: $e');
+    } finally {
+      isLoadingRegister.value = false;
+    }
 
+    return null;
+  }
 }

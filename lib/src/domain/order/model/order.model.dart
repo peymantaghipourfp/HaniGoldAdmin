@@ -51,6 +51,8 @@ class OrderModel {
   final double? limitPrice;
   @JsonKey(name: "description")
   final String? description;
+  @JsonKey(name: "registered")
+  final bool? registered;
 
   OrderModel({
     required this.date,
@@ -71,7 +73,8 @@ class OrderModel {
     required this.recId,
     required this.infos,
     required this.limitPrice,
-    required this.description
+    required this.description,
+    required this.registered
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => _$OrderModelFromJson(json);

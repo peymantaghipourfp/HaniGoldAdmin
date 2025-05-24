@@ -1,6 +1,7 @@
 
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit_request.repository.dart';
 import 'package:hanigold_admin/src/config/repository/reason_rejection.repository.dart';
@@ -225,6 +226,7 @@ class WithdrawController extends GetxController{
 
       isLoading.value = true;
       state.value=PageState.loading;
+        //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
       final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
@@ -247,6 +249,7 @@ class WithdrawController extends GetxController{
         }
       }
       state.value = withdrawList.isEmpty ? PageState.empty : PageState.list;
+      //EasyLoading.dismiss();
       withdrawList.refresh();
       update();
     }

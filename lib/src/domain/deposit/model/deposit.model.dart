@@ -32,6 +32,8 @@ class DepositModel {
   final int? status;
   @JsonKey(name: "isDeleted")
   final bool? isDeleted;
+  @JsonKey(name: "registered")
+  final bool? registered;
   @JsonKey(name: "attachments")
   final List<Attachment>? attachments;
   @JsonKey(name: "rowNum")
@@ -58,6 +60,7 @@ class DepositModel {
     required this.amount,
     required this.status,
     required this.isDeleted,
+    required this.registered,
     required this.attachments,
     required this.rowNum,
     required this.id,

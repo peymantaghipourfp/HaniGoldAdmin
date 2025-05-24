@@ -1,5 +1,6 @@
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
@@ -30,6 +31,7 @@ class OrderController extends GetxController{
   var orderList=<OrderModel>[].obs;
   var errorMessage=''.obs;
   var isLoading=true.obs;
+  var isLoadingRegister=true.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
 
   RxInt selectedAccountId = 0.obs;
@@ -166,6 +168,7 @@ class OrderController extends GetxController{
 
   Future<List<OrderModel>> fetchOrderList() async{
     try{
+      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
         orderList.clear();
         isLoading.value=true;
       state.value=PageState.loading;
@@ -190,8 +193,10 @@ class OrderController extends GetxController{
       }
 
       state.value = orderList.isEmpty ? PageState.empty : PageState.list;
+      //EasyLoading.dismiss();
         orderList.refresh();
         update();
+
     }catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -242,6 +247,33 @@ class OrderController extends GetxController{
       isLoading.value = false;
 
     }
+    return null;
+  }
+
+  Future<List<dynamic>?> updateRegistered(int orderId,bool registered) async {
+    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingRegister.value = true;
+      var response = await orderRepository.updateRegistered(
+        orderId: orderId,
+        registered: registered,
+      );
+      if(response!= null){
+        //EasyLoading.dismiss();
+        Get.snackbar(response.first['title'],response.first["description"],
+            titleText: Text(response.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchOrderList();
+      }
+
+    } catch (e) {
+      throw ErrorException('خطا در ریجیستر: $e');
+    } finally {
+      isLoading.value = false;
+    }
+
     return null;
   }
 

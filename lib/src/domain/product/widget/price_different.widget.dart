@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
@@ -109,7 +110,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
 
     isSubmitting = true;
     setState(() => isLoading = true);
-
+    //EasyLoading.show(status: 'منتظر بمانید...');
     try {
       await productController.insertDifferentPriceItem(
         widget.id,
@@ -126,6 +127,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
     } finally {
       setState(() => isLoading = false);
       isSubmitting = false;
+      //EasyLoading.dismiss();
       FocusScope.of(context).unfocus();
     }
   }

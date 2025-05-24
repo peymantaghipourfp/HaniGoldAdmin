@@ -456,4 +456,25 @@ class DepositRepository{
       throw ErrorException('خطا در تغییر وضعیت:$e');
     }
   }
+
+  Future<List< dynamic>> updateRegistered({
+    required bool registered,
+    required int depositId,
+  })async{
+    try{
+      Map<String,dynamic> depositData={
+        "registered": registered,
+        "id": depositId,
+      };
+      print(depositData);
+
+      var response=await depositDio.put('Deposit/updateRegistered',data: depositData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در ریجیستر:$e');
+    }
+  }
 }

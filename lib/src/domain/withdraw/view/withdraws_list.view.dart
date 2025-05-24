@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -122,9 +123,11 @@ class WithdrawsListView extends StatelessWidget {
                     ),
                     Obx(() {
                       if (withdrawController.state.value == PageState.loading) {
+                        EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
                         return Center(child: CircularProgressIndicator());
                       } else
                       if (withdrawController.state.value == PageState.empty) {
+                        EasyLoading.dismiss();
                         return EmptyPage(
                           title: 'درخواستی وجود ندارد',
                           callback: () {
@@ -132,6 +135,7 @@ class WithdrawsListView extends StatelessWidget {
                           },
                         );
                       } else if (withdrawController.state.value == PageState.list) {
+                        EasyLoading.dismiss();
                         return isDesktop ?
                         Expanded(
                           child: SingleChildScrollView(
@@ -1473,6 +1477,7 @@ class WithdrawsListView extends StatelessWidget {
                           ),
                         );
                       }
+                      EasyLoading.dismiss();
                       return ErrPage(
                         callback: () {
                           withdrawController.fetchWithdrawList();
@@ -1526,6 +1531,8 @@ class WithdrawsListView extends StatelessWidget {
   List<DataColumn> buildDataColumns() {
     return [
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('تاریخ تراکنش', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center),
       /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
@@ -1558,6 +1565,7 @@ class WithdrawsListView extends StatelessWidget {
         DataRow(
           color: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.1)),
           cells: [
+            DataCell(SizedBox.shrink()),
             DataCell(
               Column(
                 children: [
@@ -1611,6 +1619,14 @@ class WithdrawsListView extends StatelessWidget {
             ),
 
             cells: [
+              // ردیف
+              DataCell(
+                  Center(
+                    child: Text(
+                      "${withdraw.rowNum}",
+                      style: AppTextStyle.labelText,
+                    ),
+                  )),
               // تاریخ تراکنش
               DataCell(
                   Center(

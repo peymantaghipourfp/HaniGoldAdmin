@@ -35,6 +35,7 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
       infos: json['infos'] as List<dynamic>?,
       limitPrice: (json['limitPrice'] as num?)?.toDouble(),
       description: json['description'] as String?,
+      registered: json['registered'] as bool?,
     );
 
 Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
@@ -58,6 +59,7 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'infos': instance.infos,
       'limitPrice': instance.limitPrice,
       'description': instance.description,
+      'registered': instance.registered,
     };
 
 Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(

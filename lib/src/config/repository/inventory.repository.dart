@@ -870,4 +870,25 @@ class InventoryRepository {
       throw ErrorException('خطا در آپدیت اطلاعات:$e');
     }
   }
+
+  Future<List< dynamic>> updateRegistered({
+    required bool registered,
+    required int inventoryId,
+  })async{
+    try{
+      Map<String,dynamic> inventoryData={
+        "registered": registered,
+        "id": inventoryId,
+      };
+      print(inventoryData);
+
+      var response=await inventoryDio.put('Inventory/updateRegistered',data: inventoryData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در ریجیستر:$e');
+    }
+  }
 }

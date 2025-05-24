@@ -103,6 +103,8 @@ class RemittanceView extends GetView<RemittanceController> {
 
   List<DataColumn> buildDataColumns() {
     return [
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
@@ -191,6 +193,36 @@ class RemittanceView extends GetView<RemittanceController> {
       //print(" تسسسسسسسست ${inventory.inventoryDetails?.first.itemUnit?.name}");
       return DataRow(
         cells: [
+          // ردیف
+          DataCell(
+              Center(
+                child:
+                Row(
+                  children: [
+                    // رجیستر
+                    Checkbox(
+                      value: remittance.registered ?? false,
+                      onChanged: (value) async{
+                        if (value != null) {
+                          //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                          await controller.updateRegistered(
+                              remittance.id!,
+                              value
+                          );
+                        }
+                        controller.fetchRemittanceList();
+                        //EasyLoading.dismiss();
+                      },
+                    ),
+                    SizedBox(width: 5,),
+                    Text("${remittance.rowNum}",
+                      style:
+                      AppTextStyle.bodyText,
+                    ),
+                  ],
+                ),
+              ),
+          ),
           // تاریخ
           DataCell(Center(
             child: Text(

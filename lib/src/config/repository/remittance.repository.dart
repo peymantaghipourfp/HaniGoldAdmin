@@ -146,4 +146,25 @@ class RemittanceRepository{
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
+
+  Future<List< dynamic>> updateRegistered({
+    required bool registered,
+    required int remittanceId,
+  })async{
+    try{
+      Map<String,dynamic> remittanceData={
+        "registered": registered,
+        "id": remittanceId,
+      };
+      print(remittanceData);
+
+      var response=await remittanceDio.put('Remittance/updateRegistered',data: remittanceData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در ریجیستر:$e');
+    }
+  }
 }

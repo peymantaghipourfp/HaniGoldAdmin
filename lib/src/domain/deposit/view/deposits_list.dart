@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/deposit/controller/deposit.controller.dart';
@@ -91,14 +92,63 @@ class DepositsListView extends StatelessWidget {
                                 SizedBox(
                                   width: 5,
                                 ),
+                                // خروجی اکسل
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                      padding: WidgetStatePropertyAll(
+                                        EdgeInsets.symmetric(
+                                            horizontal: 15,vertical: 7
+                                        ),
+                                      ),
+                                      elevation: WidgetStatePropertyAll(5),
+                                      backgroundColor:
+                                      WidgetStatePropertyAll(AppColor.secondary3Color),
+                                      shape: WidgetStatePropertyAll(
+                                          RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  5)))),
+                                  onPressed: () {
+                                   depositController.exportToExcel();
+                                  },
+                                  child: Text(
+                                    'خروجی اکسل',
+                                    style: AppTextStyle.labelText,
+                                  ),
+                                ),
+                                SizedBox(width: 5,),
+                                // خروجی pdf
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                      padding: WidgetStatePropertyAll(
+                                        EdgeInsets.symmetric(
+                                            horizontal: 15,vertical: 7
+                                        ),
+                                      ),
+                                      elevation: WidgetStatePropertyAll(5),
+                                      backgroundColor:
+                                      WidgetStatePropertyAll(AppColor.secondary3Color),
+                                      shape: WidgetStatePropertyAll(
+                                          RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(
+                                                  5)))),
+                                  onPressed: () {
+                                    depositController.exportToPdf();
+                                  },
+                                  child: Text(
+                                    'خروجی pdf',
+                                    style: AppTextStyle.labelText,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
                           // لیست واریزی ها
                           Obx(() {
                             if (depositController.state.value == PageState.loading) {
+                              EasyLoading.show(status: 'لطفا منتظر بمانید...');
                               return Center(child: CircularProgressIndicator());
                             } else if (depositController.state.value == PageState.empty) {
+                              EasyLoading.dismiss();
                               return EmptyPage(
                                 title: 'واریزی وجود ندارد',
                                 callback: () {
@@ -106,6 +156,7 @@ class DepositsListView extends StatelessWidget {
                                 },
                               );
                             } else if (depositController.state.value == PageState.list) {
+                              EasyLoading.dismiss();
                               // لیست واریزی ها
                               return
                                   isDesktop ?
@@ -478,6 +529,21 @@ class DepositsListView extends StatelessWidget {
                                                         Row(mainAxisAlignment: MainAxisAlignment
                                                             .spaceBetween,
                                                           children: [
+                                                            // رجیستر
+                                                            Checkbox(
+                                                              value: deposits.registered ?? false,
+                                                              onChanged: (value) async{
+                                                                if (value != null) {
+                                                                  //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                                                                  await depositController.updateRegistered(
+                                                                      deposits.id!,
+                                                                      value
+                                                                  );
+                                                                }
+                                                                depositController.fetchDepositList();
+                                                                //EasyLoading.dismiss();
+                                                              },
+                                                            ),
                                                             // آیکون ویرایش
                                                             GestureDetector(
                                                               onTap: () {
@@ -576,6 +642,7 @@ class DepositsListView extends StatelessWidget {
                                   );
 
                             }
+                            EasyLoading.dismiss();
                             return ErrPage(
                               callback: () {
                                 depositController.fetchDepositList();
@@ -658,9 +725,29 @@ class DepositsListView extends StatelessWidget {
           // ردیف
           DataCell(
               Center(
-                child: Text(
-                  "${deposit.rowNum}",
-                  style: AppTextStyle.labelText,
+                child: Row(
+                  children: [
+                    // رجیستر
+                    Checkbox(
+                      value: deposit.registered ?? false,
+                      onChanged: (value) async{
+                        if (value != null) {
+                          //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                          await depositController.updateRegistered(
+                              deposit.id!,
+                              value
+                          );
+                        }
+                        depositController.fetchDepositList();
+                        //EasyLoading.dismiss();
+                      },
+                    ),
+                    SizedBox(width: 5,),
+                    Text(
+                      "${deposit.rowNum}",
+                      style: AppTextStyle.labelText,
+                    ),
+                  ],
                 ),
               )),
           // تاریخ

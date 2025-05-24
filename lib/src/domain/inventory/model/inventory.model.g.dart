@@ -34,6 +34,7 @@ InventoryModel _$InventoryModelFromJson(Map<String, dynamic> json) =>
       balances: (json['balances'] as List<dynamic>?)
           ?.map((e) => Balance.fromJson(e as Map<String, dynamic>))
           .toList(),
+      registered: json['registered'] as bool?,
     );
 
 Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
@@ -53,6 +54,7 @@ Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
       'description': instance.description,
       'inventoryDetailsCount': instance.inventoryDetailsCount,
       'balances': instance.balances,
+      'registered': instance.registered,
     };
 
 Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(

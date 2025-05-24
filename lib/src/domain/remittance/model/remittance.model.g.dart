@@ -39,6 +39,8 @@ RemittanceModel _$RemittanceModelFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
+      registered: json['registered'] as bool?,
+      rowNum: (json['rowNum'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$RemittanceModelToJson(RemittanceModel instance) =>
@@ -59,4 +61,6 @@ Map<String, dynamic> _$RemittanceModelToJson(RemittanceModel instance) =>
       'description': instance.description,
       'recId': instance.recId,
       'infos': instance.infos,
+      'registered': instance.registered,
+      'rowNum': instance.rowNum,
     };

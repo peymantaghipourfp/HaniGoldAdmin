@@ -29,6 +29,7 @@ DepositModel _$DepositModelFromJson(Map<String, dynamic> json) => DepositModel(
       amount: (json['amount'] as num?)?.toInt(),
       status: (json['status'] as num?)?.toInt(),
       isDeleted: json['isDeleted'] as bool?,
+      registered: json['registered'] as bool?,
       attachments: (json['attachments'] as List<dynamic>?)
           ?.map((e) => Attachment.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -54,6 +55,7 @@ Map<String, dynamic> _$DepositModelToJson(DepositModel instance) =>
       'amount': instance.amount,
       'status': instance.status,
       'isDeleted': instance.isDeleted,
+      'registered': instance.registered,
       'attachments': instance.attachments,
       'rowNum': instance.rowNum,
       'id': instance.id,

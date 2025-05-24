@@ -16,7 +16,6 @@ class OrderRepository{
       Map<String, dynamic> options = {
         "options": {
           "order": {
-
               "Predicate": [
                 {
                   "innerCondition": 0,
@@ -322,6 +321,27 @@ class OrderRepository{
     }
     catch(e){
       throw ErrorException('خطا در حذف:$e');
+    }
+  }
+
+  Future<List< dynamic>> updateRegistered({
+    required bool registered,
+    required int orderId,
+  })async{
+    try{
+      Map<String,dynamic> orderData={
+        "registered": registered,
+        "id": orderId,
+      };
+      print(orderData);
+
+      var response=await orderDio.put('Order/updateRegistered',data: orderData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در ریجیستر:$e');
     }
   }
 }
