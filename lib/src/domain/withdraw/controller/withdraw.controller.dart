@@ -1,6 +1,11 @@
 
-
+import 'dart:io';
+import 'dart:typed_data';
+import 'package:excel/excel.dart';
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit_request.repository.dart';
@@ -16,6 +21,7 @@ import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -24,13 +30,17 @@ import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../users/model/balance_item.model.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 
 enum PageState{loading,err,empty,list}
 class WithdrawController extends GetxController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 15.obs;
+  RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
 
@@ -585,5 +595,259 @@ class WithdrawController extends GetxController{
   void resetAccountSearch() {
     searchController.clear();
     searchedAccounts.assignAll(accountList);
+  }
+
+  // خروجی اکسل
+  Future<void> exportToExcel() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      final excel = Excel.createExcel();
+      final sheet = excel['برداشت ها'];
+
+      sheet.appendRow([
+        TextCellValue('ردیف'),
+        TextCellValue('تاریخ'),
+        TextCellValue('نام کاربر'),
+        TextCellValue('دارنده حساب'),
+        TextCellValue('مبلغ کل'),
+        TextCellValue('مبلغ مانده'),
+        TextCellValue('مبلغ واریز شده'),
+        TextCellValue('وضعیت'),
+      ]);
+      EasyLoading.show(status: 'دریافت فایل اکسل...');
+      final allWithdraws = await withdrawRepository.getWithdrawList(
+        startIndex: 1,
+        toIndex: 5000,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+      );
+
+      for (var withdraw in allWithdraws) {
+        sheet.appendRow([
+          TextCellValue(withdraw.rowNum.toString()),
+          TextCellValue(withdraw.requestDate?.toPersianDate(twoDigits: true) ?? ''),
+          TextCellValue(withdraw.wallet?.account?.name ?? ''),
+          TextCellValue("${withdraw.ownerName} (${withdraw.bank?.name})" ?? ''),
+          TextCellValue(withdraw.amount?.toString() ?? ''),
+          TextCellValue(withdraw.undividedAmount?.toString() ?? ''),
+          TextCellValue(withdraw.paidAmount?.toString() ?? ''),
+          TextCellValue(getStatusText(withdraw.status ?? 0 )),
+        ]);
+      }
+
+      final fileBytes = excel.encode();
+      if (fileBytes == null) throw Exception('خطا در دریافت فایل');
+      final uint8List = Uint8List.fromList(fileBytes);
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'withdraws_${DateTime.now().millisecondsSinceEpoch}.xlsx')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      }else {
+        final output = await getDownloadsDirectory();
+        final filePath = '${output?.path}/withdraws_${DateTime
+            .now()
+            .millisecondsSinceEpoch}.xlsx';
+        final fileBytes = excel.encode();
+        if (fileBytes != null) {
+          await File(filePath).writeAsBytes(uint8List);
+
+          await FileSaver.instance.saveFile(
+            name: 'withdraws',
+            bytes: uint8List,
+            ext: 'xlsx',
+            mimeType: MimeType.microsoftExcel,
+          );
+        }
+      }
+      Get.snackbar('موفق', 'فایل اکسل با موفقیت دریافت شد');
+      EasyLoading.dismiss();
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar('خطا', 'خطا در دریافت فایل اکسل: ${e.toString()}');
+      print(e.toString());
+    }
+  }
+
+  String getStatusText(int status) {
+    switch (status) {
+      case 0:
+        return 'نامشخص';
+      case 1:
+        return 'تایید شده';
+      case 2:
+        return 'تایید نشده';
+      default:
+        return 'نامعتبر';
+    }
+  }
+
+  // خروجی pdf
+  Future<void> exportToPdf() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      EasyLoading.show(status: 'دریافت فایل PDF...');
+
+      final allWithdraws = await withdrawRepository.getWithdrawList(
+        startIndex: 1,
+        toIndex: 500,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+      );
+
+      final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+      final ttf = pw.Font.ttf(fontData);
+
+      final pdf = pw.Document();
+
+      // افزودن MultiPage برای مدیریت خودکار صفحه‌بندی
+      pdf.addPage(
+        pw.MultiPage(
+          textDirection: pw.TextDirection.rtl,
+          maxPages: 2000,
+          theme: pw.ThemeData.withFont(base: ttf,fontFallback: [ttf],),
+          header: (pw.Context context) => buildHeaderTable(),
+          build: (pw.Context context) => [
+            pw.Table(
+              border: pw.TableBorder.all(),
+              columnWidths: getColumnWidths(),
+              children: [
+                for (var withdraw in allWithdraws)
+                  buildDataRow(withdraw),
+              ],
+            ),
+          ],
+          footer: (pw.Context context) => buildPageNumber(context.pageNumber, context.pagesCount),
+        ),
+      );
+
+      final bytes = await pdf.save();
+      if (kIsWeb) {
+        final blob = html.Blob([bytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: url)
+          ..download = 'withdraws_${DateTime.now().millisecondsSinceEpoch}.pdf'
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: 'withdraws.pdf',
+        );
+      }
+
+      EasyLoading.dismiss();
+      Get.snackbar('موفق', 'فایل PDF با موفقیت دریافت شد');
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar('خطا', 'خطا در دریافت فایل PDF: ${e.toString()}');
+      print(e.toString());
+    }
+  }
+
+  Map<int, pw.TableColumnWidth> getColumnWidths() {
+    return {
+      0: pw.FlexColumnWidth(2),
+      1: pw.FlexColumnWidth(3),
+      2: pw.FlexColumnWidth(3),
+      3: pw.FlexColumnWidth(3),
+      4: pw.FlexColumnWidth(3),
+      5: pw.FlexColumnWidth(3),
+      6: pw.FlexColumnWidth(2.5),
+      7: pw.FlexColumnWidth(1.5),
+    };
+  }
+  // ساخت هدر جدول
+  pw.Table buildHeaderTable() {
+    return pw.Table(
+      columnWidths: {
+        0: pw.FlexColumnWidth(2),
+        1: pw.FlexColumnWidth(3),
+        2: pw.FlexColumnWidth(3),
+        3: pw.FlexColumnWidth(3),
+        4: pw.FlexColumnWidth(3),
+        5: pw.FlexColumnWidth(3),
+        6: pw.FlexColumnWidth(2.5),
+        7: pw.FlexColumnWidth(1.5),
+      },
+      border: pw.TableBorder.all(),
+      children: [
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColors.grey300),
+          children: [
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('وضعیت', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8) ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('مبلغ واریز شده', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('مبلغ مانده', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('مبلغ کل', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('دارنده ساب', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('نام کاربر', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('تاریخ', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('ردیف', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  // ساخت سلول‌های داده
+  pw.Padding buildDataCell(String text, {bool isCenter = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(5.0),
+      child: pw.Text(text,
+        style: pw.TextStyle(fontSize: 8),
+        textAlign: isCenter ? pw.TextAlign.center : pw.TextAlign.right,
+        textDirection: pw.TextDirection.rtl,
+      ),
+    );
+  }
+
+  pw.TableRow buildDataRow(WithdrawModel withdraw) {
+    return pw.TableRow(
+      children: [
+        buildDataCell(getStatusText(withdraw.status ?? 0)),
+        buildDataCell(withdraw.paidAmount?.toString().seRagham(separator: ',') ?? ''),
+        buildDataCell(withdraw.undividedAmount?.toString().seRagham(separator: ',') ?? ''),
+        buildDataCell(withdraw.amount?.toString().seRagham(separator: ',') ?? ''),
+        buildDataCell("${withdraw.ownerName} ${withdraw.bank?.name}" ?? ''),
+        buildDataCell(withdraw.wallet?.account?.name ?? ''),
+        buildDataCell(withdraw.requestDate?.toPersianDate(twoDigits: true) ?? ''),
+        buildDataCell(withdraw.rowNum.toString(), isCenter: true),
+      ],
+    );
+  }
+
+  pw.Widget buildPageNumber(int currentPage, int totalPages) {
+    return pw.Container(
+      alignment: pw.Alignment.center,
+      margin: const pw.EdgeInsets.only(top: 20),
+      child: pw.Text(
+        'صفحه ${currentPage.toString().toPersianDigit()} از ${totalPages.toString().toPersianDigit()}',
+        style: pw.TextStyle(fontSize: 8),
+      ),
+    );
   }
 }

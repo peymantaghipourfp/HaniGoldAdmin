@@ -80,7 +80,7 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                             constraints: BoxConstraints(maxWidth: 700),
                             padding: EdgeInsets.symmetric(
                                 horizontal: 40, vertical: 20),
-                            decoration: BoxDecoration(
+                            /*decoration: BoxDecoration(
                               color: AppColor.backGroundColor1,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
@@ -90,7 +90,7 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                   offset: Offset(0, 4),
                                 ),
                               ],
-                            ),
+                            ),*/
                             child: SizedBox(
                               width: Get.width * 0.9,
                               height: Get.height,

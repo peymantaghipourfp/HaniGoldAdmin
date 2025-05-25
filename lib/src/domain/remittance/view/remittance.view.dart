@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../controller/remittance.controller.dart';
 
@@ -13,90 +15,95 @@ class RemittanceView extends GetView<RemittanceController> {
   @override
   Widget build(BuildContext context) {
     return Obx(() => Scaffold(
-          appBar: CustomAppBar(
+          appBar: CustomAppbar1(
             title: 'لیست حواله',
-            onBackTap: () => Get.back(),
+            onBackTap: () => Get.offNamed('/home'),
           ),
-          body: SafeArea(
-            child: controller.state.value == PageState.loading
-                ? Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : controller.state.value == PageState.list
-                    ? SizedBox(
-                      height: Get.height,width: Get.width,
-                        child: Column(
-                          children: [
-                            //فیلد جستجو
-                            Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: 15, vertical: 10),
-                              height: 41,
-                              child: TextFormField(
-                                controller: controller.searchController,
-                                style: AppTextStyle.labelText,
-                                textInputAction: TextInputAction.search,
-                                onFieldSubmitted: (value) async {},
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  filled: true,
-                                  fillColor: AppColor.textFieldColor,
-                                  hintText: "جستجو ... ",
-                                  hintStyle: AppTextStyle.labelText,
-                                  prefixIcon: IconButton(
-                                      onPressed: () async {},
-                                      icon: Icon(
-                                        Icons.search,
-                                        color: AppColor.textColor,
-                                        size: 30,
-                                      )),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                controller: controller.scrollController,
-                                physics: ClampingScrollPhysics(),
-                                child: Row(
-                                  children: [
-                                    SingleChildScrollView(
-                                      child: Column(
-                                        children: [
-                                          DataTable(
-                                            columns: buildDataColumns(),
-                                            dividerThickness: 0.3,
-                                            rows: buildDataRows(context),
-                                            border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
-                                            dataRowMaxHeight: 90,
-                                            //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                            //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                            headingRowHeight: 60,
-                                            columnSpacing: 25,
-                                            horizontalMargin: 6,
-                                          ),
-                                          buildPaginationControls(),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+          body: Stack(
+            children: [
+              BackgroundImageTotal(),
+              SafeArea(
+                child: controller.state.value == PageState.loading
+                    ? Center(
+                        child: CircularProgressIndicator(),
                       )
-                    : Center(
-                        child: Text(
-                          'خطا در سمت سرور رخ داده',
-                          style: AppTextStyle.labelText.copyWith(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                    : controller.state.value == PageState.list
+                        ? SizedBox(
+                          height: Get.height,width: Get.width,
+                            child: Column(
+                              children: [
+                                //فیلد جستجو
+                                Container(
+                                  margin: EdgeInsets.symmetric(
+                                      horizontal: 15, vertical: 10),
+                                  height: 41,
+                                  child: TextFormField(
+                                    controller: controller.searchController,
+                                    style: AppTextStyle.labelText,
+                                    textInputAction: TextInputAction.search,
+                                    onFieldSubmitted: (value) async {},
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      filled: true,
+                                      fillColor: AppColor.textFieldColor,
+                                      hintText: "جستجو ... ",
+                                      hintStyle: AppTextStyle.labelText,
+                                      prefixIcon: IconButton(
+                                          onPressed: () async {},
+                                          icon: Icon(
+                                            Icons.search,
+                                            color: AppColor.textColor,
+                                            size: 30,
+                                          )),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    controller: controller.scrollController,
+                                    physics: ClampingScrollPhysics(),
+                                    child: Row(
+                                      children: [
+                                        SingleChildScrollView(
+                                          child: Column(
+                                            children: [
+                                              DataTable(
+                                                columns: buildDataColumns(),
+                                                dividerThickness: 0.3,
+                                                rows: buildDataRows(context),
+                                                border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
+                                                dataRowMaxHeight: 90,
+                                                //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                                //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                                headingRowHeight: 60,
+                                                columnSpacing: 25,
+                                                horizontalMargin: 6,
+                                              ),
+                                              buildPaginationControls(),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Center(
+                            child: Text(
+                              'خطا در سمت سرور رخ داده',
+                              style: AppTextStyle.labelText.copyWith(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
+              ),
+            ],
           ),
         ));
   }

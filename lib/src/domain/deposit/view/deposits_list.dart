@@ -38,26 +38,31 @@ class DepositsListView extends StatelessWidget {
                   child:
                       Column(
                         children: [
+                          isDesktop?
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               children: [
                                 //فیلد جستجو
                                 Expanded(
-                                  child: SizedBox(
-                                    height: 41,
+                                  child: Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                                    padding: EdgeInsets.symmetric(horizontal: 20),
+                                    color: AppColor.appBarColor.withOpacity(0.5),
+                                    alignment: Alignment.center,
+                                    height: 80,
                                     child: TextFormField(
                                       controller: depositController.searchController,
                                       style: AppTextStyle.labelText,
                                       textInputAction: TextInputAction.search,
                                       onFieldSubmitted: (value) async {
-                                  if (value.isNotEmpty) {
-                                    await depositController.searchAccounts(value);
-                                    showSearchResults(context);
-                                  } else {
+                                      if (value.isNotEmpty) {
+                                        await depositController.searchAccounts(value);
+                                        showSearchResults(context);
+                                      } else {
                                     depositController.clearSearch();
-                                  }
-                                },
+                                          }
+                                        },
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(10),
@@ -73,9 +78,9 @@ class DepositsListView extends StatelessWidget {
                                               depositController.searchController.text
                                           );
                                           showSearchResults(context);
-                                        }else {
+                                          }else {
                                                 depositController.clearSearch();
-                                        }
+                                              }
                                             },
                                             icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
                                         ),
@@ -89,55 +94,157 @@ class DepositsListView extends StatelessWidget {
                                     ),
                                   ),
                                 ),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                // خروجی اکسل
-                                ElevatedButton(
-                                  style: ButtonStyle(
-                                      padding: WidgetStatePropertyAll(
-                                        EdgeInsets.symmetric(
-                                            horizontal: 15,vertical: 7
+                              ],
+                            ),
+                          ) :
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: [
+                                //فیلد جستجو
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Container(
+                                        margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                                        padding: EdgeInsets.symmetric(horizontal: 20),
+                                        color: AppColor.appBarColor.withOpacity(0.5),
+                                        alignment: Alignment.center,
+                                        height: 80,
+                                        child: TextFormField(
+                                          controller: depositController.searchController,
+                                          style: AppTextStyle.labelText,
+                                          textInputAction: TextInputAction.search,
+                                          onFieldSubmitted: (value) async {
+                                            if (value.isNotEmpty) {
+                                              await depositController.searchAccounts(value);
+                                              showSearchResults(context);
+                                            } else {
+                                              depositController.clearSearch();
+                                            }
+                                          },
+                                          decoration: InputDecoration(
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                            ),
+                                            filled: true,
+                                            fillColor: AppColor.textFieldColor,
+                                            hintText: "جستجو ... ",
+                                            hintStyle: AppTextStyle.labelText,
+                                            prefixIcon: IconButton(
+                                                onPressed: ()async{
+                                                  if (depositController.searchController.text.isNotEmpty) {
+                                                    await depositController.searchAccounts(
+                                                        depositController.searchController.text
+                                                    );
+                                                    showSearchResults(context);
+                                                  }else {
+                                                    depositController.clearSearch();
+                                                  }
+                                                },
+                                                icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
+                                            ),
+                                            suffixIcon: depositController.selectedAccountId.value > 0
+                                                ? IconButton(
+                                              onPressed: depositController.clearSearch,
+                                              icon: Icon(Icons.close, color: AppColor.textColor),
+                                            )
+                                                : null,
+                                          ),
                                         ),
                                       ),
-                                      elevation: WidgetStatePropertyAll(5),
-                                      backgroundColor:
-                                      WidgetStatePropertyAll(AppColor.secondary3Color),
-                                      shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  5)))),
-                                  onPressed: () {
-                                   depositController.exportToExcel();
-                                  },
-                                  child: Text(
-                                    'خروجی اکسل',
-                                    style: AppTextStyle.labelText,
-                                  ),
+                                    ),
+                                  ],
                                 ),
-                                SizedBox(width: 5,),
-                                // خروجی pdf
-                                ElevatedButton(
-                                  style: ButtonStyle(
-                                      padding: WidgetStatePropertyAll(
-                                        EdgeInsets.symmetric(
-                                            horizontal: 15,vertical: 7
+                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        // خروجی اکسل
+                                        ElevatedButton(
+                                          style: ButtonStyle(
+                                              padding: WidgetStatePropertyAll(
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 15,vertical: 7
+                                                ),
+                                              ),
+                                              elevation: WidgetStatePropertyAll(5),
+                                              backgroundColor:
+                                              WidgetStatePropertyAll(AppColor.secondary3Color),
+                                              shape: WidgetStatePropertyAll(
+                                                  RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(
+                                                          5)))),
+                                          onPressed: () {
+                                            depositController.exportToExcel();
+                                          },
+                                          child: Text(
+                                            'خروجی اکسل',
+                                            style: AppTextStyle.labelText,
+                                          ),
                                         ),
+                                        SizedBox(width: 5,),
+                                        // خروجی pdf
+                                        ElevatedButton(
+                                          style: ButtonStyle(
+                                              padding: WidgetStatePropertyAll(
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 15,vertical: 7
+                                                ),
+                                              ),
+                                              elevation: WidgetStatePropertyAll(5),
+                                              backgroundColor:
+                                              WidgetStatePropertyAll(AppColor.secondary3Color),
+                                              shape: WidgetStatePropertyAll(
+                                                  RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(
+                                                          5)))),
+                                          onPressed: () {
+                                            depositController.exportToPdf();
+                                          },
+                                          child: Text(
+                                            'خروجی pdf',
+                                            style: AppTextStyle.labelText,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+                                      decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.all(Radius.circular(5)),
+                                          border: Border.all(color: AppColor.textColor)
+
                                       ),
-                                      elevation: WidgetStatePropertyAll(5),
-                                      backgroundColor:
-                                      WidgetStatePropertyAll(AppColor.secondary3Color),
-                                      shape: WidgetStatePropertyAll(
-                                          RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(
-                                                  5)))),
-                                  onPressed: () {
-                                    depositController.exportToPdf();
-                                  },
-                                  child: Text(
-                                    'خروجی pdf',
-                                    style: AppTextStyle.labelText,
-                                  ),
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                              'assets/svg/filter3.svg',
+                                              height: 17,
+                                              colorFilter:
+                                              ColorFilter
+                                                  .mode(
+                                                AppColor
+                                                    .textColor,
+                                                BlendMode
+                                                    .srcIn,
+                                              )),
+                                          SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            'فیلتر',
+                                            style: AppTextStyle
+                                                .labelText
+                                                .copyWith(
+                                                fontSize: isDesktop
+                                                    ? 12
+                                                    : 10),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
@@ -161,29 +268,139 @@ class DepositsListView extends StatelessWidget {
                               return
                                   isDesktop ?
                                   Expanded(
-                                    child: SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: [
-                                          SingleChildScrollView(
-                                            child: Column(
-                                              children: [
-                                                DataTable(
-                                                  columns: buildDataColumns(),
-                                                  rows: buildDataRows(context),
-                                                  dataRowMaxHeight: double.infinity,
-                                                  dividerThickness: 0.3,
-                                                  border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
-                                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                                  //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                  headingRowHeight: 40,
-                                                  horizontalMargin: 6,
-                                                ),
-                                                buildPaginationControls(),
-                                              ],
+                                    child: Container(
+                                      margin: EdgeInsets.symmetric(horizontal: 60,vertical: 10),
+                                      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+                                      color: AppColor.appBarColor.withOpacity(0.5),
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          children: [
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+                                              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Row(
+                                                    children: [
+                                                      // خروجی اکسل
+                                                      ElevatedButton(
+                                                        style: ButtonStyle(
+                                                            padding: WidgetStatePropertyAll(
+                                                              EdgeInsets.symmetric(
+                                                                  horizontal: 15,vertical: 7
+                                                              ),
+                                                            ),
+                                                            elevation: WidgetStatePropertyAll(5),
+                                                            backgroundColor:
+                                                            WidgetStatePropertyAll(AppColor.secondary3Color),
+                                                            shape: WidgetStatePropertyAll(
+                                                                RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(
+                                                                        5)))),
+                                                        onPressed: () {
+                                                          depositController.exportToExcel();
+                                                        },
+                                                        child: Text(
+                                                          'خروجی اکسل',
+                                                          style: AppTextStyle.labelText,
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 5,),
+                                                      // خروجی pdf
+                                                      ElevatedButton(
+                                                        style: ButtonStyle(
+                                                            padding: WidgetStatePropertyAll(
+                                                              EdgeInsets.symmetric(
+                                                                  horizontal: 15,vertical: 7
+                                                              ),
+                                                            ),
+                                                            elevation: WidgetStatePropertyAll(5),
+                                                            backgroundColor:
+                                                            WidgetStatePropertyAll(AppColor.secondary3Color),
+                                                            shape: WidgetStatePropertyAll(
+                                                                RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius.circular(
+                                                                        5)))),
+                                                        onPressed: () {
+                                                          depositController.exportToPdf();
+                                                        },
+                                                        child: Text(
+                                                          'خروجی pdf',
+                                                          style: AppTextStyle.labelText,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                  Container(
+                                                    padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+                                                    decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                                                        border: Border.all(color: AppColor.textColor)
+
+                                                    ),
+                                                    child: Row(
+                                                      children: [
+                                                        SvgPicture.asset(
+                                                            'assets/svg/filter3.svg',
+                                                            height: 17,
+                                                            colorFilter:
+                                                            ColorFilter
+                                                                .mode(
+                                                              AppColor
+                                                                  .textColor,
+                                                              BlendMode
+                                                                  .srcIn,
+                                                            )),
+                                                        SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          'فیلتر',
+                                                          style: AppTextStyle
+                                                              .labelText
+                                                              .copyWith(
+                                                              fontSize: isDesktop
+                                                                  ? 12
+                                                                  : 10),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                            SizedBox(
+                                              child: SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                child: Row(
+                                                  children: [
+                                                    SingleChildScrollView(
+                                                      child: Column(
+                                                        children: [
+                                                          DataTable(
+                                                            columns: buildDataColumns(),
+                                                            rows: buildDataRows(context),
+                                                            dataRowMaxHeight: double.infinity,
+                                                            dividerThickness: 0.3,
+                                                            border: TableBorder.symmetric(
+                                                                inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                              outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                              borderRadius: BorderRadius.circular(8)
+                                                            ),
+                                                            //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                                            //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                                            headingRowHeight: 40,
+                                                            horizontalMargin: 6,
+                                                          ),
+                                                          buildPaginationControls(),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ) :

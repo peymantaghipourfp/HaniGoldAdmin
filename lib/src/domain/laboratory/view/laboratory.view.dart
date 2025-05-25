@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -18,7 +19,7 @@ class LaboratoryView extends GetView<LaboratoryController> {
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppbar1(
         title: 'لیست آزمایشگاه ها',
         onBackTap: () => Get.toNamed("/home"),
       ),

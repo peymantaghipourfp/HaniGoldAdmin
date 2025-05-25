@@ -2,6 +2,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:hanigold_admin/src/domain/product/widget/price_different.widget.dart';
@@ -11,6 +12,7 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
@@ -156,13 +158,26 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                       cells:
                                                   [
                                                     DataCell(
-                                                      Text(
-                                                        textAlign: TextAlign
-                                                            .center,
-                                                        "${productController
-                                                            .activeItemList[index]
-                                                            .name}",
-                                                        style: AppTextStyle.bodyText,
+                                                      Row(
+                                                        children: [
+                                                          productController.activeItemList[index].icon!=null ?
+                                                          Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${productController.activeItemList[index].icon}',
+                                                            width: 30,
+                                                            height: 30,) :
+                                                          SvgPicture.asset(
+                                                            'assets/svg/gold.svg',
+                                                            width: 25,
+                                                            height: 25,),
+                                                          SizedBox(width: 5,),
+                                                          Text(
+                                                            textAlign: TextAlign
+                                                                .center,
+                                                            "${productController
+                                                                .activeItemList[index]
+                                                                .name}",
+                                                            style: AppTextStyle.bodyText,
+                                                          ),
+                                                        ],
                                                       ),
                                                     ),
                                                     DataCell(

@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
@@ -207,6 +208,7 @@ class OrderCreateController extends GetxController{
 
   Future<OrderModel?> insertOrder()async{
     try {
+      EasyLoading.show(status: 'لطفا صبر کنید...');
       isLoading.value = true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
       var response = await orderRepository.insertOrder(
@@ -239,6 +241,7 @@ class OrderCreateController extends GetxController{
     catch(e){
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;

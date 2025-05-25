@@ -476,7 +476,7 @@ class DepositController extends GetxController{
           TextCellValue(deposit.date?.toPersianDate(twoDigits: true) ?? ''),
           TextCellValue(deposit.wallet?.account?.name ?? ''),
           TextCellValue(deposit.walletWithdraw?.account?.name ?? ''),
-          DoubleCellValue(double.parse(deposit.amount?.toString() ?? '')),
+          TextCellValue(deposit.amount?.toString() ?? ''),
           TextCellValue(deposit.trackingNumber ?? ''),
           TextCellValue(getStatusText(deposit.status ?? 0 )),
         ]);
@@ -513,6 +513,7 @@ class DepositController extends GetxController{
       Get.snackbar('موفق', 'فایل اکسل با موفقیت دریافت شد');
       EasyLoading.dismiss();
     } catch (e) {
+      EasyLoading.dismiss();
       Get.snackbar('خطا', 'خطا در دریافت فایل اکسل: ${e.toString()}');
       print(e.toString());
     }
@@ -533,6 +534,166 @@ class DepositController extends GetxController{
 
   // خروجی pdf
   Future<void> exportToPdf() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      EasyLoading.show(status: 'دریافت فایل PDF...');
+
+      final allDeposits = await depositRepository.getDepositList(
+        startIndex: 1,
+        toIndex: 500,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+      );
+
+      final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+      final ttf = pw.Font.ttf(fontData);
+
+      final pdf = pw.Document();
+
+      // افزودن MultiPage برای مدیریت خودکار صفحه‌بندی
+      pdf.addPage(
+        pw.MultiPage(
+          textDirection: pw.TextDirection.rtl,
+          maxPages: 2000,
+          theme: pw.ThemeData.withFont(base: ttf,fontFallback: [ttf],),
+          header: (pw.Context context) => buildHeaderTable(),
+          build: (pw.Context context) => [
+            pw.Table(
+              border: pw.TableBorder.all(),
+              columnWidths: getColumnWidths(),
+              children: [
+                for (var deposit in allDeposits)
+                  buildDataRow(deposit),
+              ],
+            ),
+          ],
+          footer: (pw.Context context) => buildPageNumber(context.pageNumber, context.pagesCount),
+        ),
+      );
+
+      final bytes = await pdf.save();
+      if (kIsWeb) {
+        final blob = html.Blob([bytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: url)
+          ..download = 'deposits_${DateTime.now().millisecondsSinceEpoch}.pdf'
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: 'deposits.pdf',
+        );
+      }
+
+      EasyLoading.dismiss();
+      Get.snackbar('موفق', 'فایل PDF با موفقیت دریافت شد');
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar('خطا', 'خطا در دریافت فایل PDF: ${e.toString()}');
+      print(e.toString());
+    }
+  }
+
+  Map<int, pw.TableColumnWidth> getColumnWidths() {
+    return {
+      0: pw.FlexColumnWidth(2),
+      1: pw.FlexColumnWidth(3),
+      2: pw.FlexColumnWidth(3),
+      3: pw.FlexColumnWidth(3),
+      4: pw.FlexColumnWidth(3),
+      5: pw.FlexColumnWidth(2.5),
+      6: pw.FlexColumnWidth(1.5),
+    };
+  }
+  // ساخت هدر جدول
+  pw.Table buildHeaderTable() {
+    return pw.Table(
+      columnWidths: {
+        0: pw.FlexColumnWidth(2),
+        1: pw.FlexColumnWidth(3),
+        2: pw.FlexColumnWidth(3),
+        3: pw.FlexColumnWidth(3),
+        4: pw.FlexColumnWidth(3),
+        5: pw.FlexColumnWidth(2.5),
+        6: pw.FlexColumnWidth(1.5),
+      },
+      border: pw.TableBorder.all(),
+      children: [
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColors.grey300),
+          children: [
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8.0),
+              child: pw.Text('وضعیت', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10) ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8.0),
+              child: pw.Text('کد رهگیری', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8.0),
+              child: pw.Text('مبلغ (ریال)', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8.0),
+              child: pw.Text('بابت', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8.0),
+              child: pw.Text('نام کاربر', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8.0),
+              child: pw.Text('تاریخ درخواست', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(8.0),
+              child: pw.Text('ردیف', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  // ساخت سلول‌های داده
+  pw.Padding buildDataCell(String text, {bool isCenter = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(8.0),
+      child: pw.Text(text,
+        style: pw.TextStyle(fontSize: 9),
+        textAlign: isCenter ? pw.TextAlign.center : pw.TextAlign.right,
+        textDirection: pw.TextDirection.rtl,
+      ),
+    );
+  }
+
+  pw.TableRow buildDataRow(DepositModel deposit) {
+    return pw.TableRow(
+      children: [
+        buildDataCell(getStatusText(deposit.status ?? 0)),
+        buildDataCell(deposit.trackingNumber ?? ''),
+        buildDataCell(deposit.amount?.toString().seRagham(separator: ',') ?? ''),
+        buildDataCell(deposit.walletWithdraw?.account?.name ?? ''),
+        buildDataCell(deposit.wallet?.account?.name ?? ''),
+        buildDataCell(deposit.date?.toPersianDate(twoDigits: true) ?? ''),
+        buildDataCell(deposit.rowNum.toString(), isCenter: true),
+      ],
+    );
+  }
+
+  pw.Widget buildPageNumber(int currentPage, int totalPages) {
+    return pw.Container(
+      alignment: pw.Alignment.center,
+      margin: const pw.EdgeInsets.only(top: 20),
+      child: pw.Text(
+        'صفحه ${currentPage.toString().toPersianDigit()} از ${totalPages.toString().toPersianDigit()}',
+        style: pw.TextStyle(fontSize: 10),
+      ),
+    );
+  }
+
+  // خروجی pdf
+  /*Future<void> exportToPdf() async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
       EasyLoading.show(status: 'دریافت فایل PDF...');
@@ -561,8 +722,7 @@ class DepositController extends GetxController{
           pw.Page(
             pageFormat: PdfPageFormat.a4,
             theme: pw.ThemeData.withFont(
-              base: ttf,
-            ),
+              base: ttf,),
             build: (pw.Context context) {
               return pw.Directionality(
                 textDirection: pw.TextDirection.rtl,
@@ -677,5 +837,5 @@ class DepositController extends GetxController{
       Get.snackbar('خطا', 'خطا در دریافت فایل PDF: ${e.toString()}');
       print(e.toString());
     }
-  }
+  }*/
 }

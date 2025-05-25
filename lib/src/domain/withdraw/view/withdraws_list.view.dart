@@ -37,16 +37,22 @@ class WithdrawsListView extends StatelessWidget {
               padding: EdgeInsets.all(8),
               child: SizedBox(
                 width: Get.width,
+                height: Get.height,
                 child: Column(
                   children: [
+                    isDesktop?
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         children: [
                           //فیلد جستجو
                           Expanded(
-                            child: SizedBox(
-                              height: 41,
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                              padding: EdgeInsets.symmetric(horizontal: 20),
+                              color: AppColor.appBarColor.withOpacity(0.5),
+                              alignment: Alignment.center,
+                              height: 80,
                               child: TextFormField(
                                 controller: withdrawController.searchController,
                                 style: AppTextStyle.labelText,
@@ -96,28 +102,184 @@ class WithdrawsListView extends StatelessWidget {
                               ),
                             ),
                           ),
-                          SizedBox(
-                            width: 5,
+                        ],
+                      ),
+                    ) :
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          //فیلد جستجو
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  color: AppColor.appBarColor.withOpacity(0.5),
+                                  alignment: Alignment.center,
+                                  height: 80,
+                                  child: TextFormField(
+                                    controller: withdrawController.searchController,
+                                    style: AppTextStyle.labelText,
+                                    textInputAction: TextInputAction.search,
+                                    onFieldSubmitted: (value) async {
+                                      if (value.isNotEmpty) {
+                                        await withdrawController.searchAccounts(value);
+                                        showSearchResults(context);
+                                      } else {
+                                        withdrawController.clearSearch();
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      filled: true,
+                                      fillColor: AppColor.textFieldColor,
+                                      hintText: "جستجو ... ",
+                                      hintStyle: AppTextStyle.labelText,
+                                      prefixIcon: IconButton(
+                                          onPressed: () async {
+                                            if (withdrawController.searchController.text
+                                                .isNotEmpty) {
+                                              await withdrawController.searchAccounts(
+                                                  withdrawController.searchController
+                                                      .text
+                                              );
+                                              showSearchResults(context);
+                                            } else {
+                                              withdrawController.clearSearch();
+                                            }
+                                          },
+                                          icon: Icon(
+                                            Icons.search, color: AppColor.textColor,
+                                            size: 30,)
+                                      ),
+                                      suffixIcon: withdrawController.selectedAccountId
+                                          .value > 0
+                                          ? IconButton(
+                                        onPressed: withdrawController.clearSearch,
+                                        icon: Icon(
+                                            Icons.close, color: AppColor.textColor),
+                                      )
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          //دکمه ایجاد درخواست برداشت جدید
-                          ElevatedButton(
-                            style: ButtonStyle(
-                                padding: WidgetStatePropertyAll(
-                                    EdgeInsets.symmetric(horizontal: 7)),
-                                elevation: WidgetStatePropertyAll(5),
-                                backgroundColor:
-                                WidgetStatePropertyAll(AppColor.buttonColor),
-                                shape: WidgetStatePropertyAll(
-                                    RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10)))),
-                            onPressed: () {
-                              Get.toNamed('/withdrawCreate');
-                            },
-                            child: Text(
-                              'ایجاد درخواست برداشت جدید',
-                              style: AppTextStyle.labelText,
-                            ),
-                          ),
+                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  //دکمه ایجاد درخواست برداشت جدید
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(horizontal: 7)),
+                                        elevation: WidgetStatePropertyAll(5),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(AppColor.buttonColor),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5)))),
+                                    onPressed: () {
+                                      Get.toNamed('/withdrawCreate');
+                                    },
+                                    child: Text(
+                                      'ایجاد درخواست برداشت جدید',
+                                      style: AppTextStyle.labelText,
+                                    ),
+                                  ),
+                                  SizedBox(width: 5,),
+                                  // خروجی اکسل
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                          EdgeInsets.symmetric(
+                                              horizontal: 15,vertical: 7
+                                          ),
+                                        ),
+                                        fixedSize: WidgetStatePropertyAll(Size(100,30)),
+                                        elevation: WidgetStatePropertyAll(5),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(AppColor.secondary3Color),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5)))),
+                                    onPressed: () {
+                                      withdrawController.exportToExcel();
+                                    },
+                                    child: Text(
+                                      'خروجی اکسل',
+                                      style: AppTextStyle.labelText,
+                                    ),
+                                  ),
+                                  SizedBox(width: 5,),
+                                  // خروجی pdf
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                          EdgeInsets.symmetric(
+                                              horizontal: 15,vertical: 7
+                                          ),
+                                        ),
+                                        elevation: WidgetStatePropertyAll(5),
+                                        fixedSize: WidgetStatePropertyAll(Size(100,30)),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(AppColor.secondary3Color),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5)))),
+                                    onPressed: () {
+                                      withdrawController.exportToPdf();
+                                    },
+                                    child: Text(
+                                      'خروجی pdf',
+                                      style: AppTextStyle.labelText,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                                    border: Border.all(color: AppColor.textColor)
+
+                                ),
+                                child: Row(
+                                  children: [
+                                    SvgPicture.asset(
+                                        'assets/svg/filter3.svg',
+                                        height: 17,
+                                        colorFilter:
+                                        ColorFilter
+                                            .mode(
+                                          AppColor
+                                              .textColor,
+                                          BlendMode
+                                              .srcIn,
+                                        )),
+                                    SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      'فیلتر',
+                                      style: AppTextStyle
+                                          .labelText
+                                          .copyWith(
+                                          fontSize: isDesktop
+                                              ? 12
+                                              : 10),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
                         ],
                       ),
                     ),
@@ -138,34 +300,164 @@ class WithdrawsListView extends StatelessWidget {
                         EasyLoading.dismiss();
                         return isDesktop ?
                         Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      DataTable(
-                                        columns: buildDataColumns(),
-                                        rows: buildDataRows(context),
-                                        dataRowMaxHeight: double.infinity,
-                                        dividerThickness: 0.3,
-                                        border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textFieldColor,width: 0.5)),
-                                        //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                        //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                        headingRowHeight: 40,
-                                        columnSpacing: 40,
-                                        horizontalMargin: 6,
-                                      ),
-                                      buildPaginationControls(),
-                                    ],
+                          child: Container(
+                            margin: EdgeInsets.symmetric(horizontal: 60,vertical: 10),
+                            padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
+                            color: AppColor.appBarColor.withOpacity(0.5),
+                            child: SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+                                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            //دکمه ایجاد درخواست برداشت جدید
+                                            ElevatedButton(
+                                              style: ButtonStyle(
+                                                  padding: WidgetStatePropertyAll(
+                                                      EdgeInsets.symmetric(horizontal: 7)),
+                                                  elevation: WidgetStatePropertyAll(5),
+                                                  backgroundColor:
+                                                  WidgetStatePropertyAll(AppColor.buttonColor),
+                                                  shape: WidgetStatePropertyAll(
+                                                      RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(5)))),
+                                              onPressed: () {
+                                                Get.toNamed('/withdrawCreate');
+                                              },
+                                              child: Text(
+                                                'ایجاد درخواست برداشت جدید',
+                                                style: AppTextStyle.labelText,
+                                              ),
+                                            ),
+                                            SizedBox(width: 5,),
+                                            // خروجی اکسل
+                                            ElevatedButton(
+                                              style: ButtonStyle(
+                                                  padding: WidgetStatePropertyAll(
+                                                    EdgeInsets.symmetric(
+                                                        horizontal: 15,vertical: 7
+                                                    ),
+                                                  ),
+                                                  fixedSize: WidgetStatePropertyAll(Size(100,30)),
+                                                  elevation: WidgetStatePropertyAll(5),
+                                                  backgroundColor:
+                                                  WidgetStatePropertyAll(AppColor.secondary3Color),
+                                                  shape: WidgetStatePropertyAll(
+                                                      RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(5)))),
+                                              onPressed: () {
+                                                withdrawController.exportToExcel();
+                                              },
+                                              child: Text(
+                                                'خروجی اکسل',
+                                                style: AppTextStyle.labelText,
+                                              ),
+                                            ),
+                                            SizedBox(width: 5,),
+                                            // خروجی pdf
+                                            ElevatedButton(
+                                              style: ButtonStyle(
+                                                  padding: WidgetStatePropertyAll(
+                                                    EdgeInsets.symmetric(
+                                                        horizontal: 15,vertical: 7
+                                                    ),
+                                                  ),
+                                                  elevation: WidgetStatePropertyAll(5),
+                                                  fixedSize: WidgetStatePropertyAll(Size(100,30)),
+                                                  backgroundColor:
+                                                  WidgetStatePropertyAll(AppColor.secondary3Color),
+                                                  shape: WidgetStatePropertyAll(
+                                                      RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(5)))),
+                                              onPressed: () {
+                                                withdrawController.exportToPdf();
+                                              },
+                                              child: Text(
+                                                'خروجی pdf',
+                                                style: AppTextStyle.labelText,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                                              border: Border.all(color: AppColor.textColor)
+
+                                          ),
+                                          child: Row(
+                                            children: [
+                                              SvgPicture.asset(
+                                                  'assets/svg/filter3.svg',
+                                                  height: 17,
+                                                  colorFilter:
+                                                  ColorFilter
+                                                      .mode(
+                                                    AppColor
+                                                        .textColor,
+                                                    BlendMode
+                                                        .srcIn,
+                                                  )),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                'فیلتر',
+                                                style: AppTextStyle
+                                                    .labelText
+                                                    .copyWith(
+                                                    fontSize: isDesktop
+                                                        ? 12
+                                                        : 10),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                ...withdrawController.withdrawList.map((
-                                    withdraw) {
-                                  return buildExpandedContent(withdraw);
-                                })
-                              ],
+                                  SizedBox(
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          SingleChildScrollView(
+                                            child: Column(
+                                              children: [
+                                                DataTable(
+                                                  columns: buildDataColumns(),
+                                                  rows: buildDataRows(context),
+                                                  dataRowMaxHeight: double.infinity,
+                                                  dividerThickness: 0.3,
+                                                  border: TableBorder.symmetric(
+                                                      inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                      outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                      borderRadius: BorderRadius.circular(8)
+                                                  ),
+                                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                                  //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                                  headingRowHeight: 40,
+                                                  columnSpacing: 40,
+                                                  horizontalMargin: 6,
+                                                ),
+                                                buildPaginationControls(),
+                                              ],
+                                            ),
+                                          ),
+                                          ...withdrawController.withdrawList.map((
+                                              withdraw) {
+                                            return buildExpandedContent(withdraw);
+                                          })
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         )
@@ -1563,7 +1855,7 @@ class WithdrawsListView extends StatelessWidget {
     groupedWithdraws.forEach((date, withdraws) {
       rows.add(
         DataRow(
-          color: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.1)),
+          color: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
           cells: [
             DataCell(SizedBox.shrink()),
             DataCell(
@@ -1614,8 +1906,8 @@ class WithdrawsListView extends StatelessWidget {
           DataRow(
             color: WidgetStatePropertyAll(
                 isExpanded
-                    ? AppColor.secondaryColor.withAlpha(140)
-                    : AppColor.backGroundColor1
+                    ? AppColor.backGroundColor1.withOpacity(0.5)
+                    : AppColor.appBarColor.withOpacity(0.5)
             ),
 
             cells: [
@@ -2127,9 +2419,7 @@ class WithdrawsListView extends StatelessWidget {
             child: Center(child: CircularProgressIndicator()));
       }
       return
-        withdrawController
-            .isLoadingDepositRequestList
-            .value ?
+        withdrawController.isLoadingDepositRequestList.value ?
         CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<
               Color>(
@@ -2169,7 +2459,7 @@ class WithdrawsListView extends StatelessWidget {
                     return
                       ListTile(
                         title: Card(
-                          color: AppColor.secondaryColor,
+                          color: AppColor.backGroundColor1,
                           child: Padding(
                             padding: const EdgeInsets.only(
                                 top: 5, left: 12, right: 12,bottom: 5),

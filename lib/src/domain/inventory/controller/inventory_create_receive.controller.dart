@@ -34,7 +34,6 @@ class InventoryCreateReceiveController extends GetxController{
   final InventoryController inventoryController=Get.find<InventoryController>();
 
 
-
   final TextEditingController searchController = TextEditingController();
   final TextEditingController searchLaboratoryController=TextEditingController();
   final TextEditingController quantityController=TextEditingController();

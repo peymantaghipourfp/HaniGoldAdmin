@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -23,13 +24,13 @@ class _UserInfoTransactionViewState extends State<TradingBalanceView> {
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(() => Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppbar1(
         title: 'تراز معاملاتی',
         onBackTap: () => Get.back(),
       ),
       body: Stack(
         children: [
-          BackgroundImage(),
+          BackgroundImageTotal(),
           SafeArea(
             child: controller.state.value == PageStateBalance.loading
                 ? Center(

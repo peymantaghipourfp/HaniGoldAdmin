@@ -35,12 +35,9 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
         .isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ?
+        appBar:
         CustomAppbar1(
-          title: 'ایجاد درخواست برداشت', onBackTap: () => Get.back(),)
-            : CustomAppBar(title: 'ایجاد درخواست برداشت',
-          onBackTap: () => Get.back(),
-        ),
+          title: 'ایجاد درخواست برداشت', onBackTap: () => Get.back(),),
         body: Stack(
           children: [
             BackgroundImage(),
@@ -75,7 +72,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                             constraints: BoxConstraints(maxWidth: 700),
                             padding: EdgeInsets.symmetric(
                                 horizontal: 40, vertical: 20),
-                            decoration: BoxDecoration(
+                            /*decoration: BoxDecoration(
                               color: AppColor.backGroundColor1,
                               borderRadius: BorderRadius.circular(16),
                               boxShadow: [
@@ -85,7 +82,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                   offset: Offset(0, 4),
                                 ),
                               ],
-                            ),
+                            ),*/
                             child: SizedBox(
                               width: Get.width * 0.9,
                               height: Get.height,
@@ -116,14 +113,14 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                               },
                                               child: Padding(
                                                 padding: EdgeInsets.only(
-                                                    right: isDesktop
-                                                        ? 200
-                                                        : 135),
+                                                    right: isDesktop ? 50 : 135,
+                                                    bottom: 10
+                                                ),
                                                 child: Row(
                                                   mainAxisSize: MainAxisSize
                                                       .min,
                                                   children: [
-                                                    Text('لیست درخواست برداشت',
+                                                    Text('لیست',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                     SizedBox(width: 10,),
@@ -147,7 +144,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                     ),
                                   ),
                                   ResponsiveRowColumnItem(
-                                    child: isDesktop ? SizedBox(width: 480,
+                                    child: isDesktop ? SizedBox(width: 400,
                                       child: Divider(
                                         height: 1,
                                         color: AppColor.appBarColor,

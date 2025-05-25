@@ -37,14 +37,10 @@ class _OrderCreateViewState extends State<OrderCreateView> {
         .isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ? CustomAppbar1(
-          title: 'ایجاد سفارش جدید', onBackTap: () => Get.back(),) :
-        CustomAppBar(
+        appBar:CustomAppbar1(
           title: 'ایجاد سفارش جدید', onBackTap: () {
-          Get.back();
-          orderCreateController.clearList();
-        },
-        ),
+            Get.back();
+            orderCreateController.clearList(); }),
         body: Stack(
           children: [
             BackgroundImage(),

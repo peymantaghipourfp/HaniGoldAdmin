@@ -270,7 +270,7 @@ class DepositUpdateController extends GetxController{
                 response.infos?.first.description ?? "", textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
         depositRequestGetOneController.fetchGetOneDepositRequest(depositId.value);
-        depositController.fetchDepositList();
+        //depositController.fetchDepositList();
         balanceList.clear();
       }
 
