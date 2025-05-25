@@ -11,7 +11,7 @@ LaboratoryModel _$LaboratoryModelFromJson(Map<String, dynamic> json) =>
       name: json['name'] as String?,
       address: json['address'] as String?,
       phone: json['phone'] as String?,
-          createdOn: json['createdOn'] == null
+      createdOn: json['createdOn'] == null
           ? null
           : DateTime.parse(json['createdOn'] as String),
       rowNum: (json['rowNum'] as num?)?.toInt(),

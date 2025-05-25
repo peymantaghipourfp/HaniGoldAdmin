@@ -113,7 +113,10 @@ Widget buildDesktopLayout() {
                   _buildSubMenuItem(
                     title: 'افزودن کاربر جدید',
                     icon: Icons.list_alt,
-                    route: '/insertUser',
+                    //route: '/insertUser',
+                    onTap: (){
+                      Get.toNamed("/insertUser",parameters: {"id":0.toString()});
+                    }
                   ),
                 ],
               ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -17,7 +19,7 @@ class UserListView extends GetView<UserListController> {
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppbar1(
         title: 'لیست کاربران',
         onBackTap: () => Get.toNamed("/home"),
       ),
@@ -31,6 +33,7 @@ class UserListView extends GetView<UserListController> {
                   height: Get.height ,
                   width: Get.width,
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       SizedBox(
                           height: 50,width: 50,
@@ -52,17 +55,17 @@ class UserListView extends GetView<UserListController> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                       padding: EdgeInsets.symmetric(horizontal: 20),
-                      color: AppColor.circleColor.withOpacity(0.5),
+                      color: AppColor.appBarColor.withOpacity(0.5),
                       alignment: Alignment.center,
 
                       height: 80,
                       child: TextFormField(
                         // onChanged: (value){
-                        //   Future.delayed(const Duration(milliseconds: 3000), () {
-                        //     controller.getListTransactionInfo();
+                        //   Future.delayed(const Duration(milliseconds: 5000), () {
+                        //     controller.getUserList();
                         //   });
                         // },
-                        controller: controller.searchController,
+                        controller: controller.nameFilterController,
                         style: AppTextStyle.labelText,
                         textInputAction: TextInputAction.search,
                         // onFieldSubmitted: (value) async {
@@ -71,7 +74,7 @@ class UserListView extends GetView<UserListController> {
                         //   // });
                         // },
                         onEditingComplete: () async {
-                         // controller.getListTransactionInfo();
+                         controller.getUserList();
                         },
 
                         decoration: InputDecoration(
@@ -85,7 +88,7 @@ class UserListView extends GetView<UserListController> {
 
                           prefixIcon: IconButton(
                               onPressed: () async {
-                               // controller.getListTransactionInfo();
+                               controller.getUserList();
                               },
                               icon: Icon(
                                 Icons.search,
@@ -98,22 +101,28 @@ class UserListView extends GetView<UserListController> {
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                       padding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
-                      color: AppColor.circleColor.withOpacity(0.5),
+                      color: AppColor.appBarColor.withOpacity(0.5),
                       child: Column(
                         children: [
                           Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
+                            padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Row(
                                   children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 15,vertical: 7),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                                        color: AppColor.secondary3Color
-                                      ),
+                                    ElevatedButton(
+                                      style: ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(horizontal: 12,vertical: 17)),
+                                          elevation: WidgetStatePropertyAll(5),
+                                          backgroundColor:
+                                          WidgetStatePropertyAll(AppColor.secondary3Color),
+                                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5)))),
+                                      onPressed: () async {
+                                        Get.toNamed("/insertUser",parameters: {"id":0.toString()});
+                                      },
                                       child: Row(
                                         children: [
                                           Icon(Icons.add,color: AppColor.textColor,size: 21,),
@@ -128,12 +137,17 @@ class UserListView extends GetView<UserListController> {
                                       ),
                                     ),
                                     SizedBox(width: 20,),
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 15,vertical: 7),
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                                        color: AppColor.secondary3Color
-                                      ),
+                                    ElevatedButton(
+                                      style: ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(horizontal: 12,vertical: 15)),
+                                          elevation: WidgetStatePropertyAll(5),
+                                          backgroundColor:
+                                          WidgetStatePropertyAll(AppColor.secondary3Color),
+                                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(5)))),
+                                      onPressed: () async {
+                                      },
                                       child: Row(
                                         children: [
                                           SvgPicture.asset(
@@ -164,13 +178,200 @@ class UserListView extends GetView<UserListController> {
                                     ),
                                   ],
                                 ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.all(Radius.circular(5)),
-                                    border: Border.all(color: AppColor.textColor)
+                                ElevatedButton(
+                                  style: ButtonStyle(
+                                      padding: WidgetStatePropertyAll(
+                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                      // elevation: WidgetStatePropertyAll(5),
+                                      backgroundColor:
+                                      WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
+                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                          borderRadius: BorderRadius.circular(5)))),
+                                  onPressed: () async {
+                                    showGeneralDialog(
+                                        context: context,
+                                        barrierDismissible: true,
+                                        barrierLabel: MaterialLocalizations.of(context)
+                                            .modalBarrierDismissLabel,
+                                        barrierColor: Colors.black45,
+                                        transitionDuration: const Duration(milliseconds: 200),
+                                        pageBuilder: (BuildContext buildContext,
+                                            Animation animation,
+                                            Animation secondaryAnimation) {
+                                          return Center(
+                                            child: Material(
+                                              color: Colors.transparent,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    color: AppColor.backGroundColor
+                                                ),
+                                                width:isDesktop?  Get.width * 0.15:Get.height * 0.5,
+                                                height:isDesktop?  Get.height * 0.35:Get.height * 0.7,
+                                                padding: EdgeInsets.all(20),
+                                                child: Column(
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          Text(
+                                                            'فیلتر',
+                                                            style: AppTextStyle.labelText.copyWith(
+                                                              fontSize: 15,
+                                                              fontWeight: FontWeight.normal,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      color: AppColor.textColor,height: 0.2,
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                      child: Column(
+                                                        children: [
+                                                          SizedBox(height: 8,),
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                'نام',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                    fontSize: 11,
+                                                                    fontWeight: FontWeight.normal,
+                                                                    color: AppColor.textColor),
+                                                              ),
+                                                              SizedBox(height: 10,),
+                                                              IntrinsicHeight(
+                                                                child: TextFormField(
+                                                                  autovalidateMode: AutovalidateMode
+                                                                      .onUserInteraction,
+                                                                 controller: controller.nameFilterController,
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                  textAlign: TextAlign.start,
+                                                                  keyboardType:TextInputType.text,
+                                                                  decoration: InputDecoration(
+                                                                    contentPadding:
+                                                                    const EdgeInsets.symmetric(
+                                                                        vertical: 11,horizontal: 15
+                                                                    ),
+                                                                    isDense: true,
+                                                                    border: OutlineInputBorder(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(6),
+                                                                    ),
+                                                                    filled: true,
+                                                                    fillColor: AppColor.textFieldColor,
+                                                                    errorMaxLines: 1,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(height: 8,),
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                'شماره تماس',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                    fontSize: 11,
+                                                                    fontWeight: FontWeight.normal,
+                                                                    color: AppColor.textColor),
+                                                              ),
+                                                              SizedBox(height: 10,),
+                                                              IntrinsicHeight(
+                                                                child: TextFormField(
+                                                                  autovalidateMode: AutovalidateMode
+                                                                      .onUserInteraction,
+                                                                  controller: controller.mobileFilterController,
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                  textAlign: TextAlign.center,
+                                                                  keyboardType:TextInputType.phone,
+                                                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                    TextInputFormatter.withFunction((oldValue, newValue) {
+                                                                      // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                      String newText = newValue.text
+                                                                          .replaceAll('٠', '0')
+                                                                          .replaceAll('١', '1')
+                                                                          .replaceAll('٢', '2')
+                                                                          .replaceAll('٣', '3')
+                                                                          .replaceAll('٤', '4')
+                                                                          .replaceAll('٥', '5')
+                                                                          .replaceAll('٦', '6')
+                                                                          .replaceAll('٧', '7')
+                                                                          .replaceAll('٨', '8')
+                                                                          .replaceAll('٩', '9');
 
-                                  ),
+                                                                      return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                                                    }),
+                                                                  ],
+                                                                  decoration: InputDecoration(
+                                                                    contentPadding:
+                                                                    const EdgeInsets.symmetric(
+                                                                        vertical: 11,horizontal: 15
+
+                                                                    ),
+                                                                    isDense: true,
+                                                                    border: OutlineInputBorder(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(6),
+                                                                    ),
+
+                                                                    filled: true,
+                                                                    fillColor: AppColor.textFieldColor,
+                                                                    errorMaxLines: 1,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(height: 8),
+
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    Spacer(),
+                                                    Container(
+                                                      margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                      width: double.infinity,
+                                                      height: 40,
+                                                      child: ElevatedButton(
+                                                        style: ButtonStyle(
+                                                            padding: WidgetStatePropertyAll(
+                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                            // elevation: WidgetStatePropertyAll(5),
+                                                            backgroundColor:
+                                                            WidgetStatePropertyAll(AppColor.appBarColor),
+                                                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                borderRadius: BorderRadius.circular(5)))),
+                                                        onPressed: () async {
+                                                          controller.getUserList();
+                                                          Get.back();
+
+                                                        },
+                                                        child: controller.isLoading.value?
+                                                        CircularProgressIndicator(
+                                                          valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                        ) :
+                                                        Text(
+                                                          'فیلتر',
+                                                          style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        });
+                                  },
                                   child: Row(
                                     children: [
                                       SvgPicture.asset(
@@ -179,13 +380,13 @@ class UserListView extends GetView<UserListController> {
                                           colorFilter:
                                           ColorFilter
                                               .mode(
-                                            AppColor
+                                       controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
                                                 .textColor,
                                             BlendMode
                                                 .srcIn,
                                           )),
                                       SizedBox(
-                                        width: 5,
+                                        width: 10,
                                       ),
                                       Text(
                                         'فیلتر',
@@ -194,7 +395,7 @@ class UserListView extends GetView<UserListController> {
                                             .copyWith(
                                             fontSize: isDesktop
                                                 ? 12
-                                                : 10),
+                                                : 10,color:  controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                       ),
                                     ],
                                   ),
@@ -222,11 +423,11 @@ class UserListView extends GetView<UserListController> {
                                         border: TableBorder.symmetric(
                                             inside: BorderSide(
                                                 color: AppColor
-                                                    .textFieldColor,
-                                                width: 0.5),outside: BorderSide(
+                                                    .textColor,
+                                                width: 0.3),outside: BorderSide(
                                             color: AppColor
-                                                .textFieldColor,
-                                            width: 0.5),borderRadius: BorderRadius.circular(8)),
+                                                .textColor,
+                                            width: 0.3),borderRadius: BorderRadius.circular(8)),
                                         dividerThickness: 0.3,
                                         rows: buildDataRows(
                                             context),
@@ -269,7 +470,7 @@ class UserListView extends GetView<UserListController> {
                 height: 70,
                   margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  color: AppColor.circleColor.withOpacity(0.5),
+                  color: AppColor.appBarColor.withOpacity(0.5),
                   alignment: Alignment.bottomCenter,
                   child:PagerWidget(countPage: controller.paginated!.totalCount??0, callBack: (int index) {
                     controller.isChangePage(index);
@@ -426,19 +627,25 @@ class UserListView extends GetView<UserListController> {
                 SizedBox(
                   width: 20,
                 ),
-                SvgPicture.asset('assets/svg/edit.svg',height: 20,
-                    colorFilter: ColorFilter.mode(
-                      AppColor.textColor,
-                      BlendMode.srcIn,
-                    )),
-                SizedBox(
-                  width: 15,
+                GestureDetector(
+                  onTap: (){
+                    print(trans.id.toString());
+                    Get.toNamed("/insertUser",parameters: {"id":trans.id.toString()});
+                  },
+                  child: SvgPicture.asset('assets/svg/edit.svg',height: 20,
+                      colorFilter: ColorFilter.mode(
+                        AppColor.textColor,
+                        BlendMode.srcIn,
+                      )),
                 ),
-                SvgPicture.asset('assets/svg/trash-bin.svg',height: 20,
-                    colorFilter: ColorFilter.mode(
-                      AppColor.textColor,
-                      BlendMode.srcIn,
-                    )),
+                // SizedBox(
+                //   width: 15,
+                // ),
+                // SvgPicture.asset('assets/svg/trash-bin.svg',height: 20,
+                //     colorFilter: ColorFilter.mode(
+                //       AppColor.textColor,
+                //       BlendMode.srcIn,
+                //     )),
                 SizedBox(
                   width: 15,
                 ),
@@ -477,19 +684,29 @@ class UserListView extends GetView<UserListController> {
                 SizedBox(
                   width: 20,
                 ),
-                SvgPicture.asset('assets/svg/close-circle1.svg',
-                    colorFilter: ColorFilter.mode(
-                      AppColor.accentColor,
-                      BlendMode.srcIn,
-                    )),
+                GestureDetector(
+                  onTap: (){
+                    controller.updateStatus(0,trans.id??0);
+                  },
+                  child: SvgPicture.asset('assets/svg/close-circle1.svg',
+                      colorFilter: ColorFilter.mode(
+                        AppColor.accentColor,
+                        BlendMode.srcIn,
+                      )),
+                ),
                 SizedBox(
                   width: 10,
                 ),
-                SvgPicture.asset('assets/svg/check-mark-circle.svg',
-                    colorFilter: ColorFilter.mode(
-                      AppColor.primaryColor,
-                      BlendMode.srcIn,
-                    )),
+                GestureDetector(
+                  onTap: (){
+                    controller.updateStatus(1,trans.id??0);
+                  },
+                  child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                      colorFilter: ColorFilter.mode(
+                        AppColor.primaryColor,
+                        BlendMode.srcIn,
+                      )),
+                ),
                 SizedBox(
                   width: 20,
                 ),

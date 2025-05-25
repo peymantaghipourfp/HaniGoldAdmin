@@ -24,9 +24,9 @@ class PagerWidget extends StatelessWidget {
             data: SfDataPagerThemeData(
                 itemColor: Colors.transparent,
                 selectedItemColor: AppColor.secondary3Color,
-                backgroundColor: AppColor.textFieldColor,
+                backgroundColor: AppColor.backGroundColor,
                 itemTextStyle:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
-                disabledItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.secondaryColor.withOpacity(0.5)),
+                disabledItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.appBarColor.withOpacity(0.5)),
                 selectedItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
                 itemBorderColor: AppColor.textColor
             ),

@@ -21,8 +21,8 @@ class InsertUserView extends GetView<InsertUserController> {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
       appBar: CustomAppBar(
-        title: 'افزودن کاربر جدید',
-        onBackTap: () => Get.toNamed("/home"),
+        title: ' ${controller.title.value} کاربر جدید ',
+        onBackTap: () => Get.back(),
       ),
       body: SafeArea(
         child: controller.state.value == PageState.loading
@@ -542,7 +542,7 @@ class InsertUserView extends GetView<InsertUserController> {
                             shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)))),
                         onPressed: () async {
-                          controller.insertUser();
+                        controller.idUser.value!=0?controller.updateUser() : controller.insertUser();
                         },
                         child: controller.isLoading.value
                             ?
@@ -550,7 +550,7 @@ class InsertUserView extends GetView<InsertUserController> {
                           valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
                         ) :
                         Text(
-                          'ایجاد حساب کاریری',
+                          '${controller.title.value} کاربر ',
                           style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
                         ),
                       ),

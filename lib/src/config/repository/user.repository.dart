@@ -1,4 +1,3 @@
-
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
@@ -11,75 +10,114 @@ import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
 import '../../domain/users/model/city_item.model.dart';
 import '../../domain/users/model/state_item.model.dart';
 
-
-
-class UserRepository{
-
-  Dio userDio=Dio();
-  UserRepository(){
-    userDio.options.baseUrl=BaseUrl.baseUrl;
+class UserRepository {
+  Dio userDio = Dio();
+  UserRepository() {
+    userDio.options.baseUrl = BaseUrl.baseUrl;
   }
 
+  Future<ListUserModel> getUserList({
+    required int startIndex,
+    required int toIndex,
+    required String name,
+    required String mobile,
+  }) async {
+    try {
 
-  Future<ListUserModel> getUserList({required int startIndex, required int toIndex,})async{
-    try{
-      Map<String , dynamic> options={
-        "options" : { "account" :{
-          "orderBy": "Account.Name",
-          "orderByType": "DESC",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
+      Map<String, dynamic> options =
+      name!="" || mobile!=""?
+      {
+        "options": {
+          "account": {
+            "Predicate": [
+              {
+                "innerCondition": 0,
+                "outerCondition": 0,
+                "filters": [
+                  name!=""?   {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Account"
+                  }:  mobile!=""?
+                  {
+                    "fieldName": "Value",
+                    "filterValue": mobile,
+                    "filterType": 0,
+                    "RefTable": "Ci"
+                  }:[]
+                ]
+              }
+            ],
+            "orderBy": "Account.Name",
+            "orderByType": "asc",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
+          }
+        }
+      }:
+      {
+        "options": {
+          "account": {
+            "orderBy": "Account.Name",
+            "orderByType": "DESC",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
+          }
+        }
       };
-      final response=await userDio.post('Account/getWrapper',data: options);
+      final response = await userDio.post('Account/getWrapper', data: options);
       print(response);
       return ListUserModel.fromJson(response.data);
-
-    }
-    catch(e){
+    } catch (e) {
       throw ErrorException('خطا:$e');
     }
   }
 
-
-  Future<List<CityItemModel>> getCityList({required int startIndex, required int toIndex,})async{
-    try{
-      Map<String , dynamic> options={
-        "options" : { "city" :{
-          "orderBy": "City.name",
-          "orderByType": "DESC",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
+  Future<List<CityItemModel>> getCityList({
+    required int startIndex,
+    required int toIndex,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "options": {
+          "city": {
+            "orderBy": "City.name",
+            "orderByType": "DESC",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
+          }
+        }
       };
-      final response=await userDio.post('City/get',data: options);
+      final response = await userDio.post('City/get', data: options);
       print(response);
-      List<dynamic> data=response.data;
-      return data.map((city)=>CityItemModel.fromJson(city)).toList();
-
-    }
-    catch(e){
+      List<dynamic> data = response.data;
+      return data.map((city) => CityItemModel.fromJson(city)).toList();
+    } catch (e) {
       throw ErrorException('خطا:$e');
     }
   }
 
-  Future<List<StateItemModel>> getStateList({required int startIndex, required int toIndex,})async{
-    try{
-      Map<String , dynamic> options={
-        "options" : { "state" :{
-          "orderBy": "State.Name",
-          "orderByType": "DESC",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
+  Future<List<StateItemModel>> getStateList({
+    required int startIndex,
+    required int toIndex,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "options": {
+          "state": {
+            "orderBy": "State.Name",
+            "orderByType": "DESC",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
+          }
+        }
       };
-      final response=await userDio.post('State/get',data: options);
+      final response = await userDio.post('State/get', data: options);
       print(response);
-      List<dynamic> data=response.data;
-      return data.map((state)=>StateItemModel.fromJson(state)).toList();
-
-    }
-    catch(e){
+      List<dynamic> data = response.data;
+      return data.map((state) => StateItemModel.fromJson(state)).toList();
+    } catch (e) {
       throw ErrorException('خطا:$e');
     }
   }
@@ -97,134 +135,221 @@ class UserRepository{
     required String city,
     required int idCity,
     required String address,
-
-  })async{
-    try{
-      Map<String , dynamic> options=
-        {
-          "type": 1,
-          "code": "1",
-          "hasDeposit": hasDeposit,
-          "name": name,
-          "parent": {
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "type": 1,
+        "code": "1",
+        "hasDeposit": hasDeposit,
+        "name": name,
+        "parent": {"infos": []},
+        "addresses": [
+          {
+            "StateMode": 1,
+            "isMain": true,
+            "name": "آدرس",
+            "account": {"infos": []},
+            "contact": {
+              "account": {"infos": []},
+              "infos": []
+            },
+            "country": {"name": "ایران", "id": 1, "infos": []},
+            "state": {"name": state, "id": idState, "infos": []},
+            "city": {"name": city, "id": idCity, "infos": []},
+            "fullAddress": address,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
+            "infos": []
+          }
+        ],
+        "contactInfos": [
+          {
+            "account": {"id": 1, "infos": []},
+            "contact": {
+              "account": {"infos": []},
+              "infos": []
+            },
+            "StateMode": 1,
+            "type": 0,
+            "name": name,
+            "value": mobile,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
             "infos": []
           },
-          "addresses": [
-            {
-              "StateMode" : 1,
-              "isMain": true,
-              "name": "آدرس",
-              "account": {
-                "infos": []
-              },
-              "contact": {
-                "account": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "country": {
-                "name": "ایران",
-                "id": 1,
-                "infos": []
-              },
-              "state": {
-                "name": state,
-                "id": idState,
-                "infos": []
-              },
-              "city": {
-                "name": city,
-                "id": idCity,
-                "infos": []
-              },
-              "fullAddress": address,
-              "rowNum": 1,
-              "id": null,
-              "attribute": "cus",
-              "infos": []
-            }
-          ],
-          "contactInfos": [
-            {
-
-              "account": {
-
-                "id": 1,
-                "infos": []
-              },
-              "contact": {
-                "account": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "StateMode" : 1,
-              "type": 0,
-              "name": name,
-              "value": mobile,
-              "rowNum": 1,
-              "id": null,
-              "attribute": "cus",
+          {
+            "account": {"id": 1, "infos": []},
+            "contact": {
+              "account": {"infos": []},
               "infos": []
             },
-            {
-              "account": {
-                "id": 1,
-                "infos": []
-              },
-              "contact": {
-
-                "account": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "StateMode" : 1,
-              "type": 1,
-              "name": name,
-              "value": phoneNumber,
-              "rowNum": 1,
-              "id": null,
-              "attribute": "cus",
+            "StateMode": 1,
+            "type": 1,
+            "name": name,
+            "value": phoneNumber,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
+            "infos": []
+          },
+          {
+            "account": {"id": 1, "infos": []},
+            "contact": {
+              "account": {"infos": []},
               "infos": []
             },
-            {
-              "account": {
-
-                "id": 1,
-                "infos": []
-              },
-              "contact": {
-                "account": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "StateMode" : 1,
-              "type": 2,
-              "name": name,
-              "value": email,
-              "rowNum": 1,
-              "id": null,
-              "attribute": "cus",
-              "infos": []
-            },
-          ],
-          "rowNum": 1,
-          "id": null,
-          "attribute": "cus",
-          "infos": []
-        };
-      final response=await userDio.post('Account/insert',data: options);
+            "StateMode": 1,
+            "type": 2,
+            "name": name,
+            "value": email,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
+            "infos": []
+          },
+        ],
+        "rowNum": 1,
+        "id": null,
+        "attribute": "cus",
+        "infos": []
+      };
+      final response = await userDio.post('Account/insert', data: options);
       print(response);
       return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
     }
-    catch(e){
+  }
+ Future<AccountModel> updateUser({
+    required String name,
+    required int id,
+    required String mobile,
+    required String phoneNumber,
+    required String email,
+    required String user,
+    required bool hasDeposit,
+    required String password,
+    required String state,
+    required int idState,
+    required String city,
+    required int idCity,
+    required String address,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "type": 1,
+        "code": "1",
+        "hasDeposit": hasDeposit,
+        "name": name,
+        "parent": {"infos": []},
+        "addresses": [
+          {
+            "StateMode": 1,
+            "isMain": true,
+            "name": "آدرس",
+            "account": {"infos": []},
+            "contact": {
+              "account": {"infos": []},
+              "infos": []
+            },
+            "country": {"name": "ایران", "id": 1, "infos": []},
+            "state": {"name": state, "id": idState, "infos": []},
+            "city": {"name": city, "id": idCity, "infos": []},
+            "fullAddress": address,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
+            "infos": []
+          }
+        ],
+        "contactInfos": [
+          {
+            "account": {"id": 1, "infos": []},
+            "contact": {
+              "account": {"infos": []},
+              "infos": []
+            },
+            "StateMode": 1,
+            "type": 0,
+            "name": name,
+            "value": mobile,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
+            "infos": []
+          },
+          {
+            "account": {"id": 1, "infos": []},
+            "contact": {
+              "account": {"infos": []},
+              "infos": []
+            },
+            "StateMode": 1,
+            "type": 1,
+            "name": name,
+            "value": phoneNumber,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
+            "infos": []
+          },
+          {
+            "account": {"id": 1, "infos": []},
+            "contact": {
+              "account": {"infos": []},
+              "infos": []
+            },
+            "StateMode": 1,
+            "type": 2,
+            "name": name,
+            "value": email,
+            "rowNum": 1,
+            "id": null,
+            "attribute": "cus",
+            "infos": []
+          },
+        ],
+        "rowNum": 1,
+        "id": id,
+        "attribute": "cus",
+        "infos": []
+      };
+      final response = await userDio.put('Account/Update', data: options);
+      print(response);
+      return AccountModel.fromJson(response.data);
+    } catch (e) {
       throw ErrorException('خطا:$e');
     }
   }
 
+  Future<AccountModel> updateStatus({
+    required int status,
+    required int id,
+  }) async {
+    try {
+      final response = await userDio
+          .put('Account/updateStatus', data: {"status": status, "id": id});
+      print(response);
+      return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<AccountModel> getOneAccount({
+    required int id,
+  }) async {
+    try {
+      final response = await userDio
+          .get('Account/getOne', queryParameters: {"id": id});
+      print(response);
+      return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
 
   // Future<RemittanceModel> insertRemittance({
   //   required String date,

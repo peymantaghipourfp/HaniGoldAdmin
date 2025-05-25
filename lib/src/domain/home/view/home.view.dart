@@ -587,7 +587,7 @@ class HomeView extends GetView<HomeController> {
                                     size: 15,
                                     color: AppColor.circleColor),
                                 onTap: () {
-                                  Get.toNamed('/insertUser');
+                                  Get.toNamed("/insertUser",parameters: {"id":0.toString()});
                                 },
                               ),
                             ),

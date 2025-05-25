@@ -3,9 +3,11 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import '../../../config/const/app_color.dart';
 import '../../../config/repository/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
@@ -32,11 +34,14 @@ class UserListController extends GetxController{
   UserRepository userRepository=UserRepository();
   ScrollController scrollController = ScrollController();
   final TextEditingController searchController=TextEditingController();
+  final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController mobileFilterController=TextEditingController();
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
    RxList<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   RxList<AccountModel> accountList=<AccountModel>[].obs;
   PaginatedModel? paginated;
   BalanceModel? balanceModel;
+
   String? indexAccountPayerGet;
   var isLoading=false.obs;
   var namePayer="".obs;
@@ -100,7 +105,29 @@ class UserListController extends GetxController{
     getUserList();
   }
 
-
+// آپدیت موقعیت
+  Future<void> updateStatus(int status,int id) async {
+    EasyLoading.show(
+      status: 'لطفا صبر کنید',
+      dismissOnTap: false,
+    );
+    try {
+      var response = await userRepository.updateStatus(status: status, id: id
+      );
+      Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
+          titleText: Text(response.infos?.first["title"],
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+          messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+      getUserList();
+      update();
+    }
+    catch (e) {
+     // state.value = PageStateUser.err;
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
 
   // لیست کاربران
   Future<void> getUserList() async {
@@ -111,10 +138,12 @@ class UserListController extends GetxController{
        state.value=PageStateUser.loading;
       var response = await userRepository.getUserList(
           startIndex: currentPage.value,
-          toIndex: itemsPerPage.value,
+          toIndex: itemsPerPage.value, name: nameFilterController.text, mobile: mobileFilterController.text,
           );
       accountList.addAll(response.accounts??[]);
       paginated=response.paginated;
+       // nameFilterController.text="";
+       // mobileFilterController.text="";
     //  print(paginated?.totalCount??0);
        state.value=PageStateUser.list;
       isOpenMore.value = true;
@@ -125,5 +154,6 @@ class UserListController extends GetxController{
       state.value = PageStateUser.err;
     } finally {}
   }
+
 
 }

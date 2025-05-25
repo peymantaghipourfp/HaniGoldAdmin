@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
@@ -40,12 +41,18 @@ class InsertUserController extends GetxController{
   final TextEditingController emailController=TextEditingController();
   RxList<StateItemModel> stateList=<StateItemModel>[].obs;
   RxList<CityItemModel> cityList=<CityItemModel>[].obs;
-  final Rxn<StateItemModel> selectedState=Rxn<StateItemModel>();
+  late Rxn<StateItemModel> selectedState=Rxn<StateItemModel>();
   final Rxn<CityItemModel> selectedCity=Rxn<CityItemModel>();
+  AccountModel? accountModel;
+  var idUser=0.obs;
+  var title="".obs;
 
   @override
   void onInit() {
     super.onInit();
+    idUser.value=int.parse(Get.parameters["id"] as String);
+    idUser.value!=0? getOneUser(idUser.value):null;
+    idUser.value!=0? title.value="ویرایش":title.value="افزودن";
     getStateList();
     getCityList();
   }
@@ -107,10 +114,17 @@ class InsertUserController extends GetxController{
     } finally {}
   }
 
-  // لیست شهر ها
+
+
+
+
   Future<void> insertUser(
       ) async {
     print("insertUser : 1");
+    EasyLoading.show(
+      status: 'لطفا صبر کنید',
+      dismissOnTap: false,
+    );
     try {
        state.value=PageState.loading;
        var response = await userRepository.insertUser(
@@ -144,7 +158,85 @@ class InsertUserController extends GetxController{
     }
     catch (e) {
       state.value = PageState.err;
-    } finally {}
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> updateUser(
+      ) async {
+    print("insertUser : 1");
+    EasyLoading.show(
+      status: 'لطفا صبر کنید',
+      dismissOnTap: false,
+    );
+    try {
+       state.value=PageState.loading;
+       var response = await userRepository.updateUser(
+           name: nameController.text,
+           mobile: mobileController.text,
+           phoneNumber: phoneController.text,
+           email: emailController.text,
+           user: userController.text,
+           hasDeposit:  isChecked.value,
+           password: passwordController.text,
+           state: selectedState.value?.name??"",
+           idState: selectedState.value?.id??0,
+           city: selectedCity.value?.name??"",
+           idCity: selectedCity.value?.id??0,
+           address: addressController.text, id: idUser.value
+          );
+       Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
+           titleText: Text(response.infos?.first["title"],
+             textAlign: TextAlign.center,
+             style: TextStyle(color: AppColor.textColor),),
+           messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+       nameController.text="";
+       mobileController.text="";
+       phoneController.text="";
+       emailController.text="";
+       userController.text="";
+       passwordController.text="";
+       addressController.text="";
+       state.value=PageState.list;
+      update();
+    }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  // کاربر
+  Future<void> getOneUser(int id) async {
+    EasyLoading.show(
+      status: 'لطفا صبر کنید',
+      dismissOnTap: false,
+    );
+    try {
+      var response = await userRepository.getOneAccount(id: id
+      );
+      accountModel=response;
+      nameController.text=accountModel?.name??"";
+      mobileController.text=accountModel?.contactInfos?.first.value??"";
+      phoneController.text=(accountModel?.contactInfos?.length)! > 2? accountModel!.contactInfos![2].value??"":"";
+      emailController.text=(accountModel?.contactInfos?.length)! > 3? accountModel!.contactInfos![3].value??"":"";
+      userController.text="";
+      passwordController.text="";
+      addressController.text=accountModel?.addresses?.first.fullAddress??"";
+      selectedState.value=accountModel?.addresses?.first.state;
+      selectedCity.value=accountModel?.addresses?.first.city;
+
+      //  print(paginated?.totalCount??0);
+
+      update();
+    }
+    catch (e) {
+
+    } finally {
+      EasyLoading.dismiss();
+    }
   }
 
 }
