@@ -1,7 +1,16 @@
 
 
 import 'dart:io';
-
+import 'dart:typed_data';
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:universal_html/html.dart' as html;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -528,5 +537,292 @@ class InventoryController extends GetxController{
     }
 
     return null;
+  }
+
+  // خروجی اکسل
+  Future<void> exportToExcel() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      final excel = Excel.createExcel();
+      final sheet = excel['دریافت پرداخت'];
+
+      sheet.appendRow([
+        TextCellValue('ردیف'),
+        TextCellValue('تاریخ'),
+        TextCellValue('نام ثبت کننده'),
+        TextCellValue('محصول'),
+        TextCellValue('مقدار'),
+        TextCellValue('شرح'),
+        TextCellValue('دریافت/پرداخت'),
+        TextCellValue('اطلاعات اضافی'),
+        TextCellValue('مانده سکه'),
+        TextCellValue('مانده ریالی'),
+        TextCellValue('مانده طلایی'),
+      ]);
+      EasyLoading.show(status: 'دریافت فایل اکسل...');
+      final allInventories = await inventoryRepository.getInventoryList(
+        startIndex: 1,
+        toIndex: 500,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+      );
+
+      for (var inventory in allInventories) {
+        sheet.appendRow([
+          TextCellValue(inventory.rowNum.toString()),
+          TextCellValue(inventory.date?.toPersianDate(twoDigits: true) ?? ''),
+          TextCellValue(inventory.account?.name ?? ''),
+          TextCellValue(inventory.inventoryDetails?.first.item?.name ?? ''),
+          TextCellValue(inventory.inventoryDetails?.first.quantity?.toString().seRagham(separator: ",") ?? ''),
+          TextCellValue(" عیار:${inventory.inventoryDetails?.first.carat ?? 0}| وزن:${inventory.inventoryDetails?.first.weight750 ?? 0}| ناخالصی:${inventory.inventoryDetails?.first.impurity ?? 0}| آزمایشگاه:${inventory.inventoryDetails?.first.laboratory?.name ?? ""}"?? ''),
+          TextCellValue(getSellBuyText(inventory.type ?? 0 )),
+          TextCellValue(getDetailText(inventory.inventoryDetailsCount ?? 1 )),
+          TextCellValue(inventory.balances?.where((e) => e.unitName == "عدد").map((e) => "\u202B${e.balance}\u202C ${e.unitName} ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
+          TextCellValue(inventory.balances?.where((e) => e.unitName == "ریال").map((e) => "\u202B${e.balance}\u202C ${e.unitName } ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
+          TextCellValue(inventory.balances?.where((e) => e.unitName == "گرم").map((e) => "\u202B${e.balance}\u202C ${e.unitName } ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
+        ]);
+      }
+
+      final fileBytes = excel.encode();
+      if (fileBytes == null) throw Exception('خطا در دریافت فایل');
+      final uint8List = Uint8List.fromList(fileBytes);
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'inventories_${DateTime.now().millisecondsSinceEpoch}.xlsx')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      }else {
+        final output = await getDownloadsDirectory();
+        final filePath = '${output?.path}/inventories_${DateTime
+            .now()
+            .millisecondsSinceEpoch}.xlsx';
+        final fileBytes = excel.encode();
+        if (fileBytes != null) {
+          await File(filePath).writeAsBytes(uint8List);
+
+          await FileSaver.instance.saveFile(
+            name: 'inventories',
+            bytes: uint8List,
+            ext: 'xlsx',
+            mimeType: MimeType.microsoftExcel,
+          );
+        }
+      }
+      Get.snackbar('موفق', 'فایل اکسل با موفقیت دریافت شد');
+      EasyLoading.dismiss();
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در دریافت فایل اکسل: ${e.toString()}');
+      EasyLoading.dismiss();
+      print(e.toString());
+    }
+  }
+
+  String getSellBuyText(int type) {
+    switch (type) {
+      case 0:
+        return 'پرداخت';
+      case 1:
+        return 'دریافت';
+      default:
+        return 'نامعتبر';
+    }
+  }
+  String getDetailText(int detailCount) {
+    switch (detailCount) {
+      case 1:
+        return 'ندارد';
+      default:
+        return 'دارد';
+    }
+  }
+
+  // خروجی pdf
+  Future<void> exportToPdf() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      EasyLoading.show(status: 'دریافت فایل PDF...');
+
+      final allInventories = await inventoryRepository.getInventoryList(
+        startIndex: 1,
+        toIndex: 500,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+      );
+
+      final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+      final ttf = pw.Font.ttf(fontData);
+      final pdf = pw.Document();
+
+      // افزودن MultiPage برای مدیریت خودکار صفحه‌بندی
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4.landscape,
+          textDirection: pw.TextDirection.rtl,
+          maxPages: 2000,
+          theme: pw.ThemeData.withFont(base: ttf,fontFallback: [ttf],),
+          header: (pw.Context context) => buildHeaderTable(),
+          build: (pw.Context context) => [
+            pw.Table(
+              border: pw.TableBorder.all(),
+              columnWidths: getColumnWidths(),
+              children: [
+                for (var inventory in allInventories)
+                  buildDataRow(inventory),
+              ],
+            ),
+          ],
+          footer: (pw.Context context) => buildPageNumber(context.pageNumber, context.pagesCount),
+        ),
+      );
+
+      final bytes = await pdf.save();
+      if (kIsWeb) {
+        final blob = html.Blob([bytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: url)
+          ..download = 'inventories_${DateTime.now().millisecondsSinceEpoch}.pdf'
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: 'inventories.pdf',
+        );
+      }
+
+      EasyLoading.dismiss();
+      Get.snackbar('موفق', 'فایل PDF با موفقیت دریافت شد');
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar('خطا', 'خطا در دریافت فایل PDF: ${e.toString()}');
+      print(e.toString());
+    }
+  }
+
+  Map<int, pw.TableColumnWidth> getColumnWidths() {
+    return {
+      0: pw.FlexColumnWidth(3),
+      1: pw.FlexColumnWidth(3),
+      2: pw.FlexColumnWidth(3),
+      3: pw.FlexColumnWidth(1.3),
+      4: pw.FlexColumnWidth(1.3),
+      5: pw.FlexColumnWidth(3),
+      6: pw.FlexColumnWidth(2),
+      7: pw.FlexColumnWidth(2),
+      8: pw.FlexColumnWidth(2.5),
+      9: pw.FlexColumnWidth(2),
+      10: pw.FlexColumnWidth(1.2),
+    };
+  }
+  // ساخت هدر جدول
+  pw.Table buildHeaderTable() {
+    return pw.Table(
+      columnWidths: {
+        0: pw.FlexColumnWidth(3),
+        1: pw.FlexColumnWidth(3),
+        2: pw.FlexColumnWidth(3),
+        3: pw.FlexColumnWidth(1.3),
+        4: pw.FlexColumnWidth(1.3),
+        5: pw.FlexColumnWidth(3),
+        6: pw.FlexColumnWidth(2),
+        7: pw.FlexColumnWidth(2),
+        8: pw.FlexColumnWidth(2.5),
+        9: pw.FlexColumnWidth(2),
+        10: pw.FlexColumnWidth(1.2),
+      },
+      border: pw.TableBorder.all(),
+      children: [
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColors.grey300),
+          children: [
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('مانده طلایی', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8) ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('مانده ریالی', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8) ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('مانده سکه', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8) ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('اطلاعات', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8) ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('نوع', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8) ),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('شرح', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('مقدار', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('محصول', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('نام ثبت کننده', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('تاریخ', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+            pw.Padding(
+              padding: const pw.EdgeInsets.all(5.0),
+              child: pw.Text('ردیف', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+  // ساخت سلول‌های داده
+  pw.Padding buildDataCell(String text, {bool isCenter = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(5.0),
+      child: pw.Text(text,
+        style: pw.TextStyle(fontSize: 8),
+        textAlign: isCenter ? pw.TextAlign.center : pw.TextAlign.right,
+        textDirection: pw.TextDirection.rtl,
+      ),
+    );
+  }
+
+  pw.TableRow buildDataRow(InventoryModel inventory) {
+    return pw.TableRow(
+      children: [
+        buildDataCell(inventory.balances?.where((e) => e.unitName == "گرم").map((e) => "${e.balance} ${e.unitName} ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
+        buildDataCell(inventory.balances?.where((e) => e.unitName == "ریال").map((e) => "${e.balance} ${e.unitName} ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
+        buildDataCell(inventory.balances?.where((e) => e.unitName == "عدد").map((e) => "${e.balance} ${e.unitName} ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
+        buildDataCell(getDetailText(inventory.inventoryDetailsCount ?? 1 )),
+        buildDataCell(getSellBuyText(inventory.type ?? 0 )),
+        buildDataCell(" عیار:${inventory.inventoryDetails?.first.carat ?? 0} وزن:${inventory.inventoryDetails?.first.weight750 ?? 0} ناخالصی:${inventory.inventoryDetails?.first.impurity ?? 0} آزمایشگاه:${inventory.inventoryDetails?.first.laboratory?.name ?? ""}"?? ''),
+        buildDataCell(inventory.inventoryDetails?.first.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(inventory.inventoryDetails?.first.item?.name ?? ''),
+        buildDataCell(inventory.account?.name ?? ''),
+        buildDataCell(inventory.date?.toPersianDate(twoDigits: true) ?? ''),
+        buildDataCell(inventory.rowNum.toString(), isCenter: true),
+      ],
+    );
+  }
+
+  pw.Widget buildPageNumber(int currentPage, int totalPages) {
+    return pw.Container(
+      alignment: pw.Alignment.center,
+      margin: const pw.EdgeInsets.only(top: 20),
+      child: pw.Text(
+        'صفحه ${currentPage.toString().toPersianDigit()} از ${totalPages.toString().toPersianDigit()}',
+        style: pw.TextStyle(fontSize: 8),
+      ),
+    );
   }
 }

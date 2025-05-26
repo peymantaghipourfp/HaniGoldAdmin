@@ -26,9 +26,9 @@ class ListTransactionInfoItemModel {
   @JsonKey(name: "goldValue")
   final double goldValue;
   @JsonKey(name: "coinValue")
-  final int rowNum;
-  @JsonKey(name: "rowNum")
   final double coinValue;
+  @JsonKey(name: "rowNum")
+  final int rowNum;
   @JsonKey(name: "balances")
   final List<BalanceModel> balances;
 

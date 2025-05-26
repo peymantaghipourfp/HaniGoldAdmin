@@ -274,69 +274,89 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                             Container(
                                               padding: EdgeInsets.only(
                                                   bottom: 5),
-                                              child: CustomDropdownWidget(
-                                                dropdownSearchData: DropdownSearchData<
-                                                    String>(
-                                                  searchController: orderUpdateController
-                                                      .searchController,
-                                                  searchInnerWidgetHeight: 50,
-                                                  searchInnerWidget: Container(
-                                                    height: 50,
-                                                    padding: const EdgeInsets
-                                                        .only(
-                                                      top: 8,
-                                                      right: 15,
-                                                      left: 15,
-                                                    ),
-                                                    child: TextFormField(
-                                                      style: AppTextStyle
-                                                          .bodyText,
-                                                      controller: orderUpdateController
-                                                          .searchController,
-                                                      decoration: InputDecoration(
-                                                        isDense: true,
-                                                        contentPadding:
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 10,
-                                                          vertical: 8,
-                                                        ),
-                                                        hintText: 'جستجوی کاربر...',
-                                                        hintStyle: AppTextStyle
-                                                            .labelText,
-                                                        border: OutlineInputBorder(
-                                                          borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
+                                              child: Row(crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Flexible(
+                                                    fit: FlexFit.loose,
+                                                    child: CustomDropdownWidget(
+                                                      dropdownSearchData: DropdownSearchData<
+                                                          String>(
+                                                        searchController: orderUpdateController
+                                                            .searchController,
+                                                        searchInnerWidgetHeight: 50,
+                                                        searchInnerWidget: Container(
+                                                          height: 50,
+                                                          padding: const EdgeInsets
+                                                              .only(
+                                                            top: 8,
+                                                            right: 15,
+                                                            left: 15,
+                                                          ),
+                                                          child: TextFormField(
+                                                            style: AppTextStyle
+                                                                .bodyText,
+                                                            controller: orderUpdateController
+                                                                .searchController,
+                                                            decoration: InputDecoration(
+                                                              isDense: true,
+                                                              contentPadding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                horizontal: 10,
+                                                                vertical: 8,
+                                                              ),
+                                                              hintText: 'جستجوی کاربر...',
+                                                              hintStyle: AppTextStyle
+                                                                  .labelText,
+                                                              border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                BorderRadius.circular(
+                                                                    8),
+                                                              ),
+                                                            ),
+                                                          ),
                                                         ),
                                                       ),
+                                                      showSearchBox: true,
+                                                      items:
+                                                      orderUpdateController
+                                                          .searchedAccounts
+                                                          .map((account) =>
+                                                      account.name ?? "").toList(),
+                                                      selectedValue: orderUpdateController
+                                                          .selectedAccount.value
+                                                          ?.name,
+                                                      onChanged: (String? newValue) {
+                                                        var selectedAccount = orderUpdateController
+                                                            .searchedAccounts
+                                                            .firstWhere((account) =>
+                                                        account.name == newValue);
+                                                        orderUpdateController
+                                                            .changeSelectedAccount(
+                                                            selectedAccount);
+                                                      },
+                                                      backgroundColor: AppColor
+                                                          .textFieldColor,
+                                                      borderRadius: 7,
+                                                      borderColor: AppColor
+                                                          .secondaryColor,
+                                                      hideUnderline: true,
                                                     ),
                                                   ),
-                                                ),
-                                                showSearchBox: true,
-                                                items:
-                                                orderUpdateController
-                                                    .searchedAccounts
-                                                    .map((account) =>
-                                                account.name ?? "").toList(),
-                                                selectedValue: orderUpdateController
-                                                    .selectedAccount.value
-                                                    ?.name,
-                                                onChanged: (String? newValue) {
-                                                  var selectedAccount = orderUpdateController
-                                                      .searchedAccounts
-                                                      .firstWhere((account) =>
-                                                  account.name == newValue);
-                                                  orderUpdateController
-                                                      .changeSelectedAccount(
-                                                      selectedAccount);
-                                                },
-                                                backgroundColor: AppColor
-                                                    .textFieldColor,
-                                                borderRadius: 7,
-                                                borderColor: AppColor
-                                                    .secondaryColor,
-                                                hideUnderline: true,
+                                                  SizedBox(width: 3),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      Get.toNamed('/insertUser',parameters: {'id':0.toString()});
+                                                    },
+                                                    child: SvgPicture.asset('assets/svg/add.svg',
+                                                      width: 35,
+                                                      height: 35,
+                                                      colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn),
+
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             // قیمت

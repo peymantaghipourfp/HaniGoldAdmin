@@ -59,7 +59,7 @@ class LaboratoryView extends GetView<LaboratoryController> {
                           Container(
                             margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                             padding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
-                            color: AppColor.circleColor.withOpacity(0.5),
+                            color: AppColor.appBarColor.withOpacity(0.5),
                             child: Column(
                               children: [
                                 Padding(
@@ -422,7 +422,7 @@ class LaboratoryView extends GetView<LaboratoryController> {
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                 padding: EdgeInsets.symmetric(horizontal: 20),
-                color: AppColor.circleColor.withOpacity(0.5),
+                color: AppColor.appBarColor.withOpacity(0.5),
                 alignment: Alignment.center,
 
                 height: 80,
@@ -474,7 +474,7 @@ class LaboratoryView extends GetView<LaboratoryController> {
                   height: 70,
                   margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  color: AppColor.circleColor.withOpacity(0.5),
+                  color: AppColor.appBarColor.withOpacity(0.5),
                   alignment: Alignment.bottomCenter,
                   child:PagerWidget(countPage: controller.paginated!.totalCount??0, callBack: (int index) {
                     controller.isChangePage(index);

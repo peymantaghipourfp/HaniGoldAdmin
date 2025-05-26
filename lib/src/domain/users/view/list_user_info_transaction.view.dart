@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -17,7 +18,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
-      appBar: CustomAppBar(
+      appBar: CustomAppbar1(
         title: 'مانده کاربران',
         onBackTap: () => Get.toNamed("/home"),
       ),

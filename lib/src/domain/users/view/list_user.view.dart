@@ -137,45 +137,47 @@ class UserListView extends GetView<UserListController> {
                                       ),
                                     ),
                                     SizedBox(width: 20,),
-                                    ElevatedButton(
-                                      style: ButtonStyle(
-                                          padding: WidgetStatePropertyAll(
-                                              EdgeInsets.symmetric(horizontal: 12,vertical: 15)),
-                                          elevation: WidgetStatePropertyAll(5),
-                                          backgroundColor:
-                                          WidgetStatePropertyAll(AppColor.secondary3Color),
-                                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(5)))),
-                                      onPressed: () async {
-                                      },
-                                      child: Row(
+                                    Row(
                                         children: [
-                                          SvgPicture.asset(
-                                              'assets/svg/fileExcel.svg',
-                                              height: 23,
-                                              colorFilter:
-                                              ColorFilter
-                                                  .mode(
-                                                AppColor
-                                                    .textColor,
-                                                BlendMode
-                                                    .srcIn,
-                                              )),
-                                          SizedBox(
-                                            width: 0,
+                                          // خروجی اکسل
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                                padding: WidgetStatePropertyAll(
+                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                // elevation: WidgetStatePropertyAll(5),
+                                                backgroundColor:
+                                                WidgetStatePropertyAll(AppColor.secondary3Color),
+                                                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(5)))),
+                                            onPressed: () {
+                                              controller.exportToExcel();
+                                            },
+                                            child: Text(
+                                              'خروجی اکسل',
+                                              style: AppTextStyle.labelText,
+                                            ),
                                           ),
-                                          Text(
-                                            'خروجی اکسل',
-                                            style: AppTextStyle
-                                                .labelText
-                                                .copyWith(
-                                                fontSize: isDesktop
-                                                    ? 12
-                                                    : 10),
+                                          SizedBox(width: 5,),
+                                          // خروجی pdf
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                                padding: WidgetStatePropertyAll(
+                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                // elevation: WidgetStatePropertyAll(5),
+                                                backgroundColor:
+                                                WidgetStatePropertyAll(AppColor.secondary3Color),
+                                                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                                    borderRadius: BorderRadius.circular(5)))),
+                                            onPressed: () {
+                                              controller.exportToPdf();
+                                            },
+                                            child: Text(
+                                              'خروجی pdf',
+                                              style: AppTextStyle.labelText,
+                                            ),
                                           ),
                                         ],
                                       ),
-                                    ),
                                   ],
                                 ),
                                 ElevatedButton(
@@ -418,16 +420,11 @@ class UserListView extends GetView<UserListController> {
                                         columns:
                                         buildDataColumns(),
                                         sortColumnIndex: controller.sortIndex.value,
-                                        sortAscending:
-                                        controller.sort.value,
+                                        sortAscending: controller.sort.value,
                                         border: TableBorder.symmetric(
-                                            inside: BorderSide(
-                                                color: AppColor
-                                                    .textColor,
-                                                width: 0.3),outside: BorderSide(
-                                            color: AppColor
-                                                .textColor,
-                                            width: 0.3),borderRadius: BorderRadius.circular(8)),
+                                            inside: BorderSide(color: AppColor.textColor, width: 0.3),
+                                            outside: BorderSide(color: AppColor.textColor, width: 0.3),
+                                            borderRadius: BorderRadius.circular(8)),
                                         dividerThickness: 0.3,
                                         rows: buildDataRows(
                                             context),
@@ -438,7 +435,6 @@ class UserListView extends GetView<UserListController> {
                                         columnSpacing: 90,
                                         horizontalMargin: 60,
                                       ),
-
                                     ],
                                   ),
                                 ),

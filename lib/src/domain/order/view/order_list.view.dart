@@ -16,6 +16,7 @@ import 'package:hanigold_admin/src/widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../../../config/repository/url/base_url.dart';
 import '../../../widget/pager_widget.dart';
 
 class OrderListView extends StatelessWidget {
@@ -179,6 +180,7 @@ class OrderListView extends StatelessWidget {
                                     ),
                                   ),
                                   SizedBox(width: 5,),
+                                  // خروجی اکسل
                                   ElevatedButton(
                                     style: ButtonStyle(
                                         padding: WidgetStatePropertyAll(
@@ -1053,10 +1055,18 @@ class OrderListView extends StatelessWidget {
           // محصول
           DataCell(
               Center(
-                child: Text(
-                  order.item?.name ?? "",
-                  style:
-                  AppTextStyle.bodyText,
+                child: Row(
+                  children: [
+                    Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${order.item?.icon}',
+                      width: 35,
+                      height: 35,),
+                    SizedBox(width: 5,),
+                    Text(
+                      order.item?.name ?? "",
+                      style:
+                      AppTextStyle.bodyText,
+                    ),
+                  ],
                 ),
               )),
           // مقدار
@@ -1132,84 +1142,86 @@ class OrderListView extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 6,),
-                    //دکمه تایید سفارش در جزئیات
-                     GestureDetector(
-                        onTap:  () {
-                          Get.defaultDialog(
-                              backgroundColor: AppColor.backGroundColor,
-                              title: "تایید سفارش",
-                              titleStyle: AppTextStyle.smallTitleText,
-                              middleText: "آیا از تایید سفارش مطمئن هستید؟",
-                              middleTextStyle: AppTextStyle.bodyText,
-                              confirm: ElevatedButton(
-                                  style: ButtonStyle(
-                                      backgroundColor: WidgetStatePropertyAll(
-                                          AppColor.primaryColor)),
-                                  onPressed: () {
-                                    orderController.updateStatusOrder(order.id!, 1);
-                                    Get.back();
-                                    orderController.fetchOrderList();
-                                  },
-                                  child: Text(
-                                    'تایید',
-                                    style: AppTextStyle.labelText,
-                                  )));
-                        },
-                        child: Container(
-                          height: 24,
-                          width: 37,
-                          alignment: Alignment(0, 0),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                            color: AppColor.primaryColor
+                    // دکمه تایید و رد سفارش
+                     Row(
+                       children: [
+                         //دکمه تایید سفارش در جزئیات
+                         GestureDetector(
+                            onTap:  () {
+                              Get.defaultDialog(
+                                  backgroundColor: AppColor.backGroundColor,
+                                  title: "تایید سفارش",
+                                  titleStyle: AppTextStyle.smallTitleText,
+                                  middleText: "آیا از تایید سفارش مطمئن هستید؟",
+                                  middleTextStyle: AppTextStyle.bodyText,
+                                  confirm: ElevatedButton(
+                                      style: ButtonStyle(
+                                          backgroundColor: WidgetStatePropertyAll(
+                                              AppColor.primaryColor)),
+                                      onPressed: () {
+                                        orderController.updateStatusOrder(order.id!, 1);
+                                        Get.back();
+                                        orderController.fetchOrderList();
+                                      },
+                                      child: Text(
+                                        'تایید',
+                                        style: AppTextStyle.labelText,
+                                      )));
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 3,vertical: 2.5),
+                              /*height: 23,
+                              width: 40,*/
+                              //alignment: Alignment(0.3, 0),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                color: AppColor.primaryColor
+                              ),
+                              child: Text(
+                                'تایید',
+                                style: AppTextStyle.bodyText.copyWith(fontSize: 11.8),textAlign: TextAlign.center,
+                              ),
+                            ),
                           ),
-                          child: Text(
-                            'تایید',
-                            style: AppTextStyle.bodyText,textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+                         SizedBox(width: 5,),
+                         //دکمه رد سفارش در جزئیات
+                         GestureDetector(
+                            onTap: () {
+                              Get.defaultDialog(
+                                  backgroundColor: AppColor.backGroundColor,
+                                  title: "رد سفارش",
+                                  titleStyle: AppTextStyle.smallTitleText,
+                                  middleTextStyle: AppTextStyle.bodyText,
+                                  middleText: "آیا از رد سفارش مطمئن هستید؟",
+                                  confirm: ElevatedButton(
+                                      style: ButtonStyle(
+                                          backgroundColor: WidgetStatePropertyAll(
+                                              AppColor.accentColor)),
+                                      onPressed: () {
+                                        orderController.updateStatusOrder(order.id!, 2);
+                                        Get.back();
+                                        orderController.fetchOrderList();
 
-                    SizedBox(
-                      height: 3,
-                    ),
-                    //دکمه رد سفارش در جزئیات
-                    GestureDetector(
-                        onTap: () {
-                          Get.defaultDialog(
-                              backgroundColor: AppColor.backGroundColor,
-                              title: "رد سفارش",
-                              titleStyle: AppTextStyle.smallTitleText,
-                              middleTextStyle: AppTextStyle.bodyText,
-                              middleText: "آیا از رد سفارش مطمئن هستید؟",
-                              confirm: ElevatedButton(
-                                  style: ButtonStyle(
-                                      backgroundColor: WidgetStatePropertyAll(
-                                          AppColor.accentColor)),
-                                  onPressed: () {
-                                    orderController.updateStatusOrder(order.id!, 2);
-                                    Get.back();
-                                    orderController.fetchOrderList();
-
-                                  },
-                                  child: Text(
-                                    'رد',
-                                    style: AppTextStyle.bodyText,
-                                  )));
-                        },
-                        child: Container(
-                          height: 24,
-                          width: 37,
-                          alignment: Alignment(0, 0),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(5),
-                              color: AppColor.accentColor
+                                      },
+                                      child: Text(
+                                        ' رد ',
+                                        style: AppTextStyle.bodyText,textAlign: TextAlign.center
+                                      )));
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 11,vertical: 2.6),
+                              //alignment: Alignment(0, 0),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(5),
+                                  color: AppColor.accentColor
+                              ),
+                              child: Text('رد',
+                                style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                              ),
+                            ),
                           ),
-                          child: Text('رد',
-                            style: AppTextStyle.bodyText,textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ),
+                       ],
+                     ),
 
                   ],
                 ),

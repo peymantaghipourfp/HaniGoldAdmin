@@ -310,100 +310,118 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                             ),
                                             // کاربر
                                             Container(
-                                              padding: EdgeInsets.only(
-                                                  bottom: 5),
+                                              padding: EdgeInsets.only(bottom: 5),
                                               child:
-                                              CustomDropdownWidget(
-
-                                                dropdownSearchData: DropdownSearchData<
-                                                    String>(
-                                                  searchController: orderCreateController
-                                                      .searchController,
-                                                  searchInnerWidgetHeight: 50,
-                                                  searchInnerWidget: Container(
-                                                    height: 50,
-                                                    padding: const EdgeInsets
-                                                        .only(
-                                                      top: 8,
-                                                      right: 15,
-                                                      left: 15,
-                                                    ),
-                                                    child: TextFormField(
-                                                      style: AppTextStyle
-                                                          .bodyText,
-                                                      controller: orderCreateController
-                                                          .searchController,
-                                                      decoration: InputDecoration(
-                                                        isDense: true,
-                                                        contentPadding:
-                                                        const EdgeInsets
-                                                            .symmetric(
-                                                          horizontal: 10,
-                                                          vertical: 8,
-                                                        ),
-                                                        hintText: 'جستجوی کاربر...',
-                                                        hintStyle: AppTextStyle
-                                                            .labelText,
-                                                        border: OutlineInputBorder(
-                                                          borderRadius:
-                                                          BorderRadius.circular(
-                                                              8),
+                                              Row(crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Flexible(
+                                                    fit: FlexFit.loose,
+                                                    child: CustomDropdownWidget(
+                                                      dropdownSearchData: DropdownSearchData<
+                                                          String>(
+                                                        searchController: orderCreateController
+                                                            .searchController,
+                                                        searchInnerWidgetHeight: 50,
+                                                        searchInnerWidget: Container(
+                                                          height: 50,
+                                                          padding: const EdgeInsets
+                                                              .only(
+                                                            top: 8,
+                                                            right: 15,
+                                                            left: 15,
+                                                          ),
+                                                          child: TextFormField(
+                                                            style: AppTextStyle
+                                                                .bodyText,
+                                                            controller: orderCreateController
+                                                                .searchController,
+                                                            decoration: InputDecoration(
+                                                              isDense: true,
+                                                              contentPadding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                horizontal: 10,
+                                                                vertical: 8,
+                                                              ),
+                                                              hintText: 'جستجوی کاربر...',
+                                                              hintStyle: AppTextStyle
+                                                                  .labelText,
+                                                              border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                BorderRadius.circular(
+                                                                    8),
+                                                              ),
+                                                            ),
+                                                          ),
                                                         ),
                                                       ),
+                                                      value: orderCreateController
+                                                          .selectedAccount.value,
+                                                      validator: (value) {
+                                                        if (value == 'انتخاب کنید' ||
+                                                            value == null ||
+                                                            value.isEmpty) {
+                                                          return 'کاربر را انتخاب کنید';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      showSearchBox: true,
+                                                      items: [
+                                                        'انتخاب کنید',
+                                                        ...orderCreateController
+                                                            .searchedAccounts.map((
+                                                            account) =>
+                                                        account.name ?? "")
+                                                      ].toList(),
+                                                      selectedValue: orderCreateController
+                                                          .selectedAccount.value
+                                                          ?.name,
+                                                      onChanged: (String? newValue) {
+                                                        if (newValue ==
+                                                            'انتخاب کنید') {
+                                                          orderCreateController
+                                                              .changeSelectedAccount(
+                                                              null);
+                                                        } else {
+                                                          var selectedAccount = orderCreateController
+                                                              .searchedAccounts
+                                                              .firstWhere((account) =>
+                                                          account.name == newValue);
+                                                          orderCreateController
+                                                              .changeSelectedAccount(
+                                                              selectedAccount);
+                                                        }
+                                                      },
+                                                      onMenuStateChange: (isOpen) {
+                                                        if (!isOpen) {
+                                                          orderCreateController
+                                                              .resetAccountSearch();
+                                                        } else {
+                                                    
+                                                        }
+                                                      },
+                                                      backgroundColor: AppColor
+                                                          .textFieldColor,
+                                                      borderRadius: 7,
+                                                      borderColor: AppColor
+                                                          .secondaryColor,
+                                                      hideUnderline: true,
                                                     ),
                                                   ),
-                                                ),
-                                                value: orderCreateController
-                                                    .selectedAccount.value,
-                                                validator: (value) {
-                                                  if (value == 'انتخاب کنید' ||
-                                                      value == null ||
-                                                      value.isEmpty) {
-                                                    return 'کاربر را انتخاب کنید';
-                                                  }
-                                                  return null;
-                                                },
-                                                showSearchBox: true,
-                                                items: [
-                                                  'انتخاب کنید',
-                                                  ...orderCreateController
-                                                      .searchedAccounts.map((
-                                                      account) =>
-                                                  account.name ?? "")
-                                                ].toList(),
-                                                selectedValue: orderCreateController
-                                                    .selectedAccount.value
-                                                    ?.name,
-                                                onChanged: (String? newValue) {
-                                                  if (newValue ==
-                                                      'انتخاب کنید') {
-                                                    orderCreateController
-                                                        .changeSelectedAccount(
-                                                        null);
-                                                  } else {
-                                                    var selectedAccount = orderCreateController
-                                                        .searchedAccounts
-                                                        .firstWhere((account) =>
-                                                    account.name == newValue);
-                                                    orderCreateController
-                                                        .changeSelectedAccount(
-                                                        selectedAccount);
-                                                  }
-                                                },
-                                                onMenuStateChange: (isOpen) {
-                                                  if (!isOpen) {
-                                                    orderCreateController
-                                                        .resetAccountSearch();
-                                                  } else {
+                                                  SizedBox(width: 3),
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      Get.toNamed('/insertUser',parameters: {'id':0.toString()});
+                                                    },
+                                                      child: SvgPicture.asset('assets/svg/add.svg',
+                                                        width: 35,
+                                                        height: 35,
+                                                        colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn),
 
-                                                  }
-                                                },
-                                                backgroundColor: AppColor
-                                                    .textFieldColor,
-                                                borderRadius: 7,
-                                                borderColor: AppColor
-                                                    .secondaryColor,
-                                                hideUnderline: true,
+                                                      ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             // قیمت

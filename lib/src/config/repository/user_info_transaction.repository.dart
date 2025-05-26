@@ -117,7 +117,7 @@ class UserInfoTransactionRepository{
               ]
             }
           ],
-          "orderBy": "AccountValues.CurrencyValue",
+          "orderBy": "ABS(AccountValues.CurrencyValue)",
           "orderByType": "DESC",
           "StartIndex": startIndex,
           "ToIndex": toIndex

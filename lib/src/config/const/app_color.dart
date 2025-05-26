@@ -8,7 +8,7 @@ class AppColor{
   static const Color textFieldColor=Color(0xff2c2d30);
   static const Color primaryColor=Color(0xff1bc06e);
   static const Color secondaryColor=Color(0xFF2D3541);
-  static const Color accentColor=Color(0xfff40d30);
+  static const Color accentColor=Color(0xffe91e63);
   //static const Color accentColor=Color(0xffce2525);
   static const Color buttonColor=Color(0xff02807e);
   static const Color circleColor=Color(0xff2f2b44);
