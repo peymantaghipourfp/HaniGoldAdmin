@@ -36,6 +36,7 @@ import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../product/model/item.model.dart';
+import '../../users/model/paginated.model.dart';
 import '../model/remittance.model.dart';
 
 
@@ -55,6 +56,8 @@ class RemittanceController extends GetxController{
   ScrollController scrollController = ScrollController();
   final TextEditingController searchController=TextEditingController();
   final TextEditingController searchControllerP=TextEditingController();
+  final TextEditingController dateStartController=TextEditingController();
+  final TextEditingController dateEndController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
   final TextEditingController namePayerController=TextEditingController();
   final TextEditingController mobilePayerController=TextEditingController();
@@ -65,8 +68,10 @@ class RemittanceController extends GetxController{
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<ItemModel> itemList=<ItemModel>[].obs;
   final List<AccountModel> accountListP=<AccountModel>[].obs;
-
+  PaginatedModel? paginated;
   var errorMessage=''.obs;
+  final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController mobileFilterController=TextEditingController();
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<AccountModel> selectedAccountP = Rxn<AccountModel>();
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
@@ -136,7 +141,7 @@ class RemittanceController extends GetxController{
   void onInit() {
     searchController.addListener(onSearchChanged);
     searchControllerP.addListener(onSearchChangedP);
-    fetchRemittanceList();
+    getRemittanceListPager();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
@@ -194,18 +199,10 @@ Timer? debounceP;
 
     }
   }
-  void nextPage() {
-    if (hasMore.value) {
-      currentPage.value++;
-      fetchRemittanceList();
-    }
-  }
-
-  void previousPage() {
-    if (currentPage.value > 1) {
-      currentPage.value--;
-      fetchRemittanceList();
-    }
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    getRemittanceListPager();
   }
 
 
@@ -292,7 +289,7 @@ Timer? debounceP;
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
 
-        fetchRemittanceList();
+      getRemittanceListPager();
 
     } catch (e) {
       throw ErrorException('خطا در ایجاد حواله: $e');
@@ -302,7 +299,33 @@ Timer? debounceP;
     return null;
   }
 
-  Future<List<dynamic>?> updateRegistered(int remittanceId,bool registered) async {
+  // لیست حواله ها با صفحه بندی
+  Future<void> getRemittanceListPager() async {
+    print("### getRemittanceListPager ###");
+    isOpenMore.value = false;
+    remittanceList.clear();
+    try {
+      state.value=PageState.loading;
+      var response = await remittanceRepository.getRemittanceListPager(
+        startIndex: currentPage.value,
+        toIndex: itemsPerPage.value,
+      );
+      remittanceList.addAll(response.remittances??[]);
+      paginated=response.paginated;
+      state.value=PageState.list;
+      isOpenMore.value = true;
+
+      update();
+    }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {}
+  }
+
+
+
+
+  Future< RemittanceModel?> updateRegistered(int remittanceId,bool registered) async {
     //EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoadingRegister.value = true;
@@ -311,13 +334,13 @@ Timer? debounceP;
         registered: registered,
       );
       if(response!= null){
-        //EasyLoading.dismiss();
-        Get.snackbar(response.first['title'],response.first["description"],
-            titleText: Text(response.first['title'],
+        EasyLoading.dismiss();
+        Get.snackbar(response.infos!.first['title'],response.infos!.first["description"],
+            titleText: Text(response.infos!.first['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchRemittanceList();
+            messageText: Text(response.infos!.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        getRemittanceListPager();
       }
 
     } catch (e) {

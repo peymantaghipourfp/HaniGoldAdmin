@@ -48,6 +48,9 @@ class MyApp extends StatelessWidget {
         appBarTheme: AppBarTheme(backgroundColor: AppColor.backGroundColor),
         scaffoldBackgroundColor: AppColor.backGroundColor1,
         iconTheme: IconThemeData(color: AppColor.textColor),
+          scrollbarTheme: ScrollbarThemeData().copyWith(
+            thumbColor: WidgetStateProperty.all(AppColor.dividerColor),
+          )
       ),
       debugShowCheckedModeBanner: false,
       getPages: RoutePage.routePage,

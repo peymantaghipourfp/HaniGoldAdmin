@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
+import 'package:hanigold_admin/src/domain/remittance/model/list_remittance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 
 class RemittanceRepository{
@@ -31,6 +32,36 @@ class RemittanceRepository{
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((account)=>RemittanceModel.fromJson(account)).toList();
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<ListRemittanceModel> getRemittanceListPager({
+    required int startIndex,
+    required int toIndex,
+  })async{
+    try{
+      Map<String , dynamic> options={
+        "options" : {
+          "remittance" :{
+          "orderBy": "Remittance.Id",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      };
+      final response=await remittanceDio.post('Remittance/getWrapper',data: options);
+      print("url : Remittance/get" );
+      print("request : $options" );
+      print("response : ${response.data}" );
+      if(response.statusCode==200){
+        return ListRemittanceModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
@@ -147,7 +178,7 @@ class RemittanceRepository{
     }
   }
 
-  Future<List< dynamic>> updateRegistered({
+  Future< RemittanceModel> updateRegistered({
     required bool registered,
     required int remittanceId,
   })async{
@@ -161,7 +192,7 @@ class RemittanceRepository{
       var response=await remittanceDio.put('Remittance/updateRegistered',data: remittanceData);
       print('Status Code: ${response.statusCode}');
       print('Response Data: ${response.data}');
-      return response.data;
+      return RemittanceModel.fromJson(response.data) ;
     }
     catch(e){
       throw ErrorException('خطا در ریجیستر:$e');

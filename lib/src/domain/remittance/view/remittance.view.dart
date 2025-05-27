@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -9,6 +11,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../../widget/pager_widget.dart';
 import '../controller/remittance.controller.dart';
 
 class RemittanceView extends GetView<RemittanceController> {
@@ -151,13 +154,309 @@ class RemittanceView extends GetView<RemittanceController> {
                                                 ],
                                               ),
                                               // فیلتر
-                                              Container(
-                                                padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                                                decoration: BoxDecoration(
-                                                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                                                    border: Border.all(color: AppColor.textColor)
-                                  
-                                                ),
+                                              ElevatedButton(
+                                                style: ButtonStyle(
+                                                    padding: WidgetStatePropertyAll(
+                                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                    // elevation: WidgetStatePropertyAll(5),
+                                                    backgroundColor:
+                                                    WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
+                                                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                        borderRadius: BorderRadius.circular(5)))),
+                                                onPressed: () async {
+                                                  showGeneralDialog(
+                                                      context: context,
+                                                      barrierDismissible: true,
+                                                      barrierLabel: MaterialLocalizations.of(context)
+                                                          .modalBarrierDismissLabel,
+                                                      barrierColor: Colors.black45,
+                                                      transitionDuration: const Duration(milliseconds: 200),
+                                                      pageBuilder: (BuildContext buildContext,
+                                                          Animation animation,
+                                                          Animation secondaryAnimation) {
+                                                        return Center(
+                                                          child: Material(
+                                                            color: Colors.transparent,
+                                                            child: Container(
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius: BorderRadius.circular(8),
+                                                                  color: AppColor.backGroundColor
+                                                              ),
+                                                              width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                              height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                              padding: EdgeInsets.all(20),
+                                                              child: Column(
+                                                                children: [
+                                                                  Padding(
+                                                                    padding: const EdgeInsets.all(8.0),
+                                                                    child: Row(
+                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      children: [
+                                                                        Text(
+                                                                          'فیلتر',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                            fontSize: 15,
+                                                                            fontWeight: FontWeight.normal,
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                  Container(
+                                                                    color: AppColor.textColor,height: 0.2,
+                                                                  ),
+                                                                  Padding(
+                                                                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                    child: Column(
+                                                                      children: [
+                                                                        SizedBox(height: 8,),
+                                                                        Column(
+                                                                          crossAxisAlignment:
+                                                                          CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Text(
+                                                                              'نام',
+                                                                              style: AppTextStyle.labelText.copyWith(
+                                                                                  fontSize: 11,
+                                                                                  fontWeight: FontWeight.normal,
+                                                                                  color: AppColor.textColor),
+                                                                            ),
+                                                                            SizedBox(height: 10,),
+                                                                            IntrinsicHeight(
+                                                                              child: TextFormField(
+                                                                                autovalidateMode: AutovalidateMode
+                                                                                    .onUserInteraction,
+                                                                                controller: controller.nameFilterController,
+                                                                                style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                                textAlign: TextAlign.start,
+                                                                                keyboardType:TextInputType.text,
+                                                                                decoration: InputDecoration(
+                                                                                  contentPadding:
+                                                                                  const EdgeInsets.symmetric(
+                                                                                      vertical: 11,horizontal: 15
+                                                                                  ),
+                                                                                  isDense: true,
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius:
+                                                                                    BorderRadius.circular(6),
+                                                                                  ),
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor.textFieldColor,
+                                                                                  errorMaxLines: 1,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 8,),
+                                                                        Column(
+                                                                          crossAxisAlignment:
+                                                                          CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Text(
+                                                                              'شماره تماس',
+                                                                              style: AppTextStyle.labelText.copyWith(
+                                                                                  fontSize: 11,
+                                                                                  fontWeight: FontWeight.normal,
+                                                                                  color: AppColor.textColor),
+                                                                            ),
+                                                                            SizedBox(height: 10,),
+                                                                            IntrinsicHeight(
+                                                                              child: TextFormField(
+                                                                                autovalidateMode: AutovalidateMode
+                                                                                    .onUserInteraction,
+                                                                                controller: controller.mobileFilterController,
+                                                                                style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                                textAlign: TextAlign.center,
+                                                                                keyboardType:TextInputType.phone,
+                                                                                inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                                  TextInputFormatter.withFunction((oldValue, newValue) {
+                                                                                    // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                                    String newText = newValue.text
+                                                                                        .replaceAll('٠', '0')
+                                                                                        .replaceAll('١', '1')
+                                                                                        .replaceAll('٢', '2')
+                                                                                        .replaceAll('٣', '3')
+                                                                                        .replaceAll('٤', '4')
+                                                                                        .replaceAll('٥', '5')
+                                                                                        .replaceAll('٦', '6')
+                                                                                        .replaceAll('٧', '7')
+                                                                                        .replaceAll('٨', '8')
+                                                                                        .replaceAll('٩', '9');
+
+                                                                                    return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                                                                  }),
+                                                                                ],
+                                                                                decoration: InputDecoration(
+                                                                                  contentPadding:
+                                                                                  const EdgeInsets.symmetric(
+                                                                                      vertical: 11,horizontal: 15
+
+                                                                                  ),
+                                                                                  isDense: true,
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius:
+                                                                                    BorderRadius.circular(6),
+                                                                                  ),
+
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor.textFieldColor,
+                                                                                  errorMaxLines: 1,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 8),
+                                                                        Column(
+                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Text(
+                                                                              'از تاریخ',
+                                                                              style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                  fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                            ),
+                                                                            Container(
+                                                                              //height: 50,
+                                                                              padding: EdgeInsets.only(bottom: 5),
+                                                                              child: IntrinsicHeight(
+                                                                                child: TextFormField(
+                                                                                  validator: (value){
+                                                                                    if(value==null || value.isEmpty){
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: controller.dateStartController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle.labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius.circular(10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor.textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali.now(),
+                                                                                      firstDate: Jalali(1400,1,1),
+                                                                                      lastDate: Jalali(1450,12,29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                      locale: Locale("fa","IR"),
+                                                                                    );
+                                                                                    DateTime date=DateTime.now();
+
+                                                                                    if(pickedDate!=null){
+                                                                                      controller.dateStartController.text =
+                                                                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                    }
+                                                                                  },
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 8),
+                                                                        Column(
+                                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Text(
+                                                                              'تا تاریخ',
+                                                                              style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                  fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                            ),
+                                                                            Container(
+                                                                              //height: 50,
+                                                                              padding: EdgeInsets.only(bottom: 5),
+                                                                              child: IntrinsicHeight(
+                                                                                child: TextFormField(
+                                                                                  validator: (value){
+                                                                                    if(value==null || value.isEmpty){
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: controller.dateEndController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle.labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius.circular(10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor.textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali.now(),
+                                                                                      firstDate: Jalali(1400,1,1),
+                                                                                      lastDate: Jalali(1450,12,29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                      locale: Locale("fa","IR"),
+                                                                                    );
+                                                                                    DateTime date=DateTime.now();
+
+                                                                                    if(pickedDate!=null){
+                                                                                      controller.dateEndController.text =
+                                                                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                    }
+                                                                                  },
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                  Spacer(),
+                                                                  Container(
+                                                                    margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                                    width: double.infinity,
+                                                                    height: 40,
+                                                                    child: ElevatedButton(
+                                                                      style: ButtonStyle(
+                                                                          padding: WidgetStatePropertyAll(
+                                                                              EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                          // elevation: WidgetStatePropertyAll(5),
+                                                                          backgroundColor:
+                                                                          WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                              borderRadius: BorderRadius.circular(5)))),
+                                                                      onPressed: () async {
+                                                                       // controller.getUserList();
+                                                                        Get.back();
+
+                                                                      },
+                                                                      child: controller.isLoading.value?
+                                                                      CircularProgressIndicator(
+                                                                        valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                      ) :
+                                                                      Text(
+                                                                        'فیلتر',
+                                                                        style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      });
+                                                },
                                                 child: Row(
                                                   children: [
                                                     SvgPicture.asset(
@@ -166,20 +465,22 @@ class RemittanceView extends GetView<RemittanceController> {
                                                         colorFilter:
                                                         ColorFilter
                                                             .mode(
-                                                          AppColor
+                                                          controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
                                                               .textColor,
                                                           BlendMode
                                                               .srcIn,
                                                         )),
                                                     SizedBox(
-                                                      width: 5,
+                                                      width: 10,
                                                     ),
                                                     Text(
                                                       'فیلتر',
                                                       style: AppTextStyle
                                                           .labelText
                                                           .copyWith(
-                                                          fontSize: 12),
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10,color:  controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                                     ),
                                                   ],
                                                 ),
@@ -206,14 +507,13 @@ class RemittanceView extends GetView<RemittanceController> {
                                                           outside: BorderSide(color: AppColor.textColor,width: 0.3),
                                                           borderRadius: BorderRadius.circular(8)
                                                       ),
-                                                      dataRowMaxHeight: 90,
+                                                      dataRowMaxHeight: 100,
                                                       //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                                       //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                      headingRowHeight: 60,
-                                                      columnSpacing: 25,
-                                                      horizontalMargin: 6,
+                                                      headingRowHeight: 50,
+                                                      columnSpacing: 20,
+                                                      horizontalMargin: 10,
                                                     ),
-                                                    buildPaginationControls(),
                                                   ],
                                                 ),
                                               ),
@@ -223,6 +523,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                       ],
                                     ),
                                   ),
+                                  SizedBox(height: 80,)
                                 ],
                               ),
                             ),
@@ -236,6 +537,20 @@ class RemittanceView extends GetView<RemittanceController> {
                               ),
                             ),
                           ),
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  controller.paginated!=null?   Container(
+                      height: 70,
+                      margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      color: AppColor.appBarColor.withOpacity(0.5),
+                      alignment: Alignment.bottomCenter,
+                      child:PagerWidget(countPage: controller.paginated!.totalCount??0, callBack: (int index) {
+                        controller.isChangePage(index);
+                      },)):SizedBox(),
+                ],
               ),
             ],
           ),
@@ -351,7 +666,7 @@ class RemittanceView extends GetView<RemittanceController> {
                               value
                           );
                         }
-                        controller.fetchRemittanceList();
+
                         //EasyLoading.dismiss();
                       },
                     ),
@@ -368,14 +683,14 @@ class RemittanceView extends GetView<RemittanceController> {
           DataCell(Center(
             child: Text(
               remittance.date?.toPersianDate(showTime: true) ?? 'نامشخص',
-              style: AppTextStyle.bodyText,
+              style: AppTextStyle.bodyText.copyWith(fontSize: 10),
               textDirection: TextDirection.ltr,
             ),
           )),
           DataCell(Center(
             child: Text(
               remittance.createdBy?.name ?? 'نامشخص',
-              style: AppTextStyle.bodyText,
+              style: AppTextStyle.bodyText.copyWith(fontSize: 11),
             ),
           )),
           DataCell(Center(
@@ -384,7 +699,7 @@ class RemittanceView extends GetView<RemittanceController> {
               children: [
                 Text("${remittance.walletPayer?.account?.name ?? 'نامشخص'} ",
                     style: AppTextStyle.bodyText
-                        .copyWith(color: AppColor.accentColor, fontSize: 12)),
+                        .copyWith(color: AppColor.accentColor, fontSize: 11)),
                 SvgPicture.asset('assets/svg/refresh.svg',
                     height: 16,
                     colorFilter: ColorFilter.mode(
@@ -393,23 +708,24 @@ class RemittanceView extends GetView<RemittanceController> {
                     )),
                 Text(" ${remittance.walletReciept?.account?.name ?? 'نامشخص'}",
                     style: AppTextStyle.bodyText
-                        .copyWith(color: AppColor.primaryColor, fontSize: 12)),
+                        .copyWith(color: AppColor.primaryColor, fontSize: 11)),
               ],
             ),
           )),
           DataCell(Center(
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${remittance.item?.icon}',
-                  width: 35,
-                  height: 35,),
+                  width: 25,
+                  height: 25,),
                 SizedBox(width: 5,),
                 Text(
                   remittance.item?.name ?? 'نامشخص',
                   style: AppTextStyle.bodyText.copyWith(
                       color: AppColor.secondary2Color,
                       fontWeight: FontWeight.w500,
-                      fontSize: 14),
+                      fontSize: 12),
                 ),
               ],
             ),
@@ -421,7 +737,7 @@ class RemittanceView extends GetView<RemittanceController> {
                   : remittance.item?.itemUnit?.id == 2
                       ? "${remittance.quantity} گرم "
                       : "${remittance.quantity.toString().seRagham()} ریال ",
-              style: AppTextStyle.bodyText,
+              style: AppTextStyle.bodyText.copyWith(fontSize: 12),
             ),
           )),
           DataCell(Center(
@@ -433,7 +749,7 @@ class RemittanceView extends GetView<RemittanceController> {
                       : remittance.status == 1
                           ? AppColor.accentColor
                           : AppColor.textFieldColor,
-                  borderRadius: BorderRadius.circular(7)),
+                  borderRadius: BorderRadius.circular(5)),
               child: Text(
                 remittance.status == 1
                     ? "تایید شده"
@@ -441,7 +757,7 @@ class RemittanceView extends GetView<RemittanceController> {
                         ? "تایید نشده"
                         : "نامشخص",
                 style: AppTextStyle.bodyText
-                    .copyWith(color: AppColor.textColor, fontSize: 12),
+                    .copyWith(color: AppColor.textColor, fontSize: 10),
               ),
             ),
           )),
@@ -488,7 +804,7 @@ class RemittanceView extends GetView<RemittanceController> {
                               : "${remittance.quantity.toString().seRagham()} ریال ",
                       style: AppTextStyle.bodyText.copyWith(
                           color: AppColor.textColor,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w500,
                           fontSize: 10),
                     ),
                     Text(
@@ -516,275 +832,290 @@ class RemittanceView extends GetView<RemittanceController> {
                     Text(
                       'توضیحات : ',
                       style: AppTextStyle.bodyText.copyWith(
-                          color: AppColor.textColor,
+                          color: AppColor.dividerColor,
                           fontWeight: FontWeight.w700,
                           fontSize: 10),
                     ),
                     Text(remittance.description ?? 'نامشخص',
                         style: AppTextStyle.bodyText.copyWith(
                             color: AppColor.textColor,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w500,
                             fontSize: 10)),
                   ],
                 ),
-                SizedBox(
-                  height: 5,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      remittance.date?.toPersianDate(showTime: true) ??
-                          'نامشخص',
-                      style: AppTextStyle.bodyText.copyWith(
-                          color: AppColor.iconViewColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10),
-                      textDirection: TextDirection.ltr,
-                    ),
-                  ],
-                ),
+                // SizedBox(
+                //   height: 5,
+                // ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.center,
+                //   children: [
+                //     Text(
+                //       remittance.date?.toPersianDate(showTime: true) ??
+                //           'نامشخص',
+                //       style: AppTextStyle.bodyText.copyWith(
+                //           color: AppColor.iconViewColor,
+                //           fontWeight: FontWeight.w700,
+                //           fontSize: 10),
+                //       textDirection: TextDirection.ltr,
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           )),
           DataCell(Center(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              remittance.balancePayer==null?SizedBox() :Column(
-                children: remittance.balancePayer!
-                    .map((e) => Container(
-                          child: e.unitName == "ریال"
-                              ? Row(
-                                  children: [
-                                    Text(
-                                      " ${e.itemName} ",
-                                      style: AppTextStyle.bodyText.copyWith(
-                                          fontSize: 12,
-                                          color: AppColor.accentColor),
-                                    ),
-                                    Text(
-                                      e.balance.toString(),
-                                      style: AppTextStyle.bodyText.copyWith(
-                                          fontSize: 12,
-                                          color: AppColor.accentColor),
-                                      textDirection: TextDirection.ltr,
-                                    ),
-                                    Text(
-                                      " ${e.unitName} ",
-                                      style: AppTextStyle.bodyText.copyWith(
-                                          fontSize: 12,
-                                          color: AppColor.accentColor),
-                                    //  textDirection: TextDirection.ltr,
-                                    ),
+              child: SizedBox(
+                child: SingleChildScrollView(
+                  child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                  remittance.balancePayer==null?SizedBox() :Column(
+                    children: remittance.balancePayer!
+                        .map((e) => Container(
+                              child: e.unitName == "ریال"
+                                  ? Row(
+                                      children: [
+                                        Text(
+                                          " ${e.itemName} ",
+                                          style: AppTextStyle.bodyText.copyWith(
+                                              fontSize: 10,
+                                              color: AppColor.accentColor),
+                                        ),
+                                        Text(
+                                          e.balance.toString(),
+                                          style: AppTextStyle.bodyText.copyWith(
+                                              fontSize: 11,
+                                              color: AppColor.accentColor),
+                                          textDirection: TextDirection.ltr,
+                                        ),
+                                        Text(
+                                          " ${e.unitName} ",
+                                          style: AppTextStyle.bodyText.copyWith(
+                                              fontSize: 10,
+                                              color: AppColor.accentColor),
+                                        //  textDirection: TextDirection.ltr,
+                                        ),
 
-                                  ],
-                                )
-                              : SizedBox(),
-                        ))
-                    .toList(),
-              ),
-              remittance.balanceReciept==null?SizedBox() : Column(
-                children: remittance.balanceReciept!
-                    .map((e) => Container(
-                  child: e.unitName == "ریال"
-                      ? Row(
-                    children: [
-                      Text(
-                        " ${e.itemName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                      ),
-                      Text(
-                        e.balance.toString(),
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                        textDirection: TextDirection.ltr,
-                      ),
-                      Text(
-                        " ${e.unitName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                        //  textDirection: TextDirection.ltr,
-                      ),
+                                      ],
+                                    )
+                                  : SizedBox(),
+                            ))
+                        .toList(),
+                  ),
+                  remittance.balanceReciept==null?SizedBox() : Column(
+                    children: remittance.balanceReciept!
+                        .map((e) => Container(
+                      child: e.unitName == "ریال"
+                          ? Row(
+                        children: [
+                          Text(
+                            " ${e.itemName} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 10,
+                                color: AppColor.primaryColor),
+                          ),
+                          Text(
+                            e.balance.toString(),
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 11,
+                                color: AppColor.primaryColor),
+                            textDirection: TextDirection.ltr,
+                          ),
+                          Text(
+                            " ${e.unitName} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 10,
+                                color: AppColor.primaryColor),
+                            //  textDirection: TextDirection.ltr,
+                          ),
 
-                    ],
-                  )
-                      : SizedBox(),
-                ))
-                    .toList(),
-              ),
-            ],
-          ))),
+                        ],
+                      )
+                          : SizedBox(),
+                    ))
+                        .toList(),
+                  ),
+                              ],
+                            ),
+                ),
+              ))),
           DataCell(Center(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              remittance.balancePayer==null?SizedBox() : Column(
-                children: remittance.balancePayer!
-                    .map((e) => Container(
-                  child: e.unitName == "گرم"
-                      ? Row(
-                    children: [
-                      Text(
-                        " ${e.itemName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.accentColor),
-                      ),
-                      Text(
-                        e.balance.toString(),
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.accentColor),
-                        textDirection: TextDirection.ltr,
-                      ),
-                      Text(
-                        " ${e.unitName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.accentColor),
-                        //  textDirection: TextDirection.ltr,
-                      ),
+              child: SizedBox(
+                child: SingleChildScrollView(
+                  clipBehavior: Clip.hardEdge,
+                  child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                  remittance.balancePayer==null?SizedBox() : Column(
+                    children: remittance.balancePayer!
+                        .map((e) => Container(
+                      child: e.unitName == "گرم"
+                          ? Row(
+                        children: [
+                          Text(
+                            " ${e.itemName} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 10,
+                                color: AppColor.accentColor),
+                          ),
+                          Text(
+                            e.balance.toString(),
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 11,
+                                color: AppColor.accentColor),
+                            textDirection: TextDirection.ltr,
+                          ),
+                          Text(
+                            " ${e.unitName} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 10,
+                                color: AppColor.accentColor),
+                            //  textDirection: TextDirection.ltr,
+                          ),
 
-                    ],
-                  )
-                      : SizedBox(),
-                ))
-                    .toList(),
-              ),
-              remittance.balanceReciept==null?SizedBox() :  Column(
-                children: remittance.balanceReciept!
-                    .map((e) => Container(
-                  child: e.unitName == "گرم"
-                      ? Row(
-                    children: [
-                      Text(
-                        " ${e.itemName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                      ),
-                      Text(
-                        e.balance.toString(),
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                        textDirection: TextDirection.ltr,
-                      ),
-                      Text(
-                        " ${e.unitName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                        //  textDirection: TextDirection.ltr,
-                      ),
+                        ],
+                      )
+                          : SizedBox(),
+                    ))
+                        .toList(),
+                  ),
+                  remittance.balanceReciept==null?SizedBox() :  Column(
+                    children: remittance.balanceReciept!
+                        .map((e) => Container(
+                      child: e.unitName == "گرم"
+                          ? Row(
+                        children: [
+                          Text(
+                            " ${e.itemName} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 10,
+                                color: AppColor.primaryColor),
+                          ),
+                          Text(
+                            e.balance.toString(),
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 11,
+                                color: AppColor.primaryColor),
+                            textDirection: TextDirection.ltr,
+                          ),
+                          Text(
+                            " ${e.unitName} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                fontSize: 10,
+                                color: AppColor.primaryColor),
+                            //  textDirection: TextDirection.ltr,
+                          ),
 
-                    ],
-                  )
-                      : SizedBox(),
-                ))
-                    .toList(),
-              ),
-            ],
-          ))),
+                        ],
+                      )
+                          : SizedBox(),
+                    ))
+                        .toList(),
+                  ),
+                              ],
+                            ),
+                ),
+              ))),
           DataCell(Center(
-              child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              remittance.balancePayer==null?SizedBox() :  Column(
-                children: remittance.balancePayer!
-                    .map((e) => Container(
-                  child: e.unitName == "عدد"
-                      ? Row(
-                    children: [
-                      Text(
-                        " ${e.itemName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.accentColor),
-                      ),
-                      Text(
-                        e.balance.toString(),
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.accentColor),
-                        textDirection: TextDirection.ltr,
-                      ),
-                      Text(
-                        " ${e.unitName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.accentColor),
-                        //  textDirection: TextDirection.ltr,
-                      ),
-
-                    ],
-                  )
-                      : SizedBox(),
-                ))
-                    .toList(),
-              ),
-              remittance.balanceReciept==null?SizedBox() : Column(
-                children: remittance.balanceReciept!
-                    .map((e) => Container(
-                  child: e.unitName == "عدد"
-                      ? Row(
-                    children: [
-                      Text(
-                        " ${e.itemName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                      ),
-                      Text(
-                        e.balance.toString(),
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                        textDirection: TextDirection.ltr,
-                      ),
-                      Text(
-                        " ${e.unitName} ",
-                        style: AppTextStyle.bodyText.copyWith(
-                            fontSize: 12,
-                            color: AppColor.primaryColor),
-                        //  textDirection: TextDirection.ltr,
-                      ),
-
-                    ],
-                  )
-                      : SizedBox(),
-                ))
-                    .toList(),
-              ),
-            ],
-          ))),
+              child: SizedBox(
+                child: Scrollbar(
+                  child: SingleChildScrollView(
+                    child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                    remittance.balancePayer==null?SizedBox() :  Column(
+                      children: remittance.balancePayer!
+                          .map((e) => Container(
+                        child: e.unitName == "عدد"
+                            ? Row(
+                          children: [
+                            Text(
+                              " ${e.itemName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.accentColor),
+                            ),
+                            Text(
+                              e.balance.toString(),
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 11,
+                                  color: AppColor.accentColor),
+                              textDirection: TextDirection.ltr,
+                            ),
+                            Text(
+                              " ${e.unitName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.accentColor),
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                  
+                          ],
+                        )
+                            : SizedBox(),
+                      ))
+                          .toList(),
+                    ),
+                    remittance.balanceReciept==null?SizedBox() : Column(
+                      children: remittance.balanceReciept!
+                          .map((e) => Container(
+                        child: e.unitName == "عدد"
+                            ? Row(
+                          children: [
+                            Text(
+                              " ${e.itemName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.primaryColor),
+                            ),
+                            Text(
+                              e.balance.toString(),
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 11,
+                                  color: AppColor.primaryColor),
+                              textDirection: TextDirection.ltr,
+                            ),
+                            Text(
+                              " ${e.unitName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.primaryColor),
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                  
+                          ],
+                        )
+                            : SizedBox(),
+                      ))
+                          .toList(),
+                    ),
+                                ],
+                              ),
+                  ),
+                ),
+              ))),
 
           DataCell(Center(
               child: Row(
             children: [
               SizedBox(
-                width: 20,
+                width: 10,
               ),
-              SvgPicture.asset('assets/svg/edit.svg',
+              SvgPicture.asset('assets/svg/edit.svg',height: 20,
                   colorFilter: ColorFilter.mode(
-                    AppColor.iconViewColor,
+                    AppColor.textColor,
                     BlendMode.srcIn,
                   )),
               SizedBox(
-                width: 30,
+                width: 10,
               ),
-              SvgPicture.asset('assets/svg/trash-bin.svg',
+              SvgPicture.asset('assets/svg/trash-bin.svg',height: 20,
                   colorFilter: ColorFilter.mode(
-                    AppColor.accentColor,
+                    AppColor.textColor,
                     BlendMode.srcIn,
                   )),
               SizedBox(
-                width: 20,
+                width: 10,
               ),
             ],
           ))),
@@ -793,29 +1124,5 @@ class RemittanceView extends GetView<RemittanceController> {
     }).toList();
   }
 
-  Widget buildPaginationControls() {
-    return Obx(() => Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              IconButton(
-                icon: Icon(Icons.chevron_left),
-                onPressed: controller.currentPage.value > 1
-                    ? controller.previousPage
-                    : null,
-              ),
-              Text(
-                'صفحه ${controller.currentPage.value}',
-                style: AppTextStyle.bodyText,
-              ),
-              IconButton(
-                icon: Icon(Icons.chevron_right),
-                onPressed:
-                    controller.hasMore.value ? controller.nextPage : null,
-              ),
-            ],
-          ),
-        ));
-  }
+
 }
