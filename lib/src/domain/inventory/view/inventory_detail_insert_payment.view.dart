@@ -262,9 +262,7 @@ class _InventoryDetailInsertPaymentViewState
                                                 ),
                                               ),
                                               // لیست دریافتی ها
-                                              inventoryDetailInsertPaymentController
-                                                  .selectedWalletAccount.value
-                                                  ?.item?.itemUnit?.id == 2 ?
+                                              inventoryDetailInsertPaymentController.selectedWalletAccount.value?.item?.itemUnit?.id == 2 ?
                                               ElevatedButton(
                                                 style: ButtonStyle(
                                                     fixedSize: WidgetStatePropertyAll(

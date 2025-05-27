@@ -28,7 +28,7 @@ class WithdrawGetOneView extends StatelessWidget {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: CustomAppbar1(title: 'مشاهده درخواست برداشت',
-        onBackTap: ()=> Get.back()
+        onBackTap: ()=> Get.back(),
       ),
       body: Stack(
         children: [

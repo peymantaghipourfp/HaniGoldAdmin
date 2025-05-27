@@ -57,6 +57,8 @@ class OrderCreateController extends GetxController{
 
   var maxItemSell=0.obs;
   var maxItemBuy=0.obs;
+  var manualPriceChecked = false.obs;
+  var notLimitChecked = false.obs;
   final Rxn<ItemModel> getOneItem=Rxn<ItemModel>();
   final Rxn<OrderTypeModel> selectedBuySell = Rxn<OrderTypeModel>();
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
@@ -221,6 +223,8 @@ class OrderCreateController extends GetxController{
         price: double.parse(priceController.text.replaceAll(',', '').toEnglishDigit()),
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         description: descriptionController.text,
+        notLimit:notLimitChecked.value,
+        manualPrice:manualPriceChecked.value,
       );
       print(response);
       if (response != null) {
@@ -279,6 +283,8 @@ class OrderCreateController extends GetxController{
     selectedBuySell.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
+    manualPriceChecked.value=false;
+    notLimitChecked.value=false;
   }
   void clearListChangeItem() {
     priceController.clear();
@@ -286,6 +292,8 @@ class OrderCreateController extends GetxController{
     descriptionController.clear();
     totalPriceController.clear();
     selectedItem.value=null;
+    manualPriceChecked.value=false;
+    notLimitChecked.value=false;
   }
   void resetAccountSearch() {
     searchController.clear();

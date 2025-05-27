@@ -73,10 +73,11 @@ String convertJalaliToGregorian(String jalaliDateTime) {
     int day = int.parse(parts[2]);
 
     Jalali jalali = Jalali(year, month, day);
+    print("تاریخ جلالی:::${jalali}");
     Gregorian gregorian = jalali.toGregorian();
 
     // فرمت تاریخ میلادی با اضافه کردن زمان
-    print("${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}");
+    print("تغییر تاریخ متد::${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}");
     return "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
   } catch (e) {
     throw Exception("خطا در تبدیل تاریخ: $e");

@@ -65,6 +65,8 @@ class OrderRepository{
     required double price,
     required double quantity,
     required String? description,
+    required bool? notLimit,
+    required bool? manualPrice,
 })async{
     try{
       Map<String, dynamic> orderData = {
@@ -108,9 +110,11 @@ class OrderRepository{
         "rowNum": 1,
         "id": 1,
         "attribute": "cus",
-        "recId": "25a39f5d-81c6-4362-b59b-3dc6123a9364",
+        "recId": null,
         "infos": [],
         "description": description,
+        "manualPrice":manualPrice,
+        "notLimit":notLimit,
       };
 
       var response=await orderDio.post('Order/insert',data: orderData);
@@ -137,6 +141,8 @@ class OrderRepository{
     required double price,
     required double quantity,
     required String? description,
+    required bool? notLimit,
+    required bool? manualPrice,
 })async{
     try{
       Map<String, dynamic> orderData = {
@@ -180,9 +186,11 @@ class OrderRepository{
         "checked": true,
         "rowNum": 1,
         "attribute": "cus",
-        "recId": "25a39f5d-81c6-4362-b59b-3dc6123a9364",
+        "recId": null,
         "infos": [],
         "description": description,
+        "manualPrice":manualPrice,
+        "notLimit":notLimit,
       };
       var response=await orderDio.put('Order/update',data: orderData );
       print(response.data);

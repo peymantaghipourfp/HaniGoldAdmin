@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
@@ -189,6 +190,7 @@ class DepositCreateController extends GetxController{
   }
 
   Future<DepositModel?> insertDeposit()async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -225,8 +227,10 @@ class DepositCreateController extends GetxController{
       withdrawController.withdrawList.refresh();
       withdrawController.fetchDepositRequestList(depositRequest.withdrawRequest?.id ?? 0);
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;

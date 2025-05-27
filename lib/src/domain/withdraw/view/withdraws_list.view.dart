@@ -865,7 +865,7 @@ class WithdrawsListView extends StatelessWidget {
                                                             textCancel: 'بستن',
                                                           );
                                                         } else {*/
-                                                        Get.toNamed(
+                                                        Get.offAllNamed(
                                                             '/withdrawUpdate',
                                                             arguments: withdraws);
                                                         // }
@@ -1922,11 +1922,22 @@ class WithdrawsListView extends StatelessWidget {
               // تاریخ تراکنش
               DataCell(
                   Center(
-                    child: Text(
-                      //withdraw.status == 0 ?
-                           withdraw.requestDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? 'نامشخص',
-                          //: withdraw.confirmDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? 'نامشخص',
-                      style: AppTextStyle.bodyText,
+                    child: Row(
+                      children: [
+                        Text(
+                          //withdraw.status == 0 ?
+                               withdraw.requestDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? 'نامشخص',
+                              //: withdraw.confirmDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? 'نامشخص',
+                          style: AppTextStyle.bodyText,
+                        ),
+                        SizedBox(width: 8,),
+                        GestureDetector(
+                          onTap: () {
+                            withdrawController.updateRequestDateWithdraw(withdraw.id ?? 0);
+                          },
+                            child: SvgPicture.asset('assets/svg/arrow.svg',colorFilter: ColorFilter.mode(AppColor.dividerColor, BlendMode.srcIn),),
+                        ),
+                      ],
                     ),
                   )),
               // تاریخ
@@ -2360,7 +2371,7 @@ class WithdrawsListView extends StatelessWidget {
                               textCancel: 'بستن',
                             );
                           } else {*/
-                              Get.toNamed(
+                              Get.offAllNamed(
                                   '/withdrawUpdate',
                                   arguments: withdraw);
                               //}

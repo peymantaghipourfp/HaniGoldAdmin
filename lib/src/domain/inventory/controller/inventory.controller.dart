@@ -292,6 +292,7 @@ class InventoryController extends GetxController{
   }
 
   Future<List<dynamic>?> deleteInventory(int inventoryId,bool isDeleted)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoadingDelete.value=true;
       var response=await inventoryRepository.deleteInventory(isDeleted: isDeleted, inventoryId: inventoryId);
@@ -304,8 +305,10 @@ class InventoryController extends GetxController{
         fetchInventoryList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در حذف دریافت/پرداخت: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoadingDelete.value=false;
     }
     return null;
@@ -321,6 +324,7 @@ class InventoryController extends GetxController{
       int itemId,
       double quantity,
       )async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await inventoryRepository.deleteInventoryDetail(
@@ -344,8 +348,10 @@ class InventoryController extends GetxController{
         fetchInventoryList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در حذف: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
     return null;
@@ -360,6 +366,7 @@ class InventoryController extends GetxController{
       int itemId,
       double quantity,
       )async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await inventoryRepository.deleteInventoryDetail(
@@ -383,8 +390,10 @@ class InventoryController extends GetxController{
         fetchInventoryList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در حذف: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
     return null;
@@ -513,7 +522,7 @@ class InventoryController extends GetxController{
   }
 
   Future<List<dynamic>?> updateRegistered(int inventoryId,bool registered) async {
-    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoadingRegister.value = true;
       var response = await inventoryRepository.updateRegistered(
@@ -531,8 +540,10 @@ class InventoryController extends GetxController{
       }
 
     } catch (e) {
+      EasyLoading.dismiss();
       throw ErrorException('خطا در ریجیستر: $e');
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
 

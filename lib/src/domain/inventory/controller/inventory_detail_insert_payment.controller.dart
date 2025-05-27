@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/config/repository/laboratory.repository.dart';
@@ -102,15 +103,16 @@ class InventoryDetailInsertPaymentController extends GetxController{
     update();
   }
 
+  late InventoryModel? inventory;
   @override
   void onInit() async{
 
-    final InventoryModel? inventory = Get.arguments;
+    inventory = Get.arguments;
     if(inventory!=null){
-      inventoryId.value=inventory.id ?? 0;
-      dateController.text=inventory.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
-      accountId.value = inventory.account!.id!;
-      accountName.value = inventory.account!.name!;
+      inventoryId.value=inventory?.id ?? 0;
+      dateController.text=inventory?.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
+      accountId.value = inventory!.account!.id!;
+      accountName.value = inventory!.account!.name!;
       getWalletAccount(accountId.value);
       getBalanceList(accountId.value);
     }
@@ -119,10 +121,6 @@ class InventoryDetailInsertPaymentController extends GetxController{
     fetchAccountList();
     fetchWalletAccountList();
     fetchForPaymentList();
-    var now = Jalali.now();
-    DateTime date=DateTime.now();
-    dateController.text =
-    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     super.onInit();
   }
 
@@ -301,8 +299,13 @@ class InventoryDetailInsertPaymentController extends GetxController{
   }
 
   Future<InventoryModel?> insertInventoryDetailPayment()async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
+      /*var now = Jalali.now();
+      DateTime date=DateTime.now();
+      dateController.text =
+      "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";*/
       String gregorianDate = convertJalaliToGregorian(dateController.text);
       print(inventoryId.value);
       print(accountName.value);
@@ -346,8 +349,10 @@ class InventoryDetailInsertPaymentController extends GetxController{
         clearList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;

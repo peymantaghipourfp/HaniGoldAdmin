@@ -244,9 +244,7 @@ class DepositController extends GetxController{
 
   Future<void> fetchDepositList() async{
     try{
-
         depositList.clear();
-
       isLoading.value = true;
       state.value=PageState.loading;
         //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
@@ -284,6 +282,7 @@ class DepositController extends GetxController{
 
 
   Future<List<dynamic>?> deleteDeposit(int depositId,bool isDeleted)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await depositRepository.deleteDeposit(isDeleted: isDeleted, depositId: depositId);
@@ -296,8 +295,10 @@ class DepositController extends GetxController{
         fetchDepositList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در حذف واریزی: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
     return null;
@@ -395,6 +396,7 @@ class DepositController extends GetxController{
   }
 
   Future<DepositModel?> updateStatusDeposit(int depositId,int status,int reasonRejectionId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoading.value = true;
       var response = await depositRepository.updateStatusDeposit(
@@ -412,8 +414,10 @@ class DepositController extends GetxController{
       }
 
     } catch (e) {
+      EasyLoading.dismiss();
       throw ErrorException('خطا در تغییر وضعیت: $e');
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
 
@@ -421,7 +425,7 @@ class DepositController extends GetxController{
   }
 
   Future<List<dynamic>?> updateRegistered(int depositId,bool registered) async {
-    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoadingRegister.value = true;
       var response = await depositRepository.updateRegistered(
@@ -429,7 +433,6 @@ class DepositController extends GetxController{
         registered: registered,
       );
       if(response!= null){
-        //EasyLoading.dismiss();
         Get.snackbar(response.first['title'],response.first["description"],
             titleText: Text(response.first['title'],
               textAlign: TextAlign.center,
@@ -437,10 +440,11 @@ class DepositController extends GetxController{
             messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         fetchDepositList();
       }
-
     } catch (e) {
+      EasyLoading.dismiss();
       throw ErrorException('خطا در ریجیستر: $e');
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
 

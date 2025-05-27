@@ -66,6 +66,8 @@ class OrderUpdateController extends GetxController{
   final RxInt orderId=0.obs;
   var maxItemSell=0.obs;
   var maxItemBuy=0.obs;
+  var manualPriceChecked = false.obs;
+  var notLimitChecked = false.obs;
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
     selectedBuySell.value = newValue;
@@ -94,7 +96,7 @@ class OrderUpdateController extends GetxController{
     double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
     double quantity=double.tryParse(quantityController.text==""? "0" : quantityController.text.toEnglishDigit()) ?? 0.0;
     double totalPrice= price * quantity;
-    totalPriceController.text=totalPrice.toStringAsFixed(2).seRagham().toPersianDigit();
+    totalPriceController.text=totalPrice.toString().toPersianDigit().seRagham();
   }
 
   void updateQuantity(){
@@ -103,22 +105,17 @@ class OrderUpdateController extends GetxController{
     double quantity=totalPrice / price;
     quantityController.text=quantity.toString();
   }
-
+  late OrderModel? existingOrder;
   @override
   void onInit(){
     searchController.addListener(onSearchChanged);
     fetchItemList();
     fetchAccountList();
-    final OrderModel? existingOrder = Get.arguments as OrderModel?;
+    existingOrder = Get.arguments as OrderModel?;
     if (existingOrder != null) {
-      setOrderDetails(existingOrder);
-      getBalanceList(existingOrder.account?.id ?? 0);
+      setOrderDetails(existingOrder!);
+      getBalanceList(existingOrder?.account?.id ?? 0);
     }
-    /*final now = DateTime.now();
-    final jalaliDate = Jalali.fromDateTime(now);
-    final formattedDate = "${jalaliDate.year}-${jalaliDate.month.toString().padLeft(2, '0')}-${jalaliDate.day.toString().padLeft(2, '0')}";
-    final formattedTime = "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}";
-    dateController.text="$formattedDate $formattedTime";*/
     super.onInit();
   }
 
@@ -126,21 +123,23 @@ class OrderUpdateController extends GetxController{
   void onClose() {
     debounce?.cancel();
     searchController.dispose();
+    Get.delete<OrderUpdateController>(force: true);
     super.onClose();
   }
 
   // لیست محصولات
   Future<void> fetchItemList() async{
     try{
+      itemList.clear();
       state.value=PageState.loading;
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
       itemList.removeWhere((e) => e.price==null,);
       state.value=PageState.list;
-      final OrderModel? existingOrder = Get.arguments as OrderModel?;
-      if (existingOrder != null && existingOrder.item != null) {
+      //final OrderModel? existingOrder = Get.arguments as OrderModel?;
+      if (existingOrder != null && existingOrder?.item != null) {
         final match = itemList.firstWhereOrNull(
-              (i) => i.id == existingOrder.item!.id,
+              (i) => i.id == existingOrder?.item!.id,
         );
         if (match != null) {
           selectedItem.value = match;
@@ -159,6 +158,7 @@ class OrderUpdateController extends GetxController{
   // لیست کاربران
   Future<void> fetchAccountList() async{
     try{
+      accountList.clear();
       state.value=PageState.loading;
       var fetchedAccountList=await accountRepository.getAccountList();
       accountList.assignAll(fetchedAccountList);
@@ -211,10 +211,11 @@ class OrderUpdateController extends GetxController{
     try {
       isLoading.value = true;
 
-      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      //String gregorianDate = convertJalaliToGregorian(dateController.text);
+      Gregorian date=existingOrder!.date!.toGregorian();
      var response = await orderRepository.updateOrder(
         orderId: orderId.value,
-        date: gregorianDate,
+        date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
         type: selectedBuySell.value?.id ?? 0,
@@ -223,11 +224,13 @@ class OrderUpdateController extends GetxController{
         price: double.parse(priceController.text.replaceAll(',', '').toEnglishDigit()),
         quantity: double.parse(quantityController.text.toEnglishDigit()),
         description: descriptionController.text,
+        notLimit:notLimitChecked.value,
+        manualPrice:manualPriceChecked.value,
       );
 
      if(response!= null){
        OrderModel orderResponse=OrderModel.fromJson(response);
-       Get.back();
+       Get.offNamed('/orderList');
        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
            titleText: Text(orderResponse.infos!.first['title'],
              textAlign: TextAlign.center,
@@ -254,12 +257,13 @@ class OrderUpdateController extends GetxController{
     //selectedItem.value = itemList.firstWhereOrNull((item) => item.id == order.item?.id);
     //selectedAccount.value = accountList.firstWhereOrNull((account) => account.id == order.account?.id);
 
-    dateController.text = order.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '' ?? '';
+    dateController.text = order.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
     priceController.text = order.price?.toString().seRagham(separator: ',') ?? '';
     quantityController.text = order.quantity?.toString() ?? '';
     totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
     isLoadingBalance.value=true;
+    print("تاریخ ست:::${dateController.text}");
   }
 
   // لیست بالانس
@@ -294,6 +298,8 @@ class OrderUpdateController extends GetxController{
     selectedBuySell.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
+    manualPriceChecked.value=false;
+    notLimitChecked.value=false;
   }
   void clearListChangeItem() {
     dateController.clear();
@@ -302,6 +308,8 @@ class OrderUpdateController extends GetxController{
     descriptionController.clear();
     totalPriceController.clear();
     selectedItem.value=null;
+    manualPriceChecked.value=false;
+    notLimitChecked.value=false;
   }
   void resetAccountSearch() {
     searchController.clear();

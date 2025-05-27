@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/config/repository/laboratory.repository.dart';
@@ -314,6 +315,7 @@ class InventoryCreateReceiveController extends GetxController{
 
 
   Future<InventoryModel?> submitFinalInventory()async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       if (tempDetails.isEmpty) {
         throw ErrorException('لیست آیتم‌ها خالی است');
@@ -347,8 +349,10 @@ class InventoryCreateReceiveController extends GetxController{
         clearList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
       isFinalizing.value=false;
     }

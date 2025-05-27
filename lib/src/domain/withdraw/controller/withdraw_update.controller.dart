@@ -118,14 +118,16 @@ class WithdrawUpdateController extends GetxController{
     print(selectedIndex);
   }*/
 
+  late WithdrawModel? existingWithdraw;
+
   @override
   void onInit() {
     searchController.addListener(onSearchChanged);
     fetchBankList();
-    final WithdrawModel? existingWithdraw = Get.arguments as WithdrawModel?;
+    existingWithdraw = Get.arguments as WithdrawModel?;
     if (existingWithdraw != null) {
-      withdrawId.value = existingWithdraw.id ?? 0;
-      getBalanceList(existingWithdraw.wallet?.account?.id ?? 0);
+      withdrawId.value = existingWithdraw?.id ?? 0;
+      getBalanceList(existingWithdraw?.wallet?.account?.id ?? 0);
     }
     super.onInit();
   }
@@ -133,9 +135,9 @@ class WithdrawUpdateController extends GetxController{
   @override
   void onReady() async {
     await fetchAccountList();
-    final WithdrawModel? existingWithdraw = Get.arguments as WithdrawModel?;
+    existingWithdraw = Get.arguments as WithdrawModel?;
     if (existingWithdraw != null) {
-      setWithdrawDetails(existingWithdraw);
+      setWithdrawDetails(existingWithdraw!);
     }
     super.onReady();
   }
@@ -281,7 +283,8 @@ class WithdrawUpdateController extends GetxController{
     }
     try{
       isLoading.value = true;
-      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      //String gregorianDate = convertJalaliToGregorian(dateController.text);
+      Gregorian date=existingWithdraw!.requestDate!.toGregorian();
       var response=await withdrawRepository.updateWithdraw(
           withdrawId: withdrawId.value,
           walletId: selectedWalletId.value,
@@ -298,12 +301,12 @@ class WithdrawUpdateController extends GetxController{
           cardNumber: cardNumberController.text,
           sheba: shebaController.text,
           description: descriptionController.text,
-          date: gregorianDate,
+          date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
           status: statusId.value
       );
 
       if(response!= null){
-        Get.back();
+        Get.toNamed('/withdrawsList');
         Get.snackbar("موفقیت آمیز","ویرایش با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,

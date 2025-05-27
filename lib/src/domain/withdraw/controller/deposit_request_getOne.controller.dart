@@ -82,7 +82,7 @@ class DepositRequestGetOneController extends GetxController{
   }
 
   Future<List<dynamic>?> updateRegistered(int depositId,bool registered) async {
-    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoadingRegister.value = true;
       var response = await depositRepository.updateRegistered(
@@ -101,8 +101,10 @@ class DepositRequestGetOneController extends GetxController{
       }
 
     } catch (e) {
+      EasyLoading.dismiss();
       throw ErrorException('خطا در ریجیستر: $e');
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
 

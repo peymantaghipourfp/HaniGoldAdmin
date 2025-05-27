@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
@@ -237,9 +238,11 @@ class DepositUpdateController extends GetxController{
   }
 
   Future<DepositModel?> updateDeposit()async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
-      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      //String gregorianDate = convertJalaliToGregorian(dateController.text);
+      Gregorian date=getOneDeposit.value!.date!.toGregorian();
       var response=await depositRepository.updateDeposit(
         walletWithdrawId: walletWithdrawId.value,
         depositId: depositId.value,
@@ -255,12 +258,15 @@ class DepositUpdateController extends GetxController{
           // number: numberController.text,
           // cardNumber: cardNumberController.text,
           // sheba: shebaController.text,
-          date: gregorianDate,
+          date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+          //date: gregorianDate,
           status: statusId.value,
           trackingNumber: trackingNumberController.text,
       );
 
       if(response!=null) {
+        clearList();
+        if (Get.isDialogOpen!) Get.back();
         Get.back();
         Get.snackbar(response.infos?.first.title?? "", response.infos?.first.description ?? "",
             titleText: Text(response.infos?.first.title?? "",
@@ -270,14 +276,16 @@ class DepositUpdateController extends GetxController{
                 response.infos?.first.description ?? "", textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
         depositRequestGetOneController.fetchGetOneDepositRequest(depositId.value);
-        //depositController.fetchDepositList();
+        depositController.fetchDepositList();
         balanceList.clear();
       }
 
       //Get.offNamed('/depositList');
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;

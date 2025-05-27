@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/config/repository/laboratory.repository.dart';
@@ -102,18 +103,19 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     update();
   }
 
+  late InventoryDetailModel? inventoryDetail;
   @override
   void onInit() async{
 
-    final InventoryDetailModel? inventoryDetail = Get.arguments;
+    inventoryDetail = Get.arguments;
     if(inventoryDetail!=null){
-      await fetchGetOneInventory(inventoryDetail.inventoryId!);
-      setInventoryDetail(inventoryDetail);
-      inventoryId.value=inventoryDetail.inventoryId ?? 0;
-      inventoryDetailId.value=inventoryDetail.id ?? 0;
-      inputItemId.value=inventoryDetail.inputItemId ?? 0;
-      accountId.value = inventoryDetail.wallet!.account!.id!;
-      accountName.value = inventoryDetail.wallet!.account!.name!;
+      await fetchGetOneInventory(inventoryDetail!.inventoryId!);
+      setInventoryDetail(inventoryDetail!);
+      inventoryId.value=inventoryDetail?.inventoryId ?? 0;
+      inventoryDetailId.value=inventoryDetail?.id ?? 0;
+      inputItemId.value=inventoryDetail?.inputItemId ?? 0;
+      accountId.value = inventoryDetail!.wallet!.account!.id!;
+      accountName.value = inventoryDetail!.wallet!.account!.name!;
       getWalletAccount(accountId.value);
       getBalanceList(accountId.value);
     }
@@ -139,6 +141,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
 
   // لیست کاربران
   Future<void> fetchAccountList() async{
+    accountList.clear();
     try{
       state.value=PageState.loading;
       var fetchedAccountList=await accountRepository.getAccountList();
@@ -314,6 +317,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   }
 
   Future<InventoryModel?> updateInventoryDetailPayment()async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -362,8 +366,10 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         clearList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;

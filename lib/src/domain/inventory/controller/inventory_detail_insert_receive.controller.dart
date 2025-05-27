@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/config/repository/laboratory.repository.dart';
@@ -129,10 +130,10 @@ class InventoryDetailInsertReceiveController extends GetxController{
     fetchAccountList();
     fetchWalletAccountList();
     fetchLaboratoryList();
-    var now = Jalali.now();
+    /*var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text =
-    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";*/
     super.onInit();
   }
 
@@ -305,6 +306,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
   }
 
   Future<InventoryModel?> insertInventoryDetailReceive()async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -345,8 +347,10 @@ class InventoryDetailInsertReceiveController extends GetxController{
         clearList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;

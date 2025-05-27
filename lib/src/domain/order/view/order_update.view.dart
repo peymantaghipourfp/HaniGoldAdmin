@@ -35,12 +35,9 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
         .isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ?
-        CustomAppbar1(title: 'ویرایش سفارش', onBackTap: () => Get.back(),)
-            : CustomAppBar(title: 'ویرایش سفارش', onBackTap: () {
-          Get.back();
-          orderUpdateController.clearList();
-        },),
+        appBar: CustomAppbar1(title: 'ویرایش سفارش', onBackTap: () {
+          Get.toNamed('/orderList');
+          orderUpdateController.clearList(); }),
         body: Stack(
           children: [
             BackgroundImage(),
@@ -378,40 +375,59 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                               padding: EdgeInsets.only(
                                                   bottom: 5),
                                               child:
-                                              TextFormField(
-                                                controller: orderUpdateController
-                                                    .priceController,
-                                                style: AppTextStyle.labelText,
-                                                keyboardType: TextInputType
-                                                    .number,
-                                                onChanged: (value) {
-                                                  // حذف کاماهای قبلی و فرمت جدید
-                                                  String cleanedValue = value
-                                                      .replaceAll(',', '');
-                                                  if (cleanedValue.isNotEmpty) {
-                                                    orderUpdateController
-                                                        .priceController.text =
-                                                        cleanedValue
-                                                            .toPersianDigit()
-                                                            .seRagham();
-                                                    orderUpdateController
-                                                        .priceController
-                                                        .selection =
-                                                        TextSelection.collapsed(
-                                                            offset: orderUpdateController
-                                                                .priceController
-                                                                .text.length);
-                                                  }
-                                                },
-                                                decoration: InputDecoration(
-                                                  border: OutlineInputBorder(
-                                                    borderRadius: BorderRadius
-                                                        .circular(10),
+                                              Row(crossAxisAlignment: CrossAxisAlignment.start,
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Flexible(fit: FlexFit.loose,
+                                                    child: TextFormField(
+                                                      readOnly: !orderUpdateController.manualPriceChecked.value,
+                                                      controller: orderUpdateController
+                                                          .priceController,
+                                                      style: AppTextStyle.labelText,
+                                                      keyboardType: TextInputType
+                                                          .number,
+                                                      onChanged: (value) {
+                                                        // حذف کاماهای قبلی و فرمت جدید
+                                                        String cleanedValue = value
+                                                            .replaceAll(',', '');
+                                                        if (cleanedValue.isNotEmpty) {
+                                                          orderUpdateController
+                                                              .priceController.text =
+                                                              cleanedValue
+                                                                  .toPersianDigit()
+                                                                  .seRagham();
+                                                          orderUpdateController
+                                                              .priceController
+                                                              .selection =
+                                                              TextSelection.collapsed(
+                                                                  offset: orderUpdateController
+                                                                      .priceController
+                                                                      .text.length);
+                                                        }
+                                                        orderUpdateController.updateTotalPrice();
+                                                      },
+                                                      decoration: InputDecoration(
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius
+                                                              .circular(10),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor
+                                                            .textFieldColor,
+                                                      ),
+                                                    ),
                                                   ),
-                                                  filled: true,
-                                                  fillColor: AppColor
-                                                      .textFieldColor,
-                                                ),
+                                                  SizedBox(width: 3),
+                                                  Checkbox(
+                                                    value: orderUpdateController.manualPriceChecked.value,
+                                                    onChanged: (value) async{
+                                                      orderUpdateController.manualPriceChecked.value = value!;
+                                                      if(!value) {
+                                                        orderUpdateController.changeSelectedItem(orderUpdateController.selectedItem.value);
+                                                      }
+                                                    },
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                             // گرم/عدد
@@ -437,103 +453,107 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                IntrinsicHeight(
-                                                  child: TextFormField(
-                                                    validator: (value) {
-                                                      if (value == null ||
-                                                          value.isEmpty) {
-                                                        return 'لطفا مقدار سفارش را وارد کنید';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        double item = double
-                                                            .tryParse(
-                                                            value == ""
-                                                                ? "0"
-                                                                : value
-                                                                .replaceAll(
-                                                                " ", "")
-                                                                .toEnglishDigit()) ??
-                                                            0;
-                                                        if (item >=
+                                                Row(crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Flexible(fit: FlexFit.loose,
+                                                      child: IntrinsicHeight(
+                                                        child: TextFormField(
+                                                          validator: (value) {
+                                                            if (value == null ||
+                                                                value.isEmpty) {
+                                                              return 'لطفا مقدار سفارش را وارد کنید';
+                                                            }
+                                                            return null;
+                                                          },
+                                                          onChanged: (value) {
+                                                            if(orderUpdateController.notLimitChecked.value==false){
+                                                              setState(() {
+                                                                double item = double
+                                                                    .tryParse(
+                                                                    value == ""
+                                                                        ? "0"
+                                                                        : value.replaceAll(" ", "").toEnglishDigit()) ?? 0;
+                                                                if (item >= orderUpdateController.maxItemSell.value) {
+                                                                  orderUpdateController.quantityController.text =
+                                                                      orderUpdateController.maxItemSell.value.toString();
+                                                                  print(item);
+                                                                }
+                                                              });
+                                                            }
                                                             orderUpdateController
-                                                                .maxItemSell
-                                                                .value) {
-                                                          orderUpdateController
-                                                              .quantityController
-                                                              .text =
-                                                              orderUpdateController
-                                                                  .maxItemSell
-                                                                  .value
-                                                                  .toString();
-                                                          print(item);
-                                                        }
-                                                      });
-                                                      orderUpdateController
-                                                          .updateTotalPrice();
-                                                    },
-                                                    autovalidateMode: AutovalidateMode
-                                                        .onUserInteraction,
-                                                    controller: orderUpdateController
-                                                        .quantityController,
-                                                    style: AppTextStyle
-                                                        .labelText,
-                                                    keyboardType: TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .allow(RegExp(
-                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                      TextInputFormatter
-                                                          .withFunction((
-                                                          oldValue, newValue) {
-                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                        String newText = newValue
-                                                            .text
-                                                            .replaceAll(
-                                                            '٠', '0')
-                                                            .replaceAll(
-                                                            '١', '1')
-                                                            .replaceAll(
-                                                            '٢', '2')
-                                                            .replaceAll(
-                                                            '٣', '3')
-                                                            .replaceAll(
-                                                            '٤', '4')
-                                                            .replaceAll(
-                                                            '٥', '5')
-                                                            .replaceAll(
-                                                            '٦', '6')
-                                                            .replaceAll(
-                                                            '٧', '7')
-                                                            .replaceAll(
-                                                            '٨', '8')
-                                                            .replaceAll(
-                                                            '٩', '9');
+                                                                .updateTotalPrice();
+                                                          },
+                                                          autovalidateMode: AutovalidateMode
+                                                              .onUserInteraction,
+                                                          controller: orderUpdateController
+                                                              .quantityController,
+                                                          style: AppTextStyle
+                                                              .labelText,
+                                                          keyboardType: TextInputType
+                                                              .numberWithOptions(
+                                                              decimal: true),
+                                                          inputFormatters: [
+                                                            FilteringTextInputFormatter
+                                                                .allow(RegExp(
+                                                                r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                            TextInputFormatter
+                                                                .withFunction((
+                                                                oldValue, newValue) {
+                                                              // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                              String newText = newValue
+                                                                  .text
+                                                                  .replaceAll(
+                                                                  '٠', '0')
+                                                                  .replaceAll(
+                                                                  '١', '1')
+                                                                  .replaceAll(
+                                                                  '٢', '2')
+                                                                  .replaceAll(
+                                                                  '٣', '3')
+                                                                  .replaceAll(
+                                                                  '٤', '4')
+                                                                  .replaceAll(
+                                                                  '٥', '5')
+                                                                  .replaceAll(
+                                                                  '٦', '6')
+                                                                  .replaceAll(
+                                                                  '٧', '7')
+                                                                  .replaceAll(
+                                                                  '٨', '8')
+                                                                  .replaceAll(
+                                                                  '٩', '9');
 
-                                                        return newValue
-                                                            .copyWith(
-                                                            text: newText,
-                                                            selection: TextSelection
-                                                                .collapsed(
-                                                                offset: newText
-                                                                    .length));
-                                                      }),
-                                                    ],
-                                                    decoration: InputDecoration(
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius
-                                                            .circular(10),
+                                                              return newValue
+                                                                  .copyWith(
+                                                                  text: newText,
+                                                                  selection: TextSelection
+                                                                      .collapsed(
+                                                                      offset: newText
+                                                                          .length));
+                                                            }),
+                                                          ],
+                                                          decoration: InputDecoration(
+                                                            border: OutlineInputBorder(
+                                                              borderRadius: BorderRadius
+                                                                  .circular(10),
+                                                            ),
+                                                            filled: true,
+                                                            fillColor: AppColor
+                                                                .textFieldColor,
+                                                            errorMaxLines: 1,
+                                                          ),
+                                                        ),
                                                       ),
-                                                      filled: true,
-                                                      fillColor: AppColor
-                                                          .textFieldColor,
-                                                      errorMaxLines: 1,
                                                     ),
-                                                  ),
+                                                    SizedBox(width: 3),
+                                                    Checkbox(
+                                                      value: orderUpdateController.notLimitChecked.value,
+                                                      onChanged: (value) async{
+                                                        orderUpdateController.notLimitChecked.value = value!;
+                                                      },
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             )
@@ -543,103 +563,106 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                IntrinsicHeight(
-                                                  child: TextFormField(
-                                                    validator: (value) {
-                                                      if (value == null ||
-                                                          value.isEmpty) {
-                                                        return 'لطفا مقدار سفارش را وارد کنید';
-                                                      }
-                                                      return null;
-                                                    },
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        double item = double
-                                                            .tryParse(
-                                                            value == ""
-                                                                ? "0"
-                                                                : value
-                                                                .replaceAll(
-                                                                " ", "")
-                                                                .toEnglishDigit()) ??
-                                                            0;
-                                                        if (item >=
+                                                Row(crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Flexible(fit: FlexFit.loose,
+                                                      child: IntrinsicHeight(
+                                                        child: TextFormField(
+                                                          validator: (value) {
+                                                            if (value == null ||
+                                                                value.isEmpty) {
+                                                              return 'لطفا مقدار سفارش را وارد کنید';
+                                                            }
+                                                            return null;
+                                                          },
+                                                          onChanged: (value) {
+                                                            if(orderUpdateController.notLimitChecked.value==false){
+                                                              setState(() {
+                                                                double item = double
+                                                                    .tryParse(
+                                                                    value == ""
+                                                                        ? "0"
+                                                                        : value.replaceAll(" ", "").toEnglishDigit()) ?? 0;
+                                                                if (item >= orderUpdateController.maxItemBuy.value) {
+                                                                  orderUpdateController.quantityController.text = orderUpdateController.maxItemBuy.value.toString();
+                                                                  print(item);
+                                                                }
+                                                              });
+                                                            }
                                                             orderUpdateController
-                                                                .maxItemBuy
-                                                                .value) {
-                                                          orderUpdateController
-                                                              .quantityController
-                                                              .text =
-                                                              orderUpdateController
-                                                                  .maxItemBuy
-                                                                  .value
-                                                                  .toString();
-                                                          print(item);
-                                                        }
-                                                      });
-                                                      orderUpdateController
-                                                          .updateTotalPrice();
-                                                    },
-                                                    autovalidateMode: AutovalidateMode
-                                                        .onUserInteraction,
-                                                    controller: orderUpdateController
-                                                        .quantityController,
-                                                    style: AppTextStyle
-                                                        .labelText,
-                                                    keyboardType: TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .allow(RegExp(
-                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                      TextInputFormatter
-                                                          .withFunction((
-                                                          oldValue, newValue) {
-                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                        String newText = newValue
-                                                            .text
-                                                            .replaceAll(
-                                                            '٠', '0')
-                                                            .replaceAll(
-                                                            '١', '1')
-                                                            .replaceAll(
-                                                            '٢', '2')
-                                                            .replaceAll(
-                                                            '٣', '3')
-                                                            .replaceAll(
-                                                            '٤', '4')
-                                                            .replaceAll(
-                                                            '٥', '5')
-                                                            .replaceAll(
-                                                            '٦', '6')
-                                                            .replaceAll(
-                                                            '٧', '7')
-                                                            .replaceAll(
-                                                            '٨', '8')
-                                                            .replaceAll(
-                                                            '٩', '9');
+                                                                .updateTotalPrice();
+                                                          },
+                                                          autovalidateMode: AutovalidateMode
+                                                              .onUserInteraction,
+                                                          controller: orderUpdateController
+                                                              .quantityController,
+                                                          style: AppTextStyle
+                                                              .labelText,
+                                                          keyboardType: TextInputType
+                                                              .numberWithOptions(
+                                                              decimal: true),
+                                                          inputFormatters: [
+                                                            FilteringTextInputFormatter
+                                                                .allow(RegExp(
+                                                                r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                            TextInputFormatter
+                                                                .withFunction((
+                                                                oldValue, newValue) {
+                                                              // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                              String newText = newValue
+                                                                  .text
+                                                                  .replaceAll(
+                                                                  '٠', '0')
+                                                                  .replaceAll(
+                                                                  '١', '1')
+                                                                  .replaceAll(
+                                                                  '٢', '2')
+                                                                  .replaceAll(
+                                                                  '٣', '3')
+                                                                  .replaceAll(
+                                                                  '٤', '4')
+                                                                  .replaceAll(
+                                                                  '٥', '5')
+                                                                  .replaceAll(
+                                                                  '٦', '6')
+                                                                  .replaceAll(
+                                                                  '٧', '7')
+                                                                  .replaceAll(
+                                                                  '٨', '8')
+                                                                  .replaceAll(
+                                                                  '٩', '9');
 
-                                                        return newValue
-                                                            .copyWith(
-                                                            text: newText,
-                                                            selection: TextSelection
-                                                                .collapsed(
-                                                                offset: newText
-                                                                    .length));
-                                                      }),
-                                                    ],
-                                                    decoration: InputDecoration(
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius
-                                                            .circular(10),
+                                                              return newValue
+                                                                  .copyWith(
+                                                                  text: newText,
+                                                                  selection: TextSelection
+                                                                      .collapsed(
+                                                                      offset: newText
+                                                                          .length));
+                                                            }),
+                                                          ],
+                                                          decoration: InputDecoration(
+                                                            border: OutlineInputBorder(
+                                                              borderRadius: BorderRadius
+                                                                  .circular(10),
+                                                            ),
+                                                            filled: true,
+                                                            fillColor: AppColor
+                                                                .textFieldColor,
+                                                            errorMaxLines: 1,
+                                                          ),
+                                                        ),
                                                       ),
-                                                      filled: true,
-                                                      fillColor: AppColor
-                                                          .textFieldColor,
-                                                      errorMaxLines: 1,
                                                     ),
-                                                  ),
+                                                    SizedBox(width: 3),
+                                                    Checkbox(
+                                                      value: orderUpdateController.notLimitChecked.value,
+                                                      onChanged: (value) async{
+                                                        orderUpdateController.notLimitChecked.value = value!;
+                                                      },
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -785,8 +808,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                               padding: EdgeInsets.only(
                                                   bottom: 5),
                                               child: TextFormField(
-                                                controller: orderUpdateController
-                                                    .dateController,
+                                                controller: orderUpdateController.dateController,
                                                 readOnly: true,
                                                 style: AppTextStyle.labelText,
                                                 decoration: InputDecoration(

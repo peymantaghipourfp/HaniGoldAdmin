@@ -37,12 +37,9 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
         .isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ?
-        CustomAppbar1(
-            title: 'ویرایش درخواست برداشت', onBackTap: () => Get.back())
-            : CustomAppBar(title: 'ویرایش درخواست برداشت',
+        appBar: CustomAppbar1(title: 'ویرایش درخواست برداشت',
           onBackTap: () {
-            Get.back();
+            Get.toNamed('/withdrawsList');
             withdrawUpdateController.clearList();
           },
         ),

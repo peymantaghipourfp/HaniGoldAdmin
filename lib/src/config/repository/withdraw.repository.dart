@@ -313,4 +313,24 @@ class WithdrawRepository{
     }
   }
 
+  Future<List< dynamic>> updateRequestDateWithdraw({
+    required int withdrawId,
+  })async{
+    try{
+      Map<String,dynamic> withdrawData={
+        "id": withdrawId,
+      };
+
+      print(withdrawData);
+
+      var response=await withdrawDio.put('WithdrawRequest/updateDate',data: withdrawData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در آپدیت تاریخ:$e');
+    }
+  }
+
 }

@@ -35,11 +35,11 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
         .isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ?
-        CustomAppbar1(title: 'ویرایش واریزی', onBackTap: () => Get.back(),)
-            :
-        CustomAppBar(title: 'ویرایش واریزی',
-          onBackTap: () => Get.back(),
+        appBar: CustomAppbar1(title: 'ویرایش واریزی',
+          onBackTap: () {
+            Get.back();
+            depositUpdateController.clearList();
+          },
         ),
         body: Stack(
           children: [

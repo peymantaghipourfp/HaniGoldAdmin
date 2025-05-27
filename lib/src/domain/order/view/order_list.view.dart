@@ -801,8 +801,7 @@ class OrderListView extends StatelessWidget {
                       //دکمه ادیت جزئیات سفارش
                       OutlinedButton(
                         onPressed: () {
-                          Get.back();
-                          Get.toNamed('/orderUpdate',arguments: orders);
+                          Get.offAllNamed('/orderUpdate',arguments: orders);
                         },
                         style: ButtonStyle(
                           shape: WidgetStatePropertyAll(
@@ -1277,8 +1276,8 @@ class OrderListView extends StatelessWidget {
                   //دکمه ادیت جزئیات سفارش
                   OutlinedButton(
                     onPressed: () {
-                      Get.back();
-                      Get.toNamed('/orderUpdate',arguments: order);
+
+                      Get.offAllNamed('/orderUpdate',arguments: order);
                     },
                     style: ButtonStyle(
                       shape: WidgetStatePropertyAll(

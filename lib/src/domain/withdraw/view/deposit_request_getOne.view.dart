@@ -27,7 +27,7 @@ class DepositRequestGetOneView extends StatelessWidget {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: CustomAppbar1(title: 'اطلاعات واریزی',
-          onBackTap: ()=> Get.back()
+          onBackTap: ()=> Get.back(),
       ),
       body: Stack(
         children: [

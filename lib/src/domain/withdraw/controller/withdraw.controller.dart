@@ -104,12 +104,14 @@ class WithdrawController extends GetxController{
     if (page < 1) return;
     currentPage.value = page;
     fetchWithdrawList();
+    expandedIndex.value=null;
   }
 
   void nextPage() {
     if (hasMore.value) {
       currentPage.value++;
       fetchWithdrawList();
+      expandedIndex.value=null;
     }
   }
 
@@ -117,6 +119,7 @@ class WithdrawController extends GetxController{
     if (currentPage.value > 1) {
       currentPage.value--;
       fetchWithdrawList();
+      expandedIndex.value=null;
     }
   }
 
@@ -130,6 +133,7 @@ class WithdrawController extends GetxController{
   }
   @override void onClose() {
     scrollController.dispose();
+    withdrawList.clear();
     super.onClose();
   }
 
@@ -233,7 +237,6 @@ class WithdrawController extends GetxController{
   Future<void> fetchWithdrawList()async{
     try{
         withdrawList.clear();
-
       isLoading.value = true;
       state.value=PageState.loading;
         //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
@@ -367,7 +370,7 @@ class WithdrawController extends GetxController{
   // آپدیت وضعیت درخواست های برداشت (updateStatusWithdraw)
 
   Future<WithdrawModel?> updateStatusWithdraw(int withdrawId,int status,int reasonRejectionId) async {
-
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoading.value = true;
 
@@ -386,8 +389,10 @@ class WithdrawController extends GetxController{
       }
 
     } catch (e) {
+      EasyLoading.dismiss();
       throw ErrorException('خطا در تغییر وضعیت: $e');
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
 
     }
@@ -396,7 +401,7 @@ class WithdrawController extends GetxController{
 
   // آپدیت وضعیت درخواست های واریز (updateStatusِDepositRequest)
   Future<DepositRequestModel?> updateStatusDepositRequest(int depositRequestId,int status,int reasonRejectionId) async {
-
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoading.value = true;
       var response = await depositRequestRepository.updateStatusDepositRequest(
@@ -414,8 +419,10 @@ class WithdrawController extends GetxController{
       }
 
     } catch (e) {
+      EasyLoading.dismiss();
       throw ErrorException('خطا در تغییر وضعیت: $e');
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
     return null;
@@ -423,7 +430,6 @@ class WithdrawController extends GetxController{
 
   // لیست درخواست های واریز(depositRequest)
   Future<void> fetchDepositRequestList(int id)async{
-
     depositRequestList.clear();
     try{
       isLoadingDepositRequestList.value = true;
@@ -445,6 +451,7 @@ class WithdrawController extends GetxController{
 
   // درج درخواست های واریز(insert deposit request)
   Future<DepositRequestModel?> insertDepositRequest(int id,int walletId)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
       var response=await depositRequestRepository.insertDepositRequest(
@@ -471,14 +478,17 @@ class WithdrawController extends GetxController{
         return depositRequestResponse;
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;
   }
 
   Future<DepositRequestModel?> updateDepositRequest(int withdrawId,int depositRequestId)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
       var response=await depositRequestRepository.updateDepositRequest(
@@ -505,8 +515,10 @@ class WithdrawController extends GetxController{
         return depositRequestResponse;
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;
@@ -522,6 +534,7 @@ class WithdrawController extends GetxController{
   }
 
   Future<List<dynamic>?> deleteWithdraw(int withdrawId,bool isDeleted)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await withdrawRepository.deleteWithdraw(isDeleted: isDeleted, withdrawId: withdrawId);
@@ -534,15 +547,41 @@ class WithdrawController extends GetxController{
         fetchWithdrawList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در حذف درخواست برداشت: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
 
     }
     return null;
   }
 
+  Future<List<dynamic>?> updateRequestDateWithdraw(int withdrawId)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      isLoading.value = true;
+      var response=await withdrawRepository.updateRequestDateWithdraw(withdrawId: withdrawId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","آپدیت تاریخ با موفقیت انجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text('آپدیت تاریخ با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchWithdrawList();
+      }
+    }catch(e){
+      EasyLoading.dismiss();
+      throw ErrorException('خطا در آپدیت تاریخ: $e');
+    }finally {
+      EasyLoading.dismiss();
+      isLoading.value = false;
+    }
+    return null;
+  }
+
   Future<List<dynamic>?> deleteDepositRequest(int depositRequestId,bool isDeleted)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await depositRequestRepository.deleteDepositRequest(isDeleted: isDeleted, depositRequestId: depositRequestId);
@@ -556,8 +595,10 @@ class WithdrawController extends GetxController{
         fetchWithdrawList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در حذف درخواست واریزی: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
 
     }

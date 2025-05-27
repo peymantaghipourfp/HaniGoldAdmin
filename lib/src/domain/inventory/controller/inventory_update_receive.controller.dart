@@ -3,6 +3,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/config/repository/laboratory.repository.dart';
@@ -102,22 +103,23 @@ class InventoryUpdateReceiveController extends GetxController{
     selectedLaboratory.value=newValue;
   }
 
+  late InventoryDetailModel? inventoryDetail;
 
   @override
   void onInit() async{
-    final InventoryDetailModel? inventoryDetail=Get.arguments;
+     inventoryDetail=Get.arguments;
     if(inventoryDetail!=null) {
-      await fetchGetOneInventory(inventoryDetail.inventoryId!);
-      setInventoryDetail(inventoryDetail);
-      inventoryId.value=inventoryDetail.inventoryId ?? 0;
-      inventoryDetailId.value=inventoryDetail.id ?? 0;
-      accountId.value = inventoryDetail.wallet!.account!.id!;
-      accountName.value = inventoryDetail.wallet!.account!.name!;
-      selectedWalletAccount2.value=inventoryDetail.wallet;
+      await fetchGetOneInventory(inventoryDetail!.inventoryId!);
+      setInventoryDetail(inventoryDetail!);
+      inventoryId.value=inventoryDetail?.inventoryId ?? 0;
+      inventoryDetailId.value=inventoryDetail?.id ?? 0;
+      accountId.value = inventoryDetail!.wallet!.account!.id!;
+      accountName.value = inventoryDetail!.wallet!.account!.name!;
+      selectedWalletAccount2.value=inventoryDetail?.wallet;
       getWalletAccount(accountId.value);
       getBalanceList(accountId.value);
       print(accountId.value);
-      print(inventoryDetail.wallet?.id);
+      print(inventoryDetail?.wallet?.id);
 
     }
 
@@ -326,6 +328,7 @@ class InventoryUpdateReceiveController extends GetxController{
   }
 
   Future<InventoryModel?> updateInventoryDetailReceive()async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -371,8 +374,10 @@ class InventoryUpdateReceiveController extends GetxController{
         clearList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;
@@ -385,7 +390,6 @@ class InventoryUpdateReceiveController extends GetxController{
     weight750Controller.text=inventoryDetail.weight750.toString() ?? '';
     caratController.text=inventoryDetail.carat.toString() ?? '';
     receiptNumberController.text=inventoryDetail.receiptNumber.toString() ?? '';
-
     selectedLaboratory.value=inventoryDetail.laboratory;
     //selectedWalletAccount.value=inventoryDetail.wallet;
   }

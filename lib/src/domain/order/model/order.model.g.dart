@@ -36,6 +36,8 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
       limitPrice: (json['limitPrice'] as num?)?.toDouble(),
       description: json['description'] as String?,
       registered: json['registered'] as bool?,
+      notLimit: json['notLimit'] as bool?,
+      manualPrice: json['manualPrice'] as bool?,
     );
 
 Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
@@ -60,6 +62,8 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'limitPrice': instance.limitPrice,
       'description': instance.description,
       'registered': instance.registered,
+      'notLimit': instance.notLimit,
+      'manualPrice': instance.manualPrice,
     };
 
 Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(

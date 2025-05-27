@@ -86,6 +86,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                               tabs: [
                                 Tab(text: "فعال"),
                                 Tab(text: "غیر فعال"),
+
                               ],
                             ),
                           ),
@@ -109,321 +110,112 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                               EasyLoading.dismiss();
                               return isDesktop ?
                                 Expanded(
-                                child: Container(
-                                  constraints: BoxConstraints(
-                                      maxWidth: double.infinity
-                                  ),
                                   child: TabBarView(
+                                    physics: NeverScrollableScrollPhysics(),
                                     children: [
                                       // Tabbar1 فعال
-                                        DataTable2(
-                                            columnSpacing: 10,
-                                            horizontalMargin: 20,
-                                            columns: [
-                                              DataColumn2(fixedWidth: 150,
-                                                label: Text('عنوان',
-                                                  style: AppTextStyle
-                                                      .smallTitleText,),
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: SizedBox(
+                                            width: Get.width,
+                                            child: DataTable2(
+                                              border: TableBorder.symmetric(
+                                                  inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                  outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                  borderRadius: BorderRadius.circular(8)
                                               ),
-                                              DataColumn2(fixedWidth: 150,
-                                                label: Text('قیمت خرید',
-                                                  style: AppTextStyle
-                                                      .smallTitleText,),
-                                              ),
-                                              DataColumn2(
-                                                size: ColumnSize.L,
-                                                label: Text('قیمت فروش',
-                                                  style: AppTextStyle
-                                                      .smallTitleText,),
-                                              ),
-                                              DataColumn2(
-                                                size: ColumnSize.L,
-                                                label: Text(
-                                                  'تفاوت قیمت فروش',
-                                                  style: AppTextStyle
-                                                      .smallTitleText,),
-                                              ),
-                                              DataColumn2(fixedWidth: 100,
-                                                size: ColumnSize.S,
-                                                label: Text('وضعیت فروش',
-                                                  style: AppTextStyle
-                                                      .smallTitleText,),
-                                              ),
-                                            ],
-
-                                            rows: List<DataRow>.generate(
-                                              productController.activeItemList.length,
-                                                  (index) =>
-                                                  DataRow(
-                                                      cells:
-                                                  [
-                                                    DataCell(
-                                                      Row(
-                                                        children: [
-                                                          productController.activeItemList[index].icon!=null ?
-                                                          Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${productController.activeItemList[index].icon}',
-                                                            width: 30,
-                                                            height: 30,) :
-                                                          SvgPicture.asset(
-                                                            'assets/svg/gold.svg',
-                                                            width: 25,
-                                                            height: 25,),
-                                                          SizedBox(width: 5,),
-                                                          Text(
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            "${productController
-                                                                .activeItemList[index]
-                                                                .name}",
-                                                            style: AppTextStyle.bodyText,
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    DataCell(
-                                                      Text(
-                                                        textAlign: TextAlign.center,
-                                                        (((productController.activeItemList[index].price?.toDouble() ?? 0)-(productController.activeItemList[index].differentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
-                                                        style: AppTextStyle.bodyText,
-                                                      ),
-                                                    ),
-                                                    // price
-                                                    DataCell(
-                                                          () {
-                                                        String price = productController
-                                                            .activeItemList[index]
-                                                            .price
-                                                            .toString()
-                                                            .replaceAll(
-                                                            RegExp(
-                                                                r'[^0-9]'),
-                                                            '');
-                                                        List<
-                                                            String> parts = [
-                                                        ];
-                                                        String remaining = price;
-                                                        int count = 0;
-                                                        while (remaining
-                                                            .isNotEmpty &&
-                                                            count < 3) {
-                                                          int end = remaining
-                                                              .length;
-                                                          int start = end -
-                                                              3;
-                                                          if (start < 0)
-                                                            start = 0;
-                                                          String part = remaining
-                                                              .substring(
-                                                              start, end);
-                                                          parts.add(part);
-                                                          remaining =
-                                                              remaining
-                                                                  .substring(
-                                                                  0,
-                                                                  start);
-                                                          count++;
-                                                        }
-                                                        String price1 = parts
-                                                            .isNotEmpty
-                                                            ? parts[0]
-                                                            : '';
-                                                        String price2 = parts
-                                                            .length >= 2
-                                                            ? parts[1]
-                                                            : '';
-                                                        String price3 = parts
-                                                            .length >= 3
-                                                            ? parts[2]
-                                                            : '';
-                                                        String price4 = remaining;
-                                                        return PriceSellWidget(
-                                                          price1: price1,
-                                                          price2: price2,
-                                                          price3: price3,
-                                                          price4: price4,
-                                                          different: productController
-                                                              .activeItemList[index]
-                                                              .differentPrice ??
-                                                              0,
-                                                          id: productController
-                                                              .activeItemList[index]
-                                                              .id!,
-
-                                                        );
-                                                      }(),
-                                                    ),
-                                                    //different
-                                                    DataCell(
-                                                          () {
-                                                        String differentPrice = productController
-                                                            .activeItemList[index]
-                                                            .differentPrice
-                                                            .toString()
-                                                            .replaceAll(
-                                                            RegExp(
-                                                                r'[^0-9]'),
-                                                            '');
-                                                        List<
-                                                            String> parts = [
-                                                        ];
-                                                        String remaining = differentPrice;
-                                                        int count = 0;
-                                                        while (remaining
-                                                            .isNotEmpty &&
-                                                            count < 3) {
-                                                          int end = remaining
-                                                              .length;
-                                                          int start = end -
-                                                              3;
-                                                          if (start < 0)
-                                                            start = 0;
-                                                          String part = remaining
-                                                              .substring(
-                                                              start, end);
-                                                          parts.add(part);
-                                                          remaining =
-                                                              remaining
-                                                                  .substring(
-                                                                  0,
-                                                                  start);
-                                                          count++;
-                                                        }
-                                                        String differentPrice1 = parts
-                                                            .isNotEmpty
-                                                            ? parts[0]
-                                                            : '';
-                                                        String differentPrice2 = parts
-                                                            .length >= 2
-                                                            ? parts[1]
-                                                            : '';
-                                                        String differentPrice3 = parts
-                                                            .length >= 3
-                                                            ? parts[2]
-                                                            : '';
-                                                        return PriceDifferentWidget(
-                                                          differentPrice1: differentPrice1,
-                                                          differentPrice2: differentPrice2,
-                                                          differentPrice3: differentPrice3,
-                                                          price: productController
-                                                              .activeItemList[index]
-                                                              .price ?? 0,
-                                                          id: productController
-                                                              .activeItemList[index]
-                                                              .id!,
-                                                        );
-                                                      }(),
-                                                    ),
-                                                    // status
-                                                    DataCell(
-                                                      Card(
-                                                        shape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius
-                                                              .circular(
-                                                              5),
-                                                        ),
-                                                        color: productController
-                                                            .activeItemList[index]
-                                                            .status ==
-                                                            true
-                                                            ? AppColor
-                                                            .primaryColor
-                                                            : AppColor
-                                                            .accentColor,
-                                                        margin: EdgeInsets
-                                                            .symmetric(
-                                                            vertical: 0,
-                                                            horizontal: 5),
-                                                        child: Padding(
-                                                          padding: const EdgeInsets
-                                                              .all(6),
-                                                          child: Text(
-                                                              productController
-                                                                  .activeItemList[index]
-                                                                  .status ==
-                                                                  true
-                                                                  ? 'فعال'
-                                                                  : 'غیر فعال',
-                                                              style: AppTextStyle
-                                                                  .labelText,
-                                                              textAlign: TextAlign
-                                                                  .center),
-                                                        ),
-                                                      ),
-                                                    )
-                                                  ]
-                                                  ),
-                                            ),
-                                                                                     ),
-                                      //Tabbar2 غیر فعال
-                                        DataTable2(
-                                                columnSpacing: 12,
+                                                columnSpacing: 10,
                                                 horizontalMargin: 20,
-
+                                                dividerThickness: 0.3,
                                                 columns: [
-                                                  DataColumn2(fixedWidth: 150,
+                                                  DataColumn2(
+                                                    fixedWidth: 170,
+                                                    headingRowAlignment: MainAxisAlignment.center,
                                                     label: Text('عنوان',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                   ),
-                                                  DataColumn2(fixedWidth: 150,
+                                                  DataColumn2(
+                                                    fixedWidth: 150,
+                                                    headingRowAlignment: MainAxisAlignment.center,
                                                     label: Text('قیمت خرید',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                   ),
                                                   DataColumn2(
+                                                    headingRowAlignment: MainAxisAlignment.center,
                                                     size: ColumnSize.L,
                                                     label: Text('قیمت فروش',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                   ),
                                                   DataColumn2(
+                                                    headingRowAlignment: MainAxisAlignment.center,
                                                     size: ColumnSize.L,
-                                                    label: Text('تفاوت قیمت فروش',
+                                                    label: Text(
+                                                      'تفاوت قیمت فروش',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                   ),
-                                                  DataColumn2(fixedWidth: 100,
+                                                  DataColumn2(
+                                                    headingRowAlignment: MainAxisAlignment.center,
+                                                    fixedWidth: 60,
                                                     size: ColumnSize.S,
-                                                    label: Text('وضعیت فروش',
+                                                    label: Text('وضعیت',
                                                       style: AppTextStyle
                                                           .smallTitleText,),
                                                   ),
                                                 ],
 
                                                 rows: List<DataRow>.generate(
-                                                  productController.inactiveItemList.length,
+                                                  productController.activeItemList.length,
                                                       (index) =>
-                                                      DataRow(cells:
+                                                      DataRow(
+                                                          cells:
                                                       [
                                                         DataCell(
-                                                          Text(
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            "${productController.inactiveItemList[index]
-                                                                .name}",
-                                                            style: AppTextStyle
-                                                                .bodyTextBold,
+                                                          Row(
+                                                            children: [
+                                                              productController.activeItemList[index].icon!=null ?
+                                                              Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${productController.activeItemList[index].icon}',
+                                                                width: 30,
+                                                                height: 30,) :
+                                                              SvgPicture.asset(
+                                                                'assets/svg/gold.svg',
+                                                                width: 25,
+                                                                height: 25,),
+                                                              SizedBox(width: 5,),
+                                                              Text(
+                                                                textAlign: TextAlign
+                                                                    .center,
+                                                                "${productController
+                                                                    .activeItemList[index]
+                                                                    .name}",
+                                                                style: AppTextStyle.bodyText,
+                                                              ),
+                                                            ],
                                                           ),
                                                         ),
                                                         DataCell(
                                                           Text(
-                                                            textAlign: TextAlign
-                                                                .center,
-                                                            (((productController.inactiveItemList[index].price?.toDouble() ?? 0)-(productController.inactiveItemList[index].differentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
-                                                            style: AppTextStyle
-                                                                .bodyTextBold,
+                                                            textAlign: TextAlign.center,
+                                                            (((productController.activeItemList[index].price?.toDouble() ?? 0)-(productController.activeItemList[index].differentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+                                                            style: AppTextStyle.bodyText,
                                                           ),
                                                         ),
                                                         // price
                                                         DataCell(
                                                               () {
-                                                            String price = productController.inactiveItemList[index]
-                                                                .price.toString()
+                                                            String price = productController
+                                                                .activeItemList[index]
+                                                                .price
+                                                                .toString()
                                                                 .replaceAll(
                                                                 RegExp(
                                                                     r'[^0-9]'),
                                                                 '');
-                                                            List<String> parts = [
+                                                            List<
+                                                                String> parts = [
                                                             ];
                                                             String remaining = price;
                                                             int count = 0;
@@ -432,10 +224,10 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                                 count < 3) {
                                                               int end = remaining
                                                                   .length;
-                                                              int start = end - 3;
+                                                              int start = end -
+                                                                  3;
                                                               if (start < 0)
-                                                                start =
-                                                                0;
+                                                                start = 0;
                                                               String part = remaining
                                                                   .substring(
                                                                   start, end);
@@ -443,7 +235,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                               remaining =
                                                                   remaining
                                                                       .substring(
-                                                                      0, start);
+                                                                      0,
+                                                                      start);
                                                               count++;
                                                             }
                                                             String price1 = parts
@@ -464,10 +257,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                               price2: price2,
                                                               price3: price3,
                                                               price4: price4,
-                                                              different: productController.inactiveItemList[index]
+                                                              different: productController
+                                                                  .activeItemList[index]
                                                                   .differentPrice ??
                                                                   0,
-                                                              id: productController.inactiveItemList[index]
+                                                              id: productController
+                                                                  .activeItemList[index]
                                                                   .id!,
 
                                                             );
@@ -476,14 +271,16 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                         //different
                                                         DataCell(
                                                               () {
-                                                            String differentPrice = productController.inactiveItemList[index]
+                                                            String differentPrice = productController
+                                                                .activeItemList[index]
                                                                 .differentPrice
                                                                 .toString()
                                                                 .replaceAll(
                                                                 RegExp(
                                                                     r'[^0-9]'),
                                                                 '');
-                                                            List<String> parts = [
+                                                            List<
+                                                                String> parts = [
                                                             ];
                                                             String remaining = differentPrice;
                                                             int count = 0;
@@ -492,7 +289,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                                 count < 3) {
                                                               int end = remaining
                                                                   .length;
-                                                              int start = end - 3;
+                                                              int start = end -
+                                                                  3;
                                                               if (start < 0)
                                                                 start = 0;
                                                               String part = remaining
@@ -502,7 +300,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                               remaining =
                                                                   remaining
                                                                       .substring(
-                                                                      0, start);
+                                                                      0,
+                                                                      start);
                                                               count++;
                                                             }
                                                             String differentPrice1 = parts
@@ -521,23 +320,27 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                               differentPrice1: differentPrice1,
                                                               differentPrice2: differentPrice2,
                                                               differentPrice3: differentPrice3,
-                                                              price: productController.inactiveItemList[index]
+                                                              price: productController
+                                                                  .activeItemList[index]
                                                                   .price ?? 0,
-                                                              id: productController.inactiveItemList[index]
+                                                              id: productController
+                                                                  .activeItemList[index]
                                                                   .id!,
                                                             );
                                                           }(),
                                                         ),
-
                                                         // status
                                                         DataCell(
                                                           Card(
                                                             shape: RoundedRectangleBorder(
                                                               borderRadius: BorderRadius
-                                                                  .circular(5),
+                                                                  .circular(
+                                                                  5),
                                                             ),
-                                                            color: productController.inactiveItemList[index]
-                                                                .status == true
+                                                            color: productController
+                                                                .activeItemList[index]
+                                                                .status ==
+                                                                true
                                                                 ? AppColor
                                                                 .primaryColor
                                                                 : AppColor
@@ -550,7 +353,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                               padding: const EdgeInsets
                                                                   .all(6),
                                                               child: Text(
-                                                                  productController.inactiveItemList[index]
+                                                                  productController
+                                                                      .activeItemList[index]
                                                                       .status ==
                                                                       true
                                                                       ? 'فعال'
@@ -565,11 +369,243 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                       ]
                                                       ),
                                                 ),
+                                                                                         ),
+                                          ),
+                                        ),
+                                      //Tabbar2 غیر فعال
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          child: SizedBox(
+                                            width: Get.width,
+                                            child: DataTable2(
+                                              border: TableBorder.symmetric(
+                                                  inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                  outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                  borderRadius: BorderRadius.circular(8)
                                               ),
+                                                    columnSpacing: 12,
+                                                    horizontalMargin: 20,
+                                                    dividerThickness: 0.3,
+                                                    columns: [
+                                                      DataColumn2(
+                                                        headingRowAlignment: MainAxisAlignment.center,
+                                                        fixedWidth: 170,
+                                                        label: Text('عنوان',
+                                                          style: AppTextStyle
+                                                              .smallTitleText,),
+                                                      ),
+                                                      DataColumn2(
+                                                        headingRowAlignment: MainAxisAlignment.center,
+                                                        fixedWidth: 150,
+                                                        label: Text('قیمت خرید',
+                                                          style: AppTextStyle
+                                                              .smallTitleText,),
+                                                      ),
+                                                      DataColumn2(
+                                                        headingRowAlignment: MainAxisAlignment.center,
+                                                        size: ColumnSize.L,
+                                                        label: Text('قیمت فروش',
+                                                          style: AppTextStyle
+                                                              .smallTitleText,),
+                                                      ),
+                                                      DataColumn2(
+                                                        headingRowAlignment: MainAxisAlignment.center,
+                                                        size: ColumnSize.L,
+                                                        label: Text('تفاوت قیمت فروش',
+                                                          style: AppTextStyle
+                                                              .smallTitleText,),
+                                                      ),
+                                                      DataColumn2(
+                                                        headingRowAlignment: MainAxisAlignment.center,
+                                                        fixedWidth: 60,
+                                                        size: ColumnSize.S,
+                                                        label: Text('وضعیت فروش',
+                                                          style: AppTextStyle
+                                                              .smallTitleText,),
+                                                      ),
+                                                    ],
+
+                                                    rows: List<DataRow>.generate(
+                                                      productController.inactiveItemList.length,
+                                                          (index) =>
+                                                          DataRow(cells:
+                                                          [
+                                                            DataCell(
+                                                              Text(
+                                                                textAlign: TextAlign
+                                                                    .center,
+                                                                "${productController.inactiveItemList[index]
+                                                                    .name}",
+                                                                style: AppTextStyle
+                                                                    .bodyTextBold,
+                                                              ),
+                                                            ),
+                                                            DataCell(
+                                                              Text(
+                                                                textAlign: TextAlign
+                                                                    .center,
+                                                                (((productController.inactiveItemList[index].price?.toDouble() ?? 0)-(productController.inactiveItemList[index].differentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+                                                                style: AppTextStyle
+                                                                    .bodyTextBold,
+                                                              ),
+                                                            ),
+                                                            // price
+                                                            DataCell(
+                                                                  () {
+                                                                String price = productController.inactiveItemList[index]
+                                                                    .price.toString()
+                                                                    .replaceAll(
+                                                                    RegExp(
+                                                                        r'[^0-9]'),
+                                                                    '');
+                                                                List<String> parts = [
+                                                                ];
+                                                                String remaining = price;
+                                                                int count = 0;
+                                                                while (remaining
+                                                                    .isNotEmpty &&
+                                                                    count < 3) {
+                                                                  int end = remaining
+                                                                      .length;
+                                                                  int start = end - 3;
+                                                                  if (start < 0)
+                                                                    start =
+                                                                    0;
+                                                                  String part = remaining
+                                                                      .substring(
+                                                                      start, end);
+                                                                  parts.add(part);
+                                                                  remaining =
+                                                                      remaining
+                                                                          .substring(
+                                                                          0, start);
+                                                                  count++;
+                                                                }
+                                                                String price1 = parts
+                                                                    .isNotEmpty
+                                                                    ? parts[0]
+                                                                    : '';
+                                                                String price2 = parts
+                                                                    .length >= 2
+                                                                    ? parts[1]
+                                                                    : '';
+                                                                String price3 = parts
+                                                                    .length >= 3
+                                                                    ? parts[2]
+                                                                    : '';
+                                                                String price4 = remaining;
+                                                                return PriceSellWidget(
+                                                                  price1: price1,
+                                                                  price2: price2,
+                                                                  price3: price3,
+                                                                  price4: price4,
+                                                                  different: productController.inactiveItemList[index]
+                                                                      .differentPrice ??
+                                                                      0,
+                                                                  id: productController.inactiveItemList[index]
+                                                                      .id!,
+
+                                                                );
+                                                              }(),
+                                                            ),
+                                                            //different
+                                                            DataCell(
+                                                                  () {
+                                                                String differentPrice = productController.inactiveItemList[index]
+                                                                    .differentPrice
+                                                                    .toString()
+                                                                    .replaceAll(
+                                                                    RegExp(
+                                                                        r'[^0-9]'),
+                                                                    '');
+                                                                List<String> parts = [
+                                                                ];
+                                                                String remaining = differentPrice;
+                                                                int count = 0;
+                                                                while (remaining
+                                                                    .isNotEmpty &&
+                                                                    count < 3) {
+                                                                  int end = remaining
+                                                                      .length;
+                                                                  int start = end - 3;
+                                                                  if (start < 0)
+                                                                    start = 0;
+                                                                  String part = remaining
+                                                                      .substring(
+                                                                      start, end);
+                                                                  parts.add(part);
+                                                                  remaining =
+                                                                      remaining
+                                                                          .substring(
+                                                                          0, start);
+                                                                  count++;
+                                                                }
+                                                                String differentPrice1 = parts
+                                                                    .isNotEmpty
+                                                                    ? parts[0]
+                                                                    : '';
+                                                                String differentPrice2 = parts
+                                                                    .length >= 2
+                                                                    ? parts[1]
+                                                                    : '';
+                                                                String differentPrice3 = parts
+                                                                    .length >= 3
+                                                                    ? parts[2]
+                                                                    : '';
+                                                                return PriceDifferentWidget(
+                                                                  differentPrice1: differentPrice1,
+                                                                  differentPrice2: differentPrice2,
+                                                                  differentPrice3: differentPrice3,
+                                                                  price: productController.inactiveItemList[index]
+                                                                      .price ?? 0,
+                                                                  id: productController.inactiveItemList[index]
+                                                                      .id!,
+                                                                );
+                                                              }(),
+                                                            ),
+
+                                                            // status
+                                                            DataCell(
+                                                              Card(
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius
+                                                                      .circular(5),
+                                                                ),
+                                                                color: productController.inactiveItemList[index]
+                                                                    .status == true
+                                                                    ? AppColor
+                                                                    .primaryColor
+                                                                    : AppColor
+                                                                    .accentColor,
+                                                                margin: EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical: 0,
+                                                                    horizontal: 5),
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                      .all(6),
+                                                                  child: Text(
+                                                                      productController.inactiveItemList[index]
+                                                                          .status ==
+                                                                          true
+                                                                          ? 'فعال'
+                                                                          : 'غیر فعال',
+                                                                      style: AppTextStyle
+                                                                          .labelText,
+                                                                      textAlign: TextAlign
+                                                                          .center),
+                                                                ),
+                                                              ),
+                                                            )
+                                                          ]
+                                                          ),
+                                                    ),
+                                                  ),
+                                          ),
+                                        ),
                                     ],
                                   ),
-                                ),
-                              ) :
+                                ) :
 
                                 Expanded(
                                       child: Container(
@@ -753,7 +789,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                     );
                                                   },
                                               ),
-                                              
+
                                               // tab2
                                               ListView.builder(
                                                 shrinkWrap: true,
