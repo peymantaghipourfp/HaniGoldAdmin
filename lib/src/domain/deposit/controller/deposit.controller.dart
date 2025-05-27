@@ -219,7 +219,7 @@ class DepositController extends GetxController{
         return;
       }
 
-      final accounts = await accountRepository.searchAccountList(name);
+      final accounts = await accountRepository.searchAccountList(name,"1");
       searchedAccounts.assignAll(accounts);
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");

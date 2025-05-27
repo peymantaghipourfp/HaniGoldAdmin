@@ -265,18 +265,13 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 },
                                                 items: [
                                                   'انتخاب کنید',
-                                                  ...orderCreateController
-                                                      .itemList.map((
-                                                      item) => item.name ?? '')
+                                                  ...orderCreateController.itemList.map((item) => item.name ?? '')
                                                 ].toList(),
                                                 selectedValue: orderCreateController
                                                     .selectedItem.value?.name,
                                                 onChanged: (String? newValue) {
-                                                  if (newValue ==
-                                                      'انتخاب کنید') {
-                                                    orderCreateController
-                                                        .changeSelectedItem(
-                                                        null);
+                                                  if (newValue == 'انتخاب کنید') {
+                                                    orderCreateController.changeSelectedItem(null);
                                                   } else {
                                                     var selectedItem = orderCreateController
                                                         .itemList

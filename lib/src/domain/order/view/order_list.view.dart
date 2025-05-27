@@ -1160,7 +1160,7 @@ class OrderListView extends StatelessWidget {
                                       onPressed: () {
                                         orderController.updateStatusOrder(order.id!, 1);
                                         Get.back();
-                                        orderController.fetchOrderList();
+                                        //orderController.fetchOrderList();
                                       },
                                       child: Text(
                                         'تایید',
@@ -1199,7 +1199,7 @@ class OrderListView extends StatelessWidget {
                                       onPressed: () {
                                         orderController.updateStatusOrder(order.id!, 2);
                                         Get.back();
-                                        orderController.fetchOrderList();
+                                        //orderController.fetchOrderList();
 
                                       },
                                       child: Text(

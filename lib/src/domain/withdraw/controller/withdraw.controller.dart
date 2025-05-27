@@ -180,7 +180,7 @@ class WithdrawController extends GetxController{
   Future<void> fetchAccountList() async{
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList();
+      var fetchedAccountList=await accountRepository.getAccountList("1");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -209,7 +209,7 @@ class WithdrawController extends GetxController{
         return;
       }
 
-      final accounts = await AccountRepository().searchAccountList(name);
+      final accounts = await AccountRepository().searchAccountList(name,"1");
       searchedAccounts.assignAll(accounts);
 
     } catch (e) {
@@ -245,13 +245,12 @@ class WithdrawController extends GetxController{
       var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
           startIndex: startIndex,
           toIndex: toIndex,
-        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
       );
       hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
 
       if (selectedAccountId.value == 0) {
         withdrawList.assignAll(fetchedWithdrawList);
-
       }else {
         if (currentPage.value == 1) {
           withdrawList.assignAll(fetchedWithdrawList);
@@ -563,11 +562,12 @@ class WithdrawController extends GetxController{
       isLoading.value = true;
       var response=await withdrawRepository.updateRequestDateWithdraw(withdrawId: withdrawId);
       if(response!= null){
-        Get.snackbar("موفقیت آمیز","آپدیت تاریخ با موفقیت انجام شد",
-            titleText: Text('موفقیت آمیز',
+        WithdrawModel updateDateResponse=WithdrawModel.fromJson(response);
+        Get.snackbar(updateDateResponse.infos!.first['title'],updateDateResponse.infos!.first["description"],
+            titleText: Text(updateDateResponse.infos!.first['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text('آپدیت تاریخ با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            messageText: Text(updateDateResponse.infos!.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         fetchWithdrawList();
       }
     }catch(e){

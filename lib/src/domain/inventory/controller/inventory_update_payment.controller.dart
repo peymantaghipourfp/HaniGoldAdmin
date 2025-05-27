@@ -124,10 +124,10 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     fetchAccountList();
     fetchWalletAccountList();
     fetchForPaymentList();
-    var now = Jalali.now();
+    /*var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text =
-    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";*/
     super.onInit();
   }
 
@@ -144,7 +144,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     accountList.clear();
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList();
+      var fetchedAccountList=await accountRepository.getAccountList("1");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -181,7 +181,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         state.value = PageState.list;
         return;
       }
-      final results = await accountRepository.searchAccountList(name);
+      final results = await accountRepository.searchAccountList(name,"1");
       searchedAccounts.assignAll(results);
       state.value = searchedAccounts.isEmpty ? PageState.empty : PageState.list;
     } catch (e) {
@@ -320,7 +320,8 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
-      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      //String gregorianDate = convertJalaliToGregorian(dateController.text);
+      Gregorian date=inventoryDetail!.date!.toGregorian();
       print(inventoryId.value);
       print(accountName.value);
       if (selectedInputItem.value?.id != null &&
@@ -330,7 +331,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
       var response=await inventoryRepository.updateDetailInventoryPayment(
         id: inventoryId.value,
         inventoryDetailId: inventoryDetailId.value,
-        date: gregorianDate,
+        date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
         accountId: accountId.value,
         accountName: accountName.value,
         type: 0,
@@ -405,6 +406,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     caratController.text=inventoryDetail.carat.toString() ?? '';
     receiptNumberController.text=inventoryDetail.receiptNumber.toString() ?? '';
     inputItemId.value=inventoryDetail.inputItemId ?? 0;
+    dateController.text = inventoryDetail.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
   }
   void clearList() {
     dateController.clear();

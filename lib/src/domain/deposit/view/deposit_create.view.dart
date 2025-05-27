@@ -23,9 +23,8 @@ class DepositCreateView extends StatefulWidget {
 }
 
 class _DepositCreateViewState extends State<DepositCreateView> {
-
-  final DepositCreateController depositCreateController = Get.find<
-      DepositCreateController>();
+  final formKey = GlobalKey<FormState>();
+  final DepositCreateController depositCreateController = Get.find<DepositCreateController>();
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +34,8 @@ class _DepositCreateViewState extends State<DepositCreateView> {
         .isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ?
-        CustomAppbar1(title: 'ثبت واریزی', onBackTap: () => Get.back(),)
-            :
-        CustomAppBar(title: 'ثبت واریزی',
-          onBackTap: () => Get.offNamed('/withdrawsList'),
-        ),
+        appBar:
+        CustomAppbar1(title: 'ثبت واریزی', onBackTap: () => Get.back(),),
         body: Stack(
           children: [
             BackgroundImage(),
@@ -141,7 +136,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                               horizontal: 24),
                                           child:
                                           Form(
-                                            //key: withdrawCreateController.formKey,
+                                            key:formKey,
                                             child: Column(
                                               crossAxisAlignment: CrossAxisAlignment
                                                   .start,
@@ -487,48 +482,58 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                 ),
                                                 // مبلغ
                                                 Container(
-                                                  height: 50,
+                                                  height: 60,
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
                                                   child:
-                                                  TextFormField(
-                                                    controller: depositCreateController
-                                                        .amountController,
-                                                    style: AppTextStyle
-                                                        .labelText,
-                                                    keyboardType: TextInputType
-                                                        .number,
-                                                    onChanged: (value) {
-                                                      // حذف کاماهای قبلی و فرمت جدید
-                                                      String cleanedValue = value
-                                                          .replaceAll(',', '');
-                                                      if (cleanedValue
-                                                          .isNotEmpty) {
-                                                        depositCreateController
-                                                            .amountController
-                                                            .text =
-                                                            cleanedValue
-                                                                .toPersianDigit()
-                                                                .seRagham();
-                                                        depositCreateController
-                                                            .amountController
-                                                            .selection =
-                                                            TextSelection
-                                                                .collapsed(
-                                                                offset: depositCreateController
-                                                                    .amountController
-                                                                    .text
-                                                                    .length);
-                                                      }
-                                                    },
-                                                    decoration: InputDecoration(
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius
-                                                            .circular(10),
+                                                  IntrinsicHeight(
+                                                    child: TextFormField(
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty) {
+                                                          return 'لطفا مبلغ را وارد کنید';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                      controller: depositCreateController
+                                                          .amountController,
+                                                      style: AppTextStyle
+                                                          .labelText,
+                                                      keyboardType: TextInputType
+                                                          .number,
+                                                      onChanged: (value) {
+                                                        // حذف کاماهای قبلی و فرمت جدید
+                                                        String cleanedValue = value
+                                                            .replaceAll(',', '');
+                                                        if (cleanedValue
+                                                            .isNotEmpty) {
+                                                          depositCreateController
+                                                              .amountController
+                                                              .text =
+                                                              cleanedValue
+                                                                  .toPersianDigit()
+                                                                  .seRagham();
+                                                          depositCreateController
+                                                              .amountController
+                                                              .selection =
+                                                              TextSelection
+                                                                  .collapsed(
+                                                                  offset: depositCreateController
+                                                                      .amountController
+                                                                      .text
+                                                                      .length);
+                                                        }
+                                                      },
+                                                      decoration: InputDecoration(
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius
+                                                              .circular(10),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor
+                                                            .textFieldColor,
                                                       ),
-                                                      filled: true,
-                                                      fillColor: AppColor
-                                                          .textFieldColor,
                                                     ),
                                                   ),
                                                 ),
@@ -792,10 +797,9 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                                     .circular(
                                                                     10)))),
                                                     onPressed: () async {
-                                                      await depositCreateController
-                                                          .insertDeposit();
-                                                      depositCreateController
-                                                          .clearList();
+                                                      if (formKey.currentState!.validate()){
+                                                        await depositCreateController.insertDeposit();
+                                                      }
                                                     },
                                                     child: depositCreateController
                                                         .isLoading.value

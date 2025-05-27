@@ -155,7 +155,7 @@ class OrderController extends GetxController{
         return;
       }
 
-      final accounts = await accountRepository.searchAccountList(name);
+      final accounts = await accountRepository.searchAccountList(name,"1");
       searchedAccounts.assignAll(accounts);
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");
@@ -221,6 +221,7 @@ class OrderController extends GetxController{
   }
 
   Future<List<dynamic>?> updateStatusOrder(int orderId,int status)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await orderRepository.updateStatusOrder(status: status, orderId: orderId);
@@ -234,8 +235,10 @@ class OrderController extends GetxController{
         fetchOrderList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در تغییر وضعیت: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
 
     }
@@ -243,6 +246,7 @@ class OrderController extends GetxController{
   }
 
   Future<List<dynamic>?> deleteOrder(int orderId,bool isDeleted)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await orderRepository.deleteOrder(isDeleted: isDeleted, orderId: orderId);
@@ -256,8 +260,10 @@ class OrderController extends GetxController{
         fetchOrderList();
       }
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا در حذف سفارش: $e');
     }finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
 
     }
@@ -265,7 +271,7 @@ class OrderController extends GetxController{
   }
 
   Future<List<dynamic>?> updateRegistered(int orderId,bool registered) async {
-    //EasyLoading.show(status: 'لطفا منتظر بمانید');
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoadingRegister.value = true;
       var response = await orderRepository.updateRegistered(
@@ -273,7 +279,6 @@ class OrderController extends GetxController{
         registered: registered,
       );
       if(response!= null){
-        //EasyLoading.dismiss();
         Get.snackbar(response.first['title'],response.first["description"],
             titleText: Text(response.first['title'],
               textAlign: TextAlign.center,
@@ -283,8 +288,10 @@ class OrderController extends GetxController{
       }
 
     } catch (e) {
+      EasyLoading.dismiss();
       throw ErrorException('خطا در ریجیستر: $e');
     } finally {
+      EasyLoading.dismiss();
       isLoading.value = false;
     }
 
