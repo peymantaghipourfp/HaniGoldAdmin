@@ -231,7 +231,7 @@ Timer? debounceP;
   Future<void> fetchAccountList(String name) async{
     try{
    //   state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.searchAccountListNew(name);
+      var fetchedAccountList=await accountRepository.searchAccountListNew(name,"1");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
     //  state.value=PageState.list;
@@ -251,7 +251,7 @@ Timer? debounceP;
   Future<void> fetchAccountListP(String name) async{
     try{
      // state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.searchAccountListNew(name);
+      var fetchedAccountList=await accountRepository.searchAccountListNew(name,"1");
       accountListP.assignAll(fetchedAccountList);
       searchedAccountsP.assignAll(fetchedAccountList);
      // state.value=PageState.list;

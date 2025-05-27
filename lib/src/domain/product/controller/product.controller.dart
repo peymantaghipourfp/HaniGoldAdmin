@@ -122,6 +122,7 @@ class ProductController extends GetxController{
   }
 
   Future<bool> insertPriceItem(int id, double price, double different )async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await itemRepository.insertPriceItem(
@@ -144,13 +145,16 @@ class ProductController extends GetxController{
       }
       return false;
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
   }
 
   Future<bool> insertDifferentPriceItem(int id, double different, double price )async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await itemRepository.insertDifferentPriceItem(
@@ -174,8 +178,10 @@ class ProductController extends GetxController{
       }
       return false;
     }catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
   }

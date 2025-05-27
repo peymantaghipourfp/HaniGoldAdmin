@@ -11,11 +11,25 @@ class AccountRepository{
   AccountRepository(){
     accountDio.options.baseUrl=BaseUrl.baseUrl;
   }
-  Future<List<AccountModel>> getAccountList()async{
+  Future<List<AccountModel>> getAccountList(String status)async{
     try{
       Map<String , dynamic> options={
         "options" : {
           "account" :{
+            "Predicate": [
+              {
+                "innerCondition": 0,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "Status",
+                    "filterValue": status,
+                    "filterType": 4,
+                    "RefTable": "Account"
+                  }
+                ]
+              }
+            ],
           "orderBy": "Account.Name",
           "orderByType": "asc",
           "StartIndex": 1,
@@ -53,7 +67,7 @@ class AccountRepository{
       throw ErrorException('خطا:$e');
     }
   }*/
-  Future<List<AccountModel>> searchAccountList(String name) async {
+  Future<List<AccountModel>> searchAccountList(String name,String status) async {
     try {
       Map<String, dynamic> options = {
         "options": {
@@ -67,6 +81,12 @@ class AccountRepository{
                     "fieldName": "Name",
                     "filterValue": name,
                     "filterType": 0,
+                    "RefTable": "Account"
+                  },
+                  {
+                    "fieldName": "Status",
+                    "filterValue": status,
+                    "filterType": 4,
                     "RefTable": "Account"
                   }
                 ]
@@ -93,7 +113,7 @@ class AccountRepository{
   }
 
 
-  Future<List<AccountModel>> searchAccountListNew(String name) async {
+  Future<List<AccountModel>> searchAccountListNew(String name,String status) async {
     try {
 
       Map<String, dynamic> options =name!=""? {
@@ -108,6 +128,12 @@ class AccountRepository{
                     "fieldName": "Name",
                     "filterValue": name,
                     "filterType": 0,
+                    "RefTable": "Account"
+                  },
+                  {
+                    "fieldName": "Status",
+                    "filterValue": status,
+                    "filterType": 4,
                     "RefTable": "Account"
                   }
                 ]

@@ -39,7 +39,7 @@ class WithdrawRepository{
               ]
             }
           ],
-          "orderBy": "withdrawrequest.Id",
+          "orderBy": "withdrawrequest.requestDate",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
@@ -313,7 +313,7 @@ class WithdrawRepository{
     }
   }
 
-  Future<List< dynamic>> updateRequestDateWithdraw({
+  Future<Map<String,dynamic>> updateRequestDateWithdraw({
     required int withdrawId,
   })async{
     try{
@@ -332,5 +332,4 @@ class WithdrawRepository{
       throw ErrorException('خطا در آپدیت تاریخ:$e');
     }
   }
-
 }

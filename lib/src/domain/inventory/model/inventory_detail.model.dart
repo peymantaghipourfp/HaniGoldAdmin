@@ -68,6 +68,8 @@ class InventoryDetailModel {
   final String? description;
   @JsonKey(name: "inputItemId")
   final int? inputItemId;
+  @JsonKey(name: "date")
+  final DateTime? date;
 
   InventoryDetailModel({
     this.inventoryId,
@@ -95,7 +97,8 @@ class InventoryDetailModel {
     this.recId,
     this.infos,
     this.description,
-    this.inputItemId
+    this.inputItemId,
+    this.date,
   });
 
   InventoryDetailModel copyWith({
@@ -125,6 +128,7 @@ class InventoryDetailModel {
     List<dynamic>? infos,
     String? description,
     int? inputItemId,
+    DateTime? date,
   }) {
     return InventoryDetailModel(
       inventoryId: inventoryId ?? this.inventoryId,
@@ -153,6 +157,7 @@ class InventoryDetailModel {
       infos: infos ?? this.infos,
       description: description ?? this.description,
       inputItemId: inputItemId ?? this.inputItemId,
+      date: date ?? this.date,
     );
   }
 

@@ -61,7 +61,7 @@ class LoginView extends GetView<AuthController> {
                           height: 200,
                         ),
                         Text(
-                          'به سیستم مدیریت هانی گلد خوش آمدید',
+                          'به سیستم مدیریت حانی گلد خوش آمدید',
                           style: AppTextStyle.smallTitleText.copyWith(fontSize: isDesktop ? 24 : 18),
                           textAlign: TextAlign.center,
                         ),
@@ -94,7 +94,7 @@ class LoginView extends GetView<AuthController> {
                                     height: 150,
                                   ),
                                   Text(
-                                    'به سیستم مدیریت هانی گلد خوش آمدید',
+                                    'به سیستم مدیریت حانی گلد خوش آمدید',
                                     style: AppTextStyle.smallTitleText,
                                     textAlign: TextAlign.center,
                                   ),

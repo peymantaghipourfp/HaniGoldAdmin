@@ -36,7 +36,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
     return Scaffold(
       appBar:
       CustomAppbar1(
-        title: 'بروزرسانی قیمت محصولات', onBackTap: () => Get.back(),),
+        title: 'بروزرسانی قیمت محصولات', onBackTap: () => Get.toNamed('/home'),),
       body: Stack(
         children: [
           Positioned.fill(

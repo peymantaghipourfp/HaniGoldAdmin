@@ -160,7 +160,7 @@ class OrderUpdateController extends GetxController{
     try{
       accountList.clear();
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList();
+      var fetchedAccountList=await accountRepository.getAccountList("1");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -191,7 +191,7 @@ class OrderUpdateController extends GetxController{
       if (name.length>2) {
         searchedAccounts.assignAll(accountList);
       } else {
-        final results = await accountRepository.searchAccountList(name);
+        final results = await accountRepository.searchAccountList(name,"1");
         searchedAccounts.assignAll(results);
         state.value=PageState.list;
       }

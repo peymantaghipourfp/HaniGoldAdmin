@@ -208,7 +208,7 @@ class OrderRepository{
     }
   }
 
-  Future<List<Map<String , dynamic>>> updateStatusOrder({
+  Future<List<dynamic>> updateStatusOrder({
     required int status,
     required int orderId,
   })async{

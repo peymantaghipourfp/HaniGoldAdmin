@@ -193,7 +193,6 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                     bottom: 5),
                                                 child:
                                                 CustomDropdownWidget(
-
                                                   dropdownSearchData: DropdownSearchData<
                                                       String>(
                                                     searchController: withdrawCreateController
@@ -443,25 +442,20 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                     ],
                                                   ),
                                                   items:
-                                                  withdrawCreateController
-                                                      .bankList.map((bank) {
+                                                  withdrawCreateController.bankList.map((bank) {
                                                     return DropdownMenuItem(
                                                         value: bank.id
                                                             .toString(),
                                                         child: Row(
                                                           children: [
-                                                            bank.icon != null
-                                                                ? Image.network(
+                                                            bank.icon != null ?
+                                                            Image.network(
                                                               '${BaseUrl
                                                                   .baseUrl}Attachment/downloadResource?fileName=${bank
                                                                   .icon}',
                                                               width: 22,
                                                               height: 22,)
-                                                                : SvgPicture
-                                                                .asset(
-                                                              'assets/svg/bank.svg',
-                                                              width: 22,
-                                                              height: 22,),
+                                                                : SvgPicture.asset('assets/svg/bank.svg', width: 22, height: 22,),
                                                             SizedBox(
                                                               width: 10,),
                                                             Text(
@@ -562,22 +556,32 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                               ),
                                               // نام صاحب حساب
                                               Container(
-                                                height: 50,
+                                                height: 60,
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawCreateController
-                                                      .ownerNameController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                IntrinsicHeight(
+                                                  child: TextFormField(
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'لطفا نام صاحب حساب را وارد کنید';
+                                                      }
+                                                      return null;
+                                                    },
+                                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                    controller: withdrawCreateController
+                                                        .ownerNameController,
+                                                    style: AppTextStyle.bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -596,46 +600,56 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                               ),
                                               // مبلغ
                                               Container(
-                                                height: 50,
+                                                height: 60,
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawCreateController
-                                                      .amountController,
-                                                  style: AppTextStyle.labelText,
-                                                  keyboardType: TextInputType
-                                                      .number,
-                                                  onChanged: (value) {
-                                                    // حذف کاماهای قبلی و فرمت جدید
-                                                    String cleanedValue = value
-                                                        .replaceAll(',', '');
-                                                    if (cleanedValue
-                                                        .isNotEmpty) {
-                                                      withdrawCreateController
-                                                          .amountController
-                                                          .text =
-                                                          cleanedValue
-                                                              .toPersianDigit()
-                                                              .seRagham();
-                                                      withdrawCreateController
-                                                          .amountController
-                                                          .selection =
-                                                          TextSelection
-                                                              .collapsed(
-                                                              offset: withdrawCreateController
-                                                                  .amountController
-                                                                  .text.length);
-                                                    }
-                                                  },
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                IntrinsicHeight(
+                                                  child: TextFormField(
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'لطفا مبلغ را وارد کنید';
+                                                      }
+                                                      return null;
+                                                    },
+                                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                    controller: withdrawCreateController
+                                                        .amountController,
+                                                    style: AppTextStyle.labelText,
+                                                    keyboardType: TextInputType
+                                                        .number,
+                                                    onChanged: (value) {
+                                                      // حذف کاماهای قبلی و فرمت جدید
+                                                      String cleanedValue = value
+                                                          .replaceAll(',', '');
+                                                      if (cleanedValue
+                                                          .isNotEmpty) {
+                                                        withdrawCreateController
+                                                            .amountController
+                                                            .text =
+                                                            cleanedValue
+                                                                .toPersianDigit()
+                                                                .seRagham();
+                                                        withdrawCreateController
+                                                            .amountController
+                                                            .selection =
+                                                            TextSelection
+                                                                .collapsed(
+                                                                offset: withdrawCreateController
+                                                                    .amountController
+                                                                    .text.length);
+                                                      }
+                                                    },
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -801,13 +815,9 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                                   .circular(
                                                                   10)))),
                                                   onPressed: () async {
-                                                    if (formKey.currentState!
-                                                        .validate()) {
-                                                      await withdrawCreateController
-                                                          .insertWithdraw();
+                                                    if (formKey.currentState!.validate()) {
+                                                      await withdrawCreateController.insertWithdraw();
                                                     }
-                                                    withdrawCreateController
-                                                        .clearList();
                                                   },
                                                   child: withdrawCreateController
                                                       .isLoading.value
