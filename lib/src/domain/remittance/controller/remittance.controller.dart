@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
@@ -28,14 +29,18 @@ import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:pluto_grid/pluto_grid.dart';
+import 'package:uuid/uuid.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/upload.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../product/model/item.model.dart';
+import '../../users/model/balance_item.model.dart';
 import '../../users/model/paginated.model.dart';
 import '../model/remittance.model.dart';
 
@@ -70,14 +75,25 @@ class RemittanceController extends GetxController{
   final List<AccountModel> accountListP=<AccountModel>[].obs;
   PaginatedModel? paginated;
   var errorMessage=''.obs;
+  var startDateFilter=''.obs;
+  var endDateFilter=''.obs;
   final TextEditingController nameFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
+  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<AccountModel> selectedAccountP = Rxn<AccountModel>();
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   RxList<AccountModel> searchedAccountsP = <AccountModel>[].obs;
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   BalanceModel? balanceModel;
+  RxList<BalanceItemModel> balanceList = <BalanceItemModel>[].obs;
+  RxList<BalanceItemModel> balanceListP = <BalanceItemModel>[].obs;
+  var uuid = Uuid();
+  var isLoadingBalance=true.obs;
   String? indexAccountPayerGet;
   var isLoading=false.obs;
   var isLoadingRegister=false.obs;
@@ -104,14 +120,22 @@ class RemittanceController extends GetxController{
 
 
 
-  void changeSelectedAccount(AccountModel? newValue) {
+  void changeSelectedAccount(AccountModel? newValue)async {
     selectedAccount.value = newValue;
+    balanceList.clear();
+    balanceList.assignAll((await getBalanceList(selectedAccount.value?.id??0))!);
+    balanceList.refresh();
+    update();
     // selectedWalletAccount.value = null;
     // getWalletAccount(selectedAccount.value?.id ?? 0);
   }
-  void changeSelectedAccountP(AccountModel? newValue) {
+  void changeSelectedAccountP(AccountModel? newValue)async {
     selectedAccountP.value = newValue;
+    balanceListP.clear();
     namePayerController.text=newValue?.name??"";
+    balanceListP.assignAll((await getBalanceList(selectedAccountP.value?.id??0))!);
+    balanceListP.refresh();
+    update();
     // selectedWalletAccount.value = null;
     // getWalletAccount(selectedAccount.value?.id ?? 0);
   }
@@ -147,6 +171,7 @@ class RemittanceController extends GetxController{
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     fetchItemList();
     fetchAccountList("");
+    fetchAccountListP("");
     super.onInit();
   }
 
@@ -206,26 +231,108 @@ Timer? debounceP;
   }
 
 
-  // لیست حواله
-  Future<void> fetchRemittanceList() async{
-    print("kkkkkkkkkk");
-    remittanceList.clear();
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> pickImageDesktop( String type, String entityType,) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.assignAll(images);
+        await uploadImagesDesktop( type, entityType);
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+
+  }
+
+
+
+  Future<void> uploadImagesDesktop( String type, String entityType,) async {
+    if (selectedImagesDesktop.isEmpty) return;
+
+    isUploadingDesktop.value = true;
+    uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+
+    try {
+      for (int i = 0; i < selectedImagesDesktop.length; i++) {
+        final file = selectedImagesDesktop[i];
+        if(file!=null) {
+          try{
+            final bytes = await file.readAsBytes();
+            String success = await uploadRepositoryDesktop.uploadImageDesktop(
+              imageBytes: bytes,
+              fileName: file.name,
+              recordId: uuid.v4(),
+              type: type,
+              entityType: entityType,
+            );
+
+            uploadStatusesDesktop[i] = success.isNotEmpty;
+          }catch(e){
+            Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+          }
+        }
+      }
+      if (uploadStatusesDesktop.every((status) => status)) {
+        Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+      }
+    } finally {
+      isUploadingDesktop.value = false;
+      selectedImagesDesktop.clear();
+      uploadStatusesDesktop.clear();
+    }
+  }
+
+
+
+
+  // لیست بالانس
+  Future<List<BalanceItemModel>?> getBalanceList(int id) async{
+    print("getBalanceList : $id");
+    isLoadingBalance.value=false;
+    // balanceList.clear();
+    // balanceListP.clear();
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await remittanceRepository.getRemittanceList();
-      remittanceList.addAll(fetchedAccountList);
-      state.value=PageState.list;
-      if(remittanceList.isEmpty){
-        state.value=PageState.empty;
-      }
-     // remittanceList.refresh();
-      update();
+      var response=await userInfoTransactionRepository.getBalanceList(id);
+     // balanceList.addAll(response);
+      response.removeWhere((r)=>r.balance==0);
+      return response;
+
+      // state.value=PageState.list;
+      // isLoadingBalance.value=true;
+      // if(balanceList.isEmpty){
+      //   state.value=PageState.empty;
+      // }
+      // update();
     }
     catch(e){
       state.value=PageState.err;
     }finally{
     }
+    return null;
   }
+  // // لیست حواله
+  // Future<void> fetchRemittanceList() async{
+  //   print("kkkkkkkkkk");
+  //   remittanceList.clear();
+  //   try{
+  //     state.value=PageState.loading;
+  //     var fetchedAccountList=await remittanceRepository.getRemittanceList(startDate: startDateFilter.value, endDate: endDateFilter.value);
+  //     remittanceList.addAll(fetchedAccountList);
+  //     state.value=PageState.list;
+  //     if(remittanceList.isEmpty){
+  //       state.value=PageState.empty;
+  //     }
+  //    // remittanceList.refresh();
+  //     update();
+  //   }
+  //   catch(e){
+  //     state.value=PageState.err;
+  //   }finally{
+  //   }
+  // }
 
   // لیست کاربران
   Future<void> fetchAccountList(String name) async{
@@ -308,7 +415,7 @@ Timer? debounceP;
       state.value=PageState.loading;
       var response = await remittanceRepository.getRemittanceListPager(
         startIndex: currentPage.value,
-        toIndex: itemsPerPage.value,
+        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       remittanceList.addAll(response.remittances??[]);
       paginated=response.paginated;
@@ -375,7 +482,7 @@ Timer? debounceP;
         TextCellValue('مانده سکه'),
       ]);
       EasyLoading.show(status: 'دریافت فایل اکسل...');
-      final allRemittances = await remittanceRepository.getRemittanceList();
+      final allRemittances = await remittanceRepository.getRemittanceList(startDate: startDateFilter.value, endDate: endDateFilter.value);
 
       for (var remittance in allRemittances) {
         sheet.appendRow([
@@ -453,7 +560,7 @@ Timer? debounceP;
       WidgetsFlutterBinding.ensureInitialized();
       EasyLoading.show(status: 'دریافت فایل PDF...');
 
-      final allRemittances = await remittanceRepository.getRemittanceList();
+      final allRemittances = await remittanceRepository.getRemittanceList(startDate: startDateFilter.value, endDate: endDateFilter.value);
 
       final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
       final ttf = pw.Font.ttf(fontData);

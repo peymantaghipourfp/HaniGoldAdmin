@@ -11,7 +11,8 @@ import '../controller/user_info_transaction.controller.dart';
 class BalanceWidget extends StatefulWidget {
   final List<BalanceItemModel> listBalance;
   final double size;
-  const BalanceWidget({super.key, required this.listBalance, required this.size});
+  final String? title;
+  const BalanceWidget({super.key, required this.listBalance, required this.size, this.title});
 
   @override
   State<BalanceWidget> createState() => _BalanceWidgetState();
@@ -38,7 +39,7 @@ class _BalanceWidgetState extends State<BalanceWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                'تراز کاربر ',
+                '  تراز کاربر ${widget.title??""}',
                 style: AppTextStyle.labelText.copyWith(fontSize: 14,
                   fontWeight: FontWeight.bold, ),
               ),

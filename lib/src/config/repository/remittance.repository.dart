@@ -13,15 +13,30 @@ class RemittanceRepository{
   RemittanceRepository(){
     remittanceDio.options.baseUrl=BaseUrl.baseUrl;
   }
-  Future<List<RemittanceModel>> getRemittanceList()async{
+  Future<List<RemittanceModel>> getRemittanceList({required String startDate,
+    required String endDate,})async{
     try{
       Map<String , dynamic> options={
         "options" : {
           "remittance" :{
+            "Predicate": startDate!=""?  [
+              {
+                "innerCondition": 0,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Remittance"
+                  }
+                ]
+              }
+            ]:[],
           "orderBy": "Remittance.Id",
           "orderByType": "desc",
           "StartIndex": 1,
-          "ToIndex": 10
+          "ToIndex": 10000
         }
         }
       };
@@ -44,11 +59,27 @@ class RemittanceRepository{
   Future<ListRemittanceModel> getRemittanceListPager({
     required int startIndex,
     required int toIndex,
+    required String startDate,
+    required String endDate,
   })async{
     try{
       Map<String , dynamic> options={
         "options" : {
           "remittance" :{
+           "Predicate": startDate!=""?  [
+              {
+                "innerCondition": 0,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Remittance"
+                  }
+                ]
+              }
+            ]:[],
           "orderBy": "Remittance.Id",
           "orderByType": "desc",
           "StartIndex": startIndex,
@@ -199,3 +230,24 @@ class RemittanceRepository{
     }
   }
 }
+
+//{"options" : { "remittance" :{
+//     "Predicate": [
+//         {
+//             "innerCondition": 0,
+//             "outerCondition": 0,
+//             "filters": [
+//                 {
+//                     "fieldName": "Date",
+//                     "filterValue": "2024-12-01|2025-01-27",
+//                     "filterType": 25,
+//                     "RefTable": "Remittance"
+//                 }
+//             ]
+//         }
+//     ],
+//     "orderBy": "Remittance.Id",
+//     "orderByType": "asc",
+//     "StartIndex": 1,
+//     "ToIndex": 10
+// }}}
