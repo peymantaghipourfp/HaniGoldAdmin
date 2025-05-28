@@ -103,16 +103,16 @@ class InventoryDetailInsertPaymentController extends GetxController{
     update();
   }
 
-  late InventoryModel? inventory;
+  //late InventoryModel? inventory;
   @override
   void onInit() async{
 
-    inventory = Get.arguments;
+    final InventoryModel? inventory = Get.arguments;
     if(inventory!=null){
-      inventoryId.value=inventory?.id ?? 0;
-      dateController.text=inventory?.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
-      accountId.value = inventory!.account!.id!;
-      accountName.value = inventory!.account!.name!;
+      inventoryId.value=inventory.id ?? 0;
+      dateController.text=inventory.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
+      accountId.value = inventory.account!.id!;
+      accountName.value = inventory.account!.name!;
       getWalletAccount(accountId.value);
       getBalanceList(accountId.value);
     }

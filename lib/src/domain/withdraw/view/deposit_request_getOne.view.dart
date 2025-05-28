@@ -364,15 +364,8 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                 child: Row(
                                                                   children: [
                                                                     Text(
-                                                                      'عکس‌ (${getOneDeposit
-                                                                          ?.attachments
-                                                                          ?.length ??
-                                                                          0}) ',
-                                                                      style: AppTextStyle
-                                                                          .bodyText
-                                                                          .copyWith(
-                                                                          color: AppColor
-                                                                              .iconViewColor
+                                                                      'عکس‌ (${getOneDeposit?.attachments?.length ?? 0}) ',
+                                                                      style: AppTextStyle.bodyText.copyWith(color: AppColor.iconViewColor
                                                                       ),
                                                                     ),
                                                                     SizedBox(

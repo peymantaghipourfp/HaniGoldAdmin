@@ -110,6 +110,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
     selectedLaboratory.value=newValue;
   }
 
+  //late InventoryModel? inventory;
   @override
   void onInit() async{
 

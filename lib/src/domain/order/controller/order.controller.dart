@@ -38,6 +38,8 @@ class OrderController extends GetxController{
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
   PaginatedModel? paginated;
+  final TextEditingController dateStartController=TextEditingController();
+  final TextEditingController dateEndController=TextEditingController();
 
   final TextEditingController searchController=TextEditingController();
   final AccountRepository accountRepository=AccountRepository();
@@ -46,6 +48,8 @@ class OrderController extends GetxController{
   var errorMessage=''.obs;
   var isLoading=true.obs;
   var isLoadingRegister=true.obs;
+  var startDateFilter=''.obs;
+  var endDateFilter=''.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
 
   RxInt selectedAccountId = 0.obs;
@@ -108,6 +112,7 @@ class OrderController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          startDate: startDateFilter.value, endDate: endDateFilter.value,
         );
         if (fetchedOrderList.isNotEmpty) {
           orderList.addAll(fetchedOrderList);
@@ -155,7 +160,7 @@ class OrderController extends GetxController{
         return;
       }
 
-      final accounts = await accountRepository.searchAccountList(name,"1");
+      final accounts = await accountRepository.searchAccountList(name,"");
       searchedAccounts.assignAll(accounts);
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");
@@ -192,6 +197,7 @@ class OrderController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       hasMore.value = fetchedOrderList.length == itemsPerPage.value;
       //print("بالانس: ${orderList.first.balances}");
@@ -322,8 +328,9 @@ class OrderController extends GetxController{
       EasyLoading.show(status: 'دریافت فایل اکسل...');
       final allOrders = await orderRepository.getOrderList(
         startIndex: 1,
-        toIndex: 500,
+        toIndex: 10000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       for (var order in allOrders) {
@@ -352,12 +359,12 @@ class OrderController extends GetxController{
         final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         final url = html.Url.createObjectUrlFromBlob(blob);
         final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', 'deposits_${DateTime.now().millisecondsSinceEpoch}.xlsx')
+          ..setAttribute('download', 'orders_${DateTime.now().millisecondsSinceEpoch}.xlsx')
           ..click();
         html.Url.revokeObjectUrl(url);
       }else {
         final output = await getDownloadsDirectory();
-        final filePath = '${output?.path}/deposits_${DateTime
+        final filePath = '${output?.path}/orders_${DateTime
             .now()
             .millisecondsSinceEpoch}.xlsx';
         final fileBytes = excel.encode();
@@ -365,7 +372,7 @@ class OrderController extends GetxController{
           await File(filePath).writeAsBytes(uint8List);
 
           await FileSaver.instance.saveFile(
-            name: 'deposits',
+            name: 'orders',
             bytes: uint8List,
             ext: 'xlsx',
             mimeType: MimeType.microsoftExcel,
@@ -412,8 +419,9 @@ class OrderController extends GetxController{
 
       final allOrders = await orderRepository.getOrderList(
         startIndex: 1,
-        toIndex: 500,
+        toIndex: 10000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');

@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -211,7 +212,201 @@ class InventoryListView extends StatelessWidget {
                                             RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(5)))),
                                     onPressed: () {
-                                      inventoryController.exportToExcel();
+                                      showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          barrierLabel: MaterialLocalizations.of(context)
+                                              .modalBarrierDismissLabel,
+                                          barrierColor: Colors.black45,
+                                          transitionDuration: const Duration(milliseconds: 200),
+                                          pageBuilder: (BuildContext buildContext,
+                                              Animation animation,
+                                              Animation secondaryAnimation) {
+                                            return Center(
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                      color: AppColor.backGroundColor
+                                                  ),
+                                                  width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                  height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                  padding: EdgeInsets.all(20),
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            Text(
+                                                              'خروجی اکسل',
+                                                              style: AppTextStyle.labelText.copyWith(
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight.normal,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        color: AppColor.textColor,height: 0.2,
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'از تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: inventoryController.dateStartController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        inventoryController.startDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        inventoryController.dateStartController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'تا تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: inventoryController.dateEndController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        // DateTime date=DateTime.now();
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        inventoryController.endDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        inventoryController.dateEndController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      Container(
+                                                        margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                        width: double.infinity,
+                                                        height: 40,
+                                                        child: ElevatedButton(
+                                                          style: ButtonStyle(
+                                                              padding: WidgetStatePropertyAll(
+                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                              // elevation: WidgetStatePropertyAll(5),
+                                                              backgroundColor:
+                                                              WidgetStatePropertyAll(AppColor.appBarColor),
+                                                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                  borderRadius: BorderRadius.circular(5)))),
+                                                          onPressed: () async {
+                                                            inventoryController.exportToExcel();
+                                                            Get.back();
+                                                          },
+                                                          child: inventoryController.isLoading.value?
+                                                          CircularProgressIndicator(
+                                                            valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                          ) :
+                                                          Text(
+                                                            'ثبت',
+                                                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          });
+
                                     },
                                     child: Text(
                                       'خروجی اکسل',
@@ -235,7 +430,201 @@ class InventoryListView extends StatelessWidget {
                                             RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(5)))),
                                     onPressed: () {
-                                      inventoryController.exportToPdf();
+                                      showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          barrierLabel: MaterialLocalizations.of(context)
+                                              .modalBarrierDismissLabel,
+                                          barrierColor: Colors.black45,
+                                          transitionDuration: const Duration(milliseconds: 200),
+                                          pageBuilder: (BuildContext buildContext,
+                                              Animation animation,
+                                              Animation secondaryAnimation) {
+                                            return Center(
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                      color: AppColor.backGroundColor
+                                                  ),
+                                                  width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                  height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                  padding: EdgeInsets.all(20),
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            Text(
+                                                              'خروجی pdf',
+                                                              style: AppTextStyle.labelText.copyWith(
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight.normal,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        color: AppColor.textColor,height: 0.2,
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'از تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: inventoryController.dateStartController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        inventoryController.startDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        inventoryController.dateStartController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'تا تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: inventoryController.dateEndController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        // DateTime date=DateTime.now();
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        inventoryController.endDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        inventoryController.dateEndController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      Container(
+                                                        margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                        width: double.infinity,
+                                                        height: 40,
+                                                        child: ElevatedButton(
+                                                          style: ButtonStyle(
+                                                              padding: WidgetStatePropertyAll(
+                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                              // elevation: WidgetStatePropertyAll(5),
+                                                              backgroundColor:
+                                                              WidgetStatePropertyAll(AppColor.appBarColor),
+                                                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                  borderRadius: BorderRadius.circular(5)))),
+                                                          onPressed: () async {
+                                                            inventoryController.exportToPdf();
+                                                            Get.back();
+                                                          },
+                                                          child: inventoryController.isLoading.value?
+                                                          CircularProgressIndicator(
+                                                            valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                          ) :
+                                                          Text(
+                                                            'ثبت',
+                                                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          });
+
                                     },
                                     child: Text(
                                       'خروجی pdf',
@@ -352,7 +741,201 @@ class InventoryListView extends StatelessWidget {
                                                       RoundedRectangleBorder(
                                                           borderRadius: BorderRadius.circular(5)))),
                                               onPressed: () {
-                                                inventoryController.exportToExcel();
+                                                showGeneralDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    barrierLabel: MaterialLocalizations.of(context)
+                                                        .modalBarrierDismissLabel,
+                                                    barrierColor: Colors.black45,
+                                                    transitionDuration: const Duration(milliseconds: 200),
+                                                    pageBuilder: (BuildContext buildContext,
+                                                        Animation animation,
+                                                        Animation secondaryAnimation) {
+                                                      return Center(
+                                                        child: Material(
+                                                          color: Colors.transparent,
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                color: AppColor.backGroundColor
+                                                            ),
+                                                            width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                            height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                            padding: EdgeInsets.all(20),
+                                                            child: Column(
+                                                              children: [
+                                                                Padding(
+                                                                  padding: const EdgeInsets.all(8.0),
+                                                                  child: Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    children: [
+                                                                      Text(
+                                                                        'خروجی اکسل',
+                                                                        style: AppTextStyle.labelText.copyWith(
+                                                                          fontSize: 15,
+                                                                          fontWeight: FontWeight.normal,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  color: AppColor.textColor,height: 0.2,
+                                                                ),
+                                                                Padding(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                  child: Column(
+                                                                    children: [
+                                                                      SizedBox(height: 8),
+                                                                      Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            'از تاریخ',
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                          ),
+                                                                          Container(
+                                                                            //height: 50,
+                                                                            padding: EdgeInsets.only(bottom: 5),
+                                                                            child: IntrinsicHeight(
+                                                                              child: TextFormField(
+                                                                                validator: (value){
+                                                                                  if(value==null || value.isEmpty){
+                                                                                    return 'لطفا تاریخ را انتخاب کنید';
+                                                                                  }
+                                                                                  return null;
+                                                                                },
+                                                                                controller: inventoryController.dateStartController,
+                                                                                readOnly: true,
+                                                                                style: AppTextStyle.labelText,
+                                                                                decoration: InputDecoration(
+                                                                                  suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                  ),
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor.textFieldColor,
+                                                                                  errorMaxLines: 1,
+                                                                                ),
+                                                                                onTap: () async {
+                                                                                  Jalali? pickedDate = await showPersianDatePicker(
+                                                                                    context: context,
+                                                                                    initialDate: Jalali.now(),
+                                                                                    firstDate: Jalali(1400,1,1),
+                                                                                    lastDate: Jalali(1450,12,29),
+                                                                                    initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                    initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                    locale: Locale("fa","IR"),
+                                                                                  );
+                                                                                  Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                  inventoryController.startDateFilter.value =
+                                                                                  "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                  inventoryController.dateStartController.text =
+                                                                                  "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                },
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(height: 8),
+                                                                      Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            'تا تاریخ',
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                          ),
+                                                                          Container(
+                                                                            //height: 50,
+                                                                            padding: EdgeInsets.only(bottom: 5),
+                                                                            child: IntrinsicHeight(
+                                                                              child: TextFormField(
+                                                                                validator: (value){
+                                                                                  if(value==null || value.isEmpty){
+                                                                                    return 'لطفا تاریخ را انتخاب کنید';
+                                                                                  }
+                                                                                  return null;
+                                                                                },
+                                                                                controller: inventoryController.dateEndController,
+                                                                                readOnly: true,
+                                                                                style: AppTextStyle.labelText,
+                                                                                decoration: InputDecoration(
+                                                                                  suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                  ),
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor.textFieldColor,
+                                                                                  errorMaxLines: 1,
+                                                                                ),
+                                                                                onTap: () async {
+                                                                                  Jalali? pickedDate = await showPersianDatePicker(
+                                                                                    context: context,
+                                                                                    initialDate: Jalali.now(),
+                                                                                    firstDate: Jalali(1400,1,1),
+                                                                                    lastDate: Jalali(1450,12,29),
+                                                                                    initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                    initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                    locale: Locale("fa","IR"),
+                                                                                  );
+                                                                                  // DateTime date=DateTime.now();
+                                                                                  Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                  inventoryController.endDateFilter.value =
+                                                                                  "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                  inventoryController.dateEndController.text =
+                                                                                  "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                },
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Spacer(),
+                                                                Container(
+                                                                  margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                                  width: double.infinity,
+                                                                  height: 40,
+                                                                  child: ElevatedButton(
+                                                                    style: ButtonStyle(
+                                                                        padding: WidgetStatePropertyAll(
+                                                                            EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        // elevation: WidgetStatePropertyAll(5),
+                                                                        backgroundColor:
+                                                                        WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                            borderRadius: BorderRadius.circular(5)))),
+                                                                    onPressed: () async {
+                                                                      inventoryController.exportToExcel();
+                                                                      Get.back();
+                                                                    },
+                                                                    child: inventoryController.isLoading.value?
+                                                                    CircularProgressIndicator(
+                                                                      valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                    ) :
+                                                                    Text(
+                                                                      'ثبت',
+                                                                      style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
+
                                               },
                                               child: Text(
                                                 'خروجی اکسل',
@@ -376,7 +959,201 @@ class InventoryListView extends StatelessWidget {
                                                       RoundedRectangleBorder(
                                                           borderRadius: BorderRadius.circular(5)))),
                                               onPressed: () {
-                                                inventoryController.exportToPdf();
+                                                showGeneralDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    barrierLabel: MaterialLocalizations.of(context)
+                                                        .modalBarrierDismissLabel,
+                                                    barrierColor: Colors.black45,
+                                                    transitionDuration: const Duration(milliseconds: 200),
+                                                    pageBuilder: (BuildContext buildContext,
+                                                        Animation animation,
+                                                        Animation secondaryAnimation) {
+                                                      return Center(
+                                                        child: Material(
+                                                          color: Colors.transparent,
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                color: AppColor.backGroundColor
+                                                            ),
+                                                            width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                            height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                            padding: EdgeInsets.all(20),
+                                                            child: Column(
+                                                              children: [
+                                                                Padding(
+                                                                  padding: const EdgeInsets.all(8.0),
+                                                                  child: Row(
+                                                                    mainAxisAlignment: MainAxisAlignment.center,
+                                                                    children: [
+                                                                      Text(
+                                                                        'خروجی pdf',
+                                                                        style: AppTextStyle.labelText.copyWith(
+                                                                          fontSize: 15,
+                                                                          fontWeight: FontWeight.normal,
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  color: AppColor.textColor,height: 0.2,
+                                                                ),
+                                                                Padding(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                  child: Column(
+                                                                    children: [
+                                                                      SizedBox(height: 8),
+                                                                      Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            'از تاریخ',
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                          ),
+                                                                          Container(
+                                                                            //height: 50,
+                                                                            padding: EdgeInsets.only(bottom: 5),
+                                                                            child: IntrinsicHeight(
+                                                                              child: TextFormField(
+                                                                                validator: (value){
+                                                                                  if(value==null || value.isEmpty){
+                                                                                    return 'لطفا تاریخ را انتخاب کنید';
+                                                                                  }
+                                                                                  return null;
+                                                                                },
+                                                                                controller: inventoryController.dateStartController,
+                                                                                readOnly: true,
+                                                                                style: AppTextStyle.labelText,
+                                                                                decoration: InputDecoration(
+                                                                                  suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                  ),
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor.textFieldColor,
+                                                                                  errorMaxLines: 1,
+                                                                                ),
+                                                                                onTap: () async {
+                                                                                  Jalali? pickedDate = await showPersianDatePicker(
+                                                                                    context: context,
+                                                                                    initialDate: Jalali.now(),
+                                                                                    firstDate: Jalali(1400,1,1),
+                                                                                    lastDate: Jalali(1450,12,29),
+                                                                                    initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                    initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                    locale: Locale("fa","IR"),
+                                                                                  );
+                                                                                  Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                  inventoryController.startDateFilter.value =
+                                                                                  "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                  inventoryController.dateStartController.text =
+                                                                                  "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                },
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(height: 8),
+                                                                      Column(
+                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            'تا تاریخ',
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                          ),
+                                                                          Container(
+                                                                            //height: 50,
+                                                                            padding: EdgeInsets.only(bottom: 5),
+                                                                            child: IntrinsicHeight(
+                                                                              child: TextFormField(
+                                                                                validator: (value){
+                                                                                  if(value==null || value.isEmpty){
+                                                                                    return 'لطفا تاریخ را انتخاب کنید';
+                                                                                  }
+                                                                                  return null;
+                                                                                },
+                                                                                controller: inventoryController.dateEndController,
+                                                                                readOnly: true,
+                                                                                style: AppTextStyle.labelText,
+                                                                                decoration: InputDecoration(
+                                                                                  suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius: BorderRadius.circular(10),
+                                                                                  ),
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor.textFieldColor,
+                                                                                  errorMaxLines: 1,
+                                                                                ),
+                                                                                onTap: () async {
+                                                                                  Jalali? pickedDate = await showPersianDatePicker(
+                                                                                    context: context,
+                                                                                    initialDate: Jalali.now(),
+                                                                                    firstDate: Jalali(1400,1,1),
+                                                                                    lastDate: Jalali(1450,12,29),
+                                                                                    initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                    initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                    locale: Locale("fa","IR"),
+                                                                                  );
+                                                                                  // DateTime date=DateTime.now();
+                                                                                  Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                  inventoryController.endDateFilter.value =
+                                                                                  "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                  inventoryController.dateEndController.text =
+                                                                                  "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                },
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Spacer(),
+                                                                Container(
+                                                                  margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                                  width: double.infinity,
+                                                                  height: 40,
+                                                                  child: ElevatedButton(
+                                                                    style: ButtonStyle(
+                                                                        padding: WidgetStatePropertyAll(
+                                                                            EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        // elevation: WidgetStatePropertyAll(5),
+                                                                        backgroundColor:
+                                                                        WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                            borderRadius: BorderRadius.circular(5)))),
+                                                                    onPressed: () async {
+                                                                      inventoryController.exportToPdf();
+                                                                      Get.back();
+                                                                    },
+                                                                    child: inventoryController.isLoading.value?
+                                                                    CircularProgressIndicator(
+                                                                      valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                    ) :
+                                                                    Text(
+                                                                      'ثبت',
+                                                                      style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
+
                                               },
                                               child: Text(
                                                 'خروجی pdf',
@@ -762,7 +1539,7 @@ class InventoryListView extends StatelessWidget {
                                                                                       .srcIn),),
 
                                                                           ),
-                                                                          Obx(() {
+                                                                          /*Obx(() {
                                                                             if (inventoryController
                                                                                 .isUploading
                                                                                 .value) {
@@ -793,7 +1570,7 @@ class InventoryListView extends StatelessWidget {
                                                                                   ))
                                                                                   .toList(),
                                                                             );
-                                                                          }),
+                                                                          }),*/
                                                                         ],
                                                                       ),
                                                                       SizedBox(
@@ -1495,7 +2272,7 @@ class InventoryListView extends StatelessWidget {
                                                   BlendMode.srcIn),),
 
                                           ),
-                                          Obx(() {
+                                          /*Obx(() {
                                             if (inventoryController.isUploading
                                                 .value) {
                                               return CircularProgressIndicator();
@@ -1519,7 +2296,7 @@ class InventoryListView extends StatelessWidget {
                                                   ))
                                                   .toList(),
                                             );
-                                          }),
+                                          }),*/
                                         ],
                                       ),
                                       SizedBox(height: 10,),
@@ -2164,8 +2941,7 @@ class InventoryListView extends StatelessWidget {
                     GestureDetector(
                       onTap: () =>
                           inventoryController.pickImageDesktop(
-                              inventory.inventoryDetails!.first.recId
-                                  .toString(), "image", "Inventory",
+                              inventory.inventoryDetails!.first.recId.toString(), "image", "Inventory",
                               inventoryId: inventory.id!),
                       child: Container(
                         constraints: BoxConstraints(maxWidth: 100),
@@ -2183,7 +2959,7 @@ class InventoryListView extends StatelessWidget {
                       ),
 
                     ),
-                    Obx(() {
+                    /*Obx(() {
                       if (inventoryController
                           .isUploadingDesktop
                           .value) {
@@ -2204,7 +2980,7 @@ class InventoryListView extends StatelessWidget {
                             ))
                             .toList(),
                       );
-                    }),
+                    }),*/
                   ],
                 ),
               )),
@@ -2263,9 +3039,7 @@ class InventoryListView extends StatelessWidget {
                                           ?.first.attachments![index];
                                       return Image
                                           .network(
-                                        "${BaseUrl
-                                            .baseUrl}Attachment/downloadAttachment?fileName=${attachment
-                                            ?.guidId}",
+                                        "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment?.guidId}",
                                         loadingBuilder: (context,
                                             child,
                                             loadingProgress) {
@@ -2446,8 +3220,7 @@ class InventoryListView extends StatelessWidget {
                   ),
                   SizedBox(width: 2,),
                   Text(
-                    'عکس‌ها (${inventory.inventoryDetails?.first.attachments
-                        ?.length ?? 0}) ',
+                    'عکس‌ها (${inventory.inventoryDetails?.first.attachments?.length ?? 0}) ',
                     style: AppTextStyle
                         .bodyText
                         .copyWith(
@@ -2678,8 +3451,7 @@ class InventoryListView extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Center(
-                  child:
-                      inventory.balances!=null ?
+                  child: inventory.balances!=null ?
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: inventory.balances!.map((e)=>
@@ -2809,8 +3581,7 @@ class InventoryListView extends StatelessWidget {
                                                   .toString(),
                                               "image",
                                               "Inventory",
-                                              inventoryId: inventory
-                                                  .id!),
+                                              inventoryId: inventory.id!),
                                       child: Row(
                                         children: [
                                           Text(
@@ -2830,7 +3601,7 @@ class InventoryListView extends StatelessWidget {
                                         ],
                                       ),
                                     ),
-                                    Obx(() {
+                                    /*Obx(() {
                                       if (inventoryController
                                           .isUploadingDesktop
                                           .value) {
@@ -2860,7 +3631,7 @@ class InventoryListView extends StatelessWidget {
                                             ))
                                             .toList(),
                                       );
-                                    }),
+                                    }),*/
                                   ],
                                 ),
                                 SizedBox(
@@ -3027,12 +3798,9 @@ class InventoryListView extends StatelessWidget {
                                                             itemBuilder: (
                                                                 context,
                                                                 index) {
-                                                              final attachment = getOneInventories
-                                                                  .attachments![index];
+                                                              final attachment = getOneInventories.attachments![index];
                                                               return Image.network(
-                                                                "${BaseUrl
-                                                                    .baseUrl}Attachment/downloadAttachment?fileName=${attachment
-                                                                    .guidId}",
+                                                                "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
                                                                 loadingBuilder: (
                                                                     context,
                                                                     child,

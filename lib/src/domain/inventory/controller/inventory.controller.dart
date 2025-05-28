@@ -40,6 +40,8 @@ class InventoryController extends GetxController{
   final InventoryRepository inventoryRepository=InventoryRepository();
   final AccountRepository accountRepository=AccountRepository();
   final TextEditingController searchController=TextEditingController();
+  final TextEditingController dateStartController=TextEditingController();
+  final TextEditingController dateEndController=TextEditingController();
 
   var inventoryList=<InventoryModel>[].obs;
   var errorMessage=''.obs;
@@ -69,6 +71,8 @@ class InventoryController extends GetxController{
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   RxBool isDateSort = true.obs;
   var sortIndex = 0.obs;
+  var startDateFilter=''.obs;
+  var endDateFilter=''.obs;
 
   void sortByDate(int columnIndex,bool desc ) {
     final list = List<InventoryModel>.from(inventoryList);
@@ -159,6 +163,7 @@ class InventoryController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          startDate: startDateFilter.value, endDate: endDateFilter.value,
         );
         if (fetchedInventoryList.isNotEmpty) {
           inventoryList.addAll(fetchedInventoryList);
@@ -183,7 +188,7 @@ class InventoryController extends GetxController{
         return;
       }
 
-      final accounts = await AccountRepository().searchAccountList(name,"1");
+      final accounts = await AccountRepository().searchAccountList(name,"");
       searchedAccounts.assignAll(accounts);
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");
@@ -219,6 +224,7 @@ class InventoryController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
 
@@ -437,6 +443,7 @@ class InventoryController extends GetxController{
   }
 
   Future<void> uploadImages(String recordId, String type, String entityType,int inventoryId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     if (selectedImages.isEmpty) return;
 
     isUploading.value = true;
@@ -451,19 +458,21 @@ class InventoryController extends GetxController{
             type: type,
             entityType: entityType,
           );
-
           uploadStatuses[i] = success as bool;
         } catch (e) {
+          EasyLoading.dismiss();
           Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
         }
       }
 
       if (uploadStatuses.every((status) => status)) {
+        EasyLoading.dismiss();
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
         await fetchInventoryList();
        // await fetchGetOneInventory(inventoryId);
       }
     } finally {
+      EasyLoading.dismiss();
       isUploading.value = false;
       selectedImages.clear();
       uploadStatuses.clear();
@@ -484,11 +493,10 @@ class InventoryController extends GetxController{
   }
 
   Future<void> uploadImagesDesktop(String recordId, String type, String entityType,int inventoryId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     if (selectedImagesDesktop.isEmpty) return;
-
     isUploadingDesktop.value = true;
     uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
-
     try {
       for (int i = 0; i < selectedImagesDesktop.length; i++) {
         final file = selectedImagesDesktop[i];
@@ -502,19 +510,21 @@ class InventoryController extends GetxController{
               type: type,
               entityType: entityType,
             );
-
             uploadStatusesDesktop[i] = success.isNotEmpty;
           }catch(e){
+            EasyLoading.dismiss();
             Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
           }
         }
       }
       if (uploadStatusesDesktop.every((status) => status)) {
+        EasyLoading.dismiss();
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
         fetchInventoryList();
         await fetchGetOneInventory(inventoryId);
       }
     } finally {
+      EasyLoading.dismiss();
       isUploadingDesktop.value = false;
       selectedImagesDesktop.clear();
       uploadStatusesDesktop.clear();
@@ -573,8 +583,9 @@ class InventoryController extends GetxController{
       EasyLoading.show(status: 'دریافت فایل اکسل...');
       final allInventories = await inventoryRepository.getInventoryList(
         startIndex: 1,
-        toIndex: 500,
+        toIndex: 100000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       for (var inventory in allInventories) {
@@ -657,8 +668,9 @@ class InventoryController extends GetxController{
 
       final allInventories = await inventoryRepository.getInventoryList(
         startIndex: 1,
-        toIndex: 500,
+        toIndex: 100000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');

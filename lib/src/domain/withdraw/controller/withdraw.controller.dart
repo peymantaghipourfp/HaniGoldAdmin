@@ -1,4 +1,8 @@
 
+
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:excel/excel.dart';
@@ -53,6 +57,8 @@ class WithdrawController extends GetxController{
   final TextEditingController amountController=TextEditingController();
   final TextEditingController requestAmountController=TextEditingController();
   final TextEditingController searchController=TextEditingController();
+  final TextEditingController dateStartController=TextEditingController();
+  final TextEditingController dateEndController=TextEditingController();
 
   var withdrawList=<WithdrawModel>[].obs;
   var depositRequestList=<DepositRequestModel>[].obs;
@@ -69,6 +75,8 @@ class WithdrawController extends GetxController{
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   RxnInt expandedIndex = RxnInt();
   var isLoadingBalance=true.obs;
+  var startDateFilter=''.obs;
+  var endDateFilter=''.obs;
 
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
 
@@ -158,6 +166,7 @@ class WithdrawController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          startDate: startDateFilter.value, endDate: endDateFilter.value,
         );
         if (fetchedWithdrawList.isNotEmpty) {
           withdrawList.addAll(fetchedWithdrawList);
@@ -180,7 +189,7 @@ class WithdrawController extends GetxController{
   Future<void> fetchAccountList() async{
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList("1");
+      var fetchedAccountList=await accountRepository.getAccountList("");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -209,7 +218,7 @@ class WithdrawController extends GetxController{
         return;
       }
 
-      final accounts = await AccountRepository().searchAccountList(name,"1");
+      final accounts = await AccountRepository().searchAccountList(name,"");
       searchedAccounts.assignAll(accounts);
 
     } catch (e) {
@@ -236,7 +245,7 @@ class WithdrawController extends GetxController{
   //لیست درخواست های برداشت(withdrawRequest)
   Future<void> fetchWithdrawList()async{
     try{
-        withdrawList.clear();
+        //withdrawList.clear();
       isLoading.value = true;
       state.value=PageState.loading;
         //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
@@ -246,6 +255,7 @@ class WithdrawController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
 
@@ -658,8 +668,9 @@ class WithdrawController extends GetxController{
       EasyLoading.show(status: 'دریافت فایل اکسل...');
       final allWithdraws = await withdrawRepository.getWithdrawList(
         startIndex: 1,
-        toIndex: 5000,
+        toIndex: 100000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       for (var withdraw in allWithdraws) {
@@ -733,8 +744,9 @@ class WithdrawController extends GetxController{
 
       final allWithdraws = await withdrawRepository.getWithdrawList(
         startIndex: 1,
-        toIndex: 500,
+        toIndex: 100000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
@@ -891,4 +903,45 @@ class WithdrawController extends GetxController{
       ),
     );
   }
+
+ /* Future<void> captureRowScreenshot(GlobalKey<State<StatefulWidget>> key) async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 100));
+      final RenderRepaintBoundary boundary =
+      key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      if (!boundary.debugNeedsPaint){
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final ByteData? byteData =
+      await image.toByteData(format: ui.ImageByteFormat.png);
+      final Uint8List pngBytes = byteData!.buffer.asUint8List();
+      // ذخیره تصویر
+      if (kIsWeb) {
+        final blob = html.Blob([pngBytes], 'image/png');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'screenshot_${DateTime.now().millisecondsSinceEpoch}.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        final result = await ImageGallerySaver.saveImage(
+          pngBytes,
+          quality: 100,
+          name: 'screenshot_${DateTime.now().millisecondsSinceEpoch}',
+        );
+        if (result['isSuccess'] == true) {
+          Get.snackbar(
+            'موفق',
+            'اسکرین شات ذخیره شد\nمسیر: ${result['filePath']}',
+          );
+        } else {
+          Get.snackbar('خطا', 'ذخیره عکس با مشکل مواجه شد');
+        }
+      }
+      }
+    } catch (e) {
+      print('خطا در گرفتن اسکرین شات: $e');
+      Get.snackbar('خطا', 'خطا در گرفتن اسکرین شات: $e');
+
+    }
+  }*/
 }

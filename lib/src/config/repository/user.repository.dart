@@ -16,6 +16,47 @@ class UserRepository {
     userDio.options.baseUrl = BaseUrl.baseUrl;
   }
 
+  Future<ListUserModel> getUserListExport({
+    required int startIndex,
+    required int toIndex,
+    required String startDate,
+    required String endDate
+  }) async {
+    try {
+
+      Map<String, dynamic> options =
+      {
+        "options": {
+          "account": {
+            "Predicate": [
+              {
+                "innerCondition": 0,
+                "outerCondition": 0,
+                "filters": startDate!=""? [
+                  {
+                    "fieldName": "StartDate",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Account"
+                  }
+                ] : [],
+              }
+            ],
+            "orderBy": "Account.Name",
+            "orderByType": "DESC",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
+          }
+        }
+      };
+      final response = await userDio.post('Account/getWrapper', data: options);
+      print(response);
+      return ListUserModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
+
   Future<ListUserModel> getUserList({
     required int startIndex,
     required int toIndex,
@@ -45,7 +86,7 @@ class UserRepository {
                     "filterValue": mobile,
                     "filterType": 0,
                     "RefTable": "Ci"
-                  }:[]
+                  } :[]
                 ]
               }
             ],

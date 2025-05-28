@@ -16,7 +16,7 @@ class AccountRepository{
       Map<String , dynamic> options={
         "options" : {
           "account" :{
-            "Predicate": [
+            "Predicate": status!="" ? [
               {
                 "innerCondition": 0,
                 "outerCondition": 0,
@@ -29,7 +29,7 @@ class AccountRepository{
                   }
                 ]
               }
-            ],
+            ] : [],
           "orderBy": "Account.Name",
           "orderByType": "asc",
           "StartIndex": 1,
@@ -83,6 +83,7 @@ class AccountRepository{
                     "filterType": 0,
                     "RefTable": "Account"
                   },
+                  if(status!="")
                   {
                     "fieldName": "Status",
                     "filterValue": status,
@@ -112,7 +113,6 @@ class AccountRepository{
     }
   }
 
-
   Future<List<AccountModel>> searchAccountListNew(String name,String status) async {
     try {
 
@@ -130,6 +130,7 @@ class AccountRepository{
                     "filterType": 0,
                     "RefTable": "Account"
                   },
+                  if(status!="")
                   {
                     "fieldName": "Status",
                     "filterValue": status,

@@ -11,7 +11,12 @@ class DepositRepository{
     depositDio.options.baseUrl=BaseUrl.baseUrl;
   }
 
-  Future<List<DepositModel>> getDepositList({required int startIndex, required int toIndex,int? accountId,})async{
+  Future<List<DepositModel>> getDepositList({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate})async{
     try{
       Map<String, dynamic> options = {
         "options" : { "deposit" :{
@@ -33,7 +38,14 @@ class DepositRepository{
                   "filterValue": "0",
                   "filterType": 4,
                   "RefTable": "Deposit"
-                }
+                },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Deposit"
+                  }
               ]
             }
           ],
@@ -171,7 +183,7 @@ class DepositRepository{
         "rowNum": 1,
         "id": 1,
         "attribute": "cus",
-        "recId": "25f4521c-f9f2-461c-a72d-ba76a299d03c",
+        "recId": null,
         "infos": []
       };
       var response=await depositDio.post('Deposit/insert',data: depositData);
@@ -300,7 +312,7 @@ class DepositRepository{
         "rowNum": 1,
         "id": depositId,
         "attribute": "cus",
-        "recId": "25f4521c-f9f2-461c-a72d-ba76a299d03c",
+        "recId": null,
         "infos": []
       };
       var response=await depositDio.put('Deposit/update',data: depositData);
@@ -442,7 +454,7 @@ class DepositRepository{
         "rowNum": 1,
         "id": depositId,
         "attribute": "cus",
-        "recId": "25f4521c-f9f2-461c-a72d-ba76a299d03c",
+        "recId": null,
         "infos": []
       };
       print(depositData);

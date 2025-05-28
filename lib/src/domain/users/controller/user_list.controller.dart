@@ -49,6 +49,8 @@ class UserListController extends GetxController{
   final TextEditingController searchController=TextEditingController();
   final TextEditingController nameFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
+  final TextEditingController dateStartController=TextEditingController();
+  final TextEditingController dateEndController=TextEditingController();
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
    RxList<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   RxList<AccountModel> accountList=<AccountModel>[].obs;
@@ -62,7 +64,8 @@ class UserListController extends GetxController{
   var sort = true.obs; // or `false`...
   var sortIndex = 0.obs; // or `false`...
   var id = 0.obs; // or `false`...
-
+  var startDateFilter=''.obs;
+  var endDateFilter=''.obs;
 
   onSortColum(int columnIndex, bool ascending) {
     if (columnIndex > 0) {
@@ -184,9 +187,10 @@ class UserListController extends GetxController{
         TextCellValue('تاریخ ثبت نام'),
       ]);
       EasyLoading.show(status: 'دریافت فایل اکسل...');
-      var response = await userRepository.getUserList(
+      var response = await userRepository.getUserListExport(
         startIndex: 0,
-        toIndex: 500, name: nameFilterController.text, mobile: mobileFilterController.text,
+        toIndex: 100000,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       for (var user in response.accounts!) {
         sheet.appendRow([
@@ -253,9 +257,10 @@ class UserListController extends GetxController{
       WidgetsFlutterBinding.ensureInitialized();
       EasyLoading.show(status: 'دریافت فایل PDF...');
 
-      var response = await userRepository.getUserList(
+      var response = await userRepository.getUserListExport(
         startIndex: 0,
-        toIndex: 500, name: nameFilterController.text, mobile: mobileFilterController.text,
+        toIndex: 100000,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');

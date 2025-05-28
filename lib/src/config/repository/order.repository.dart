@@ -11,7 +11,12 @@ class OrderRepository{
     orderDio.options.connectTimeout=Duration(seconds: 30);
 
   }
-  Future<List<OrderModel>> getOrderList({required int startIndex, required int toIndex,int? accountId,}) async{
+  Future<List<OrderModel>> getOrderList({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate}) async{
     try{
       Map<String, dynamic> options = {
         "options": {
@@ -33,7 +38,14 @@ class OrderRepository{
                       "filterValue": "0",
                       "filterType": 4,
                       "RefTable": "Orders"
-                    }
+                    },
+                    if(startDate!="")
+                      {
+                        "fieldName": "Date",
+                        "filterValue": "$startDate|$endDate",
+                        "filterType": 25,
+                        "RefTable": "Orders"
+                      }
                   ]
                 }
               ],

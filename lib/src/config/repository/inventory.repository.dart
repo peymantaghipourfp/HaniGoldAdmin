@@ -15,7 +15,12 @@ class InventoryRepository {
     inventoryDio.options.connectTimeout=Duration(seconds: 10);
   }
 
-  Future<List<InventoryModel>> getInventoryList({required int startIndex, required int toIndex,int? accountId,})async{
+  Future<List<InventoryModel>> getInventoryList({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate})async{
     try{
       Map<String , dynamic> options={
         "options" : { "inventory" :{
@@ -36,11 +41,18 @@ class InventoryRepository {
                   "filterValue": "0",
                   "filterType": 4,
                   "RefTable": "JoinedData"
+                },
+                if(startDate!="")
+                {
+                  "fieldName": "Date",
+                  "filterValue": "$startDate|$endDate",
+                  "filterType": 25,
+                  "RefTable": "JoinedData"
                 }
               ]
             }
           ],
-          "orderBy": "JoinedData.Id",
+          "orderBy": "JoinedData.Date",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
@@ -111,7 +123,7 @@ class InventoryRepository {
           "rowNum": 1,
           "id": 1,
           "attribute": "cus",
-          "recId": "0c45d651-51cd-47b9-8b9c-c559a04d4987",
+          "recId": null,
           "infos": []
         }).toList(),
 
@@ -229,7 +241,7 @@ class InventoryRepository {
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": "8f96e0b1-93b2-4ff3-a263-d2037fd0495c",
+            "recId": null,
             "infos": []
           }
         ],
@@ -349,7 +361,7 @@ class InventoryRepository {
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": "8f96e0b1-93b2-4ff3-a263-d2037fd0495c",
+            "recId": null,
             "infos": []
           }
         ],
@@ -488,7 +500,7 @@ class InventoryRepository {
             "id": inventoryDetailId,
             "stateMode":stateMode,
             "attribute": "cus",
-            "recId": "156b925c-9e26-4465-8582-e6587fac6228",
+            "recId": null,
             "infos": []
           }
         ],
@@ -611,7 +623,7 @@ class InventoryRepository {
           "rowNum": 1,
           "id": 1,
           "attribute": "cus",
-          "recId": "0c45d651-51cd-47b9-8b9c-c559a04d4987",
+          "recId": null,
           "infos": []
         }).toList(),
 
@@ -731,7 +743,7 @@ class InventoryRepository {
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": "8f96e0b1-93b2-4ff3-a263-d2037fd0495c",
+            "recId": null,
             "infos": []
           }
         ],
@@ -852,7 +864,7 @@ class InventoryRepository {
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": "8f96e0b1-93b2-4ff3-a263-d2037fd0495c",
+            "recId": null,
             "infos": []
           }
         ],

@@ -119,7 +119,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                       mainAxisAlignment: MainAxisAlignment.center,
                                                       children: [
                                                         Text(
-                                                          getWithdraw.confirmDate?.toPersianDate(
+                                                          getWithdraw.requestDate?.toPersianDate(
                                                               showTime: true,
                                                               twoDigits: true,
                                                               timeSeprator: "-") ?? "",

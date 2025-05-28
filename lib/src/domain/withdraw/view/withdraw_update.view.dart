@@ -39,8 +39,7 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
       return Scaffold(
         appBar: CustomAppbar1(title: 'ویرایش درخواست برداشت',
           onBackTap: () {
-            Get.toNamed('/withdrawsList');
-            withdrawUpdateController.clearList();
+            Get.back();
           },
         ),
         body: Stack(

@@ -49,6 +49,8 @@ class DepositController extends GetxController{
   final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
   final DepositRepository depositRepository=DepositRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
+  final TextEditingController dateStartController=TextEditingController();
+  final TextEditingController dateEndController=TextEditingController();
 
   var depositList=<DepositModel>[].obs;
   var errorMessage=''.obs;
@@ -66,6 +68,8 @@ class DepositController extends GetxController{
   Rx<XFile?> selectedImage = Rx<XFile?>(null);
   Rx<XFile?> selectedImageDesktop = Rx<XFile?>(null);
   RxBool isUploading = false.obs;
+  var startDateFilter=''.obs;
+  var endDateFilter=''.obs;
 
   void setError(String message){
     state.value=PageState.err;
@@ -125,6 +129,7 @@ class DepositController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          startDate: startDateFilter.value, endDate: endDateFilter.value,
         );
         if (fetchedDepositList.isNotEmpty) {
           depositList.addAll(fetchedDepositList);
@@ -159,6 +164,7 @@ class DepositController extends GetxController{
         print("Imaggggge: ${selectedImage}");
   }
   Future<void> uploadImage(String recordId, String type, String entityType) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     if (selectedImage.value == null) return;
 
     isUploading.value = true;
@@ -170,11 +176,13 @@ class DepositController extends GetxController{
     );
 
     if (success.isNotEmpty) {
+      EasyLoading.dismiss();
       Get.snackbar("موفقیت‌آمیز", "تصویر با موفقیت آپلود شد");
     } else {
+      EasyLoading.dismiss();
       Get.snackbar("خطا", "ارسال تصویر ناموفق بود");
     }
-
+    EasyLoading.dismiss();
     isUploading.value = false;
   }
 
@@ -193,6 +201,7 @@ class DepositController extends GetxController{
   }
 
   Future<void> uploadImageDesktop(String recordId, String type, String entityType) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     if (selectedImageDesktop.value == null) return;
     isUploading.value = true;
     final bytes = await selectedImageDesktop.value.readAsBytes();
@@ -204,12 +213,14 @@ class DepositController extends GetxController{
         entityType: entityType,
       );
       if (success.isNotEmpty) {
+        EasyLoading.dismiss();
         Get.snackbar("موفقیت‌آمیز", "تصویر با موفقیت آپلود شد");
       }else{
+        EasyLoading.dismiss();
         Get.snackbar("خطا", "ارسال تصویر ناموفق بود");
       }
+    EasyLoading.dismiss();
       isUploading.value = false;
-
   }
 
   Future<void> searchAccounts(String name) async {
@@ -219,7 +230,7 @@ class DepositController extends GetxController{
         return;
       }
 
-      final accounts = await accountRepository.searchAccountList(name,"1");
+      final accounts = await accountRepository.searchAccountList(name,"");
       searchedAccounts.assignAll(accounts);
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");
@@ -254,6 +265,7 @@ class DepositController extends GetxController{
           startIndex: startIndex,
           toIndex: toIndex,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       hasMore.value = fetchedDepositList.length == itemsPerPage.value;
 
@@ -470,8 +482,9 @@ class DepositController extends GetxController{
       EasyLoading.show(status: 'دریافت فایل اکسل...');
       final allDeposits = await depositRepository.getDepositList(
         startIndex: 1,
-        toIndex: 5000,
+        toIndex: 100000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       for (var deposit in allDeposits) {
@@ -544,8 +557,9 @@ class DepositController extends GetxController{
 
       final allDeposits = await depositRepository.getDepositList(
         startIndex: 1,
-        toIndex: 500,
+        toIndex: 100000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
       final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');

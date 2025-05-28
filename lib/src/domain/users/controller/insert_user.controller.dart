@@ -141,6 +141,7 @@ class InsertUserController extends GetxController{
            idCity: selectedCity.value?.id??0,
            address: addressController.text
           );
+       Get.back();
        Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
            titleText: Text(response.infos?.first["title"],
              textAlign: TextAlign.center,
@@ -186,6 +187,7 @@ class InsertUserController extends GetxController{
            idCity: selectedCity.value?.id??0,
            address: addressController.text, id: idUser.value
           );
+       Get.back();
        Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
            titleText: Text(response.infos?.first["title"],
              textAlign: TextAlign.center,

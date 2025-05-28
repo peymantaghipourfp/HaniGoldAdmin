@@ -115,7 +115,8 @@ class WithdrawGetOneController extends GetxController{
       final toIndex = currentPage.value * itemsPerPage.value;
       var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
           startIndex: startIndex,
-          toIndex: toIndex
+          toIndex: toIndex,
+        startDate: '', endDate: '',
       );
       hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
       if (currentPage.value == 1) {

@@ -14,7 +14,12 @@ class WithdrawRepository{
     withdrawDio.options.baseUrl=BaseUrl.baseUrl;
 
   }
-  Future<List<WithdrawModel>> getWithdrawList({required int startIndex, required int toIndex,int? accountId,})async{
+  Future<List<WithdrawModel>> getWithdrawList({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate})async{
     try{
       Map<String , dynamic> options={
         "options" : { "withdrawrequest" :{
@@ -35,7 +40,14 @@ class WithdrawRepository{
                   "filterValue": "0",
                   "filterType": 4,
                   "RefTable": "WithdrawRequest"
-                }
+                },
+                if(startDate!="")
+                  {
+                    "fieldName": "RequestDate",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "WithdrawRequest"
+                  }
               ]
             }
           ],
