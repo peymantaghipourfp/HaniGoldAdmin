@@ -1034,6 +1034,7 @@ class RemittanceView extends GetView<RemittanceController> {
   }
 
   List<DataRow> buildDataRows(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return controller.remittanceList.map((remittance) {
       //print(" تسسسسسسسست ${inventory.inventoryDetails?.first.itemUnit?.name}");
       return DataRow(
@@ -1490,11 +1491,236 @@ class RemittanceView extends GetView<RemittanceController> {
               SizedBox(
                 width: 10,
               ),
-              SvgPicture.asset('assets/svg/edit.svg',height: 20,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.textColor,
-                    BlendMode.srcIn,
-                  )),
+             GestureDetector(
+             onTap: () async{
+              await controller.getImage(remittance.recId??"", "Remittance");
+
+               Future.delayed(const Duration(milliseconds: 200), () {
+                 showDialog(
+                   context: context,
+                   builder: (BuildContext context) {
+                     return Dialog(
+                       backgroundColor: AppColor
+                           .backGroundColor,
+                       shape: RoundedRectangleBorder(
+                         borderRadius: BorderRadius
+                             .circular(
+                             10),
+                       ),
+                       child: Container(
+                         padding: EdgeInsets
+                             .all(
+                             8),
+                         child: Column(
+                           mainAxisSize: MainAxisSize
+                               .min,
+                           children: [
+                             // نمایش اسلایدی عکس‌ها
+                             SizedBox(
+                               width: 500,
+                               height: 500,
+                               child: Stack(
+                                 children: [
+                                   PageView.builder(
+                                     controller: controller
+                                         .pageController,
+                                     itemCount: controller.imageList.length,
+                                     onPageChanged: (index) =>
+                                     controller
+                                         .currentImagePage
+                                         .value =
+                                         index,
+                                     itemBuilder: (context,
+                                         index) {
+                                       final attachment = controller.imageList[index];
+                                       return Image
+                                           .network(
+                                         "${BaseUrl
+                                             .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                         loadingBuilder: (context,
+                                             child,
+                                             loadingProgress) {
+                                           if (loadingProgress ==
+                                               null)
+                                             return child;
+                                           return Center(
+                                             child: CircularProgressIndicator(),
+                                           );
+                                         },
+                                         errorBuilder: (context,
+                                             error,
+                                             stackTrace) =>
+                                             Icon(
+                                                 Icons
+                                                     .error,
+                                                 color: Colors
+                                                     .red),
+                                         fit: BoxFit.contain,
+                                       );
+                                     },
+                                   ),
+                                   SizedBox(
+                                     height: 2,),
+                                   Obx(() {
+                                     return Positioned(
+                                         left: 10,
+                                         top: 0,
+                                         bottom: 0,
+                                         child: Visibility(
+                                           visible: controller
+                                               .currentImagePage.value > 0,
+                                           child: IconButton(
+                                             style: ButtonStyle(
+                                               backgroundColor: WidgetStateProperty
+                                                   .all(Colors.black54),
+                                               shape: WidgetStateProperty.all(
+                                                   CircleBorder()),
+                                               padding: WidgetStateProperty.all(
+                                                   EdgeInsets.all(8)),
+                                             ),
+                                             icon: Icon(Icons.chevron_left,
+                                               color: Colors.white,
+                                               size: 40,
+                                               shadows: [
+                                                 Shadow(
+                                                   blurRadius: 10,
+                                                   color: Colors.black,
+                                                   offset: Offset(0, 0),
+                                                 )
+                                               ],
+                                             ),
+                                             onPressed: () {
+                                               controller.pageController
+                                                   .previousPage(
+                                                 duration: Duration(
+                                                     milliseconds: 300),
+                                                 curve: Curves.easeInOut,
+                                               );
+                                             },
+                                           ),
+                                         )
+                                     );
+                                   }),
+                                   Obx(() {
+                                     return Positioned(
+                                         right: 10,
+                                         top: 0,
+                                         bottom: 0,
+                                         child: Visibility(
+                                           visible: controller
+                                               .currentImagePage.value <
+                                               (controller.imageList.length ?? 1) -
+                                                   1,
+                                           child: IconButton(
+                                             style: ButtonStyle(
+                                               backgroundColor: WidgetStateProperty
+                                                   .all(Colors.black54),
+                                               shape: WidgetStateProperty.all(
+                                                   CircleBorder()),
+                                               padding: WidgetStateProperty.all(
+                                                   EdgeInsets.all(8)),
+                                             ),
+                                             icon: Icon(Icons.chevron_right,
+                                               color: Colors.white,
+                                               size: 40,
+                                               shadows: [
+                                                 Shadow(
+                                                   blurRadius: 10,
+                                                   color: Colors.black,
+                                                   offset: Offset(0, 0),
+                                                 ),
+                                               ],
+                                             ),
+                                             onPressed: () {
+                                               controller.pageController
+                                                   .nextPage(
+                                                 duration: Duration(
+                                                     milliseconds: 300),
+                                                 curve: Curves.easeInOut,
+                                               );
+                                             },
+                                           ),
+                                         )
+                                     );
+                                   }),
+                                   SizedBox(
+                                     height: 2,),
+                                   // نمایش نقاط راهنما
+                                   Obx(() =>
+                                       Row(
+                                         mainAxisAlignment: MainAxisAlignment
+                                             .center,
+                                         children: List
+                                             .generate(
+                                           controller.imageList.length,
+                                               (index) =>
+                                               Container(
+                                                 width: 8,
+                                                 height: 8,
+                                                 margin: EdgeInsets
+                                                     .symmetric(
+                                                     horizontal: 4),
+                                                 decoration: BoxDecoration(
+                                                   shape: BoxShape
+                                                       .circle,
+                                                   color: controller
+                                                       .currentImagePage
+                                                       .value ==
+                                                       index
+                                                       ? Colors
+                                                       .blue
+                                                       : Colors
+                                                       .grey,
+                                                 ),
+                                               ),
+                                         ),
+                                       )),
+                                   SizedBox(
+                                       height: 10),
+                                 ],
+                               ),
+                             ),
+                             TextButton(
+                               onPressed: () =>
+                                   Get
+                                       .back(),
+                               child: Text(
+                                 "بستن",
+                                 style: AppTextStyle
+                                     .bodyText,),
+                             ),
+                           ],
+                         ),
+                       ),
+                     );
+                   },
+                 );
+
+               });
+
+
+             },
+             child: SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                    colorFilter: ColorFilter.mode(
+
+                      AppColor.textColor,
+
+                      BlendMode.srcIn,
+                    )),
+           ),
+              SizedBox(
+                width: 10,
+              ),
+              GestureDetector(
+                onTap: (){
+                  controller.getOneRemittance(remittance.id??0);
+                },
+                child: SvgPicture.asset('assets/svg/edit.svg',height: 20,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+                      BlendMode.srcIn,
+                    )),
+              ),
               SizedBox(
                 width: 10,
               ),

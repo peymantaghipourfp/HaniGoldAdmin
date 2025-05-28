@@ -690,7 +690,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                               TabelInfoWidget(
                                 list: controller
                                     .headerInfoUserTransactionModel!
-                                    .orders!,
+                                    .orders??[],
                                 title: 'خرید و فروش',
                                 title1: 'خرید',
                                 title2: 'فروش',

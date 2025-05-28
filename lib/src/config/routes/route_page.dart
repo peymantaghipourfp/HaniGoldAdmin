@@ -36,6 +36,7 @@ import '../../domain/inventory/view/inventory_detail_update_payment.view.dart';
 import '../../domain/laboratory/view/laboratory.view.dart';
 import '../../domain/remittance/view/insert_remittance.view.dart';
 import '../../domain/remittance/view/remittance.view.dart';
+import '../../domain/remittance/view/update_remittance.view.dart';
 import '../../domain/splash/view/splash.view.dart';
 import '../../domain/users/view/list_user_info_transaction.view.dart';
 import '../../domain/users/view/user_info_transaction.view.dart';
@@ -75,6 +76,7 @@ class RoutePage{
     GetPage(name: '/wallet', page: ()=>WalletView()),
     GetPage(name: '/remittance', page: ()=>RemittanceView(),binding: RemittanceBindings()),
     GetPage(name: '/insertRemittance', page: ()=>InsertRemittanceView(),binding: RemittanceBindings()),
+    GetPage(name: '/updateRemittance', page: ()=>UpdateRemittanceView(),binding: RemittanceBindings()),
     GetPage(name: '/userInfoTransaction', page: ()=>UserInfoTransactionView(),binding: UserInfoDetailTransactionBindings()),
     GetPage(name: '/listUserInfoTransaction', page: ()=>ListUserInfoTransactionView(),binding: UserInfoTransactionBindings()),
     GetPage(name: '/tradingBalance', page: ()=>TradingBalanceView(),binding: TradingBalanceBindings()),

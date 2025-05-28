@@ -11,6 +11,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:image/image.dart' as img;
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
@@ -18,14 +19,14 @@ import '../../users/widgets/balance.widget.dart';
 import '../controller/remittance.controller.dart';
 
 
-class InsertRemittanceView extends StatefulWidget {
-  const InsertRemittanceView({super.key});
+class UpdateRemittanceView extends StatefulWidget {
+  const UpdateRemittanceView({super.key});
 
   @override
-  State<InsertRemittanceView> createState() => _InsertRemittanceViewState();
+  State<UpdateRemittanceView> createState() => _UpdateRemittanceViewState();
 }
 
-class _InsertRemittanceViewState extends State<InsertRemittanceView> {
+class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
 
   var controller=Get.find<RemittanceController>();
 
@@ -35,7 +36,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
-        title: 'ایجاد حواله', onBackTap: () => Get.back(),),
+        title: 'ویرایش حواله', onBackTap: () => Get.back(),),
       body: Stack(
 
         children: [
@@ -71,7 +72,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'ایجاد حواله',
+                                    'ویرایش حواله',
                                     style: AppTextStyle.labelText.copyWith(fontSize: 15,
                                         fontWeight: FontWeight.bold,color: AppColor.textColor ),
                                   ),
@@ -565,7 +566,72 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                               //     ],
                               //   ),
                               // ),
-                            Row(
+
+
+                            //  controller.imageList.isNotEmpty?
+                              SizedBox(
+                                width: Get.width * 0.7,
+                                height: 100,
+                                child: Row(
+                                  children: controller.imageList.map((e)=>
+                                      Stack(
+                                        children: [
+                                          GestureDetector(
+                                            onTap:(){
+                                              showGeneralDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  barrierLabel: MaterialLocalizations.of(context)
+                                                      .modalBarrierDismissLabel,
+                                                  barrierColor: Colors.black45,
+                                                  transitionDuration: const Duration(milliseconds: 200),
+                                                  pageBuilder: (BuildContext buildContext,
+                                                      Animation animation,
+                                                      Animation secondaryAnimation) {
+                                                    return Center(
+                                                      child: Material(
+                                                        color: Colors.transparent,
+                                                        child: Container(
+                                                          margin: EdgeInsets.all(10),
+                                                          decoration: BoxDecoration(
+                                                              borderRadius: BorderRadius.circular(8),
+                                                              border: Border.all(color: AppColor.textColor),
+                                                              image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.fill,
+                                                              )
+                                                          ),
+                                                          height: Get.height * 0.8,width: Get.width * 0.4,
+                                                          // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  });
+                                            },
+                                            child: Container(
+                                              margin: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  border: Border.all(color: AppColor.textColor),
+                                                  image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
+                                                  )
+                                              ),
+                                              height: 60,width: 60,
+                                              // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            child: CircleAvatar(
+                                              backgroundColor: AppColor.accentColor,radius: 10,
+                                              child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                            ),
+                                            onTap: (){
+                                              controller.deleteImage(e);
+                                            },
+                                          )
+                                        ],
+                                      ),).toList(),
+                                ),
+                              ),
+                              Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
                                   Obx(() {
@@ -622,7 +688,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                   GestureDetector(
                                     onTap: () =>
                                         controller.pickImageDesktop(
-                                            ),
+                                        ),
                                     child: Container(
                                       constraints: BoxConstraints(maxWidth: 100),
                                       child: SvgPicture
@@ -642,6 +708,84 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
 
                                 ],
                               ),
+                              //     :
+                              // Row(
+                              //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              //   children: [
+                              //     Obx(() {
+                              //       if (controller
+                              //           .isUploadingDesktop
+                              //           .value) {
+                              //         return Row(
+                              //           children: [
+                              //             Text(
+                              //               'در حال بارگزاری عکس',
+                              //               style: AppTextStyle.labelText.copyWith(fontSize: 12,
+                              //                   fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                              //             ),
+                              //             SizedBox(width: 10,),
+                              //             CircularProgressIndicator(),
+                              //           ],
+                              //         );
+                              //       }
+                              //       return SizedBox(
+                              //         height: 80,
+                              //         width: Get.width * 0.3,
+                              //         child: SingleChildScrollView(
+                              //           scrollDirection: Axis.horizontal,
+                              //           child: Row(
+                              //             children: controller.selectedImagesDesktop.map((e){
+                              //               return  Stack(
+                              //                 children: [
+                              //                   Container(
+                              //                     margin: EdgeInsets.all(10),
+                              //                     decoration: BoxDecoration(
+                              //                         borderRadius: BorderRadius.circular(8),
+                              //                         border: Border.all(color: AppColor.textColor),
+                              //                         image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
+                              //                     ),
+                              //                     height: 60,width: 60,
+                              //                     // child: Image.network(e!.path,fit: BoxFit.cover,),
+                              //                   ),
+                              //                   GestureDetector(
+                              //                     child: CircleAvatar(
+                              //                       backgroundColor: AppColor.accentColor,radius: 10,
+                              //                       child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                              //                     ),
+                              //                     onTap: (){
+                              //                       controller.selectedImagesDesktop.remove(e);
+                              //                     },
+                              //                   )
+                              //                 ],
+                              //               );
+                              //             }).toList(),
+                              //           ),
+                              //         ),
+                              //       );
+                              //     }),
+                              //     GestureDetector(
+                              //       onTap: () =>
+                              //           controller.pickImageDesktop(
+                              //           ),
+                              //       child: Container(
+                              //         constraints: BoxConstraints(maxWidth: 100),
+                              //         child: SvgPicture
+                              //             .asset(
+                              //           'assets/svg/camera.svg',
+                              //           width: 30,
+                              //           height: 30,
+                              //           colorFilter: ColorFilter
+                              //               .mode(
+                              //               AppColor
+                              //                   .iconViewColor,
+                              //               BlendMode
+                              //                   .srcIn),),
+                              //       ),
+                              //
+                              //     ),
+                              //
+                              //   ],
+                              // ),
                               Container(
                                 margin: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
 
@@ -657,7 +801,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(10)))),
                                   onPressed: () async {
-                                    await controller. uploadImagesDesktop( "image", "Remittance");
+                                    await controller. uploadImagesDesktopUpdate( "image", "Remittance");
                                   },
                                   child: controller.isLoading.value
                                       ?
@@ -665,7 +809,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                     valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
                                   ) :
                                   Text(
-                                    'ایجاد حواله جدید',
+                                    'ویرایش حواله',
                                     style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
                                   ),
                                 ),
@@ -1235,6 +1379,68 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
 
                                 ],
                               ),
+                             SizedBox(
+                          width: Get.width * 0.7,
+                          height: 100,
+                          child: Row(
+                            children: controller.imageList.map((e)=>
+                                Stack(
+                                  children: [
+                                    GestureDetector(
+                                      onTap:(){
+                                        showGeneralDialog(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            barrierLabel: MaterialLocalizations.of(context)
+                                                .modalBarrierDismissLabel,
+                                            barrierColor: Colors.black45,
+                                            transitionDuration: const Duration(milliseconds: 200),
+                                            pageBuilder: (BuildContext buildContext,
+                                                Animation animation,
+                                                Animation secondaryAnimation) {
+                                              return Center(
+                                                child: Material(
+                                                  color: Colors.transparent,
+                                                  child: Container(
+                                                    margin: EdgeInsets.all(10),
+                                                    decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        border: Border.all(color: AppColor.textColor),
+                                                        image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
+                                                        )
+                                                    ),
+                                                    height: 200,width: 200,
+                                                    // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                  ),
+                                                ),
+                                              );
+                                            });
+                                      },
+                                      child: Container(
+                                        margin: EdgeInsets.all(10),
+                                        decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.circular(8),
+                                            border: Border.all(color: AppColor.textColor),
+                                            image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
+                                            )
+                                        ),
+                                        height: 60,width: 60,
+                                        // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      child: CircleAvatar(
+                                        backgroundColor: AppColor.accentColor,radius: 10,
+                                        child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                      ),
+                                      onTap: (){
+                                        controller.imageList.remove(e);
+                                      },
+                                    )
+                                  ],
+                                ),).toList(),
+                          ),
+                        ),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                 children: [
@@ -1312,6 +1518,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
 
                                 ],
                               ),
+
                               Container(
                                 margin: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
 
@@ -1327,7 +1534,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(10)))),
                                   onPressed: () async {
-                                    await controller. uploadImagesDesktop( "image", "Remittance");
+                                    await controller. uploadImagesDesktopUpdate( "image", "Remittance");
                                   },
                                   child: controller.isLoading.value
                                       ?
@@ -1335,39 +1542,11 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                     valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
                                   ) :
                                   Text(
-                                    'ایجاد حواله جدید',
+                                    'ویرایش حواله',
                                     style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
                                   ),
                                 ),
                               ),
-                              Container(
-                                margin: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
-
-                                width: double.infinity,
-                                height: 40,
-                                child: ElevatedButton(
-                                  style: ButtonStyle(
-                                      padding: WidgetStatePropertyAll(
-                                          EdgeInsets.symmetric(horizontal: 7)),
-                                      elevation: WidgetStatePropertyAll(5),
-                                      backgroundColor:
-                                      WidgetStatePropertyAll(AppColor.buttonColor),
-                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10)))),
-                                  onPressed: () async {
-                                    await controller. uploadImagesDesktop( "image", "Remittance");
-                                  },
-                                  child: controller.isLoading.value
-                                      ?
-                                  CircularProgressIndicator(
-                                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
-                                  ) :
-                                  Text(
-                                    'ایجاد حواله جدید',
-                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
-                                  ),
-                                ),
-                              )
                             ],
                           )
                         ],

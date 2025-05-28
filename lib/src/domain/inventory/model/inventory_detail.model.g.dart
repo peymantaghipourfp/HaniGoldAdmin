@@ -50,7 +50,7 @@ InventoryDetailModel _$InventoryDetailModelFromJson(
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
       inputItemId: (json['inputItemId'] as num?)?.toInt(),
-          date:
+      date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
     );
 

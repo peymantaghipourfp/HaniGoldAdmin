@@ -43,6 +43,7 @@ import '../../product/model/item.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../../users/model/paginated.model.dart';
 import '../model/remittance.model.dart';
+import '../view/update_remittance.view.dart';
 
 
 enum PageState{loading,err,empty,list}
@@ -70,7 +71,11 @@ class RemittanceController extends GetxController{
   final TextEditingController descController=TextEditingController();
   RxList<String> getList = RxList([]);
   RxList<RemittanceModel> remittanceList = RxList([]);
+  RemittanceModel? remittanceModel;
   final List<AccountModel> accountList=<AccountModel>[].obs;
+  RxList<String> imageList = <String>[].obs;
+  RxInt currentImagePage = 0.obs;
+  final PageController pageController = PageController();
   final List<ItemModel> itemList=<ItemModel>[].obs;
   final List<AccountModel> accountListP=<AccountModel>[].obs;
   PaginatedModel? paginated;
@@ -99,6 +104,7 @@ class RemittanceController extends GetxController{
   var isLoadingRegister=false.obs;
   var namePayer="".obs;
   var mobilePayer="".obs;
+  var recordId="".obs;
   getAccountPayer(String index){
     indexAccountPayerGet=index;
     for(int i=0;i<accountList.length;i++){
@@ -233,12 +239,12 @@ Timer? debounceP;
 
   final ImagePicker _picker = ImagePicker();
 
-  Future<void> pickImageDesktop( String type, String entityType,) async {
+  Future<void> pickImageDesktop( ) async {
     try{
       final List<XFile?> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
         selectedImagesDesktop.assignAll(images);
-        await uploadImagesDesktop( type, entityType);
+
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
@@ -249,39 +255,87 @@ Timer? debounceP;
 
 
   Future<void> uploadImagesDesktop( String type, String entityType,) async {
-    if (selectedImagesDesktop.isEmpty) return;
 
-    isUploadingDesktop.value = true;
-    uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      insertRemittance(recordId.value);
 
-    try {
-      for (int i = 0; i < selectedImagesDesktop.length; i++) {
-        final file = selectedImagesDesktop[i];
-        if(file!=null) {
-          try{
-            final bytes = await file.readAsBytes();
-            String success = await uploadRepositoryDesktop.uploadImageDesktop(
-              imageBytes: bytes,
-              fileName: file.name,
-              recordId: uuid.v4(),
-              type: type,
-              entityType: entityType,
-            );
+    } else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
 
-            uploadStatusesDesktop[i] = success.isNotEmpty;
-          }catch(e){
-            Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
           }
         }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          insertRemittance(recordId.value);
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
       }
-      if (uploadStatusesDesktop.every((status) => status)) {
-        Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
-      }
-    } finally {
-      isUploadingDesktop.value = false;
-      selectedImagesDesktop.clear();
-      uploadStatusesDesktop.clear();
     }
+
+  }
+
+  Future<void> uploadImagesDesktopUpdate( String type, String entityType,) async {
+
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      updateRemittance(recordId.value);
+    }else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          updateRemittance(recordId.value);
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
+      }
+    }
+
   }
 
 
@@ -294,7 +348,7 @@ Timer? debounceP;
     // balanceList.clear();
     // balanceListP.clear();
     try{
-      state.value=PageState.loading;
+     // state.value=PageState.loading;
       var response=await userInfoTransactionRepository.getBalanceList(id);
      // balanceList.addAll(response);
       response.removeWhere((r)=>r.balance==0);
@@ -308,7 +362,7 @@ Timer? debounceP;
       // update();
     }
     catch(e){
-      state.value=PageState.err;
+     // state.value=PageState.err;
     }finally{
     }
     return null;
@@ -332,7 +386,36 @@ Timer? debounceP;
   //     state.value=PageState.err;
   //   }finally{
   //   }
-  // }
+
+
+  // }// //  حواله
+  Future<void> getOneRemittance(int id) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    print("getOneRemittance");
+    try{
+      var remittance=await remittanceRepository.getOneRemittance(id: id);
+      remittanceModel=remittance;
+      namePayerController.text=remittanceModel?.walletReciept?.account?.name??"";
+      dateController.text=remittanceModel?.date?.toPersianDate()??"";
+      descController.text=remittanceModel?.description??"";
+      quantityPayerController.text="${remittanceModel?.quantity??0}";
+      mobilePayerController.text=remittanceModel?.walletReciept?.account?.contactInfo??"";
+      selectedAccountP.value=remittanceModel?.walletPayer!.account;
+      selectedAccount.value=remittanceModel?.walletReciept!.account;
+      selectedItem.value=remittanceModel?.item;
+      balanceList.assignAll((await getBalanceList(selectedAccount.value?.id??0))!);
+      balanceListP.assignAll((await getBalanceList(selectedAccountP.value?.id??0))!);
+      getImage(remittanceModel?.recId??"", "Remittance");
+     Get.toNamed('/updateRemittance');
+      update();
+    }
+    catch(e){
+      state.value=PageState.err;
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }
+
 
   // لیست کاربران
   Future<void> fetchAccountList(String name) async{
@@ -351,6 +434,40 @@ Timer? debounceP;
     //  state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
+    }
+  }
+ // لیست عکس ها
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+    //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
+  }
+ // لیست عکس ها
+  Future<void> deleteImage(String fileName,) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    print('تعداد image:');
+    try{
+      var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
+     if(fetch){
+       getImage(remittanceModel?.recId??"", "Remittance");
+     }
+    }
+    catch(e){
+    //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      EasyLoading.dismiss();
     }
   }
 
@@ -375,7 +492,7 @@ Timer? debounceP;
   }
 
 
-  Future<RemittanceModel?> insertRemittance() async {
+  Future<RemittanceModel?> insertRemittance(String recId) async {
     try {
       isLoading.value = true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
@@ -387,7 +504,7 @@ Timer? debounceP;
         accountIdPayer: selectedAccount.value?.id??0,
         accountNamePayer: selectedAccount.value?.name??"",
         accountIdReciept: selectedAccountP.value?.id??0,
-        accountNameReciept: selectedAccountP.value?.name??"",
+        accountNameReciept: selectedAccountP.value?.name??"", recId: recId,
       );
         Get.toNamed('/remittance');
         Get.snackbar(response.infos!.first['title'], response.infos!.first["description"],
@@ -396,6 +513,44 @@ Timer? debounceP;
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
 
+      descController.text="";
+      dateController.text="";
+      quantityPayerController.text="";
+      getRemittanceListPager();
+
+    } catch (e) {
+      throw ErrorException('خطا در ایجاد حواله: $e');
+    } finally {
+      isLoading.value = false;
+    }
+    return null;
+  }
+
+  Future<RemittanceModel?> updateRemittance(String recId) async {
+    try {
+      isLoading.value = true;
+    //  String gregorianDate = convertJalaliToGregorian(dateController.text);
+      Gregorian date=remittanceModel!.date!.toGregorian();
+      RemittanceModel response = await remittanceRepository.updateRemittance(
+        date:"${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+        itemId: selectedItem.value?.id ?? 0,
+        quantity: double.parse(quantityPayerController.text.toEnglishDigit()),
+        description: descController.text,
+        accountIdPayer: selectedAccount.value?.id??0,
+        accountNamePayer: selectedAccount.value?.name??"",
+        accountIdReciept: selectedAccountP.value?.id??0,
+        accountNameReciept: selectedAccountP.value?.name??"", recId: remittanceModel?.recId??"", id: remittanceModel?.id??0,
+      );
+        Get.toNamed('/remittance');
+        Get.snackbar(response.infos!.first['title'], response.infos!.first["description"],
+            titleText: Text(response.infos!.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+
+      descController.text="";
+      dateController.text="";
+      quantityPayerController.text="";
       getRemittanceListPager();
 
     } catch (e) {
