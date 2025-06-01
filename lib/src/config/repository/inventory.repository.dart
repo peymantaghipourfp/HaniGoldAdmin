@@ -131,7 +131,8 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getWithFirstRowWrapper',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
       return ListInventoryModel.fromJson(response.data);
     }
     catch(e){
@@ -205,7 +206,8 @@ class InventoryRepository {
         "description": description,
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -323,7 +325,8 @@ class InventoryRepository {
         "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -444,7 +447,8 @@ class InventoryRepository {
         "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -455,7 +459,8 @@ class InventoryRepository {
   Future<InventoryModel> getOneInventory(int inventoryId)async{
     try{
       final response=await inventoryDio.get('Inventory/getOne',queryParameters: {"id":inventoryId});
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       Map<String, dynamic> data=response.data;
       return InventoryModel.fromJson(data);
     }catch(e){
@@ -584,7 +589,8 @@ class InventoryRepository {
         "infos": []
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -631,7 +637,8 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getForPeyment',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((receive)=>InventoryDetailModel.fromJson(receive)).toList();
 
@@ -708,7 +715,8 @@ class InventoryRepository {
         "description": description,
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -829,7 +837,8 @@ class InventoryRepository {
         "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -951,7 +960,8 @@ class InventoryRepository {
         "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
 
     }catch(e){

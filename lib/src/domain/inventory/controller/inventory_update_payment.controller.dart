@@ -373,6 +373,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         if (uploadStatusesDesktop.every((status) => status)) {
           Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
           updateInventoryDetailPayment(recordId.value);
+          Get.back();
         }
       } finally {
         isUploadingDesktop.value = false;

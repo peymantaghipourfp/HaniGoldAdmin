@@ -384,6 +384,7 @@ class InventoryUpdateReceiveController extends GetxController{
         if (uploadStatusesDesktop.every((status) => status)) {
           Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
           updateInventoryDetailReceive(recordId.value);
+          Get.back();
         }
       } finally {
         isUploadingDesktop.value = false;
