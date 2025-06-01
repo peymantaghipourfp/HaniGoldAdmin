@@ -77,6 +77,7 @@ class InventoryRepository {
     required int type,
     required String? description,
     required List<InventoryDetailModel>? details,
+    required String? recId,
       })async{
     try{
       Map<String, dynamic> inventoryData= {
@@ -123,7 +124,7 @@ class InventoryRepository {
           "rowNum": 1,
           "id": 1,
           "attribute": "cus",
-          "recId": null,
+          "recId": detail.recId,
           "infos": []
         }).toList(),
 
@@ -160,7 +161,7 @@ class InventoryRepository {
     required int stateMode,
     required int laboratoryId,
     required String laboratoryName,
-
+    required String recId,
   })async{
     try{
       Map<String, dynamic> inventoryData= {
@@ -241,7 +242,7 @@ class InventoryRepository {
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": null,
+            "recId": recId,
             "infos": []
           }
         ],
@@ -279,6 +280,7 @@ class InventoryRepository {
     required int stateMode,
     required int laboratoryId,
     required String laboratoryName,
+    required String recId,
 
   })async{
     try{
@@ -348,20 +350,20 @@ class InventoryRepository {
             },
             "laboratory":{
               "name":laboratoryName,
-              "id":laboratoryId,
+              "id":laboratoryId!=0?laboratoryId:null,
             },
             "quantity": quantity,
             "impurity": impurity,
             "weight750": weight750,
             "carat": carat,
-            "receiptNumber": receiptNumber,
+            "receiptNumber": receiptNumber!=''?receiptNumber:null,
             "type": type,
             "stateMode":stateMode,
             "id": inventoryDetailId,
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": null,
+            "recId": recId,
             "infos": []
           }
         ],
@@ -415,6 +417,7 @@ class InventoryRepository {
   }
 
   Future<Map<String, dynamic>> deleteInventoryDetail({
+    required String date,
     required int id,
     required int inventoryDetailId,
     required int accountId,
@@ -427,7 +430,7 @@ class InventoryRepository {
   })async{
     try{
       Map<String, dynamic> inventoryData= {
-        "date": "2025-04-13T18:13:00",
+        "date": date,
         "account": {
           "code": "1",
           "name": "",
@@ -576,6 +579,7 @@ class InventoryRepository {
     required int type,
     required String? description,
     required List<InventoryDetailModel>? details,
+    required String? recId,
   })async{
     try{
       Map<String, dynamic> inventoryData= {
@@ -623,7 +627,7 @@ class InventoryRepository {
           "rowNum": 1,
           "id": 1,
           "attribute": "cus",
-          "recId": null,
+          "recId": detail.recId,
           "infos": []
         }).toList(),
 
@@ -661,6 +665,7 @@ class InventoryRepository {
     required int inputItemId,
     required int laboratoryId,
     required String laboratoryName,
+    required String recId,
 
   })async{
     try{
@@ -743,7 +748,7 @@ class InventoryRepository {
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": null,
+            "recId": recId,
             "infos": []
           }
         ],
@@ -781,6 +786,7 @@ class InventoryRepository {
     required int stateMode,
     required int laboratoryId,
     required String laboratoryName,
+    required String recId,
 
   })async{
     try{
@@ -850,21 +856,21 @@ class InventoryRepository {
             },
             "laboratory":{
               "name":laboratoryName,
-              "id":laboratoryId,
+              "id":laboratoryId!=0 ? laboratoryId : null,
             },
             "quantity": quantity,
             "impurity": impurity,
             "weight750": weight750,
             "carat": carat,
-            "receiptNumber": receiptNumber,
+            "receiptNumber": receiptNumber!='' ? receiptNumber : null,
             "type": type,
-            "inputItemId":inputItemId,
+            "inputItemId":inputItemId!=0 ? inputItemId : null,
             "stateMode":stateMode,
             "id": inventoryDetailId,
             "isDeleted": false,
             "rowNum": 1,
             "attribute": "cus",
-            "recId": null,
+            "recId": recId,
             "infos": []
           }
         ],

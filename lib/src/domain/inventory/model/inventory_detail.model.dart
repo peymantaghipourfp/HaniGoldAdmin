@@ -1,4 +1,5 @@
 
+import 'package:image_picker/image_picker.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
@@ -61,7 +62,7 @@ class InventoryDetailModel {
   @JsonKey(name: "modifiedOn")
   final DateTime? modifiedOn;
   @JsonKey(name: "recId")
-  final String? recId;
+  late  String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
   @JsonKey(name: "description")
@@ -70,6 +71,8 @@ class InventoryDetailModel {
   final int? inputItemId;
   @JsonKey(name: "date")
   final DateTime? date;
+  @JsonKey(name: "listXfile")
+  late List<XFile>? listXfile;
 
   InventoryDetailModel({
     this.inventoryId,
@@ -99,6 +102,7 @@ class InventoryDetailModel {
     this.description,
     this.inputItemId,
     this.date,
+    this.listXfile
   });
 
   InventoryDetailModel copyWith({
@@ -129,6 +133,7 @@ class InventoryDetailModel {
     String? description,
     int? inputItemId,
     DateTime? date,
+    List<XFile>? listXfile,
   }) {
     return InventoryDetailModel(
       inventoryId: inventoryId ?? this.inventoryId,
@@ -158,6 +163,7 @@ class InventoryDetailModel {
       description: description ?? this.description,
       inputItemId: inputItemId ?? this.inputItemId,
       date: date ?? this.date,
+      listXfile: listXfile ?? this.listXfile,
     );
   }
 

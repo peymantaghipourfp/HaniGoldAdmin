@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
@@ -526,6 +527,82 @@ class _InventoryDetailInsertPaymentViewState
                                                   ),
                                                 ),
                                               ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                children: [
+                                                  Obx(() {
+                                                    if (inventoryDetailInsertPaymentController
+                                                        .isUploadingDesktop
+                                                        .value) {
+                                                      return Row(
+                                                        children: [
+                                                          Text(
+                                                            'در حال بارگزاری عکس',
+                                                            style: AppTextStyle.labelText.copyWith(fontSize: 12,
+                                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                          ),
+                                                          SizedBox(width: 10,),
+                                                          CircularProgressIndicator(),
+                                                        ],
+                                                      );
+                                                    }
+                                                    return SizedBox(
+                                                      height: 80,
+                                                      width: Get.width * 0.17,
+                                                      child: SingleChildScrollView(
+                                                        scrollDirection: Axis.horizontal,
+                                                        child: Row(
+                                                          children: inventoryDetailInsertPaymentController.selectedImagesDesktop.map((e){
+                                                            return  Stack(
+                                                              children: [
+                                                                Container(
+                                                                  margin: EdgeInsets.all(10),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius: BorderRadius.circular(8),
+                                                                      border: Border.all(color: AppColor.textColor),
+                                                                      image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
+                                                                  ),
+                                                                  height: 60,width: 60,
+                                                                  // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                                ),
+                                                                GestureDetector(
+                                                                  child: CircleAvatar(
+                                                                    backgroundColor: AppColor.accentColor,radius: 10,
+                                                                    child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                                  ),
+                                                                  onTap: (){
+                                                                    inventoryDetailInsertPaymentController.selectedImagesDesktop.remove(e);
+                                                                  },
+                                                                )
+                                                              ],
+                                                            );
+                                                          }).toList(),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }),
+                                                  GestureDetector(
+                                                    onTap: () =>
+                                                        inventoryDetailInsertPaymentController.pickImageDesktop(),
+                                                    child: Container(
+                                                      constraints: BoxConstraints(maxWidth: 100),
+                                                      child: SvgPicture
+                                                          .asset(
+                                                        'assets/svg/camera.svg',
+                                                        width: 30,
+                                                        height: 30,
+                                                        colorFilter: ColorFilter
+                                                            .mode(
+                                                            AppColor
+                                                                .iconViewColor,
+                                                            BlendMode
+                                                                .srcIn),),
+                                                    ),
+
+                                                  ),
+
+                                                ],
+                                              ),
                                               //  دکمه ثبت نهایی
                                               SizedBox(height: 20,),
                                               SizedBox(width: double.infinity,
@@ -554,8 +631,7 @@ class _InventoryDetailInsertPaymentViewState
                                                                   .circular(
                                                                   10)))),
                                                   onPressed: () async {
-                                                    inventoryDetailInsertPaymentController
-                                                        .insertInventoryDetailPayment();
+                                                   await inventoryDetailInsertPaymentController.uploadImagesDesktop( "image", "InventoryDetail");
                                                   },
                                                   child: inventoryDetailInsertPaymentController
                                                       .isLoading.value

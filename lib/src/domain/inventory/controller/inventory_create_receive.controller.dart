@@ -11,12 +11,15 @@ import 'package:hanigold_admin/src/domain/inventory/controller/inventory.control
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet_account_req.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
@@ -27,6 +30,7 @@ import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/predicate.model.dart';
+import 'dart:typed_data';
 
 enum PageState{loading,err,empty,list}
 
@@ -50,6 +54,7 @@ class InventoryCreateReceiveController extends GetxController{
   final InventoryRepository inventoryRepository=InventoryRepository();
   final LaboratoryRepository laboratoryRepository=LaboratoryRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<WalletModel> walletAccountList=<WalletModel>[].obs;
@@ -71,6 +76,13 @@ class InventoryCreateReceiveController extends GetxController{
   RxList<LaboratoryModel> searchedLaboratories = <LaboratoryModel>[].obs;
   RxInt editingIndex = RxInt(-1);
   RxBool isEditing = false.obs;
+  var recordId="".obs;
+  var uuid = Uuid();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
+  List<Uint8List> selectedImagesBytes = [];
+  List<String> selectedFileNames = [];
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -105,6 +117,16 @@ class InventoryCreateReceiveController extends GetxController{
   }
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
     selectedLaboratory.value=newValue;
+  }
+
+  void updateDetail(int index, String recId,List<XFile> listXfile) {
+    if (index >= 0 && index < tempDetails.length) {
+      tempDetails[index].recId=recId;
+      tempDetails[index].listXfile=listXfile;
+      print("reccccccc::${recId}");
+      print("reccccciddd::${tempDetails[index].recId}");
+
+    }
   }
 
   @override
@@ -272,6 +294,51 @@ class InventoryCreateReceiveController extends GetxController{
     }
   }
 
+  Future<void> uploadImagesDesktop( String type, String entityType) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    for(int i=0; i < tempDetails.length; i++){
+      recordId.value=uuid.v4();
+      if (tempDetails[i].listXfile!.isEmpty){
+        return;
+      }else{
+        isUploadingDesktop.value = true;
+        uploadStatusesDesktop.assignAll(List.filled(tempDetails[i].listXfile!.length, false));
+        try {
+          for (int j = 0; j < tempDetails[i].listXfile!.length; j++) {
+            final file = tempDetails[i].listXfile![j];
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: tempDetails[i].recId ?? '',
+                type: type,
+                entityType: entityType,
+              );
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              EasyLoading.dismiss();
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+          if (uploadStatusesDesktop.every((status) => status)) {
+            EasyLoading.dismiss();
+            Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+
+          }
+        } finally {
+
+          EasyLoading.dismiss();
+          isUploadingDesktop.value = false;
+          selectedImagesDesktop.clear();
+          uploadStatusesDesktop.clear();
+        }
+      }
+    }
+
+    submitFinalInventory();
+  }
+
 // لیست موقت فاکتور
   Future<void> addToTempList() async {
     try {
@@ -330,7 +397,8 @@ class InventoryCreateReceiveController extends GetxController{
           accountName: selectedAccount.value?.name ?? "",
           type: 1,
           description: descriptionController.text,
-        details:tempDetails,
+          details:tempDetails,
+          recId: null
       );
       print(response);
       if (response != null) {
@@ -392,6 +460,7 @@ class InventoryCreateReceiveController extends GetxController{
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    selectedImagesDesktop.clear();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
@@ -407,6 +476,7 @@ class InventoryCreateReceiveController extends GetxController{
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    selectedImagesDesktop.clear();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";

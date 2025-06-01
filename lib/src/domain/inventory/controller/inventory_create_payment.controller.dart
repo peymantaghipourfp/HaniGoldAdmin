@@ -17,6 +17,7 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
@@ -27,6 +28,9 @@ import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/predicate.model.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
+import 'dart:typed_data';
 
 enum PageState{loading,err,empty,list}
 
@@ -49,6 +53,7 @@ class InventoryCreatePaymentController extends GetxController{
   final InventoryRepository inventoryRepository=InventoryRepository();
   final LaboratoryRepository laboratoryRepository=LaboratoryRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<WalletModel> walletAccountList=<WalletModel>[].obs;
@@ -74,6 +79,14 @@ class InventoryCreatePaymentController extends GetxController{
   RxBool isEditing = false.obs;
   final RxSet<int> selectedForPaymentId = RxSet<int>();
   RxInt selectedLaboratoryId = RxInt(0);
+  final ImagePicker _picker = ImagePicker();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
+  List<Uint8List> selectedImagesBytes = [];
+  List<String> selectedFileNames = [];
+  var recordId="".obs;
+  var uuid = Uuid();
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -106,6 +119,15 @@ class InventoryCreatePaymentController extends GetxController{
       final oldDetail = tempDetails[index];
       final newDetail = oldDetail.copyWith(quantity: newQuantity);
       tempDetails[index] = newDetail;
+    }
+  }
+  void updateDetail(int index, String recId,List<XFile> listXfile) {
+    if (index >= 0 && index < tempDetails.length) {
+      tempDetails[index].recId=recId;
+      tempDetails[index].listXfile=listXfile;
+      print("reccccccc::${recId}");
+      print("reccccciddd::${tempDetails[index].recId}");
+
     }
   }
 
@@ -281,6 +303,62 @@ class InventoryCreatePaymentController extends GetxController{
     }
   }
 
+  Future<void> pickImageDesktop() async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.assignAll(images);
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> uploadImagesDesktop( String type, String entityType) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    for(int i=0; i < tempDetails.length; i++){
+      recordId.value=uuid.v4();
+      if (tempDetails[i].listXfile!.isEmpty){
+        return;
+      }else{
+        isUploadingDesktop.value = true;
+        uploadStatusesDesktop.assignAll(List.filled(tempDetails[i].listXfile!.length, false));
+        try {
+          for (int j = 0; j < tempDetails[i].listXfile!.length; j++) {
+            final file = tempDetails[i].listXfile![j];
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: tempDetails[i].recId ?? '',
+                type: type,
+                entityType: entityType,
+              );
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              EasyLoading.dismiss();
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+                    }
+          if (uploadStatusesDesktop.every((status) => status)) {
+            EasyLoading.dismiss();
+            Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+
+          }
+        } finally {
+
+          EasyLoading.dismiss();
+          isUploadingDesktop.value = false;
+          selectedImagesDesktop.clear();
+          uploadStatusesDesktop.clear();
+        }
+      }
+    }
+
+    submitFinalInventory();
+  }
+
 // لیست موقت فاکتور
   Future<void> addToTempList() async {
     try {
@@ -343,6 +421,7 @@ class InventoryCreatePaymentController extends GetxController{
         type: 0,
         description: descriptionController.text,
         details:tempDetails,
+        recId: null
       );
       print(response);
       if (response != null) {

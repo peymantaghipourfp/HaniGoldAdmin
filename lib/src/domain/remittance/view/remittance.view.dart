@@ -1485,7 +1485,8 @@ class RemittanceView extends GetView<RemittanceController> {
                 ),
               ))),
 
-          DataCell(Center(
+          DataCell(
+              Center(
               child: Row(
             children: [
               SizedBox(

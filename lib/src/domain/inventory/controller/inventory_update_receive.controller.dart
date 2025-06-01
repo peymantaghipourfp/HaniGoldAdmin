@@ -11,12 +11,16 @@ import 'package:hanigold_admin/src/domain/inventory/controller/inventory.control
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet_account_req.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
@@ -50,6 +54,8 @@ class InventoryUpdateReceiveController extends GetxController{
   final InventoryRepository inventoryRepository=InventoryRepository();
   final LaboratoryRepository laboratoryRepository=LaboratoryRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<WalletModel> walletAccountList=<WalletModel>[].obs;
@@ -77,6 +83,13 @@ class InventoryUpdateReceiveController extends GetxController{
   RxBool isEditing = false.obs;
   var accountId=0.obs;
   var accountName=''.obs;
+  final ImagePicker _picker = ImagePicker();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  var recordId="".obs;
+  var uuid = Uuid();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
+  RxList<String> imageList = <String>[].obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -327,7 +340,95 @@ class InventoryUpdateReceiveController extends GetxController{
     }
   }
 
-  Future<InventoryModel?> updateInventoryDetailReceive()async{
+  Future<void> pickImageDesktop( ) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.addAll(images);
+
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+
+  }
+
+  Future<void> uploadImagesDesktopUpdate( String type, String entityType,) async {
+
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      updateInventoryDetailReceive(recordId.value);
+    }else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          updateInventoryDetailReceive(recordId.value);
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
+      }
+    }
+
+  }
+
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
+  }
+
+  Future<void> deleteImage(String fileName,) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    print('تعداد image:');
+    try{
+      var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
+      if(fetch){
+        getImage(inventoryDetail?.recId??"", "InventoryDetail");
+      }
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<InventoryModel?> updateInventoryDetailReceive(String recId)async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
@@ -356,6 +457,7 @@ class InventoryUpdateReceiveController extends GetxController{
         stateMode : 2,
         laboratoryName: selectedLaboratory.value?.name ?? '',
         laboratoryId: selectedLaboratory.value?.id ?? 0,
+        recId: inventoryDetail?.recId ?? '',
 
       );
       print(response);
@@ -393,6 +495,7 @@ class InventoryUpdateReceiveController extends GetxController{
     receiptNumberController.text=inventoryDetail.receiptNumber.toString() ?? '';
     selectedLaboratory.value=inventoryDetail.laboratory;
     dateController.text = inventoryDetail.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
+    getImage(inventoryDetail.recId ?? '', "InventoryDetail");
     //selectedWalletAccount.value=inventoryDetail.wallet;
   }
 

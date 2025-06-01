@@ -2,9 +2,12 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
@@ -21,9 +24,13 @@ import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/inventory.repository.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
+import 'package:path/path.dart' as path;
 
 import '../../../config/network/error/network.error.dart';
+import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/upload.repository.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../account/model/account.model.dart';
 
 enum PageState{loading,err,empty,list}
@@ -39,6 +46,8 @@ class InventoryController extends GetxController{
   final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
   final InventoryRepository inventoryRepository=InventoryRepository();
   final AccountRepository accountRepository=AccountRepository();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
+
   final TextEditingController searchController=TextEditingController();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
@@ -64,6 +73,7 @@ class InventoryController extends GetxController{
   final PageController pageController = PageController();
   RxInt currentImagePage = 0.obs;
   RxBool showArrows = false.obs;
+  RxList<String> imageList = <String>[].obs;
 
   Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
 
@@ -73,6 +83,8 @@ class InventoryController extends GetxController{
   var sortIndex = 0.obs;
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
+  var recordId="".obs;
+  var uuid = Uuid();
 
   void sortByDate(int columnIndex,bool desc ) {
     final list = List<InventoryModel>.from(inventoryList);
@@ -321,6 +333,7 @@ class InventoryController extends GetxController{
   }
 
   Future<List<dynamic>?> updateDeleteInventoryReceive(
+      String date,
       int id,
       int inventoryDetailId,
       int stateMode,
@@ -334,6 +347,7 @@ class InventoryController extends GetxController{
     try{
       isLoading.value = true;
       var response=await inventoryRepository.deleteInventoryDetail(
+          date:date,
           id: id,
           inventoryDetailId: inventoryDetailId,
           stateMode: stateMode,
@@ -363,6 +377,7 @@ class InventoryController extends GetxController{
     return null;
   }
   Future<List<dynamic>?> updateDeleteInventoryPayment(
+      String date,
       int id,
       int inventoryDetailId,
       int stateMode,
@@ -376,14 +391,15 @@ class InventoryController extends GetxController{
     try{
       isLoading.value = true;
       var response=await inventoryRepository.deleteInventoryDetail(
+          date: date,
           id: id,
           inventoryDetailId: inventoryDetailId,
           stateMode: stateMode,
           type:0 ,
           accountId: accountId,
-        walletId: walletId,
-        itemId: itemId,
-        quantity: quantity
+          walletId: walletId,
+          itemId: itemId,
+          quantity: quantity,
       );
       if(response!= null){
         Get.back();
@@ -482,18 +498,18 @@ class InventoryController extends GetxController{
   Future<void> pickImageDesktop(String recordId, String type, String entityType,{required int inventoryId}) async {
     try{
       final List<XFile?> images = await _picker.pickMultiImage();
-      if (images != null && images.isNotEmpty) {
+      if (images.isNotEmpty) {
         selectedImagesDesktop.assignAll(images);
-        await uploadImagesDesktop(recordId, type, entityType, inventoryId);
+        //await uploadImagesDesktop(recordId, type, entityType, inventoryId);
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
-
   }
 
-  Future<void> uploadImagesDesktop(String recordId, String type, String entityType,int inventoryId) async {
+  Future<void> uploadImagesDesktop( String type, String entityType,int inventoryId) async {
     EasyLoading.show(status: 'لطفا منتظر بمانید');
+    recordId.value=uuid.v4();
     if (selectedImagesDesktop.isEmpty) return;
     isUploadingDesktop.value = true;
     uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
@@ -506,7 +522,7 @@ class InventoryController extends GetxController{
             String success = await uploadRepositoryDesktop.uploadImageDesktop(
               imageBytes: bytes,
               fileName: file.name,
-              recordId: recordId,
+              recordId: recordId.value,
               type: type,
               entityType: entityType,
             );
@@ -559,6 +575,68 @@ class InventoryController extends GetxController{
 
     return null;
   }
+
+  // لیست عکس ها
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
+  }
+
+  /*void downloadImage(String guidId) async {
+    if (kIsWeb){
+      final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+      final anchor = html.AnchorElement(href: url)
+        ..download = "image_$guidId"
+        ..style.display = 'none';
+
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+    }else{
+      try {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) return;
+
+        final dio = Dio();
+        final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access downloads directory');
+        }
+        String fileExtension = path.extension(guidId);
+        if(fileExtension.isEmpty) fileExtension = '.png';
+        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+        final savePath = path.join(downloadsDir.path, fileName);
+        *//*final dir = await getApplicationDocumentsDirectory();
+        final path = '${dir.path}/images_$guidId.png';*//*
+        await dio.download(url, savePath);
+        print(savePath);
+        Get.snackbar(
+          'موفقیت',
+          'تصویر با موفقیت ذخیره شد',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'خطا',
+          'خطا در دانلود تصویر: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
+  }*/
 
   // خروجی اکسل
   Future<void> exportToExcel() async {

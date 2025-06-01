@@ -11,12 +11,15 @@ import 'package:hanigold_admin/src/domain/inventory/controller/inventory.control
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet_account_req.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
@@ -51,6 +54,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
   final InventoryRepository inventoryRepository=InventoryRepository();
   final LaboratoryRepository laboratoryRepository=LaboratoryRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<WalletModel> walletAccountList=<WalletModel>[].obs;
@@ -77,6 +81,12 @@ class InventoryDetailInsertReceiveController extends GetxController{
   RxBool isEditing = false.obs;
   var accountId=0.obs;
   var accountName=''.obs;
+  final ImagePicker _picker = ImagePicker();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  var recordId="".obs;
+  var uuid = Uuid();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -117,13 +127,16 @@ class InventoryDetailInsertReceiveController extends GetxController{
     final InventoryModel? inventory = Get.arguments;
     if(inventory!=null){
       inventoryId.value=inventory.id ?? 0;
-      dateController.text=inventory.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
+      //dateController.text=inventory.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
       accountId.value = inventory.account!.id!;
       accountName.value = inventory.account!.name!;
       getWalletAccount(accountId.value);
       getBalanceList(accountId.value);
     }
-
+    var now = Jalali.now();
+    DateTime date=DateTime.now();
+    dateController.text =
+    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
     quantityController.addListener(updateW750);
@@ -131,10 +144,6 @@ class InventoryDetailInsertReceiveController extends GetxController{
     fetchAccountList();
     fetchWalletAccountList();
     fetchLaboratoryList();
-    /*var now = Jalali.now();
-    DateTime date=DateTime.now();
-    dateController.text =
-    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";*/
     super.onInit();
   }
 
@@ -306,7 +315,65 @@ class InventoryDetailInsertReceiveController extends GetxController{
     }
   }
 
-  Future<InventoryModel?> insertInventoryDetailReceive()async{
+  Future<void> pickImageDesktop( ) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.addAll(images);
+
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+
+  }
+
+
+
+  Future<void> uploadImagesDesktop( String type, String entityType,) async {
+
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      insertInventoryDetailReceive(recordId.value);
+
+    } else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          insertInventoryDetailReceive(recordId.value);
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
+      }
+    }
+
+  }
+
+  Future<InventoryModel?> insertInventoryDetailReceive(String recId)async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
@@ -331,6 +398,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
         stateMode : 1,
         laboratoryName: selectedLaboratory.value?.name ?? '',
         laboratoryId: selectedLaboratory.value?.id ?? 0,
+        recId: recId,
 
       );
       print(response);
@@ -390,8 +458,11 @@ class InventoryDetailInsertReceiveController extends GetxController{
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    selectedImagesDesktop.clear();
     var now = Jalali.now();
-    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    DateTime date=DateTime.now();
+    dateController.text =
+    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
   }
   void resetFieldsForTab(int tabIndex) {
     //dateController.clear();
@@ -404,8 +475,11 @@ class InventoryDetailInsertReceiveController extends GetxController{
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    selectedImagesDesktop.clear();
     var now = Jalali.now();
-    dateController.text = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+    DateTime date=DateTime.now();
+    dateController.text =
+    "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
   }
   void resetAccountSearch() {
     searchController.clear();

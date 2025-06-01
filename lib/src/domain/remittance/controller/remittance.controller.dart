@@ -669,7 +669,7 @@ Timer? debounceP;
         final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         final url = html.Url.createObjectUrlFromBlob(blob);
         final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', 'inventories_${DateTime.now().millisecondsSinceEpoch}.xlsx')
+          ..setAttribute('download', 'remittances_${DateTime.now().millisecondsSinceEpoch}.xlsx')
           ..click();
         html.Url.revokeObjectUrl(url);
       }else {

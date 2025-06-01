@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_payment.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
@@ -12,7 +13,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../controller/inventory_create_receive.controller.dart';
-import 'item_temp_detail.widget.dart';
+import 'item_temp_detail_payment.widget.dart';
 typedef SelectCallBack = Function(int id);
 class InventoryCreatePaymentTabWidget extends StatefulWidget {
   final SelectCallBack callBack;
@@ -388,7 +389,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                 // بخش لیست موقت
                 Center(
                   child: SizedBox(
-                    width: Get.width * (isDesktop ? 0.5 : 1),
+                    width: Get.width * (isDesktop ? 0.6 : 1),
                     height: isDesktop ? 300 : 200,
                     child: Card(color: AppColor.secondaryColor,
                       child: Column(
@@ -407,7 +408,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                                     .tempDetails[index];
                                 return ListTile(
                                     title:
-                                    ItemTempDetailWidget(
+                                    ItemTempDetailWidgetPayment(
                                         detail: detail,
                                         quantity: detail.quantity ?? 0,
                                       onQuantityChanged: (newQuantity) { // اضافه شده
@@ -415,6 +416,13 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                                           index,
                                           newQuantity,
                                         );
+                                      },
+                                      recId: (recId,list){
+                                          inventoryCreatePaymentController.updateDetail(
+                                              index,
+                                              recId,
+                                              list
+                                          );
                                       },
                                     ),
                                     trailing: IconButton(
@@ -487,7 +495,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                           shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10)))),
                       onPressed: () async {
-                        inventoryCreatePaymentController.submitFinalInventory();
+                        await inventoryCreatePaymentController.uploadImagesDesktop( "image", "InventoryDetail");
                       },
                       child: inventoryCreatePaymentController.isFinalizing.value
                           ?

@@ -1900,10 +1900,10 @@ class InventoryListView extends StatelessWidget {
                                                                                   .defaultDialog(
                                                                                   backgroundColor: AppColor
                                                                                       .backGroundColor,
-                                                                                  title: "حذف واریزی",
+                                                                                  title: "حذف",
                                                                                   titleStyle: AppTextStyle
                                                                                       .smallTitleText,
-                                                                                  middleText: "آیا از حذف واریزی مطمئن هستید؟",
+                                                                                  middleText: "آیا از حذف مطمئن هستید؟",
                                                                                   middleTextStyle: AppTextStyle
                                                                                       .bodyText,
                                                                                   confirm: ElevatedButton(
@@ -1912,17 +1912,20 @@ class InventoryListView extends StatelessWidget {
                                                                                               AppColor
                                                                                                   .primaryColor)),
                                                                                       onPressed: () {
+                                                                                        Gregorian date=getOneInventories!.date!.toGregorian();
                                                                                         Get.back();
-                                                                                        getOneInventories?.type==1 ?
+                                                                                        getOneInventories.type==1 ?
                                                                                         inventoryController.updateDeleteInventoryReceive(
+                                                                                          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                                                             inventories.id!,
-                                                                                            getOneInventories!.id!, 3,0,
+                                                                                            getOneInventories.id!, 3,0,
                                                                                             inventories.account!.id!,
                                                                                           getOneInventories.wallet!.id!,
                                                                                             getOneInventories.item!.id!,
                                                                                           getOneInventories.quantity!,
                                                                                         )
                                                                                             : inventoryController.updateDeleteInventoryPayment(
+                                                                                          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                                                             inventories.id!,
                                                                                             getOneInventories!.id!, 3,1,
                                                                                             inventories.account!.id!,
@@ -2590,10 +2593,10 @@ class InventoryListView extends StatelessWidget {
                                               Get.defaultDialog(
                                                   backgroundColor: AppColor
                                                       .backGroundColor,
-                                                  title: "حذف واریزی",
+                                                  title: "حذف",
                                                   titleStyle: AppTextStyle
                                                       .smallTitleText,
-                                                  middleText: "آیا از حذف واریزی مطمئن هستید؟",
+                                                  middleText: "آیا از حذف مطمئن هستید؟",
                                                   middleTextStyle: AppTextStyle
                                                       .bodyText,
                                                   confirm: ElevatedButton(
@@ -2602,17 +2605,20 @@ class InventoryListView extends StatelessWidget {
                                                               AppColor
                                                                   .primaryColor)),
                                                       onPressed: () {
+                                                        Gregorian date=getOneInventories!.date!.toGregorian();
                                                         Get.back();
-                                                        getOneInventories?.type==1 ?
+                                                        getOneInventories.type==1 ?
                                                         inventoryController.updateDeleteInventoryReceive(
+                                                          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                             inventories.id!,
-                                                            getOneInventories!.id!, 3,0,
+                                                            getOneInventories.id!, 3,0,
                                                             inventories.account!.id!,
                                                           getOneInventories.wallet!.id!,
                                                           getOneInventories.item!.id!,
                                                           getOneInventories.quantity!,
                                                         )
                                                             : inventoryController.updateDeleteInventoryPayment(
+                                                          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                             inventories.id!,
                                                             getOneInventories!.id!, 3,1,
                                                             inventories.account!.id!,
@@ -2987,249 +2993,228 @@ class InventoryListView extends StatelessWidget {
           // نمایش تصاویر
           DataCell(
             GestureDetector(
-              onTap: () {
-                if (inventory.inventoryDetails?.first.attachments == null ||
-                    inventory.inventoryDetails!.first.attachments!.isEmpty) {
-                  Get
-                      .snackbar(
-                      'پیغام',
-                      'تصویری ثبت نشده است');
-                  return;
-                }
+              onTap: () async{
+                await inventoryController.getImage(inventory.recId??"", "Inventory");
 
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Dialog(
-                      backgroundColor: AppColor
-                          .backGroundColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius
-                            .circular(
-                            10),
-                      ),
-                      child: Container(
-                        padding: EdgeInsets
-                            .all(
-                            8),
-                        child: Column(
-                          mainAxisSize: MainAxisSize
-                              .min,
-                          children: [
-                            // نمایش اسلایدی عکس‌ها
-                            SizedBox(
-                              width: 500,
-                              height: 500,
-                              child: Stack(
-                                children: [
-                                  PageView.builder(
-                                    controller: inventoryController
-                                        .pageController,
-                                    itemCount: inventory.inventoryDetails?.first
-                                        .attachments!.length,
-                                    onPageChanged: (index) =>
-                                    inventoryController
-                                        .currentImagePage
-                                        .value =
-                                        index,
-                                    itemBuilder: (context,
-                                        index) {
-                                      final attachment = inventory
-                                          .inventoryDetails
-                                          ?.first.attachments![index];
-                                      return Image
-                                          .network(
-                                        "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment?.guidId}",
-                                        loadingBuilder: (context,
-                                            child,
-                                            loadingProgress) {
-                                          if (loadingProgress ==
-                                              null)
-                                            return child;
-                                          return Center(
-                                            child: CircularProgressIndicator(),
-                                          );
-                                        },
-                                        errorBuilder: (context,
-                                            error,
-                                            stackTrace) =>
-                                            Icon(
-                                                Icons
-                                                    .error,
-                                                color: Colors
-                                                    .red),
-                                        fit: BoxFit.contain,
-                                      );
-                                    },
-                                  ),
-                                  SizedBox(
-                                    height: 2,),
-                                  Obx(() {
-                                    return Positioned(
-                                        left: 10,
-                                        top: 0,
-                                        bottom: 0,
-                                        child: Visibility(
-                                          visible: inventoryController
-                                              .currentImagePage.value > 0,
-                                          child: IconButton(
-                                            style: ButtonStyle(
-                                              backgroundColor: WidgetStateProperty
-                                                  .all(Colors.black54),
-                                              shape: WidgetStateProperty.all(
-                                                  CircleBorder()),
-                                              padding: WidgetStateProperty.all(
-                                                  EdgeInsets.all(8)),
-                                            ),
-                                            icon: Icon(Icons.chevron_left,
-                                              color: Colors.white,
-                                              size: 40,
-                                              shadows: [
-                                                Shadow(
-                                                  blurRadius: 10,
-                                                  color: Colors.black,
-                                                  offset: Offset(0, 0),
-                                                )
-                                              ],
-                                            ),
-                                            onPressed: () {
-                                              inventoryController.pageController
-                                                  .previousPage(
-                                                duration: Duration(
-                                                    milliseconds: 300),
-                                                curve: Curves.easeInOut,
-                                              );
-                                            },
-                                          ),
-                                        )
-                                    );
-                                  }),
-                                  Obx(() {
-                                    return Positioned(
-                                        right: 10,
-                                        top: 0,
-                                        bottom: 0,
-                                        child: Visibility(
-                                          visible: inventoryController
-                                              .currentImagePage.value <
-                                              (inventory.inventoryDetails?.first
-                                                  .attachments!.length ?? 1) -
-                                                  1,
-                                          child: IconButton(
-                                            style: ButtonStyle(
-                                              backgroundColor: WidgetStateProperty
-                                                  .all(Colors.black54),
-                                              shape: WidgetStateProperty.all(
-                                                  CircleBorder()),
-                                              padding: WidgetStateProperty.all(
-                                                  EdgeInsets.all(8)),
-                                            ),
-                                            icon: Icon(Icons.chevron_right,
-                                              color: Colors.white,
-                                              size: 40,
-                                              shadows: [
-                                                Shadow(
-                                                  blurRadius: 10,
-                                                  color: Colors.black,
-                                                  offset: Offset(0, 0),
-                                                ),
-                                              ],
-                                            ),
-                                            onPressed: () {
-                                              inventoryController.pageController
-                                                  .nextPage(
-                                                duration: Duration(
-                                                    milliseconds: 300),
-                                                curve: Curves.easeInOut,
-                                              );
-                                            },
-                                          ),
-                                        )
-                                    );
-                                  }),
-                                  SizedBox(
-                                    height: 2,),
-                                  // نمایش نقاط راهنما
-                                  Obx(() =>
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment
-                                            .center,
-                                        children: List
-                                            .generate(
-                                          inventory.inventoryDetails!.first
-                                              .attachments!.length,
-                                              (index) =>
-                                              Container(
-                                                width: 8,
-                                                height: 8,
-                                                margin: EdgeInsets
-                                                    .symmetric(
-                                                    horizontal: 4),
-                                                decoration: BoxDecoration(
-                                                  shape: BoxShape
-                                                      .circle,
-                                                  color: inventoryController
-                                                      .currentImagePage
-                                                      .value ==
-                                                      index
-                                                      ? Colors
-                                                      .blue
-                                                      : Colors
-                                                      .grey,
-                                                ),
-                                              ),
-                                        ),
-                                      )),
-                                  SizedBox(
-                                      height: 10),
-                                ],
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () =>
-                                  Get
-                                      .back(),
-                              child: Text(
-                                "بستن",
-                                style: AppTextStyle
-                                    .bodyText,),
-                            ),
-                          ],
+                Future.delayed(const Duration(milliseconds: 200), () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Dialog(
+                        backgroundColor: AppColor
+                            .backGroundColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius
+                              .circular(
+                              10),
                         ),
-                      ),
-                    );
-                  },
-                );
+                        child: Container(
+                          padding: EdgeInsets
+                              .all(
+                              8),
+                          child: Column(
+                            mainAxisSize: MainAxisSize
+                                .min,
+                            children: [
+                              // نمایش اسلایدی عکس‌ها
+                              SizedBox(
+                                width: 500,
+                                height: 500,
+                                child: Stack(
+                                  children: [
+                                    PageView.builder(
+                                      controller: inventoryController
+                                          .pageController,
+                                      itemCount: inventoryController.imageList.length,
+                                      onPageChanged: (index) =>
+                                      inventoryController
+                                          .currentImagePage
+                                          .value =
+                                          index,
+                                      itemBuilder: (context,
+                                          index) {
+                                        final attachment = inventoryController.imageList[index];
+                                        return Image
+                                            .network(
+                                          "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                          loadingBuilder: (context,
+                                              child,
+                                              loadingProgress) {
+                                            if (loadingProgress ==
+                                                null)
+                                              return child;
+                                            return Center(
+                                              child: CircularProgressIndicator(),
+                                            );
+                                          },
+                                          errorBuilder: (context,
+                                              error,
+                                              stackTrace) =>
+                                              Icon(
+                                                  Icons
+                                                      .error,
+                                                  color: Colors
+                                                      .red),
+                                          fit: BoxFit.contain,
+                                        );
+                                      },
+                                    ),
+                                    /*Row(mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                          onPressed: () => inventoryController.downloadImage(attachment,),
+                                        ),
+                                      ],
+                                    ),*/
+                                    SizedBox(
+                                      height: 2,),
+                                    Obx(() {
+                                      return Positioned(
+                                          left: 10,
+                                          top: 0,
+                                          bottom: 0,
+                                          child: Visibility(
+                                            visible: inventoryController
+                                                .currentImagePage.value > 0,
+                                            child: IconButton(
+                                              style: ButtonStyle(
+                                                backgroundColor: WidgetStateProperty
+                                                    .all(Colors.black54),
+                                                shape: WidgetStateProperty.all(
+                                                    CircleBorder()),
+                                                padding: WidgetStateProperty.all(
+                                                    EdgeInsets.all(8)),
+                                              ),
+                                              icon: Icon(Icons.chevron_left,
+                                                color: Colors.white,
+                                                size: 40,
+                                                shadows: [
+                                                  Shadow(
+                                                    blurRadius: 10,
+                                                    color: Colors.black,
+                                                    offset: Offset(0, 0),
+                                                  )
+                                                ],
+                                              ),
+                                              onPressed: () {
+                                                inventoryController.pageController
+                                                    .previousPage(
+                                                  duration: Duration(
+                                                      milliseconds: 300),
+                                                  curve: Curves.easeInOut,
+                                                );
+                                              },
+                                            ),
+                                          )
+                                      );
+                                    }),
+                                    Obx(() {
+                                      return Positioned(
+                                          right: 10,
+                                          top: 0,
+                                          bottom: 0,
+                                          child: Visibility(
+                                            visible: inventoryController
+                                                .currentImagePage.value <
+                                                (inventoryController.imageList.length ?? 1) -
+                                                    1,
+                                            child: IconButton(
+                                              style: ButtonStyle(
+                                                backgroundColor: WidgetStateProperty
+                                                    .all(Colors.black54),
+                                                shape: WidgetStateProperty.all(
+                                                    CircleBorder()),
+                                                padding: WidgetStateProperty.all(
+                                                    EdgeInsets.all(8)),
+                                              ),
+                                              icon: Icon(Icons.chevron_right,
+                                                color: Colors.white,
+                                                size: 40,
+                                                shadows: [
+                                                  Shadow(
+                                                    blurRadius: 10,
+                                                    color: Colors.black,
+                                                    offset: Offset(0, 0),
+                                                  ),
+                                                ],
+                                              ),
+                                              onPressed: () {
+                                                inventoryController.pageController
+                                                    .nextPage(
+                                                  duration: Duration(
+                                                      milliseconds: 300),
+                                                  curve: Curves.easeInOut,
+                                                );
+                                              },
+                                            ),
+                                          )
+                                      );
+                                    }),
+                                    SizedBox(
+                                      height: 2,),
+                                    // نمایش نقاط راهنما
+                                    Obx(() =>
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment
+                                              .center,
+                                          children: List
+                                              .generate(
+                                            inventoryController.imageList.length,
+                                                (index) =>
+                                                Container(
+                                                  width: 8,
+                                                  height: 8,
+                                                  margin: EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 4),
+                                                  decoration: BoxDecoration(
+                                                    shape: BoxShape
+                                                        .circle,
+                                                    color: inventoryController
+                                                        .currentImagePage
+                                                        .value ==
+                                                        index
+                                                        ? Colors
+                                                        .blue
+                                                        : Colors
+                                                        .grey,
+                                                  ),
+                                                ),
+                                          ),
+                                        )),
+                                    SizedBox(
+                                        height: 10),
+                                  ],
+                                ),
+                              ),
+                              TextButton(
+                                onPressed: () =>
+                                    Get
+                                        .back(),
+                                child: Text(
+                                  "بستن",
+                                  style: AppTextStyle
+                                      .bodyText,),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+
+                });
+
+
               },
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: SvgPicture
-                        .asset(
-                      'assets/svg/picture.svg',
-                      colorFilter: ColorFilter
-                          .mode(
-                        AppColor
-                            .iconViewColor,
-                        BlendMode
-                            .srcIn,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 2,),
-                  Text(
-                    'عکس‌ها (${inventory.inventoryDetails?.first.attachments?.length ?? 0}) ',
-                    style: AppTextStyle
-                        .bodyText
-                        .copyWith(
-                        color: AppColor
-                            .iconViewColor
-                    ),
-                  ),
-                ],
-              ),
+              child: SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                  colorFilter: ColorFilter.mode(
+
+                    AppColor.textColor,
+
+                    BlendMode.srcIn,
+                  )),
             ),
           ),
           // آیکون های عملیات
@@ -3744,285 +3729,221 @@ class InventoryListView extends StatelessWidget {
                                   children: [
                                     // نمایش عکس
                                     GestureDetector(
-                                      onTap: () {
-                                        if (getOneInventories
-                                            ?.attachments ==
-                                            null ||
-                                            getOneInventories!
-                                                .attachments!
-                                                .isEmpty) {
-                                          Get
-                                              .snackbar(
-                                              'پیغام',
-                                              'تصویری ثبت نشده است');
-                                          return;
-                                        }
-                                        showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return Dialog(
-                                              backgroundColor: AppColor
-                                                  .backGroundColor,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius
-                                                    .circular(
-                                                    10),
-                                              ),
-                                              child: Container(
-                                                padding: EdgeInsets
-                                                    .all(
-                                                    8),
-                                                child: Column(
-                                                  mainAxisSize: MainAxisSize
-                                                      .min,
-                                                  children: [
-                                                    // نمایش اسلایدی عکس‌ها
-                                                    SizedBox(
-                                                      width: 500,
-                                                      height: 500,
-                                                      child: Stack(
-                                                        children: [
-                                                          PageView
-                                                              .builder(
-                                                            controller: inventoryController
-                                                                .pageController,
-                                                            itemCount: getOneInventories
-                                                                .attachments!
-                                                                .length,
-                                                            onPageChanged: (
-                                                                index) =>
-                                                            inventoryController
-                                                                .currentImagePage
-                                                                .value =
-                                                                index,
-                                                            itemBuilder: (
-                                                                context,
-                                                                index) {
-                                                              final attachment = getOneInventories.attachments![index];
-                                                              return Image.network(
-                                                                "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
-                                                                loadingBuilder: (
-                                                                    context,
-                                                                    child,
-                                                                    loadingProgress) {
-                                                                  if (loadingProgress ==
-                                                                      null) {
-                                                                    return child;
-                                                                  }
-                                                                  return Center(
-                                                                    child: CircularProgressIndicator(),
-                                                                  );
-                                                                },
-                                                                errorBuilder: (
-                                                                    context,
-                                                                    error,
-                                                                    stackTrace) =>
-                                                                    Icon(
-                                                                        Icons
-                                                                            .error,
-                                                                        color: Colors
-                                                                            .red),
-                                                                fit: BoxFit.contain,
-                                                              );
-                                                            },
-                                                          ),
-                                                          SizedBox(
-                                                            height: 2,),
-                                                          Obx(() {
-                                                            return Positioned(
-                                                                left: 10,
-                                                                top: 0,
-                                                                bottom: 0,
-                                                                child: Visibility(
-                                                                  visible: inventoryController
-                                                                      .currentImagePage
-                                                                      .value >
-                                                                      0,
-                                                                  child: IconButton(
-                                                                    style: ButtonStyle(
-                                                                      backgroundColor: WidgetStateProperty
-                                                                          .all(
-                                                                          Colors
-                                                                              .black54),
-                                                                      shape: WidgetStateProperty
-                                                                          .all(
-                                                                          CircleBorder()),
-                                                                      padding: WidgetStateProperty
-                                                                          .all(
-                                                                          EdgeInsets
-                                                                              .all(
-                                                                              8)),
-                                                                    ),
-                                                                    icon: Icon(
-                                                                      Icons
-                                                                          .chevron_left,
-                                                                      color: Colors
-                                                                          .white,
-                                                                      size: 40,
-                                                                      shadows: [
-                                                                        Shadow(
-                                                                          blurRadius: 10,
-                                                                          color: Colors
-                                                                              .black,
-                                                                          offset: Offset(
-                                                                              0,
-                                                                              0),
-                                                                        )
-                                                                      ],
-                                                                    ),
-                                                                    onPressed: () {
-                                                                      inventoryController
-                                                                          .pageController
-                                                                          .previousPage(
-                                                                        duration: Duration(
-                                                                            milliseconds: 300),
-                                                                        curve: Curves
-                                                                            .easeInOut,
-                                                                      );
-                                                                    },
-                                                                  ),
-                                                                )
-                                                            );
-                                                          }),
-                                                          Obx(() {
-                                                            return Positioned(
-                                                                right: 10,
-                                                                top: 0,
-                                                                bottom: 0,
-                                                                child: Visibility(
-                                                                  visible: inventoryController.currentImagePage.value < (getOneInventories.attachments?.length ?? 1) - 1,
-                                                                  child: IconButton(
-                                                                    style: ButtonStyle(
-                                                                      backgroundColor: WidgetStateProperty
-                                                                          .all(
-                                                                          Colors
-                                                                              .black54),
-                                                                      shape: WidgetStateProperty
-                                                                          .all(
-                                                                          CircleBorder()),
-                                                                      padding: WidgetStateProperty
-                                                                          .all(
-                                                                          EdgeInsets
-                                                                              .all(
-                                                                              8)),
-                                                                    ),
-                                                                    icon: Icon(
-                                                                      Icons
-                                                                          .chevron_right,
-                                                                      color: Colors
-                                                                          .white,
-                                                                      size: 40,
-                                                                      shadows: [
-                                                                        Shadow(
-                                                                          blurRadius: 10,
-                                                                          color: Colors
-                                                                              .black,
-                                                                          offset: Offset(
-                                                                              0,
-                                                                              0),
-                                                                        ),
-                                                                      ],
-                                                                    ),
-                                                                    onPressed: () {
-                                                                      inventoryController
-                                                                          .pageController
-                                                                          .nextPage(
-                                                                        duration: Duration(
-                                                                            milliseconds: 300),
-                                                                        curve: Curves
-                                                                            .easeInOut,
-                                                                      );
-                                                                    },
-                                                                  ),
-                                                                )
-                                                            );
-                                                          }),
-                                                          SizedBox(
-                                                            height: 2,),
-                                                          // نمایش نقاط راهنما
-                                                          Obx(() =>
-                                                              Row(
-                                                                mainAxisAlignment: MainAxisAlignment
-                                                                    .center,
-                                                                children: List
-                                                                    .generate(
-                                                                  getOneInventories
-                                                                      .attachments!
-                                                                      .length,
-                                                                      (index) =>
-                                                                      Container(
-                                                                        width: 8,
-                                                                        height: 8,
-                                                                        margin: EdgeInsets
-                                                                            .symmetric(
-                                                                            horizontal: 4),
-                                                                        decoration: BoxDecoration(
-                                                                          shape: BoxShape
-                                                                              .circle,
-                                                                          color: inventoryController
-                                                                              .currentImagePage
-                                                                              .value ==
-                                                                              index
-                                                                              ? Colors
-                                                                              .blue
-                                                                              : Colors
-                                                                              .grey,
-                                                                        ),
-                                                                      ),
-                                                                ),
-                                                              )),
-                                                          SizedBox(
-                                                              height: 10),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    TextButton(
-                                                      onPressed: () =>
-                                                          Get
-                                                              .back(),
-                                                      child: Text(
-                                                        "بستن",
-                                                        style: AppTextStyle
-                                                            .bodyText,),
-                                                    ),
-                                                  ],
+                                      onTap: () async{
+                                        await inventoryController.getImage(getOneInventories?.recId??"", "InventoryDetail");
+
+                                        Future.delayed(const Duration(milliseconds: 200), () {
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return Dialog(
+                                                backgroundColor: AppColor
+                                                    .backGroundColor,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius
+                                                      .circular(
+                                                      10),
                                                 ),
-                                              ),
-                                            );
-                                          },
-                                        );
+                                                child: Container(
+                                                  padding: EdgeInsets
+                                                      .all(
+                                                      8),
+                                                  child: Column(
+                                                    mainAxisSize: MainAxisSize
+                                                        .min,
+                                                    children: [
+                                                      // نمایش اسلایدی عکس‌ها
+                                                      SizedBox(
+                                                        width: 500,
+                                                        height: 500,
+                                                        child: Stack(
+                                                          children: [
+                                                            PageView.builder(
+                                                              controller: inventoryController
+                                                                  .pageController,
+                                                              itemCount: inventoryController.imageList.length,
+                                                              onPageChanged: (index) =>
+                                                              inventoryController
+                                                                  .currentImagePage
+                                                                  .value =
+                                                                  index,
+                                                              itemBuilder: (context,
+                                                                  index) {
+                                                                final attachment = inventoryController.imageList[index];
+                                                                return Image
+                                                                    .network(
+                                                                  "${BaseUrl
+                                                                      .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                  loadingBuilder: (context,
+                                                                      child,
+                                                                      loadingProgress) {
+                                                                    if (loadingProgress ==
+                                                                        null)
+                                                                      return child;
+                                                                    return Center(
+                                                                      child: CircularProgressIndicator(),
+                                                                    );
+                                                                  },
+                                                                  errorBuilder: (context,
+                                                                      error,
+                                                                      stackTrace) =>
+                                                                      Icon(
+                                                                          Icons
+                                                                              .error,
+                                                                          color: Colors
+                                                                              .red),
+                                                                  fit: BoxFit.contain,
+                                                                );
+                                                              },
+                                                            ),
+                                                            SizedBox(
+                                                              height: 2,),
+                                                            Obx(() {
+                                                              return Positioned(
+                                                                  left: 10,
+                                                                  top: 0,
+                                                                  bottom: 0,
+                                                                  child: Visibility(
+                                                                    visible: inventoryController
+                                                                        .currentImagePage.value > 0,
+                                                                    child: IconButton(
+                                                                      style: ButtonStyle(
+                                                                        backgroundColor: WidgetStateProperty
+                                                                            .all(Colors.black54),
+                                                                        shape: WidgetStateProperty.all(
+                                                                            CircleBorder()),
+                                                                        padding: WidgetStateProperty.all(
+                                                                            EdgeInsets.all(8)),
+                                                                      ),
+                                                                      icon: Icon(Icons.chevron_left,
+                                                                        color: Colors.white,
+                                                                        size: 40,
+                                                                        shadows: [
+                                                                          Shadow(
+                                                                            blurRadius: 10,
+                                                                            color: Colors.black,
+                                                                            offset: Offset(0, 0),
+                                                                          )
+                                                                        ],
+                                                                      ),
+                                                                      onPressed: () {
+                                                                        inventoryController.pageController
+                                                                            .previousPage(
+                                                                          duration: Duration(
+                                                                              milliseconds: 300),
+                                                                          curve: Curves.easeInOut,
+                                                                        );
+                                                                      },
+                                                                    ),
+                                                                  )
+                                                              );
+                                                            }),
+                                                            Obx(() {
+                                                              return Positioned(
+                                                                  right: 10,
+                                                                  top: 0,
+                                                                  bottom: 0,
+                                                                  child: Visibility(
+                                                                    visible: inventoryController
+                                                                        .currentImagePage.value <
+                                                                        (inventoryController.imageList.length ?? 1) -
+                                                                            1,
+                                                                    child: IconButton(
+                                                                      style: ButtonStyle(
+                                                                        backgroundColor: WidgetStateProperty
+                                                                            .all(Colors.black54),
+                                                                        shape: WidgetStateProperty.all(
+                                                                            CircleBorder()),
+                                                                        padding: WidgetStateProperty.all(
+                                                                            EdgeInsets.all(8)),
+                                                                      ),
+                                                                      icon: Icon(Icons.chevron_right,
+                                                                        color: Colors.white,
+                                                                        size: 40,
+                                                                        shadows: [
+                                                                          Shadow(
+                                                                            blurRadius: 10,
+                                                                            color: Colors.black,
+                                                                            offset: Offset(0, 0),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      onPressed: () {
+                                                                        inventoryController.pageController
+                                                                            .nextPage(
+                                                                          duration: Duration(
+                                                                              milliseconds: 300),
+                                                                          curve: Curves.easeInOut,
+                                                                        );
+                                                                      },
+                                                                    ),
+                                                                  )
+                                                              );
+                                                            }),
+                                                            SizedBox(
+                                                              height: 2,),
+                                                            // نمایش نقاط راهنما
+                                                            Obx(() =>
+                                                                Row(
+                                                                  mainAxisAlignment: MainAxisAlignment
+                                                                      .center,
+                                                                  children: List
+                                                                      .generate(
+                                                                    inventoryController.imageList.length,
+                                                                        (index) =>
+                                                                        Container(
+                                                                          width: 8,
+                                                                          height: 8,
+                                                                          margin: EdgeInsets
+                                                                              .symmetric(
+                                                                              horizontal: 4),
+                                                                          decoration: BoxDecoration(
+                                                                            shape: BoxShape
+                                                                                .circle,
+                                                                            color: inventoryController
+                                                                                .currentImagePage
+                                                                                .value ==
+                                                                                index
+                                                                                ? Colors
+                                                                                .blue
+                                                                                : Colors
+                                                                                .grey,
+                                                                          ),
+                                                                        ),
+                                                                  ),
+                                                                )),
+                                                            SizedBox(
+                                                                height: 10),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      TextButton(
+                                                        onPressed: () =>
+                                                            Get
+                                                                .back(),
+                                                        child: Text(
+                                                          "بستن",
+                                                          style: AppTextStyle
+                                                              .bodyText,),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          );
+
+                                        });
+
+
                                       },
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'عکس‌ها (${getOneInventories
-                                                ?.attachments
-                                                ?.length ??
-                                                0}) ',
-                                            style: AppTextStyle
-                                                .bodyText
-                                                .copyWith(
-                                                color: AppColor
-                                                    .iconViewColor
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            width: 25,
-                                            height: 25,
-                                            child: SvgPicture
-                                                .asset(
-                                              'assets/svg/picture.svg',
-                                              colorFilter: ColorFilter
-                                                  .mode(
-                                                AppColor
-                                                    .iconViewColor,
-                                                BlendMode
-                                                    .srcIn,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                      child: SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                                          colorFilter: ColorFilter.mode(
+
+                                            AppColor.textColor,
+
+                                            BlendMode.srcIn,
+                                          )),
                                     ),
                                     //  آیکون ویرایش
                                     GestureDetector(
@@ -4071,23 +3992,26 @@ class InventoryListView extends StatelessWidget {
                                                     backgroundColor: WidgetStatePropertyAll(
                                                         AppColor.primaryColor)),
                                                 onPressed: () {
+                                                  Gregorian date=getOneInventories!.date!.toGregorian();
                                                   Get.back();
-                                                  getOneInventories?.type==1 ?
+                                                  getOneInventories.type==1 ?
                                                   inventoryController.updateDeleteInventoryReceive(
+                                                    "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                       inventory.id!,
-                                                      getOneInventories!.id!, 3 ,1,
+                                                      getOneInventories.id!, 3 ,1,
                                                       inventory.account!.id!,
-                                                    getOneInventories.wallet!.id!,
-                                                    getOneInventories.item!.id!,
-                                                    getOneInventories.quantity!,
+                                                      getOneInventories.wallet!.id!,
+                                                      getOneInventories.item!.id!,
+                                                      getOneInventories.quantity!,
                                                   )
                                                       : inventoryController.updateDeleteInventoryPayment(
+                                                    "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                       inventory.id!,
-                                                      getOneInventories!.id!, 3 ,0,
+                                                      getOneInventories.id!, 3 ,0,
                                                       inventory.account!.id!,
-                                                    getOneInventories.wallet!.id!,
-                                                    getOneInventories.item!.id!,
-                                                    getOneInventories.quantity!,
+                                                      getOneInventories.wallet!.id!,
+                                                      getOneInventories.item!.id!,
+                                                      getOneInventories.quantity!,
                                                   );
                                                 },
                                                 child: Text(

@@ -1,6 +1,7 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
@@ -10,6 +11,7 @@ import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
@@ -530,6 +532,144 @@ class _InventoryDetailUpdatePaymentViewState
                                                   ),
                                                 ),
                                               ),
+                                              SizedBox(
+                                                width: Get.width * 0.7,
+                                                height: 100,
+                                                child: Row(
+                                                  children: inventoryDetailUpdatePaymentController.imageList.map((e)=>
+                                                      Stack(
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap:(){
+                                                              showGeneralDialog(
+                                                                  context: context,
+                                                                  barrierDismissible: true,
+                                                                  barrierLabel: MaterialLocalizations.of(context)
+                                                                      .modalBarrierDismissLabel,
+                                                                  barrierColor: Colors.black45,
+                                                                  transitionDuration: const Duration(milliseconds: 200),
+                                                                  pageBuilder: (BuildContext buildContext,
+                                                                      Animation animation,
+                                                                      Animation secondaryAnimation) {
+                                                                    return Center(
+                                                                      child: Material(
+                                                                        color: Colors.transparent,
+                                                                        child: Container(
+                                                                          margin: EdgeInsets.all(10),
+                                                                          decoration: BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(8),
+                                                                              border: Border.all(color: AppColor.textColor),
+                                                                              image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.fill,
+                                                                              )
+                                                                          ),
+                                                                          height: Get.height * 0.8,width: Get.width * 0.4,
+                                                                          // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  });
+                                                            },
+                                                            child: Container(
+                                                              margin: EdgeInsets.all(10),
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius: BorderRadius.circular(8),
+                                                                  border: Border.all(color: AppColor.textColor),
+                                                                  image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
+                                                                  )
+                                                              ),
+                                                              height: 60,width: 60,
+                                                              // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                            ),
+                                                          ),
+                                                          GestureDetector(
+                                                            child: CircleAvatar(
+                                                              backgroundColor: AppColor.accentColor,radius: 10,
+                                                              child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                            ),
+                                                            onTap: (){
+                                                              inventoryDetailUpdatePaymentController.deleteImage(e);
+                                                            },
+                                                          )
+                                                        ],
+                                                      ),).toList(),
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                children: [
+                                                  Obx(() {
+                                                    if (inventoryDetailUpdatePaymentController
+                                                        .isUploadingDesktop
+                                                        .value) {
+                                                      return Row(
+                                                        children: [
+                                                          Text(
+                                                            'در حال بارگزاری عکس',
+                                                            style: AppTextStyle.labelText.copyWith(fontSize: 12,
+                                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                          ),
+                                                          SizedBox(width: 10,),
+                                                          CircularProgressIndicator(),
+                                                        ],
+                                                      );
+                                                    }
+                                                    return SizedBox(
+                                                      height: 80,
+                                                      width: Get.width * 0.17,
+                                                      child: SingleChildScrollView(
+                                                        scrollDirection: Axis.horizontal,
+                                                        child: Row(
+                                                          children: inventoryDetailUpdatePaymentController.selectedImagesDesktop.map((e){
+                                                            return  Stack(
+                                                              children: [
+                                                                Container(
+                                                                  margin: EdgeInsets.all(10),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius: BorderRadius.circular(8),
+                                                                      border: Border.all(color: AppColor.textColor),
+                                                                      image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
+                                                                  ),
+                                                                  height: 60,width: 60,
+                                                                  // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                                ),
+                                                                GestureDetector(
+                                                                  child: CircleAvatar(
+                                                                    backgroundColor: AppColor.accentColor,radius: 10,
+                                                                    child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                                  ),
+                                                                  onTap: (){
+                                                                    inventoryDetailUpdatePaymentController.selectedImagesDesktop.remove(e);
+                                                                  },
+                                                                )
+                                                              ],
+                                                            );
+                                                          }).toList(),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }),
+                                                  GestureDetector(
+                                                    onTap: () =>
+                                                        inventoryDetailUpdatePaymentController.pickImageDesktop(),
+                                                    child: Container(
+                                                      constraints: BoxConstraints(maxWidth: 100),
+                                                      child: SvgPicture
+                                                          .asset(
+                                                        'assets/svg/camera.svg',
+                                                        width: 30,
+                                                        height: 30,
+                                                        colorFilter: ColorFilter
+                                                            .mode(
+                                                            AppColor
+                                                                .iconViewColor,
+                                                            BlendMode
+                                                                .srcIn),),
+                                                    ),
+
+                                                  ),
+
+                                                ],
+                                              ),
                                               //  دکمه ثبت نهایی
                                               SizedBox(height: 20,),
                                               SizedBox(width: double.infinity,
@@ -558,8 +698,7 @@ class _InventoryDetailUpdatePaymentViewState
                                                                   .circular(
                                                                   10)))),
                                                   onPressed: () async {
-                                                    inventoryDetailUpdatePaymentController
-                                                        .updateInventoryDetailPayment();
+                                                    inventoryDetailUpdatePaymentController.uploadImagesDesktopUpdate( "image", "InventoryDetail");
                                                   },
                                                   child: inventoryDetailUpdatePaymentController
                                                       .isLoading.value

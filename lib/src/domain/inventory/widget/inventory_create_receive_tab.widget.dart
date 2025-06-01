@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/inventory/widget/item_temp_detail_receive.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -636,19 +637,24 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                               itemBuilder: (context, index) {
                                 final detail = inventoryCreateReceiveController
                                     .tempDetails[index];
-                                return Card(color: AppColor.backGroundColor,
-                                  child: ListTile(
-                                    title: Text(detail.item?.name ?? '',
-                                      style: AppTextStyle.bodyText,),
-                                    subtitle: Text('مقدار: ${detail.quantity}',
-                                      style: AppTextStyle.bodyText,),
-                                    trailing: IconButton(
+                                return ListTile(
+                                  title:
+                                  ItemTempDetailWidgetReceive(
+                                    detail: detail,
+                                    recId: (recId,list){
+                                      inventoryCreateReceiveController.updateDetail(
+                                          index,
+                                          recId,
+                                          list
+                                      );
+                                    },
+                                  ),
+                                  trailing: IconButton(
                                       icon: Icon(Icons.delete,
                                         color: AppColor.accentColor,),
-                                      onPressed: () =>
-                                          inventoryCreateReceiveController.tempDetails
-                                              .removeAt(index),
-                                    ),
+                                      onPressed: () {
+                                         inventoryCreateReceiveController.tempDetails.removeAt(index);
+                                      }
                                   ),
                                 );
                               },
@@ -714,7 +720,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                             shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10)))),
                         onPressed: () async {
-                          inventoryCreateReceiveController.submitFinalInventory();
+                          await inventoryCreateReceiveController.uploadImagesDesktop( "image", "InventoryDetail");
                         },
                         child: inventoryCreateReceiveController.isFinalizing.value
                             ?
