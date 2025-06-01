@@ -7,13 +7,16 @@ import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/bank.repository.dart';
 import '../../../config/repository/bank_account.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../users/model/balance_item.model.dart';
@@ -46,6 +49,7 @@ class DepositCreateController extends GetxController{
   final BankAccountRepository bankAccountRepository=BankAccountRepository();
   final WalletRepository walletRepository=WalletRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
 
   final List<BankModel> bankList=<BankModel>[].obs;
   final List<BankAccountModel> bankAccountList=<BankAccountModel>[].obs;
@@ -64,6 +68,12 @@ class DepositCreateController extends GetxController{
   String? selectedIndex ;
   Rx<int> selectedBankId = Rx<int>(0);
   Rx<String> selectedBankName = Rx<String>("");
+  final ImagePicker _picker = ImagePicker();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  var recordId="".obs;
+  var uuid = Uuid();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
 
 
 
@@ -189,7 +199,62 @@ class DepositCreateController extends GetxController{
     }
   }
 
-  Future<DepositModel?> insertDeposit()async{
+  Future<void> pickImageDesktop( ) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.addAll(images);
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> uploadImagesDesktop( String type, String entityType,) async {
+
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      insertDeposit(recordId.value);
+
+    } else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          insertDeposit(recordId.value);
+          Get.back();
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
+      }
+    }
+
+  }
+
+  Future<DepositModel?> insertDeposit(String recId)async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
@@ -212,6 +277,7 @@ class DepositCreateController extends GetxController{
         date: gregorianDate,
         trackingNumber: trackingNumberController.text,
         status: 1,
+        recId:recId,
       );
       if(response.id!=null) {
         Get.back();

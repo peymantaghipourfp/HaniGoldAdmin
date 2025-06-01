@@ -17,7 +17,8 @@ class DepositRequestRepository{
   Future<List<DepositRequestModel>> getDepositRequest(int withdrawId)async{
     try{
       final response=await depositRequestDio.get('DepositRequest/getByWithdraw',queryParameters: {'id':withdrawId});
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       List<dynamic> data=response.data;
       return data.map((depositRequest)=>DepositRequestModel.fromJson(depositRequest)).toList();
     }
@@ -121,6 +122,8 @@ class DepositRequestRepository{
         "infos": []
       };
       var response=await depositRequestDio.post('DepositRequest/insert',data: depositRequestData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
     }catch(e){
       throw ErrorException('خطا در درج اطلاعات:$e');
@@ -159,6 +162,8 @@ class DepositRequestRepository{
         "infos": []
       };
       var response=await depositRequestDio.put('DepositRequest/update',data: depositRequestData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
     }catch(e){
       throw ErrorException('خطا در ویرایش اطلاعات:$e');

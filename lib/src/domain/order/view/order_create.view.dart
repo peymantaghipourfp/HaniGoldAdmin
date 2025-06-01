@@ -32,9 +32,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    final isMobile = ResponsiveBreakpoints
-        .of(context)
-        .isMobile;
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     return Obx(() {
       return Scaffold(
         appBar:CustomAppbar1(
@@ -75,7 +73,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 20),
+                              horizontal:isDesktop ?40 : 2, vertical: isDesktop ? 20 : 5),
                           /*decoration: BoxDecoration(
                             color: AppColor.backGroundColor1.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(16),
@@ -114,8 +112,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                               orderCreateController.clearList();
                                             },
                                             child: Padding(
-                                              padding: EdgeInsets.only(
-                                                  right: isDesktop ? 200 : 135),
+                                              padding: EdgeInsets.only(right: isDesktop ? 200 : 45, bottom: 10),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [

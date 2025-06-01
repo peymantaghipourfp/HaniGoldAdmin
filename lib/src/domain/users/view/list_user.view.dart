@@ -101,7 +101,7 @@ class UserListView extends GetView<UserListController> {
                     ),
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
+                      padding: EdgeInsets.symmetric(horizontal: 50,vertical: 20),
                       color: AppColor.appBarColor.withOpacity(0.5),
                       child: Column(
                         children: [
@@ -126,13 +126,11 @@ class UserListView extends GetView<UserListController> {
                                       },
                                       child: Row(
                                         children: [
-                                          Icon(Icons.add,color: AppColor.textColor,size: 21,),
+                                          Icon(Icons.add,color: AppColor.textColor,size: 18,),
+                                          SizedBox(width: 5,),
                                           Text(
                                             'ایجاد کاربری جدید',
-                                            style: AppTextStyle.labelText.copyWith(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.normal,
-                                            ),
+                                            style: AppTextStyle.labelText,
                                           ),
                                         ],
                                       ),

@@ -77,7 +77,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                             child: Container(
                               constraints: BoxConstraints(maxWidth: 700),
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 40, vertical: 20),
+                                  horizontal:isDesktop ? 40 : 2, vertical: 20),
                               /*decoration: BoxDecoration(
                                 color: AppColor.backGroundColor1,
                                 borderRadius: BorderRadius.circular(16),
@@ -767,7 +767,145 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                   ),
                                                 ),
 
+                                                SizedBox(
+                                                  width: Get.width * 0.7,
+                                                  height: 100,
+                                                  child: Row(
+                                                    children: depositUpdateController.imageList.map((e)=>
+                                                        Stack(
+                                                          children: [
+                                                            GestureDetector(
+                                                              onTap:(){
+                                                                showGeneralDialog(
+                                                                    context: context,
+                                                                    barrierDismissible: true,
+                                                                    barrierLabel: MaterialLocalizations.of(context)
+                                                                        .modalBarrierDismissLabel,
+                                                                    barrierColor: Colors.black45,
+                                                                    transitionDuration: const Duration(milliseconds: 200),
+                                                                    pageBuilder: (BuildContext buildContext,
+                                                                        Animation animation,
+                                                                        Animation secondaryAnimation) {
+                                                                      return Center(
+                                                                        child: Material(
+                                                                          color: Colors.transparent,
+                                                                          child: Container(
+                                                                            margin: EdgeInsets.all(10),
+                                                                            decoration: BoxDecoration(
+                                                                                borderRadius: BorderRadius.circular(8),
+                                                                                border: Border.all(color: AppColor.textColor),
+                                                                                image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.fill,
+                                                                                )
+                                                                            ),
+                                                                            height: Get.height * 0.8,width: Get.width * 0.4,
+                                                                            // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                                          ),
+                                                                        ),
+                                                                      );
+                                                                    });
+                                                              },
+                                                              child: Container(
+                                                                margin: EdgeInsets.all(10),
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius: BorderRadius.circular(8),
+                                                                    border: Border.all(color: AppColor.textColor),
+                                                                    image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
+                                                                    )
+                                                                ),
+                                                                height: 60,width: 60,
+                                                                // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                              ),
+                                                            ),
+                                                            GestureDetector(
+                                                              child: CircleAvatar(
+                                                                backgroundColor: AppColor.accentColor,radius: 10,
+                                                                child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                              ),
+                                                              onTap: (){
+                                                                depositUpdateController.deleteImage(e);
+                                                              },
+                                                            )
+                                                          ],
+                                                        ),
+                                                    ).toList(),
+                                                  ),
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                  children: [
+                                                    Obx(() {
+                                                      if (depositUpdateController
+                                                          .isUploadingDesktop
+                                                          .value) {
+                                                        return Row(
+                                                          children: [
+                                                            Text(
+                                                              'در حال بارگزاری عکس',
+                                                              style: AppTextStyle.labelText.copyWith(fontSize: 12,
+                                                                  fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                            ),
+                                                            SizedBox(width: 10,),
+                                                            CircularProgressIndicator(),
+                                                          ],
+                                                        );
+                                                      }
+                                                      return SizedBox(
+                                                        height: 80,
+                                                        width: Get.width * 0.17,
+                                                        child: SingleChildScrollView(
+                                                          scrollDirection: Axis.horizontal,
+                                                          child: Row(
+                                                            children: depositUpdateController.selectedImagesDesktop.map((e){
+                                                              return  Stack(
+                                                                children: [
+                                                                  Container(
+                                                                    margin: EdgeInsets.all(10),
+                                                                    decoration: BoxDecoration(
+                                                                        borderRadius: BorderRadius.circular(8),
+                                                                        border: Border.all(color: AppColor.textColor),
+                                                                        image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
+                                                                    ),
+                                                                    height: 60,width: 60,
+                                                                    // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                                  ),
+                                                                  GestureDetector(
+                                                                    child: CircleAvatar(
+                                                                      backgroundColor: AppColor.accentColor,radius: 10,
+                                                                      child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                                    ),
+                                                                    onTap: (){
+                                                                      depositUpdateController.selectedImagesDesktop.remove(e);
+                                                                    },
+                                                                  )
+                                                                ],
+                                                              );
+                                                            }).toList(),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                    GestureDetector(
+                                                      onTap: () =>
+                                                          depositUpdateController.pickImageDesktop(),
+                                                      child: Container(
+                                                        constraints: BoxConstraints(maxWidth: 100),
+                                                        child: SvgPicture
+                                                            .asset(
+                                                          'assets/svg/camera.svg',
+                                                          width: 30,
+                                                          height: 30,
+                                                          colorFilter: ColorFilter
+                                                              .mode(
+                                                              AppColor
+                                                                  .iconViewColor,
+                                                              BlendMode
+                                                                  .srcIn),),
+                                                      ),
 
+                                                    ),
+
+                                                  ],
+                                                ),
                                                 // دکمه ویرایش درخواست
                                                 SizedBox(height: 20,),
 
@@ -794,7 +932,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                                     .circular(
                                                                     10)))),
                                                     onPressed: () async {
-                                                      await depositUpdateController.updateDeposit();
+                                                      await depositUpdateController.uploadImagesDesktopUpdate( "image", "Deposit");
                                                     },
                                                     child: depositUpdateController
                                                         .isLoading.value

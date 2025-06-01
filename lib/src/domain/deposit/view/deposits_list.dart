@@ -604,7 +604,7 @@ class DepositsListView extends StatelessWidget {
                                     ElevatedButton(
                                       style: ButtonStyle(
                                           padding: WidgetStatePropertyAll(
-                                              EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                              EdgeInsets.symmetric(horizontal: 23,vertical: 12)),
                                           // elevation: WidgetStatePropertyAll(5),
                                           backgroundColor:
                                           WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
@@ -1793,7 +1793,7 @@ class DepositsListView extends StatelessWidget {
                                         crossAxisCount:  1,
                                         mainAxisSpacing: 10,
                                         crossAxisSpacing: 10,
-                                        mainAxisExtent:  180,
+                                        mainAxisExtent:  190,
                                       ),
                                         itemCount: depositController.depositList.length +
                                       (depositController.hasMore.value ? 1 : 0),
@@ -1810,7 +1810,7 @@ class DepositsListView extends StatelessWidget {
                                             color: AppColor.secondaryColor,
                                             elevation: 10,
                                             child: Padding(
-                                              padding: EdgeInsets.all( 8),
+                                              padding: EdgeInsets.all( 5),
                                               child: Column(
                                                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                 children: [
@@ -1845,6 +1845,7 @@ class DepositsListView extends StatelessWidget {
                                                                 ),
                                                               ],
                                                             ),
+                                                            SizedBox(height: 8,),
                                                             //نام کاربر
                                                             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                               crossAxisAlignment:
@@ -1867,19 +1868,19 @@ class DepositsListView extends StatelessWidget {
                                                                     ),
                                                                   ],
                                                                 ),
-                                                                Row(
+                                                                /*Row(
                                                                   children: [
                                                                     Text('الصاق تصویر ',style: AppTextStyle.labelText,),
                                                                     GestureDetector(
-                                                                      onTap: () =>
-                                                                        depositController.pickImage(deposits.recId.toString(), "image", "Deposit"),
+                                                                      *//*onTap: () =>
+                                                                        depositController.pickImage(deposits.recId.toString(), "image", "Deposit"),*//*
                                                                       child: SvgPicture.asset('assets/svg/camera.svg',
                                                                         width: 25,
                                                                         height: 25,
                                                                         colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),),
                                                                     )
                                                                   ],
-                                                                )
+                                                                )*/
                                                               ],
                                                             ),
 
@@ -2600,8 +2601,8 @@ class DepositsListView extends StatelessWidget {
           DataCell(
             Center(
               child: GestureDetector(
-                onTap: () =>
-                    depositController.pickImageDesktop(deposit.recId.toString(), "image", "Deposit"),
+                /*onTap: () =>
+                    depositController.pickImageDesktop(deposit.recId.toString(), "image", "Deposit"),*/
                 child: SvgPicture.asset('assets/svg/camera.svg',
                   width: 25,
                   height: 25,

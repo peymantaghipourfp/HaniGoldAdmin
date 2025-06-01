@@ -176,11 +176,11 @@ class OrderListView extends StatelessWidget {
                                       Get.toNamed('/orderCreate');
                                     },
                                     child: Text(
-                                      'ایجاد سفارش جدید',
+                                      'سفارش جدید',
                                       style: AppTextStyle.labelText,
                                     ),
                                   ),
-                                  SizedBox(width: 5,),
+                                  SizedBox(width: 3,),
                                   // خروجی اکسل
                                   ElevatedButton(
                                     style: ButtonStyle(
@@ -398,7 +398,7 @@ class OrderListView extends StatelessWidget {
                                       style: AppTextStyle.labelText,
                                     ),
                                   ),
-                                  SizedBox(width: 5,),
+                                  SizedBox(width: 3,),
                                   // خروجی pdf
                                   ElevatedButton(
                                     style: ButtonStyle(
@@ -616,7 +616,7 @@ class OrderListView extends StatelessWidget {
                                       style: AppTextStyle.labelText,
                                     ),
                                   ),
-                                  SizedBox(width: 5,),
+                                  SizedBox(width: 3,),
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
                                     decoration: BoxDecoration(

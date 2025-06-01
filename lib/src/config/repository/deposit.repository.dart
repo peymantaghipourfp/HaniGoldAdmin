@@ -57,7 +57,8 @@ class DepositRepository{
         }}
       };
       final response=await depositDio.post('Deposit/get',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((deposit)=>DepositModel.fromJson(deposit)).toList();
     }
@@ -111,7 +112,8 @@ class DepositRepository{
         }}
       };
       final response=await depositDio.post('Deposit/getWrapper',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
       return ListDepositModel.fromJson(response.data);
     }
     catch(e){
@@ -136,7 +138,7 @@ class DepositRepository{
     required int status,
     required int walletWithdrawId,
     required String trackingNumber,
-
+    required String recId,
   })async{
     try{
       Map<String , dynamic> depositData={
@@ -237,7 +239,7 @@ class DepositRepository{
         "rowNum": 1,
         "id": 1,
         "attribute": "cus",
-        "recId": null,
+        "recId": recId,
         "infos": []
       };
       var response=await depositDio.post('Deposit/insert',data: depositData);
@@ -265,6 +267,7 @@ class DepositRepository{
     required int status,
     required int walletWithdrawId,
     required String trackingNumber,
+    required String recId,
 
   })async{
     try{
@@ -366,7 +369,7 @@ class DepositRepository{
         "rowNum": 1,
         "id": depositId,
         "attribute": "cus",
-        "recId": null,
+        "recId": recId,
         "infos": []
       };
       var response=await depositDio.put('Deposit/update',data: depositData);
@@ -381,7 +384,8 @@ class DepositRepository{
     try {
       final response = await depositDio.get(
           'Deposit/getOne', queryParameters: {'id': depositId});
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       Map<String, dynamic> data=response.data;
       return DepositModel.fromJson(data);
     }catch(e){

@@ -52,13 +52,13 @@ class InsertUserView extends GetView<InsertUserController> {
               children: [
                 Container(
                   margin: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 30,vertical: 10),
                   /*decoration: BoxDecoration(
                       borderRadius: BorderRadius.all(Radius.circular(10)),
                       color: AppColor.circleColor
                   ),*/
                   height: Get.height * 0.9,
-                  width:isDesktop? Get.width * 0.35:Get.width * 0.87,
+                  width:isDesktop? Get.width * 0.35:Get.width * 0.80,
                   child: SingleChildScrollView(
                     child: Column(
                       children: [

@@ -191,7 +191,7 @@ class WithdrawsListView extends StatelessWidget {
                                       Get.toNamed('/withdrawCreate');
                                     },
                                     child: Text(
-                                      'ایجاد درخواست برداشت جدید',
+                                      'برداشت جدید',
                                       style: AppTextStyle.labelText,
                                     ),
                                   ),
@@ -2256,7 +2256,6 @@ class WithdrawsListView extends StatelessWidget {
                                                                         .id!
                                                                         .toInt());
                                                               },
-
                                                               child: SvgPicture
                                                                   .asset(
                                                                   'assets/svg/add.svg',
@@ -2384,9 +2383,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                       ),
                                                                       SizedBox(height: 5,),*/
                                                                       // نام کاربر و مبلغ کل
-                                                                      Row(
-                                                                        mainAxisAlignment: MainAxisAlignment
-                                                                            .spaceBetween,
+                                                                      Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                                         children: [
                                                                           Text(
                                                                             depositRequests
@@ -2395,9 +2392,10 @@ class WithdrawsListView extends StatelessWidget {
                                                                                 "",
                                                                             style: AppTextStyle
                                                                                 .bodyText,),
+                                                                          SizedBox(height: 5,),
                                                                           Row(
                                                                             mainAxisAlignment: MainAxisAlignment
-                                                                                .spaceEvenly,
+                                                                                .start,
                                                                             children: [
                                                                               Text(
                                                                                   'مبلغ کل:',

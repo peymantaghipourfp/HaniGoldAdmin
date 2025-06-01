@@ -314,7 +314,7 @@ Timer? debounceP;
               String success = await uploadRepositoryDesktop.uploadImageDesktop(
                 imageBytes: bytes,
                 fileName: file.name,
-                recordId: recordId.value,
+                recordId: remittanceModel?.recId ?? "",
                 type: type,
                 entityType: entityType,
               );
@@ -540,6 +540,8 @@ Timer? debounceP;
         accountNamePayer: selectedAccount.value?.name??"",
         accountIdReciept: selectedAccountP.value?.id??0,
         accountNameReciept: selectedAccountP.value?.name??"", recId: remittanceModel?.recId??"", id: remittanceModel?.id??0,
+        walletPayerId: remittanceModel?.walletPayer?.id ?? 0  ,
+        walletRecieptId: remittanceModel?.walletReciept?.id ?? 0,
       );
         Get.toNamed('/remittance');
         Get.snackbar(response.infos!.first['title'], response.infos!.first["description"],

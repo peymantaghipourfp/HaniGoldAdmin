@@ -36,7 +36,8 @@ class UploadRepository{
         },
       ),
       );
-      print(response.data);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response.data;
       } else {
@@ -78,7 +79,8 @@ class UploadRepositoryDesktop{
       },
       ),
     );
-    print(response.data);
+    print('Status Code: ${response.statusCode}');
+    print('Response Data: ${response.data}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       return response.data;
     } else {

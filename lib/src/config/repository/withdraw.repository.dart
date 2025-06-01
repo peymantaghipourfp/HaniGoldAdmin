@@ -59,7 +59,8 @@ class WithdrawRepository{
         }}
       };
       final response=await withdrawDio.post('WithdrawRequest/get',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
         List<dynamic> data=response.data;
         return data.map((withdraw)=>WithdrawModel.fromJson(withdraw)).toList();
 
@@ -128,7 +129,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
             }}
           };
       final response=await withdrawDio.post('WithdrawRequest/getWrapper',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
         return ListWithdrawModel.fromJson(response.data);
 
     }
@@ -210,6 +212,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
       print(withdrawData);
       
       var response=await withdrawDio.post('WithdrawRequest/insert',data: withdrawData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -292,7 +296,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
       print(withdrawData);
 
       var response=await withdrawDio.put('WithdrawRequest/update',data: withdrawData);
-      print(response.data);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       return response.data;
     }
     catch(e){

@@ -60,7 +60,8 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getWithFirstRow',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((inventory)=>InventoryModel.fromJson(inventory)).toList();
 

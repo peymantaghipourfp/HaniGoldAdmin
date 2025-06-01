@@ -243,6 +243,8 @@ class RemittanceRepository{
     required int id,
     required double quantity,
     required String? description,
+    required int walletPayerId,
+    required int walletRecieptId,
   })async{
     try{
       Map<String, dynamic> orderData =
@@ -273,7 +275,7 @@ class RemittanceRepository{
               },
               "infos": []
             },
-            "id": null,
+            "id": walletPayerId,
             "infos": []
           },
           "walletReciept": {
@@ -301,7 +303,7 @@ class RemittanceRepository{
               },
               "infos": []
             },
-            "id": null,
+            "id": walletRecieptId,
             "infos": []
           },
           "item": {

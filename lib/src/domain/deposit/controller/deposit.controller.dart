@@ -15,6 +15,7 @@ import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/upload.repository.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:image_picker/image_picker.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -35,8 +36,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
 enum PageState{loading,err,empty,list}
-
-typedef XFile= dynamic;
 
 class DepositController extends GetxController{
   RxInt currentPage = 1.obs;
@@ -135,7 +134,7 @@ class DepositController extends GetxController{
     }
   }
 
-  Future<void> pickImage(String recordId, String type, String entityType) async {
+  /*Future<void> pickImage(String recordId, String type, String entityType) async {
 
         final XFile? image = await _picker.pickImage(source: ImageSource.camera);
         if (image == null) {
@@ -149,8 +148,8 @@ class DepositController extends GetxController{
           await uploadImage(recordId, type, entityType);
         }
         print("Imaggggge: ${selectedImage}");
-  }
-  Future<void> uploadImage(String recordId, String type, String entityType) async {
+  }*/
+  /*Future<void> uploadImage(String recordId, String type, String entityType) async {
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     if (selectedImage.value == null) return;
 
@@ -171,9 +170,9 @@ class DepositController extends GetxController{
     }
     EasyLoading.dismiss();
     isUploading.value = false;
-  }
+  }*/
 
-  Future<void> pickImageDesktop(String recordId, String type, String entityType) async {
+  /*Future<void> pickImageDesktop(String recordId, String type, String entityType) async {
 
       final galleryImage = await _picker.pickImage(source: ImageSource.gallery);
       if(galleryImage!=null) {
@@ -185,9 +184,9 @@ class DepositController extends GetxController{
       }
 
     print("Imaggggge: ${selectedImageDesktop}");
-  }
+  }*/
 
-  Future<void> uploadImageDesktop(String recordId, String type, String entityType) async {
+  /*Future<void> uploadImageDesktop(String recordId, String type, String entityType) async {
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     if (selectedImageDesktop.value == null) return;
     isUploading.value = true;
@@ -208,7 +207,7 @@ class DepositController extends GetxController{
       }
     EasyLoading.dismiss();
       isUploading.value = false;
-  }
+  }*/
 
   Future<void> searchAccounts(String name) async {
     try {

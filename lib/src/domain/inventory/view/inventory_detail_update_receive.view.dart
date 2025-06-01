@@ -923,7 +923,8 @@ class _InventoryDetailUpdateReceiveViewState
                                                             },
                                                           )
                                                         ],
-                                                      ),).toList(),
+                                                      ),
+                                                  ).toList(),
                                                 ),
                                               ),
                                               Row(

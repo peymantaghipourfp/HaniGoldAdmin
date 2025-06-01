@@ -9,18 +9,21 @@ import 'package:hanigold_admin/src/domain/deposit/controller/deposit.controller.
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_getOne.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/bank.repository.dart';
 import '../../../config/repository/bank_account.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../users/model/balance_item.model.dart';
 import '../../wallet/model/wallet.model.dart';
-import '../../withdraw/controller/withdraw.controller.dart';
 import '../../withdraw/model/bank.model.dart';
 import '../../withdraw/model/bank_account.model.dart';
 import '../../withdraw/model/options.model.dart';
@@ -32,7 +35,6 @@ enum PageState{loading,err,empty,list}
 
 class DepositUpdateController extends GetxController{
 
-  final WithdrawController withdrawController=WithdrawController();
   final DepositController depositController=Get.find<DepositController>();
   final DepositRequestGetOneController depositRequestGetOneController=Get.find<DepositRequestGetOneController>();
 
@@ -50,6 +52,8 @@ class DepositUpdateController extends GetxController{
   final BankAccountRepository bankAccountRepository=BankAccountRepository();
   final WalletRepository walletRepository=WalletRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
 
   final RxList<BankModel> bankList=<BankModel>[].obs;
   final RxList<BankAccountModel> bankAccountList=<BankAccountModel>[].obs;
@@ -76,6 +80,13 @@ class DepositUpdateController extends GetxController{
   String? selectedIndex ;
   Rx<int> selectedBankId = Rx<int>(0);
   Rx<String> selectedBankName = Rx<String>("");
+  final ImagePicker _picker = ImagePicker();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  var recordId="".obs;
+  var uuid = Uuid();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
+  RxList<String> imageList = <String>[].obs;
 
 
   /*changeSelectedBank(String newValue){
@@ -237,7 +248,98 @@ class DepositUpdateController extends GetxController{
     }return null;
   }
 
-  Future<DepositModel?> updateDeposit()async{
+  Future<void> pickImageDesktop( ) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.addAll(images);
+
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+
+  }
+
+  Future<void> uploadImagesDesktopUpdate( String type, String entityType,) async {
+
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      updateDeposit(recordId.value);
+    }else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: getOneDeposit.value?.recId ?? "",
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          updateDeposit(recordId.value);
+          Get.back();
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
+      }
+    }
+
+  }
+
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
+  }
+
+  Future<void> deleteImage(String fileName,) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    print('تعداد image:');
+    try{
+      var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
+      if(fetch){
+        getImage(getOneDeposit.value?.recId ??"", "Deposit");
+      }
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }
+
+
+
+  Future<DepositModel?> updateDeposit(String recId)async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
@@ -262,6 +364,7 @@ class DepositUpdateController extends GetxController{
           //date: gregorianDate,
           status: statusId.value,
           trackingNumber: trackingNumberController.text,
+        recId: getOneDeposit.value?.recId ?? "",
       );
 
       if(response!=null) {
@@ -307,6 +410,7 @@ class DepositUpdateController extends GetxController{
     accountController.text=deposit.wallet?.account?.name ?? '';
     trackingNumberController.text=deposit.trackingNumber ?? '';
     statusId.value=deposit.status ?? 0;
+    getImage(getOneDeposit.value?.recId ?? '', "Deposit");
 
     /*if(deposit.wallet?.account!=null){
       if (deposit.bankAccount != null) {

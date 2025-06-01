@@ -57,7 +57,8 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/get',data: options);
-      print(response);
+      print("request : $options" );
+      print("response : ${response.data}" );
         List<dynamic> data=response.data;
         return data.map((order) => OrderModel.fromJson(order)).toList();
 
@@ -130,6 +131,8 @@ class OrderRepository{
       };
 
       var response=await orderDio.post('Order/insert',data: orderData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       /*if(response.statusCode==200){
         print('ثبت با موفقیت انجام شد');
       }else{
@@ -205,7 +208,8 @@ class OrderRepository{
         "notLimit":notLimit,
       };
       var response=await orderDio.put('Order/update',data: orderData );
-      print(response.data);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       // if(response.statusCode==200){
       //   print('ویرایش با موفقیت انجام شد');
       //   print(response.data);

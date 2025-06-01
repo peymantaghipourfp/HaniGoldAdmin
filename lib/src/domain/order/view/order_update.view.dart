@@ -72,7 +72,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 20),
+                              horizontal:isDesktop ?40 : 2, vertical: isDesktop ? 20 : 5),
                           /*decoration: BoxDecoration(
                             color: AppColor.backGroundColor1,
 
@@ -113,7 +113,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                             },
                                             child: Padding(
                                               padding: EdgeInsets.only(
-                                                  right: isDesktop ? 200 : 135),
+                                                  right: isDesktop ? 200 : 70, bottom: 10),
                                               child: Row(
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [

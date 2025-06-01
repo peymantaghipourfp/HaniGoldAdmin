@@ -17,7 +17,8 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
     try {
       final response = await withdrawGetOneDio.get(
           'WithdrawRequest/getOne', queryParameters: {'id': withdrawId});
-      print(response);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
       Map<String, dynamic> data=response.data;
       return WithdrawModel.fromJson(data);
     }catch(e){
