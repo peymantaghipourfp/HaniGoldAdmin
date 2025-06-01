@@ -15,6 +15,7 @@ import 'package:image_picker/image_picker.dart';
 class ItemTempDetailWidgetPayment extends StatefulWidget {
   final InventoryDetailModel detail;
   final double quantity;
+  final List<XFile> image;
   final Function(double)? onQuantityChanged;
   final Function(String,List<XFile>)? recId;
 
@@ -23,7 +24,7 @@ class ItemTempDetailWidgetPayment extends StatefulWidget {
     required this.detail,
     required this.quantity,
     this.onQuantityChanged,
-    this.recId,
+    this.recId, required this.image,
   });
 
   @override
@@ -43,20 +44,24 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
     try{
       final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        setState(() {
+         setState(() {
           selectedImagesDesktop.addAll(images);
-        });
+         });
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
-    widget.recId?.call(recordId.value,selectedImagesDesktop);
-  }
+    if (selectedImagesDesktop.isNotEmpty) {
+      setState(() {
+        widget.recId?.call(recordId.value,selectedImagesDesktop);
+      });
+    }
 
+
+  }
   @override
   void initState() {
     quantityController.text = widget.quantity.toString();
-
     super.initState();
   }
 
@@ -162,8 +167,8 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
                           width: Get.width * 0.17,
                           child: SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: selectedImagesDesktop.map((e){
+                            child:widget.image.isNotEmpty? Row(
+                              children: widget.image.map((e){
                                 return  Stack(
                                   children: [
                                     Container(
@@ -188,7 +193,7 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
                                   ],
                                 );
                               }).toList(),
-                            ),
+                            ):SizedBox(),
                           ),
                         );
                       }),

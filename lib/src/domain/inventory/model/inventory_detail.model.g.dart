@@ -50,8 +50,8 @@ InventoryDetailModel _$InventoryDetailModelFromJson(
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
       inputItemId: (json['inputItemId'] as num?)?.toInt(),
-      date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
-      listXfile: json['listXfile'] as List<XFile>?,
+      date:
+          json['date'] == null ? null : DateTime.parse(json['date'] as String),
     );
 
 Map<String, dynamic> _$InventoryDetailModelToJson(
@@ -84,7 +84,6 @@ Map<String, dynamic> _$InventoryDetailModelToJson(
       'description': instance.description,
       'inputItemId': instance.inputItemId,
       'date': instance.date?.toIso8601String(),
-      'listXfile':instance.listXfile,
     };
 
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(

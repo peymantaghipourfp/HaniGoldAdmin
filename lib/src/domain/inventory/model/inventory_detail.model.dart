@@ -72,7 +72,7 @@ class InventoryDetailModel {
   @JsonKey(name: "date")
   final DateTime? date;
   @JsonKey(name: "listXfile")
-  late List<XFile>? listXfile;
+   late List<XFile>? listXfile;
 
   InventoryDetailModel({
     this.inventoryId,
@@ -102,7 +102,7 @@ class InventoryDetailModel {
     this.description,
     this.inputItemId,
     this.date,
-    this.listXfile
+   // this.listXfile
   });
 
   InventoryDetailModel copyWith({
@@ -163,7 +163,7 @@ class InventoryDetailModel {
       description: description ?? this.description,
       inputItemId: inputItemId ?? this.inputItemId,
       date: date ?? this.date,
-      listXfile: listXfile ?? this.listXfile,
+    //  listXfile: listXfile ?? this.listXfile,
     );
   }
 

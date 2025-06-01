@@ -32,6 +32,7 @@ import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../account/model/account.model.dart';
+import '../../users/model/paginated.model.dart';
 
 enum PageState{loading,err,empty,list}
 class InventoryController extends GetxController{
@@ -47,7 +48,8 @@ class InventoryController extends GetxController{
   final InventoryRepository inventoryRepository=InventoryRepository();
   final AccountRepository accountRepository=AccountRepository();
   final RemittanceRepository remittanceRepository=RemittanceRepository();
-
+  final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController mobileFilterController=TextEditingController();
   final TextEditingController searchController=TextEditingController();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
@@ -60,7 +62,7 @@ class InventoryController extends GetxController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateGetOne=Rx<PageState>(PageState.list);
   RxnInt expandedIndex = RxnInt();
-
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   final ImagePicker _picker = ImagePicker();
   RxList<File?> selectedImages = RxList<File?>();
   RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
@@ -126,7 +128,7 @@ class InventoryController extends GetxController{
 
   @override
   void onInit() {
-    fetchInventoryList();
+    getInventoryListPager();
     setupScrollListener();
     super.onInit();
   }
@@ -134,25 +136,7 @@ class InventoryController extends GetxController{
     scrollController.dispose();
     super.onClose();
   }
-  void goToPage(int page) {
-    if (page < 1) return;
-    currentPage.value = page;
-    fetchInventoryList();
-  }
 
-  void nextPage() {
-    if (hasMore.value) {
-      currentPage.value++;
-      fetchInventoryList();
-    }
-  }
-
-  void previousPage() {
-    if (currentPage.value > 1) {
-      currentPage.value--;
-      fetchInventoryList();
-    }
-  }
 
   void setupScrollListener() {
     scrollController.addListener(() {
@@ -212,7 +196,7 @@ class InventoryController extends GetxController{
     selectedAccountId.value = account.id!;
     searchController.text = account.name!;
     Get.back(); // Close search dialog
-    fetchInventoryList();
+    getInventoryListPager();
   }
 
   void clearSearch() {
@@ -220,47 +204,70 @@ class InventoryController extends GetxController{
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
-    fetchInventoryList();
+    getInventoryListPager();
   }
 
 
-  Future<void> fetchInventoryList()async{
-    try{
-      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-        inventoryList.clear();
-      isLoading.value = true;
+  // Future<void> fetchInventoryList()async{
+  //   try{
+  //     //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+  //       inventoryList.clear();
+  //     isLoading.value = true;
+  //     state.value=PageState.loading;
+  //     final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
+  //     final toIndex = currentPage.value * itemsPerPage.value;
+  //     var fetchedInventoryList=await inventoryRepository.getInventoryList(
+  //         startIndex: startIndex,
+  //         toIndex: toIndex,
+  //       accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+  //       startDate: startDateFilter.value, endDate: endDateFilter.value,
+  //     );
+  //     hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
+  //
+  //     if (selectedAccountId.value == 0) {
+  //       inventoryList.assignAll(fetchedInventoryList);
+  //     }else {
+  //       if (currentPage.value == 1) {
+  //         inventoryList.assignAll(fetchedInventoryList);
+  //       } else {
+  //         inventoryList.addAll(fetchedInventoryList);
+  //       }
+  //     }
+  //
+  //     state.value = inventoryList.isEmpty ? PageState.empty : PageState.list;
+  //     //EasyLoading.dismiss();
+  //       inventoryList.refresh();
+  //       update();
+  //   }catch(e){
+  //     state.value=PageState.err;
+  //     errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+  //   }finally{
+  //     isLoading.value=false;
+  //   }
+  // }
+
+  // لیست حواله ها با صفحه بندی
+  Future<void> getInventoryListPager() async {
+    print("### getRemittanceListPager ###");
+    inventoryList.clear();
+    isLoading.value=true;
+    try {
       state.value=PageState.loading;
-      final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
-      final toIndex = currentPage.value * itemsPerPage.value;
-      var fetchedInventoryList=await inventoryRepository.getInventoryList(
-          startIndex: startIndex,
-          toIndex: toIndex,
-        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
-        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      var response = await inventoryRepository.getInventoryListPager(
+        startIndex: currentPage.value,
+        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
-      hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
-
-      if (selectedAccountId.value == 0) {
-        inventoryList.assignAll(fetchedInventoryList);
-      }else {
-        if (currentPage.value == 1) {
-          inventoryList.assignAll(fetchedInventoryList);
-        } else {
-          inventoryList.addAll(fetchedInventoryList);
-        }
-      }
-
-      state.value = inventoryList.isEmpty ? PageState.empty : PageState.list;
-      //EasyLoading.dismiss();
-        inventoryList.refresh();
-        update();
-    }catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
       isLoading.value=false;
+      inventoryList.addAll(response.inventories??[]);
+      paginated.value=response.paginated;
+      state.value=PageState.list;
+      update();
     }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {}
   }
+
 
 
   Future<void> fetchGetOneInventory(int id)async{
@@ -320,7 +327,7 @@ class InventoryController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف دریافت/پرداخت با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchInventoryList();
+        getInventoryListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -365,7 +372,7 @@ class InventoryController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         Get.back();
-        fetchInventoryList();
+        getInventoryListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -409,7 +416,7 @@ class InventoryController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         Get.back();
-        fetchInventoryList();
+        getInventoryListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -484,7 +491,7 @@ class InventoryController extends GetxController{
       if (uploadStatuses.every((status) => status)) {
         EasyLoading.dismiss();
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
-        await fetchInventoryList();
+        await getInventoryListPager();
        // await fetchGetOneInventory(inventoryId);
       }
     } finally {
@@ -536,7 +543,7 @@ class InventoryController extends GetxController{
       if (uploadStatusesDesktop.every((status) => status)) {
         EasyLoading.dismiss();
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
-        fetchInventoryList();
+        getInventoryListPager();
         await fetchGetOneInventory(inventoryId);
       }
     } finally {
@@ -562,7 +569,7 @@ class InventoryController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchInventoryList();
+        getInventoryListPager();
       }
 
     } catch (e) {
@@ -574,6 +581,12 @@ class InventoryController extends GetxController{
     }
 
     return null;
+  }
+
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    getInventoryListPager();
   }
 
   // لیست عکس ها

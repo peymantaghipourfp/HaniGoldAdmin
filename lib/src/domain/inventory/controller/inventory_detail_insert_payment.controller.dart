@@ -410,7 +410,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
       print(response);
       if (response != null) {
         Get.toNamed('/inventoryList');
-        inventoryController.fetchInventoryList();
+        inventoryController.getInventoryListPager();
         Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
           titleText: Text('موفقیت آمیز',
             textAlign: TextAlign.center,

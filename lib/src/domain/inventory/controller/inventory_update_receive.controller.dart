@@ -472,7 +472,7 @@ class InventoryUpdateReceiveController extends GetxController{
             'ویرایش با موفقیت آنجام شد', textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
-        inventoryController.fetchInventoryList();
+        inventoryController.getInventoryListPager();
         Get.back();
         clearList();
       }

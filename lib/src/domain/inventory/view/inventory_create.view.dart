@@ -32,9 +32,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    final isMobile = ResponsiveBreakpoints
-        .of(context)
-        .isMobile;
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     return Obx(() {
       return Scaffold(
         appBar: isDesktop ?

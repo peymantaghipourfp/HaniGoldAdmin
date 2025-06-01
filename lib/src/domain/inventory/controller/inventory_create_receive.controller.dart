@@ -121,13 +121,19 @@ class InventoryCreateReceiveController extends GetxController{
 
   void updateDetail(int index, String recId,List<XFile> listXfile) {
     if (index >= 0 && index < tempDetails.length) {
-      tempDetails[index].recId=recId;
-      tempDetails[index].listXfile=listXfile;
+      final oldDetail = tempDetails[index];
+      List<XFile> list = tempDetails[index].listXfile!=null?tempDetails[index].listXfile!:[];
+      if(listXfile.isNotEmpty){
+        list .addAll(listXfile);
+      }
+      final newDetail = oldDetail.copyWith(recId: recId,listXfile: list);
+      tempDetails[index] = newDetail;
       print("reccccccc::${recId}");
       print("reccccciddd::${tempDetails[index].recId}");
-
+      update();
     }
   }
+
 
   @override
   void onInit() {
@@ -412,7 +418,7 @@ class InventoryCreateReceiveController extends GetxController{
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
         );
-        inventoryController.fetchInventoryList();
+        inventoryController.getInventoryListPager();
         Get.toNamed('inventoryList');
         clearList();
       }

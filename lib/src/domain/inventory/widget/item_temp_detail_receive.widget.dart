@@ -16,11 +16,11 @@ import 'package:image_picker/image_picker.dart';
 class ItemTempDetailWidgetReceive extends StatefulWidget {
   final InventoryDetailModel detail;
   final Function(String,List<XFile>)? recId;
-
+  final List<XFile> image;
   const ItemTempDetailWidgetReceive({
     super.key,
     required this.detail,
-    this.recId,
+    this.recId, required this.image,
   });
 
   @override
@@ -46,7 +46,11 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
-    widget.recId?.call(recordId.value,selectedImagesDesktop);
+    if (selectedImagesDesktop.isNotEmpty) {
+      setState(() {
+        widget.recId?.call(recordId.value,selectedImagesDesktop);
+      });
+    }
   }
 
   @override
@@ -101,8 +105,8 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                             width: Get.width * 0.18,
                             child: SingleChildScrollView(
                               scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: selectedImagesDesktop.map((e){
+                              child: widget.image.isNotEmpty? Row(
+                                children: widget.image.map((e){
                                   return  Stack(
                                     children: [
                                       Container(
@@ -127,7 +131,7 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                                     ],
                                   );
                                 }).toList(),
-                              ),
+                              ):SizedBox(),
                             ),
                           );
                         }),

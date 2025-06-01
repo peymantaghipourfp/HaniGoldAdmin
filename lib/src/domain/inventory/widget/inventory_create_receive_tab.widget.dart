@@ -647,7 +647,10 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                                           recId,
                                           list
                                       );
-                                    },
+                                      setState(() {
+
+                                      });
+                                    },  image: detail.listXfile!=null?detail.listXfile!:[],
                                   ),
                                   trailing: IconButton(
                                       icon: Icon(Icons.delete,

@@ -423,7 +423,9 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                                               recId,
                                               list
                                           );
-                                      },
+                                          setState(() {
+                                          });
+                                      }, image: detail.listXfile!=null?detail.listXfile!:[],
                                     ),
                                     trailing: IconButton(
                                       icon: Icon(Icons.delete,

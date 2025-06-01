@@ -6,6 +6,7 @@ import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 
 import '../../domain/inventory/model/inventory.model.dart';
+import '../../domain/inventory/model/list_inventory.model.dart';
 import '../network/error/network.error.dart';
 
 class InventoryRepository {
@@ -63,6 +64,74 @@ class InventoryRepository {
       List<dynamic> data=response.data;
       return data.map((inventory)=>InventoryModel.fromJson(inventory)).toList();
 
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+ Future<ListInventoryModel> getInventoryListPager({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate})async{
+    try{
+      Map<String , dynamic> options=
+      accountId != null?
+      {
+        "options" : { "inventory" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "AccountId",
+                  "filterValue": accountId.toString(),
+                  "filterType": 4,
+                  "RefTable": "JoinedData"
+                },
+              ],
+            }
+          ],
+          "orderBy": "JoinedData.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      }:
+      startDate!=""? {
+        "options" : { "inventory" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "Date",
+                  "filterValue": "$startDate|$endDate",
+                  "filterType": 25,
+                  "RefTable": "JoinedData"
+                }
+              ]
+            }
+          ],
+          "orderBy": "JoinedData.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      }:{
+        "options" : { "inventory" : {
+          "orderBy": "JoinedData.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      };
+      final response=await inventoryDio.post('Inventory/getWithFirstRowWrapper',data: options);
+      print(response);
+      return ListInventoryModel.fromJson(response.data);
     }
     catch(e){
       throw ErrorException('خطا:$e');
