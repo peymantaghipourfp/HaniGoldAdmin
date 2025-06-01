@@ -243,9 +243,9 @@ Timer? debounceP;
     try{
       final List<XFile?> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        selectedImagesDesktop.assignAll(images);
-
+        selectedImagesDesktop.addAll(images);
       }
+      print(selectedImagesDesktop.length);
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
@@ -421,7 +421,7 @@ Timer? debounceP;
   Future<void> fetchAccountList(String name) async{
     try{
    //   state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.searchAccountListNew(name,"1");
+      var fetchedAccountList=await accountRepository.searchAccountListNew(name,"");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
     //  state.value=PageState.list;
@@ -475,7 +475,7 @@ Timer? debounceP;
   Future<void> fetchAccountListP(String name) async{
     try{
      // state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.searchAccountListNew(name,"1");
+      var fetchedAccountList=await accountRepository.searchAccountListNew(name,"");
       accountListP.assignAll(fetchedAccountList);
       searchedAccountsP.assignAll(fetchedAccountList);
      // state.value=PageState.list;

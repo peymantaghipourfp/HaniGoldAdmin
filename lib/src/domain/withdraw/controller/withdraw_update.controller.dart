@@ -312,7 +312,7 @@ class WithdrawUpdateController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('ویرایش با موفقیت آنجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        withdrawController.fetchWithdrawList();
+        withdrawController.getWithdrawListPager();
         balanceList.clear();
         clearList();
         withdrawController.withdrawList.refresh();

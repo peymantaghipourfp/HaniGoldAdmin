@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 
+import '../../domain/deposit/model/list_deposit.model.dart';
 import '../network/error/network.error.dart';
 
 class DepositRepository{
@@ -59,6 +60,59 @@ class DepositRepository{
       print(response);
       List<dynamic> data=response.data;
       return data.map((deposit)=>DepositModel.fromJson(deposit)).toList();
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+ Future<ListDepositModel> getDepositListPager({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate})async{
+    try{
+      Map<String, dynamic> options = {
+        "options" : { "deposit" :{
+
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if (accountId != null)
+                {
+                  "fieldName": "Id",
+                  "filterValue": accountId.toString(),
+                  "filterType": 4,
+                  "RefTable": "AccountDeposit"
+                },
+                {
+                  "fieldName": "IsDeleted",
+                  "filterValue": "0",
+                  "filterType": 4,
+                  "RefTable": "Deposit"
+                },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Deposit"
+                  }
+              ]
+            }
+          ],
+          "orderBy": "deposit.Id",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      };
+      final response=await depositDio.post('Deposit/getWrapper',data: options);
+      print(response);
+      return ListDepositModel.fromJson(response.data);
     }
     catch(e){
       throw ErrorException('خطا:$e');

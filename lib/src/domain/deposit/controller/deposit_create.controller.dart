@@ -223,7 +223,7 @@ class DepositCreateController extends GetxController{
                 response.infos?.first.description ?? "", textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
       }
-      withdrawController.fetchWithdrawList();
+      withdrawController.getWithdrawListPager();
       withdrawController.withdrawList.refresh();
       withdrawController.fetchDepositRequestList(depositRequest.withdrawRequest?.id ?? 0);
     }catch(e){

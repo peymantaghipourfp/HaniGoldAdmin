@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 
+import '../../domain/remittance/model/list_withdraw.model.dart';
 import '../network/error/network.error.dart';
 
 class WithdrawRepository{
@@ -61,6 +62,74 @@ class WithdrawRepository{
       print(response);
         List<dynamic> data=response.data;
         return data.map((withdraw)=>WithdrawModel.fromJson(withdraw)).toList();
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+Future<ListWithdrawModel> getWithdrawListPager({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate})async{
+    try{
+      Map<String , dynamic> options=
+          accountId != null?
+      {
+          "options" : { "withdrawrequest" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+                "filters": [
+                {
+                  "fieldName": "Id",
+                  "filterValue": accountId.toString(),
+                  "filterType": 4,
+                  "RefTable": "Account"
+                },
+              ],
+            }
+          ],
+          "orderBy": "withdrawrequest.requestDate",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      }:startDate!=""? {
+            "options" : { "withdrawrequest" : {
+              "Predicate": [
+                {
+                  "innerCondition": 0,
+                  "outerCondition": 0,
+                  "filters": [
+                    {
+                      "fieldName": "RequestDate",
+                      "filterValue": "$startDate|$endDate",
+                      "filterType": 25,
+                      "RefTable": "WithdrawRequest"
+                    }
+                  ]
+                }
+              ],
+              "orderBy": "withdrawrequest.requestDate",
+              "orderByType": "desc",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          }:{
+            "options" : { "withdrawrequest" : {
+              "orderBy": "withdrawrequest.requestDate",
+              "orderByType": "desc",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          };
+      final response=await withdrawDio.post('WithdrawRequest/getWrapper',data: options);
+      print(response);
+        return ListWithdrawModel.fromJson(response.data);
 
     }
     catch(e){

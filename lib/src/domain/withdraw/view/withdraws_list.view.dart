@@ -16,6 +16,7 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import '../../../widget/pager_widget.dart';
 import 'deposit_request_update.view.dart';
 
 class WithdrawsListView extends StatelessWidget {
@@ -49,7 +50,7 @@ class WithdrawsListView extends StatelessWidget {
                           //فیلد جستجو
                           Expanded(
                             child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                              margin: EdgeInsets.symmetric(horizontal: 50,vertical: 0),
                               padding: EdgeInsets.symmetric(horizontal: 20),
                               color: AppColor.appBarColor.withOpacity(0.5),
                               alignment: Alignment.center,
@@ -674,23 +675,23 @@ class WithdrawsListView extends StatelessWidget {
                     ),
                     Obx(() {
                       if (withdrawController.state.value == PageState.loading) {
-                        EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+                      //  EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
                         return Center(child: CircularProgressIndicator());
                       } else
                       if (withdrawController.state.value == PageState.empty) {
-                        EasyLoading.dismiss();
+                       // EasyLoading.dismiss();
                         return EmptyPage(
                           title: 'درخواستی وجود ندارد',
                           callback: () {
-                            withdrawController.fetchWithdrawList();
+                            withdrawController.getWithdrawListPager();
                           },
                         );
                       } else if (withdrawController.state.value == PageState.list) {
-                        EasyLoading.dismiss();
+                       // EasyLoading.dismiss();
                         return isDesktop ?
                         Expanded(
                           child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 60,vertical: 10),
+                            margin: EdgeInsets.symmetric(horizontal: 60,vertical: 0),
                             padding: EdgeInsets.symmetric(horizontal: 20,vertical: 20),
                             color: AppColor.appBarColor.withOpacity(0.5),
                             child: SingleChildScrollView(
@@ -1159,13 +1160,312 @@ class WithdrawsListView extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(5)),
-                                              border: Border.all(color: AppColor.textColor)
+                                        ElevatedButton(
+                                          style: ButtonStyle(
+                                              padding: WidgetStatePropertyAll(
+                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                              // elevation: WidgetStatePropertyAll(5),
+                                              backgroundColor:
+                                              WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
+                                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                  borderRadius: BorderRadius.circular(5)))),
+                                          onPressed: () async {
+                                            showGeneralDialog(
+                                                context: context,
+                                                barrierDismissible: true,
+                                                barrierLabel: MaterialLocalizations.of(context)
+                                                    .modalBarrierDismissLabel,
+                                                barrierColor: Colors.black45,
+                                                transitionDuration: const Duration(milliseconds: 200),
+                                                pageBuilder: (BuildContext buildContext,
+                                                    Animation animation,
+                                                    Animation secondaryAnimation) {
+                                                  return Center(
+                                                    child: Material(
+                                                      color: Colors.transparent,
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.circular(8),
+                                                            color: AppColor.backGroundColor
+                                                        ),
+                                                        width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                        height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                        padding: EdgeInsets.all(20),
+                                                        child: SingleChildScrollView(
+                                                          child: Column(
+                                                            children: [
+                                                              Padding(
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  children: [
+                                                                    Text(
+                                                                      'فیلتر',
+                                                                      style: AppTextStyle.labelText.copyWith(
+                                                                        fontSize: 15,
+                                                                        fontWeight: FontWeight.normal,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                color: AppColor.textColor,height: 0.2,
+                                                              ),
+                                                              Padding(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                child: Column(
+                                                                  children: [
+                                                                    SizedBox(height: 8,),
+                                                                    Column(
+                                                                      crossAxisAlignment:
+                                                                      CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'نام',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                              fontSize: 11,
+                                                                              fontWeight: FontWeight.normal,
+                                                                              color: AppColor.textColor),
+                                                                        ),
+                                                                        SizedBox(height: 10,),
+                                                                        IntrinsicHeight(
+                                                                          child: TextFormField(
+                                                                            autovalidateMode: AutovalidateMode
+                                                                                .onUserInteraction,
+                                                                            controller: withdrawController.nameFilterController,
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                            textAlign: TextAlign.start,
+                                                                            keyboardType:TextInputType.text,
+                                                                            decoration: InputDecoration(
+                                                                              contentPadding:
+                                                                              const EdgeInsets.symmetric(
+                                                                                  vertical: 11,horizontal: 15
+                                                                              ),
+                                                                              isDense: true,
+                                                                              border: OutlineInputBorder(
+                                                                                borderRadius:
+                                                                                BorderRadius.circular(6),
+                                                                              ),
+                                                                              filled: true,
+                                                                              fillColor: AppColor.textFieldColor,
+                                                                              errorMaxLines: 1,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8,),
+                                                                    Column(
+                                                                      crossAxisAlignment:
+                                                                      CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'شماره تماس',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                              fontSize: 11,
+                                                                              fontWeight: FontWeight.normal,
+                                                                              color: AppColor.textColor),
+                                                                        ),
+                                                                        SizedBox(height: 10,),
+                                                                        IntrinsicHeight(
+                                                                          child: TextFormField(
+                                                                            autovalidateMode: AutovalidateMode
+                                                                                .onUserInteraction,
+                                                                            controller: withdrawController.mobileFilterController,
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                            textAlign: TextAlign.center,
+                                                                            keyboardType:TextInputType.phone,
+                                                                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                              TextInputFormatter.withFunction((oldValue, newValue) {
+                                                                                // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                                String newText = newValue.text
+                                                                                    .replaceAll('٠', '0')
+                                                                                    .replaceAll('١', '1')
+                                                                                    .replaceAll('٢', '2')
+                                                                                    .replaceAll('٣', '3')
+                                                                                    .replaceAll('٤', '4')
+                                                                                    .replaceAll('٥', '5')
+                                                                                    .replaceAll('٦', '6')
+                                                                                    .replaceAll('٧', '7')
+                                                                                    .replaceAll('٨', '8')
+                                                                                    .replaceAll('٩', '9');
 
-                                          ),
+                                                                                return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                                                              }),
+                                                                            ],
+                                                                            decoration: InputDecoration(
+                                                                              contentPadding:
+                                                                              const EdgeInsets.symmetric(
+                                                                                  vertical: 11,horizontal: 15
+
+                                                                              ),
+                                                                              isDense: true,
+                                                                              border: OutlineInputBorder(
+                                                                                borderRadius:
+                                                                                BorderRadius.circular(6),
+                                                                              ),
+
+                                                                              filled: true,
+                                                                              fillColor: AppColor.textFieldColor,
+                                                                              errorMaxLines: 1,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'از تاریخ',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                              fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets.only(bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (value){
+                                                                                if(value==null || value.isEmpty){
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: withdrawController.dateStartController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle.labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius.circular(10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor.textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali.now(),
+                                                                                  firstDate: Jalali(1400,1,1),
+                                                                                  lastDate: Jalali(1450,12,29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                  locale: Locale("fa","IR"),
+                                                                                );
+                                                                                Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                withdrawController.startDateFilter.value =
+                                                                                "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                withdrawController.dateStartController.text =
+                                                                                "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'تا تاریخ',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                              fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets.only(bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (value){
+                                                                                if(value==null || value.isEmpty){
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: withdrawController.dateEndController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle.labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius.circular(10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor.textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali.now(),
+                                                                                  firstDate: Jalali(1400,1,1),
+                                                                                  lastDate: Jalali(1450,12,29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                  locale: Locale("fa","IR"),
+                                                                                );
+                                                                                // DateTime date=DateTime.now();
+                                                                                Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                withdrawController.endDateFilter.value =
+                                                                                "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                withdrawController.dateEndController.text =
+                                                                                "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              //   Spacer(),
+                                                              Container(
+                                                                margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                                width: double.infinity,
+                                                                height: 40,
+                                                                child: ElevatedButton(
+                                                                  style: ButtonStyle(
+                                                                      padding: WidgetStatePropertyAll(
+                                                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                      // elevation: WidgetStatePropertyAll(5),
+                                                                      backgroundColor:
+                                                                      WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                          borderRadius: BorderRadius.circular(5)))),
+                                                                  onPressed: () async {
+                                                                    withdrawController.getWithdrawListPager();
+                                                                    Get.back();
+
+                                                                  },
+                                                                  child: withdrawController.isLoading.value?
+                                                                  CircularProgressIndicator(
+                                                                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                  ) :
+                                                                  Text(
+                                                                    'فیلتر',
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                });
+                                          },
                                           child: Row(
                                             children: [
                                               SvgPicture.asset(
@@ -1174,13 +1474,13 @@ class WithdrawsListView extends StatelessWidget {
                                                   colorFilter:
                                                   ColorFilter
                                                       .mode(
-                                                    AppColor
+                                                    withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
                                                         .textColor,
                                                     BlendMode
                                                         .srcIn,
                                                   )),
                                               SizedBox(
-                                                width: 5,
+                                                width: 10,
                                               ),
                                               Text(
                                                 'فیلتر',
@@ -1189,7 +1489,7 @@ class WithdrawsListView extends StatelessWidget {
                                                     .copyWith(
                                                     fontSize: isDesktop
                                                         ? 12
-                                                        : 10),
+                                                        : 10,color:  withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                               ),
                                             ],
                                           ),
@@ -1221,7 +1521,6 @@ class WithdrawsListView extends StatelessWidget {
                                                   columnSpacing: 40,
                                                   horizontalMargin: 6,
                                                 ),
-                                                buildPaginationControls(),
                                               ],
                                             ),
                                           ),
@@ -1233,6 +1532,7 @@ class WithdrawsListView extends StatelessWidget {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 50,)
                                 ],
                               ),
                             ),
@@ -1765,7 +2065,7 @@ class WithdrawsListView extends StatelessWidget {
                                                                 value, 0);
                                                           }
                                                           withdrawController
-                                                              .fetchWithdrawList();
+                                                              .getWithdrawListPager();
                                                         },
                                                         shape: const RoundedRectangleBorder(
                                                           borderRadius: BorderRadius
@@ -2549,7 +2849,7 @@ class WithdrawsListView extends StatelessWidget {
                       EasyLoading.dismiss();
                       return ErrPage(
                         callback: () {
-                          withdrawController.fetchWithdrawList();
+                          withdrawController.getWithdrawListPager();
                         },
                         title: "خطا در دریافت لیست درخواست ها",
                         des: 'برای دریافت درخواست ها مجددا تلاش کنید',
@@ -2561,6 +2861,20 @@ class WithdrawsListView extends StatelessWidget {
               ),
             ),
           ),
+          Obx(()=>Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              withdrawController.paginated.value!=null?   Container(
+                  height: 70,
+                  margin: EdgeInsets.symmetric(horizontal: 70,vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  color: AppColor.appBarColor.withOpacity(0.5),
+                  alignment: Alignment.bottomCenter,
+                  child:PagerWidget(countPage: withdrawController.paginated.value?.totalCount??0, callBack: (int index) {
+                    withdrawController.isChangePage(index);
+                  },)):SizedBox(),
+            ],
+          ),)
         ],
       ),
     );
@@ -2841,7 +3155,7 @@ class WithdrawsListView extends StatelessWidget {
                                   value, 0);
                             }
                             withdrawController
-                                .fetchWithdrawList();
+                                .getWithdrawListPager();
                           },
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius
@@ -2988,7 +3302,7 @@ class WithdrawsListView extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 6),
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                   // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // آیکون تقسیم و حذف
                       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -3040,7 +3354,7 @@ class WithdrawsListView extends StatelessWidget {
                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SvgPicture.asset(
-                                    'assets/svg/add.svg',width: 25,height: 25,
+                                    'assets/svg/add.svg',width: 20,height: 20,
                                     colorFilter: ColorFilter
                                         .mode(AppColor
                                         .buttonColor,
@@ -3052,7 +3366,7 @@ class WithdrawsListView extends StatelessWidget {
                                       .bodyText
                                       .copyWith(
                                       color: AppColor
-                                          .buttonColor),),
+                                          .buttonColor,fontSize: 12),),
                               ],
                             ),
                           ),
@@ -3101,7 +3415,7 @@ class WithdrawsListView extends StatelessWidget {
                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SvgPicture.asset(
-                                    'assets/svg/trash-bin.svg',width: 25,height: 25,
+                                    'assets/svg/trash-bin.svg',width: 20,height: 20,
                                     colorFilter: ColorFilter
                                         .mode(AppColor
                                         .accentColor,
@@ -3113,12 +3427,14 @@ class WithdrawsListView extends StatelessWidget {
                                       .bodyText
                                       .copyWith(
                                       color: AppColor
-                                          .accentColor),),
+                                          .accentColor,fontSize: 12),),
                               ],
                             ),
                           ),
                         ],
                       ),
+
+                      SizedBox(height: 10,),
                       // آیکون مشاهده و ویرایش
                       Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -3131,7 +3447,7 @@ class WithdrawsListView extends StatelessWidget {
                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SvgPicture.asset(
-                                    'assets/svg/eye1.svg',width: 25,height: 25,
+                                    'assets/svg/eye1.svg',width: 20,height: 20,
                                     colorFilter: ColorFilter
                                         .mode(AppColor
                                         .iconViewColor,
@@ -3143,7 +3459,7 @@ class WithdrawsListView extends StatelessWidget {
                                       .bodyText
                                       .copyWith(
                                       color: AppColor
-                                          .iconViewColor),),
+                                          .iconViewColor,fontSize: 12),),
                               ],
                             ),
                           ),
@@ -3170,7 +3486,7 @@ class WithdrawsListView extends StatelessWidget {
                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 SvgPicture.asset(
-                                    'assets/svg/edit.svg',width: 25,height: 25,
+                                    'assets/svg/edit.svg',width: 20,height: 20,
                                     colorFilter: ColorFilter
                                         .mode(AppColor
                                         .iconViewColor,
@@ -3182,7 +3498,7 @@ class WithdrawsListView extends StatelessWidget {
                                       .bodyText
                                       .copyWith(
                                       color: AppColor
-                                          .iconViewColor),),
+                                          .iconViewColor,fontSize: 12),),
                               ],
                             ),
                           ),
@@ -3826,32 +4142,6 @@ class WithdrawsListView extends StatelessWidget {
     });
   }
 
-  Widget buildPaginationControls() {
-    return Obx(() => Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.chevron_left),
-            onPressed: withdrawController.currentPage.value > 1
-                ? withdrawController.previousPage
-                : null,
-          ),
-          Text(
-            'صفحه ${withdrawController.currentPage.value}',
-            style: AppTextStyle.bodyText,
-          ),
-          IconButton(
-            icon: Icon(Icons.chevron_right),
-            onPressed: withdrawController.hasMore.value
-                ? withdrawController.nextPage
-                : null,
-          ),
-        ],
-      ),
-    ));
-  }
 
   Map<String, List<WithdrawModel>> groupWithdrawsByDate(List<WithdrawModel> withdraws) {
     final grouped = <String, List<WithdrawModel>>{};

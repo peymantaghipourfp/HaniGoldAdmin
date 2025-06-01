@@ -23,6 +23,7 @@ import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/reason_rejection.repository.dart';
 import '../../account/model/account.model.dart';
+import '../../users/model/paginated.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/predicate.model.dart';
@@ -39,7 +40,7 @@ typedef XFile= dynamic;
 
 class DepositController extends GetxController{
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 20.obs;
+  RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
   final TextEditingController searchController=TextEditingController();
@@ -51,8 +52,9 @@ class DepositController extends GetxController{
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
-
-  var depositList=<DepositModel>[].obs;
+  final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController mobileFilterController=TextEditingController();
+  RxList<DepositModel> depositList = RxList([]);
   var errorMessage=''.obs;
   var isLoading=true.obs;
   var isLoadingRegister=true.obs;
@@ -60,6 +62,7 @@ class DepositController extends GetxController{
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
   final Rxn<ReasonRejectionModel> selectedReasonRejection = Rxn<ReasonRejectionModel>();
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
 
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
@@ -75,11 +78,15 @@ class DepositController extends GetxController{
     state.value=PageState.err;
     errorMessage.value=message;
   }
-
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    getDepositListPager();
+  }
 
   @override
   void onInit() {
-    fetchDepositList();
+    getDepositListPager();
     setupScrollListener();
     super.onInit();
   }
@@ -88,26 +95,6 @@ class DepositController extends GetxController{
     scrollController.dispose();
     super.onClose();
   }
-  void goToPage(int page) {
-    if (page < 1) return;
-    currentPage.value = page;
-    fetchDepositList();
-  }
-
-  void nextPage() {
-    if (hasMore.value) {
-      currentPage.value++;
-      fetchDepositList();
-    }
-  }
-
-  void previousPage() {
-    if (currentPage.value > 1) {
-      currentPage.value--;
-      fetchDepositList();
-    }
-  }
-
   void setupScrollListener() {
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
@@ -242,7 +229,7 @@ class DepositController extends GetxController{
     selectedAccountId.value = account.id!;
     searchController.text = account.name!;
     Get.back(); // Close search dialog
-    fetchDepositList();
+    getDepositListPager();
   }
 
   void clearSearch() {
@@ -250,47 +237,69 @@ class DepositController extends GetxController{
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
-    fetchDepositList();
+    getDepositListPager();
   }
-
-  Future<void> fetchDepositList() async{
-    try{
-        depositList.clear();
-      isLoading.value = true;
+// لیست دریافت ها با صفحه بندی
+  Future<void> getDepositListPager() async {
+    print("### getDepositListPager ###");
+    depositList.clear();
+    isLoading.value=true;
+    try {
       state.value=PageState.loading;
-        //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-      final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
-      final toIndex = currentPage.value * itemsPerPage.value;
-      var fetchedDepositList=await depositRepository.getDepositList(
-          startIndex: startIndex,
-          toIndex: toIndex,
-        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
-        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      var response = await depositRepository.getDepositListPager(
+        startIndex: currentPage.value,
+        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
-      hasMore.value = fetchedDepositList.length == itemsPerPage.value;
-
-      if (selectedAccountId.value == 0) {
-        depositList.assignAll(fetchedDepositList);
-      }else {
-        if (currentPage.value == 1) {
-          depositList.assignAll(fetchedDepositList);
-        } else {
-          depositList.addAll(fetchedDepositList);
-        }
-      }
-      print(depositList.length);
-      state.value = depositList.isEmpty ? PageState.empty : PageState.list;
-      //EasyLoading.dismiss();
-        depositList.refresh();
-        update();
-
-    }catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
       isLoading.value=false;
+      depositList.addAll(response.deposit??[]);
+      paginated.value=response.paginated;
+      state.value=PageState.list;
+
+      update();
     }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {}
   }
+
+  // Future<void> fetchDepositList() async{
+  //   try{
+  //       depositList.clear();
+  //     isLoading.value = true;
+  //     state.value=PageState.loading;
+  //       //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+  //     final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
+  //     final toIndex = currentPage.value * itemsPerPage.value;
+  //     var fetchedDepositList=await depositRepository.getDepositList(
+  //         startIndex: startIndex,
+  //         toIndex: toIndex,
+  //       accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+  //       startDate: startDateFilter.value, endDate: endDateFilter.value,
+  //     );
+  //     hasMore.value = fetchedDepositList.length == itemsPerPage.value;
+  //
+  //     if (selectedAccountId.value == 0) {
+  //       depositList.assignAll(fetchedDepositList);
+  //     }else {
+  //       if (currentPage.value == 1) {
+  //         depositList.assignAll(fetchedDepositList);
+  //       } else {
+  //         depositList.addAll(fetchedDepositList);
+  //       }
+  //     }
+  //     print(depositList.length);
+  //     state.value = depositList.isEmpty ? PageState.empty : PageState.list;
+  //     //EasyLoading.dismiss();
+  //       depositList.refresh();
+  //       update();
+  //
+  //   }catch(e){
+  //     state.value=PageState.err;
+  //     errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+  //   }finally{
+  //     isLoading.value=false;
+  //   }
+  // }
 
 
   Future<List<dynamic>?> deleteDeposit(int depositId,bool isDeleted)async{
@@ -304,7 +313,7 @@ class DepositController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف واریزی با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchDepositList();
+        getDepositListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -444,15 +453,13 @@ class DepositController extends GetxController{
         depositId: depositId,
         registered: registered,
       );
-      if(response!= null){
-        Get.snackbar(response.first['title'],response.first["description"],
-            titleText: Text(response.first['title'],
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchDepositList();
-      }
-    } catch (e) {
+      Get.snackbar(response.first['title'],response.first["description"],
+          titleText: Text(response.first['title'],
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+          messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+     // getDepositListPager();
+        } catch (e) {
       EasyLoading.dismiss();
       throw ErrorException('خطا در ریجیستر: $e');
     } finally {

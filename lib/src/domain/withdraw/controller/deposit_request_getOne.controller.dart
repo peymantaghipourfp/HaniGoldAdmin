@@ -70,7 +70,7 @@ class DepositRequestGetOneController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف واریزی با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        depositController.fetchDepositList();
+        depositController.getDepositListPager();
         fetchGetOneDepositRequest(id.value);
       }
     }catch(e){
@@ -96,7 +96,7 @@ class DepositRequestGetOneController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        depositController.fetchDepositList();
+        depositController.getDepositListPager();
         fetchGetOneDepositRequest(id.value);
       }
 

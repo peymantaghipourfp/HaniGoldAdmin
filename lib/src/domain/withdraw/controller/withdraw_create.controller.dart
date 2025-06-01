@@ -289,7 +289,7 @@ Future<WithdrawModel?> insertWithdraw()async{
             messageText: Text(
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
-        withdrawController.fetchWithdrawList();
+        withdrawController.getWithdrawListPager();
         balanceList.clear();
         clearList();
       }

@@ -2,7 +2,6 @@
 
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
-import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:excel/excel.dart';
@@ -39,6 +38,8 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../users/model/paginated.model.dart';
+
 
 enum PageState{loading,err,empty,list}
 class WithdrawController extends GetxController{
@@ -59,14 +60,15 @@ class WithdrawController extends GetxController{
   final TextEditingController searchController=TextEditingController();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
-
-  var withdrawList=<WithdrawModel>[].obs;
+  final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController mobileFilterController=TextEditingController();
+  RxList<WithdrawModel> withdrawList = RxList([]);
   var depositRequestList=<DepositRequestModel>[].obs;
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<AccountModel> filterAccountList=<AccountModel>[].obs;
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
   final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
-
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   var errorMessage=''.obs;
   var isLoading=true.obs;
   RxBool isLoadingDepositRequestList=RxBool(true);
@@ -89,7 +91,11 @@ class WithdrawController extends GetxController{
     state.value=PageState.err;
     errorMessage.value=message;
   }
-
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    getWithdrawListPager();
+  }
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
     getBalanceList(newValue?.id ?? 0);
@@ -108,33 +114,12 @@ class WithdrawController extends GetxController{
     return expandedIndex.value==index;
   }
 
-  void goToPage(int page) {
-    if (page < 1) return;
-    currentPage.value = page;
-    fetchWithdrawList();
-    expandedIndex.value=null;
-  }
 
-  void nextPage() {
-    if (hasMore.value) {
-      currentPage.value++;
-      fetchWithdrawList();
-      expandedIndex.value=null;
-    }
-  }
-
-  void previousPage() {
-    if (currentPage.value > 1) {
-      currentPage.value--;
-      fetchWithdrawList();
-      expandedIndex.value=null;
-    }
-  }
 
 
   @override
   void onInit() {
-    fetchWithdrawList();
+    getWithdrawListPager();
     fetchAccountList();
     setupScrollListener();
     super.onInit();
@@ -231,7 +216,7 @@ class WithdrawController extends GetxController{
     selectedAccountId.value = account.id!;
     searchController.text = account.name!;
     Get.back(); // Close search dialog
-    fetchWithdrawList();
+    getWithdrawListPager();
   }
 
   void clearSearch() {
@@ -239,48 +224,71 @@ class WithdrawController extends GetxController{
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
-    fetchWithdrawList();
+    getWithdrawListPager();
   }
 
-  //لیست درخواست های برداشت(withdrawRequest)
-  Future<void> fetchWithdrawList()async{
-    try{
-        //withdrawList.clear();
-      isLoading.value = true;
+  // //لیست درخواست های برداشت(withdrawRequest)
+  // Future<void> fetchWithdrawList()async{
+  //   try{
+  //       //withdrawList.clear();
+  //     isLoading.value = true;
+  //     state.value=PageState.loading;
+  //       //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+  //     final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
+  //     final toIndex = currentPage.value * itemsPerPage.value;
+  //     var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
+  //         startIndex: startIndex,
+  //         toIndex: toIndex,
+  //         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+  //       startDate: startDateFilter.value, endDate: endDateFilter.value,
+  //     );
+  //     hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
+  //
+  //     if (selectedAccountId.value == 0) {
+  //       withdrawList.assignAll(fetchedWithdrawList);
+  //     }else {
+  //       if (currentPage.value == 1) {
+  //         withdrawList.assignAll(fetchedWithdrawList);
+  //
+  //       } else {
+  //         withdrawList.addAll(fetchedWithdrawList);
+  //
+  //       }
+  //     }
+  //     state.value = withdrawList.isEmpty ? PageState.empty : PageState.list;
+  //     //EasyLoading.dismiss();
+  //     withdrawList.refresh();
+  //     update();
+  //   }
+  //   catch(e){
+  //     state.value=PageState.err;
+  //     errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+  //   }finally{
+  //     isLoading.value=false;
+  //   }
+  // }
+
+  // لیست دریافت ها با صفحه بندی
+  Future<void> getWithdrawListPager() async {
+    print("### getWithdrawListPager ###");
+    withdrawList.clear();
+    isLoading.value=true;
+    try {
       state.value=PageState.loading;
-        //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-      final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
-      final toIndex = currentPage.value * itemsPerPage.value;
-      var fetchedWithdrawList=await withdrawRepository.getWithdrawList(
-          startIndex: startIndex,
-          toIndex: toIndex,
-          accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
-        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      var response = await withdrawRepository.getWithdrawListPager(
+        startIndex: currentPage.value,accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
-      hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
+      isLoading.value=false;
+      withdrawList.addAll(response.withdrawRequests??[]);
+      paginated.value=response.paginated;
+      state.value=PageState.list;
 
-      if (selectedAccountId.value == 0) {
-        withdrawList.assignAll(fetchedWithdrawList);
-      }else {
-        if (currentPage.value == 1) {
-          withdrawList.assignAll(fetchedWithdrawList);
-
-        } else {
-          withdrawList.addAll(fetchedWithdrawList);
-
-        }
-      }
-      state.value = withdrawList.isEmpty ? PageState.empty : PageState.list;
-      //EasyLoading.dismiss();
-      withdrawList.refresh();
       update();
     }
-    catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
-      isLoading.value=false;
-    }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {}
   }
 
   // مدل آپشن ReasonRejection
@@ -483,7 +491,7 @@ class WithdrawController extends GetxController{
                 style: TextStyle(color: AppColor.textColor)));
         clearList();
         fetchDepositRequestList(id);
-        fetchWithdrawList();
+        getWithdrawListPager();
         return depositRequestResponse;
       }
     }catch(e){
@@ -520,7 +528,7 @@ class WithdrawController extends GetxController{
                 style: TextStyle(color: AppColor.textColor)));
         clearList();
         fetchDepositRequestList(withdrawId);
-        fetchWithdrawList();
+        getWithdrawListPager();
         return depositRequestResponse;
       }
     }catch(e){
@@ -553,7 +561,7 @@ class WithdrawController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف درخواست برداشت با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchWithdrawList();
+        getWithdrawListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -578,7 +586,7 @@ class WithdrawController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(updateDateResponse.infos!.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchWithdrawList();
+        getWithdrawListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -602,7 +610,7 @@ class WithdrawController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف درخواست واریزی با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         fetchDepositRequestList(depositRequestId);
-        fetchWithdrawList();
+        getWithdrawListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
