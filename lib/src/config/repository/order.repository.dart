@@ -68,6 +68,63 @@ class OrderRepository{
   }
 
 
+  Future<List<OrderModel>> getOrderListPager({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate}) async{
+    try{
+      Map<String, dynamic> options = {
+        "options": {
+          "order": {
+              "Predicate": [
+                {
+                  "innerCondition": 0,
+                  "outerCondition": 0,
+                  "filters": [
+                    if (accountId != null)
+                    {
+                      "fieldName": "AccountId",
+                      "filterValue": accountId.toString(),
+                      "filterType": 4,
+                      "RefTable": "Orders"
+                    },
+                    {
+                      "fieldName": "IsDeleted",
+                      "filterValue": "0",
+                      "filterType": 4,
+                      "RefTable": "Orders"
+                    },
+                    if(startDate!="")
+                      {
+                        "fieldName": "Date",
+                        "filterValue": "$startDate|$endDate",
+                        "filterType": 25,
+                        "RefTable": "Orders"
+                      }
+                  ]
+                }
+              ],
+            "orderBy": "Orders.Id",
+            "orderByType": "desc",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
+          }
+        }
+      };
+      final response=await orderDio.post('Order/get',data: options);
+      print("request : $options" );
+      print("response : ${response.data}" );
+        List<dynamic> data=response.data;
+        return data.map((order) => OrderModel.fromJson(order)).toList();
+
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+
   Future<Map<String, dynamic>> insertOrder({
     required String date,
     required int accountId,

@@ -41,6 +41,7 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
 
   Future<void> pickImageDesktop() async {
     recordId.value=uuid.v4();
+    selectedImagesDesktop.clear();
     try{
       final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
@@ -187,7 +188,9 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
                                         child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
                                       ),
                                       onTap: (){
-                                        selectedImagesDesktop.remove(e);
+                                       setState(() {
+                                         widget.image.remove(e);
+                                       });
                                       },
                                     )
                                   ],
