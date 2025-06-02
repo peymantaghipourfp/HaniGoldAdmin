@@ -102,7 +102,7 @@ class InventoryDetailModel {
     this.description,
     this.inputItemId,
     this.date,
-   // this.listXfile
+    this.listXfile
   });
 
   InventoryDetailModel copyWith({
@@ -163,7 +163,7 @@ class InventoryDetailModel {
       description: description ?? this.description,
       inputItemId: inputItemId ?? this.inputItemId,
       date: date ?? this.date,
-    //  listXfile: listXfile ?? this.listXfile,
+      listXfile: listXfile ?? this.listXfile,
     );
   }
 
