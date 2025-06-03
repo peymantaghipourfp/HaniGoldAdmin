@@ -37,10 +37,11 @@ class OrderController extends GetxController{
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
-  PaginatedModel? paginated;
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
-
+  final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController mobileFilterController=TextEditingController();
   final TextEditingController searchController=TextEditingController();
   final AccountRepository accountRepository=AccountRepository();
   final OrderRepository orderRepository=OrderRepository();
@@ -62,32 +63,13 @@ class OrderController extends GetxController{
 
   @override
   void onInit() {
-    fetchOrderList();
+    getDepositListPager();
     setupScrollListener();
     super.onInit();
   }
   @override void onClose() {
     scrollController.dispose();
     super.onClose();
-  }
-  void goToPage(int page) {
-    if (page < 1) return;
-    currentPage.value = page;
-    fetchOrderList();
-  }
-
-  void nextPage() {
-    if (hasMore.value) {
-      currentPage.value++;
-      fetchOrderList();
-    }
-  }
-
-  void previousPage() {
-    if (currentPage.value > 1) {
-      currentPage.value--;
-      fetchOrderList();
-    }
   }
 
   void setupScrollListener() {
@@ -172,7 +154,7 @@ class OrderController extends GetxController{
     selectedAccountId.value = account.id!;
     searchController.text = account.name!;
     Get.back(); // Close search dialog
-    fetchOrderList();
+    getDepositListPager();
   }
 
   void clearSearch() {
@@ -180,51 +162,72 @@ class OrderController extends GetxController{
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
-    fetchOrderList();
+    getDepositListPager();
   }
 
-
-
-  Future<List<OrderModel>> fetchOrderList() async{
-    try{
-      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-        orderList.clear();
-        isLoading.value=true;
+// لیست سفارشات با صفحه بندی
+  Future<void> getDepositListPager() async {
+    print("### getDepositListPager ###");
+    orderList.clear();
+    isLoading.value=true;
+    try {
       state.value=PageState.loading;
-      final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
-      final toIndex = currentPage.value * itemsPerPage.value;
-      var fetchedOrderList=await orderRepository.getOrderList(
-          startIndex: startIndex,
-          toIndex: toIndex,
-        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
-        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      var response = await orderRepository.getOrderListPager(
+        startIndex: currentPage.value,
+        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
-      hasMore.value = fetchedOrderList.length == itemsPerPage.value;
-      //print("بالانس: ${orderList.first.balances}");
-
-      if (selectedAccountId.value == 0) {
-        orderList.assignAll(fetchedOrderList);
-      }else {
-        if (currentPage.value == 1) {
-          orderList.assignAll(fetchedOrderList);
-        } else {
-          orderList.addAll(fetchedOrderList);
-        }
-      }
-
-      state.value = orderList.isEmpty ? PageState.empty : PageState.list;
-      //EasyLoading.dismiss();
-        orderList.refresh();
-        update();
-
-    }catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
       isLoading.value=false;
-      return orderList;
+      orderList.addAll(response.orders??[]);
+      paginated.value=response.paginated;
+      state.value=PageState.list;
+
+      update();
     }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {}
   }
+
+  // Future<List<OrderModel>> fetchOrderList() async{
+  //   try{
+  //     //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+  //       orderList.clear();
+  //       isLoading.value=true;
+  //     state.value=PageState.loading;
+  //     final startIndex = (currentPage.value - 1) * itemsPerPage.value +1 ;
+  //     final toIndex = currentPage.value * itemsPerPage.value;
+  //     var fetchedOrderList=await orderRepository.getOrderList(
+  //         startIndex: startIndex,
+  //         toIndex: toIndex,
+  //       accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+  //       startDate: startDateFilter.value, endDate: endDateFilter.value,
+  //     );
+  //     hasMore.value = fetchedOrderList.length == itemsPerPage.value;
+  //     //print("بالانس: ${orderList.first.balances}");
+  //
+  //     if (selectedAccountId.value == 0) {
+  //       orderList.assignAll(fetchedOrderList);
+  //     }else {
+  //       if (currentPage.value == 1) {
+  //         orderList.assignAll(fetchedOrderList);
+  //       } else {
+  //         orderList.addAll(fetchedOrderList);
+  //       }
+  //     }
+  //
+  //     state.value = orderList.isEmpty ? PageState.empty : PageState.list;
+  //     //EasyLoading.dismiss();
+  //       orderList.refresh();
+  //       update();
+  //
+  //   }catch(e){
+  //     state.value=PageState.err;
+  //     errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+  //   }finally{
+  //     isLoading.value=false;
+  //     return orderList;
+  //   }
+  // }
 
   Future<List<dynamic>?> updateStatusOrder(int orderId,int status)async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
@@ -238,7 +241,7 @@ class OrderController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchOrderList();
+        getDepositListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -263,7 +266,7 @@ class OrderController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف سفارش با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         Get.back();
-        fetchOrderList();
+        getDepositListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -276,6 +279,12 @@ class OrderController extends GetxController{
     return null;
   }
 
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    getDepositListPager();
+  }
+
   Future<List<dynamic>?> updateRegistered(int orderId,bool registered) async {
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
@@ -284,14 +293,12 @@ class OrderController extends GetxController{
         orderId: orderId,
         registered: registered,
       );
-      if(response!= null){
-        Get.snackbar(response.first['title'],response.first["description"],
-            titleText: Text(response.first['title'],
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchOrderList();
-      }
+      Get.snackbar(response.first['title'],response.first["description"],
+          titleText: Text(response.first['title'],
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+          messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+      getDepositListPager();
 
     } catch (e) {
       EasyLoading.dismiss();

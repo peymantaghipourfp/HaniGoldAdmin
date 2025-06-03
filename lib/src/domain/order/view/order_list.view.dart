@@ -617,13 +617,310 @@ class OrderListView extends StatelessWidget {
                                     ),
                                   ),
                                   SizedBox(width: 3,),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                                    decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.all(Radius.circular(5)),
-                                        border: Border.all(color: AppColor.textColor)
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(horizontal: 23,vertical: 12)),
+                                        // elevation: WidgetStatePropertyAll(5),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
+                                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                            borderRadius: BorderRadius.circular(5)))),
+                                    onPressed: () async {
+                                      showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          barrierLabel: MaterialLocalizations.of(context)
+                                              .modalBarrierDismissLabel,
+                                          barrierColor: Colors.black45,
+                                          transitionDuration: const Duration(milliseconds: 200),
+                                          pageBuilder: (BuildContext buildContext,
+                                              Animation animation,
+                                              Animation secondaryAnimation) {
+                                            return Center(
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                      color: AppColor.backGroundColor
+                                                  ),
+                                                  width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                  height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                  padding: EdgeInsets.all(20),
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            Text(
+                                                              'فیلتر',
+                                                              style: AppTextStyle.labelText.copyWith(
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight.normal,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        color: AppColor.textColor,height: 0.2,
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(height: 8,),
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'نام',
+                                                                  style: AppTextStyle.labelText.copyWith(
+                                                                      fontSize: 11,
+                                                                      fontWeight: FontWeight.normal,
+                                                                      color: AppColor.textColor),
+                                                                ),
+                                                                SizedBox(height: 10,),
+                                                                IntrinsicHeight(
+                                                                  child: TextFormField(
+                                                                    autovalidateMode: AutovalidateMode
+                                                                        .onUserInteraction,
+                                                                    controller: orderController.nameFilterController,
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                    textAlign: TextAlign.start,
+                                                                    keyboardType:TextInputType.text,
+                                                                    decoration: InputDecoration(
+                                                                      contentPadding:
+                                                                      const EdgeInsets.symmetric(
+                                                                          vertical: 11,horizontal: 15
+                                                                      ),
+                                                                      isDense: true,
+                                                                      border: OutlineInputBorder(
+                                                                        borderRadius:
+                                                                        BorderRadius.circular(6),
+                                                                      ),
+                                                                      filled: true,
+                                                                      fillColor: AppColor.textFieldColor,
+                                                                      errorMaxLines: 1,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 8,),
+                                                            Column(
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'شماره تماس',
+                                                                  style: AppTextStyle.labelText.copyWith(
+                                                                      fontSize: 11,
+                                                                      fontWeight: FontWeight.normal,
+                                                                      color: AppColor.textColor),
+                                                                ),
+                                                                SizedBox(height: 10,),
+                                                                IntrinsicHeight(
+                                                                  child: TextFormField(
+                                                                    autovalidateMode: AutovalidateMode
+                                                                        .onUserInteraction,
+                                                                    controller: orderController.mobileFilterController,
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                    textAlign: TextAlign.center,
+                                                                    keyboardType:TextInputType.phone,
+                                                                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                      TextInputFormatter.withFunction((oldValue, newValue) {
+                                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                        String newText = newValue.text
+                                                                            .replaceAll('٠', '0')
+                                                                            .replaceAll('١', '1')
+                                                                            .replaceAll('٢', '2')
+                                                                            .replaceAll('٣', '3')
+                                                                            .replaceAll('٤', '4')
+                                                                            .replaceAll('٥', '5')
+                                                                            .replaceAll('٦', '6')
+                                                                            .replaceAll('٧', '7')
+                                                                            .replaceAll('٨', '8')
+                                                                            .replaceAll('٩', '9');
 
-                                    ),
+                                                                        return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                                                      }),
+                                                                    ],
+                                                                    decoration: InputDecoration(
+                                                                      contentPadding:
+                                                                      const EdgeInsets.symmetric(
+                                                                          vertical: 11,horizontal: 15
+
+                                                                      ),
+                                                                      isDense: true,
+                                                                      border: OutlineInputBorder(
+                                                                        borderRadius:
+                                                                        BorderRadius.circular(6),
+                                                                      ),
+
+                                                                      filled: true,
+                                                                      fillColor: AppColor.textFieldColor,
+                                                                      errorMaxLines: 1,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'از تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: orderController.dateStartController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        orderController.startDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        orderController.dateStartController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'تا تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: orderController.dateEndController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        // DateTime date=DateTime.now();
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        orderController.endDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        orderController.dateEndController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      Container(
+                                                        margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                        width: double.infinity,
+                                                        height: 40,
+                                                        child: ElevatedButton(
+                                                          style: ButtonStyle(
+                                                              padding: WidgetStatePropertyAll(
+                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                              // elevation: WidgetStatePropertyAll(5),
+                                                              backgroundColor:
+                                                              WidgetStatePropertyAll(AppColor.appBarColor),
+                                                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                  borderRadius: BorderRadius.circular(5)))),
+                                                          onPressed: () async {
+                                                            orderController.getDepositListPager();
+                                                            Get.back();
+
+                                                          },
+                                                          child: orderController.isLoading.value?
+                                                          CircularProgressIndicator(
+                                                            valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                          ) :
+                                                          Text(
+                                                            'فیلتر',
+                                                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          });
+                                    },
                                     child: Row(
                                       children: [
                                         SvgPicture.asset(
@@ -632,13 +929,13 @@ class OrderListView extends StatelessWidget {
                                             colorFilter:
                                             ColorFilter
                                                 .mode(
-                                              AppColor
+                                              orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
                                                   .textColor,
                                               BlendMode
                                                   .srcIn,
                                             )),
                                         SizedBox(
-                                          width: 5,
+                                          width: 10,
                                         ),
                                         Text(
                                           'فیلتر',
@@ -647,7 +944,7 @@ class OrderListView extends StatelessWidget {
                                               .copyWith(
                                               fontSize: isDesktop
                                                   ? 12
-                                                  : 10),
+                                                  : 10,color:  orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                         ),
                                       ],
                                     ),
@@ -664,20 +961,20 @@ class OrderListView extends StatelessWidget {
                   // لیست سفارشات
                   Obx(() {
                     if (orderController.state.value == PageState.loading) {
-                      EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+                   //   EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
                       return Center(child: CircularProgressIndicator());
                     }
                     else if (orderController.state.value == PageState.empty) {
-                      EasyLoading.dismiss();
+                    //  EasyLoading.dismiss();
                       return EmptyPage(
                         title: 'سفارشی وجود ندارد',
                         callback: () {
-                          orderController.fetchOrderList();
+                          orderController.getDepositListPager();
                         },
                       );
                     }
                     else if (orderController.state.value == PageState.list) {
-                      EasyLoading.dismiss();
+                     // EasyLoading.dismiss();
                       // لیست سفارشات
                       return
                         isDesktop ?
@@ -1154,13 +1451,312 @@ class OrderListView extends StatelessWidget {
                                             ),
                                           ],
                                         ),
-                                        Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                                          decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.all(Radius.circular(5)),
-                                              border: Border.all(color: AppColor.textColor)
+                                        ElevatedButton(
+                                          style: ButtonStyle(
+                                              padding: WidgetStatePropertyAll(
+                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 12)),
+                                              // elevation: WidgetStatePropertyAll(5),
+                                              backgroundColor:
+                                              WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
+                                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                  borderRadius: BorderRadius.circular(5)))),
+                                          onPressed: () async {
+                                            showGeneralDialog(
+                                                context: context,
+                                                barrierDismissible: true,
+                                                barrierLabel: MaterialLocalizations.of(context)
+                                                    .modalBarrierDismissLabel,
+                                                barrierColor: Colors.black45,
+                                                transitionDuration: const Duration(milliseconds: 200),
+                                                pageBuilder: (BuildContext buildContext,
+                                                    Animation animation,
+                                                    Animation secondaryAnimation) {
+                                                  return Center(
+                                                    child: Material(
+                                                      color: Colors.transparent,
+                                                      child: Container(
+                                                        decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.circular(8),
+                                                            color: AppColor.backGroundColor
+                                                        ),
+                                                        width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                        height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                        padding: EdgeInsets.all(20),
+                                                        child: SingleChildScrollView(
+                                                          child: Column(
+                                                            children: [
+                                                              Padding(
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  children: [
+                                                                    Text(
+                                                                      'فیلتر',
+                                                                      style: AppTextStyle.labelText.copyWith(
+                                                                        fontSize: 15,
+                                                                        fontWeight: FontWeight.normal,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                color: AppColor.textColor,height: 0.2,
+                                                              ),
+                                                              Padding(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                child: Column(
+                                                                  children: [
+                                                                    SizedBox(height: 8,),
+                                                                    Column(
+                                                                      crossAxisAlignment:
+                                                                      CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'نام',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                              fontSize: 11,
+                                                                              fontWeight: FontWeight.normal,
+                                                                              color: AppColor.textColor),
+                                                                        ),
+                                                                        SizedBox(height: 10,),
+                                                                        IntrinsicHeight(
+                                                                          child: TextFormField(
+                                                                            autovalidateMode: AutovalidateMode
+                                                                                .onUserInteraction,
+                                                                            controller: orderController.nameFilterController,
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                            textAlign: TextAlign.start,
+                                                                            keyboardType:TextInputType.text,
+                                                                            decoration: InputDecoration(
+                                                                              contentPadding:
+                                                                              const EdgeInsets.symmetric(
+                                                                                  vertical: 11,horizontal: 15
+                                                                              ),
+                                                                              isDense: true,
+                                                                              border: OutlineInputBorder(
+                                                                                borderRadius:
+                                                                                BorderRadius.circular(6),
+                                                                              ),
+                                                                              filled: true,
+                                                                              fillColor: AppColor.textFieldColor,
+                                                                              errorMaxLines: 1,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8,),
+                                                                    Column(
+                                                                      crossAxisAlignment:
+                                                                      CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'شماره تماس',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                              fontSize: 11,
+                                                                              fontWeight: FontWeight.normal,
+                                                                              color: AppColor.textColor),
+                                                                        ),
+                                                                        SizedBox(height: 10,),
+                                                                        IntrinsicHeight(
+                                                                          child: TextFormField(
+                                                                            autovalidateMode: AutovalidateMode
+                                                                                .onUserInteraction,
+                                                                            controller: orderController.mobileFilterController,
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                            textAlign: TextAlign.center,
+                                                                            keyboardType:TextInputType.phone,
+                                                                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                              TextInputFormatter.withFunction((oldValue, newValue) {
+                                                                                // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                                String newText = newValue.text
+                                                                                    .replaceAll('٠', '0')
+                                                                                    .replaceAll('١', '1')
+                                                                                    .replaceAll('٢', '2')
+                                                                                    .replaceAll('٣', '3')
+                                                                                    .replaceAll('٤', '4')
+                                                                                    .replaceAll('٥', '5')
+                                                                                    .replaceAll('٦', '6')
+                                                                                    .replaceAll('٧', '7')
+                                                                                    .replaceAll('٨', '8')
+                                                                                    .replaceAll('٩', '9');
 
-                                          ),
+                                                                                return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                                                              }),
+                                                                            ],
+                                                                            decoration: InputDecoration(
+                                                                              contentPadding:
+                                                                              const EdgeInsets.symmetric(
+                                                                                  vertical: 11,horizontal: 15
+
+                                                                              ),
+                                                                              isDense: true,
+                                                                              border: OutlineInputBorder(
+                                                                                borderRadius:
+                                                                                BorderRadius.circular(6),
+                                                                              ),
+
+                                                                              filled: true,
+                                                                              fillColor: AppColor.textFieldColor,
+                                                                              errorMaxLines: 1,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'از تاریخ',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                              fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets.only(bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (value){
+                                                                                if(value==null || value.isEmpty){
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: orderController.dateStartController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle.labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius.circular(10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor.textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali.now(),
+                                                                                  firstDate: Jalali(1400,1,1),
+                                                                                  lastDate: Jalali(1450,12,29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                  locale: Locale("fa","IR"),
+                                                                                );
+                                                                                Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                orderController.startDateFilter.value =
+                                                                                "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                orderController.dateStartController.text =
+                                                                                "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'تا تاریخ',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                              fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets.only(bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (value){
+                                                                                if(value==null || value.isEmpty){
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: orderController.dateEndController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle.labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius.circular(10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor.textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali.now(),
+                                                                                  firstDate: Jalali(1400,1,1),
+                                                                                  lastDate: Jalali(1450,12,29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                  locale: Locale("fa","IR"),
+                                                                                );
+                                                                                // DateTime date=DateTime.now();
+                                                                                Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                orderController.endDateFilter.value =
+                                                                                "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                orderController.dateEndController.text =
+                                                                                "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            //  Spacer(),
+                                                              Container(
+                                                                margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                                width: double.infinity,
+                                                                height: 40,
+                                                                child: ElevatedButton(
+                                                                  style: ButtonStyle(
+                                                                      padding: WidgetStatePropertyAll(
+                                                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                      // elevation: WidgetStatePropertyAll(5),
+                                                                      backgroundColor:
+                                                                      WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                          borderRadius: BorderRadius.circular(5)))),
+                                                                  onPressed: () async {
+                                                                    orderController.getDepositListPager();
+                                                                    Get.back();
+
+                                                                  },
+                                                                  child: orderController.isLoading.value?
+                                                                  CircularProgressIndicator(
+                                                                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                  ) :
+                                                                  Text(
+                                                                    'فیلتر',
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  );
+                                                });
+                                          },
                                           child: Row(
                                             children: [
                                               SvgPicture.asset(
@@ -1169,13 +1765,13 @@ class OrderListView extends StatelessWidget {
                                                   colorFilter:
                                                   ColorFilter
                                                       .mode(
-                                                    AppColor
+                                                    orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
                                                         .textColor,
                                                     BlendMode
                                                         .srcIn,
                                                   )),
                                               SizedBox(
-                                                width: 5,
+                                                width: 10,
                                               ),
                                               Text(
                                                 'فیلتر',
@@ -1184,7 +1780,7 @@ class OrderListView extends StatelessWidget {
                                                     .copyWith(
                                                     fontSize: isDesktop
                                                         ? 12
-                                                        : 10),
+                                                        : 10,color:  orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                               ),
                                             ],
                                           ),
@@ -1216,7 +1812,6 @@ class OrderListView extends StatelessWidget {
                                                   columnSpacing: 30,
                                                   horizontalMargin: 5,
                                                 ),
-                                                buildPaginationControls(),
                                               ],
                                             ),
                                           ),
@@ -1224,6 +1819,7 @@ class OrderListView extends StatelessWidget {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(height: 50,)
                                 ],
                               ),
                             ),
@@ -1391,7 +1987,7 @@ class OrderListView extends StatelessWidget {
                     EasyLoading.dismiss();
                     return ErrPage(
                       callback: () {
-                        orderController.fetchOrderList();
+                        orderController.getDepositListPager();
                       },
                       title: "خطا در دریافت سفارشات",
                       des: 'برای دریافت سفارشات مجددا تلاش کنید',
@@ -1401,20 +1997,20 @@ class OrderListView extends StatelessWidget {
               ),
             ),
           )),
-          /*Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              orderController.paginated!=null?   Container(
-                  height: 70,
-                  margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  color: AppColor.appBarColor.withOpacity(0.5),
-                  alignment: Alignment.bottomCenter,
-                  child:PagerWidget(countPage: orderController.paginated!.totalCount??0, callBack: (int index) {
-                    orderController.isChangePage(index);
-                  },)):SizedBox(),
-            ],
-          ),*/
+         Obx(()=> Column(
+           mainAxisAlignment: MainAxisAlignment.end,
+           children: [
+             orderController.paginated.value!=null?   Container(
+                 height: 70,
+                 margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                 padding: EdgeInsets.symmetric(horizontal: 20),
+                 color: AppColor.appBarColor.withOpacity(0.5),
+                 alignment: Alignment.bottomCenter,
+                 child:PagerWidget(countPage: orderController.paginated.value?.totalCount??0, callBack: (int index) {
+                   orderController.isChangePage(index);
+                 },)):SizedBox(),
+           ],
+         ),)
         ],
       ),
     );
@@ -1612,7 +2208,7 @@ class OrderListView extends StatelessWidget {
                                   onPressed: () {
                                     Get.back();
                                     orderController.updateStatusOrder(orders.id!, 1);
-                                    orderController.fetchOrderList();
+                                    orderController.getDepositListPager();
                                     Get.back();
                                   },
                                   child: Text(
@@ -1652,7 +2248,7 @@ class OrderListView extends StatelessWidget {
                                   onPressed: () {
                                     Get.back();
                                     orderController.updateStatusOrder(orders.id!, 2);
-                                    orderController.fetchOrderList();
+                                    orderController.getDepositListPager();
                                     Get.back();
                                   },
                                   child: Text(
@@ -1788,7 +2384,7 @@ class OrderListView extends StatelessWidget {
                               value
                           );
                         }
-                        orderController.fetchOrderList();
+                        orderController.getDepositListPager();
                         //EasyLoading.dismiss();
                       },
                     ),
@@ -1807,7 +2403,7 @@ class OrderListView extends StatelessWidget {
                   order.date != null ? order.date?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? ''
                       : 'تاریخ نامشخص',
                   style:
-                  AppTextStyle.bodyText,
+                  AppTextStyle.bodyText.copyWith(fontSize: 11),
                 ),
               )),
           // نام کاربر
@@ -1816,7 +2412,7 @@ class OrderListView extends StatelessWidget {
                 child: Text(
                   order.account?.name ?? "",
                   style:
-                  AppTextStyle.bodyText,
+                  AppTextStyle.bodyText.copyWith(fontSize: 11),
                 ),
               )),
           // موبایل
@@ -1834,13 +2430,13 @@ class OrderListView extends StatelessWidget {
                 child: Row(
                   children: [
                     Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${order.item?.icon}',
-                      width: 35,
-                      height: 35,),
+                      width: 25,
+                      height: 25,),
                     SizedBox(width: 5,),
                     Text(
                       order.item?.name ?? "",
                       style:
-                      AppTextStyle.bodyText,
+                      AppTextStyle.bodyText.copyWith(fontSize: 11),
                     ),
                   ],
                 ),
@@ -1851,7 +2447,7 @@ class OrderListView extends StatelessWidget {
                 child: Text(
                   "${order.quantity?.toString().seRagham(separator: ",")} ${order.item?.itemUnit?.name ?? ""}",
                   style:
-                  AppTextStyle.bodyText,
+                  AppTextStyle.bodyText.copyWith(fontSize: 11),
                 ),
               )),
           // قیمت
@@ -1860,7 +2456,7 @@ class OrderListView extends StatelessWidget {
                 child: Text(
                   "${order.price == null ? 0 : order.price?.toInt().toString().seRagham(separator: ',')} ریال",
                   style:
-                  AppTextStyle.bodyText,
+                  AppTextStyle.bodyText.copyWith(fontSize: 11),
                 ),
               ),
           ),
@@ -1871,7 +2467,7 @@ class OrderListView extends StatelessWidget {
                 (order.totalPrice != null)
                     ? "${order.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
                     : "0",
-                style: AppTextStyle.bodyText,
+                style: AppTextStyle.bodyText.copyWith(fontSize: 11),
               ),
             ),
           ),
@@ -1879,8 +2475,9 @@ class OrderListView extends StatelessWidget {
           DataCell(
             Center(
               child: Container(
+                height: 25,width: 60,
                 decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(7),
+                    borderRadius: BorderRadius.circular(5),
                   color: (order.type == 0)
                       ? AppColor.accentColor
                       : AppColor.secondary2Color,
@@ -1891,7 +2488,7 @@ class OrderListView extends StatelessWidget {
                     (order.type == 0)
                         ? 'فروش'
                         : 'خرید',
-                    style: TextStyle(color: AppColor.textColor , fontSize: 11),
+                    style: TextStyle(color: AppColor.textColor , fontSize: 10),
                     textAlign: TextAlign.center),
               ),
             ),
@@ -1914,7 +2511,7 @@ class OrderListView extends StatelessWidget {
                             ? AppColor.primaryColor
                             : order.status == 2
                             ? AppColor.accentColor
-                            : AppColor.textColor,
+                            : AppColor.textColor,fontSize: 11
                       ),
                     ),
                     SizedBox(height: 6,),
@@ -1945,21 +2542,24 @@ class OrderListView extends StatelessWidget {
                                       )));
                             },
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 3,vertical: 2.5),
+                              alignment: Alignment.center,
+                              height: 25,width: 45,
+                            //  padding: EdgeInsets.symmetric(horizontal: 3,vertical: 2.5),
                               /*height: 23,
                               width: 40,*/
                               //alignment: Alignment(0.3, 0),
                               decoration: BoxDecoration(
+                                border: Border.all(color: AppColor.primaryColor),
                                   borderRadius: BorderRadius.circular(5),
                                 color: AppColor.primaryColor
                               ),
                               child: Text(
                                 'تایید',
-                                style: AppTextStyle.bodyText.copyWith(fontSize: 11.8),textAlign: TextAlign.center,
+                                style: AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.textColor),textAlign: TextAlign.center,
                               ),
                             ),
                           ),
-                         SizedBox(width: 5,),
+                         SizedBox(width: 7,),
                          //دکمه رد سفارش در جزئیات
                          GestureDetector(
                             onTap: () {
@@ -1985,14 +2585,16 @@ class OrderListView extends StatelessWidget {
                                       )));
                             },
                             child: Container(
-                              padding: EdgeInsets.symmetric(horizontal: 11,vertical: 2.6),
-                              //alignment: Alignment(0, 0),
+                              height: 25,width: 45,
+                            //  padding: EdgeInsets.symmetric(horizontal: 11,vertical: 2.6),
+                              alignment: Alignment.center,
                               decoration: BoxDecoration(
+                                border: Border.all(color: AppColor.accentColor),
                                   borderRadius: BorderRadius.circular(5),
                                   color: AppColor.accentColor
                               ),
                               child: Text('رد',
-                                style: AppTextStyle.bodyText,textAlign: TextAlign.center,
+                                style: AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.textColor),textAlign: TextAlign.center,
                               ),
                             ),
                           ),
@@ -2010,6 +2612,10 @@ class OrderListView extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
+                  SizedBox(
+                    width: 5,
+                    height: 5,
+                  ),
                   //دکمه حذف سفارش
                   OutlinedButton(
                     onPressed: () {
@@ -2041,14 +2647,14 @@ class OrderListView extends StatelessWidget {
                       ),
                     ),
                     child: SvgPicture.asset(
-                      'assets/svg/trash-bin.svg',
+                      'assets/svg/trash-bin.svg',height: 20,width: 20,
                       colorFilter: ColorFilter.mode(
                         AppColor.accentColor, BlendMode.srcIn,),
                     ),
                   ),
                   SizedBox(
                     width: 5,
-                    height: 3,
+                    height: 5,
                   ),
                   //دکمه ادیت جزئیات سفارش
                   OutlinedButton(
@@ -2064,13 +2670,14 @@ class OrderListView extends StatelessWidget {
                       ),
                     ),
                     child: SvgPicture.asset(
-                      'assets/svg/edit.svg',
+                      'assets/svg/edit.svg',height: 20,width: 20,
                       colorFilter: ColorFilter.mode(
                           AppColor.iconViewColor, BlendMode.srcIn),
                     ),
                   ),
                   SizedBox(
                     width: 5,
+                    height: 5,
                   ),
                 ],
               ),
@@ -2092,23 +2699,23 @@ class OrderListView extends StatelessWidget {
                               Container(
                                 padding: EdgeInsets.only(left: 2),
                                 child: e.unitName=="عدد"? Text( "${e.balance}",style:e.balance!>0 ?
-                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
-                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor,fontWeight: FontWeight.bold),
                                 textDirection: TextDirection.ltr,
                                 ):SizedBox(),
                               ),
                               Container(
                                 padding: EdgeInsets.only(left: 2),
                                 child: e.unitName=="عدد"? Text( "${e.unitName}",style:e.balance!>0 ?
-                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
-                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
+                                AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor),
                                   textDirection: TextDirection.ltr,
                                 ):SizedBox(),
                               ),
                               Container(
                                 child: e.unitName=="عدد"? Text( "${e.itemName}",style:e.balance!>0 ?
-                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
-                                AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
+                                AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor) :
+                                AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor),
                                   textDirection: TextDirection.ltr,
                                 ):SizedBox(),
                               ),
@@ -2136,23 +2743,23 @@ class OrderListView extends StatelessWidget {
                                    Container(
                                      padding: EdgeInsets.only(left: 2),
                                      child: e.unitName=="ریال"? Text( "${e.balance?.toInt().toString().seRagham(separator: ',')}",style:e.balance!>0 ?
-                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
-                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                     AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor,fontWeight: FontWeight.bold),
                                        textDirection: TextDirection.ltr,
                                      ):SizedBox(),
                                    ),
                                    Container(
                                      padding: EdgeInsets.only(left: 2),
                                      child: e.unitName=="ریال"? Text( "${e.unitName}",style:e.balance!>0 ?
-                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
-                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
+                                     AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor),
                                        textDirection: TextDirection.ltr,
                                      ):SizedBox(),
                                    ),
                                    Container(
                                      child: e.unitName=="ریال"? Text( "${e.itemName}",style:e.balance!>0 ?
-                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
-                                     AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
+                                     AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor) :
+                                     AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor),
                                        textDirection: TextDirection.ltr,
                                      ):SizedBox(),
                                    ),
@@ -2180,23 +2787,23 @@ class OrderListView extends StatelessWidget {
                             Container(
                               padding: EdgeInsets.only(left: 2),
                               child: e.unitName=="گرم"? Text( "${e.balance}",style:e.balance!>0 ?
-                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
-                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                              AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor,fontWeight: FontWeight.bold) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor,fontWeight: FontWeight.bold),
                                 textDirection: TextDirection.ltr,
                               ):SizedBox(),
                             ),
                             Container(
                               padding: EdgeInsets.only(left: 2),
                               child: e.unitName=="گرم"? Text( "${e.unitName}",style:e.balance!>0 ?
-                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
-                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
+                              AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor),
                                 textDirection: TextDirection.ltr,
                               ):SizedBox(),
                             ),
                             Container(
                               child: e.unitName=="گرم"? Text( "${e.itemName}",style:e.balance!>0 ?
-                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.primaryColor) :
-                              AppTextStyle.bodyText.copyWith(fontSize: 13,color: AppColor.accentColor),
+                              AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.primaryColor) :
+                              AppTextStyle.bodyText.copyWith(fontSize: 11,color: AppColor.accentColor),
                                 textDirection: TextDirection.ltr,
                               ):SizedBox(),
                             ),
@@ -2213,32 +2820,4 @@ class OrderListView extends StatelessWidget {
     }).toList();
   }
 
-  Widget buildPaginationControls() {
-    return Obx(() => Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.chevron_left),
-            onPressed: orderController.currentPage.value > 1
-                ? orderController.previousPage
-                : null,
-          ),
-          Text(
-            'صفحه ${orderController.currentPage.value}',
-            style: AppTextStyle.bodyText,
-          ),
-          IconButton(
-            icon: Icon(Icons.chevron_right),
-            onPressed: orderController.hasMore.value
-                ? orderController.nextPage
-                : null,
-          ),
-        ],
-      ),
-    ),
-
-    );
-  }
 }

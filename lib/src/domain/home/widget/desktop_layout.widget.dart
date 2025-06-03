@@ -176,6 +176,11 @@ Widget buildDesktopLayout() {
                     icon: Icons.logout,
                     onTap: _showExitDialog,
                   ),
+                  _buildSubMenuItem(
+                    title: 'تغییر رمز عبور',
+                    icon: Icons.change_circle_outlined,
+                    onTap: _showChangePassword,
+                  ),
                 ],
               ),
             ],
@@ -361,6 +366,138 @@ void _showExitDialog() {
           child: Text('خروج',
               style: TextStyle(color: Colors.white)),
           onPressed: () => FlutterExitApp.exitApp(),
+        ),
+      ],
+    ),
+  );
+}
+
+var controller=Get.find<HomeController>();
+void _showChangePassword() {
+  Get.dialog(
+    AlertDialog(
+      backgroundColor: AppColor.secondaryColor,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20)),
+      title: Text('تغییر رمز عبور',
+          style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor)),
+      content: SizedBox(
+        height: Get.height * 0.5,
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            TextFormField(
+              style: AppTextStyle.bodyText.copyWith(
+                fontSize: 13,
+              ),
+              textDirection: TextDirection.rtl,
+              controller: controller.passwordOldController,
+              autofillHints: [AutofillHints.password],
+              obscureText: true,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 16,
+                ),
+                labelText: 'رمز عبور قبلی',
+                labelStyle: TextStyle(color: AppColor.textColor),
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                prefixIconColor: AppColor.textColor,
+
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'لطفا رمز عبور را وارد کنید';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+
+            // وارد کردن پسورد
+            TextFormField(
+              style: AppTextStyle.bodyText.copyWith(
+                fontSize: 13,
+              ),
+              textDirection: TextDirection.rtl,
+              controller: controller.passwordController,
+              autofillHints: [AutofillHints.password],
+              obscureText: true,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 16,
+                ),
+                labelText: 'رمز عبور جدید',
+                labelStyle: TextStyle(color: AppColor.textColor),
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                prefixIconColor: AppColor.textColor,
+
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'لطفا رمز عبور را وارد کنید';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 24),
+            TextFormField(
+              style: AppTextStyle.bodyText.copyWith(
+                fontSize: 13,
+              ),
+              textDirection: TextDirection.rtl,
+              controller: controller.retypePasswordController,
+              autofillHints: [AutofillHints.password],
+              obscureText: true,
+              decoration: InputDecoration(
+                contentPadding: EdgeInsets.symmetric(
+                  vertical: 16,
+                  horizontal: 16,
+                ),
+                labelText: 'تکرار رمز عبور جدید',
+                labelStyle: TextStyle(color: AppColor.textColor),
+                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                prefixIconColor: AppColor.textColor,
+
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'لطفا رمز عبور را وارد کنید';
+                }
+                return null;
+              },
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          child: Text('انصراف',
+              style: TextStyle(color: AppColor.primaryColor)),
+          onPressed: () => Get.back(),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColor.primaryColor,
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10)),
+          ),
+          child: Text('تغییر رمز',
+              style: TextStyle(color: Colors.white)),
+          onPressed: ()  {
+            controller.changePassword();
+            Get.back();
+          },
         ),
       ],
     ),

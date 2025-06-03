@@ -71,7 +71,7 @@ class InventoryDetailModel {
   final int? inputItemId;
   @JsonKey(name: "date")
   final DateTime? date;
-  @JsonKey(name: "listXfile")
+  @JsonKey(ignore: true)
    late List<XFile>? listXfile;
 
   InventoryDetailModel({

@@ -237,7 +237,7 @@ class OrderCreateController extends GetxController{
             messageText: Text(
                 orderResponse.infos!.first["description"] , textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
-        orderController.fetchOrderList();
+        orderController.getDepositListPager();
         balanceList.clear();
         clearList();
       }

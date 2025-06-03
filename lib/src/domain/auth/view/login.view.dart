@@ -114,6 +114,8 @@ class LoginView extends GetView<AuthController> {
                             fontSize: isDesktop ? 14 : 12,
                           ),
                           textDirection: TextDirection.rtl,
+                          controller: controller.mobileController,
+                          autofillHints: [AutofillHints.username],
                           decoration: InputDecoration(
                             contentPadding: EdgeInsets.symmetric(
                               vertical: isDesktop ? 20 : 16,
@@ -149,6 +151,8 @@ class LoginView extends GetView<AuthController> {
                               fontSize: isDesktop ? 14 : 12,
                             ),
                             textDirection: TextDirection.rtl,
+                            controller: controller.passwordController,
+                            autofillHints: [AutofillHints.password],
                             obscureText: true,
                             decoration: InputDecoration(
                               contentPadding: EdgeInsets.symmetric(
@@ -201,10 +205,10 @@ class LoginView extends GetView<AuthController> {
                                 backgroundColor: AppColor.buttonColor,
                               ),
                               onPressed: () {
-                                Get.toNamed('/home');
-                                /*if (formKey.currentState!.validate()) {
-                                  Get.toNamed('/home');
-                                }*/
+
+                                if (formKey.currentState!.validate()) {
+                                 controller.login();
+                                }
                               },
                               child: Text(
                                 'ورود',

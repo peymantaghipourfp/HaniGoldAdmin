@@ -1,5 +1,12 @@
 
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+
+import '../../../config/repository/auth.repository.dart';
+import '../../account/model/account.model.dart';
+import '../../auth/model/user.model.dart';
 
 class HomeController extends GetxController{
   /*final List<Map<String,dynamic>> homeListView=[
@@ -8,9 +15,13 @@ class HomeController extends GetxController{
     {'text':'کاربران','route':'/inventory'},
     {'text':'تنظیمات','route':'/tools'},
   ];*/
-
+  final AuthRepository authRepository=AuthRepository();
+  final TextEditingController passwordOldController=TextEditingController();
+  final TextEditingController passwordController=TextEditingController();
+  final TextEditingController retypePasswordController=TextEditingController();
+  final Rxn<UserModel> accountModel=Rxn<UserModel>();
   var activeSubMenu = ''.obs; //
-
+  final box = GetStorage();
   void toggleSubMenu(String menuName) {
     if (activeSubMenu.value == menuName) {
       activeSubMenu.value = ''; //
@@ -21,5 +32,26 @@ class HomeController extends GetxController{
 
   bool isSubMenuOpen(String menuName) {
     return activeSubMenu.value == menuName;
+  }
+
+  Future<void> changePassword() async{
+
+    if(passwordController.text==retypePasswordController.text){
+      try{
+        EasyLoading.show(status: 'لطفا منتظر بمانید');
+        var fetch=await authRepository.changePassword(box.read("mobile"),passwordController.text,passwordOldController.text,);
+        Get.snackbar(fetch.infos!.first["title"].toString(), fetch.infos!.first["description"].toString());
+        accountModel.value=fetch;
+        Get.back();
+      }
+      catch(e){
+        //  state.value=PageState.err;
+      }finally{
+        EasyLoading.dismiss();
+      }
+    }else{
+      Get.snackbar("رمز عبور", "عدم تطابق رمز عبور و تکرار آن");
+    }
+
   }
 }

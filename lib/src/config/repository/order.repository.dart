@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
+import '../../domain/order/model/list_order.model.dart';
 import '../network/error/network.error.dart';
 
 class OrderRepository{
@@ -68,7 +69,7 @@ class OrderRepository{
   }
 
 
-  Future<List<OrderModel>> getOrderListPager({
+  Future<ListOrderModel> getOrderListPager({
     required int startIndex,
     required int toIndex,
     int? accountId,
@@ -113,11 +114,10 @@ class OrderRepository{
           }
         }
       };
-      final response=await orderDio.post('Order/get',data: options);
+      final response=await orderDio.post('Order/getWrapper',data: options);
       print("request : $options" );
       print("response : ${response.data}" );
-        List<dynamic> data=response.data;
-        return data.map((order) => OrderModel.fromJson(order)).toList();
+        return ListOrderModel.fromJson(response.data);
 
     }catch(e){
       throw ErrorException('خطا:$e');
