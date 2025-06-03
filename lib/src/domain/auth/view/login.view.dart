@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -5,13 +7,29 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/auth/controller/auth.controller.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import 'forget_password.view.dart';
 
-class LoginView extends GetView<AuthController> {
-   LoginView({super.key});
+
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+
   final formKey = GlobalKey<FormState>();
+  var controller=Get.find<AuthController>() ;
 
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
@@ -102,120 +120,126 @@ class LoginView extends GetView<AuthController> {
                               ),
                             ),
                             const SizedBox(height: 40),
-                          Text(
-                          'ورود به حساب کاربری',
-                          style: AppTextStyle.largeBodyTextBold.copyWith(fontSize: 18)
-                        ),
-                        const SizedBox(height: 32),
-
-                        // وارد کردن شماره موبایل
-                        TextFormField(
-                          style: AppTextStyle.bodyText.copyWith(
-                            fontSize: isDesktop ? 14 : 12,
-                          ),
-                          textDirection: TextDirection.rtl,
-                          controller: controller.mobileController,
-                          autofillHints: [AutofillHints.username],
-                          decoration: InputDecoration(
-                            contentPadding: EdgeInsets.symmetric(
-                              vertical: isDesktop ? 20 : 16,
-                              horizontal: 16,
+                            Text(
+                                'ورود به حساب کاربری',
+                                style: AppTextStyle.largeBodyTextBold.copyWith(fontSize: 18)
                             ),
-                            labelText: 'شماره موبایل',
-                            labelStyle: TextStyle(color: AppColor.textColor),
-                            hintText: '09xxxxxxxxx',
-                            hintStyle: TextStyle(color: AppColor.textColor.withAlpha(50)),
+                            const SizedBox(height: 32),
 
-                            floatingLabelBehavior: FloatingLabelBehavior.always,
-                            prefixIcon: const Icon(Icons.phone_android_rounded),
-                            prefixIconColor: AppColor.textColor,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-
-                            ),
-                          ),
-                          keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'لطفا شماره موبایل را وارد کنید';
-                            }
-                            return null;
-                          },
-                        ),
-
-                          const SizedBox(height: 24),
-
-                          // وارد کردن پسورد
-                          TextFormField(
-                            style: AppTextStyle.bodyText.copyWith(
-                              fontSize: isDesktop ? 14 : 12,
-                            ),
-                            textDirection: TextDirection.rtl,
-                            controller: controller.passwordController,
-                            autofillHints: [AutofillHints.password],
-                            obscureText: true,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.symmetric(
-                                vertical: isDesktop ? 20 : 16,
-                                horizontal: 16,
+                            // وارد کردن شماره موبایل
+                            TextFormField(
+                              style: AppTextStyle.bodyText.copyWith(
+                                fontSize: isDesktop ? 14 : 12,
                               ),
-                              labelText: 'رمز عبور',
-                              labelStyle: TextStyle(color: AppColor.textColor),
-                              prefixIcon: const Icon(Icons.lock_outline_rounded),
-                              prefixIconColor: AppColor.textColor,
+                              textDirection: TextDirection.rtl,
+                              controller: controller.mobileController,
+                              autofillHints: [AutofillHints.username],
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: isDesktop ? 20 : 16,
+                                  horizontal: 16,
+                                ),
+                                labelText: 'شماره موبایل',
+                                labelStyle: TextStyle(color: AppColor.textColor),
+                                hintText: '09xxxxxxxxx',
+                                hintStyle: TextStyle(color: AppColor.textColor.withAlpha(50)),
 
-                              border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12)),
-                              floatingLabelBehavior: FloatingLabelBehavior.always,
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                prefixIcon: const Icon(Icons.phone_android_rounded),
+                                prefixIconColor: AppColor.textColor,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+
+                                ),
+                              ),
+                              keyboardType: TextInputType.phone,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'لطفا شماره موبایل را وارد کنید';
+                                }
+                                return null;
+                              },
                             ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'لطفا رمز عبور را وارد کنید';
-                              }
-                              return null;
-                            },
-                          ),
 
-                          const SizedBox(height: 16),
+                            const SizedBox(height: 24),
 
-                          // فراموشی پسورد
-                          /*Align(
-                            alignment: Alignment.centerLeft,
-                            child: TextButton(
-                              onPressed: () {},
-                              child: Text(
-                                'رمز عبور را فراموش کرده‌اید؟',
-                                style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: theme.colorScheme.primary,
+                            // وارد کردن پسورد
+                            TextFormField(
+                              style: AppTextStyle.bodyText.copyWith(
+                                fontSize: isDesktop ? 14 : 12,
+                              ),
+                              textDirection: TextDirection.rtl,
+                              controller: controller.passwordController,
+                              autofillHints: [AutofillHints.password],
+                              obscureText: true,
+                              decoration: InputDecoration(
+                                contentPadding: EdgeInsets.symmetric(
+                                  vertical: isDesktop ? 20 : 16,
+                                  horizontal: 16,
+                                ),
+                                labelText: 'رمز عبور',
+                                labelStyle: TextStyle(color: AppColor.textColor),
+                                prefixIcon: const Icon(Icons.lock_outline_rounded),
+                                prefixIconColor: AppColor.textColor,
+
+                                border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12)),
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                              ),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'لطفا رمز عبور را وارد کنید';
+                                }
+                                return null;
+                              },
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // فراموشی پسورد
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: TextButton(
+                                onPressed: () {
+                                  Get.dialog(
+                                      ForgetPasswordPage());
+                                  setState(() {
+
+                                  });
+                                },
+                                child: Text(
+                                  'رمز عبور را فراموش کرده‌اید؟',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.colorScheme.primary,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),*/
 
-                          const SizedBox(height: 32),
+                            const SizedBox(height: 32),
 
-                          // دکمه ورود
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: FilledButton.tonal(
-                              style: FilledButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                                backgroundColor: AppColor.buttonColor,
-                              ),
-                              onPressed: () {
+                            // دکمه ورود
+                            SizedBox(
+                              width: double.infinity,
+                              height: 52,
+                              child: FilledButton.tonal(
+                                style: FilledButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  backgroundColor: AppColor.buttonColor,
+                                ),
+                                onPressed: () {
 
-                                if (formKey.currentState!.validate()) {
-                                 controller.login();
-                                }
-                              },
-                              child: Text(
-                                'ورود',
-                                style: AppTextStyle.mediumTitleText,
+                                  if (formKey.currentState!.validate()) {
+                                    controller.login();
+                                  }
+                                },
+                                child: Text(
+                                  'ورود',
+                                  style: AppTextStyle.mediumTitleText,
+                                ),
                               ),
                             ),
-                          ),
                           ],
                         ),
                       ),

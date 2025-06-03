@@ -21,7 +21,7 @@ class UserListView extends GetView<UserListController> {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
-        title: 'لیست کاربران',
+        title: 'لیست اکانت ها',
         onBackTap: () => Get.toNamed("/home"),
       ),
       body:Stack(
@@ -1103,64 +1103,6 @@ class UserListView extends GetView<UserListController> {
         .toList();
   }
 
-  // Widget buildPaginationControls() {
-  //   return Obx(() => Padding(
-  //     padding: const EdgeInsets.all(8.0),
-  //     child: Row(
-  //       mainAxisAlignment: MainAxisAlignment.center,
-  //       children: [
-  //         IconButton(
-  //           icon: Icon(Icons.chevron_left),
-  //           onPressed: controller.currentPageIndex.value > 1
-  //               ? controller.previousPage
-  //               : null,
-  //         ),
-  //         Text(
-  //           'صفحه ${controller.currentPageIndex.value}',
-  //           style: AppTextStyle.bodyText,
-  //         ),
-  //         IconButton(
-  //           icon: Icon(Icons.chevron_right),
-  //           onPressed:
-  //           controller.hasMore.value ? controller.nextPage : null,
-  //         ),
-  //       ],
-  //     ),
-  //   ));
-  // }
-
-  // Widget buildPaginationControls() {
-  //   return Padding(
-  //       padding: const EdgeInsets.all(8.0),
-  //       child:   SizedBox(
-  //         height: 60,
-  //         child:controller.paginated!=null? SfDataPagerTheme(
-  //           data: SfDataPagerThemeData(
-  //             itemColor: Colors.transparent,
-  //             selectedItemColor: AppColor.secondary3Color,
-  //             backgroundColor: AppColor.textFieldColor,
-  //             itemTextStyle:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
-  //             disabledItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.secondaryColor.withOpacity(0.5)),
-  //             selectedItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
-  //             itemBorderColor: AppColor.textColor
-  //           ),
-  //           child: SfDataPager(
-  //             controller:controller.dataPagerController ,
-  //             onPageNavigationEnd:(value){
-  //               print(value+1);
-  //                controller.isChangePage(value+1);
-  //             },
-  //             onPageNavigationStart: (value){
-  //              // print(value);
-  //              // controller.getUserList();
-  //             },
-  //             delegate: DataPagerDelegate(),
-  //             direction: Axis.horizontal, pageCount: (controller.paginated!.totalCount!/10).toDouble(),
-  //           ),
-  //         ):SizedBox(),
-  //       )
-  //   );
-  // }
 
 
 

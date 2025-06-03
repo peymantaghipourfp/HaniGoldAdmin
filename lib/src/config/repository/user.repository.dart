@@ -8,6 +8,7 @@ import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart
 import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
 
 import '../../domain/users/model/city_item.model.dart';
+import '../../domain/users/model/list_user_account.model.dart';
 import '../../domain/users/model/state_item.model.dart';
 
 class UserRepository {
@@ -16,30 +17,29 @@ class UserRepository {
     userDio.options.baseUrl = BaseUrl.baseUrl;
   }
 
-  Future<ListUserModel> getUserListExport({
-    required int startIndex,
-    required int toIndex,
-    required String startDate,
-    required String endDate
-  }) async {
+  Future<ListUserModel> getUserListExport(
+      {required int startIndex,
+      required int toIndex,
+      required String startDate,
+      required String endDate}) async {
     try {
-
-      Map<String, dynamic> options =
-      {
+      Map<String, dynamic> options = {
         "options": {
           "account": {
             "Predicate": [
               {
                 "innerCondition": 0,
                 "outerCondition": 0,
-                "filters": startDate!=""? [
-                  {
-                    "fieldName": "StartDate",
-                    "filterValue": "$startDate|$endDate",
-                    "filterType": 25,
-                    "RefTable": "Account"
-                  }
-                ] : [],
+                "filters": startDate != ""
+                    ? [
+                        {
+                          "fieldName": "StartDate",
+                          "filterValue": "$startDate|$endDate",
+                          "filterType": 25,
+                          "RefTable": "Account"
+                        }
+                      ]
+                    : [],
               }
             ],
             "orderBy": "Account.Name",
@@ -64,52 +64,125 @@ class UserRepository {
     required String mobile,
   }) async {
     try {
+      Map<String, dynamic> options = name != "" || mobile != ""
+          ? {
+              "options": {
+                "account": {
+                  "Predicate": [
+                    {
+                      "innerCondition": 0,
+                      "outerCondition": 0,
+                      "filters": [
+                        name != ""
+                            ? {
+                                "fieldName": "Name",
+                                "filterValue": name,
+                                "filterType": 0,
+                                "RefTable": "Account"
+                              }
+                            : mobile != ""
+                                ? {
+                                    "fieldName": "Value",
+                                    "filterValue": mobile,
+                                    "filterType": 0,
+                                    "RefTable": "Ci"
+                                  }
+                                : []
+                      ]
+                    }
+                  ],
+                  "orderBy": "Account.Name",
+                  "orderByType": "asc",
+                  "StartIndex": startIndex,
+                  "ToIndex": toIndex
+                }
+              }
+            }
+          : {
+              "options": {
+                "account": {
+                  "orderBy": "Account.Name",
+                  "orderByType": "DESC",
+                  "StartIndex": startIndex,
+                  "ToIndex": toIndex
+                }
+              }
+            };
+      final response = await userDio.post('Account/getWrapper', data: options);
+      print(response);
+      return ListUserModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
 
-      Map<String, dynamic> options =
-      name!="" || mobile!=""?
-      {
+  Future<ListUserAccountModel> getUserAccountListPager({
+    required int startIndex,
+    required int toIndex,
+    required String nameAccount,
+    required String nameContact,
+    required String mobile,
+    required String username,
+    required int status,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
         "options": {
-          "account": {
+          "user": {
             "Predicate": [
               {
                 "innerCondition": 0,
                 "outerCondition": 0,
                 "filters": [
-                  name!=""?   {
-                    "fieldName": "Name",
-                    "filterValue": name,
-                    "filterType": 0,
-                    "RefTable": "Account"
-                  }:  mobile!=""?
-                  {
-                    "fieldName": "Value",
-                    "filterValue": mobile,
-                    "filterType": 0,
-                    "RefTable": "Ci"
-                  } :[]
+                  if (nameAccount != "")
+                    {
+                      "fieldName": "Name",
+                      "filterValue": nameAccount,
+                      "filterType": 0,
+                      "RefTable": "Account"
+                    },
+                  if (nameContact != "")
+                    {
+                      "fieldName": "Name",
+                      "filterValue": nameContact,
+                      "filterType": 0,
+                      "RefTable": "Contact"
+                    },
+                  if (mobile != "")
+                    {
+                      "fieldName": "MobileNumber",
+                      "filterValue": mobile,
+                      "filterType": 0,
+                      "RefTable": "Users"
+                    },
+                  if (username != "")
+                    {
+                      "fieldName": "UserName",
+                      "filterValue": username,
+                      "filterType": 0,
+                      "RefTable": "Users"
+                    },
+                  if (status != 0)
+                    {
+                      "fieldName": "Status",
+                      "filterValue": "$status",
+                      "filterType": 4,
+                      "RefTable": "Users"
+                    }
                 ]
               }
             ],
-            "orderBy": "Account.Name",
+            "orderBy": "users.Id",
             "orderByType": "asc",
             "StartIndex": startIndex,
             "ToIndex": toIndex
           }
         }
-      }:
-      {
-        "options": {
-          "account": {
-            "orderBy": "Account.Name",
-            "orderByType": "DESC",
-            "StartIndex": startIndex,
-            "ToIndex": toIndex
-          }
-        }
       };
-      final response = await userDio.post('Account/getWrapper', data: options);
+
+      final response = await userDio.post('User/getWrapper', data: options);
       print(response);
-      return ListUserModel.fromJson(response.data);
+      return ListUserAccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
     }
@@ -263,7 +336,8 @@ class UserRepository {
       throw ErrorException('خطا:$e');
     }
   }
- Future<AccountModel> updateUser({
+
+  Future<AccountModel> updateUser({
     required String name,
     required int id,
     required String mobile,
@@ -365,6 +439,83 @@ class UserRepository {
     }
   }
 
+  Future<AccountModel> updateUserAccount({
+    required String userName,
+    required int id,
+    required String mobile,
+    required String email,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "contact": {
+          "account": {
+            "name": "احسان 1",
+            "accountGroup": {"infos": []},
+            "id": 1,
+            "infos": []
+          },
+          "name": "احسان 1",
+          "id": id,
+          "infos": []
+        },
+        "code": "1",
+        "userName": userName,
+        "mobileNumber": mobile,
+        "email": email,
+        "rowNum": 1,
+        "id": id,
+        "attribute": "cus",
+        "description": "احسان",
+        "recId": null,
+        "infos": []
+      };
+      final response = await userDio.put('User/update', data: options);
+      print(response);
+      return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<AccountModel> updateStatusUserAccount({
+    required int id,
+    required String status,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "contact": {
+          "account": {
+            "name": "احسان 1",
+            "accountGroup": {
+              "infos": []
+            },
+            "id": 1,
+            "infos": []
+          },
+          "name": "احسان 1",
+          "id": 1,
+          "infos": []
+        },
+        "code": "1",
+        "status": status,
+        "userName": "09129348848",
+        "mobileNumber": "09129348848",
+        "email": "ehsan@gmailcom",
+        "rowNum": 1,
+        "id": id,
+        "attribute": "cus",
+        "description": "احسان",
+        "recId": "416c0b50-d827-4829-8915-bc6725bde371",
+        "infos": []
+      };
+      final response = await userDio.put('User/updateStatus', data: options);
+      print(response);
+      return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
+
   Future<AccountModel> updateStatus({
     required int status,
     required int id,
@@ -383,8 +534,8 @@ class UserRepository {
     required int id,
   }) async {
     try {
-      final response = await userDio
-          .get('Account/getOne', queryParameters: {"id": id});
+      final response =
+          await userDio.get('Account/getOne', queryParameters: {"id": id});
       print(response);
       return AccountModel.fromJson(response.data);
     } catch (e) {

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
+import 'package:hanigold_admin/src/domain/users/controller/user_list.controller.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/const/app_color.dart';
@@ -24,6 +25,7 @@ enum PageState{loading,err,empty,list}
 
 class InsertUserController extends GetxController{
 
+  var controller=Get.find<UserListController>();
   Rx<PageState> state=Rx<PageState>(PageState.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
@@ -155,6 +157,7 @@ class InsertUserController extends GetxController{
        passwordController.text="";
        addressController.text="";
        state.value=PageState.list;
+       controller.getUserList();
       update();
     }
     catch (e) {
@@ -201,6 +204,7 @@ class InsertUserController extends GetxController{
        passwordController.text="";
        addressController.text="";
        state.value=PageState.list;
+       controller.getUserList();
       update();
     }
     catch (e) {

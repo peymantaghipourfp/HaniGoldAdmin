@@ -6,7 +6,7 @@ import 'package:get_storage/get_storage.dart';
 
 import '../../../config/repository/auth.repository.dart';
 import '../../account/model/account.model.dart';
-import '../../auth/model/user.model.dart';
+import '../../auth/model/user_login.model.dart';
 
 class HomeController extends GetxController{
   /*final List<Map<String,dynamic>> homeListView=[
@@ -19,7 +19,7 @@ class HomeController extends GetxController{
   final TextEditingController passwordOldController=TextEditingController();
   final TextEditingController passwordController=TextEditingController();
   final TextEditingController retypePasswordController=TextEditingController();
-  final Rxn<UserModel> accountModel=Rxn<UserModel>();
+  final Rxn<UserLoginModel> accountModel=Rxn<UserLoginModel>();
   var activeSubMenu = ''.obs; //
   final box = GetStorage();
   void toggleSubMenu(String menuName) {
@@ -39,7 +39,7 @@ class HomeController extends GetxController{
     if(passwordController.text==retypePasswordController.text){
       try{
         EasyLoading.show(status: 'لطفا منتظر بمانید');
-        var fetch=await authRepository.changePassword(box.read("mobile"),passwordController.text,passwordOldController.text,);
+        var fetch=await authRepository.changePassword(box.read("mobile"),passwordController.text,passwordOldController.text,box.read("id")as int);
         Get.snackbar(fetch.infos!.first["title"].toString(), fetch.infos!.first["description"].toString());
         accountModel.value=fetch;
         Get.back();

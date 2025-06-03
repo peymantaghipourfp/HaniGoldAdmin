@@ -6,6 +6,7 @@ import 'package:hanigold_admin/src/config/routes/bindings/deposit.bindings.dart'
 import 'package:hanigold_admin/src/config/routes/bindings/home.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/inventory.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/order.bindings.dart';
+import 'package:hanigold_admin/src/config/routes/bindings/person_list.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/product.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/remittance.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/splash.bindings.dart';
@@ -25,6 +26,7 @@ import 'package:hanigold_admin/src/domain/product/view/item_update_price.view.da
 import 'package:hanigold_admin/src/domain/tools/view/tools.view.dart';
 import 'package:hanigold_admin/src/domain/users/view/insert_user.view.dart';
 import 'package:hanigold_admin/src/domain/users/view/list_user.view.dart';
+import 'package:hanigold_admin/src/domain/users/view/person_list.view.dart';
 import 'package:hanigold_admin/src/domain/wallet/view/wallet.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_create.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_getOne.view.dart';
@@ -83,5 +85,6 @@ class RoutePage{
     GetPage(name: '/userList', page: ()=>UserListView(),binding: UserListBindings()),
     GetPage(name: '/insertUser', page: ()=>InsertUserView(),binding: InsertUserBindings()),
     GetPage(name: '/laboratory', page: ()=>LaboratoryView(),binding: LaboratoryBindings()),
+    GetPage(name: '/personList', page: ()=>PersonListView(),binding: PersonListBindings()),
   ];
 }

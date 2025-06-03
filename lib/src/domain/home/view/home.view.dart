@@ -547,7 +547,7 @@ class HomeView extends GetView<HomeController> {
                                 horizontalTitleGap: 5,
                                 minTileHeight: 10,
                                 title: Text(
-                                  'لیست کاربران',
+                                  'لیست اکانت ها',
                                   style: AppTextStyle.bodyText,
                                 ),
                                 leading: Icon(Icons.circle,
@@ -580,7 +580,40 @@ class HomeView extends GetView<HomeController> {
                                 horizontalTitleGap: 5,
                                 minTileHeight: 10,
                                 title: Text(
-                                  'افزودن کاربر جدید',
+                                  'لیست کاربران',
+                                  style: AppTextStyle.bodyText,
+                                ),
+                                leading: Icon(Icons.circle,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/personList');
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                            : const SizedBox(),
+                      ),
+                    ),
+                    // نمایش زیر مجموعه کاربران
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: AnimatedSize(
+                        duration: Duration(milliseconds: 350), // سرعت انیمیشن
+                        curve: Curves.easeInOut, // نوع حرکت انیمیشن
+                        child: controller.isSubMenuOpen('users')
+                            ? Column(
+                          children: [
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'افزودن اکانت جدید',
                                   style: AppTextStyle.bodyText,
                                 ),
                                 leading: Icon(Icons.circle,

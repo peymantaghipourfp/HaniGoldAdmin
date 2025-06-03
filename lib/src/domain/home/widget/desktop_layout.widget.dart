@@ -106,13 +106,18 @@ Widget buildDesktopLayout() {
                     route: '/listUserInfoTransaction',
                   ),
                   _buildSubMenuItem(
-                    title: 'لیست کاربران',
+                    title: 'لیست اکانت ها',
                     icon: Icons.list_alt,
                     route: '/userList',
                   ),
                   _buildSubMenuItem(
-                    title: 'افزودن کاربر جدید',
-                    icon: Icons.list_alt,
+                    title: 'لیست کاربران',
+                    icon: Icons.perm_identity_sharp,
+                    route: '/personList',
+                  ),
+                  _buildSubMenuItem(
+                    title: 'افزودن اکانت جدید',
+                    icon: Icons.person_add_alt,
                     //route: '/insertUser',
                     onTap: (){
                       Get.toNamed("/insertUser",parameters: {"id":0.toString()});
