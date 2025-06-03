@@ -255,7 +255,10 @@ class InventoryController extends GetxController{
       state.value=PageState.loading;
       var response = await inventoryRepository.getInventoryListPager(
         startIndex: currentPage.value,
-        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
+        toIndex: itemsPerPage.value,
+        name:nameFilterController.text,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
       inventoryList.addAll(response.inventories??[]);
@@ -938,5 +941,14 @@ class InventoryController extends GetxController{
         style: pw.TextStyle(fontSize: 8),
       ),
     );
+  }
+
+  void clearFilter() {
+    nameFilterController.clear();
+    mobileFilterController.clear();
+    dateStartController.clear();
+    dateEndController.clear();
+    startDateFilter.value="";
+    endDateFilter.value="";
   }
 }

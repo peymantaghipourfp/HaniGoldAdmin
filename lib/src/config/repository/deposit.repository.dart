@@ -72,40 +72,106 @@ class DepositRepository{
     required int toIndex,
     int? accountId,
     required String startDate,
-    required String endDate})async{
+    required String endDate,
+   required String nameDeposit,
+   required String nameRequest,
+ })async{
     try{
-      Map<String, dynamic> options = {
-        "options" : { "deposit" :{
-
+      Map<String, dynamic> options =
+      accountId != null?
+      {
+        "options" : { "deposit" : {
           "Predicate": [
             {
               "innerCondition": 0,
               "outerCondition": 0,
               "filters": [
-                if (accountId != null)
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
                   "filterType": 4,
                   "RefTable": "AccountDeposit"
                 },
+              ],
+            }
+          ],
+          "orderBy": "deposit.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      }:startDate!=""? {
+        "options" : { "deposit" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
                 {
-                  "fieldName": "IsDeleted",
-                  "filterValue": "0",
-                  "filterType": 4,
+                  "fieldName": "Date",
+                  "filterValue": "$startDate|$endDate",
+                  "filterType": 25,
                   "RefTable": "Deposit"
-                },
-                if(startDate!="")
-                  {
-                    "fieldName": "Date",
-                    "filterValue": "$startDate|$endDate",
-                    "filterType": 25,
-                    "RefTable": "Deposit"
-                  }
+                }
               ]
             }
           ],
-          "orderBy": "deposit.Id",
+          "orderBy": "deposit.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      }:nameDeposit!="" ?
+      {
+        "options" : { "deposit" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "Name",
+                  "filterValue": nameDeposit,
+                  "filterType": 0,
+                  "RefTable": "AccountDeposit"
+                },
+              ],
+            }
+          ],
+          "orderBy": "deposit.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      }:nameRequest!="" ?
+      {
+        "options" : { "deposit" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "Name",
+                  "filterValue": nameRequest,
+                  "filterType": 0,
+                  "RefTable": "AccountRequest"
+                },
+              ],
+            }
+          ],
+          "orderBy": "deposit.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      } :
+      {
+        "options" : { "deposit" : {
+          "orderBy": "deposit.Date",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex

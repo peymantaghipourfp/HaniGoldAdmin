@@ -203,7 +203,7 @@ class WithdrawController extends GetxController{
         return;
       }
 
-      final accounts = await AccountRepository().searchAccountList(name,"");
+      final accounts = await accountRepository.searchAccountList(name,"");
       searchedAccounts.assignAll(accounts);
 
     } catch (e) {
@@ -277,6 +277,7 @@ class WithdrawController extends GetxController{
       state.value=PageState.loading;
       var response = await withdrawRepository.getWithdrawListPager(
         startIndex: currentPage.value,accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        name: nameFilterController.text,
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
@@ -627,22 +628,11 @@ class WithdrawController extends GetxController{
   Future<void> getBalanceList(int id) async{
     print("getBalanceList : $id");
     balanceList.clear();
-    try{
-      state.value=PageState.loading;
       var response=await userInfoTransactionRepository.getBalanceList(id);
       balanceList.addAll(response);
       balanceList.removeWhere((r)=>r.balance==0);
       isLoadingBalance.value=true;
-      state.value=PageState.list;
-      if(balanceList.isEmpty){
-        state.value=PageState.empty;
-      }
       update();
-    }
-    catch(e){
-      state.value=PageState.err;
-    }finally{
-    }
   }
 
   void clearList(){
@@ -910,6 +900,15 @@ class WithdrawController extends GetxController{
         style: pw.TextStyle(fontSize: 8),
       ),
     );
+  }
+
+  void clearFilter() {
+    nameFilterController.clear();
+    mobileFilterController.clear();
+    dateStartController.clear();
+    dateEndController.clear();
+    startDateFilter.value="";
+    endDateFilter.value="";
   }
 
  /* Future<void> captureRowScreenshot(GlobalKey<State<StatefulWidget>> key) async {

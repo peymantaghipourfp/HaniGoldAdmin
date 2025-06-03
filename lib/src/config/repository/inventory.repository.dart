@@ -75,7 +75,9 @@ class InventoryRepository {
     required int toIndex,
     int? accountId,
     required String startDate,
-    required String endDate})async{
+    required String endDate,
+   required String name,
+ })async{
     try{
       Map<String , dynamic> options=
       accountId != null?
@@ -87,7 +89,7 @@ class InventoryRepository {
               "outerCondition": 0,
               "filters": [
                 {
-                  "fieldName": "AccountId",
+                  "fieldName": "Account_Id",
                   "filterValue": accountId.toString(),
                   "filterType": 4,
                   "RefTable": "JoinedData"
@@ -122,7 +124,32 @@ class InventoryRepository {
           "StartIndex": startIndex,
           "ToIndex": toIndex
         }}
-      }:{
+      }:
+      name!="" ?
+      {
+        "options" : { "inventory" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "Account_Name",
+                  "filterValue": name,
+                  "filterType": 0,
+                  "RefTable": "JoinedData"
+                },
+              ],
+            }
+          ],
+          "orderBy": "JoinedData.date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      }:
+      {
         "options" : { "inventory" : {
           "orderBy": "JoinedData.Date",
           "orderByType": "desc",

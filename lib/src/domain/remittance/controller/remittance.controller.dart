@@ -66,6 +66,7 @@ class RemittanceController extends GetxController{
   final TextEditingController dateEndController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
   final TextEditingController namePayerController=TextEditingController();
+  final TextEditingController nameRecieptController=TextEditingController();
   final TextEditingController mobilePayerController=TextEditingController();
   final TextEditingController quantityPayerController=TextEditingController();
   final TextEditingController descController=TextEditingController();
@@ -86,6 +87,7 @@ class RemittanceController extends GetxController{
   final TextEditingController mobileFilterController=TextEditingController();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
+  RxInt selectedAccountId = 0.obs;
   final Rxn<AccountModel> selectedAccountP = Rxn<AccountModel>();
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   RxList<AccountModel> searchedAccountsP = <AccountModel>[].obs;
@@ -105,6 +107,10 @@ class RemittanceController extends GetxController{
   var namePayer="".obs;
   var mobilePayer="".obs;
   var recordId="".obs;
+
+
+
+
   getAccountPayer(String index){
     indexAccountPayerGet=index;
     for(int i=0;i<accountList.length;i++){
@@ -563,6 +569,35 @@ Timer? debounceP;
     return null;
   }
 
+  Future<void> searchAccounts(String name) async {
+    try {
+      if (name.isEmpty) {
+        searchedAccounts.clear();
+        return;
+      }
+
+      final accounts = await accountRepository.searchAccountList(name,"");
+      searchedAccounts.assignAll(accounts);
+    } catch (e) {
+      state.value = PageState.err;
+    }
+  }
+
+  void selectAccount(AccountModel account) {
+    currentPage.value = 1;
+    selectedAccountId.value = account.id!;
+    searchController.text = account.name!;
+    Get.back(); // Close search dialog
+    getRemittanceListPager();
+  }
+
+  void clearSearch() {
+    currentPage.value = 1;
+    selectedAccountId.value = 0;
+    searchController.clear();
+    searchedAccounts.clear();
+    getRemittanceListPager();
+  }
   // لیست حواله ها با صفحه بندی
   Future<void> getRemittanceListPager() async {
     print("### getRemittanceListPager ###");
@@ -573,6 +608,9 @@ Timer? debounceP;
       var response = await remittanceRepository.getRemittanceListPager(
         startIndex: currentPage.value,
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        namePayer: namePayerController.text ,nameReciept: nameRecieptController.text,
+
       );
       remittanceList.addAll(response.remittances??[]);
       paginated=response.paginated;
@@ -913,4 +951,13 @@ Timer? debounceP;
     );
   }
 
+  void clearFilter() {
+    namePayerController.clear();
+    nameRecieptController.clear();
+    mobileFilterController.clear();
+    dateStartController.clear();
+    dateEndController.clear();
+    startDateFilter.value="";
+    endDateFilter.value="";
+  }
 }

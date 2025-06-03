@@ -90,14 +90,11 @@ class OrderListView extends StatelessWidget {
                                       Icons.search, color: AppColor.textColor,
                                       size: 30,)
                                 ),
-                                suffixIcon: orderController.selectedAccountId
-                                    .value > 0
-                                    ? IconButton(
+                                suffixIcon:  IconButton(
                                   onPressed: orderController.clearSearch,
                                   icon: Icon(
                                       Icons.close, color: AppColor.textColor),
-                                )
-                                    : null,
+                                ),
                               ),
                             ),
                           );
@@ -145,14 +142,11 @@ class OrderListView extends StatelessWidget {
                                         Icons.search, color: AppColor.textColor,
                                         size: 30,)
                                   ),
-                                  suffixIcon: orderController.selectedAccountId
-                                      .value > 0
-                                      ? IconButton(
+                                  suffixIcon: IconButton(
                                     onPressed: orderController.clearSearch,
                                     icon: Icon(
                                         Icons.close, color: AppColor.textColor),
-                                  )
-                                      : null,
+                                  ),
                                 ),
                               ),
                               SizedBox(height: 12),
@@ -653,13 +647,39 @@ class OrderListView extends StatelessWidget {
                                                       Padding(
                                                         padding: const EdgeInsets.all(8.0),
                                                         child: Row(
-                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          mainAxisAlignment: MainAxisAlignment.end,
                                                           children: [
-                                                            Text(
-                                                              'فیلتر',
-                                                              style: AppTextStyle.labelText.copyWith(
-                                                                fontSize: 15,
-                                                                fontWeight: FontWeight.normal,
+                                                            Expanded(
+                                                              child: Center(
+                                                                child: Text(
+                                                                  'فیلتر',
+                                                                  style: AppTextStyle.labelText.copyWith(
+                                                                    fontSize: 15,
+                                                                    fontWeight: FontWeight.normal,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            SizedBox(
+                                                              width: 50,height: 27,
+                                                              child: ElevatedButton(
+                                                                style: ButtonStyle(
+                                                                    padding: WidgetStatePropertyAll(
+                                                                        EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                    // elevation: WidgetStatePropertyAll(5),
+                                                                    backgroundColor:
+                                                                    WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                        borderRadius: BorderRadius.circular(5)))),
+                                                                onPressed: () async {
+                                                                  orderController.clearFilter();
+                                                                  orderController.getOrderListPager();
+                                                                  Get.back();
+                                                                },
+                                                                child: Text(
+                                                                  'حذف فیلتر',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                                ),
                                                               ),
                                                             ),
                                                           ],
@@ -900,7 +920,7 @@ class OrderListView extends StatelessWidget {
                                                               shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                   borderRadius: BorderRadius.circular(5)))),
                                                           onPressed: () async {
-                                                            orderController.getDepositListPager();
+                                                            orderController.getOrderListPager();
                                                             Get.back();
 
                                                           },
@@ -969,7 +989,7 @@ class OrderListView extends StatelessWidget {
                       return EmptyPage(
                         title: 'سفارشی وجود ندارد',
                         callback: () {
-                          orderController.getDepositListPager();
+                          orderController.getOrderListPager();
                         },
                       );
                     }
@@ -1488,13 +1508,39 @@ class OrderListView extends StatelessWidget {
                                                               Padding(
                                                                 padding: const EdgeInsets.all(8.0),
                                                                 child: Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  mainAxisAlignment: MainAxisAlignment.end,
                                                                   children: [
-                                                                    Text(
-                                                                      'فیلتر',
-                                                                      style: AppTextStyle.labelText.copyWith(
-                                                                        fontSize: 15,
-                                                                        fontWeight: FontWeight.normal,
+                                                                    Expanded(
+                                                                      child: Center(
+                                                                        child: Text(
+                                                                          'فیلتر',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                            fontSize: 15,
+                                                                            fontWeight: FontWeight.normal,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                    SizedBox(
+                                                                      width: 50,height: 27,
+                                                                      child: ElevatedButton(
+                                                                        style: ButtonStyle(
+                                                                            padding: WidgetStatePropertyAll(
+                                                                                EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                            // elevation: WidgetStatePropertyAll(5),
+                                                                            backgroundColor:
+                                                                            WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                                borderRadius: BorderRadius.circular(5)))),
+                                                                        onPressed: () async {
+                                                                          orderController.clearFilter();
+                                                                          orderController.getOrderListPager();
+                                                                          Get.back();
+                                                                        },
+                                                                        child: Text(
+                                                                          'حذف فیلتر',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                                        ),
                                                                       ),
                                                                     ),
                                                                   ],
@@ -1735,7 +1781,7 @@ class OrderListView extends StatelessWidget {
                                                                       shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                           borderRadius: BorderRadius.circular(5)))),
                                                                   onPressed: () async {
-                                                                    orderController.getDepositListPager();
+                                                                    orderController.getOrderListPager();
                                                                     Get.back();
 
                                                                   },
@@ -1987,7 +2033,8 @@ class OrderListView extends StatelessWidget {
                     EasyLoading.dismiss();
                     return ErrPage(
                       callback: () {
-                        orderController.getDepositListPager();
+                        orderController.clearFilter();
+                        orderController.getOrderListPager();
                       },
                       title: "خطا در دریافت سفارشات",
                       des: 'برای دریافت سفارشات مجددا تلاش کنید',
@@ -2208,7 +2255,7 @@ class OrderListView extends StatelessWidget {
                                   onPressed: () {
                                     Get.back();
                                     orderController.updateStatusOrder(orders.id!, 1);
-                                    orderController.getDepositListPager();
+                                    orderController.getOrderListPager();
                                     Get.back();
                                   },
                                   child: Text(
@@ -2248,7 +2295,7 @@ class OrderListView extends StatelessWidget {
                                   onPressed: () {
                                     Get.back();
                                     orderController.updateStatusOrder(orders.id!, 2);
-                                    orderController.getDepositListPager();
+                                    orderController.getOrderListPager();
                                     Get.back();
                                   },
                                   child: Text(
@@ -2384,7 +2431,7 @@ class OrderListView extends StatelessWidget {
                               value
                           );
                         }
-                        orderController.getDepositListPager();
+                        orderController.getOrderListPager();
                         //EasyLoading.dismiss();
                       },
                     ),

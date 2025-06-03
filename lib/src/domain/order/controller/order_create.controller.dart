@@ -96,7 +96,7 @@ class OrderCreateController extends GetxController{
     double totalPrice= price * quantity;
     totalPriceController.text=totalPrice.toString().toPersianDigit().seRagham();
   }
-
+  
   void updateQuantity(){
     double totalPrice=double.tryParse(totalPriceController.text ==""?"0" : totalPriceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
     double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
@@ -237,7 +237,7 @@ class OrderCreateController extends GetxController{
             messageText: Text(
                 orderResponse.infos!.first["description"] , textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
-        orderController.getDepositListPager();
+        orderController.getOrderListPager();
         balanceList.clear();
         clearList();
       }

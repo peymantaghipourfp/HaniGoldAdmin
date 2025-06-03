@@ -87,12 +87,10 @@ class DepositsListView extends StatelessWidget {
                                             },
                                             icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
                                         ),
-                                        suffixIcon: depositController.selectedAccountId.value > 0
-                                      ? IconButton(
+                                        suffixIcon: IconButton(
                                     onPressed: depositController.clearSearch,
                                     icon: Icon(Icons.close, color: AppColor.textColor),
-                                  )
-                                      : null,
+                                  ),
                                       ),
                                     ),
                                   ),
@@ -147,12 +145,10 @@ class DepositsListView extends StatelessWidget {
                                                 },
                                                 icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
                                             ),
-                                            suffixIcon: depositController.selectedAccountId.value > 0
-                                                ? IconButton(
+                                            suffixIcon: IconButton(
                                               onPressed: depositController.clearSearch,
                                               icon: Icon(Icons.close, color: AppColor.textColor),
-                                            )
-                                                : null,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -604,7 +600,7 @@ class DepositsListView extends StatelessWidget {
                                     ElevatedButton(
                                       style: ButtonStyle(
                                           padding: WidgetStatePropertyAll(
-                                              EdgeInsets.symmetric(horizontal: 23,vertical: 12)),
+                                              EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
                                           // elevation: WidgetStatePropertyAll(5),
                                           backgroundColor:
                                           WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
@@ -629,8 +625,8 @@ class DepositsListView extends StatelessWidget {
                                                         borderRadius: BorderRadius.circular(8),
                                                         color: AppColor.backGroundColor
                                                     ),
-                                                    width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
-                                                    height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                    width:isDesktop?  Get.width * 0.3:Get.width * 0.5,
+                                                    height:Get.height * 0.6,
                                                     padding: EdgeInsets.all(20),
                                                     child: SingleChildScrollView(
                                                       child: Column(
@@ -638,13 +634,39 @@ class DepositsListView extends StatelessWidget {
                                                           Padding(
                                                             padding: const EdgeInsets.all(8.0),
                                                             child: Row(
-                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                              mainAxisAlignment: MainAxisAlignment.end,
                                                               children: [
-                                                                Text(
-                                                                  'فیلتر',
-                                                                  style: AppTextStyle.labelText.copyWith(
-                                                                    fontSize: 15,
-                                                                    fontWeight: FontWeight.normal,
+                                                                Expanded(
+                                                                  child: Center(
+                                                                    child: Text(
+                                                                      'فیلتر',
+                                                                      style: AppTextStyle.labelText.copyWith(
+                                                                        fontSize: 15,
+                                                                        fontWeight: FontWeight.normal,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                  width: 50,height: 27,
+                                                                  child: ElevatedButton(
+                                                                    style: ButtonStyle(
+                                                                        padding: WidgetStatePropertyAll(
+                                                                            EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                        // elevation: WidgetStatePropertyAll(5),
+                                                                        backgroundColor:
+                                                                        WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                            borderRadius: BorderRadius.circular(5)))),
+                                                                    onPressed: () async {
+                                                                      depositController.clearFilter();
+                                                                      depositController.getDepositListPager();
+                                                                      Get.back();
+                                                                    },
+                                                                    child: Text(
+                                                                      'حذف فیلتر',
+                                                                      style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                                    ),
                                                                   ),
                                                                 ),
                                                               ],
@@ -674,7 +696,46 @@ class DepositsListView extends StatelessWidget {
                                                                       child: TextFormField(
                                                                         autovalidateMode: AutovalidateMode
                                                                             .onUserInteraction,
-                                                                        controller: depositController.nameFilterController,
+                                                                        controller: depositController.nameDepositFilterController,
+                                                                        style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                        textAlign: TextAlign.start,
+                                                                        keyboardType:TextInputType.text,
+                                                                        decoration: InputDecoration(
+                                                                          contentPadding:
+                                                                          const EdgeInsets.symmetric(
+                                                                              vertical: 11,horizontal: 15
+                                                                          ),
+                                                                          isDense: true,
+                                                                          border: OutlineInputBorder(
+                                                                            borderRadius:
+                                                                            BorderRadius.circular(6),
+                                                                          ),
+                                                                          filled: true,
+                                                                          fillColor: AppColor.textFieldColor,
+                                                                          errorMaxLines: 1,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(height: 8,),
+                                                                Column(
+                                                                  crossAxisAlignment:
+                                                                  CrossAxisAlignment.start,
+                                                                  children: [
+                                                                    Text(
+                                                                      'بابت',
+                                                                      style: AppTextStyle.labelText.copyWith(
+                                                                          fontSize: 11,
+                                                                          fontWeight: FontWeight.normal,
+                                                                          color: AppColor.textColor),
+                                                                    ),
+                                                                    SizedBox(height: 10,),
+                                                                    IntrinsicHeight(
+                                                                      child: TextFormField(
+                                                                        autovalidateMode: AutovalidateMode
+                                                                            .onUserInteraction,
+                                                                        controller: depositController.nameRequestFilterController,
                                                                         style: AppTextStyle.labelText.copyWith(fontSize: 15),
                                                                         textAlign: TextAlign.start,
                                                                         keyboardType:TextInputType.text,
@@ -870,7 +931,7 @@ class DepositsListView extends StatelessWidget {
                                                               ],
                                                             ),
                                                           ),
-                                                          //Spacer(),
+                                                          //   Spacer(),
                                                           Container(
                                                             margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
                                                             width: double.infinity,
@@ -915,7 +976,7 @@ class DepositsListView extends StatelessWidget {
                                               colorFilter:
                                               ColorFilter
                                                   .mode(
-                                                depositController.nameFilterController.text!="" ||  depositController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                                depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!=""  ?AppColor.accentColor:  AppColor
                                                     .textColor,
                                                 BlendMode
                                                     .srcIn,
@@ -930,7 +991,7 @@ class DepositsListView extends StatelessWidget {
                                                 .copyWith(
                                                 fontSize: isDesktop
                                                     ? 12
-                                                    : 10,color:  depositController.nameFilterController.text!="" ||  depositController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                    : 10,color:  depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                           ),
                                         ],
                                       ),
@@ -1440,8 +1501,8 @@ class DepositsListView extends StatelessWidget {
                                                                             borderRadius: BorderRadius.circular(8),
                                                                             color: AppColor.backGroundColor
                                                                         ),
-                                                                        width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
-                                                                        height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                                        width:isDesktop?  Get.width * 0.3:Get.width * 0.5,
+                                                                        height:Get.height * 0.6,
                                                                         padding: EdgeInsets.all(20),
                                                                         child: SingleChildScrollView(
                                                                           child: Column(
@@ -1449,13 +1510,39 @@ class DepositsListView extends StatelessWidget {
                                                                               Padding(
                                                                                 padding: const EdgeInsets.all(8.0),
                                                                                 child: Row(
-                                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                                  mainAxisAlignment: MainAxisAlignment.end,
                                                                                   children: [
-                                                                                    Text(
-                                                                                      'فیلتر',
-                                                                                      style: AppTextStyle.labelText.copyWith(
-                                                                                        fontSize: 15,
-                                                                                        fontWeight: FontWeight.normal,
+                                                                                    Expanded(
+                                                                                      child: Center(
+                                                                                        child: Text(
+                                                                                          'فیلتر',
+                                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                                            fontSize: 15,
+                                                                                            fontWeight: FontWeight.normal,
+                                                                                          ),
+                                                                                        ),
+                                                                                      ),
+                                                                                    ),
+                                                                                    SizedBox(
+                                                                                      width: 50,height: 27,
+                                                                                      child: ElevatedButton(
+                                                                                        style: ButtonStyle(
+                                                                                            padding: WidgetStatePropertyAll(
+                                                                                                EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                                            // elevation: WidgetStatePropertyAll(5),
+                                                                                            backgroundColor:
+                                                                                            WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                                                borderRadius: BorderRadius.circular(5)))),
+                                                                                        onPressed: () async {
+                                                                                          depositController.clearFilter();
+                                                                                          depositController.getDepositListPager();
+                                                                                          Get.back();
+                                                                                        },
+                                                                                        child: Text(
+                                                                                          'حذف فیلتر',
+                                                                                          style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                                                        ),
                                                                                       ),
                                                                                     ),
                                                                                   ],
@@ -1485,7 +1572,46 @@ class DepositsListView extends StatelessWidget {
                                                                                           child: TextFormField(
                                                                                             autovalidateMode: AutovalidateMode
                                                                                                 .onUserInteraction,
-                                                                                            controller: depositController.nameFilterController,
+                                                                                            controller: depositController.nameDepositFilterController,
+                                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                                            textAlign: TextAlign.start,
+                                                                                            keyboardType:TextInputType.text,
+                                                                                            decoration: InputDecoration(
+                                                                                              contentPadding:
+                                                                                              const EdgeInsets.symmetric(
+                                                                                                  vertical: 11,horizontal: 15
+                                                                                              ),
+                                                                                              isDense: true,
+                                                                                              border: OutlineInputBorder(
+                                                                                                borderRadius:
+                                                                                                BorderRadius.circular(6),
+                                                                                              ),
+                                                                                              filled: true,
+                                                                                              fillColor: AppColor.textFieldColor,
+                                                                                              errorMaxLines: 1,
+                                                                                            ),
+                                                                                          ),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                    SizedBox(height: 8,),
+                                                                                    Column(
+                                                                                      crossAxisAlignment:
+                                                                                      CrossAxisAlignment.start,
+                                                                                      children: [
+                                                                                        Text(
+                                                                                          'بابت',
+                                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                                              fontSize: 11,
+                                                                                              fontWeight: FontWeight.normal,
+                                                                                              color: AppColor.textColor),
+                                                                                        ),
+                                                                                        SizedBox(height: 10,),
+                                                                                        IntrinsicHeight(
+                                                                                          child: TextFormField(
+                                                                                            autovalidateMode: AutovalidateMode
+                                                                                                .onUserInteraction,
+                                                                                            controller: depositController.nameRequestFilterController,
                                                                                             style: AppTextStyle.labelText.copyWith(fontSize: 15),
                                                                                             textAlign: TextAlign.start,
                                                                                             keyboardType:TextInputType.text,
@@ -1726,7 +1852,7 @@ class DepositsListView extends StatelessWidget {
                                                                   colorFilter:
                                                                   ColorFilter
                                                                       .mode(
-                                                                    depositController.nameFilterController.text!="" ||  depositController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                                                    depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!=""  ?AppColor.accentColor:  AppColor
                                                                         .textColor,
                                                                     BlendMode
                                                                         .srcIn,
@@ -1741,7 +1867,7 @@ class DepositsListView extends StatelessWidget {
                                                                     .copyWith(
                                                                     fontSize: isDesktop
                                                                         ? 12
-                                                                        : 10,color:  depositController.nameFilterController.text!="" ||  depositController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                                        : 10,color:  depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                                               ),
                                                             ],
                                                           ),
@@ -2247,6 +2373,7 @@ class DepositsListView extends StatelessWidget {
                            // EasyLoading.dismiss();
                             return ErrPage(
                               callback: () {
+                                depositController.clearFilter();
                                 depositController.getDepositListPager();
                               },
                               title: "خطا در دریافت واریزی ها",

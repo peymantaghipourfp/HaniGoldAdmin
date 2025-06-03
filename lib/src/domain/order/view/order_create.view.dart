@@ -479,6 +479,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                   ),
                                                   SizedBox(width: 3),
                                                   Checkbox(
+                                                    hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                     value: orderCreateController.manualPriceChecked.value,
                                                     onChanged: (value) async{
                                                       orderCreateController.manualPriceChecked.value = value!;
@@ -606,6 +607,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                     ),
                                                     SizedBox(width: 3),
                                                     Checkbox(
+                                                      hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                       value: orderCreateController.notLimitChecked.value,
                                                       onChanged: (value) async{
                                                         orderCreateController.notLimitChecked.value = value!;
@@ -712,6 +714,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                     ),
                                                     SizedBox(width: 3),
                                                     Checkbox(
+                                                      hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                       value: orderCreateController.notLimitChecked.value,
                                                       onChanged: (value) async{
                                                         orderCreateController.notLimitChecked.value = value!;
@@ -983,7 +986,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                                       Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
                                                                       SizedBox(width: 2,),
                                                                       Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                      Text(orderCreateController.quantityController.text, style: AppTextStyle.bodyText,),
+                                                                      Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
                                                                     ],
                                                                   ),
                                                                   SizedBox(height: 5,),
@@ -1104,7 +1107,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                                   Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
                                                                   SizedBox(width: 2,),
                                                                   Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                  Text(orderCreateController.quantityController.text, style: AppTextStyle.bodyText,),
+                                                                  Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
                                                                 ],
                                                               ),
                                                               SizedBox(height: 5,),
@@ -1213,6 +1216,18 @@ class _OrderCreateViewState extends State<OrderCreateView> {
         ),
       );
     });
+  }
+
+  String formatQuantity(double value) {
+    String formatted = value.toStringAsFixed(4);
+
+    if (formatted.endsWith('.0000')) {
+      return value.toStringAsFixed(0);
+    } else {
+      formatted = formatted.replaceAll(RegExp(r'0*$'), '');
+      formatted = formatted.replaceAll(RegExp(r'\.$'), '');
+      return formatted;
+    }
   }
 }
 

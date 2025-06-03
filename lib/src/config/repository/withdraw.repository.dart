@@ -74,7 +74,9 @@ Future<ListWithdrawModel> getWithdrawListPager({
     required int toIndex,
     int? accountId,
     required String startDate,
-    required String endDate})async{
+    required String endDate,
+  required String name,
+})async{
     try{
       Map<String , dynamic> options=
           accountId != null?
@@ -120,7 +122,30 @@ Future<ListWithdrawModel> getWithdrawListPager({
               "StartIndex": startIndex,
               "ToIndex": toIndex
             }}
-          }:{
+          }: name!="" ?
+          {
+            "options" : { "withdrawrequest" : {
+              "Predicate": [
+                {
+                  "innerCondition": 0,
+                  "outerCondition": 0,
+                  "filters": [
+                    {
+                      "fieldName": "Name",
+                      "filterValue": name,
+                      "filterType": 0,
+                      "RefTable": "Account"
+                    },
+                  ],
+                }
+              ],
+              "orderBy": "withdrawrequest.requestDate",
+              "orderByType": "desc",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          } :
+          {
             "options" : { "withdrawrequest" : {
               "orderBy": "withdrawrequest.requestDate",
               "orderByType": "desc",

@@ -93,14 +93,11 @@ class InventoryListView extends StatelessWidget {
                                         Icons.search, color: AppColor.textColor,
                                         size: 30,)
                                   ),
-                                  suffixIcon: inventoryController.selectedAccountId
-                                      .value > 0
-                                      ? IconButton(
+                                  suffixIcon:IconButton(
                                     onPressed: inventoryController.clearSearch,
                                     icon: Icon(
                                         Icons.close, color: AppColor.textColor),
-                                  )
-                                      : null,
+                                  ),
                                 ),
                               ),
                             ),
@@ -160,14 +157,11 @@ class InventoryListView extends StatelessWidget {
                                             Icons.search, color: AppColor.textColor,
                                             size: 30,)
                                       ),
-                                      suffixIcon: inventoryController.selectedAccountId
-                                          .value > 0
-                                          ? IconButton(
+                                      suffixIcon: IconButton(
                                         onPressed: inventoryController.clearSearch,
                                         icon: Icon(
                                             Icons.close, color: AppColor.textColor),
-                                      )
-                                          : null,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -635,13 +629,337 @@ class InventoryListView extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              Container(
-                                padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(5)),
-                                    border: Border.all(color: AppColor.textColor)
+                              ElevatedButton(
+                                style: ButtonStyle(
+                                    padding: WidgetStatePropertyAll(
+                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                    // elevation: WidgetStatePropertyAll(5),
+                                    backgroundColor:
+                                    WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
+                                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                        borderRadius: BorderRadius.circular(5)))),
+                                onPressed: () async {
+                                  showGeneralDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      barrierLabel: MaterialLocalizations.of(context)
+                                          .modalBarrierDismissLabel,
+                                      barrierColor: Colors.black45,
+                                      transitionDuration: const Duration(milliseconds: 200),
+                                      pageBuilder: (BuildContext buildContext,
+                                          Animation animation,
+                                          Animation secondaryAnimation) {
+                                        return Center(
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                  color: AppColor.backGroundColor
+                                              ),
+                                              width:isDesktop?  Get.width * 0.3:Get.width * 0.5,
+                                              height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                              padding: EdgeInsets.all(20),
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets.all(8.0),
+                                                      child: Row(
+                                                        mainAxisAlignment: MainAxisAlignment.end,
+                                                        children: [
+                                                          Expanded(
+                                                            child: Center(
+                                                              child: Text(
+                                                                'فیلتر',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                  fontSize: 15,
+                                                                  fontWeight: FontWeight.normal,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 50,height: 27,
+                                                            child: ElevatedButton(
+                                                              style: ButtonStyle(
+                                                                  padding: WidgetStatePropertyAll(
+                                                                      EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                  // elevation: WidgetStatePropertyAll(5),
+                                                                  backgroundColor:
+                                                                  WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                      borderRadius: BorderRadius.circular(5)))),
+                                                              onPressed: () async {
+                                                                inventoryController.clearFilter();
+                                                                inventoryController.getInventoryListPager();
+                                                                Get.back();
+                                                              },
+                                                              child: Text(
+                                                                'حذف فیلتر',
+                                                                style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                              ),
+                                                            ),
+                                                          ),                                                                  ],
+                                                      ),
+                                                    ),
+                                                    Container(
+                                                      color: AppColor.textColor,height: 0.2,
+                                                    ),
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                      child: Column(
+                                                        children: [
+                                                          SizedBox(height: 8,),
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                'نام',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                    fontSize: 11,
+                                                                    fontWeight: FontWeight.normal,
+                                                                    color: AppColor.textColor),
+                                                              ),
+                                                              SizedBox(height: 10,),
+                                                              IntrinsicHeight(
+                                                                child: TextFormField(
+                                                                  autovalidateMode: AutovalidateMode
+                                                                      .onUserInteraction,
+                                                                  controller: inventoryController.nameFilterController,
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                  textAlign: TextAlign.start,
+                                                                  keyboardType:TextInputType.text,
+                                                                  decoration: InputDecoration(
+                                                                    contentPadding:
+                                                                    const EdgeInsets.symmetric(
+                                                                        vertical: 11,horizontal: 15
+                                                                    ),
+                                                                    isDense: true,
+                                                                    border: OutlineInputBorder(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(6),
+                                                                    ),
+                                                                    filled: true,
+                                                                    fillColor: AppColor.textFieldColor,
+                                                                    errorMaxLines: 1,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(height: 8,),
+                                                          Column(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                'شماره تماس',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                    fontSize: 11,
+                                                                    fontWeight: FontWeight.normal,
+                                                                    color: AppColor.textColor),
+                                                              ),
+                                                              SizedBox(height: 10,),
+                                                              IntrinsicHeight(
+                                                                child: TextFormField(
+                                                                  autovalidateMode: AutovalidateMode
+                                                                      .onUserInteraction,
+                                                                  controller: inventoryController.mobileFilterController,
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                  textAlign: TextAlign.center,
+                                                                  keyboardType:TextInputType.phone,
+                                                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                    TextInputFormatter.withFunction((oldValue, newValue) {
+                                                                      // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                      String newText = newValue.text
+                                                                          .replaceAll('٠', '0')
+                                                                          .replaceAll('١', '1')
+                                                                          .replaceAll('٢', '2')
+                                                                          .replaceAll('٣', '3')
+                                                                          .replaceAll('٤', '4')
+                                                                          .replaceAll('٥', '5')
+                                                                          .replaceAll('٦', '6')
+                                                                          .replaceAll('٧', '7')
+                                                                          .replaceAll('٨', '8')
+                                                                          .replaceAll('٩', '9');
 
-                                ),
+                                                                      return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                                                    }),
+                                                                  ],
+                                                                  decoration: InputDecoration(
+                                                                    contentPadding:
+                                                                    const EdgeInsets.symmetric(
+                                                                        vertical: 11,horizontal: 15
+
+                                                                    ),
+                                                                    isDense: true,
+                                                                    border: OutlineInputBorder(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(6),
+                                                                    ),
+
+                                                                    filled: true,
+                                                                    fillColor: AppColor.textFieldColor,
+                                                                    errorMaxLines: 1,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(height: 8),
+                                                          Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                'از تاریخ',
+                                                                style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                    fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                              ),
+                                                              Container(
+                                                                //height: 50,
+                                                                padding: EdgeInsets.only(bottom: 5),
+                                                                child: IntrinsicHeight(
+                                                                  child: TextFormField(
+                                                                    validator: (value){
+                                                                      if(value==null || value.isEmpty){
+                                                                        return 'لطفا تاریخ را انتخاب کنید';
+                                                                      }
+                                                                      return null;
+                                                                    },
+                                                                    controller: inventoryController.dateStartController,
+                                                                    readOnly: true,
+                                                                    style: AppTextStyle.labelText,
+                                                                    decoration: InputDecoration(
+                                                                      suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                      border: OutlineInputBorder(
+                                                                        borderRadius: BorderRadius.circular(10),
+                                                                      ),
+                                                                      filled: true,
+                                                                      fillColor: AppColor.textFieldColor,
+                                                                      errorMaxLines: 1,
+                                                                    ),
+                                                                    onTap: () async {
+                                                                      Jalali? pickedDate = await showPersianDatePicker(
+                                                                        context: context,
+                                                                        initialDate: Jalali.now(),
+                                                                        firstDate: Jalali(1400,1,1),
+                                                                        lastDate: Jalali(1450,12,29),
+                                                                        initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                        initialDatePickerMode: PersianDatePickerMode.day,
+                                                                        locale: Locale("fa","IR"),
+                                                                      );
+                                                                      Gregorian gregorian= pickedDate!.toGregorian();
+                                                                      inventoryController.startDateFilter.value =
+                                                                      "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                      inventoryController.dateStartController.text =
+                                                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(height: 8),
+                                                          Column(
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                'تا تاریخ',
+                                                                style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                    fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                              ),
+                                                              Container(
+                                                                //height: 50,
+                                                                padding: EdgeInsets.only(bottom: 5),
+                                                                child: IntrinsicHeight(
+                                                                  child: TextFormField(
+                                                                    validator: (value){
+                                                                      if(value==null || value.isEmpty){
+                                                                        return 'لطفا تاریخ را انتخاب کنید';
+                                                                      }
+                                                                      return null;
+                                                                    },
+                                                                    controller: inventoryController.dateEndController,
+                                                                    readOnly: true,
+                                                                    style: AppTextStyle.labelText,
+                                                                    decoration: InputDecoration(
+                                                                      suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                      border: OutlineInputBorder(
+                                                                        borderRadius: BorderRadius.circular(10),
+                                                                      ),
+                                                                      filled: true,
+                                                                      fillColor: AppColor.textFieldColor,
+                                                                      errorMaxLines: 1,
+                                                                    ),
+                                                                    onTap: () async {
+                                                                      Jalali? pickedDate = await showPersianDatePicker(
+                                                                        context: context,
+                                                                        initialDate: Jalali.now(),
+                                                                        firstDate: Jalali(1400,1,1),
+                                                                        lastDate: Jalali(1450,12,29),
+                                                                        initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                        initialDatePickerMode: PersianDatePickerMode.day,
+                                                                        locale: Locale("fa","IR"),
+                                                                      );
+                                                                      // DateTime date=DateTime.now();
+                                                                      Gregorian gregorian= pickedDate!.toGregorian();
+                                                                      inventoryController.endDateFilter.value =
+                                                                      "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                      inventoryController.dateEndController.text =
+                                                                      "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                    },
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    //   Spacer(),
+                                                    Container(
+                                                      margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                      width: double.infinity,
+                                                      height: 40,
+                                                      child: ElevatedButton(
+                                                        style: ButtonStyle(
+                                                            padding: WidgetStatePropertyAll(
+                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                            // elevation: WidgetStatePropertyAll(5),
+                                                            backgroundColor:
+                                                            WidgetStatePropertyAll(AppColor.appBarColor),
+                                                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                borderRadius: BorderRadius.circular(5)))),
+                                                        onPressed: () async {
+                                                          inventoryController.getInventoryListPager();
+                                                          Get.back();
+
+                                                        },
+                                                        child: inventoryController.isLoading.value?
+                                                        CircularProgressIndicator(
+                                                          valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                        ) :
+                                                        Text(
+                                                          'فیلتر',
+                                                          style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      });
+                                },
                                 child: Row(
                                   children: [
                                     SvgPicture.asset(
@@ -650,13 +968,13 @@ class InventoryListView extends StatelessWidget {
                                         colorFilter:
                                         ColorFilter
                                             .mode(
-                                          AppColor
+                                          inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
                                               .textColor,
                                           BlendMode
                                               .srcIn,
                                         )),
                                     SizedBox(
-                                      width: 5,
+                                      width: 10,
                                     ),
                                     Text(
                                       'فیلتر',
@@ -665,7 +983,7 @@ class InventoryListView extends StatelessWidget {
                                           .copyWith(
                                           fontSize: isDesktop
                                               ? 12
-                                              : 10),
+                                              : 10,color:  inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                     ),
                                   ],
                                 ),
@@ -1192,7 +1510,7 @@ class InventoryListView extends StatelessWidget {
                                                             borderRadius: BorderRadius.circular(8),
                                                             color: AppColor.backGroundColor
                                                         ),
-                                                        width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                        width:isDesktop?  Get.width * 0.2:Get.width * 0.5,
                                                         height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
                                                         padding: EdgeInsets.all(20),
                                                         child: SingleChildScrollView(
@@ -1201,16 +1519,41 @@ class InventoryListView extends StatelessWidget {
                                                               Padding(
                                                                 padding: const EdgeInsets.all(8.0),
                                                                 child: Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  mainAxisAlignment: MainAxisAlignment.end,
                                                                   children: [
-                                                                    Text(
-                                                                      'فیلتر',
-                                                                      style: AppTextStyle.labelText.copyWith(
-                                                                        fontSize: 15,
-                                                                        fontWeight: FontWeight.normal,
+                                                                    Expanded(
+                                                                      child: Center(
+                                                                        child: Text(
+                                                                          'فیلتر',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                            fontSize: 15,
+                                                                            fontWeight: FontWeight.normal,
+                                                                          ),
+                                                                        ),
                                                                       ),
                                                                     ),
-                                                                  ],
+                                                                    SizedBox(
+                                                                      width: 50,height: 27,
+                                                                      child: ElevatedButton(
+                                                                        style: ButtonStyle(
+                                                                            padding: WidgetStatePropertyAll(
+                                                                                EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                            // elevation: WidgetStatePropertyAll(5),
+                                                                            backgroundColor:
+                                                                            WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                                borderRadius: BorderRadius.circular(5)))),
+                                                                        onPressed: () async {
+                                                                          inventoryController.clearFilter();
+                                                                          inventoryController.getInventoryListPager();
+                                                                          Get.back();
+                                                                        },
+                                                                        child: Text(
+                                                                          'حذف فیلتر',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                                        ),
+                                                                      ),
+                                                                    ),                                                                  ],
                                                                 ),
                                                               ),
                                                               Container(
@@ -2264,6 +2607,7 @@ class InventoryListView extends StatelessWidget {
                       EasyLoading.dismiss();
                       return ErrPage(
                         callback: () {
+                          inventoryController.clearFilter();
                           inventoryController.getInventoryListPager();
                         },
                         title: "خطا در دریافت",

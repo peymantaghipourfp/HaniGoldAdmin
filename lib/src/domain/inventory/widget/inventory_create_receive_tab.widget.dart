@@ -709,6 +709,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                     Row(mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Checkbox(
+                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                           value: inventoryCreateReceiveController.factorChecked.value,
                           onChanged: (value) async{
                             inventoryCreateReceiveController.factorChecked.value = value!;

@@ -63,7 +63,7 @@ class OrderController extends GetxController{
 
   @override
   void onInit() {
-    getDepositListPager();
+    getOrderListPager();
     setupScrollListener();
     super.onInit();
   }
@@ -154,7 +154,7 @@ class OrderController extends GetxController{
     selectedAccountId.value = account.id!;
     searchController.text = account.name!;
     Get.back(); // Close search dialog
-    getDepositListPager();
+    getOrderListPager();
   }
 
   void clearSearch() {
@@ -162,19 +162,23 @@ class OrderController extends GetxController{
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
-    getDepositListPager();
+    getOrderListPager();
   }
 
 // لیست سفارشات با صفحه بندی
-  Future<void> getDepositListPager() async {
+  Future<void> getOrderListPager() async {
     print("### getDepositListPager ###");
     orderList.clear();
     isLoading.value=true;
     try {
       state.value=PageState.loading;
+      print("selectedAccountId.value:::::${selectedAccountId.value}");
       var response = await orderRepository.getOrderListPager(
         startIndex: currentPage.value,
-        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
+        toIndex: itemsPerPage.value,
+        name:nameFilterController.text,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
       orderList.addAll(response.orders??[]);
@@ -241,7 +245,7 @@ class OrderController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        getDepositListPager();
+        getOrderListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -266,7 +270,7 @@ class OrderController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف سفارش با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         Get.back();
-        getDepositListPager();
+        getOrderListPager();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -282,7 +286,7 @@ class OrderController extends GetxController{
   void isChangePage(int index){
     currentPage.value=index*10-10;
     itemsPerPage.value=index*10;
-    getDepositListPager();
+    getOrderListPager();
   }
 
   Future<List<dynamic>?> updateRegistered(int orderId,bool registered) async {
@@ -298,7 +302,7 @@ class OrderController extends GetxController{
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-      getDepositListPager();
+      getOrderListPager();
 
     } catch (e) {
       EasyLoading.dismiss();
@@ -614,4 +618,12 @@ class OrderController extends GetxController{
     );
   }
 
+  void clearFilter() {
+    nameFilterController.clear();
+    mobileFilterController.clear();
+    dateStartController.clear();
+    dateEndController.clear();
+    startDateFilter.value="";
+    endDateFilter.value="";
+  }
 }

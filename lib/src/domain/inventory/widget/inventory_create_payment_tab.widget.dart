@@ -461,6 +461,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                     Row(mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Checkbox(
+                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                           value: inventoryCreatePaymentController.factorChecked.value,
                           onChanged: (value) async{
                             inventoryCreatePaymentController.factorChecked.value = value!;

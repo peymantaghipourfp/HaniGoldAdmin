@@ -51,7 +51,8 @@ class DepositController extends GetxController{
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
-  final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController nameDepositFilterController=TextEditingController();
+  final TextEditingController nameRequestFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
   RxList<DepositModel> depositList = RxList([]);
   var errorMessage=''.obs;
@@ -248,6 +249,8 @@ class DepositController extends GetxController{
       var response = await depositRepository.getDepositListPager(
         startIndex: currentPage.value,
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
       );
       isLoading.value=false;
       depositList.addAll(response.deposit??[]);
@@ -714,6 +717,16 @@ class DepositController extends GetxController{
         style: pw.TextStyle(fontSize: 10),
       ),
     );
+  }
+
+  void clearFilter() {
+    nameDepositFilterController.clear();
+    nameRequestFilterController.clear();
+    mobileFilterController.clear();
+    dateStartController.clear();
+    dateEndController.clear();
+    startDateFilter.value="";
+    endDateFilter.value="";
   }
 
   // خروجی pdf

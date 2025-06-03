@@ -11,6 +11,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../controller/remittance.controller.dart';
 
@@ -50,7 +51,14 @@ class RemittanceView extends GetView<RemittanceController> {
                                       controller: controller.searchController,
                                       style: AppTextStyle.labelText,
                                       textInputAction: TextInputAction.search,
-                                      onFieldSubmitted: (value) async {},
+                                      onFieldSubmitted: (value) async {
+                                        if (value.isNotEmpty) {
+                                          await controller.searchAccounts(value);
+                                          showSearchResults(context);
+                                        } else {
+                                          controller.clearSearch();
+                                        }
+                                      },
                                       decoration: InputDecoration(
                                         border: OutlineInputBorder(
                                           borderRadius: BorderRadius.circular(10),
@@ -60,12 +68,22 @@ class RemittanceView extends GetView<RemittanceController> {
                                         hintText: "جستجو ... ",
                                         hintStyle: AppTextStyle.labelText,
                                         prefixIcon: IconButton(
-                                            onPressed: () async {},
-                                            icon: Icon(
-                                              Icons.search,
-                                              color: AppColor.textColor,
-                                              size: 30,
-                                            )),
+                                            onPressed: ()async{
+                                              if (controller.searchController.text.isNotEmpty) {
+                                                await controller.searchAccounts(
+                                                    controller.searchController.text
+                                                );
+                                                showSearchResults(context);
+                                              }else {
+                                                controller.clearSearch();
+                                              }
+                                            },
+                                            icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
+                                        ),
+                                        suffixIcon: IconButton(
+                                          onPressed: controller.clearSearch,
+                                          icon: Icon(Icons.close, color: AppColor.textColor),
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -570,21 +588,47 @@ class RemittanceView extends GetView<RemittanceController> {
                                                                   borderRadius: BorderRadius.circular(8),
                                                                   color: AppColor.backGroundColor
                                                               ),
-                                                              width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
-                                                              height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                              width:isDesktop?  Get.width * 0.2:Get.width * 0.5,
+                                                              height:Get.height * 0.6,
                                                               padding: EdgeInsets.all(20),
                                                               child: Column(
                                                                 children: [
                                                                   Padding(
                                                                     padding: const EdgeInsets.all(8.0),
                                                                     child: Row(
-                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      mainAxisAlignment: MainAxisAlignment.end,
                                                                       children: [
-                                                                        Text(
-                                                                          'فیلتر',
-                                                                          style: AppTextStyle.labelText.copyWith(
-                                                                            fontSize: 15,
-                                                                            fontWeight: FontWeight.normal,
+                                                                        Expanded(
+                                                                          child: Center(
+                                                                            child: Text(
+                                                                              'فیلتر',
+                                                                              style: AppTextStyle.labelText.copyWith(
+                                                                                fontSize: 15,
+                                                                                fontWeight: FontWeight.normal,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(
+                                                                          width: 50,height: 27,
+                                                                          child: ElevatedButton(
+                                                                            style: ButtonStyle(
+                                                                                padding: WidgetStatePropertyAll(
+                                                                                    EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                                // elevation: WidgetStatePropertyAll(5),
+                                                                                backgroundColor:
+                                                                                WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                                shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                                    borderRadius: BorderRadius.circular(5)))),
+                                                                            onPressed: () async {
+                                                                              controller.clearFilter();
+                                                                              controller.getRemittanceListPager();
+                                                                              Get.back();
+                                                                            },
+                                                                            child: Text(
+                                                                              'حذف فیلتر',
+                                                                              style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                                            ),
                                                                           ),
                                                                         ),
                                                                       ],
@@ -603,7 +647,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                                                           CrossAxisAlignment.start,
                                                                           children: [
                                                                             Text(
-                                                                              'نام',
+                                                                              'نام بدهکار',
                                                                               style: AppTextStyle.labelText.copyWith(
                                                                                   fontSize: 11,
                                                                                   fontWeight: FontWeight.normal,
@@ -614,7 +658,46 @@ class RemittanceView extends GetView<RemittanceController> {
                                                                               child: TextFormField(
                                                                                 autovalidateMode: AutovalidateMode
                                                                                     .onUserInteraction,
-                                                                                controller: controller.nameFilterController,
+                                                                                controller: controller.namePayerController,
+                                                                                style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                                textAlign: TextAlign.start,
+                                                                                keyboardType:TextInputType.text,
+                                                                                decoration: InputDecoration(
+                                                                                  contentPadding:
+                                                                                  const EdgeInsets.symmetric(
+                                                                                      vertical: 11,horizontal: 15
+                                                                                  ),
+                                                                                  isDense: true,
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius:
+                                                                                    BorderRadius.circular(6),
+                                                                                  ),
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor.textFieldColor,
+                                                                                  errorMaxLines: 1,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 8,),
+                                                                        Column(
+                                                                          crossAxisAlignment:
+                                                                          CrossAxisAlignment.start,
+                                                                          children: [
+                                                                            Text(
+                                                                              'نام بستانکار',
+                                                                              style: AppTextStyle.labelText.copyWith(
+                                                                                  fontSize: 11,
+                                                                                  fontWeight: FontWeight.normal,
+                                                                                  color: AppColor.textColor),
+                                                                            ),
+                                                                            SizedBox(height: 10,),
+                                                                            IntrinsicHeight(
+                                                                              child: TextFormField(
+                                                                                autovalidateMode: AutovalidateMode
+                                                                                    .onUserInteraction,
+                                                                                controller: controller.nameRecieptController,
                                                                                 style: AppTextStyle.labelText.copyWith(fontSize: 15),
                                                                                 textAlign: TextAlign.start,
                                                                                 keyboardType:TextInputType.text,
@@ -917,15 +1000,14 @@ class RemittanceView extends GetView<RemittanceController> {
                               ),
                             ),
                           )
-                        : Center(
-                            child: Text(
-                              'خطا در سمت سرور رخ داده',
-                              style: AppTextStyle.labelText.copyWith(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
+                        : ErrPage(
+                          callback: () {
+                            controller.clearFilter();
+                            controller.getRemittanceListPager();
+                          },
+                  title: "خطا در دریافت لیست حواله",
+                  des: 'برای دریافت لیست حواله ها مجددا تلاش کنید',
+                ),
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.end,
@@ -944,6 +1026,35 @@ class RemittanceView extends GetView<RemittanceController> {
             ],
           ),
         ));
+  }
+
+  void showSearchResults(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(backgroundColor: AppColor.backGroundColor,
+        title: Text('انتخاب کنید',style: AppTextStyle.smallTitleText,),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: controller.searchedAccounts.length,
+            itemBuilder: (context, index) {
+              final account = controller.searchedAccounts[index];
+              return ListTile(
+                title: Text(account.name ?? '',style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
+                onTap: () => controller.selectAccount(account),
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('بستن',style: AppTextStyle.bodyText,),
+          ),
+        ],
+      ),
+    );
   }
 
   List<DataColumn> buildDataColumns() {

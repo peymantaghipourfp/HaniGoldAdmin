@@ -81,8 +81,7 @@ class InsertDepositRequestWidget extends StatelessWidget {
                         child: CustomDropdownWidget(
 
                           dropdownSearchData: DropdownSearchData<String>(
-                            searchController: withdrawController
-                                .searchController,
+                            searchController: withdrawController.searchController,
                             searchInnerWidgetHeight: 50,
                             searchInnerWidget: Container(
                               height: 50,
@@ -92,8 +91,7 @@ class InsertDepositRequestWidget extends StatelessWidget {
                                 left: 15,
                               ),
                               child: TextFormField(style: AppTextStyle.bodyText,
-                                controller: withdrawController
-                                    .searchController,
+                                controller: withdrawController.searchController,
                                 decoration: InputDecoration(
                                   isDense: true,
                                   contentPadding:
