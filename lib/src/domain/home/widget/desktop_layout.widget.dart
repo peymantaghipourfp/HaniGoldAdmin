@@ -370,7 +370,7 @@ void _showExitDialog() {
           ),
           child: Text('خروج',
               style: TextStyle(color: Colors.white)),
-          onPressed: () => FlutterExitApp.exitApp(),
+          onPressed: () => Get.offAllNamed("/login"),
         ),
       ],
     ),
