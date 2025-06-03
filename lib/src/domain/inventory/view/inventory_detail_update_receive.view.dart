@@ -30,6 +30,7 @@ class InventoryDetailUpdateReceiveView extends StatefulWidget {
 class _InventoryDetailUpdateReceiveViewState
     extends State<InventoryDetailUpdateReceiveView>
     with TickerProviderStateMixin {
+  final formKey = GlobalKey<FormState>();
   InventoryUpdateReceiveController inventoryUpdateReceiveController = Get.find<
       InventoryUpdateReceiveController>();
 
@@ -146,6 +147,7 @@ class _InventoryDetailUpdateReceiveViewState
                                             horizontal: 24),
                                         child:
                                         Form(
+                                          key: formKey,
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment
                                                 .start,
@@ -263,116 +265,124 @@ class _InventoryDetailUpdateReceiveViewState
                                                   ),
                                                 ),
                                               ),
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
                                               // آزمایشگاه
-                                              Container(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 3, top: 5),
-                                                child: Text(
-                                                  'آزمایشگاه',
-                                                  style: AppTextStyle.labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop
-                                                          ? 12
-                                                          : 10),
-                                                ),
-                                              ),
-                                              // آزمایشگاه
-                                              Container(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 5),
-                                                child:
-                                                CustomDropdownWidget(
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'آزمایشگاه',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
+                                                    ),
+                                                  ),
+                                                  // آزمایشگاه
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    CustomDropdownWidget(
 
-                                                  dropdownSearchData: DropdownSearchData<
-                                                      String>(
-                                                    searchController: inventoryUpdateReceiveController
-                                                        .searchLaboratoryController,
-                                                    searchInnerWidgetHeight: 50,
-                                                    searchInnerWidget: Container(
-                                                      height: 50,
-                                                      padding: const EdgeInsets
-                                                          .only(
-                                                        top: 8,
-                                                        right: 15,
-                                                        left: 15,
-                                                      ),
-                                                      child: TextFormField(
-                                                        style: AppTextStyle
-                                                            .bodyText,
-                                                        controller: inventoryUpdateReceiveController
+                                                      dropdownSearchData: DropdownSearchData<
+                                                          String>(
+                                                        searchController: inventoryUpdateReceiveController
                                                             .searchLaboratoryController,
-                                                        decoration: InputDecoration(
-                                                          isDense: true,
-                                                          contentPadding:
-                                                          const EdgeInsets
-                                                              .symmetric(
-                                                            horizontal: 10,
-                                                            vertical: 8,
+                                                        searchInnerWidgetHeight: 50,
+                                                        searchInnerWidget: Container(
+                                                          height: 50,
+                                                          padding: const EdgeInsets
+                                                              .only(
+                                                            top: 8,
+                                                            right: 15,
+                                                            left: 15,
                                                           ),
-                                                          hintText: 'جستجوی آزمایشگاه...',
-                                                          hintStyle: AppTextStyle
-                                                              .labelText,
-                                                          border: OutlineInputBorder(
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
+                                                          child: TextFormField(
+                                                            style: AppTextStyle
+                                                                .bodyText,
+                                                            controller: inventoryUpdateReceiveController
+                                                                .searchLaboratoryController,
+                                                            decoration: InputDecoration(
+                                                              isDense: true,
+                                                              contentPadding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                horizontal: 10,
+                                                                vertical: 8,
+                                                              ),
+                                                              hintText: 'جستجوی آزمایشگاه...',
+                                                              hintStyle: AppTextStyle
+                                                                  .labelText,
+                                                              border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(8),
+                                                              ),
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
+                                                      value: inventoryUpdateReceiveController
+                                                          .selectedLaboratory.value,
+                                                      /*validator: (value) {
+                                                                                        if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
+                                                                                          return 'کاربر را انتخاب کنید';
+                                                                                        }
+                                                                                        return null;
+                                                                                      },*/
+                                                      showSearchBox: true,
+                                                      items: [
+                                                        'انتخاب کنید',
+                                                        ...inventoryUpdateReceiveController
+                                                            .searchedLaboratories
+                                                            .map((laboratory) =>
+                                                        laboratory.name ?? "")
+                                                      ].toList(),
+                                                      selectedValue: inventoryUpdateReceiveController
+                                                          .selectedLaboratory.value
+                                                          ?.name,
+                                                      onChanged: (
+                                                          String? newValue) {
+                                                        if (newValue ==
+                                                            'انتخاب کنید') {
+                                                          inventoryUpdateReceiveController
+                                                              .changeSelectedLaboratory(
+                                                              null);
+                                                        } else {
+                                                          var selectedLaboratory = inventoryUpdateReceiveController
+                                                              .searchedLaboratories
+                                                              .firstWhere((
+                                                              laboratory) =>
+                                                          laboratory.name ==
+                                                              newValue);
+                                                          inventoryUpdateReceiveController
+                                                              .changeSelectedLaboratory(
+                                                              selectedLaboratory);
+                                                        }
+                                                      },
+                                                      onMenuStateChange: (isOpen) {
+                                                        if (!isOpen) {
+                                                          inventoryUpdateReceiveController
+                                                              .resetLaboratorySearch();
+                                                        }
+                                                      },
+                                                      backgroundColor: AppColor
+                                                          .textFieldColor,
+                                                      borderRadius: 7,
+                                                      borderColor: AppColor
+                                                          .secondaryColor,
+                                                      hideUnderline: true,
                                                     ),
                                                   ),
-                                                  value: inventoryUpdateReceiveController
-                                                      .selectedLaboratory.value,
-                                                  /*validator: (value) {
-                                                                                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                                                                                      return 'کاربر را انتخاب کنید';
-                                                                                    }
-                                                                                    return null;
-                                                                                  },*/
-                                                  showSearchBox: true,
-                                                  items: [
-                                                    'انتخاب کنید',
-                                                    ...inventoryUpdateReceiveController
-                                                        .searchedLaboratories
-                                                        .map((laboratory) =>
-                                                    laboratory.name ?? "")
-                                                  ].toList(),
-                                                  selectedValue: inventoryUpdateReceiveController
-                                                      .selectedLaboratory.value
-                                                      ?.name,
-                                                  onChanged: (
-                                                      String? newValue) {
-                                                    if (newValue ==
-                                                        'انتخاب کنید') {
-                                                      inventoryUpdateReceiveController
-                                                          .changeSelectedLaboratory(
-                                                          null);
-                                                    } else {
-                                                      var selectedLaboratory = inventoryUpdateReceiveController
-                                                          .searchedLaboratories
-                                                          .firstWhere((
-                                                          laboratory) =>
-                                                      laboratory.name ==
-                                                          newValue);
-                                                      inventoryUpdateReceiveController
-                                                          .changeSelectedLaboratory(
-                                                          selectedLaboratory);
-                                                    }
-                                                  },
-                                                  onMenuStateChange: (isOpen) {
-                                                    if (!isOpen) {
-                                                      inventoryUpdateReceiveController
-                                                          .resetLaboratorySearch();
-                                                    }
-                                                  },
-                                                  backgroundColor: AppColor
-                                                      .textFieldColor,
-                                                  borderRadius: 7,
-                                                  borderColor: AppColor
-                                                      .secondaryColor,
-                                                  hideUnderline: true,
-                                                ),
-                                              ),
+                                                ],
+                                              ):
+                                                  SizedBox.shrink(),
+
                                               // مقدار
                                               Container(
                                                 padding: EdgeInsets.only(
@@ -394,6 +404,13 @@ class _InventoryDetailUpdateReceiveViewState
                                                 child:
                                                 IntrinsicHeight(
                                                   child: TextFormField(
+                                                    validator: (value) {
+                                                      if (value == null ||
+                                                          value.isEmpty) {
+                                                        return 'لطفا مقدار را وارد کنید';
+                                                      }
+                                                      return null;
+                                                    },
                                                     autovalidateMode: AutovalidateMode
                                                         .onUserInteraction,
                                                     controller: inventoryUpdateReceiveController
@@ -457,258 +474,280 @@ class _InventoryDetailUpdateReceiveViewState
                                                   ),
                                                 ),
                                               ),
+
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
                                               // ناخالصی
-                                              Container(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 3, top: 5),
-                                                child: Text(
-                                                  'ناخالصی',
-                                                  style: AppTextStyle.labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop
-                                                          ? 12
-                                                          : 10),
-                                                ),
-                                              ),
-                                              // ناخالصی
-                                              Container(
-                                                //height: 50,
-                                                padding: EdgeInsets.only(
-                                                    bottom: 5),
-                                                child:
-                                                IntrinsicHeight(
-                                                  child: TextFormField(
-                                                    autovalidateMode: AutovalidateMode
-                                                        .onUserInteraction,
-                                                    controller: inventoryUpdateReceiveController
-                                                        .impurityController,
-                                                    style: AppTextStyle
-                                                        .labelText,
-                                                    keyboardType: TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .allow(RegExp(
-                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                      TextInputFormatter
-                                                          .withFunction((
-                                                          oldValue, newValue) {
-                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                        String newText = newValue
-                                                            .text
-                                                            .replaceAll(
-                                                            '٠', '0')
-                                                            .replaceAll(
-                                                            '١', '1')
-                                                            .replaceAll(
-                                                            '٢', '2')
-                                                            .replaceAll(
-                                                            '٣', '3')
-                                                            .replaceAll(
-                                                            '٤', '4')
-                                                            .replaceAll(
-                                                            '٥', '5')
-                                                            .replaceAll(
-                                                            '٦', '6')
-                                                            .replaceAll(
-                                                            '٧', '7')
-                                                            .replaceAll(
-                                                            '٨', '8')
-                                                            .replaceAll(
-                                                            '٩', '9');
-
-                                                        return newValue
-                                                            .copyWith(
-                                                            text: newText,
-                                                            selection: TextSelection
-                                                                .collapsed(
-                                                                offset: newText
-                                                                    .length));
-                                                      }),
-                                                    ],
-                                                    decoration: InputDecoration(
-                                                      isDense: true,
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius
-                                                            .circular(10),
-                                                      ),
-                                                      filled: true,
-                                                      fillColor: AppColor
-                                                          .textFieldColor,
-                                                      errorMaxLines: 1,
+                                              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'ناخالصی',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
                                                     ),
                                                   ),
-                                                ),
-                                              ),
+                                                  // ناخالصی
+                                                  Container(
+                                                    //height: 50,
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    IntrinsicHeight(
+                                                      child: TextFormField(
+                                                        autovalidateMode: AutovalidateMode
+                                                            .onUserInteraction,
+                                                        controller: inventoryUpdateReceiveController
+                                                            .impurityController,
+                                                        style: AppTextStyle
+                                                            .labelText,
+                                                        keyboardType: TextInputType
+                                                            .numberWithOptions(
+                                                            decimal: true),
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter
+                                                              .allow(RegExp(
+                                                              r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                          TextInputFormatter
+                                                              .withFunction((
+                                                              oldValue, newValue) {
+                                                            // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                            String newText = newValue
+                                                                .text
+                                                                .replaceAll(
+                                                                '٠', '0')
+                                                                .replaceAll(
+                                                                '١', '1')
+                                                                .replaceAll(
+                                                                '٢', '2')
+                                                                .replaceAll(
+                                                                '٣', '3')
+                                                                .replaceAll(
+                                                                '٤', '4')
+                                                                .replaceAll(
+                                                                '٥', '5')
+                                                                .replaceAll(
+                                                                '٦', '6')
+                                                                .replaceAll(
+                                                                '٧', '7')
+                                                                .replaceAll(
+                                                                '٨', '8')
+                                                                .replaceAll(
+                                                                '٩', '9');
+
+                                                            return newValue
+                                                                .copyWith(
+                                                                text: newText,
+                                                                selection: TextSelection
+                                                                    .collapsed(
+                                                                    offset: newText
+                                                                        .length));
+                                                          }),
+                                                        ],
+                                                        decoration: InputDecoration(
+                                                          isDense: true,
+                                                          border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius
+                                                                .circular(10),
+                                                          ),
+                                                          filled: true,
+                                                          fillColor: AppColor
+                                                              .textFieldColor,
+                                                          errorMaxLines: 1,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
+
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
                                               // وزن 750
-                                              Container(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 3, top: 5),
-                                                child: Text(
-                                                  'وزن 750',
-                                                  style: AppTextStyle.labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop
-                                                          ? 12
-                                                          : 10),
-                                                ),
-                                              ),
-                                              // وزن 750
-                                              Container(
-                                                //height: 50,
-                                                padding: EdgeInsets.only(
-                                                    bottom: 5),
-                                                child:
-                                                IntrinsicHeight(
-                                                  child: TextFormField(
-                                                    autovalidateMode: AutovalidateMode
-                                                        .onUserInteraction,
-                                                    controller: inventoryUpdateReceiveController
-                                                        .weight750Controller,
-                                                    style: AppTextStyle
-                                                        .labelText,
-                                                    keyboardType: TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .allow(RegExp(
-                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                      TextInputFormatter
-                                                          .withFunction((
-                                                          oldValue, newValue) {
-                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                        String newText = newValue
-                                                            .text
-                                                            .replaceAll(
-                                                            '٠', '0')
-                                                            .replaceAll(
-                                                            '١', '1')
-                                                            .replaceAll(
-                                                            '٢', '2')
-                                                            .replaceAll(
-                                                            '٣', '3')
-                                                            .replaceAll(
-                                                            '٤', '4')
-                                                            .replaceAll(
-                                                            '٥', '5')
-                                                            .replaceAll(
-                                                            '٦', '6')
-                                                            .replaceAll(
-                                                            '٧', '7')
-                                                            .replaceAll(
-                                                            '٨', '8')
-                                                            .replaceAll(
-                                                            '٩', '9');
-
-                                                        return newValue
-                                                            .copyWith(
-                                                            text: newText,
-                                                            selection: TextSelection
-                                                                .collapsed(
-                                                                offset: newText
-                                                                    .length));
-                                                      }),
-                                                    ],
-                                                    decoration: InputDecoration(
-                                                      isDense: true,
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius
-                                                            .circular(10),
-                                                      ),
-                                                      filled: true,
-                                                      fillColor: AppColor
-                                                          .textFieldColor,
-                                                      errorMaxLines: 1,
+                                              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'وزن 750',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
                                                     ),
                                                   ),
-                                                ),
-                                              ),
-                                              // عیار
-                                              Container(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 3, top: 5),
-                                                child: Text(
-                                                  'عیار',
-                                                  style: AppTextStyle.labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop
-                                                          ? 12
-                                                          : 10),
-                                                ),
-                                              ),
-                                              // عیار
-                                              Container(
-                                                //height: 50,
-                                                padding: EdgeInsets.only(
-                                                    bottom: 5),
-                                                child:
-                                                IntrinsicHeight(
-                                                  child: TextFormField(
-                                                    autovalidateMode: AutovalidateMode
-                                                        .onUserInteraction,
-                                                    controller: inventoryUpdateReceiveController
-                                                        .caratController,
-                                                    style: AppTextStyle
-                                                        .labelText,
-                                                    keyboardType: TextInputType
-                                                        .numberWithOptions(
-                                                        decimal: true),
-                                                    inputFormatters: [
-                                                      FilteringTextInputFormatter
-                                                          .allow(RegExp(
-                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                      TextInputFormatter
-                                                          .withFunction((
-                                                          oldValue, newValue) {
-                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                        String newText = newValue
-                                                            .text
-                                                            .replaceAll(
-                                                            '٠', '0')
-                                                            .replaceAll(
-                                                            '١', '1')
-                                                            .replaceAll(
-                                                            '٢', '2')
-                                                            .replaceAll(
-                                                            '٣', '3')
-                                                            .replaceAll(
-                                                            '٤', '4')
-                                                            .replaceAll(
-                                                            '٥', '5')
-                                                            .replaceAll(
-                                                            '٦', '6')
-                                                            .replaceAll(
-                                                            '٧', '7')
-                                                            .replaceAll(
-                                                            '٨', '8')
-                                                            .replaceAll(
-                                                            '٩', '9');
+                                                  // وزن 750
+                                                  Container(
+                                                    //height: 50,
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    IntrinsicHeight(
+                                                      child: TextFormField(
+                                                        autovalidateMode: AutovalidateMode
+                                                            .onUserInteraction,
+                                                        controller: inventoryUpdateReceiveController
+                                                            .weight750Controller,
+                                                        style: AppTextStyle
+                                                            .labelText,
+                                                        keyboardType: TextInputType
+                                                            .numberWithOptions(
+                                                            decimal: true),
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter
+                                                              .allow(RegExp(
+                                                              r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                          TextInputFormatter
+                                                              .withFunction((
+                                                              oldValue, newValue) {
+                                                            // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                            String newText = newValue
+                                                                .text
+                                                                .replaceAll(
+                                                                '٠', '0')
+                                                                .replaceAll(
+                                                                '١', '1')
+                                                                .replaceAll(
+                                                                '٢', '2')
+                                                                .replaceAll(
+                                                                '٣', '3')
+                                                                .replaceAll(
+                                                                '٤', '4')
+                                                                .replaceAll(
+                                                                '٥', '5')
+                                                                .replaceAll(
+                                                                '٦', '6')
+                                                                .replaceAll(
+                                                                '٧', '7')
+                                                                .replaceAll(
+                                                                '٨', '8')
+                                                                .replaceAll(
+                                                                '٩', '9');
 
-                                                        return newValue
-                                                            .copyWith(
-                                                            text: newText,
-                                                            selection: TextSelection
-                                                                .collapsed(
-                                                                offset: newText
-                                                                    .length));
-                                                      }),
-                                                    ],
-                                                    decoration: InputDecoration(
-                                                      isDense: true,
-                                                      border: OutlineInputBorder(
-                                                        borderRadius: BorderRadius
-                                                            .circular(10),
+                                                            return newValue
+                                                                .copyWith(
+                                                                text: newText,
+                                                                selection: TextSelection
+                                                                    .collapsed(
+                                                                    offset: newText
+                                                                        .length));
+                                                          }),
+                                                        ],
+                                                        decoration: InputDecoration(
+                                                          isDense: true,
+                                                          border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius
+                                                                .circular(10),
+                                                          ),
+                                                          filled: true,
+                                                          fillColor: AppColor
+                                                              .textFieldColor,
+                                                          errorMaxLines: 1,
+                                                        ),
                                                       ),
-                                                      filled: true,
-                                                      fillColor: AppColor
-                                                          .textFieldColor,
-                                                      errorMaxLines: 1,
                                                     ),
                                                   ),
-                                                ),
-                                              ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
+
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                                              // عیار
+                                              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'عیار',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
+                                                    ),
+                                                  ),
+                                                  // عیار
+                                                  Container(
+                                                    //height: 50,
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    IntrinsicHeight(
+                                                      child: TextFormField(
+                                                        autovalidateMode: AutovalidateMode
+                                                            .onUserInteraction,
+                                                        controller: inventoryUpdateReceiveController
+                                                            .caratController,
+                                                        style: AppTextStyle
+                                                            .labelText,
+                                                        keyboardType: TextInputType
+                                                            .numberWithOptions(
+                                                            decimal: true),
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter
+                                                              .allow(RegExp(
+                                                              r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                          TextInputFormatter
+                                                              .withFunction((
+                                                              oldValue, newValue) {
+                                                            // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                            String newText = newValue
+                                                                .text
+                                                                .replaceAll(
+                                                                '٠', '0')
+                                                                .replaceAll(
+                                                                '١', '1')
+                                                                .replaceAll(
+                                                                '٢', '2')
+                                                                .replaceAll(
+                                                                '٣', '3')
+                                                                .replaceAll(
+                                                                '٤', '4')
+                                                                .replaceAll(
+                                                                '٥', '5')
+                                                                .replaceAll(
+                                                                '٦', '6')
+                                                                .replaceAll(
+                                                                '٧', '7')
+                                                                .replaceAll(
+                                                                '٨', '8')
+                                                                .replaceAll(
+                                                                '٩', '9');
+
+                                                            return newValue
+                                                                .copyWith(
+                                                                text: newText,
+                                                                selection: TextSelection
+                                                                    .collapsed(
+                                                                    offset: newText
+                                                                        .length));
+                                                          }),
+                                                        ],
+                                                        decoration: InputDecoration(
+                                                          isDense: true,
+                                                          border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius
+                                                                .circular(10),
+                                                          ),
+                                                          filled: true,
+                                                          fillColor: AppColor
+                                                              .textFieldColor,
+                                                          errorMaxLines: 1,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
+
                                               // شماره قبض
                                               Container(
                                                 padding: EdgeInsets.only(
@@ -724,6 +763,7 @@ class _InventoryDetailUpdateReceiveViewState
                                               ),
                                               // شماره قبض
                                               Container(
+                                                height: 40,
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
@@ -1031,7 +1071,9 @@ class _InventoryDetailUpdateReceiveViewState
                                                                   .circular(
                                                                   10)))),
                                                   onPressed: () async {
-                                                    inventoryUpdateReceiveController.uploadImagesDesktopUpdate( "image", "InventoryDetail");
+                                                    if(formKey.currentState!.validate()){
+                                                      inventoryUpdateReceiveController.uploadImagesDesktopUpdate( "image", "InventoryDetail");
+                                                    }
                                                   },
                                                   child: inventoryUpdateReceiveController
                                                       .isLoading.value

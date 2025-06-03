@@ -60,8 +60,8 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getWithFirstRow',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getInventoryList : $options" );
+      print("response getInventoryList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((inventory)=>InventoryModel.fromJson(inventory)).toList();
 
@@ -131,8 +131,8 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getWithFirstRowWrapper',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getInventoryListPager : $options" );
+      print("response getInventoryListPager : ${response.data}" );
       return ListInventoryModel.fromJson(response.data);
     }
     catch(e){
@@ -207,7 +207,7 @@ class InventoryRepository {
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
       print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Response Data insertInventoryReceive: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -326,7 +326,7 @@ class InventoryRepository {
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Response Data insertDetailInventoryReceive: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -448,7 +448,7 @@ class InventoryRepository {
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Response Data updateDetailInventoryReceive: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -460,7 +460,7 @@ class InventoryRepository {
     try{
       final response=await inventoryDio.get('Inventory/getOne',queryParameters: {"id":inventoryId});
       print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Response Data getOneInventory: ${response.data}');
       Map<String, dynamic> data=response.data;
       return InventoryModel.fromJson(data);
     }catch(e){
@@ -637,8 +637,8 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getForPeyment',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getForPaymentlist : $options" );
+      print("response getForPaymentlist : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((receive)=>InventoryDetailModel.fromJson(receive)).toList();
 
@@ -716,7 +716,7 @@ class InventoryRepository {
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
       print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Response Data insertInventoryPayment: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -838,7 +838,7 @@ class InventoryRepository {
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Response Data insertDetailInventoryPayment: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -961,7 +961,7 @@ class InventoryRepository {
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Response Data updateDetailInventoryPayment: ${response.data}');
       return response.data;
 
     }catch(e){

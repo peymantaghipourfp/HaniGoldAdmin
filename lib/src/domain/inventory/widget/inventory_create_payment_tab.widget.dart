@@ -27,6 +27,7 @@ class InventoryCreatePaymentTabWidget extends StatefulWidget {
 }
 
 class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePaymentTabWidget> {
+  final formKey = GlobalKey<FormState>();
   InventoryCreatePaymentController inventoryCreatePaymentController = Get.find<
       InventoryCreatePaymentController>();
 
@@ -42,6 +43,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
 
         child: Obx(() {
           return Form(
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -94,12 +96,12 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                       ),
                     ),
                     value: inventoryCreatePaymentController.selectedAccount.value,
-                    /*validator: (value) {
+                    validator: (value) {
                     if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                       return 'کاربر را انتخاب کنید';
                     }
                     return null;
-                  },*/
+                  },
                     showSearchBox: true,
                     items: [
                       'انتخاب کنید',
@@ -298,6 +300,13 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                             fillColor: AppColor.textFieldColor,
                             errorMaxLines: 1,
                           ),
+                          validator: (value) {
+                            if (value == null ||
+                                value.isEmpty) {
+                              return 'لطفا مقدار را وارد کنید';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
@@ -447,69 +456,91 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                   ),
                 ),
                 //  دکمه ثبت و ثبت نهایی
-                Row(mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                   children: [
-                    // دکمه ثبت
-                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.itemUnit?.id!=2 ?
-                    ElevatedButton(
-                      style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                          isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                          isDesktop ? 50 : 40
-                      ),
-                      ),
-                          padding: WidgetStatePropertyAll(
-                            EdgeInsets.symmetric(
-                                horizontal: isDesktop ? 20 : 7
-                            ),),
-                          elevation: WidgetStatePropertyAll(5),
-                          backgroundColor:
-                          WidgetStatePropertyAll(AppColor.buttonColor),
-                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)))),
-                      onPressed: () async {
-                        inventoryCreatePaymentController.addToTempList();
-                      },
-                      child: inventoryCreatePaymentController.isLoading.value
-                          ?
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColor.textColor),
-                      ) :
-                      Text(
-                        'ثبت',
-                        style: AppTextStyle.bodyText,
-                      ),
-                    ) : SizedBox.shrink(),
-                    SizedBox(width: 10,),
-                    // دکمه ثبت نهایی
-                    ElevatedButton(
-                      style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                          isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                          isDesktop ? 50 : 40
-                      ),),
-                          padding: WidgetStatePropertyAll(
-                            EdgeInsets.symmetric(
-                                horizontal: isDesktop ? 20 : 7
-                            ),),
-                          elevation: WidgetStatePropertyAll(5),
-                          backgroundColor:
-                          WidgetStatePropertyAll(AppColor.primaryColor),
-                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10)))),
-                      onPressed: () async {
-                        await inventoryCreatePaymentController.uploadImagesDesktop( "image", "InventoryDetail");
-                      },
-                      child: inventoryCreatePaymentController.isFinalizing.value
-                          ?
-                      CircularProgressIndicator(
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColor.textColor),
-                      ) :
-                      Text(
-                        'ثبت نهایی',
-                        style: AppTextStyle.bodyText,
-                      ),
-                    )
+                    Row(mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: inventoryCreatePaymentController.factorChecked.value,
+                          onChanged: (value) async{
+                            inventoryCreatePaymentController.factorChecked.value = value!;
+                          },
+                        ),
+                        SizedBox(width: 8,),
+                        Text('ثبت نهایی همراه با صدور فاکتور',style: AppTextStyle.bodyTextBold,)
+                      ],
+                    ),
+                    SizedBox(height: 5,),
+                    Row(mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // دکمه ثبت
+                        inventoryCreatePaymentController.selectedWalletAccount.value?.item?.itemUnit?.id!=2 ?
+                        ElevatedButton(
+                          style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
+                              isDesktop ? Get.width * 0.12 : Get.width * 0.3,
+                              isDesktop ? 50 : 40
+                          ),
+                          ),
+                              padding: WidgetStatePropertyAll(
+                                EdgeInsets.symmetric(
+                                    horizontal: isDesktop ? 20 : 7
+                                ),),
+                              elevation: WidgetStatePropertyAll(5),
+                              backgroundColor:
+                              WidgetStatePropertyAll(AppColor.buttonColor),
+                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)))),
+                          onPressed: () {
+                            if(formKey.currentState!.validate()){
+                              inventoryCreatePaymentController.addToTempList();
+                            }
+                          },
+                          child: inventoryCreatePaymentController.isLoading.value
+                              ?
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColor.textColor),
+                          ) :
+                          Text(
+                            'ثبت',
+                            style: AppTextStyle.bodyText,
+                          ),
+                        ) : SizedBox.shrink(),
+                        SizedBox(width: 10,),
+                        // دکمه ثبت نهایی
+                        ElevatedButton(
+                          style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
+                              isDesktop ? Get.width * 0.12 : Get.width * 0.3,
+                              isDesktop ? 50 : 40
+                          ),),
+                              padding: WidgetStatePropertyAll(
+                                EdgeInsets.symmetric(
+                                    horizontal: isDesktop ? 20 : 7
+                                ),),
+                              elevation: WidgetStatePropertyAll(5),
+                              backgroundColor:
+                              WidgetStatePropertyAll(AppColor.primaryColor),
+                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)))),
+                          onPressed: () async {
+                            if(inventoryCreatePaymentController.tempDetails.isNotEmpty){
+                              await inventoryCreatePaymentController.uploadImagesDesktop( "image", "InventoryDetail");
+                            }
+                          },
+                          child: inventoryCreatePaymentController.isFinalizing.value
+                              ?
+                          CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColor.textColor),
+                          ) :
+                          Text(
+                            'ثبت نهایی',
+                            style: AppTextStyle.bodyText,
+                          ),
+                        ),
+
+                      ],
+                    ),
                   ],
                 )
               ],

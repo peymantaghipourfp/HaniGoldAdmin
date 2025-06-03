@@ -1,7 +1,11 @@
 
 
 import 'dart:async';
-
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
+import 'package:pdf/pdf.dart';
+import 'package:printing/printing.dart';
+import 'package:universal_html/html.dart' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -31,6 +35,7 @@ import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/predicate.model.dart';
 import 'dart:typed_data';
+import 'package:pdf/widgets.dart' as pw;
 
 enum PageState{loading,err,empty,list}
 
@@ -83,6 +88,7 @@ class InventoryCreateReceiveController extends GetxController{
   RxBool isUploadingDesktop = false.obs;
   List<Uint8List> selectedImagesBytes = [];
   List<String> selectedFileNames = [];
+  var factorChecked = false.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -302,47 +308,47 @@ class InventoryCreateReceiveController extends GetxController{
 
   Future<void> uploadImagesDesktop( String type, String entityType) async {
     EasyLoading.show(status: 'لطفا منتظر بمانید');
-    for(int i=0; i < tempDetails.length; i++){
-      recordId.value=uuid.v4();
-      if (tempDetails[i].listXfile!.isEmpty){
-        return;
-      }else{
-        isUploadingDesktop.value = true;
-        uploadStatusesDesktop.assignAll(List.filled(tempDetails[i].listXfile!.length, false));
-        try {
-          for (int j = 0; j < tempDetails[i].listXfile!.length; j++) {
-            final file = tempDetails[i].listXfile![j];
-            try{
-              final bytes = await file.readAsBytes();
-              String success = await uploadRepositoryDesktop.uploadImageDesktop(
-                imageBytes: bytes,
-                fileName: file.name,
-                recordId: tempDetails[i].recId ?? '',
-                type: type,
-                entityType: entityType,
-              );
-              uploadStatusesDesktop[i] = success.isNotEmpty;
-            }catch(e){
-              EasyLoading.dismiss();
-              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+    try{
+      for(int i=0; i < tempDetails.length; i++){
+        recordId.value=uuid.v4();
+        if (tempDetails[i].listXfile==null){
+          return;
+        }else{
+          isUploadingDesktop.value = true;
+          uploadStatusesDesktop.assignAll(List.filled(tempDetails[i].listXfile!.length, false));
+            for (int j = 0; j < tempDetails[i].listXfile!.length; j++) {
+              final file = tempDetails[i].listXfile![j];
+              try{
+                final bytes = await file.readAsBytes();
+                String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                  imageBytes: bytes,
+                  fileName: file.name,
+                  recordId: tempDetails[i].recId ?? '',
+                  type: type,
+                  entityType: entityType,
+                );
+                uploadStatusesDesktop[i] = success.isNotEmpty;
+              }catch(e){
+                EasyLoading.dismiss();
+                Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+              }
             }
-          }
-          if (uploadStatusesDesktop.every((status) => status)) {
-            EasyLoading.dismiss();
-            Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+            if (uploadStatusesDesktop.every((status) => status)) {
+              EasyLoading.dismiss();
+              Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
 
-          }
-        } finally {
-
-          EasyLoading.dismiss();
-          isUploadingDesktop.value = false;
-          selectedImagesDesktop.clear();
-          uploadStatusesDesktop.clear();
+            }
         }
       }
     }
+    finally{
+      submitFinalInventory();
+      EasyLoading.dismiss();
+      isUploadingDesktop.value = false;
+      selectedImagesDesktop.clear();
+      uploadStatusesDesktop.clear();
+    }
 
-    submitFinalInventory();
   }
 
 // لیست موقت فاکتور
@@ -410,16 +416,65 @@ class InventoryCreateReceiveController extends GetxController{
       if (response != null) {
         Get.back();
         tempDetails.clear();
-        Get.snackbar("موفقیت آمیز", "ثبت نهایی انجام شد",
-            titleText: Text('موفقیت آمیز',
+        InventoryModel responseData=InventoryModel.fromJson(response);
+        var inventoryDetails=responseData.inventoryDetails;
+        Get.snackbar(responseData.infos?.first['title'], responseData.infos?.first["description"],
+            titleText: Text(responseData.infos?.first['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(
-                'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+              responseData.infos?.first["description"], textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
         );
         inventoryController.getInventoryListPager();
-        Get.toNamed('inventoryList');
+        if(factorChecked.value==true){
+
+          final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+          final ttf = pw.Font.ttf(fontData);
+          final pdf = pw.Document();
+
+          pdf.addPage(
+            pw.MultiPage(
+              pageFormat: PdfPageFormat.a4,
+              textDirection: pw.TextDirection.rtl,
+              theme: pw.ThemeData.withFont(base: ttf, fontFallback: [ttf]),
+              build: (pw.Context context) {
+                return [
+                  buildInvoiceHeader(responseData),
+                  pw.SizedBox(height: 20),
+                  pw.Table(
+                    border: pw.TableBorder.all(),
+                    columnWidths: getInvoiceColumnWidths(),
+                    children: [
+                      buildInvoiceTableHeader(),
+                      for (var i = 0; i < inventoryDetails!.length; i++)
+                        buildInvoiceDataRow(inventoryDetails[i], i),
+                    ],
+                  ),
+                  pw.SizedBox(height: 20),
+                  buildInvoiceFooter(inventoryDetails),
+                ];
+              },
+              footer: (context) => buildPageNumber(context.pageNumber, context.pagesCount),
+            ),
+          );
+
+          final bytes = await pdf.save();
+          if (kIsWeb) {
+            final blob = html.Blob([bytes], 'application/pdf');
+            final url = html.Url.createObjectUrlFromBlob(blob);
+            html.AnchorElement(href: url)
+              ..download = 'factorInventoryReceive_${DateTime.now().millisecondsSinceEpoch}.pdf'
+              ..click();
+            html.Url.revokeObjectUrl(url);
+          } else {
+            await Printing.sharePdf(
+              bytes: bytes,
+              filename: 'factorInventoryReceive.pdf',
+            );
+          }
+        }
+        Get.toNamed('/inventoryList');
         clearList();
       }
     }catch(e){
@@ -431,6 +486,130 @@ class InventoryCreateReceiveController extends GetxController{
       isFinalizing.value=false;
     }
     return null;
+  }
+
+  pw.Widget buildInvoiceHeader(InventoryModel responseData) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        /*pw.Row(
+          children: [
+            pw.Image(
+              pw.MemoryImage(logoBytes),
+              width: 100,
+              height: 50,
+            ),
+            pw.SizedBox(width: 20),
+            pw.Text('فاکتور رسمی', style: pw.TextStyle(fontSize: 24)),
+          ],
+        ),*/
+        pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center,
+            children:[
+              pw.Text('فاکتور مشتری', style: pw.TextStyle(fontSize: 17)),
+            ]
+        ),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text('شماره فاکتور: ${responseData.id ?? '-'}',style: pw.TextStyle(fontSize: 12)),
+            pw.Text('تاریخ: ${responseData.date?.toPersianDate(twoDigits: true) ?? '-'}',style: pw.TextStyle(fontSize: 12)),
+          ],
+        ),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Text('نام مشتری: ${responseData.account?.name ?? '-'}',style: pw.TextStyle(fontSize: 12)),
+            pw.Text('شناسه مشتری: ${selectedAccount.value?.id ?? '-'}',style: pw.TextStyle(fontSize: 12)),
+          ],
+        ),
+        pw.Divider(thickness: 1),
+      ],
+    );
+  }
+
+  Map<int, pw.TableColumnWidth> getInvoiceColumnWidths() {
+    return {
+      0: pw.FlexColumnWidth(2.5),
+      1: pw.FlexColumnWidth(2.5),
+      4: pw.FlexColumnWidth(1.5),
+    };
+  }
+
+  pw.TableRow buildInvoiceTableHeader() {
+    return pw.TableRow(
+      decoration: pw.BoxDecoration(color: PdfColors.grey300),
+      children: [
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5.0),
+          child: pw.Text('مقدار', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5.0),
+          child: pw.Text('محصول', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+        ),
+        pw.Padding(
+          padding: const pw.EdgeInsets.all(5.0),
+          child: pw.Text('ردیف', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 8)),
+        ),
+      ],
+    );
+  }
+
+  pw.TableRow buildInvoiceDataRow(InventoryDetailModel detail, int index) {
+    return pw.TableRow(
+      children: [
+        buildDataCell(detail.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(detail.item?.name ?? ''),
+        buildDataCell(detail.rowNum.toString(), isCenter: true),
+      ],
+    );
+  }
+  // ساخت سلول‌های داده
+  pw.Padding buildDataCell(String text, {bool isCenter = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(5.0),
+      child: pw.Text(text,
+        style: pw.TextStyle(fontSize: 8),
+        textAlign:pw.TextAlign.center,
+        textDirection: pw.TextDirection.rtl,
+      ),
+    );
+  }
+
+  pw.Widget buildPageNumber(int currentPage, int totalPages) {
+    return pw.Container(
+      alignment: pw.Alignment.center,
+      margin: const pw.EdgeInsets.only(top: 20),
+      child: pw.Text(
+        'صفحه ${currentPage.toString().toPersianDigit()} از ${totalPages.toString().toPersianDigit()}',
+        style: pw.TextStyle(fontSize: 8),
+      ),
+    );
+  }
+
+  pw.Widget buildInvoiceFooter(List<InventoryDetailModel> details) {
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.SizedBox(height: 40),
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
+          children: [
+            pw.Column(
+              children: [
+                pw.Text('امضا مسئول',style: pw.TextStyle(fontSize: 10)),
+              ],
+            ),
+            pw.Column(
+              children: [
+                pw.Text('مهر و امضا مشتری',style: pw.TextStyle(fontSize: 10)),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   // لیست بالانس
@@ -467,6 +646,7 @@ class InventoryCreateReceiveController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     selectedImagesDesktop.clear();
+    factorChecked.value=false;
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
@@ -483,6 +663,7 @@ class InventoryCreateReceiveController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     selectedImagesDesktop.clear();
+    factorChecked.value=false;
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";

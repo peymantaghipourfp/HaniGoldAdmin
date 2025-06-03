@@ -1808,7 +1808,8 @@ class InventoryListView extends StatelessWidget {
                                                                       bottom: 8),
                                                                   child: Column(
                                                                     children: [
-                                                                      Row(
+                                                                      // الصاق تصویر
+                                                                      /*Row(
                                                                         mainAxisAlignment: MainAxisAlignment
                                                                             .end,
                                                                         children: [
@@ -1840,40 +1841,8 @@ class InventoryListView extends StatelessWidget {
                                                                                       .srcIn),),
 
                                                                           ),
-                                                                          /*Obx(() {
-                                                                            if (inventoryController
-                                                                                .isUploading
-                                                                                .value) {
-                                                                              return CircularProgressIndicator();
-                                                                            }
-                                                                            return Wrap(
-                                                                              children: inventoryController
-                                                                                  .selectedImages
-                                                                                  .asMap()
-                                                                                  .entries
-                                                                                  .map((
-                                                                                  entry) =>
-                                                                                  Chip(
-                                                                                    label: Text(
-                                                                                        'تصویر ${entry
-                                                                                            .key +
-                                                                                            1}'),
-                                                                                    deleteIcon: inventoryController
-                                                                                        .uploadStatuses[entry
-                                                                                        .key]
-                                                                                        ? Icon(
-                                                                                        Icons
-                                                                                            .check)
-                                                                                        : Icon(
-                                                                                        Icons
-                                                                                            .close),
-                                                                                    onDeleted: () {},
-                                                                                  ))
-                                                                                  .toList(),
-                                                                            );
-                                                                          }),*/
                                                                         ],
-                                                                      ),
+                                                                      ),*/
                                                                       SizedBox(
                                                                         height: 10,),
                                                                       // آیتم- مقدار
@@ -2568,7 +2537,8 @@ class InventoryListView extends StatelessWidget {
                                       bottom: 8),
                                   child: Column(
                                     children: [
-                                      Row(mainAxisAlignment: MainAxisAlignment
+                                      // الصاق تصویر
+                                      /*Row(mainAxisAlignment: MainAxisAlignment
                                           .end,
                                         children: [
                                           Text('الصاق تصویر  ',
@@ -2590,33 +2560,8 @@ class InventoryListView extends StatelessWidget {
                                                   BlendMode.srcIn),),
 
                                           ),
-                                          /*Obx(() {
-                                            if (inventoryController.isUploading
-                                                .value) {
-                                              return CircularProgressIndicator();
-                                            }
-                                            return Wrap(
-                                              children: inventoryController
-                                                  .selectedImages
-                                                  .asMap()
-                                                  .entries
-                                                  .map((entry) =>
-                                                  Chip(
-                                                    label: Text(
-                                                        'تصویر ${entry.key +
-                                                            1}'),
-                                                    deleteIcon: inventoryController
-                                                        .uploadStatuses[entry
-                                                        .key]
-                                                        ? Icon(Icons.check)
-                                                        : Icon(Icons.close),
-                                                    onDeleted: () {},
-                                                  ))
-                                                  .toList(),
-                                            );
-                                          }),*/
                                         ],
-                                      ),
+                                      ),*/
                                       SizedBox(height: 10,),
                                       // آیتم- مقدار
                                       Row(
@@ -3025,10 +2970,10 @@ class InventoryListView extends StatelessWidget {
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('دریافت/پرداخت', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+      /*DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('الصاق تصاویر', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('نمایش تصاویر', style: AppTextStyle.labelText)),
@@ -3257,7 +3202,7 @@ class InventoryListView extends StatelessWidget {
                 ),
               )),
           // الصاق تصاویر
-          DataCell(
+          /*DataCell(
               Center(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -3283,31 +3228,9 @@ class InventoryListView extends StatelessWidget {
                       ),
 
                     ),
-                    /*Obx(() {
-                      if (inventoryController
-                          .isUploadingDesktop
-                          .value) {
-                        return CircularProgressIndicator();
-                      }
-                      return Wrap(
-                        children: inventoryController.selectedImagesDesktop
-                            .asMap()
-                            .entries
-                            .map((entry) =>
-                            Chip(label: Text(
-                                'تصویر ${entry.key + 1}'),
-                              deleteIcon: inventoryController
-                                  .uploadStatusesDesktop[entry.key]
-                                  ? Icon(Icons.check)
-                                  : Icon(Icons.close),
-                              onDeleted: () {},
-                            ))
-                            .toList(),
-                      );
-                    }),*/
                   ],
                 ),
-              )),
+              )),*/
           // نمایش تصاویر
           DataCell(
             GestureDetector(

@@ -359,7 +359,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
               String success = await uploadRepositoryDesktop.uploadImageDesktop(
                 imageBytes: bytes,
                 fileName: file.name,
-                recordId: recordId.value,
+                recordId: inventoryDetail?.recId ?? '',
                 type: type,
                 entityType: entityType,
               );
@@ -457,12 +457,13 @@ class InventoryDetailUpdatePaymentController extends GetxController{
       if (response != null) {
         inventoryController.fetchGetOneInventory(inventoryId.value);
         Get.back();
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-          titleText: Text('موفقیت آمیز',
+        InventoryModel responseData=InventoryModel.fromJson(response);
+        Get.snackbar(responseData.infos?.first['title'], responseData.infos?.first["description"],
+          titleText: Text(responseData.infos?.first['title'],
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(
-            'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+            responseData.infos?.first["description"], textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
         inventoryController.getInventoryListPager();

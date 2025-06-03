@@ -25,6 +25,7 @@ class InventoryCreateReceiveTabWidget extends StatefulWidget {
 }
 
 class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceiveTabWidget> {
+  final formKey = GlobalKey<FormState>();
   InventoryCreateReceiveController inventoryCreateReceiveController = Get.find<
       InventoryCreateReceiveController>();
 
@@ -39,6 +40,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
         ),
         child: Obx(() {
           return Form(
+            key: formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -91,12 +93,12 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                       ),
                     ),
                     value: inventoryCreateReceiveController.selectedAccount.value,
-                    /*validator: (value) {
+                    validator: (value) {
                     if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                       return 'کاربر را انتخاب کنید';
                     }
                     return null;
-                  },*/
+                  },
                     showSearchBox: true,
                     items: [
                       'انتخاب کنید',
@@ -209,91 +211,93 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                     ),
                   ),
                 ),
+                inventoryCreateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
                 // آزمایشگاه
-                Container(
-                  padding: EdgeInsets.only(
-                      bottom: 3, top: 5),
-                  child: Text(
-                    'آزمایشگاه',
-                    style: AppTextStyle.labelText,
-                  ),
-                ),
-                // آزمایشگاه
-                Container(
-                  padding: EdgeInsets.only(bottom: 5),
-                  child:
-                  CustomDropdownWidget(
+                Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // آزمایشگاه
+                    Container(
+                      padding: EdgeInsets.only(
+                          bottom: 3, top: 5),
+                      child: Text(
+                        'آزمایشگاه',
+                        style: AppTextStyle.labelText,
+                      ),
+                    ),
+                    // آزمایشگاه
+                    Container(
+                      padding: EdgeInsets.only(bottom: 5),
+                      child:
+                      CustomDropdownWidget(
 
-                    dropdownSearchData: DropdownSearchData<String>(
-                      searchController: inventoryCreateReceiveController
-                          .searchLaboratoryController,
-                      searchInnerWidgetHeight: 50,
-                      searchInnerWidget: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          right: 15,
-                          left: 15,
-                        ),
-                        child: TextFormField(style: AppTextStyle.bodyText,
-                          controller: inventoryCreateReceiveController
+                        dropdownSearchData: DropdownSearchData<String>(
+                          searchController: inventoryCreateReceiveController
                               .searchLaboratoryController,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding:
-                            const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
+                          searchInnerWidgetHeight: 50,
+                          searchInnerWidget: Container(
+                            height: 50,
+                            padding: const EdgeInsets.only(
+                              top: 8,
+                              right: 15,
+                              left: 15,
                             ),
-                            hintText: 'جستجوی آزمایشگاه...',
-                            hintStyle: AppTextStyle.labelText,
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(8),
+                            child: TextFormField(style: AppTextStyle.bodyText,
+                              controller: inventoryCreateReceiveController
+                                  .searchLaboratoryController,
+                              decoration: InputDecoration(
+                                isDense: true,
+                                contentPadding:
+                                const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 8,
+                                ),
+                                hintText: 'جستجوی آزمایشگاه...',
+                                hintStyle: AppTextStyle.labelText,
+                                border: OutlineInputBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(8),
+                                ),
+                              ),
                             ),
                           ),
                         ),
+                        value: inventoryCreateReceiveController.selectedLaboratory.value,
+                        showSearchBox: true,
+                        items: [
+                          'انتخاب کنید',
+                          ...inventoryCreateReceiveController.searchedLaboratories.map((
+                              laboratory) => laboratory.name ?? "")
+                        ].toList(),
+                        selectedValue: inventoryCreateReceiveController.selectedLaboratory
+                            .value?.name,
+                        onChanged: (String? newValue) {
+                          if (newValue == 'انتخاب کنید') {
+                            inventoryCreateReceiveController.changeSelectedLaboratory(
+                                null);
+                          } else {
+                            var selectedLaboratory = inventoryCreateReceiveController
+                                .searchedLaboratories
+                                .firstWhere((laboratory) =>
+                            laboratory.name == newValue);
+                            inventoryCreateReceiveController.changeSelectedLaboratory(
+                                selectedLaboratory);
+                          }
+                        },
+                        onMenuStateChange: (isOpen) {
+                          if (!isOpen) {
+                            inventoryCreateReceiveController.resetLaboratorySearch();
+                          }
+                        },
+                        backgroundColor: AppColor.textFieldColor,
+                        borderRadius: 7,
+                        borderColor: AppColor.secondaryColor,
+                        hideUnderline: true,
                       ),
                     ),
-                    value: inventoryCreateReceiveController.selectedLaboratory.value,
-                    /*validator: (value) {
-                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                      return 'کاربر را انتخاب کنید';
-                    }
-                    return null;
-                  },*/
-                    showSearchBox: true,
-                    items: [
-                      'انتخاب کنید',
-                      ...inventoryCreateReceiveController.searchedLaboratories.map((
-                          laboratory) => laboratory.name ?? "")
-                    ].toList(),
-                    selectedValue: inventoryCreateReceiveController.selectedLaboratory
-                        .value?.name,
-                    onChanged: (String? newValue) {
-                      if (newValue == 'انتخاب کنید') {
-                        inventoryCreateReceiveController.changeSelectedLaboratory(
-                            null);
-                      } else {
-                        var selectedLaboratory = inventoryCreateReceiveController
-                            .searchedLaboratories
-                            .firstWhere((laboratory) =>
-                        laboratory.name == newValue);
-                        inventoryCreateReceiveController.changeSelectedLaboratory(
-                            selectedLaboratory);
-                      }
-                    },
-                    onMenuStateChange: (isOpen) {
-                      if (!isOpen) {
-                        inventoryCreateReceiveController.resetLaboratorySearch();
-                      }
-                    },
-                    backgroundColor: AppColor.textFieldColor,
-                    borderRadius: 7,
-                    borderColor: AppColor.secondaryColor,
-                    hideUnderline: true,
-                  ),
-                ),
+                  ],
+                ) :
+                SizedBox.shrink(),
+
                 // مقدار
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -344,171 +348,200 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                         fillColor: AppColor.textFieldColor,
                         errorMaxLines: 1,
                       ),
-                    ),
-                  ),
-                ),
-                // ناخالصی
-                Container(
-                  padding: EdgeInsets.only(bottom: 3, top: 5),
-                  child: Text(
-                    'ناخالصی',
-                    style: AppTextStyle.labelText,
-                  ),
-                ),
-                // ناخالصی
-                Container(
-                  //height: 50,
-                  padding: EdgeInsets.only(bottom: 5),
-                  child:
-                  IntrinsicHeight(
-                    child: TextFormField(
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      controller: inventoryCreateReceiveController.impurityController,
-                      style: AppTextStyle.labelText,
-                      keyboardType: TextInputType.numberWithOptions(
-                          decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(
-                          RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                        TextInputFormatter.withFunction((oldValue, newValue) {
-                          // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                          String newText = newValue.text
-                              .replaceAll('٠', '0')
-                              .replaceAll('١', '1')
-                              .replaceAll('٢', '2')
-                              .replaceAll('٣', '3')
-                              .replaceAll('٤', '4')
-                              .replaceAll('٥', '5')
-                              .replaceAll('٦', '6')
-                              .replaceAll('٧', '7')
-                              .replaceAll('٨', '8')
-                              .replaceAll('٩', '9');
-
-                          return newValue.copyWith(text: newText,
-                              selection: TextSelection.collapsed(
-                                  offset: newText.length));
-                        }),
-                      ],
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: AppColor.textFieldColor,
-                        errorMaxLines: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                // وزن 750
-                Container(
-                  padding: EdgeInsets.only(bottom: 3, top: 5),
-                  child: Text(
-                    'وزن 750',
-                    style: AppTextStyle.labelText,
-                  ),
-                ),
-                // وزن 750
-                Container(
-                  //height: 50,
-                  padding: EdgeInsets.only(bottom: 5),
-                  child:
-                  IntrinsicHeight(
-                    child: TextFormField(
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      controller: inventoryCreateReceiveController.weight750Controller,
-                      style: AppTextStyle.labelText,
-                      keyboardType: TextInputType.numberWithOptions(
-                          decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(
-                          RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                        TextInputFormatter.withFunction((oldValue, newValue) {
-                          // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                          String newText = newValue.text
-                              .replaceAll('٠', '0')
-                              .replaceAll('١', '1')
-                              .replaceAll('٢', '2')
-                              .replaceAll('٣', '3')
-                              .replaceAll('٤', '4')
-                              .replaceAll('٥', '5')
-                              .replaceAll('٦', '6')
-                              .replaceAll('٧', '7')
-                              .replaceAll('٨', '8')
-                              .replaceAll('٩', '9');
-
-                          return newValue.copyWith(text: newText,
-                              selection: TextSelection.collapsed(
-                                  offset: newText.length));
-                        }),
-                      ],
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: AppColor.textFieldColor,
-                        errorMaxLines: 1,
-                      ),
-                    ),
-                  ),
-                ),
-                // عیار
-                Container(
-                  padding: EdgeInsets.only(bottom: 3, top: 5),
-                  child: Text(
-                    'عیار',
-                    style: AppTextStyle.labelText,
-                  ),
-                ),
-                // عیار
-                Container(
-                  //height: 50,
-                  padding: EdgeInsets.only(bottom: 5),
-                  child:
-                  IntrinsicHeight(
-                    child: TextFormField(
-                      onChanged: (value) {
-                        inventoryCreateReceiveController.updateW750();
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty) {
+                          return 'لطفا مقدار را وارد کنید';
+                        }
+                        return null;
                       },
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      controller: inventoryCreateReceiveController.caratController,
-                      style: AppTextStyle.labelText,
-                      keyboardType: TextInputType.numberWithOptions(
-                          decimal: true),
-                      inputFormatters: [FilteringTextInputFormatter.allow(
-                          RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                        TextInputFormatter.withFunction((oldValue, newValue) {
-                          // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                          String newText = newValue.text
-                              .replaceAll('٠', '0')
-                              .replaceAll('١', '1')
-                              .replaceAll('٢', '2')
-                              .replaceAll('٣', '3')
-                              .replaceAll('٤', '4')
-                              .replaceAll('٥', '5')
-                              .replaceAll('٦', '6')
-                              .replaceAll('٧', '7')
-                              .replaceAll('٨', '8')
-                              .replaceAll('٩', '9');
-
-                          return newValue.copyWith(text: newText,
-                              selection: TextSelection.collapsed(
-                                  offset: newText.length));
-                        }),
-                      ],
-                      decoration: InputDecoration(
-                        isDense: true,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        filled: true,
-                        fillColor: AppColor.textFieldColor,
-                        errorMaxLines: 1,
-                      ),
                     ),
                   ),
                 ),
+
+                inventoryCreateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                // ناخالصی
+                Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(bottom: 3, top: 5),
+                      child: Text(
+                        'ناخالصی',
+                        style: AppTextStyle.labelText,
+                      ),
+                    ),
+                    // ناخالصی
+                    Container(
+                      //height: 50,
+                      padding: EdgeInsets.only(bottom: 5),
+                      child:
+                      IntrinsicHeight(
+                        child: TextFormField(
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          controller: inventoryCreateReceiveController.impurityController,
+                          style: AppTextStyle.labelText,
+                          keyboardType: TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(
+                              RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                            TextInputFormatter.withFunction((oldValue, newValue) {
+                              // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                              String newText = newValue.text
+                                  .replaceAll('٠', '0')
+                                  .replaceAll('١', '1')
+                                  .replaceAll('٢', '2')
+                                  .replaceAll('٣', '3')
+                                  .replaceAll('٤', '4')
+                                  .replaceAll('٥', '5')
+                                  .replaceAll('٦', '6')
+                                  .replaceAll('٧', '7')
+                                  .replaceAll('٨', '8')
+                                  .replaceAll('٩', '9');
+
+                              return newValue.copyWith(text: newText,
+                                  selection: TextSelection.collapsed(
+                                      offset: newText.length));
+                            }),
+                          ],
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: AppColor.textFieldColor,
+                            errorMaxLines: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ):
+                SizedBox.shrink(),
+
+                inventoryCreateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                // وزن 750
+                Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(bottom: 3, top: 5),
+                      child: Text(
+                        'وزن 750',
+                        style: AppTextStyle.labelText,
+                      ),
+                    ),
+                    // وزن 750
+                    Container(
+                      //height: 50,
+                      padding: EdgeInsets.only(bottom: 5),
+                      child:
+                      IntrinsicHeight(
+                        child: TextFormField(
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          controller: inventoryCreateReceiveController.weight750Controller,
+                          style: AppTextStyle.labelText,
+                          keyboardType: TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(
+                              RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                            TextInputFormatter.withFunction((oldValue, newValue) {
+                              // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                              String newText = newValue.text
+                                  .replaceAll('٠', '0')
+                                  .replaceAll('١', '1')
+                                  .replaceAll('٢', '2')
+                                  .replaceAll('٣', '3')
+                                  .replaceAll('٤', '4')
+                                  .replaceAll('٥', '5')
+                                  .replaceAll('٦', '6')
+                                  .replaceAll('٧', '7')
+                                  .replaceAll('٨', '8')
+                                  .replaceAll('٩', '9');
+
+                              return newValue.copyWith(text: newText,
+                                  selection: TextSelection.collapsed(
+                                      offset: newText.length));
+                            }),
+                          ],
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: AppColor.textFieldColor,
+                            errorMaxLines: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ):
+                SizedBox.shrink(),
+
+                inventoryCreateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                // عیار
+                Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.only(bottom: 3, top: 5),
+                      child: Text(
+                        'عیار',
+                        style: AppTextStyle.labelText,
+                      ),
+                    ),
+                    // عیار
+                    Container(
+                      //height: 50,
+                      padding: EdgeInsets.only(bottom: 5),
+                      child:
+                      IntrinsicHeight(
+                        child: TextFormField(
+                          onChanged: (value) {
+                            inventoryCreateReceiveController.updateW750();
+                          },
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          controller: inventoryCreateReceiveController.caratController,
+                          style: AppTextStyle.labelText,
+                          keyboardType: TextInputType.numberWithOptions(
+                              decimal: true),
+                          inputFormatters: [FilteringTextInputFormatter.allow(
+                              RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                            TextInputFormatter.withFunction((oldValue, newValue) {
+                              // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                              String newText = newValue.text
+                                  .replaceAll('٠', '0')
+                                  .replaceAll('١', '1')
+                                  .replaceAll('٢', '2')
+                                  .replaceAll('٣', '3')
+                                  .replaceAll('٤', '4')
+                                  .replaceAll('٥', '5')
+                                  .replaceAll('٦', '6')
+                                  .replaceAll('٧', '7')
+                                  .replaceAll('٨', '8')
+                                  .replaceAll('٩', '9');
+
+                              return newValue.copyWith(text: newText,
+                                  selection: TextSelection.collapsed(
+                                      offset: newText.length));
+                            }),
+                          ],
+                          decoration: InputDecoration(
+                            isDense: true,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            filled: true,
+                            fillColor: AppColor.textFieldColor,
+                            errorMaxLines: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ):
+                SizedBox.shrink(),
+
                 // شماره قبض
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -519,6 +552,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                 ),
                 // شماره قبض
                 Container(
+                  height: 40,
                   padding: EdgeInsets.only(bottom: 5),
                   child:
                   TextFormField(
@@ -554,6 +588,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                         }
                         return null;
                       },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                       controller: inventoryCreateReceiveController.dateController,
                       readOnly: true,
                       style: AppTextStyle.labelText,
@@ -669,74 +704,94 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                   ),
                 ),
                 //  دکمه ثبت و ثبت نهایی
-                SizedBox(height: 20,),
-                Row(mainAxisAlignment: MainAxisAlignment.center,
+                Column(
                   children: [
-                    // دکمه ثبت
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                            isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                            isDesktop ? 50 : 40
-                        ),),
-                            padding: WidgetStatePropertyAll(
-                              EdgeInsets.symmetric(
-                                  horizontal: isDesktop ? 20 : 7
-                              ),),
-                            elevation: WidgetStatePropertyAll(5),
-                            backgroundColor:
-                            WidgetStatePropertyAll(AppColor.buttonColor),
-                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)))),
-                        onPressed: () async {
-                          inventoryCreateReceiveController.addToTempList();
-                        },
-                        child: inventoryCreateReceiveController.isLoading.value
-                            ?
-                        CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColor.textColor),
-                        ) :
-                        Text(
-                          'ثبت موقت',
-                          style: AppTextStyle.bodyText,
+                    Row(mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          value: inventoryCreateReceiveController.factorChecked.value,
+                          onChanged: (value) async{
+                            inventoryCreateReceiveController.factorChecked.value = value!;
+                          },
                         ),
-                      ),
+                        SizedBox(width: 8,),
+                        Text('ثبت نهایی همراه با صدور فاکتور',style: AppTextStyle.bodyTextBold,)
+                      ],
                     ),
+                    SizedBox(height: 5,),
+                    Row(mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // دکمه ثبت
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
+                                isDesktop ? Get.width * 0.12 : Get.width * 0.3,
+                                isDesktop ? 50 : 40
+                            ),),
+                                padding: WidgetStatePropertyAll(
+                                  EdgeInsets.symmetric(
+                                      horizontal: isDesktop ? 20 : 7
+                                  ),),
+                                elevation: WidgetStatePropertyAll(5),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.buttonColor),
+                                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)))),
+                            onPressed: () async {
+                              if(formKey.currentState!.validate()){
+                              inventoryCreateReceiveController.addToTempList();
+                              }
+                            },
+                            child: inventoryCreateReceiveController.isLoading.value
+                                ?
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColor.textColor),
+                            ) :
+                            Text(
+                              'ثبت موقت',
+                              style: AppTextStyle.bodyText,
+                            ),
+                          ),
+                        ),
 
-                    SizedBox(width: 10,),
-                    // دکمه ثبت نهایی
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                            isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                            isDesktop ? 50 : 40
-                        ),
-                        ),
-                            padding: WidgetStatePropertyAll(
-                              EdgeInsets.symmetric(
-                                  horizontal: isDesktop ? 20 : 7
-                              ),),
-                            elevation: WidgetStatePropertyAll(5),
-                            backgroundColor:
-                            WidgetStatePropertyAll(AppColor.primaryColor),
-                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)))),
-                        onPressed: () async {
-                          await inventoryCreateReceiveController.uploadImagesDesktop( "image", "InventoryDetail");
-                        },
-                        child: inventoryCreateReceiveController.isFinalizing.value
-                            ?
-                        CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                              AppColor.textColor),
-                        ) :
-                        Text(
-                          'ثبت نهایی',
-                          style: AppTextStyle.bodyText,
-                        ),
-                      ),
-                    )
+                        SizedBox(width: 10,),
+                        // دکمه ثبت نهایی
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
+                                isDesktop ? Get.width * 0.12 : Get.width * 0.3,
+                                isDesktop ? 50 : 40
+                            ),
+                            ),
+                                padding: WidgetStatePropertyAll(
+                                  EdgeInsets.symmetric(
+                                      horizontal: isDesktop ? 20 : 7
+                                  ),),
+                                elevation: WidgetStatePropertyAll(5),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.primaryColor),
+                                shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)))),
+                            onPressed: () async {
+                              if(inventoryCreateReceiveController.tempDetails.isNotEmpty){
+                                await inventoryCreateReceiveController.uploadImagesDesktop( "image", "InventoryDetail");
+                              }
+                            },
+                            child: inventoryCreateReceiveController.isFinalizing.value
+                                ?
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColor.textColor),
+                            ) :
+                            Text(
+                              'ثبت نهایی',
+                              style: AppTextStyle.bodyText,
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                   ],
                 )
               ],

@@ -411,12 +411,13 @@ class InventoryDetailInsertPaymentController extends GetxController{
       if (response != null) {
         Get.toNamed('/inventoryList');
         inventoryController.getInventoryListPager();
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-          titleText: Text('موفقیت آمیز',
+        InventoryModel responseData=InventoryModel.fromJson(response);
+        Get.snackbar(responseData.infos?.first['title'], responseData.infos?.first["description"],
+          titleText: Text(responseData.infos?.first['title'],
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(
-            'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+            responseData.infos?.first["description"], textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
         clearList();

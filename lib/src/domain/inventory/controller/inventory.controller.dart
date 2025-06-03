@@ -248,7 +248,7 @@ class InventoryController extends GetxController{
 
   // لیست حواله ها با صفحه بندی
   Future<void> getInventoryListPager() async {
-    print("### getRemittanceListPager ###");
+    print("### getInventoryListPager ###");
     inventoryList.clear();
     isLoading.value=true;
     try {
