@@ -404,4 +404,9 @@ class UserListController extends GetxController{
     );
   }
 
+  void clearFilter() {
+    nameFilterController.clear();
+    mobileFilterController.clear();
+  }
+
 }

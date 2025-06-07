@@ -23,6 +23,7 @@ class ProductController extends GetxController{
   final TextEditingController priceController=TextEditingController();
   final TextEditingController differentPriceController=TextEditingController();
   //final TextEditingController itemController=TextEditingController();
+  ScrollController scrollController = ScrollController();
 
   final ItemRepository itemRepository=ItemRepository();
 
@@ -49,6 +50,7 @@ class ProductController extends GetxController{
   @override
   void onInit() {
     fetchActiveItemList();
+    fetchInactiveItemList();
     /*if(getOneItem.value!=null) {
       itemController.text = getOneItem.value!.name!;
     }*/
@@ -183,6 +185,30 @@ class ProductController extends GetxController{
     }finally{
       EasyLoading.dismiss();
       isLoading.value=false;
+    }
+  }
+
+  Future<void> updateStatusItem(int id,bool status) async {
+    EasyLoading.show(
+      status: 'لطفا صبر کنید',
+      dismissOnTap: false,
+    );
+    try {
+      var response = await itemRepository.updateStatusItem(
+        id: id, status: status,
+      );
+      fetchActiveItemList();
+      fetchInactiveItemList();
+      Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
+          titleText: Text(response.infos?.first["title"],
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+          messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+
+      update();
+    } catch (e) {
+    } finally {
+      EasyLoading.dismiss();
     }
   }
 

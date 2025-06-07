@@ -184,6 +184,7 @@ class RemittanceController extends GetxController{
     fetchItemList();
     fetchAccountList("");
     fetchAccountListP("");
+    clearList();
     super.onInit();
   }
 
@@ -402,7 +403,7 @@ Timer? debounceP;
       var remittance=await remittanceRepository.getOneRemittance(id: id);
       remittanceModel=remittance;
       namePayerController.text=remittanceModel?.walletReciept?.account?.name??"";
-      dateController.text=remittanceModel?.date?.toPersianDate()??"";
+      dateController.text=remittanceModel?.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English)??"";
       descController.text=remittanceModel?.description??"";
       quantityPayerController.text="${remittanceModel?.quantity??0}";
       mobilePayerController.text=remittanceModel?.walletReciept?.account?.contactInfo??"";
@@ -522,8 +523,10 @@ Timer? debounceP;
       descController.text="";
       dateController.text="";
       quantityPayerController.text="";
-      getRemittanceListPager();
-
+      //getRemittanceListPager();
+      clearFilter();
+      clearSearch();
+      clearList();
     } catch (e) {
       throw ErrorException('خطا در ایجاد حواله: $e');
     } finally {
@@ -559,8 +562,10 @@ Timer? debounceP;
       descController.text="";
       dateController.text="";
       quantityPayerController.text="";
-      getRemittanceListPager();
-
+      //getRemittanceListPager();
+      clearFilter();
+      clearSearch();
+      clearList();
     } catch (e) {
       throw ErrorException('خطا در ایجاد حواله: $e');
     } finally {
@@ -959,5 +964,15 @@ Timer? debounceP;
     dateEndController.clear();
     startDateFilter.value="";
     endDateFilter.value="";
+  }
+  void clearList() {
+    //dateController.clear();
+    quantityPayerController.clear();
+    mobilePayerController.clear();
+    descController.clear();
+    namePayerController.clear();
+    selectedAccountP.value=null;
+    selectedItem.value=null;
+    selectedAccount.value=null;
   }
 }

@@ -9,6 +9,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../controller/laboratory.controller.dart';
 
@@ -314,7 +315,7 @@ class LaboratoryView extends GetView<LaboratoryController> {
                                           ),
                                         ],
                                       ),
-                                      Container(
+                                      /*Container(
                                         padding: EdgeInsets.symmetric(horizontal: 15,vertical: 8),
                                         decoration: BoxDecoration(
                                             borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -348,7 +349,7 @@ class LaboratoryView extends GetView<LaboratoryController> {
                                             ),
                                           ],
                                         ),
-                                      ),
+                                      ),*/
                                     ],
 
                                   ),
@@ -397,19 +398,17 @@ class LaboratoryView extends GetView<LaboratoryController> {
                               ],
                             ),
                           ),
-
                         ],
                       ),
                     ),
                   )
-                      : Center(
-                    child: Text(
-                      'خطا در سمت سرور رخ داده',
-                      style: AppTextStyle.labelText.copyWith(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                      : ErrPage(
+                    callback: () {
+                      controller.clearSearch();
+                      controller.fetchLaboratoryList();
+                    },
+                    title: "خطا در دریافت واریزی ها",
+                    des: 'برای دریافت لیست واریزی ها مجددا تلاش کنید',
                   ),
                 ),
               ],
@@ -427,23 +426,22 @@ class LaboratoryView extends GetView<LaboratoryController> {
 
                 height: 80,
                 child: TextFormField(
-                  // onChanged: (value){
-                  //   Future.delayed(const Duration(milliseconds: 3000), () {
-                  //     controller.getListTransactionInfo();
-                  //   });
-                  // },
-                  controller: controller.searchController,
+                  onChanged: (value){
+                    // Future.delayed(const Duration(milliseconds: 5000), () {
+                    //   controller.getUserAccountList();
+                    // });
+                  },
+                  controller: controller.nameController,
                   style: AppTextStyle.labelText,
                   textInputAction: TextInputAction.search,
-                  // onFieldSubmitted: (value) async {
-                  //   // Future.delayed(const Duration(milliseconds: 700), () {
-                  //      controller.getListTransactionInfo();
-                  //   // });
-                  // },
-                  onEditingComplete: () async {
-                    // controller.getListTransactionInfo();
+                  onFieldSubmitted: (value) async {
+                    // Future.delayed(const Duration(milliseconds: 700), () {
+                    //   controller.getUserAccountList();
+                    // });
                   },
-
+                  onEditingComplete: () async {
+                    controller.fetchLaboratoryList();
+                  },
                   decoration: InputDecoration(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(7),
@@ -455,13 +453,17 @@ class LaboratoryView extends GetView<LaboratoryController> {
 
                     prefixIcon: IconButton(
                         onPressed: () async {
-                          // controller.getListTransactionInfo();
+                          controller.fetchLaboratoryList();
                         },
                         icon: Icon(
                           Icons.search,
                           color: AppColor.textColor,
                           size: 30,
                         )),
+                    suffixIcon: IconButton(
+                      onPressed: controller.clearSearch,
+                      icon: Icon(Icons.close, color: AppColor.textColor),
+                    ),
                   ),
                 ),
               ),

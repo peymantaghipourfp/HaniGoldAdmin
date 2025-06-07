@@ -102,4 +102,22 @@ class ItemRepository{
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
+
+  Future<ItemModel> updateStatusItem({
+    required int id,
+    required bool status,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "status": status,
+        "id": id,
+      };
+      final response = await itemDio.put('Item/updateStatus', data: options);
+      print("request : $options" );
+      print("response : ${response.data}" );
+      return ItemModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
 }

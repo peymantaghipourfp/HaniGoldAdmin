@@ -75,11 +75,21 @@ class LaboratoryController extends GetxController{
     fetchLaboratoryList();
   }
 
+  void clearSearch() {
+    currentPage.value = 1;
+    nameController.clear();
+    fetchLaboratoryList();
+  }
+
   // لیست آزمایشگاه ها
   Future<void> fetchLaboratoryList()async{
     try{
       state.value=PageStateLob.loading;
-      var fetchedLaboratoryList=await laboratoryRepository.getLaboratoryListPager(startIndex: currentPage.value, toIndex: itemsPerPage.value);
+      var fetchedLaboratoryList=await laboratoryRepository.getLaboratoryListPager(
+          startIndex: currentPage.value,
+          toIndex: itemsPerPage.value,
+          name:nameController.text
+      );
       laboratoryList.assignAll(fetchedLaboratoryList.laboratories??[]);
       paginated=fetchedLaboratoryList.paginated;
       state.value=PageStateLob.list;

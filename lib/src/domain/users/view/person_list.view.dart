@@ -173,7 +173,7 @@ class PersonListView extends GetView<PersonListController> {
                                           colorFilter:
                                           ColorFilter
                                               .mode(
-                                            controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                            controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" || controller.nameAccController.text!="" || controller.nameUserController.text!="" ||controller.status.value!=0 ?AppColor.accentColor:  AppColor
                                                 .textColor,
                                             BlendMode
                                                 .srcIn,
@@ -188,7 +188,7 @@ class PersonListView extends GetView<PersonListController> {
                                             .copyWith(
                                             fontSize: isDesktop
                                                 ? 12
-                                                : 10,color:  controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                : 10,color:  controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" || controller.nameAccController.text!="" || controller.nameUserController.text!="" ||controller.status.value!=0 ?AppColor.accentColor: AppColor.textColor),
                                       ),
                                     ],
                                   ),
@@ -199,8 +199,7 @@ class PersonListView extends GetView<PersonListController> {
                           ),
                           SingleChildScrollView(
                             scrollDirection: Axis.horizontal,
-                            controller:
-                            controller.scrollController,
+                            controller: controller.scrollController,
                             physics: ClampingScrollPhysics(),
                             child: Row(
                               children: [
@@ -215,8 +214,7 @@ class PersonListView extends GetView<PersonListController> {
                                             outside: BorderSide(color: AppColor.textColor, width: 0.3),
                                             borderRadius: BorderRadius.circular(8)),
                                         dividerThickness: 0.3,
-                                        rows: buildDataRows(
-                                            context),
+                                        rows: buildDataRows(context),
                                         dataRowMaxHeight: 50,
                                         //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                         //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),

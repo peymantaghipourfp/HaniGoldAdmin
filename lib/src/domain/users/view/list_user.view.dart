@@ -603,13 +603,39 @@ class UserListView extends GetView<UserListController> {
                                                     Padding(
                                                       padding: const EdgeInsets.all(8.0),
                                                       child: Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        mainAxisAlignment: MainAxisAlignment.end,
                                                         children: [
-                                                          Text(
-                                                            'فیلتر',
-                                                            style: AppTextStyle.labelText.copyWith(
-                                                              fontSize: 15,
-                                                              fontWeight: FontWeight.normal,
+                                                          Expanded(
+                                                            child: Center(
+                                                              child: Text(
+                                                                'فیلتر',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                  fontSize: 15,
+                                                                  fontWeight: FontWeight.normal,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                          SizedBox(
+                                                            width: 50,height: 27,
+                                                            child: ElevatedButton(
+                                                              style: ButtonStyle(
+                                                                  padding: WidgetStatePropertyAll(
+                                                                      EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                  // elevation: WidgetStatePropertyAll(5),
+                                                                  backgroundColor:
+                                                                  WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                      borderRadius: BorderRadius.circular(5)))),
+                                                              onPressed: () async {
+                                                                controller.clearFilter();
+                                                                controller.getUserList();
+                                                                Get.back();
+                                                              },
+                                                              child: Text(
+                                                                'حذف فیلتر',
+                                                                style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                              ),
                                                             ),
                                                           ),
                                                         ],

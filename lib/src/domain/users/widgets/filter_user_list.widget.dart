@@ -66,7 +66,8 @@ class _FitterUserListWidgetState extends State<FitterUserListWidget> {
                          controller.nameUserController.text="";
                          controller.status.value=0;
                        });
-
+                       controller.getUserAccountList();
+                       Get.back();
                       },
                       child: Text(
                         'حذف فیلتر',

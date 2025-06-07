@@ -949,7 +949,7 @@ class OrderListView extends StatelessWidget {
                                             colorFilter:
                                             ColorFilter
                                                 .mode(
-                                              orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                              orderController.nameFilterController.text!="" || orderController.mobileFilterController.text!="" || orderController.dateStartController.text!="" || orderController.dateEndController.text!=""  ?AppColor.accentColor:  AppColor
                                                   .textColor,
                                               BlendMode
                                                   .srcIn,
@@ -964,7 +964,7 @@ class OrderListView extends StatelessWidget {
                                               .copyWith(
                                               fontSize: isDesktop
                                                   ? 12
-                                                  : 10,color:  orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                  : 10,color:  orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" || orderController.dateStartController.text!="" || orderController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                         ),
                                       ],
                                     ),
@@ -1811,7 +1811,7 @@ class OrderListView extends StatelessWidget {
                                                   colorFilter:
                                                   ColorFilter
                                                       .mode(
-                                                    orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                                    orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" || orderController.dateStartController.text!="" || orderController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                                         .textColor,
                                                     BlendMode
                                                         .srcIn,
@@ -1826,7 +1826,7 @@ class OrderListView extends StatelessWidget {
                                                     .copyWith(
                                                     fontSize: isDesktop
                                                         ? 12
-                                                        : 10,color:  orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                        : 10,color:  orderController.nameFilterController.text!="" ||  orderController.mobileFilterController.text!="" || orderController.dateStartController.text!="" || orderController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                               ),
                                             ],
                                           ),

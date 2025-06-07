@@ -40,16 +40,40 @@ class LaboratoryRepository {
     }
   }
 
-  Future<ListLaboratoryModel> getLaboratoryListPager({required int startIndex, required int toIndex,}) async {
+  Future<ListLaboratoryModel> getLaboratoryListPager({required int startIndex, required int toIndex,required String name}) async {
     try {
-      Map<String, dynamic> options = {
+      Map<String, dynamic> options =
+          name != "" ?
+      {
         "options": { "laboratory": {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                  {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Laboratory"
+                  },
+              ]
+            }
+          ],
           "orderBy": "laboratory.Id",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
         }}
-      };
+      } :
+          {
+            "options": { "laboratory": {
+              "orderBy": "laboratory.Id",
+              "orderByType": "desc",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          };
       final response = await laboratoryDio.post(
           'Laboratory/getWrapper', data: options);
       //print(response);

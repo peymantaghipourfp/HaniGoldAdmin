@@ -967,7 +967,7 @@ class WithdrawsListView extends StatelessWidget {
                                         colorFilter:
                                         ColorFilter
                                             .mode(
-                                          withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                          withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                               .textColor,
                                           BlendMode
                                               .srcIn,
@@ -982,7 +982,7 @@ class WithdrawsListView extends StatelessWidget {
                                           .copyWith(
                                           fontSize: isDesktop
                                               ? 12
-                                              : 10,color:  withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                              : 10,color:  withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                     ),
                                   ],
                                 ),
@@ -1819,7 +1819,7 @@ class WithdrawsListView extends StatelessWidget {
                                                   colorFilter:
                                                   ColorFilter
                                                       .mode(
-                                                    withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                                    withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                                         .textColor,
                                                     BlendMode
                                                         .srcIn,
@@ -1834,7 +1834,7 @@ class WithdrawsListView extends StatelessWidget {
                                                     .copyWith(
                                                     fontSize: isDesktop
                                                         ? 12
-                                                        : 10,color:  withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                        : 10,color:  withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                               ),
                                             ],
                                           ),

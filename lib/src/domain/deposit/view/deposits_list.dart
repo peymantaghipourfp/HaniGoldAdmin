@@ -625,7 +625,7 @@ class DepositsListView extends StatelessWidget {
                                                         borderRadius: BorderRadius.circular(8),
                                                         color: AppColor.backGroundColor
                                                     ),
-                                                    width:isDesktop?  Get.width * 0.3:Get.width * 0.5,
+                                                    width:isDesktop?  Get.width * 0.2:Get.width * 0.5,
                                                     height:Get.height * 0.6,
                                                     padding: EdgeInsets.all(20),
                                                     child: SingleChildScrollView(
@@ -976,7 +976,7 @@ class DepositsListView extends StatelessWidget {
                                               colorFilter:
                                               ColorFilter
                                                   .mode(
-                                                depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!=""  ?AppColor.accentColor:  AppColor
+                                                depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" || depositController.dateStartController.text!="" || depositController.dateEndController.text!=""  ?AppColor.accentColor:  AppColor
                                                     .textColor,
                                                 BlendMode
                                                     .srcIn,
@@ -991,7 +991,7 @@ class DepositsListView extends StatelessWidget {
                                                 .copyWith(
                                                 fontSize: isDesktop
                                                     ? 12
-                                                    : 10,color:  depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                    : 10,color:  depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" || depositController.dateStartController.text!="" || depositController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                           ),
                                         ],
                                       ),
@@ -1501,7 +1501,7 @@ class DepositsListView extends StatelessWidget {
                                                                             borderRadius: BorderRadius.circular(8),
                                                                             color: AppColor.backGroundColor
                                                                         ),
-                                                                        width:isDesktop?  Get.width * 0.3:Get.width * 0.5,
+                                                                        width:isDesktop?  Get.width * 0.2:Get.width * 0.5,
                                                                         height:Get.height * 0.6,
                                                                         padding: EdgeInsets.all(20),
                                                                         child: SingleChildScrollView(
@@ -1852,7 +1852,7 @@ class DepositsListView extends StatelessWidget {
                                                                   colorFilter:
                                                                   ColorFilter
                                                                       .mode(
-                                                                    depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!=""  ?AppColor.accentColor:  AppColor
+                                                                    depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" || depositController.dateStartController.text!="" || depositController.dateEndController.text!=""  ?AppColor.accentColor:  AppColor
                                                                         .textColor,
                                                                     BlendMode
                                                                         .srcIn,
@@ -1867,7 +1867,7 @@ class DepositsListView extends StatelessWidget {
                                                                     .copyWith(
                                                                     fontSize: isDesktop
                                                                         ? 12
-                                                                        : 10,color:  depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                                        : 10,color:  depositController.nameDepositFilterController.text!="" ||  depositController.mobileFilterController.text!="" || depositController.nameRequestFilterController.text!="" || depositController.dateStartController.text!="" || depositController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                                               ),
                                                             ],
                                                           ),

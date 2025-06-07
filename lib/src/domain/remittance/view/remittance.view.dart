@@ -937,7 +937,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                                         colorFilter:
                                                         ColorFilter
                                                             .mode(
-                                                          controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                                          controller.namePayerController.text!="" || controller.nameRecieptController.text!="" ||  controller.mobileFilterController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                                               .textColor,
                                                           BlendMode
                                                               .srcIn,
@@ -952,7 +952,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                                           .copyWith(
                                                           fontSize: isDesktop
                                                               ? 12
-                                                              : 10,color:  controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                              : 10,color:  controller.namePayerController.text!="" || controller.nameRecieptController.text!="" ||  controller.mobileFilterController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                                     ),
                                                   ],
                                                 ),

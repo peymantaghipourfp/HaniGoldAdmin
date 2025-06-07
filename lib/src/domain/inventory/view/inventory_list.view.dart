@@ -968,7 +968,7 @@ class InventoryListView extends StatelessWidget {
                                         colorFilter:
                                         ColorFilter
                                             .mode(
-                                          inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                          inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" || inventoryController.dateStartController.text!="" || inventoryController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                               .textColor,
                                           BlendMode
                                               .srcIn,
@@ -983,7 +983,7 @@ class InventoryListView extends StatelessWidget {
                                           .copyWith(
                                           fontSize: isDesktop
                                               ? 12
-                                              : 10,color:  inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                              : 10,color:  inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" || inventoryController.dateStartController.text!="" || inventoryController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                     ),
                                   ],
                                 ),
@@ -1821,7 +1821,7 @@ class InventoryListView extends StatelessWidget {
                                                   colorFilter:
                                                   ColorFilter
                                                       .mode(
-                                                    inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" ?AppColor.accentColor:  AppColor
+                                                    inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" || inventoryController.dateStartController.text!="" || inventoryController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                                         .textColor,
                                                     BlendMode
                                                         .srcIn,
@@ -1836,7 +1836,7 @@ class InventoryListView extends StatelessWidget {
                                                     .copyWith(
                                                     fontSize: isDesktop
                                                         ? 12
-                                                        : 10,color:  inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                        : 10,color:  inventoryController.nameFilterController.text!="" ||  inventoryController.mobileFilterController.text!="" || inventoryController.dateStartController.text!="" || inventoryController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                               ),
                                             ],
                                           ),
