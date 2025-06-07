@@ -480,7 +480,29 @@ class RemittanceRepository{
       return RemittanceModel.fromJson(response.data) ;
     }
     catch(e){
-      throw ErrorException('خطا در ریجیستر:$e');
+      throw ErrorException('خطا در دریافت:$e');
+    }
+  }
+
+  Future<List< dynamic>> deleteRemittance({
+    required bool isDeleted,
+    required int remittanceId,
+  })async{
+    try{
+      Map<String,dynamic> remittanceData={
+        "id": remittanceId,
+        "isDeleted" : isDeleted,
+      };
+
+      print(remittanceData);
+
+      var response=await remittanceDio.delete('Remittance/updateToIsDeleted',data: remittanceData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در حذف:$e');
     }
   }
 }

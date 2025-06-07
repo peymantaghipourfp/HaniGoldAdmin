@@ -104,6 +104,7 @@ class RemittanceController extends GetxController{
   String? indexAccountPayerGet;
   var isLoading=false.obs;
   var isLoadingRegister=false.obs;
+  final isLoadingDelete=false.obs;
   var namePayer="".obs;
   var mobilePayer="".obs;
   var recordId="".obs;
@@ -657,6 +658,29 @@ Timer? debounceP;
       isLoadingRegister.value = false;
     }
 
+    return null;
+  }
+
+  Future<List< dynamic>?> deleteRemittance(int remittanceId,bool isDeleted)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      isLoadingDelete.value=true;
+      var response=await remittanceRepository.deleteRemittance(isDeleted: isDeleted, remittanceId: remittanceId);
+      if(response!= null){
+        Get.snackbar("موفقیت آمیز","حذف حواله با موفقیت انجام شد",
+            titleText: Text("موفقیت آمیز",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text("حذف حواله با موفقیت انجام شد",textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        getRemittanceListPager();
+      }
+    }catch(e){
+      EasyLoading.dismiss();
+      throw ErrorException('خطا در حذف حواله: $e');
+    }finally {
+      EasyLoading.dismiss();
+      isLoadingDelete.value=false;
+    }
     return null;
   }
 

@@ -675,9 +675,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                 .spaceAround,
                             children: [
                               TabelInfoWidget(
-                                list: controller
-                                    .headerInfoUserTransactionModel!
-                                    .inventorys!,
+                                list: controller.headerInfoUserTransactionModel!.inventorys!,
                                 title: 'دریافت و پرداخت',
                                 title1: 'دریافت',
                                 title2: 'پرداخت',

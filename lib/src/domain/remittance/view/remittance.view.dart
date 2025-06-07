@@ -1836,11 +1836,40 @@ class RemittanceView extends GetView<RemittanceController> {
               SizedBox(
                 width: 10,
               ),
-              SvgPicture.asset('assets/svg/trash-bin.svg',height: 20,
-                  colorFilter: ColorFilter.mode(
-                    AppColor.textColor,
-                    BlendMode.srcIn,
-                  )),
+              GestureDetector(
+                onTap: () {
+                  Get.defaultDialog(
+                    backgroundColor: AppColor
+                        .backGroundColor,
+                    title: "حذف ",
+                    titleStyle: AppTextStyle
+                        .smallTitleText,
+                    middleText: "آیا از حذف مطمئن هستید؟",
+                    middleTextStyle: AppTextStyle
+                        .bodyText,
+                    confirm: ElevatedButton(
+                        style: ButtonStyle(
+                            backgroundColor: WidgetStatePropertyAll(
+                                AppColor
+                                    .primaryColor)),
+                        onPressed: () {
+                          Get.back();
+                          controller.deleteRemittance(remittance.id!, true);
+                        },
+                        child: Text(
+                          'حذف',
+                          style: AppTextStyle
+                              .bodyText,
+                        )
+                    ),
+                  );
+                },
+                child: SvgPicture.asset('assets/svg/trash-bin.svg',height: 20,
+                    colorFilter: ColorFilter.mode(
+                      AppColor.textColor,
+                      BlendMode.srcIn,
+                    )),
+              ),
               SizedBox(
                 width: 10,
               ),

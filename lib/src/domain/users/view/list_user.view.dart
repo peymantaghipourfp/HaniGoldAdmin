@@ -108,7 +108,7 @@ class UserListView extends GetView<UserListController> {
                                     margin: EdgeInsets.symmetric(
                                         horizontal: 50, vertical: 10),
                                     padding: EdgeInsets.symmetric(
-                                        horizontal: 50, vertical: 20),
+                                        horizontal: 50, vertical: 40),
                                     color:
                                         AppColor.appBarColor.withOpacity(0.5),
                                     child: Column(

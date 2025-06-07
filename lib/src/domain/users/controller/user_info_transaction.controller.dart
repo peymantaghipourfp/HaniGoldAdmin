@@ -20,7 +20,7 @@ class UserInfoTransactionController extends GetxController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 7.obs;
+  RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;

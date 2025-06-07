@@ -83,42 +83,49 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                         ),
                       ),
                     ),
-                    SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      controller:
-                      controller.scrollController,
-                      physics: ClampingScrollPhysics(),
-                      child: Row(
-                        children: [
-                          SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                DataTable(
-                                  columns:
-                                  buildDataColumns(),
-                                  sortColumnIndex: controller.sortIndex.value,
-                                  sortAscending:
-                                  controller.sort.value,
-                                  border: TableBorder.symmetric(
-                                      inside: BorderSide(
-                                          color: AppColor
-                                              .textFieldColor,
-                                          width: 0.5)),
-                                  dividerThickness: 0.3,
-                                  rows: buildDataRows(
-                                      context),
-                                  dataRowMaxHeight: 100,
-                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                  //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                  headingRowHeight: 60,
-                                  columnSpacing: 20,
-                                  horizontalMargin: 0,
-                                ),
+                    Container(
+                      margin: EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 70),
+                      color:
+                      AppColor.appBarColor.withOpacity(0.5),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        controller:
+                        controller.scrollController,
+                        physics: ClampingScrollPhysics(),
+                        child: Row(
+                          children: [
+                            SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  DataTable(
+                                    columns:
+                                    buildDataColumns(),
+                                    sortColumnIndex: controller.sortIndex.value,
+                                    sortAscending:
+                                    controller.sort.value,
+                                    border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                      outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    dividerThickness: 0.3,
+                                    rows: buildDataRows(
+                                        context),
+                                    dataRowMaxHeight: 80,
+                                    //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                    headingRowHeight: 40,
+                                    columnSpacing: 20,
+                                    horizontalMargin: 5,
+                                  ),
 
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                   ],
@@ -158,9 +165,9 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
     return [
       DataColumn(
           label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 100),
+              constraints: BoxConstraints(maxWidth: 80),
               child: Text('ردیف',
-                  style: AppTextStyle.labelText.copyWith(fontSize: 11))),
+                  style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
@@ -915,7 +922,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                FontWeight
                                    .bold)),
 
-                       SizedBox(width: 20,)
+                       SizedBox(width: 5,)
                      ],
                    ),
                    Container(

@@ -1854,7 +1854,7 @@ class OrderListView extends StatelessWidget {
                                                   ),
                                                   //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                                  //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                  headingRowHeight: 40,
+                                                  headingRowHeight: 60,
                                                   columnSpacing: 30,
                                                   horizontalMargin: 5,
                                                 ),
