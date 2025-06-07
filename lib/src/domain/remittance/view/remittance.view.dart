@@ -1198,7 +1198,7 @@ class RemittanceView extends GetView<RemittanceController> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("${remittance.walletPayer?.account?.name ?? 'نامشخص'} ",
+                Text("${remittance.walletReciept?.account?.name ?? 'نامشخص'} ",
                     style: AppTextStyle.bodyText
                         .copyWith(color: AppColor.accentColor, fontSize: 11)),
                 SvgPicture.asset('assets/svg/refresh.svg',
@@ -1207,7 +1207,7 @@ class RemittanceView extends GetView<RemittanceController> {
                       AppColor.textColor,
                       BlendMode.srcIn,
                     )),
-                Text(" ${remittance.walletReciept?.account?.name ?? 'نامشخص'}",
+                Text(" ${remittance.walletPayer?.account?.name ?? 'نامشخص'}",
                     style: AppTextStyle.bodyText
                         .copyWith(color: AppColor.primaryColor, fontSize: 11)),
               ],

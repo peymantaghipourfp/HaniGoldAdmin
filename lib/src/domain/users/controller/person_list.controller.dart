@@ -172,4 +172,9 @@ class PersonListController extends GetxController {
       EasyLoading.dismiss();
     }
   }
+
+  void clearFilter() {
+    nameFilterController.clear();
+    mobileFilterController.clear();
+  }
 }

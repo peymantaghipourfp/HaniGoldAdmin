@@ -225,9 +225,16 @@ class InsertUserController extends GetxController{
       );
       accountModel=response;
       nameController.text=accountModel?.name??"";
-      mobileController.text=accountModel?.contactInfos?.first.value??"";
-      phoneController.text=(accountModel?.contactInfos?.length)! > 2? accountModel!.contactInfos![2].value??"":"";
-      emailController.text=(accountModel?.contactInfos?.length)! > 3? accountModel!.contactInfos![3].value??"":"";
+
+      for(int i=0;i<accountModel!.contactInfos!.length;i++){
+        if(accountModel!.contactInfos![i].type==0){
+          mobileController.text=accountModel?.contactInfos?[i].value??"";
+        }else  if(accountModel!.contactInfos![i].type==1){
+          phoneController.text=accountModel?.contactInfos?[i].value??"";
+        }else  if(accountModel!.contactInfos![i].type==2){
+          emailController.text=accountModel?.contactInfos?[i].value??"";
+        }
+      }
       userController.text="";
       passwordController.text="";
       addressController.text=accountModel?.addresses?.first.fullAddress??"";

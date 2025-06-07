@@ -11,6 +11,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
+import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../widgets/filter_user_list.widget.dart';
 
@@ -237,12 +238,13 @@ class PersonListView extends GetView<PersonListController> {
               ),
             )
                 : Center(
-              child: Text(
-                'خطا در سمت سرور رخ داده',
-                style: AppTextStyle.labelText.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: ErrPage(
+                callback: () {
+                  controller.clearFilter();
+                  controller.getUserAccountList();
+                },
+                title: "خطا در لیست کاربران",
+                des: 'برای دریافت لیست کاربران مجددا تلاش کنید',
               ),
             ),
           ),

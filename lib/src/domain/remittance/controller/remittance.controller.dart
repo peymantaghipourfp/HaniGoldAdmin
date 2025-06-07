@@ -402,7 +402,7 @@ Timer? debounceP;
     try{
       var remittance=await remittanceRepository.getOneRemittance(id: id);
       remittanceModel=remittance;
-      namePayerController.text=remittanceModel?.walletReciept?.account?.name??"";
+      namePayerController.text=remittanceModel?.walletPayer?.account?.name??"";
       dateController.text=remittanceModel?.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English)??"";
       descController.text=remittanceModel?.description??"";
       quantityPayerController.text="${remittanceModel?.quantity??0}";
@@ -508,10 +508,11 @@ Timer? debounceP;
         itemId: selectedItem.value?.id ?? 0,
         quantity: double.parse(quantityPayerController.text.toEnglishDigit()),
         description: descController.text,
-        accountIdPayer: selectedAccount.value?.id??0,
-        accountNamePayer: selectedAccount.value?.name??"",
-        accountIdReciept: selectedAccountP.value?.id??0,
-        accountNameReciept: selectedAccountP.value?.name??"", recId: recId,
+        accountIdPayer: selectedAccountP.value?.id??0,
+        accountNamePayer: selectedAccountP.value?.name??"",
+        accountIdReciept: selectedAccount.value?.id??0,
+        accountNameReciept:selectedAccount.value?.name??"",
+        recId: recId,
       );
         Get.toNamed('/remittance');
         Get.snackbar(response.infos!.first['title'], response.infos!.first["description"],
@@ -523,9 +524,9 @@ Timer? debounceP;
       descController.text="";
       dateController.text="";
       quantityPayerController.text="";
-      //getRemittanceListPager();
+     // getRemittanceListPager();
       clearFilter();
-      clearSearch();
+       clearSearch();
       clearList();
     } catch (e) {
       throw ErrorException('خطا در ایجاد حواله: $e');
@@ -545,10 +546,10 @@ Timer? debounceP;
         itemId: selectedItem.value?.id ?? 0,
         quantity: double.parse(quantityPayerController.text.toEnglishDigit()),
         description: descController.text,
-        accountIdPayer: selectedAccount.value?.id??0,
-        accountNamePayer: selectedAccount.value?.name??"",
-        accountIdReciept: selectedAccountP.value?.id??0,
-        accountNameReciept: selectedAccountP.value?.name??"", recId: remittanceModel?.recId??"", id: remittanceModel?.id??0,
+        accountIdPayer: selectedAccountP.value?.id??0,
+        accountNamePayer: selectedAccountP.value?.name??"",
+        accountIdReciept: selectedAccount.value?.id??0,
+        accountNameReciept: selectedAccount.value?.name??"", recId: remittanceModel?.recId??"", id: remittanceModel?.id??0,
         walletPayerId: remittanceModel?.walletPayer?.id ?? 0  ,
         walletRecieptId: remittanceModel?.walletReciept?.id ?? 0,
       );
@@ -562,9 +563,9 @@ Timer? debounceP;
       descController.text="";
       dateController.text="";
       quantityPayerController.text="";
-      //getRemittanceListPager();
-      clearFilter();
-      clearSearch();
+     // getRemittanceListPager();
+     clearFilter();
+     clearSearch();
       clearList();
     } catch (e) {
       throw ErrorException('خطا در ایجاد حواله: $e');

@@ -30,12 +30,12 @@ class AuthController extends GetxController{
       if(fetch.infos!.isNotEmpty){
         Get.snackbar(fetch.infos!.first["title"].toString(), fetch.infos!.first["description"].toString());
       }
-      if(fetch.id!=null){
+      if(fetch.id!=0){
       Get.toNamed('/home');
-        box.write('id', fetch.user?.id);
+        box.write('id', fetch.user.id);
         box.write('mobile', mobileController.text);
 
-     }else if(fetch.infos?.first[""]=="2022"){
+     }else if(fetch.infos.first[""]=="2022"){
         Get.dialog(
             ForgetPasswordPage());
 

@@ -9,6 +9,8 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../../widget/err_page.dart';
+import '../../../widget/pager_widget.dart';
 import '../controller/user_info_transaction.controller.dart';
 
 class ListUserInfoTransactionView extends GetView<UserInfoTransactionController> {
@@ -57,7 +59,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                         //   // });
                         // },
                         onEditingComplete: () async {
-                        controller.getListTransactionInfo();
+                        controller.getListTransactionInfoPager();
                       },
 
                         decoration: InputDecoration(
@@ -71,7 +73,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
 
                           prefixIcon: IconButton(
                               onPressed: () async {
-                                controller.getListTransactionInfo();
+                                controller.getListTransactionInfoPager();
                               },
                               icon: Icon(
                                 Icons.search,
@@ -124,18 +126,30 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
               ),
             )
                 : Center(
-              child: Text(
-                'خطا در سمت سرور رخ داده',
-                style: AppTextStyle.labelText.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
+              child: ErrPage(
+                callback: () {
+                  controller.clearFilter();
+                  controller.getListTransactionInfoPager();
+                },
+                title: "خطا در لیست کاربران",
+                des: 'برای دریافت لیست کاربران مجددا تلاش کنید',
               ),
             ),
           ),
-          Align(
-             alignment: Alignment.bottomCenter,
-              child: buildPaginationControls()),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              controller.paginated.value!=null?   Container(
+                  height: 70,
+                  margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  color: AppColor.appBarColor.withOpacity(0.5),
+                  alignment: Alignment.bottomCenter,
+                  child:PagerWidget(countPage: controller.paginated.value?.totalCount??0, callBack: (int index) {
+                    controller.isChangePage(index);
+                  },)):SizedBox(),
+            ],
+          ),
         ],
       ),
     ));
@@ -987,32 +1001,5 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
     ))
         .toList();
   }
-
-  Widget buildPaginationControls() {
-    return Obx(() => Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: Icon(Icons.chevron_left),
-            onPressed: controller.currentPageIndex.value > 1
-                ? controller.previousPage
-                : null,
-          ),
-          Text(
-            'صفحه ${controller.currentPageIndex.value}',
-            style: AppTextStyle.bodyText,
-          ),
-          IconButton(
-            icon: Icon(Icons.chevron_right),
-            onPressed:
-            controller.hasMore.value ? controller.nextPage : null,
-          ),
-        ],
-      ),
-    ));
-  }
-
 
 }

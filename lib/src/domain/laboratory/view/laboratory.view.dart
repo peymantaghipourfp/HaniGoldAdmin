@@ -407,8 +407,8 @@ class LaboratoryView extends GetView<LaboratoryController> {
                       controller.clearSearch();
                       controller.fetchLaboratoryList();
                     },
-                    title: "خطا در دریافت واریزی ها",
-                    des: 'برای دریافت لیست واریزی ها مجددا تلاش کنید',
+                    title: "خطا در لیست آزمایشگاه ها",
+                    des: 'برای دریافت لیست آزمایشگاه ها مجددا تلاش کنید',
                   ),
                 ),
               ],

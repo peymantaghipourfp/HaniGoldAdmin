@@ -12,11 +12,11 @@ ItemUserModel _$ItemUserModelFromJson(Map<String, dynamic> json) =>
           ? null
           : Contact.fromJson(json['contact'] as Map<String, dynamic>),
       code: json['code'] as String?,
+      status: (json['status'] as num?)?.toInt(),
       userName: json['userName'] as String?,
       mobileNumber: json['mobileNumber'] as String?,
       email: json['email'] as String?,
       rowNum: (json['rowNum'] as num?)?.toInt(),
-          status: (json['status'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
       description: json['description'] as String?,
@@ -28,6 +28,7 @@ Map<String, dynamic> _$ItemUserModelToJson(ItemUserModel instance) =>
     <String, dynamic>{
       'contact': instance.contact,
       'code': instance.code,
+      'status': instance.status,
       'userName': instance.userName,
       'mobileNumber': instance.mobileNumber,
       'email': instance.email,
