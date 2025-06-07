@@ -203,9 +203,9 @@ class InventoryDetailInsertPaymentController extends GetxController{
     walletAccountReqModel= WalletAccountReqModel(
         wallet: OptionsModel(
             orderBy: "wallet.Id",
-            orderByType: "desc",
+            orderByType: "asc",
             startIndex: 1,
-            toIndex: 1000,
+            toIndex: 10000,
             predicate: [PredicateModel(
                 innerCondition: 0,
                 outerCondition: 0,

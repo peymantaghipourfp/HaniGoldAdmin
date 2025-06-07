@@ -120,4 +120,30 @@ class ItemRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<Map<String , dynamic>> updateItemRange({
+    required int itemId,
+    required int maxSell,
+    required int maxBuy,
+    required double saleRange,
+    required double buyRange,
+  })async{
+    try{
+      Map<String, dynamic> itemData = {
+        "maxSell": maxSell,
+        "maxBuy": maxBuy,
+        "saleRange": saleRange,
+        "buyRange": buyRange,
+        "id": itemId
+      };
+
+      var response=await itemDio.put('Item/updateRange',data: itemData);
+      print('Status Code: ${response.statusCode}');
+      print('Response Data: ${response.data}');
+      return response.data;
+
+    }catch(e){
+      throw ErrorException('خطا در درج اطلاعات:$e');
+    }
+  }
 }

@@ -2453,8 +2453,8 @@ class DepositsListView extends StatelessWidget {
           child: Text('مشاهده در خواست', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('وضعیت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('الصاق تصویر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('الصاق تصویر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('عملیات', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
     ];
@@ -2727,18 +2727,18 @@ class DepositsListView extends StatelessWidget {
             ),
           ),
           //الصاق تصویر
-          DataCell(
+          /*DataCell(
             Center(
               child: GestureDetector(
-                /*onTap: () =>
-                    depositController.pickImageDesktop(deposit.recId.toString(), "image", "Deposit"),*/
+                *//*onTap: () =>
+                    depositController.pickImageDesktop(deposit.recId.toString(), "image", "Deposit"),*//*
                 child: SvgPicture.asset('assets/svg/camera.svg',
                   width: 25,
                   height: 25,
                   colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),),
               )
             ),
-          ),
+          ),*/
           // آیکون های عملیات
           DataCell(
             Center(

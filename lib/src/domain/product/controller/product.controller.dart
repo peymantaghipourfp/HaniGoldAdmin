@@ -212,6 +212,40 @@ class ProductController extends GetxController{
     }
   }
 
+  Future<bool> updateItemRange(int id,int maxSell,int maxBuy, double saleRange, double buyRange )async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      isLoading.value = true;
+      var response=await itemRepository.updateItemRange(
+        itemId: id,
+        maxSell: maxSell,
+        maxBuy: maxBuy,
+        saleRange: saleRange,
+        buyRange: buyRange ,
+      );
+      print(response);
+      if (response != null) {
+        Get.snackbar("موفقیت آمیز", "آپدیت با موفقیت آنجام شد",
+            titleText: Text('موفقیت آمیز',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(
+                'آپدیت با موفقیت آنجام شد', textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor)));
+        activeItemList.clear();
+        clearList();
+        fetchActiveItemList();
+      }
+      return false;
+    }catch(e){
+      EasyLoading.dismiss();
+      throw ErrorException('خطا:$e');
+    }finally{
+      EasyLoading.dismiss();
+      isLoading.value=false;
+    }
+  }
+
   void clearList() {
     priceController.clear();
     differentPriceController.clear();

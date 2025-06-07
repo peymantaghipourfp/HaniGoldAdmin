@@ -112,6 +112,7 @@ class LaboratoryController extends GetxController{
           phone: phoneController.text,
           address: addressController.text,
           createdOn: DateTime.now().toString());
+      Get.back();
       Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
           titleText: Text(response.infos?.first["title"],
             textAlign: TextAlign.center,
@@ -121,7 +122,7 @@ class LaboratoryController extends GetxController{
       nameController.text="";
       phoneController.text="";
       addressController.text="";
-      Get.back();
+      fetchLaboratoryList();
       //state.value=PageStateLob.list;
       if(laboratoryList.isEmpty){
        // state.value=PageStateLob.empty;

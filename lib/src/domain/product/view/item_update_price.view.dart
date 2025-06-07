@@ -5,6 +5,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
+import 'package:hanigold_admin/src/domain/product/widget/max_buy.widget.dart';
+import 'package:hanigold_admin/src/domain/product/widget/max_sell.widget.dart';
 import 'package:hanigold_admin/src/domain/product/widget/price_different.widget.dart';
 import 'package:hanigold_admin/src/domain/product/widget/price_sell.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
@@ -17,6 +19,8 @@ import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../model/item.model.dart';
+import '../widget/buy_range.widget.dart';
+import '../widget/sale_range.widget.dart';
 
 class ProductUpdatePriceView extends StatefulWidget {
   ProductUpdatePriceView({super.key});
@@ -594,6 +598,42 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
       ),
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('ماکزیمم فروش',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('ماکزیمم خرید',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('محدوده فروش',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('محدوده خرید',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
 
         label: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 60,),
@@ -768,6 +808,70 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),
+        // max sell
+        DataCell(
+              () {
+            String maxSell = activeList
+                .maxSell
+                .toString();
+            return MaxSellWidget(
+              maxSell: maxSell,
+              maxBuy: activeList.maxBuy ?? 0,
+              saleRange: activeList.saleRange ?? 0,
+              buyRange: activeList.buyRange ?? 0,
+              id: activeList.id!,
+
+            );
+          }(),
+        ),
+        // max buy
+        DataCell(
+              () {
+            String maxBuy = activeList
+                .maxBuy
+                .toString();
+            return MaxBuyWidget(
+              maxBuy: maxBuy,
+              maxSell: activeList.maxSell ?? 0,
+              saleRange: activeList.saleRange ?? 0,
+              buyRange: activeList.buyRange ?? 0,
+              id: activeList.id!,
+
+            );
+          }(),
+        ),
+        // sale range
+        DataCell(
+              () {
+            String saleRange = activeList
+                .saleRange
+                .toString();
+            return SaleRangeWidget(
+              maxSell: activeList.maxSell ?? 0,
+              maxBuy: activeList.maxBuy ?? 0,
+              saleRange: saleRange,
+              buyRange: activeList.buyRange ?? 0,
+              id: activeList.id!,
+
+            );
+          }(),
+        ),
+        // buy range
+        DataCell(
+              () {
+            String buyRange = activeList
+                .buyRange
+                .toString();
+            return BuyRangeWidget(
+              maxBuy: activeList.maxSell ?? 0,
+              maxSell: activeList.maxSell ?? 0,
+              saleRange: activeList.saleRange ?? 0,
+              buyRange: buyRange,
+              id: activeList.id!,
+
+            );
+          }(),
+        ),
         // status
         DataCell(
           Card(
@@ -876,6 +980,42 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           constraints: BoxConstraints(maxWidth: 150,),
           child: Text(
             'تفاوت قیمت فروش',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('ماکزیمم فروش',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('ماکزیمم خرید',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('محدوده فروش',
+            style: AppTextStyle
+                .smallTitleText,),
+        ),
+      ),
+      DataColumn(
+        headingRowAlignment: MainAxisAlignment.center,
+        label: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 150,),
+          child: Text('محدوده خرید',
             style: AppTextStyle
                 .smallTitleText,),
         ),
@@ -1038,6 +1178,70 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                   .price ?? 0,
               id: inActiveList
                   .id!,
+            );
+          }(),
+        ),
+        // max sell
+        DataCell(
+              () {
+            String maxSell = inActiveList
+                .maxSell
+                .toString();
+            return MaxSellWidget(
+              maxSell: maxSell,
+              maxBuy: inActiveList.maxBuy ?? 0,
+              saleRange: inActiveList.saleRange ?? 0,
+              buyRange: inActiveList.buyRange ?? 0,
+              id: inActiveList.id!,
+
+            );
+          }(),
+        ),
+        // max buy
+        DataCell(
+              () {
+            String maxBuy = inActiveList
+                .maxBuy
+                .toString();
+            return MaxBuyWidget(
+              maxBuy: maxBuy,
+              maxSell: inActiveList.maxSell ?? 0,
+              saleRange: inActiveList.saleRange ?? 0,
+              buyRange: inActiveList.buyRange ?? 0,
+              id: inActiveList.id!,
+
+            );
+          }(),
+        ),
+        // sale range
+        DataCell(
+              () {
+            String saleRange = inActiveList
+                .saleRange
+                .toString();
+            return SaleRangeWidget(
+              maxSell: inActiveList.maxSell ?? 0,
+              maxBuy: inActiveList.maxBuy ?? 0,
+              saleRange: saleRange,
+              buyRange: inActiveList.buyRange ?? 0,
+              id: inActiveList.id!,
+
+            );
+          }(),
+        ),
+        // buy range
+        DataCell(
+              () {
+            String buyRange = inActiveList
+                .buyRange
+                .toString();
+            return BuyRangeWidget(
+              maxBuy: inActiveList.maxSell ?? 0,
+              maxSell: inActiveList.maxSell ?? 0,
+              saleRange: inActiveList.saleRange ?? 0,
+              buyRange: buyRange,
+              id: inActiveList.id!,
+
             );
           }(),
         ),

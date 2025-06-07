@@ -22,6 +22,8 @@ ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
       buyStatus: json['buyStatus'] as bool?,
       maxSell: (json['maxSell'] as num?)?.toInt(),
       maxBuy: (json['maxBuy'] as num?)?.toInt(),
+      saleRange: (json['saleRange'] as num?)?.toDouble(),
+      buyRange: (json['buyRange'] as num?)?.toDouble(),
       w750: (json['w750'] as num?)?.toDouble(),
       initBalance: (json['initBalance'] as num?)?.toInt(),
       openPrice: (json['openPrice'] as num?)?.toDouble(),
@@ -56,4 +58,6 @@ Map<String, dynamic> _$ItemModelToJson(ItemModel instance) => <String, dynamic>{
       'attribute': instance.attribute,
       'recId': instance.recId,
       'infos': instance.infos,
+      'saleRange': instance.saleRange,
+      'buyRange': instance.buyRange,
     };

@@ -36,6 +36,10 @@ class ItemModel {
   final int? maxSell;
   @JsonKey(name: "maxBuy")
   final int? maxBuy;
+  @JsonKey(name: "saleRange")
+  final double? saleRange;
+  @JsonKey(name: "buyRange")
+  final double? buyRange;
   @JsonKey(name: "w750")
   final double? w750;
   @JsonKey(name: "initBalance")
@@ -79,6 +83,8 @@ class ItemModel {
     required this.attribute,
     required this.recId,
     required this.infos,
+    required this.saleRange,
+    required this.buyRange,
   });
 
   factory ItemModel.fromJson(Map<String, dynamic> json) => _$ItemModelFromJson(json);

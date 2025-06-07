@@ -210,9 +210,9 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     walletAccountReqModel= WalletAccountReqModel(
         wallet: OptionsModel(
             orderBy: "wallet.Id",
-            orderByType: "desc",
+            orderByType: "asc",
             startIndex: 1,
-            toIndex: 1000,
+            toIndex: 10000,
             predicate: [PredicateModel(
                 innerCondition: 0,
                 outerCondition: 0,
@@ -455,7 +455,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
       );
       print(response);
       if (response != null) {
-        inventoryController.fetchGetOneInventory(inventoryId.value);
         Get.back();
         InventoryModel responseData=InventoryModel.fromJson(response);
         Get.snackbar(responseData.infos?.first['title'], responseData.infos?.first["description"],
@@ -466,6 +465,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
             responseData.infos?.first["description"], textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
+        inventoryController.fetchGetOneInventory(responseData.id ?? 0);
         inventoryController.getInventoryListPager();
         Get.back();
         clearList();
