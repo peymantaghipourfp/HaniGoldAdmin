@@ -5,6 +5,8 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 
+import '../../domain/users/model/list_user.model.dart';
+
 class AccountRepository{
 
   Dio accountDio=Dio();
@@ -115,7 +117,6 @@ class AccountRepository{
 
   Future<List<AccountModel>> searchAccountListNew(String name,String status) async {
     try {
-
       Map<String, dynamic> options =name!=""? {
         "options": {
           "account": {
@@ -166,6 +167,43 @@ class AccountRepository{
       }
     } catch (e) {
       throw ErrorException('خطا: $e');
+    }
+  }
+
+
+  Future<ListUserModel> getCandidateChild(String parentId)async{
+    try{
+      Map<String , dynamic> options=
+      {"options" : { "account" :{
+        "Predicate": [
+          {
+            "innerCondition": 1,
+            "outerCondition": 0,
+            "filters": [
+              {
+                "fieldName": "ParentId",
+                "filterValue": parentId,
+                "filterType": 6,
+                "RefTable": "Account"
+              }
+            ]
+          }
+        ],
+        "orderBy": "Account.Id",
+        "orderByType": "Desc",
+        "StartIndex": 1,
+        "ToIndex": 25
+      }}};
+      final response=await accountDio.post('Account/getCandidateChild',data: options);
+      //print(response);
+      if(response.statusCode==200){
+        return ListUserModel.fromJson(response.data);
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
     }
   }
 }

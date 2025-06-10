@@ -1,0 +1,160 @@
+
+
+import 'dart:async';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
+import 'package:hanigold_admin/src/domain/users/controller/user_list.controller.dart';
+import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
+import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import '../../../config/const/app_color.dart';
+import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/user.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
+import '../../account/model/account.model.dart';
+import '../model/balance_item.model.dart';
+import '../model/city_item.model.dart';
+import '../model/header_info_user_transaction.model.dart';
+import '../model/list_transaction_info_item.model.dart';
+import '../model/paginated.model.dart';
+import '../model/transaction_info_item.model.dart';
+
+
+enum PageStateUser{loading,err,empty,list}
+
+class UserDetailController extends GetxController{
+
+  Rx<PageStateUser> state=Rx<PageStateUser>(PageStateUser.list);
+  final AccountRepository accountRepository=AccountRepository();
+  RxInt currentPageIndex = 1.obs;
+  RxInt currentPage = 1.obs;
+  RxInt itemsPerPage = 10.obs;
+  var isChecked=false.obs;
+  var isLoading=false.obs;
+  UserRepository userRepository=UserRepository();
+  ScrollController scrollController = ScrollController();
+  RxList<StateItemModel> stateList=<StateItemModel>[].obs;
+  RxList<CityItemModel> cityList=<CityItemModel>[].obs;
+  late Rxn<StateItemModel> selectedState=Rxn<StateItemModel>();
+  final Rxn<CityItemModel> selectedCity=Rxn<CityItemModel>();
+  final Rxn<AccountModel> accountModel=Rxn<AccountModel>();
+  var idUser=0.obs;
+  var title="".obs;
+  final List<AccountModel> accountList=<AccountModel>[].obs;
+  @override
+  void onInit() {
+    super.onInit();
+    idUser.value=int.parse(Get.parameters["accountId"] as String);
+    print(idUser.value);
+    idUser.value!=0? getOneUser(idUser.value):null;
+    idUser.value!=0? fetchAccountList(idUser.value.toString()):null;
+    getStateList();
+    getCityList();
+  }
+
+
+  setChecked(){
+    isChecked.value=!isChecked.value;
+    update();
+  }
+  setCheckedAccount(){
+    isLoading.value=!isLoading.value;
+    update();
+  }
+  void changeSelectedState(StateItemModel? newValue) {
+    selectedState.value = newValue;
+  }
+
+  void changeSelectedCity(CityItemModel? newValue) {
+    selectedCity.value = newValue;
+  }
+
+
+  // لیست استان ها
+  Future<void> getStateList() async {
+    print("getStateList : 1");
+    stateList.clear();
+    try {
+      // state.value=PageStateUser.loading;
+      var response = await userRepository.getStateList(
+          startIndex: currentPage.value,
+          toIndex: itemsPerPage.value,
+          );
+       stateList.addAll(response);
+       if(stateList.isNotEmpty){
+         selectedState.value=stateList.first;
+       }
+     //  state.value=PageStateUser.list;
+      update();
+    }
+    catch (e) {
+     // state.value = PageStateUser.err;
+    } finally {}
+  }
+// لیست شهر ها
+  Future<void> getCityList() async {
+    print("getCityList : 1");
+    cityList.clear();
+    try {
+      // state.value=PageStateUser.loading;
+      var response = await userRepository.getCityList(
+          startIndex: currentPage.value,
+          toIndex: itemsPerPage.value,
+          );
+       cityList.addAll(response);
+       if(cityList.isNotEmpty){
+         selectedCity.value=cityList.first;
+       }
+      // state.value=PageStateUser.list;
+      update();
+    }
+    catch (e) {
+   //   state.value = PageStateUser.err;
+    } finally {}
+  }
+
+  // لیست کاربران
+  Future<void> fetchAccountList(String parentId) async{
+    try{
+      //   state.value=PageState.loading;
+      var fetchedAccountList=await accountRepository.getCandidateChild(parentId);
+      accountList.assignAll(fetchedAccountList.accounts??[]);
+      //  state.value=PageState.list;
+      if(accountList.isEmpty){
+        //   state.value=PageState.empty;
+      }
+      print('تعداد55 :${accountList.length}');
+    }
+    catch(e){
+      //  state.value=PageState.err;
+    }finally{
+    }
+  }
+
+
+
+
+  // کاربر
+  Future<void> getOneUser(int id) async {
+    EasyLoading.show(
+      status: 'لطفا صبر کنید',
+      dismissOnTap: false,
+    );
+    try {
+      state.value=PageStateUser.loading;
+      var response = await userRepository.getOneAccount(id: id
+      );
+      accountModel.value=response;
+      state.value=PageStateUser.list;
+      update();
+    }
+    catch (e) {
+      state.value=PageStateUser.empty;
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+}

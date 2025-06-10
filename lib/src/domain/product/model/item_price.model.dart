@@ -16,6 +16,12 @@ class ItemPriceModel {
   final double? price;
   @JsonKey(name: "differentPrice")
   final double? differentPrice;
+  @JsonKey(name: "itemName")
+  final String? itemName;
+  @JsonKey(name: "salesRange")
+  final double? salesRange;
+  @JsonKey(name: "buyRange")
+  final double? buyRange;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -32,6 +38,9 @@ class ItemPriceModel {
     required this.price,
     required this.differentPrice,
     required this.rowNum,
+    required this.itemName,
+    required this.salesRange,
+    required this.buyRange,
     required this.id,
     required this.attribute,
     required this.recId,

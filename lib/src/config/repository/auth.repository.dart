@@ -1,5 +1,7 @@
 
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
@@ -33,7 +35,7 @@ class AuthRepository{
     }
   }
 
-  Future<UserLoginModel> forgetPasswordMobile(String mobile)async{
+  Future<dynamic> forgetPasswordMobile(String mobile)async{
     try{
       Map<String , dynamic> options={
           "user": {
@@ -43,7 +45,7 @@ class AuthRepository{
       final response=await authDio.post('Login/mobileVerificationForgetPassword',data: options);
       print("request : $options" );
       print("response : ${response.data}" );
-      return UserLoginModel.fromJson(response.data);
+      return jsonEncode(response.data);
     }
     catch(e){
       throw ErrorException('خطا:$e');

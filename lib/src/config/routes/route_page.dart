@@ -41,12 +41,14 @@ import '../../domain/remittance/view/remittance.view.dart';
 import '../../domain/remittance/view/update_remittance.view.dart';
 import '../../domain/splash/view/splash.view.dart';
 import '../../domain/users/view/list_user_info_transaction.view.dart';
+import '../../domain/users/view/user_detail.view.dart';
 import '../../domain/users/view/user_info_transaction.view.dart';
 import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
 import '../../domain/withdraw/view/withdraw_update.view.dart';
 import 'bindings/insert_user.bindings.dart';
 import 'bindings/laboratory.bindings.dart';
 import 'bindings/trading_balance.bindings.dart';
+import 'bindings/user_detail.bindings.dart';
 import 'bindings/user_info_detail_transaction.bindings.dart';
 import 'bindings/user_info_transaction.bindings.dart';
 import 'bindings/user_list.bindings.dart';
@@ -86,5 +88,6 @@ class RoutePage{
     GetPage(name: '/insertUser', page: ()=>InsertUserView(),binding: InsertUserBindings()),
     GetPage(name: '/laboratory', page: ()=>LaboratoryView(),binding: LaboratoryBindings()),
     GetPage(name: '/personList', page: ()=>PersonListView(),binding: PersonListBindings()),
+    GetPage(name: '/userDetail', page: ()=>UserDetailView(),binding: UserDetailBindings()),
   ];
 }

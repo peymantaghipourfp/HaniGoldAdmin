@@ -27,8 +27,8 @@ class AuthController extends GetxController{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       var fetch=await authRepository.login(mobileController.text,passwordController.text);
-      if(fetch.infos!.isNotEmpty){
-        Get.snackbar(fetch.infos!.first["title"].toString(), fetch.infos!.first["description"].toString());
+      if(fetch.infos.isNotEmpty){
+        Get.snackbar(fetch.infos.first["title"].toString(), fetch.infos.first["description"].toString());
       }
       if(fetch.id!=0){
       Get.toNamed('/home');
@@ -53,12 +53,13 @@ class AuthController extends GetxController{
     try{
       isForget.value=false;
       var fetch=await authRepository.forgetPasswordMobile(mobileController.text);
-       if(fetch.infos!.isNotEmpty){
-         Get.snackbar(fetch.infos!.first["title"].toString(), fetch.infos!.first["description"].toString());
-       }
-      if(fetch.user?.id!=null){
-        isForget.value=true;
-     }
+      isForget.value=true;
+       // if(fetch.infos.isNotEmpty){
+       //   Get.snackbar(fetch.infos.first["title"].toString(), fetch.infos.first["description"].toString());
+       // }
+       print("fffff");
+
+
       update();
     }
     catch(e){

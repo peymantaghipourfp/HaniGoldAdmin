@@ -1145,7 +1145,8 @@ class UserListView extends GetView<UserListController> {
 
   List<DataRow> buildDataRows(BuildContext context) {
     return controller.accountList
-        .map((trans) => DataRow(
+        .map((trans) =>
+        DataRow(
               cells: [
                 DataCell(Center(
                   child: Text(
@@ -1156,8 +1157,7 @@ class UserListView extends GetView<UserListController> {
                 DataCell(Center(
                   child: GestureDetector(
                     onTap: () {
-                      //  Get.toNamed("/userInfoTransaction",parameters: {"accountId":trans.accountId.toString()});
-                      // /controller.getInfo(trans.accountId);
+                       Get.toNamed("/userDetail",parameters: {"accountId":trans.id.toString()});
                     },
                     child: Text(
                       "${trans.name}",

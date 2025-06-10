@@ -8,6 +8,9 @@ part of 'account.model.dart';
 
 AccountModel _$AccountModelFromJson(Map<String, dynamic> json) => AccountModel(
       type: (json['type'] as num?)?.toInt(),
+      accountLevel: (json['accountLevel'] as num?)?.toInt(),
+      childrenCount: (json['childrenCount'] as num?)?.toInt(),
+      subGroupCount: (json['subGroupCount'] as num?)?.toInt(),
       contactInfo: json['contactInfo'] as String?,
       code: json['code'] as String?,
       firstName: json['firstName'] as String?,
@@ -28,11 +31,17 @@ AccountModel _$AccountModelFromJson(Map<String, dynamic> json) => AccountModel(
       contacts: (json['contacts'] as List<dynamic>?)
           ?.map((e) => ContactElement.fromJson(e as Map<String, dynamic>))
           .toList(),
+      accountSubGroups: (json['accountSubGroups'] as List<dynamic>?)
+          ?.map((e) => AccountSubGroupModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       addresses: (json['addresses'] as List<dynamic>?)
           ?.map((e) => Address.fromJson(e as Map<String, dynamic>))
           .toList(),
       contactInfos: (json['contactInfos'] as List<dynamic>?)
           ?.map((e) => ContactInfo.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      childs: (json['childs'] as List<dynamic>?)
+          ?.map((e) => AccountModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
@@ -44,6 +53,9 @@ AccountModel _$AccountModelFromJson(Map<String, dynamic> json) => AccountModel(
 Map<String, dynamic> _$AccountModelToJson(AccountModel instance) =>
     <String, dynamic>{
       'type': instance.type,
+      'accountLevel': instance.accountLevel,
+      'childrenCount': instance.childrenCount,
+      'subGroupCount': instance.subGroupCount,
       'code': instance.code,
       'contactInfo': instance.contactInfo,
       'firstName': instance.firstName,
@@ -55,8 +67,10 @@ Map<String, dynamic> _$AccountModelToJson(AccountModel instance) =>
       'parent': instance.parent,
       'accountGroup': instance.accountGroup,
       'contacts': instance.contacts,
+      'accountSubGroups': instance.accountSubGroups,
       'addresses': instance.addresses,
       'contactInfos': instance.contactInfos,
+      'childs': instance.childs,
       'rowNum': instance.rowNum,
       'id': instance.id,
       'attribute': instance.attribute,

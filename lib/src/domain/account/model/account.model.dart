@@ -83,6 +83,7 @@ import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
+import '../../users/model/account_sub_group.model.dart';
 import '../../users/model/city_item.model.dart';
 import '../../users/model/state_item.model.dart';
 import 'account_group.model.dart';
@@ -106,6 +107,12 @@ String accountModelToJson(AccountModel data) => json.encode(data.toJson());
 class AccountModel {
   @JsonKey(name: "type")
   final int? type;
+  @JsonKey(name: "accountLevel")
+  final int? accountLevel;
+  @JsonKey(name: "childrenCount")
+  final int? childrenCount;
+  @JsonKey(name: "subGroupCount")
+  final int? subGroupCount;
   @JsonKey(name: "code")
   final String? code;
   @JsonKey(name: "contactInfo")
@@ -128,10 +135,14 @@ class AccountModel {
   final AccountGroupModel? accountGroup;
   @JsonKey(name: "contacts")
   final List<ContactElement>? contacts;
+  @JsonKey(name: "accountSubGroups")
+  final List<AccountSubGroupModel>? accountSubGroups;
   @JsonKey(name: "addresses")
   final List<Address>? addresses;
   @JsonKey(name: "contactInfos")
   final List<ContactInfo>? contactInfos;
+  @JsonKey(name: "childs")
+  final List<AccountModel>? childs;
   @JsonKey(name: "rowNum")
   final int? rowNum;
   @JsonKey(name: "id")
@@ -145,6 +156,9 @@ class AccountModel {
 
   AccountModel({
     required this.type,
+    required this.accountLevel,
+    required this.childrenCount,
+    required this.subGroupCount,
     required this.contactInfo,
     required this.code,
     required this.firstName,
@@ -156,8 +170,10 @@ class AccountModel {
     required this.parent,
     required this.accountGroup,
     required this.contacts,
+    required this.accountSubGroups,
     required this.addresses,
     required this.contactInfos,
+    required this.childs,
     required this.rowNum,
     required this.id,
     required this.attribute,
