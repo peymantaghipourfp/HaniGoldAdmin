@@ -45,9 +45,9 @@ class RemittanceRepository{
         }
       };
       final response=await remittanceDio.post('Remittance/get',data: options);
-      // print("url : Remittance/get" );
-      // print("request : $options" );
-      // print("response : ${response.data}" );
+      print("url getRemittanceList : Remittance/get" );
+      print("request getRemittanceList : $options" );
+      print("response getRemittanceList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((account)=>RemittanceModel.fromJson(account)).toList();
@@ -67,9 +67,9 @@ class RemittanceRepository{
        "type":type
       };
       final response=await remittanceDio.get('Attachment/downloadAttachmentGuidList',queryParameters: options);
-      print("url : Attachment/downloadAttachmentGuidList" );
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("url getImage : Attachment/downloadAttachmentGuidList" );
+      print("request getImage : $options" );
+      print("response getImage : ${response.data}" );
         return ImageGuidModel.fromJson(response.data);
     }
     catch(e){
@@ -99,7 +99,7 @@ class RemittanceRepository{
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "Users"
                 },
               ],
@@ -188,9 +188,9 @@ class RemittanceRepository{
         }}
       };
       final response=await remittanceDio.post('Remittance/getWrapper',data: options);
-      print("url : Remittance/get" );
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("url getRemittanceListPager : Remittance/get" );
+      print("request getRemittanceListPager : $options" );
+      print("response getRemittanceListPager : ${response.data}" );
       if(response.statusCode==200){
         return ListRemittanceModel.fromJson(response.data);
       }else{
@@ -299,6 +299,8 @@ class RemittanceRepository{
       };
 
       var response=await remittanceDio.post('Remittance/insert',data: orderData);
+      print('Status Code insertRemittance: ${response.statusCode}');
+      print('Response Data insertRemittance: ${response.data}');
       /*if(response.statusCode==200){
         print('ثبت با موفقیت انجام شد');
       }else{
@@ -413,6 +415,8 @@ class RemittanceRepository{
       print(orderData);
 
       var response=await remittanceDio.put('Remittance/update',data: orderData);
+      print('Status Code updateRemittance: ${response.statusCode}');
+      print('Response Data updateRemittance: ${response.data}');
       /*if(response.statusCode==200){
         print('ثبت با موفقیت انجام شد');
       }else{
@@ -437,8 +441,8 @@ class RemittanceRepository{
       print(remittanceData);
 
       var response=await remittanceDio.put('Remittance/updateRegistered',data: remittanceData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateRegistered: ${response.statusCode}');
+      print('Response Data updateRegistered: ${response.data}');
       return RemittanceModel.fromJson(response.data) ;
     }
     catch(e){
@@ -456,8 +460,8 @@ class RemittanceRepository{
       print(remittanceData);
 
       var response=await remittanceDio.delete('Attachment/Delete',queryParameters: remittanceData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code deleteImage: ${response.statusCode}');
+      print('Response Data deleteImage: ${response.data}');
       return response.data ;
     }
     catch(e){
@@ -475,8 +479,8 @@ class RemittanceRepository{
       print(remittanceData);
 
       var response=await remittanceDio.get('Remittance/getOne',queryParameters: remittanceData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code getOneRemittance: ${response.statusCode}');
+      print('Response Data getOneRemittance: ${response.data}');
       return RemittanceModel.fromJson(response.data) ;
     }
     catch(e){
@@ -497,8 +501,8 @@ class RemittanceRepository{
       print(remittanceData);
 
       var response=await remittanceDio.delete('Remittance/updateToIsDeleted',data: remittanceData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code deleteRemittance: ${response.statusCode}');
+      print('Response Data deleteRemittance: ${response.data}');
       return response.data;
     }
     catch(e){

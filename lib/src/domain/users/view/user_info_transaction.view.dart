@@ -1397,13 +1397,11 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                   columns:
                                   buildDataColumns(),
                                   sortColumnIndex: controller.sortIndex.value,
-                                  sortAscending:
-                                  controller.sort.value,
-                                  border: TableBorder.symmetric(
-                                      inside: BorderSide(
-                                          color: AppColor
-                                              .textFieldColor,
-                                          width: 0.5)),
+                                  sortAscending: controller.sort.value,
+                                  border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                    outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
                                   dividerThickness: 0.3,
                                   rows: buildDataRows(
                                       context),

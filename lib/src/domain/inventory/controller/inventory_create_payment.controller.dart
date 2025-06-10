@@ -381,6 +381,7 @@ class InventoryCreatePaymentController extends GetxController{
         laboratory: selectedLaboratory.value,
         stateMode : 1,
         inputItemId: selectedInputItem.value?.id,
+        description: descriptionController.text,
       );
 
       tempDetails.add(newDetail);
@@ -420,7 +421,6 @@ class InventoryCreatePaymentController extends GetxController{
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
         type: 0,
-        description: descriptionController.text,
         details:tempDetails,
         recId: null
       );

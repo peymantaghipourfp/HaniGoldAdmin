@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/domain/order/controller/order_create.controll
 import 'package:hanigold_admin/src/domain/order/controller/order_update.controller.dart';
 
 import '../../../domain/order/controller/order.controller.dart';
+import '../../../domain/users/controller/insert_user.controller.dart';
 
 class OrderBindings implements Bindings{
   @override

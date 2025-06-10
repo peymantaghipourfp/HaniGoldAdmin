@@ -12,11 +12,11 @@ import '../../../config/const/app_text_style.dart';
 class SaleRangeWidget extends StatefulWidget {
   final int maxSell;
   final int maxBuy;
-  final String saleRange;
+  final String salesRange;
   final double buyRange;
   final int id;
   const SaleRangeWidget({
-    super.key, required this.maxSell, required this.maxBuy, required this.saleRange, required this.buyRange, required this.id,
+    super.key, required this.maxSell, required this.maxBuy, required this.salesRange, required this.buyRange, required this.id,
   });
 
   @override
@@ -34,7 +34,7 @@ class _SaleRangeWidgetState extends State<SaleRangeWidget> {
 
   @override
   void initState() {
-    saleRangeController.text = widget.saleRange.toString().seRagham(separator: ',');
+    saleRangeController.text = widget.salesRange.toString().seRagham(separator: ',');
     focusNode1 = FocusNode();
     setupFocusListeners();
 
@@ -48,7 +48,7 @@ class _SaleRangeWidgetState extends State<SaleRangeWidget> {
       } else {
         if (!isSubmitting) {
           if (saleRangeController.text != initialSaleRange) {
-            saleRangeController.text = widget.saleRange.toString().seRagham(separator: ',');
+            saleRangeController.text = widget.salesRange.toString().seRagham(separator: ',');
           }
         }
       }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -19,11 +20,42 @@ import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 
-class InventoryListView extends StatelessWidget {
+class InventoryListView extends StatefulWidget {
   InventoryListView({super.key});
 
-  final InventoryController inventoryController = Get.find<
-      InventoryController>();
+  @override
+  State<InventoryListView> createState() => _InventoryListViewState();
+}
+
+class _InventoryListViewState extends State<InventoryListView> {
+  final InventoryController inventoryController = Get.find<InventoryController>();
+  final GlobalKey _dataTableKey = GlobalKey();
+  final Map<int, GlobalKey> _rowKeys = {};
+
+  @override
+  void initState() {
+    super.initState();
+    inventoryController.inventoryList.listen((list) {
+      _prepareScreenshotKeys(list);
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _prepareScreenshotKeys(inventoryController.inventoryList);
+  }
+
+  void _prepareScreenshotKeys(List<InventoryModel> inventories) {
+    final newKeys = <int>{};
+    for (var inventory in inventories) {
+      if (inventory.id != null) {
+        newKeys.add(inventory.id!);
+        if (!_rowKeys.containsKey(inventory.id)) {
+          _rowKeys[inventory.id!] = GlobalKey(debugLabel: 'row_${inventory.id}');
+        }
+      }
+    }
+    _rowKeys.removeWhere((key, value) => !newKeys.contains(key));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1853,21 +1885,26 @@ class InventoryListView extends StatelessWidget {
                                             child: Column(
                                               children: [
 
-                                                DataTable(
-                                                  columns: buildDataColumns(),
-                                                  rows: buildDataRows(context),
-                                                  dataRowMaxHeight: double.infinity,
-                                                  dividerThickness: 0.3,
-                                                  border: TableBorder.symmetric(
-                                                      inside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                                      outside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                                      borderRadius: BorderRadius.circular(8)
+                                                RepaintBoundary(
+                                                  key: _dataTableKey,
+                                                  child: DataTable(
+                                                    sortColumnIndex: inventoryController.sortColumnIndex.value,
+                                                    sortAscending: inventoryController.sortAscending.value,
+                                                    columns: buildDataColumns(),
+                                                    rows: buildDataRows(context),
+                                                    dataRowMaxHeight: double.infinity,
+                                                    dividerThickness: 0.3,
+                                                    border: TableBorder.symmetric(
+                                                        inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                        outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                        borderRadius: BorderRadius.circular(8)
+                                                    ),
+                                                    //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                                    headingRowHeight: 40,
+                                                    columnSpacing: 25,
+                                                    horizontalMargin: 6,
                                                   ),
-                                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                                  //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                  headingRowHeight: 40,
-                                                  columnSpacing: 25,
-                                                  horizontalMargin: 6,
                                                 ),
                                               ],
                                             ),
@@ -2280,6 +2317,21 @@ class InventoryListView extends StatelessWidget {
                                                                                       .bodyText),
                                                                             ],
                                                                           ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height: 4,),
+                                                                      Row(
+                                                                        children: [
+                                                                          Text(
+                                                                              ' توضیحات: ',
+                                                                              style: AppTextStyle
+                                                                                  .labelText),
+                                                                          Text(
+                                                                              getOneInventories
+                                                                                  ?.description ?? '',
+                                                                              style: AppTextStyle
+                                                                                  .bodyText),
                                                                         ],
                                                                       ),
                                                                       SizedBox(
@@ -2994,6 +3046,21 @@ class InventoryListView extends StatelessWidget {
                                       ),
                                       SizedBox(
                                         height: 4,),
+                                      Row(
+                                        children: [
+                                          Text(
+                                              '  توضیحات: ',
+                                              style: AppTextStyle
+                                                  .labelText),
+                                          Text(
+                                              getOneInventories
+                                                  ?.description ?? '',
+                                              style: AppTextStyle
+                                                  .bodyText),
+                                        ],
+                                      ),
+                                      SizedBox(
+                                        height: 4,),
                                       Divider(
                                         height: 1,
                                         color: AppColor
@@ -3054,31 +3121,35 @@ class InventoryListView extends StatelessWidget {
                                                                   index) {
                                                                 final attachment = getOneInventories
                                                                     .attachments![index];
-                                                                return Image
-                                                                    .network(
-                                                                  "${BaseUrl
-                                                                      .baseUrl}Attachment/downloadAttachment?fileName=${attachment
-                                                                      .guidId}",
-                                                                  loadingBuilder: (
-                                                                      context,
-                                                                      child,
-                                                                      loadingProgress) {
-                                                                    if (loadingProgress ==
-                                                                        null)
-                                                                      return child;
-                                                                    return Center(
-                                                                      child: CircularProgressIndicator(),
-                                                                    );
-                                                                  },
-                                                                  errorBuilder: (
-                                                                      context,
-                                                                      error,
-                                                                      stackTrace) =>
-                                                                      Icon(Icons
-                                                                          .error,
-                                                                          color: Colors
-                                                                              .red),
-                                                                  fit: BoxFit.contain,
+                                                                return Column(
+                                                                  children: [
+                                                                    Image
+                                                                        .network(
+                                                                      "${BaseUrl
+                                                                          .baseUrl}Attachment/downloadAttachment?fileName=${attachment
+                                                                          .guidId}",
+                                                                      loadingBuilder: (
+                                                                          context,
+                                                                          child,
+                                                                          loadingProgress) {
+                                                                        if (loadingProgress ==
+                                                                            null)
+                                                                          return child;
+                                                                        return Center(
+                                                                          child: CircularProgressIndicator(),
+                                                                        );
+                                                                      },
+                                                                      errorBuilder: (
+                                                                          context,
+                                                                          error,
+                                                                          stackTrace) =>
+                                                                          Icon(Icons
+                                                                              .error,
+                                                                              color: Colors
+                                                                                  .red),
+                                                                      fit: BoxFit.contain,
+                                                                    ),
+                                                                  ],
                                                                 );
                                                               },
                                                             ),
@@ -3286,18 +3357,21 @@ class InventoryListView extends StatelessWidget {
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(
-          onSort: (columnIndex, desc) {
-            inventoryController.sortByDate(columnIndex, desc);
-            inventoryController.setSort(columnIndex,desc);
-          },
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('تاریخ', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending) {
+          inventoryController.onSort(columnIndex, ascending);
+        },
       ),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('نام ثبت کننده', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            inventoryController.onSort(columnIndex, ascending);
+          }
+      ),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('محصول', style: AppTextStyle.labelText)),
@@ -3349,6 +3423,24 @@ class InventoryListView extends StatelessWidget {
               Center(
                 child: Row(
                   children: [
+                    GestureDetector(
+                      onTap: () {
+                        inventoryController.captureRowScreenshot(inventory, _dataTableKey, _rowKeys);
+                      },
+                      child: Row(
+                        children: [
+                          SvgPicture.asset(
+                              'assets/svg/camera.svg',
+                              height: 20,
+                              colorFilter: ColorFilter.mode(
+                                AppColor.iconViewColor,
+                                BlendMode.srcIn,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 5,),
                     Checkbox(
                       value: inventory.registered ?? false,
                       onChanged: (value) async{
@@ -3420,10 +3512,13 @@ class InventoryListView extends StatelessWidget {
           ),
           // شرح
           DataCell(
-              Center(
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Column(
+                  key: _rowKeys[inventory.id],
                   mainAxisAlignment: MainAxisAlignment
                       .spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Card(
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
@@ -3497,8 +3592,8 @@ class InventoryListView extends StatelessWidget {
                         ],
                       ),
                     ),
-                    Container(padding: EdgeInsets.only(bottom: 10),
-                      child: Row(mainAxisAlignment: MainAxisAlignment.center,
+                    Container(padding: EdgeInsets.only(bottom: 10,right: 10),
+                      child: Row(mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Text(
                               ' توضیحات: ',
@@ -3509,7 +3604,7 @@ class InventoryListView extends StatelessWidget {
                                   '' : "",
                               style: AppTextStyle
                                   .bodyText.copyWith(
-                                  color: AppColor.iconViewColor,fontSize: 11)),
+                                  color: AppColor.textColor,fontSize: 11)),
                         ],
                       ),
                     ),
@@ -3580,7 +3675,6 @@ class InventoryListView extends StatelessWidget {
             GestureDetector(
               onTap: () async{
                 await inventoryController.getImage(inventory.recId??"", "Inventory");
-
                 Future.delayed(const Duration(milliseconds: 200), () {
                   showDialog(
                     context: context,
@@ -3619,28 +3713,49 @@ class InventoryListView extends StatelessWidget {
                                       itemBuilder: (context,
                                           index) {
                                         final attachment = inventoryController.imageList[index];
-                                        return Image
-                                            .network(
-                                          "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
-                                          loadingBuilder: (context,
-                                              child,
-                                              loadingProgress) {
-                                            if (loadingProgress ==
-                                                null)
-                                              return child;
-                                            return Center(
-                                              child: CircularProgressIndicator(),
-                                            );
-                                          },
-                                          errorBuilder: (context,
-                                              error,
-                                              stackTrace) =>
-                                              Icon(
-                                                  Icons
-                                                      .error,
-                                                  color: Colors
-                                                      .red),
-                                          fit: BoxFit.contain,
+                                        return Column(
+                                          children: [
+                                            if (kIsWeb)
+                                              Padding(
+                                                padding: const EdgeInsets.only(right: 50),
+                                                child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                  children: [
+                                                    IconButton(
+                                                      icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                      onPressed: () => inventoryController.downloadImage(
+                                                        attachment,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            SizedBox(
+                                              width: 450,
+                                              height: 450,
+                                              child: Image.network(
+                                                "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                loadingBuilder: (context,
+                                                    child,
+                                                    loadingProgress) {
+                                                  if (loadingProgress ==
+                                                      null)
+                                                    return child;
+                                                  return Center(
+                                                    child: CircularProgressIndicator(),
+                                                  );
+                                                },
+                                                errorBuilder: (context,
+                                                    error,
+                                                    stackTrace) =>
+                                                    Icon(
+                                                        Icons
+                                                            .error,
+                                                        color: Colors
+                                                            .red),
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ],
                                         );
                                       },
                                     ),
@@ -4316,6 +4431,22 @@ class InventoryListView extends StatelessWidget {
                                 ),
                                 SizedBox(
                                   height: 4,),
+                                Row(
+                                  children: [
+                                    Text(
+                                        ' توضیحات: ',
+                                        style: AppTextStyle
+                                            .labelText),
+                                    Text(
+                                        '${getOneInventories
+                                            ?.description ??
+                                            0}',
+                                        style: AppTextStyle
+                                            .bodyText),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 4,),
                                 Divider(
                                   height: 1,
                                   color: AppColor
@@ -4369,29 +4500,50 @@ class InventoryListView extends StatelessWidget {
                                                               itemBuilder: (context,
                                                                   index) {
                                                                 final attachment = inventoryController.imageList[index];
-                                                                return Image
-                                                                    .network(
-                                                                  "${BaseUrl
-                                                                      .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
-                                                                  loadingBuilder: (context,
-                                                                      child,
-                                                                      loadingProgress) {
-                                                                    if (loadingProgress ==
-                                                                        null)
-                                                                      return child;
-                                                                    return Center(
-                                                                      child: CircularProgressIndicator(),
-                                                                    );
-                                                                  },
-                                                                  errorBuilder: (context,
-                                                                      error,
-                                                                      stackTrace) =>
-                                                                      Icon(
-                                                                          Icons
-                                                                              .error,
-                                                                          color: Colors
-                                                                              .red),
-                                                                  fit: BoxFit.contain,
+                                                                return Column(
+                                                                  children: [
+                                                                    if (kIsWeb)
+                                                                      Padding(
+                                                                        padding: const EdgeInsets.only(right: 50),
+                                                                        child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                          children: [
+                                                                            IconButton(
+                                                                              icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                                              onPressed: () => inventoryController.downloadImage(
+                                                                                attachment,
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    SizedBox(
+                                                                      width: 450,
+                                                                      height: 450,
+                                                                      child: Image.network(
+                                                                        "${BaseUrl
+                                                                            .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                        loadingBuilder: (context,
+                                                                            child,
+                                                                            loadingProgress) {
+                                                                          if (loadingProgress ==
+                                                                              null)
+                                                                            return child;
+                                                                          return Center(
+                                                                            child: CircularProgressIndicator(),
+                                                                          );
+                                                                        },
+                                                                        errorBuilder: (context,
+                                                                            error,
+                                                                            stackTrace) =>
+                                                                            Icon(
+                                                                                Icons
+                                                                                    .error,
+                                                                                color: Colors
+                                                                                    .red),
+                                                                        fit: BoxFit.contain,
+                                                                      ),
+                                                                    ),
+                                                                  ],
                                                                 );
                                                               },
                                                             ),
@@ -4658,5 +4810,4 @@ class InventoryListView extends StatelessWidget {
         );
     });
   }
-
 }

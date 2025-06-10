@@ -56,9 +56,48 @@ class OrderController extends GetxController{
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
 
+  RxnInt sortColumnIndex = RxnInt();
+  RxBool sortAscending = true.obs;
+
   void setError(String message){
     state.value=PageState.err;
     errorMessage.value=message;
+  }
+
+  void onSort(int columnIndex, bool ascending) {
+    sortColumnIndex.value = columnIndex;
+    sortAscending.value = ascending;
+
+    if (columnIndex == 1) { // Date column
+      orderList.sort((a, b) {
+        if (a.date == null || b.date == null) return 0;
+        return ascending ? a.date!.compareTo(b.date!) : b.date!.compareTo(a.date!);
+      });
+    }else if (columnIndex == 2) { // Name column
+      orderList.sort((a, b) {
+        final aName = a.account?.name ?? '';
+        final bName = b.account?.name ?? '';
+        return ascending ? aName.compareTo(bName) : bName.compareTo(aName);
+      });
+    }else if (columnIndex == 4) { // Name column
+      orderList.sort((a, b) {
+        final aQuantity = a.quantity ?? 0;
+        final bQuantity = b.quantity ?? 0;
+        return ascending ? aQuantity.compareTo(bQuantity) : bQuantity.compareTo(aQuantity);
+      });
+    }else if (columnIndex == 5) { // Name column
+      orderList.sort((a, b) {
+        final aPrice = a.price ?? 0;
+        final bPrice = b.price ?? 0;
+        return ascending ? aPrice.compareTo(bPrice) : bPrice.compareTo(aPrice);
+      });
+    }else if (columnIndex == 6) { // Name column
+      orderList.sort((a, b) {
+        final aTotalPrice = a.totalPrice ?? 0;
+        final bTotalPrice = b.totalPrice ?? 0;
+        return ascending ? aTotalPrice.compareTo(bTotalPrice) : bTotalPrice.compareTo(aTotalPrice);
+      });
+    }
   }
 
   @override

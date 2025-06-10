@@ -14,8 +14,8 @@ class ReasonRejectionRepository{
   
   Future<List<ReasonRejectionModel>> getReasonRejectionList(ReasonRejectionReqModel reasonRejectionReqModel)async{
     final response=await reasonRejectionDio.post('ReasonRejection/get',data: {'options':reasonRejectionReqModel});
-    print('Status Code: ${response.statusCode}');
-    print('Response Data: ${response.data}');
+    print('Status Code getReasonRejectionList: ${response.statusCode}');
+    print('Response Data getReasonRejectionList: ${response.data}');
     List<dynamic> data=response.data;
     return data.map((reasonrejection)=>ReasonRejectionModel.fromJson(reasonrejection)).toList();
   }

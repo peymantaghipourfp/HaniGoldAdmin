@@ -19,10 +19,42 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../widget/pager_widget.dart';
 import 'deposit_request_update.view.dart';
 
-class WithdrawsListView extends StatelessWidget {
+class WithdrawsListView extends StatefulWidget {
   WithdrawsListView({super.key});
 
+  @override
+  State<WithdrawsListView> createState() => _WithdrawsListViewState();
+}
+
+class _WithdrawsListViewState extends State<WithdrawsListView> {
   final WithdrawController withdrawController = Get.find<WithdrawController>();
+  final GlobalKey _dataTableKey = GlobalKey();
+  final Map<int, GlobalKey> _rowKeys = {};
+
+  @override
+  void initState() {
+    super.initState();
+    withdrawController.withdrawList.listen((list) {
+      _prepareScreenshotKeys(list);
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _prepareScreenshotKeys(withdrawController.withdrawList);
+  }
+
+  void _prepareScreenshotKeys(List<WithdrawModel> withdraws) {
+    final newKeys = <int>{};
+    for (var withdraw in withdraws) {
+      if (withdraw.id != null) {
+        newKeys.add(withdraw.id!);
+        if (!_rowKeys.containsKey(withdraw.id)) {
+          _rowKeys[withdraw.id!] = GlobalKey(debugLabel: 'row_${withdraw.id}');
+        }
+      }
+    }
+    _rowKeys.removeWhere((key, value) => !newKeys.contains(key));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -1850,21 +1882,26 @@ class WithdrawsListView extends StatelessWidget {
                                           SingleChildScrollView(
                                             child: Column(
                                               children: [
-                                                DataTable(
-                                                  columns: buildDataColumns(),
-                                                  rows: buildDataRows(context),
-                                                  dataRowMaxHeight: double.infinity,
-                                                  dividerThickness: 0.3,
-                                                  border: TableBorder.symmetric(
-                                                      inside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                                      outside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                                      borderRadius: BorderRadius.circular(8)
+                                                RepaintBoundary(
+                                                  key: _dataTableKey,
+                                                  child: DataTable(
+                                                    sortColumnIndex: withdrawController.sortColumnIndex.value,
+                                                    sortAscending: withdrawController.sortAscending.value,
+                                                    columns: buildDataColumns(),
+                                                    rows: buildDataRows(context),
+                                                    dataRowMaxHeight: double.infinity,
+                                                    dividerThickness: 0.3,
+                                                    border: TableBorder.symmetric(
+                                                        inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                        outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                        borderRadius: BorderRadius.circular(8)
+                                                    ),
+                                                    //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                                    headingRowHeight: 40,
+                                                    columnSpacing: 40,
+                                                    horizontalMargin: 6,
                                                   ),
-                                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                                  //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                  headingRowHeight: 40,
-                                                  columnSpacing: 40,
-                                                  horizontalMargin: 6,
                                                 ),
                                               ],
                                             ),
@@ -2287,7 +2324,7 @@ class WithdrawsListView extends StatelessWidget {
                                                             textCancel: 'بستن',
                                                           );
                                                         } else {*/
-                                                        Get.offAllNamed(
+                                                        Get.toNamed(
                                                             '/withdrawUpdate',
                                                             arguments: withdraws);
                                                         // }
@@ -3259,8 +3296,14 @@ class WithdrawsListView extends StatelessWidget {
     return [
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('تاریخ تراکنش', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('تاریخ تراکنش', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+        onSort: (columnIndex, ascending) {
+          withdrawController.onSort(columnIndex, ascending);
+        },
+      ),
       /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -3287,7 +3330,6 @@ class WithdrawsListView extends StatelessWidget {
   List<DataRow> buildDataRows(BuildContext context) {
     final groupedWithdraws = groupWithdrawsByDate(withdrawController.withdrawList);
     final rows = <DataRow>[];
-    //final keys = <GlobalKey<State<StatefulWidget>>>[];
     groupedWithdraws.forEach((date, withdraws) {
       rows.add(
         DataRow(
@@ -3338,9 +3380,6 @@ class WithdrawsListView extends StatelessWidget {
       for (final withdraw in withdraws) {
         final index=withdrawController.withdrawList.indexOf(withdraw);
         final isExpanded = withdrawController.isItemExpanded(index);
-        //final rowKey = GlobalKey(debugLabel: 'row_${withdraw.id}');
-        //print(rowKey);
-        //keys.add(rowKey);
         rows.add(
           DataRow(
             color: WidgetStatePropertyAll(
@@ -3355,14 +3394,24 @@ class WithdrawsListView extends StatelessWidget {
                   Center(
                     child: Row(mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        /*IconButton(
-                          icon: Icon(Icons.camera_alt,
-                            size: 20,
-                            color: AppColor.primaryColor,
+                        GestureDetector(
+                          onTap: () {
+                            withdrawController.captureRowScreenshot(withdraw, _dataTableKey, _rowKeys);
+                          },
+                          child: Row(
+                            children: [
+                              SvgPicture.asset(
+                                  'assets/svg/camera.svg',
+                                  height: 20,
+                                  colorFilter: ColorFilter.mode(
+                                    AppColor.iconViewColor,
+                                    BlendMode.srcIn,
+                                  )
+                              ),
+                            ],
                           ),
-                          onPressed: () => withdrawController.captureRowScreenshot(rowKey),
                         ),
-                        SizedBox(width: 5,),*/
+                        SizedBox(width: 5,),
                         Text(
                           "${withdraw.rowNum}",
                           style: AppTextStyle.labelText,
@@ -3447,6 +3496,7 @@ class WithdrawsListView extends StatelessWidget {
               DataCell(
                 Center(
                   child: Column(
+                    key: _rowKeys[withdraw.id],
                     children: [
                       SizedBox(height: 5,),
                       Text(
@@ -4485,7 +4535,6 @@ class WithdrawsListView extends StatelessWidget {
 
     });
   }
-
 
   Map<String, List<WithdrawModel>> groupWithdrawsByDate(List<WithdrawModel> withdraws) {
     final grouped = <String, List<WithdrawModel>>{};

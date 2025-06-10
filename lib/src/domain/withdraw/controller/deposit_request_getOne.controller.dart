@@ -154,4 +154,5 @@ class DepositRequestGetOneController extends GetxController{
       }
     }
   }
+
 }

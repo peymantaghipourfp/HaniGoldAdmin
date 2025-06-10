@@ -91,6 +91,11 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
                       style: AppTextStyle.bodyText,),
                   ],
                 ),
+                Padding(
+                  padding: const EdgeInsets.only(right: 35,top: 10),
+                  child: Text('توضیحات: ${widget.detail.description}',
+                    style: AppTextStyle.bodyText,),
+                ),
                 SizedBox(height: 10,),
                 // مقدار
                 widget.detail.itemUnit?.id !=2 ?

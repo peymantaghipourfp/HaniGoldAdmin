@@ -1,7 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -15,8 +17,42 @@ import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../controller/remittance.controller.dart';
 
-class RemittanceView extends GetView<RemittanceController> {
-  const RemittanceView({super.key});
+class RemittanceView extends StatefulWidget {
+  RemittanceView({super.key});
+
+  @override
+  State<RemittanceView> createState() => _RemittanceViewState();
+}
+
+class _RemittanceViewState extends State<RemittanceView> {
+  final RemittanceController controller = Get.find<RemittanceController>();
+  final GlobalKey _dataTableKey = GlobalKey();
+  final Map<int, GlobalKey> _rowKeys = {};
+
+  @override
+  void initState() {
+    super.initState();
+    controller.remittanceList.listen((list) {
+      _prepareScreenshotKeys(list);
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _prepareScreenshotKeys(controller.remittanceList);
+  }
+
+  void _prepareScreenshotKeys(List<RemittanceModel> remittances) {
+    final newKeys = <int>{};
+    for (var remittance in remittances) {
+      if (remittance.id != null) {
+        newKeys.add(remittance.id!);
+        if (!_rowKeys.containsKey(remittance.id)) {
+          _rowKeys[remittance.id!] = GlobalKey(debugLabel: 'row_${remittance.id}');
+        }
+      }
+    }
+    _rowKeys.removeWhere((key, value) => !newKeys.contains(key));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +123,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                       ),
                                     ),
                                   ),
-                              
+
                                   Container(
                                     margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                                     padding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
@@ -958,7 +994,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                                 ),
                                               ),
                                             ],
-                                  
+
                                           ),
                                         ),
                                         SingleChildScrollView(
@@ -970,21 +1006,26 @@ class RemittanceView extends GetView<RemittanceController> {
                                               SingleChildScrollView(
                                                 child: Column(
                                                   children: [
-                                                    DataTable(
-                                                      columns: buildDataColumns(),
-                                                      dividerThickness: 0.3,
-                                                      rows: buildDataRows(context),
-                                                      border: TableBorder.symmetric(
-                                                          inside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                                          outside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                                          borderRadius: BorderRadius.circular(8)
+                                                    RepaintBoundary(
+                                                      key: _dataTableKey,
+                                                      child: DataTable(
+                                                        sortColumnIndex: controller.sortColumnIndex.value,
+                                                        sortAscending: controller.sortAscending.value,
+                                                        columns: buildDataColumns(),
+                                                        dividerThickness: 0.3,
+                                                        rows: buildDataRows(context),
+                                                        border: TableBorder.symmetric(
+                                                            inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                            outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                            borderRadius: BorderRadius.circular(8)
+                                                        ),
+                                                        dataRowMaxHeight: 100,
+                                                        //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                                        //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                                        headingRowHeight: 50,
+                                                        columnSpacing: 20,
+                                                        horizontalMargin: 10,
                                                       ),
-                                                      dataRowMaxHeight: 100,
-                                                      //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                                      //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                      headingRowHeight: 50,
-                                                      columnSpacing: 20,
-                                                      horizontalMargin: 10,
                                                     ),
                                                   ],
                                                 ),
@@ -1066,13 +1107,21 @@ class RemittanceView extends GetView<RemittanceController> {
               constraints: BoxConstraints(maxWidth: 80),
               child: Text('تاریخ',
                   style: AppTextStyle.labelText.copyWith(fontSize: 12))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending) {
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
               child: Text('نام ثبت کننده',
                   style: AppTextStyle.labelText.copyWith(fontSize: 12))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            controller.onSort(columnIndex, ascending);
+          }
+      ),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
@@ -1156,6 +1205,24 @@ class RemittanceView extends GetView<RemittanceController> {
                 child:
                 Row(
                   children: [
+                    GestureDetector(
+                      onTap: () {
+                        controller.captureRowScreenshot(remittance, _dataTableKey, _rowKeys);
+                      },
+                      child: Row(
+                        children: [
+                          SvgPicture.asset(
+                              'assets/svg/camera.svg',
+                              height: 20,
+                              colorFilter: ColorFilter.mode(
+                                AppColor.iconViewColor,
+                                BlendMode.srcIn,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(width: 5,),
                     // رجیستر
                     Checkbox(
                       value: remittance.registered ?? false,
@@ -1188,12 +1255,14 @@ class RemittanceView extends GetView<RemittanceController> {
               textDirection: TextDirection.ltr,
             ),
           )),
+          // نام ثبت کننده
           DataCell(Center(
             child: Text(
               remittance.createdBy?.name ?? 'نامشخص',
               style: AppTextStyle.bodyText.copyWith(fontSize: 11),
             ),
           )),
+          // بدهکار,بستانکار
           DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1213,6 +1282,7 @@ class RemittanceView extends GetView<RemittanceController> {
               ],
             ),
           )),
+          // محصول
           DataCell(Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -1231,6 +1301,7 @@ class RemittanceView extends GetView<RemittanceController> {
               ],
             ),
           )),
+          // مقدار
           DataCell(Center(
             child: Text(
               remittance.item?.itemUnit?.id == 1
@@ -1241,6 +1312,7 @@ class RemittanceView extends GetView<RemittanceController> {
               style: AppTextStyle.bodyText.copyWith(fontSize: 12),
             ),
           )),
+          // وضعیت
           DataCell(Center(
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
@@ -1262,8 +1334,10 @@ class RemittanceView extends GetView<RemittanceController> {
               ),
             ),
           )),
+          // شرح
           DataCell(Center(
             child: Column(
+              key: _rowKeys[remittance.id],
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(
@@ -1275,7 +1349,7 @@ class RemittanceView extends GetView<RemittanceController> {
                           .copyWith(color: AppColor.textColor, fontSize: 10),
                     ),
                     Text(
-                      " ${remittance.walletPayer?.account?.name??"نامشخص"}",
+                      "${remittance.walletReciept?.account?.name??"نامشخص"} ",
                       style: AppTextStyle.bodyText
                           .copyWith(color: AppColor.accentColor, fontSize: 10),
                     ),
@@ -1285,7 +1359,7 @@ class RemittanceView extends GetView<RemittanceController> {
                           .copyWith(color: AppColor.textColor, fontSize: 10),
                     ),
                     Text(
-                      " ${remittance.walletReciept?.account?.name??"نامشخص"}",
+                      "${remittance.walletPayer?.account?.name??"نامشخص"} ",
                       style: AppTextStyle.bodyText
                           .copyWith(color: AppColor.primaryColor, fontSize: 10),
                     ),
@@ -1364,6 +1438,7 @@ class RemittanceView extends GetView<RemittanceController> {
               ],
             ),
           )),
+          // مانده ریالی
           DataCell(Center(
               child: SizedBox(
                 child: SingleChildScrollView(
@@ -1440,6 +1515,7 @@ class RemittanceView extends GetView<RemittanceController> {
                             ),
                 ),
               ))),
+          // مانده طلایی
           DataCell(Center(
               child: SizedBox(
                 child: SingleChildScrollView(
@@ -1517,6 +1593,7 @@ class RemittanceView extends GetView<RemittanceController> {
                             ),
                 ),
               ))),
+          // مانده سکه
           DataCell(Center(
               child: SizedBox(
                 child: Scrollbar(
@@ -1550,7 +1627,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                   color: AppColor.accentColor),
                               //  textDirection: TextDirection.ltr,
                             ),
-                  
+
                           ],
                         )
                             : SizedBox(),
@@ -1583,7 +1660,7 @@ class RemittanceView extends GetView<RemittanceController> {
                                   color: AppColor.primaryColor),
                               //  textDirection: TextDirection.ltr,
                             ),
-                  
+
                           ],
                         )
                             : SizedBox(),
@@ -1595,7 +1672,7 @@ class RemittanceView extends GetView<RemittanceController> {
                   ),
                 ),
               ))),
-
+          // عملیات
           DataCell(
               Center(
               child: Row(
@@ -1645,29 +1722,50 @@ class RemittanceView extends GetView<RemittanceController> {
                                      itemBuilder: (context,
                                          index) {
                                        final attachment = controller.imageList[index];
-                                       return Image
-                                           .network(
-                                         "${BaseUrl
-                                             .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
-                                         loadingBuilder: (context,
-                                             child,
-                                             loadingProgress) {
-                                           if (loadingProgress ==
-                                               null)
-                                             return child;
-                                           return Center(
-                                             child: CircularProgressIndicator(),
-                                           );
-                                         },
-                                         errorBuilder: (context,
-                                             error,
-                                             stackTrace) =>
-                                             Icon(
-                                                 Icons
-                                                     .error,
-                                                 color: Colors
-                                                     .red),
-                                         fit: BoxFit.contain,
+                                       return Column(
+                                         children: [
+                                           if (kIsWeb)
+                                             Padding(
+                                               padding: const EdgeInsets.only(right: 50),
+                                               child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                 children: [
+                                                   IconButton(
+                                                     icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                     onPressed: () => controller.downloadImage(
+                                                       attachment,
+                                                     ),
+                                                   ),
+                                                 ],
+                                               ),
+                                             ),
+                                           SizedBox(
+                                             width: 450,
+                                             height: 450,
+                                             child: Image.network(
+                                               "${BaseUrl
+                                                   .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                               loadingBuilder: (context,
+                                                   child,
+                                                   loadingProgress) {
+                                                 if (loadingProgress ==
+                                                     null)
+                                                   return child;
+                                                 return Center(
+                                                   child: CircularProgressIndicator(),
+                                                 );
+                                               },
+                                               errorBuilder: (context,
+                                                   error,
+                                                   stackTrace) =>
+                                                   Icon(
+                                                       Icons
+                                                           .error,
+                                                       color: Colors
+                                                           .red),
+                                               fit: BoxFit.contain,
+                                             ),
+                                           ),
+                                         ],
                                        );
                                      },
                                    ),
@@ -1879,6 +1977,4 @@ class RemittanceView extends GetView<RemittanceController> {
       );
     }).toList();
   }
-
-
 }

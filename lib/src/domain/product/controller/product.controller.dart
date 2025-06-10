@@ -212,7 +212,7 @@ class ProductController extends GetxController{
     }
   }
 
-  Future<bool> updateItemRange(int id,int maxSell,int maxBuy, double saleRange, double buyRange )async{
+  Future<bool> updateItemRange(int id,int maxSell,int maxBuy, double salesRange, double buyRange )async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
@@ -220,7 +220,7 @@ class ProductController extends GetxController{
         itemId: id,
         maxSell: maxSell,
         maxBuy: maxBuy,
-        saleRange: saleRange,
+        salesRange: salesRange,
         buyRange: buyRange ,
       );
       print(response);

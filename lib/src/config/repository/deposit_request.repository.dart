@@ -17,8 +17,8 @@ class DepositRequestRepository{
   Future<List<DepositRequestModel>> getDepositRequest(int withdrawId)async{
     try{
       final response=await depositRequestDio.get('DepositRequest/getByWithdraw',queryParameters: {'id':withdrawId});
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code getDepositRequest: ${response.statusCode}');
+      print('Response Data getDepositRequest: ${response.data}');
       List<dynamic> data=response.data;
       return data.map((depositRequest)=>DepositRequestModel.fromJson(depositRequest)).toList();
     }
@@ -122,8 +122,8 @@ class DepositRequestRepository{
         "infos": []
       };
       var response=await depositRequestDio.post('DepositRequest/insert',data: depositRequestData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code insertDepositRequest: ${response.statusCode}');
+      print('Response Data insertDepositRequest: ${response.data}');
       return response.data;
     }catch(e){
       throw ErrorException('خطا در درج اطلاعات:$e');
@@ -162,8 +162,8 @@ class DepositRequestRepository{
         "infos": []
       };
       var response=await depositRequestDio.put('DepositRequest/update',data: depositRequestData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateDepositRequest: ${response.statusCode}');
+      print('Response Data updateDepositRequest: ${response.data}');
       return response.data;
     }catch(e){
       throw ErrorException('خطا در ویرایش اطلاعات:$e');
@@ -505,8 +505,8 @@ class DepositRequestRepository{
       print(depositRequestData);
 
       var response=await depositRequestDio.put('DepositRequest/updateStatus',data: depositRequestData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateStatusDepositRequest: ${response.statusCode}');
+      print('Response Data updateStatusDepositRequest: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -527,8 +527,8 @@ class DepositRequestRepository{
       print(depositRequestData);
 
       var response=await depositRequestDio.delete('DepositRequest/updateToIsDeleted',data: depositRequestData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code deleteDepositRequest: ${response.statusCode}');
+      print('Response Data deleteDepositRequest: ${response.data}');
       return response.data;
     }
     catch(e){

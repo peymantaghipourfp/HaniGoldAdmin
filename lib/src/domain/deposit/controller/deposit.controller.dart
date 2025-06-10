@@ -74,6 +74,9 @@ class DepositController extends GetxController{
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
 
+  RxnInt sortColumnIndex = RxnInt();
+  RxBool sortAscending = true.obs;
+
   void setError(String message){
     state.value=PageState.err;
     errorMessage.value=message;
@@ -82,6 +85,30 @@ class DepositController extends GetxController{
     currentPage.value=index*10-10;
     itemsPerPage.value=index*10;
     getDepositListPager();
+  }
+
+  void onSort(int columnIndex, bool ascending) {
+    sortColumnIndex.value = columnIndex;
+    sortAscending.value = ascending;
+
+    if (columnIndex == 1) { // Date column
+      depositList.sort((a, b) {
+        if (a.date == null || b.date == null) return 0;
+        return ascending ? a.date!.compareTo(b.date!) : b.date!.compareTo(a.date!);
+      });
+    }else if (columnIndex == 2) { // Name column
+      depositList.sort((a, b) {
+        final aName = a.wallet?.account?.name ?? '';
+        final bName = b.wallet?.account?.name ?? '';
+        return ascending ? aName.compareTo(bName) : bName.compareTo(aName);
+      });
+    }else if (columnIndex == 4) { // Name column
+      depositList.sort((a, b) {
+        final aAmount = a.amount ?? 0;
+        final bAmount = b.amount ?? 0;
+        return ascending ? aAmount.compareTo(bAmount) : bAmount.compareTo(aAmount);
+      });
+    }
   }
 
   @override

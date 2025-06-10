@@ -1,11 +1,13 @@
 
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -37,6 +39,7 @@ import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/upload.repository.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../product/model/item.model.dart';
@@ -44,6 +47,9 @@ import '../../users/model/balance_item.model.dart';
 import '../../users/model/paginated.model.dart';
 import '../model/remittance.model.dart';
 import '../view/update_remittance.view.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
+import 'package:path/path.dart' as path;
 
 
 enum PageState{loading,err,empty,list}
@@ -108,7 +114,8 @@ class RemittanceController extends GetxController{
   var namePayer="".obs;
   var mobilePayer="".obs;
   var recordId="".obs;
-
+  RxnInt sortColumnIndex = RxnInt();
+  RxBool sortAscending = true.obs;
 
 
 
@@ -172,7 +179,23 @@ class RemittanceController extends GetxController{
     update();
   }
 
+  void onSort(int columnIndex, bool ascending) {
+    sortColumnIndex.value = columnIndex;
+    sortAscending.value = ascending;
 
+    if (columnIndex == 1) { // Date column
+      remittanceList.sort((a, b) {
+        if (a.date == null || b.date == null) return 0;
+        return ascending ? a.date!.compareTo(b.date!) : b.date!.compareTo(a.date!);
+      });
+    }else if (columnIndex == 2) { // Name column
+      remittanceList.sort((a, b) {
+        final aName = a.createdBy?.name ?? 'نامشخص';
+        final bName = b.createdBy?.name ?? 'نامشخص';
+        return ascending ? aName.compareTo(bName) : bName.compareTo(aName);
+      });
+    }
+  }
 
   @override
   void onInit() {
@@ -999,5 +1022,142 @@ Timer? debounceP;
     selectedAccountP.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
+  }
+
+  Future<void> captureRowScreenshot(RemittanceModel remittance, GlobalKey dataTableKey, Map<int, GlobalKey> rowKeys) async {
+    final rowKey = rowKeys[remittance.id!];
+    if (rowKey == null || rowKey.currentContext == null) {
+      Get.snackbar('خطا', 'ردیفی برای ثبت پیدا نشد. کلید آماده نیست.');
+      return;
+    }
+
+    if (dataTableKey.currentContext == null) {
+      Get.snackbar('خطا', 'جدولی برای ثبت پیدا نشد. کلید آماده نیست.');
+      return;
+    }
+
+    try {
+      if (!kIsWeb) {
+        var status = await Permission.storage.request();
+        if (!status.isGranted) {
+          Get.snackbar('خطای دسترسی', 'برای ذخیره تصاویر، مجوز ذخیره‌سازی لازم است.');
+          return;
+        }
+      }
+
+      final RenderRepaintBoundary boundary = dataTableKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+
+      final RenderBox tableBox = dataTableKey.currentContext!.findRenderObject() as RenderBox;
+      final tablePosition = tableBox.localToGlobal(Offset.zero);
+      final tableSize = tableBox.size;
+
+      final RenderBox cellContentBox = rowKey.currentContext!.findRenderObject() as RenderBox;
+
+      RenderObject? tableCellRenderObject = cellContentBox;
+      while (tableCellRenderObject != null && tableCellRenderObject.parentData is! TableCellParentData) {
+        if (tableCellRenderObject.parent is RenderObject) {
+          tableCellRenderObject = tableCellRenderObject.parent as RenderObject;
+        } else {
+          tableCellRenderObject = null;
+          break;
+        }
+      }
+
+      if (tableCellRenderObject == null || tableCellRenderObject is! RenderBox) {
+        Get.snackbar('خطا', 'render object ردیف جدول پیدا نشد.');
+        return;
+      }
+
+      final RenderBox rowCellBox = tableCellRenderObject;
+      final rowCellPosition = rowCellBox.localToGlobal(Offset.zero);
+      final rowHeight = rowCellBox.size.height;
+
+      final cropRect = Rect.fromLTWH(0, // Start from the very left of the table
+        rowCellPosition.dy - tablePosition.dy,
+        tableSize.width,
+        rowHeight,
+      );
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      final paint = Paint();
+      canvas.drawImageRect(image, cropRect, Rect.fromLTWH(0, 0, cropRect.width, cropRect.height), paint,);
+
+      final picture = recorder.endRecording();
+      final croppedImage = await picture.toImage(cropRect.width.toInt(), cropRect.height.toInt());
+      final byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        Get.snackbar('خطا', 'دریافت داده‌های تصویر ناموفق بود.');
+        return;
+      }
+      final uint8List = byteData.buffer.asUint8List();
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'image/png');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'row_screenshot_${remittance.id}.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: "row_screenshot_${remittance.id}",
+          bytes: uint8List,
+          ext: 'png',
+          mimeType: MimeType.png,
+        );
+      }
+
+      Get.snackbar('موفق', 'تصویر اسکرین شات با موفقیت ذخیره شد.');
+
+    } catch (e) {
+      Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
+    }
+  }
+
+  void downloadImage(String guidId) async {
+    if (kIsWeb){
+      final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+      final anchor = html.AnchorElement(href: url)
+        ..download = "image_$guidId"
+        ..style.display = 'none';
+
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+    }else{
+      try {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) return;
+
+        final dio = Dio();
+        final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access downloads directory');
+        }
+        String fileExtension = path.extension(guidId);
+        if(fileExtension.isEmpty) fileExtension = '.png';
+        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+        final savePath = path.join(downloadsDir.path, fileName);
+        /*final dir = await getApplicationDocumentsDirectory();
+        final path = '${dir.path}/images_$guidId.png';*/
+        await dio.download(url, savePath);
+        print(savePath);
+        Get.snackbar(
+          'موفقیت',
+          'تصویر با موفقیت ذخیره شد',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'خطا',
+          'خطا در دانلود تصویر: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
   }
 }

@@ -444,6 +444,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                                         if (removedDetail.id != null) {
                                           inventoryCreatePaymentController.selectedForPaymentId.remove(removedDetail.id);
                                         }
+                                        inventoryCreatePaymentController.fetchForPaymentList();
                                       }
                                     ),
                                   );
@@ -494,6 +495,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                           onPressed: () {
                             if(formKey.currentState!.validate()){
                               inventoryCreatePaymentController.addToTempList();
+                              inventoryCreatePaymentController.descriptionController.clear();
                             }
                           },
                           child: inventoryCreatePaymentController.isLoading.value
@@ -679,6 +681,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                             inventoryCreatePaymentController.caratController.text = forPayment.carat?.toString() ?? '0';
                             inventoryCreatePaymentController.receiptNumberController.text = forPayment.receiptNumber ?? '';
                             inventoryCreatePaymentController.addToTempList();
+                            inventoryCreatePaymentController.descriptionController.clear();
                             inventoryCreatePaymentController.clearItemFields();
                           },
                           contentPadding: EdgeInsets.zero,

@@ -31,7 +31,7 @@ class OrderRepository{
                     {
                       "fieldName": "AccountId",
                       "filterValue": accountId.toString(),
-                      "filterType": 4,
+                      "filterType": 5,
                       "RefTable": "Orders"
                     },
                     {
@@ -58,8 +58,8 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/get',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getOrderList : $options" );
+      print("response getOrderList : ${response.data}" );
         List<dynamic> data=response.data;
         return data.map((order) => OrderModel.fromJson(order)).toList();
 
@@ -90,7 +90,7 @@ class OrderRepository{
                 {
                   "fieldName": "AccountId",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "Orders"
                 },
               ],
@@ -156,8 +156,8 @@ class OrderRepository{
         }}
       };
       final response=await orderDio.post('Order/getWrapper',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getOrderListPager : $options" );
+      print("response getOrderListPager : ${response.data}" );
         return ListOrderModel.fromJson(response.data);
 
     }catch(e){
@@ -229,8 +229,8 @@ class OrderRepository{
       };
 
       var response=await orderDio.post('Order/insert',data: orderData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code insertOrder: ${response.statusCode}');
+      print('Response Data insertOrder: ${response.data}');
       /*if(response.statusCode==200){
         print('ثبت با موفقیت انجام شد');
       }else{
@@ -306,8 +306,8 @@ class OrderRepository{
         "notLimit":notLimit,
       };
       var response=await orderDio.put('Order/update',data: orderData );
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateOrder: ${response.statusCode}');
+      print('Response Data updateOrder: ${response.data}');
       // if(response.statusCode==200){
       //   print('ویرایش با موفقیت انجام شد');
       //   print(response.data);
@@ -375,8 +375,8 @@ class OrderRepository{
       print(orderData);
 
       var response=await orderDio.put('Order/updateStatus',data: orderData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateStatusOrder: ${response.statusCode}');
+      print('Response Data updateStatusOrder: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -437,8 +437,8 @@ class OrderRepository{
       print(orderData);
 
       var response=await orderDio.delete('Order/updateToIsDeleted',data: orderData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code deleteOrder: ${response.statusCode}');
+      print('Response Data deleteOrder: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -458,8 +458,8 @@ class OrderRepository{
       print(orderData);
 
       var response=await orderDio.put('Order/updateRegistered',data: orderData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateRegistered: ${response.statusCode}');
+      print('Response Data updateRegistered: ${response.data}');
       return response.data;
     }
     catch(e){

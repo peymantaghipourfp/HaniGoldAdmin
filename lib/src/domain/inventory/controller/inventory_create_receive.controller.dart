@@ -371,6 +371,7 @@ class InventoryCreateReceiveController extends GetxController{
         receiptNumber: receiptNumberController.text,
         laboratory: selectedLaboratory.value,
         stateMode : 1,
+        description: descriptionController.text,
       );
 
       tempDetails.add(newDetail);
@@ -408,7 +409,6 @@ class InventoryCreateReceiveController extends GetxController{
           accountId: selectedAccount.value?.id ?? 0,
           accountName: selectedAccount.value?.name ?? "",
           type: 1,
-          description: descriptionController.text,
           details:tempDetails,
           recId: null
       );

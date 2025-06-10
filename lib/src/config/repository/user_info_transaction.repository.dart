@@ -75,7 +75,7 @@ class UserInfoTransactionRepository{
                 {
                   "fieldName": "AccountId",
                   "filterValue": accountId,
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "at"
                 }
               ]

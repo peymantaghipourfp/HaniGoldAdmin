@@ -17,8 +17,8 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
     try {
       final response = await withdrawGetOneDio.get(
           'WithdrawRequest/getOne', queryParameters: {'id': withdrawId});
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code getOneWithdraw: ${response.statusCode}');
+      print('Response Data getOneWithdraw: ${response.data}');
       Map<String, dynamic> data=response.data;
       return WithdrawModel.fromJson(data);
     }catch(e){
@@ -37,8 +37,8 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
       print(depositData);
 
       var response=await withdrawGetOneDio.put('Deposit/updateRegistered',data: depositData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateRegistered: ${response.statusCode}');
+      print('Response Data updateRegistered: ${response.data}');
       return response.data;
     }
     catch(e){

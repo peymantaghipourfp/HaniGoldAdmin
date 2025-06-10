@@ -817,7 +817,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             return MaxSellWidget(
               maxSell: maxSell,
               maxBuy: activeList.maxBuy ?? 0,
-              saleRange: activeList.saleRange ?? 0,
+              saleRange: activeList.salesRange ?? 0,
               buyRange: activeList.buyRange ?? 0,
               id: activeList.id!,
 
@@ -833,7 +833,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             return MaxBuyWidget(
               maxBuy: maxBuy,
               maxSell: activeList.maxSell ?? 0,
-              saleRange: activeList.saleRange ?? 0,
+              saleRange: activeList.salesRange ?? 0,
               buyRange: activeList.buyRange ?? 0,
               id: activeList.id!,
 
@@ -843,13 +843,13 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         // sale range
         DataCell(
               () {
-            String saleRange = activeList
-                .saleRange
+            String salesRange = activeList
+                .salesRange
                 .toString();
             return SaleRangeWidget(
               maxSell: activeList.maxSell ?? 0,
               maxBuy: activeList.maxBuy ?? 0,
-              saleRange: saleRange,
+              salesRange: salesRange,
               buyRange: activeList.buyRange ?? 0,
               id: activeList.id!,
 
@@ -865,7 +865,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             return BuyRangeWidget(
               maxBuy: activeList.maxSell ?? 0,
               maxSell: activeList.maxSell ?? 0,
-              saleRange: activeList.saleRange ?? 0,
+              saleRange: activeList.salesRange ?? 0,
               buyRange: buyRange,
               id: activeList.id!,
 
@@ -1190,7 +1190,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             return MaxSellWidget(
               maxSell: maxSell,
               maxBuy: inActiveList.maxBuy ?? 0,
-              saleRange: inActiveList.saleRange ?? 0,
+              saleRange: inActiveList.salesRange ?? 0,
               buyRange: inActiveList.buyRange ?? 0,
               id: inActiveList.id!,
 
@@ -1206,7 +1206,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             return MaxBuyWidget(
               maxBuy: maxBuy,
               maxSell: inActiveList.maxSell ?? 0,
-              saleRange: inActiveList.saleRange ?? 0,
+              saleRange: inActiveList.salesRange ?? 0,
               buyRange: inActiveList.buyRange ?? 0,
               id: inActiveList.id!,
 
@@ -1216,13 +1216,13 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         // sale range
         DataCell(
               () {
-            String saleRange = inActiveList
-                .saleRange
+            String salesRange = inActiveList
+                .salesRange
                 .toString();
             return SaleRangeWidget(
               maxSell: inActiveList.maxSell ?? 0,
               maxBuy: inActiveList.maxBuy ?? 0,
-              saleRange: saleRange,
+              salesRange: salesRange,
               buyRange: inActiveList.buyRange ?? 0,
               id: inActiveList.id!,
 
@@ -1238,7 +1238,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             return BuyRangeWidget(
               maxBuy: inActiveList.maxSell ?? 0,
               maxSell: inActiveList.maxSell ?? 0,
-              saleRange: inActiveList.saleRange ?? 0,
+              saleRange: inActiveList.salesRange ?? 0,
               buyRange: buyRange,
               id: inActiveList.id!,
 

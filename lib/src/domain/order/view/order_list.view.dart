@@ -1844,6 +1844,8 @@ class OrderListView extends StatelessWidget {
                                             child: Column(
                                               children: [
                                                 DataTable(
+                                                  sortColumnIndex: orderController.sortColumnIndex.value,
+                                                  sortAscending: orderController.sortAscending.value,
                                                   columns: buildDataColumns(),
                                                   rows: buildDataRows(context),
                                                   dataRowMaxHeight: double.infinity,
@@ -2381,20 +2383,46 @@ class OrderListView extends StatelessWidget {
     return [
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('تاریخ', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+        onSort: (columnIndex, ascending) {
+          orderController.onSort(columnIndex, ascending);
+        },
+      ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('نام کاربر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+          child: Text('نام کاربر', style: AppTextStyle.labelText)),
+        headingRowAlignment:MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            orderController.onSort(columnIndex, ascending);
+          }
+      ),
       /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('موبایل', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('محصول', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('مقدار', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+          child: Text('مقدار', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            orderController.onSort(columnIndex, ascending);
+          }
+      ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('قیمت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+          child: Text('قیمت', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            orderController.onSort(columnIndex, ascending);
+          }
+      ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('مبلغ کل', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+          child: Text('مبلغ کل', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            orderController.onSort(columnIndex, ascending);
+          }
+      ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('خرید/فروش', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -2514,7 +2542,7 @@ class OrderListView extends StatelessWidget {
                 (order.totalPrice != null)
                     ? "${order.totalPrice?.toInt().toString().seRagham(separator: ',')} ریال"
                     : "0",
-                style: AppTextStyle.bodyText.copyWith(fontSize: 11),
+                style: AppTextStyle.bodyText.copyWith(fontSize: 11,fontWeight: FontWeight.bold),
               ),
             ),
           ),

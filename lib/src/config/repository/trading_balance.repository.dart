@@ -25,7 +25,7 @@ class TradingBalanceRepository{
     try{
 
       final response=await tradingBalanceDio.get('Order/orderReport');
-      print(response);
+      print("response getTradingBalanceList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((transaction)=>BalanceTradingModel.fromJson(transaction)).toList();
 

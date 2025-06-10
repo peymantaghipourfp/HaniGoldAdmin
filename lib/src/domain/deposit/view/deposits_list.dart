@@ -1884,6 +1884,8 @@ class DepositsListView extends StatelessWidget {
                                                             child: Column(
                                                               children: [
                                                                 DataTable(
+                                                                  sortColumnIndex: depositController.sortColumnIndex.value,
+                                                                  sortAscending: depositController.sortAscending.value,
                                                                   columns: buildDataColumns(),
                                                                   rows: buildDataRows(context),
                                                                   dataRowMaxHeight: double.infinity,
@@ -2439,14 +2441,30 @@ class DepositsListView extends StatelessWidget {
     return [
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('تاریخ', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+        onSort: (columnIndex, ascending) {
+          depositController.onSort(columnIndex, ascending);
+        },
+      ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('نام کاربر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+          child: Text('نام کاربر', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            depositController.onSort(columnIndex, ascending);
+          }
+      ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('بابت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('مبلغ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+          child: Text('مبلغ', style: AppTextStyle.labelText)),
+          headingRowAlignment:MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            depositController.onSort(columnIndex, ascending);
+          }
+      ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('کد رهگیری', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),

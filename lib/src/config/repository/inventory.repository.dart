@@ -34,7 +34,7 @@ class InventoryRepository {
                 {
                   "fieldName": "AccountId",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "JoinedData"
                 },
                 {
@@ -91,7 +91,7 @@ class InventoryRepository {
                 {
                   "fieldName": "Account_Id",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "JoinedData"
                 },
               ],
@@ -173,7 +173,6 @@ class InventoryRepository {
     required int accountId,
     required String accountName,
     required int type,
-    required String? description,
     required List<InventoryDetailModel>? details,
     required String? recId,
       })async{
@@ -223,17 +222,17 @@ class InventoryRepository {
           "id": 1,
           "attribute": "cus",
           "recId": detail.recId,
-          "infos": []
+          "infos": [],
+          "description": detail.description,
         }).toList(),
 
         "rowNum": 1,
         "id": 1,
         "attribute": "cus",
         "infos": [],
-        "description": description,
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
+      print('Status Code insertInventoryReceive: ${response.statusCode}');
       print('Response Data insertInventoryReceive: ${response.data}');
       return response.data;
 
@@ -342,17 +341,17 @@ class InventoryRepository {
             "rowNum": 1,
             "attribute": "cus",
             "recId": recId,
-            "infos": []
+            "infos": [],
+            "description": description,
           }
         ],
         "rowNum": 1,
         "id": id,
         "attribute": "cus",
         "infos": [],
-        "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
+      print('Status Code insertDetailInventoryReceive: ${response.statusCode}');
       print('Response Data insertDetailInventoryReceive: ${response.data}');
       return response.data;
 
@@ -464,17 +463,17 @@ class InventoryRepository {
             "rowNum": 1,
             "attribute": "cus",
             "recId": recId,
-            "infos": []
+            "infos": [],
+            "description": description,
           }
         ],
         "rowNum": 1,
         "id": id,
         "attribute": "cus",
         "infos": [],
-        "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
+      print('Status Code updateDetailInventoryReceive: ${response.statusCode}');
       print('Response Data updateDetailInventoryReceive: ${response.data}');
       return response.data;
 
@@ -486,7 +485,7 @@ class InventoryRepository {
   Future<InventoryModel> getOneInventory(int inventoryId)async{
     try{
       final response=await inventoryDio.get('Inventory/getOne',queryParameters: {"id":inventoryId});
-      print('Status Code: ${response.statusCode}');
+      print('Status Code getOneInventory: ${response.statusCode}');
       print('Response Data getOneInventory: ${response.data}');
       Map<String, dynamic> data=response.data;
       return InventoryModel.fromJson(data);
@@ -509,8 +508,8 @@ class InventoryRepository {
       print(inventoryData);
 
       var response=await inventoryDio.delete('Inventory/updateToIsDeleted',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code deleteInventory: ${response.statusCode}');
+      print('Response Data deleteInventory: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -638,14 +637,14 @@ class InventoryRepository {
                 {
                   "fieldName": "Id",
                   "filterValue": itemId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "Item"
                 },
                 if (laboratoryId != null)
                 {
                   "fieldName": "Id",
                   "filterValue": laboratoryId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "Laboratory"
                 },
                 /*{
@@ -681,7 +680,6 @@ class InventoryRepository {
     required int accountId,
     required String accountName,
     required int type,
-    required String? description,
     required List<InventoryDetailModel>? details,
     required String? recId,
   })async{
@@ -732,14 +730,14 @@ class InventoryRepository {
           "id": 1,
           "attribute": "cus",
           "recId": detail.recId,
-          "infos": []
+          "infos": [],
+          "description": detail.description,
         }).toList(),
 
         "rowNum": 1,
         "id": 1,
         "attribute": "cus",
         "infos": [],
-        "description": description,
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
       print('Status Code: ${response.statusCode}');
@@ -854,14 +852,14 @@ class InventoryRepository {
             "rowNum": 1,
             "attribute": "cus",
             "recId": recId,
-            "infos": []
+            "infos": [],
+            "description": description,
           }
         ],
         "rowNum": 1,
         "id": id,
         "attribute": "cus",
         "infos": [],
-        "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code: ${response.statusCode}');
@@ -977,14 +975,14 @@ class InventoryRepository {
             "rowNum": 1,
             "attribute": "cus",
             "recId": recId,
-            "infos": []
+            "infos": [],
+            "description": description,
           }
         ],
         "rowNum": 1,
         "id": id,
         "attribute": "cus",
         "infos": [],
-        "description": description,
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code: ${response.statusCode}');

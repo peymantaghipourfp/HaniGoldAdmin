@@ -93,7 +93,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                           width: 150,height: 35,
                                                           child: OutlinedButton(
                                                             onPressed: () {
-                                                              Get.offNamed('/withdrawsList');
+                                                              Get.toNamed('/withdrawsList');
                                                             },
                                                             style: ButtonStyle(
                                                               shape: WidgetStatePropertyAll(
@@ -328,7 +328,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                       Text('واریزهای تقسیم شده',style: AppTextStyle.smallTitleText.copyWith(fontSize: 13),),
 
                                                                                       SizedBox(
-                                                                                        width: 160,height: 40,
+                                                                                        width: 180,height: 40,
                                                                                         child: OutlinedButton(
                                                                                           onPressed: () {
                                                                                             int validIndex=withdrawGetOneController.withdrawList.isNotEmpty ? 0 : -1;
@@ -360,7 +360,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                               ),
                                                                                               side: WidgetStatePropertyAll(BorderSide(width: 1,color: AppColor.buttonColor))
                                                                                           ),
-                                                                                          child: Text('+ اضافه کردن واریزی جدید',
+                                                                                          child: Text('+ اضافه کردن درخواست واریزی',
                                                                                             style: AppTextStyle.labelText.copyWith(color: AppColor.buttonColor,fontWeight: FontWeight.bold),
                                                                                           ),
                                                                                         ),

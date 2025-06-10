@@ -18,8 +18,8 @@ class DepositRequestGetOneRepository{
       final response=await depositRequestGetOneDio.get(
         'DepositRequest/getOne',queryParameters: {'id':depositRequestId}
       );
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code getOneDepositRequest: ${response.statusCode}');
+      print('Response Data getOneDepositRequest: ${response.data}');
       Map<String, dynamic> data=response.data;
       return DepositRequestModel.fromJson(data);
     }catch(e){

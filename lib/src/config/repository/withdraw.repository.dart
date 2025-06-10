@@ -33,7 +33,7 @@ class WithdrawRepository{
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "Account"
                 },
                 {
@@ -59,8 +59,8 @@ class WithdrawRepository{
         }}
       };
       final response=await withdrawDio.post('WithdrawRequest/get',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getWithdrawList : $options" );
+      print("response getWithdrawList : ${response.data}" );
         List<dynamic> data=response.data;
         return data.map((withdraw)=>WithdrawModel.fromJson(withdraw)).toList();
 
@@ -90,7 +90,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "Account"
                 },
               ],
@@ -154,8 +154,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
             }}
           };
       final response=await withdrawDio.post('WithdrawRequest/getWrapper',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getWithdrawListPager : $options" );
+      print("response getWithdrawListPager : ${response.data}" );
         return ListWithdrawModel.fromJson(response.data);
 
     }
@@ -237,8 +237,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
       print(withdrawData);
       
       var response=await withdrawDio.post('WithdrawRequest/insert',data: withdrawData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code insertWithdraw: ${response.statusCode}');
+      print('Response Data insertWithdraw: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -318,11 +318,11 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "infos": [],
         "description": description
       };
-      print(withdrawData);
+      print("WithdrawData Update Withdraw:${withdrawData}");
 
       var response=await withdrawDio.put('WithdrawRequest/update',data: withdrawData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code Update Withdraw: ${response.statusCode}');
+      print('Response Data Update Withdraw: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -393,8 +393,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
       print(withdrawData);
 
       var response=await withdrawDio.put('WithdrawRequest/updateStatus',data: withdrawData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateStatusWithdraw: ${response.statusCode}');
+      print('Response Data updateStatusWithdraw: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -415,8 +415,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
       print(withdrawData);
 
       var response=await withdrawDio.delete('WithdrawRequest/updateToIsDeleted',data: withdrawData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code deleteWithdraw: ${response.statusCode}');
+      print('Response Data deleteWithdraw: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -435,8 +435,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
       print(withdrawData);
 
       var response=await withdrawDio.put('WithdrawRequest/updateDate',data: withdrawData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateRequestDateWithdraw: ${response.statusCode}');
+      print('Response Data updateRequestDateWithdraw: ${response.data}');
       return response.data;
     }
     catch(e){

@@ -22,13 +22,13 @@ class ItemRepository{
           "orderBy": "Item.Id",
           "orderByType": "asc",
           "StartIndex": 1,
-          "ToIndex": 100
+          "ToIndex": 1000
         }
         }
       };
       final response=await itemDio.post('Item/get',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getItemList : $options" );
+      print("response getItemList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((items)=>ItemModel.fromJson(items)).toList();
@@ -45,8 +45,8 @@ class ItemRepository{
     try {
       final response = await itemDio.get(
           'Item/getOne', queryParameters: {'id': itemId});
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code getOneItem: ${response.statusCode}');
+      print('Response Data getOneItem: ${response.data}');
       Map<String, dynamic> data=response.data;
       return ItemModel.fromJson(data);
     }catch(e){
@@ -70,8 +70,8 @@ class ItemRepository{
       };
 
       var response=await itemDio.post('ItemPrice/insert',data: itemData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code insertPriceItem: ${response.statusCode}');
+      print('Response Data insertPriceItem: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -94,8 +94,8 @@ class ItemRepository{
       };
 
       var response=await itemDio.post('ItemPrice/insert',data: itemData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code insertDifferentPriceItem: ${response.statusCode}');
+      print('Response Data insertDifferentPriceItem: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -113,8 +113,8 @@ class ItemRepository{
         "id": id,
       };
       final response = await itemDio.put('Item/updateStatus', data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request updateStatusItem : $options" );
+      print("response updateStatusItem : ${response.data}" );
       return ItemModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -125,21 +125,21 @@ class ItemRepository{
     required int itemId,
     required int maxSell,
     required int maxBuy,
-    required double saleRange,
+    required double salesRange,
     required double buyRange,
   })async{
     try{
       Map<String, dynamic> itemData = {
         "maxSell": maxSell,
         "maxBuy": maxBuy,
-        "saleRange": saleRange,
+        "salesRange": salesRange,
         "buyRange": buyRange,
         "id": itemId
       };
 
       var response=await itemDio.put('Item/updateRange',data: itemData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateItemRange: ${response.statusCode}');
+      print('Response Data updateItemRange: ${response.data}');
       return response.data;
 
     }catch(e){

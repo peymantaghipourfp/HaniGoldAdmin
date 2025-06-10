@@ -284,6 +284,7 @@ class WithdrawUpdateController extends GetxController{
     try{
       isLoading.value = true;
       //String gregorianDate = convertJalaliToGregorian(dateController.text);
+      print("walletId updateWithdraw: ${selectedWalletId.value}");
       Gregorian date=existingWithdraw!.requestDate!.toGregorian();
       var response=await withdrawRepository.updateWithdraw(
           withdrawId: withdrawId.value,
@@ -306,7 +307,7 @@ class WithdrawUpdateController extends GetxController{
       );
 
       if(response!= null){
-        Get.toNamed('/withdrawsList');
+        Get.offNamed('/withdrawsList');
         Get.snackbar("موفقیت آمیز","ویرایش با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,

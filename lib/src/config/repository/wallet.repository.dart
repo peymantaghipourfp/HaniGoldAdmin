@@ -17,8 +17,8 @@ class WalletRepository{
   Future<WalletModel> getWalletCurrency(int accountId)async{
     try{
       final response=await walletDio.get('Wallet/getCurrency',queryParameters: {'id':accountId});
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code getWalletCurrency: ${response.statusCode}');
+      print('Response Data getWalletCurrency: ${response.data}');
       Map<String, dynamic> data=response.data;
       return WalletModel.fromJson(data);
     }
@@ -29,10 +29,9 @@ class WalletRepository{
   
   Future<List<WalletModel>>  getWalletList(WalletAccountReqModel walletAccountReqModel)async{
     final response=await walletDio.post('Wallet/get',data: {"options":walletAccountReqModel});
-    print('Status Code: ${response.statusCode}');
-    print('Response Data: ${response.data}');
+    print('Status Code getWalletList: ${response.statusCode}');
+    print('Response Data getWalletList: ${response.data}');
     List<dynamic> data=response.data;
     return data.map((wallet)=>WalletModel.fromJson(wallet)).toList();
   }
-
 }

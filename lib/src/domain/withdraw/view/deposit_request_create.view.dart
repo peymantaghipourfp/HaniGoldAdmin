@@ -116,6 +116,7 @@ class InsertDepositRequestWidget extends StatelessWidget {
                             }
                             return null;
                           },
+
                           showSearchBox: true,
                           items: [
                             'انتخاب کنید',

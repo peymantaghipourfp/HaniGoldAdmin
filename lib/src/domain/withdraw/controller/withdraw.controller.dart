@@ -25,6 +25,7 @@ import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -37,7 +38,8 @@ import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 import '../../users/model/paginated.model.dart';
 
 
@@ -87,6 +89,9 @@ class WithdrawController extends GetxController{
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
 
+  RxnInt sortColumnIndex = RxnInt();
+  RxBool sortAscending = true.obs;
+
   void setError(String message){
     state.value=PageState.err;
     errorMessage.value=message;
@@ -114,8 +119,17 @@ class WithdrawController extends GetxController{
     return expandedIndex.value==index;
   }
 
+  void onSort(int columnIndex, bool ascending) {
+    sortColumnIndex.value = columnIndex;
+    sortAscending.value = ascending;
 
-
+    if (columnIndex == 1) { // Date column
+      withdrawList.sort((a, b) {
+        if (a.requestDate == null || b.requestDate == null) return 0;
+        return ascending ? a.requestDate!.compareTo(b.requestDate!) : b.requestDate!.compareTo(a.requestDate!);
+      });
+    }
+  }
 
   @override
   void onInit() {
@@ -124,6 +138,7 @@ class WithdrawController extends GetxController{
     setupScrollListener();
     super.onInit();
   }
+
   @override void onClose() {
     scrollController.dispose();
     withdrawList.clear();
@@ -911,44 +926,98 @@ class WithdrawController extends GetxController{
     endDateFilter.value="";
   }
 
- /* Future<void> captureRowScreenshot(GlobalKey<State<StatefulWidget>> key) async {
+
+  Future<void> captureRowScreenshot(WithdrawModel withdraw, GlobalKey dataTableKey, Map<int, GlobalKey> rowKeys) async {
+    final rowKey = rowKeys[withdraw.id!];
+    if (rowKey == null || rowKey.currentContext == null) {
+      Get.snackbar('خطا', 'ردیفی برای ثبت پیدا نشد. کلید آماده نیست.');
+      return;
+    }
+
+    if (dataTableKey.currentContext == null) {
+      Get.snackbar('خطا', 'جدولی برای ثبت پیدا نشد. کلید آماده نیست.');
+      return;
+    }
+
     try {
-      await Future.delayed(const Duration(milliseconds: 100));
-      final RenderRepaintBoundary boundary =
-      key.currentContext!.findRenderObject() as RenderRepaintBoundary;
-      if (!boundary.debugNeedsPaint){
-      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-      final ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
-      final Uint8List pngBytes = byteData!.buffer.asUint8List();
-      // ذخیره تصویر
+      if (!kIsWeb) {
+        var status = await Permission.storage.request();
+        if (!status.isGranted) {
+          Get.snackbar('خطای دسترسی', 'برای ذخیره تصاویر، مجوز ذخیره‌سازی لازم است.');
+          return;
+        }
+      }
+
+      final RenderRepaintBoundary boundary = dataTableKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+
+      final RenderBox tableBox = dataTableKey.currentContext!.findRenderObject() as RenderBox;
+      final tablePosition = tableBox.localToGlobal(Offset.zero);
+      final tableSize = tableBox.size;
+
+      final RenderBox cellContentBox = rowKey.currentContext!.findRenderObject() as RenderBox;
+
+      RenderObject? tableCellRenderObject = cellContentBox;
+      while (tableCellRenderObject != null && tableCellRenderObject.parentData is! TableCellParentData) {
+        if (tableCellRenderObject.parent is RenderObject) {
+          tableCellRenderObject = tableCellRenderObject.parent as RenderObject;
+        } else {
+          tableCellRenderObject = null;
+          break;
+        }
+      }
+
+      if (tableCellRenderObject == null || tableCellRenderObject is! RenderBox) {
+        Get.snackbar('خطا', 'render object ردیف جدول پیدا نشد.');
+        return;
+      }
+
+      final RenderBox rowCellBox = tableCellRenderObject;
+      final rowCellPosition = rowCellBox.localToGlobal(Offset.zero);
+      final rowHeight = rowCellBox.size.height;
+
+      final cropRect = Rect.fromLTWH(0, // Start from the very left of the table
+        rowCellPosition.dy - tablePosition.dy,
+        tableSize.width,
+        rowHeight,
+      );
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      final paint = Paint();
+      canvas.drawImageRect(image, cropRect, Rect.fromLTWH(0, 0, cropRect.width, cropRect.height), paint,);
+
+      final picture = recorder.endRecording();
+      final croppedImage = await picture.toImage(cropRect.width.toInt(), cropRect.height.toInt());
+      final byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        Get.snackbar('خطا', 'دریافت داده‌های تصویر ناموفق بود.');
+        return;
+      }
+      final uint8List = byteData.buffer.asUint8List();
+
       if (kIsWeb) {
-        final blob = html.Blob([pngBytes], 'image/png');
+        final blob = html.Blob([uint8List], 'image/png');
         final url = html.Url.createObjectUrlFromBlob(blob);
         final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', 'screenshot_${DateTime.now().millisecondsSinceEpoch}.png')
+          ..setAttribute('download', 'row_screenshot_${withdraw.id}.png')
           ..click();
         html.Url.revokeObjectUrl(url);
       } else {
-        final result = await ImageGallerySaver.saveImage(
-          pngBytes,
-          quality: 100,
-          name: 'screenshot_${DateTime.now().millisecondsSinceEpoch}',
+        await FileSaver.instance.saveFile(
+          name: "row_screenshot_${withdraw.id}",
+          bytes: uint8List,
+          ext: 'png',
+          mimeType: MimeType.png,
         );
-        if (result['isSuccess'] == true) {
-          Get.snackbar(
-            'موفق',
-            'اسکرین شات ذخیره شد\nمسیر: ${result['filePath']}',
-          );
-        } else {
-          Get.snackbar('خطا', 'ذخیره عکس با مشکل مواجه شد');
-        }
       }
-      }
-    } catch (e) {
-      print('خطا در گرفتن اسکرین شات: $e');
-      Get.snackbar('خطا', 'خطا در گرفتن اسکرین شات: $e');
 
+      Get.snackbar('موفق', 'تصویر اسکرین شات با موفقیت ذخیره شد.');
+
+    } catch (e) {
+      Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
     }
-  }*/
+  }
+
 }

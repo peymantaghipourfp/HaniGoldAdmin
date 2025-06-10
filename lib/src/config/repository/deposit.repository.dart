@@ -31,7 +31,7 @@ class DepositRepository{
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "AccountDeposit"
                 },
                 {
@@ -57,8 +57,8 @@ class DepositRepository{
         }}
       };
       final response=await depositDio.post('Deposit/get',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getDepositList : $options" );
+      print("response getDepositList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((deposit)=>DepositModel.fromJson(deposit)).toList();
     }
@@ -89,7 +89,7 @@ class DepositRepository{
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
-                  "filterType": 4,
+                  "filterType": 5,
                   "RefTable": "AccountDeposit"
                 },
               ],
@@ -178,8 +178,8 @@ class DepositRepository{
         }}
       };
       final response=await depositDio.post('Deposit/getWrapper',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getDepositListPager : $options" );
+      print("response getDepositListPager : ${response.data}" );
       return ListDepositModel.fromJson(response.data);
     }
     catch(e){
@@ -450,8 +450,8 @@ class DepositRepository{
     try {
       final response = await depositDio.get(
           'Deposit/getOne', queryParameters: {'id': depositId});
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code getOneDeposit: ${response.statusCode}');
+      print('Response Data getOneDeposit: ${response.data}');
       Map<String, dynamic> data=response.data;
       return DepositModel.fromJson(data);
     }catch(e){
@@ -472,8 +472,8 @@ class DepositRepository{
       print(depositData);
 
       var response=await depositDio.delete('Deposit/updateToIsDeleted',data: depositData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code deleteDeposit: ${response.statusCode}');
+      print('Response Data deleteDeposit: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -584,8 +584,8 @@ class DepositRepository{
       print(depositData);
 
       var response=await depositDio.put('Deposit/updateStatus',data: depositData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateStatusDeposit: ${response.statusCode}');
+      print('Response Data updateStatusDeposit: ${response.data}');
       return response.data;
     }
     catch(e){
@@ -605,8 +605,8 @@ class DepositRepository{
       print(depositData);
 
       var response=await depositDio.put('Deposit/updateRegistered',data: depositData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      print('Status Code updateRegistered: ${response.statusCode}');
+      print('Response Data updateRegistered: ${response.data}');
       return response.data;
     }
     catch(e){

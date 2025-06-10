@@ -23,9 +23,9 @@ class LaboratoryRepository {
           "ToIndex": 10000
         }}
       };
-      final response = await laboratoryDio.post(
-          'Laboratory/get', data: options);
-      //print(response);
+      final response = await laboratoryDio.post('Laboratory/get', data: options);
+      print("request getLaboratoryList : $options" );
+      print("response getLaboratoryList : ${response.data}" );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((laboratories) =>
@@ -74,9 +74,9 @@ class LaboratoryRepository {
               "ToIndex": toIndex
             }}
           };
-      final response = await laboratoryDio.post(
-          'Laboratory/getWrapper', data: options);
-      //print(response);
+      final response = await laboratoryDio.post('Laboratory/getWrapper', data: options);
+      print("request getLaboratoryListPager : $options" );
+      print("response getLaboratoryListPager : ${response.data}" );
       if (response.statusCode == 200) {
         return
           ListLaboratoryModel.fromJson(response.data);
@@ -143,10 +143,9 @@ class LaboratoryRepository {
           "recId": null,
       };
       print(options);
-      final response = await laboratoryDio.post(
-          'Laboratory/insert', data: options);
-
-      print(response);
+      final response = await laboratoryDio.post('Laboratory/insert', data: options);
+      print('Status Code insertLaboratory: ${response.statusCode}');
+      print('Response Data insertLaboratory: ${response.data}');
       if (response.statusCode == 200) {
         return
           LaboratoryModel.fromJson(response.data);
@@ -174,9 +173,9 @@ class LaboratoryRepository {
           "recId": null,
       };
       print(options);
-      final response = await laboratoryDio.put(
-          'Laboratory/update', data: options);
-      print(response);
+      final response = await laboratoryDio.put('Laboratory/update', data: options);
+      print('Status Code updateLaboratory: ${response.statusCode}');
+      print('Response Data updateLaboratory: ${response.data}');
       if (response.statusCode == 200) {
         return
           LaboratoryModel.fromJson(response.data);

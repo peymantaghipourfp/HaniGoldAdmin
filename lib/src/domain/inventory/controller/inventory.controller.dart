@@ -33,6 +33,8 @@ import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../account/model/account.model.dart';
 import '../../users/model/paginated.model.dart';
+import 'dart:ui' as ui;
+import 'package:flutter/rendering.dart';
 
 enum PageState{loading,err,empty,list}
 class InventoryController extends GetxController{
@@ -81,34 +83,14 @@ class InventoryController extends GetxController{
 
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
-  RxBool isDateSort = true.obs;
-  var sortIndex = 0.obs;
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
   var recordId="".obs;
   var uuid = Uuid();
 
-  void sortByDate(int columnIndex,bool desc ) {
-    final list = List<InventoryModel>.from(inventoryList);
-   // if (columnIndex > 0) {
-      isDateSort.value = desc;
-      list.sort((a, b) {
-        if (a.date == null && b.date == null) return 0;
-        if (a.date == null) return -1;
-        if (b.date == null) return 1;
-        return desc
-            ? b.date!.compareTo(a.date!)
-            : a.date!.compareTo(b.date!);
-      });
-   // }
-    inventoryList.assignAll(list);
-    update();
-  }
-  setSort(int index,bool val){
-    isDateSort.value= val;
-    sortIndex.value= index;
-    update();
-  }
+  RxnInt sortColumnIndex = RxnInt();
+  RxBool sortAscending = true.obs;
+
 
   void setError(String message){
     state.value=PageState.err;
@@ -124,6 +106,24 @@ class InventoryController extends GetxController{
   }
   bool isItemExpanded(int index) {
     return expandedIndex.value==index;
+  }
+
+  void onSort(int columnIndex, bool ascending) {
+    sortColumnIndex.value = columnIndex;
+    sortAscending.value = ascending;
+
+    if (columnIndex == 1) { // Date column
+      inventoryList.sort((a, b) {
+        if (a.date == null || b.date == null) return 0;
+        return ascending ? a.date!.compareTo(b.date!) : b.date!.compareTo(a.date!);
+      });
+    } else if (columnIndex == 2) { // Name column
+      inventoryList.sort((a, b) {
+        final aName = a.account?.name ?? '';
+        final bName = b.account?.name ?? '';
+        return ascending ? aName.compareTo(bName) : bName.compareTo(aName);
+      });
+    }
   }
 
   @override
@@ -942,6 +942,145 @@ class InventoryController extends GetxController{
       ),
     );
   }
+
+
+  Future<void> captureRowScreenshot(InventoryModel inventory, GlobalKey dataTableKey, Map<int, GlobalKey> rowKeys) async {
+    final rowKey = rowKeys[inventory.id!];
+    if (rowKey == null || rowKey.currentContext == null) {
+      Get.snackbar('خطا', 'ردیفی برای ثبت پیدا نشد. کلید آماده نیست.');
+      return;
+    }
+
+    if (dataTableKey.currentContext == null) {
+      Get.snackbar('خطا', 'جدولی برای ثبت پیدا نشد. کلید آماده نیست.');
+      return;
+    }
+
+    try {
+      if (!kIsWeb) {
+        var status = await Permission.storage.request();
+        if (!status.isGranted) {
+          Get.snackbar('خطای دسترسی', 'برای ذخیره تصاویر، مجوز ذخیره‌سازی لازم است.');
+          return;
+        }
+      }
+
+      final RenderRepaintBoundary boundary = dataTableKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+
+      final RenderBox tableBox = dataTableKey.currentContext!.findRenderObject() as RenderBox;
+      final tablePosition = tableBox.localToGlobal(Offset.zero);
+      final tableSize = tableBox.size;
+
+      final RenderBox cellContentBox = rowKey.currentContext!.findRenderObject() as RenderBox;
+
+      RenderObject? tableCellRenderObject = cellContentBox;
+      while (tableCellRenderObject != null && tableCellRenderObject.parentData is! TableCellParentData) {
+        if (tableCellRenderObject.parent is RenderObject) {
+          tableCellRenderObject = tableCellRenderObject.parent as RenderObject;
+        } else {
+          tableCellRenderObject = null;
+          break;
+        }
+      }
+
+      if (tableCellRenderObject == null || tableCellRenderObject is! RenderBox) {
+        Get.snackbar('خطا', 'render object ردیف جدول پیدا نشد.');
+        return;
+      }
+
+      final RenderBox rowCellBox = tableCellRenderObject;
+      final rowCellPosition = rowCellBox.localToGlobal(Offset.zero);
+      final rowHeight = rowCellBox.size.height;
+
+      final cropRect = Rect.fromLTWH(0, // Start from the very left of the table
+        rowCellPosition.dy - tablePosition.dy,
+        tableSize.width,
+        rowHeight,
+      );
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+
+      final paint = Paint();
+      canvas.drawImageRect(image, cropRect, Rect.fromLTWH(0, 0, cropRect.width, cropRect.height), paint,);
+
+      final picture = recorder.endRecording();
+      final croppedImage = await picture.toImage(cropRect.width.toInt(), cropRect.height.toInt());
+      final byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        Get.snackbar('خطا', 'دریافت داده‌های تصویر ناموفق بود.');
+        return;
+      }
+      final uint8List = byteData.buffer.asUint8List();
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'image/png');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'row_screenshot_${inventory.id}.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: "row_screenshot_${inventory.id}",
+          bytes: uint8List,
+          ext: 'png',
+          mimeType: MimeType.png,
+        );
+      }
+
+      Get.snackbar('موفق', 'تصویر اسکرین شات با موفقیت ذخیره شد.');
+
+    } catch (e) {
+      Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
+    }
+  }
+
+  void downloadImage(String guidId) async {
+    if (kIsWeb){
+      final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+      final anchor = html.AnchorElement(href: url)
+        ..download = "image_$guidId"
+        ..style.display = 'none';
+
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+    }else{
+      try {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) return;
+
+        final dio = Dio();
+        final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access downloads directory');
+        }
+        String fileExtension = path.extension(guidId);
+        if(fileExtension.isEmpty) fileExtension = '.png';
+        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+        final savePath = path.join(downloadsDir.path, fileName);
+        /*final dir = await getApplicationDocumentsDirectory();
+        final path = '${dir.path}/images_$guidId.png';*/
+        await dio.download(url, savePath);
+        print(savePath);
+        Get.snackbar(
+          'موفقیت',
+          'تصویر با موفقیت ذخیره شد',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'خطا',
+          'خطا در دانلود تصویر: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
+  }
+
 
   void clearFilter() {
     nameFilterController.clear();

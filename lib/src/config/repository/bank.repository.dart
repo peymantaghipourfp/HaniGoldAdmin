@@ -24,8 +24,8 @@ class BankRepository{
         }}
       };
       final response=await bankDio.post('Bank/get',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
+      print("request getBankList : $options" );
+      print("response getBankList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((bank)=>BankModel.fromJson(bank)).toList();
 

@@ -36,8 +36,8 @@ class ItemModel {
   final int? maxSell;
   @JsonKey(name: "maxBuy")
   final int? maxBuy;
-  @JsonKey(name: "saleRange")
-  final double? saleRange;
+  @JsonKey(name: "salesRange")
+  final double? salesRange;
   @JsonKey(name: "buyRange")
   final double? buyRange;
   @JsonKey(name: "w750")
@@ -83,7 +83,7 @@ class ItemModel {
     required this.attribute,
     required this.recId,
     required this.infos,
-    required this.saleRange,
+    required this.salesRange,
     required this.buyRange,
   });
 

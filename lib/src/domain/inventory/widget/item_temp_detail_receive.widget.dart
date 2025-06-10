@@ -79,6 +79,11 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                         style: AppTextStyle.bodyText,),
                     ],
                   ),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 35,top: 10),
+                    child: Text('توضیحات: ${widget.detail.description}',
+                      style: AppTextStyle.bodyText,),
+                  ),
                   SizedBox(height: 10,),
                   Container(
                     padding: EdgeInsets.only(bottom: 5,right: 10),
