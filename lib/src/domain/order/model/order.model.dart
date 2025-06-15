@@ -1,7 +1,9 @@
 
 
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
+import 'package:hanigold_admin/src/domain/users/model/account_sub_group.model.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
@@ -57,6 +59,10 @@ class OrderModel {
   final bool? notLimit;
   @JsonKey(name: "manualPrice")
   final bool? manualPrice;
+  @JsonKey(name: "accountParent")
+  AccountParent? accountParent;
+  @JsonKey(name: "extraAmount")
+  final double? extraAmount;
 
   OrderModel({
     required this.date,
@@ -80,7 +86,9 @@ class OrderModel {
     required this.description,
     required this.registered,
     required this.notLimit,
-    required this.manualPrice
+    required this.manualPrice,
+    required this.accountParent,
+    required this.extraAmount,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => _$OrderModelFromJson(json);
@@ -106,4 +114,36 @@ class Balance {
   factory Balance.fromJson(Map<String, dynamic> json) => _$BalanceFromJson(json);
 
   Map<String, dynamic> toJson() => _$BalanceToJson(this);
+}
+
+@JsonSerializable()
+class AccountParent {
+  @JsonKey(name: "code")
+  final String? code;
+  @JsonKey(name: "name")
+  final String? name;
+  @JsonKey(name: "contactInfo")
+  final String? contactInfo;
+  @JsonKey(name: "accountGroup")
+  final AccountGroupModel? accountGroup;
+  @JsonKey(name: "accountSubGroup")
+  final AccountSubGroupModel? accountSubGroup;
+  @JsonKey(name: "id")
+  final int? id;
+  @JsonKey(name: "infos")
+  final List<dynamic>? infos;
+
+  AccountParent({
+    required this.code,
+    required this.name,
+    required this.contactInfo,
+    required this.accountGroup,
+    required this.accountSubGroup,
+    required this.id,
+    required this.infos,
+  });
+
+  factory AccountParent.fromJson(Map<String, dynamic> json) => _$AccountParentFromJson(json);
+
+  Map<String, dynamic> toJson() => _$AccountParentToJson(this);
 }

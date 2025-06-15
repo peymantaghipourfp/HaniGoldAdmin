@@ -228,10 +228,10 @@ class _LoginViewState extends State<LoginView> {
                                   backgroundColor: AppColor.buttonColor,
                                 ),
                                 onPressed: () {
-                                //  Get.toNamed('/home');
-                                  if (formKey.currentState!.validate()) {
+                                  Get.toNamed('/home');
+                                  /*if (formKey.currentState!.validate()) {
                                     controller.login();
-                                  }
+                                  }*/
                                 },
                                 child: Text(
                                   'ورود',

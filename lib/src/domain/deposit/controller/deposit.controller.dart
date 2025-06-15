@@ -280,7 +280,7 @@ class DepositController extends GetxController{
         nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
       );
       isLoading.value=false;
-      depositList.addAll(response.deposit??[]);
+      depositList.assignAll(response.deposit??[]);
       paginated.value=response.paginated;
       state.value=PageState.list;
 

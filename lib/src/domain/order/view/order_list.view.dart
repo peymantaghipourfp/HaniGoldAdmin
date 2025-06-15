@@ -2223,7 +2223,7 @@ class OrderListView extends StatelessWidget {
                       //دکمه ادیت جزئیات سفارش
                       OutlinedButton(
                         onPressed: () {
-                          Get.offAllNamed('/orderUpdate',arguments: orders);
+                          Get.offAllNamed('/orderUpdate',parameters:{"id":orders.id.toString()});
                         },
                         style: ButtonStyle(
                           shape: WidgetStatePropertyAll(
@@ -2424,6 +2424,9 @@ class OrderListView extends StatelessWidget {
           }
       ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('اضافه مبلغ', style: AppTextStyle.labelText)),
+      ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('خرید/فروش', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('وضعیت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
@@ -2546,6 +2549,15 @@ class OrderListView extends StatelessWidget {
               ),
             ),
           ),
+          // اضافه مبلغ
+          DataCell(
+              Center(
+                child: Text(
+                  "${order.extraAmount?.toString().seRagham(separator: ",") ?? 0}",
+                  style:
+                  AppTextStyle.bodyText.copyWith(fontSize: 11),
+                ),
+              )),
           // خرید/فروش
           DataCell(
             Center(
@@ -2735,7 +2747,7 @@ class OrderListView extends StatelessWidget {
                   OutlinedButton(
                     onPressed: () {
 
-                      Get.offAllNamed('/orderUpdate',arguments: order);
+                      Get.offAllNamed('/orderUpdate',parameters:{"id":order.id.toString()});
                     },
                     style: ButtonStyle(
                       shape: WidgetStatePropertyAll(

@@ -105,7 +105,6 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                           style: AppTextStyle.smallTitleText,
                                         ),
                                       ),
-
                                       Expanded(
                                         child: GestureDetector(
                                             onTap: () {
@@ -315,12 +314,15 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                           ),
                                                         ),
                                                       ),
+                                                      value: orderUpdateController.selectedAccount.value,
                                                       showSearchBox: true,
-                                                      items:
-                                                      orderUpdateController
-                                                          .searchedAccounts
-                                                          .map((account) =>
-                                                      account.name ?? "").toList(),
+                                                      items:[
+                                                        'انتخاب کنید',
+                                                        ...orderUpdateController
+                                                            .searchedAccounts
+                                                            .map((account) =>
+                                                        account.name ?? "")
+                                                      ].toList(),
                                                       selectedValue: orderUpdateController
                                                           .selectedAccount.value
                                                           ?.name,
@@ -329,9 +331,15 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                             .searchedAccounts
                                                             .firstWhere((account) =>
                                                         account.name == newValue);
-                                                        orderUpdateController
-                                                            .changeSelectedAccount(
-                                                            selectedAccount);
+                                                        orderUpdateController.changeSelectedAccount(selectedAccount);
+                                                      },
+                                                      onMenuStateChange: (isOpen) {
+                                                        if (isOpen) {
+                                                          orderUpdateController.fetchAccountList();
+                                                        }
+                                                        if (!isOpen) {
+                                                          orderUpdateController.resetAccountSearch();
+                                                        }
                                                       },
                                                       backgroundColor: AppColor
                                                           .textFieldColor,

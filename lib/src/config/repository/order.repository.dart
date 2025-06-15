@@ -165,6 +165,18 @@ class OrderRepository{
     }
   }
 
+  Future<OrderModel> getOneOrder(int orderId)async{
+    try {
+      final response = await orderDio.get(
+          'Order/getOne', queryParameters: {'id': orderId});
+      print('Status Code getOneOrder: ${response.statusCode}');
+      print('Response Data getOneOrder: ${response.data}');
+      Map<String, dynamic> data=response.data;
+      return OrderModel.fromJson(data);
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
 
   Future<Map<String, dynamic>> insertOrder({
     required String date,

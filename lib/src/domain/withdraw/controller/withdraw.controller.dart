@@ -296,7 +296,7 @@ class WithdrawController extends GetxController{
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
-      withdrawList.addAll(response.withdrawRequests??[]);
+      withdrawList.assignAll(response.withdrawRequests??[]);
       paginated.value=response.paginated;
       state.value=PageState.list;
 

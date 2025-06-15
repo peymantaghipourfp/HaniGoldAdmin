@@ -10,6 +10,7 @@ import 'package:hanigold_admin/src/config/routes/bindings/person_list.bindings.d
 import 'package:hanigold_admin/src/config/routes/bindings/product.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/remittance.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/splash.bindings.dart';
+import 'package:hanigold_admin/src/config/routes/bindings/user.bindings.dart';
 import 'package:hanigold_admin/src/config/routes/bindings/withdraw.bindings.dart';
 import 'package:hanigold_admin/src/domain/auth/view/login.view.dart';
 import 'package:hanigold_admin/src/domain/deposit/view/deposit_create.view.dart';
@@ -45,13 +46,8 @@ import '../../domain/users/view/user_detail.view.dart';
 import '../../domain/users/view/user_info_transaction.view.dart';
 import '../../domain/withdraw/view/deposit_request_getOne.view.dart';
 import '../../domain/withdraw/view/withdraw_update.view.dart';
-import 'bindings/insert_user.bindings.dart';
 import 'bindings/laboratory.bindings.dart';
 import 'bindings/trading_balance.bindings.dart';
-import 'bindings/user_detail.bindings.dart';
-import 'bindings/user_info_detail_transaction.bindings.dart';
-import 'bindings/user_info_transaction.bindings.dart';
-import 'bindings/user_list.bindings.dart';
 
 class RoutePage{
   static List<GetPage> routePage=[
@@ -81,13 +77,13 @@ class RoutePage{
     GetPage(name: '/remittance', page: ()=>RemittanceView(),binding: RemittanceBindings()),
     GetPage(name: '/insertRemittance', page: ()=>InsertRemittanceView(),binding: RemittanceBindings()),
     GetPage(name: '/updateRemittance', page: ()=>UpdateRemittanceView(),binding: RemittanceBindings()),
-    GetPage(name: '/userInfoTransaction', page: ()=>UserInfoTransactionView(),binding: UserInfoDetailTransactionBindings()),
-    GetPage(name: '/listUserInfoTransaction', page: ()=>ListUserInfoTransactionView(),binding: UserInfoTransactionBindings()),
+    GetPage(name: '/userInfoTransaction', page: ()=>UserInfoTransactionView(),binding: UserBindings()),
+    GetPage(name: '/listUserInfoTransaction', page: ()=>ListUserInfoTransactionView(),binding: UserBindings()),
     GetPage(name: '/tradingBalance', page: ()=>TradingBalanceView(),binding: TradingBalanceBindings()),
-    GetPage(name: '/userList', page: ()=>UserListView(),binding: UserListBindings()),
-    GetPage(name: '/insertUser', page: ()=>InsertUserView(),binding: InsertUserBindings()),
+    GetPage(name: '/userList', page: ()=>UserListView(),binding: UserBindings()),
+    GetPage(name: '/insertUser', page: ()=>InsertUserView(),binding: UserBindings()),
     GetPage(name: '/laboratory', page: ()=>LaboratoryView(),binding: LaboratoryBindings()),
     GetPage(name: '/personList', page: ()=>PersonListView(),binding: PersonListBindings()),
-    GetPage(name: '/userDetail', page: ()=>UserDetailView(),binding: UserDetailBindings()),
+    GetPage(name: '/userDetail', page: ()=>UserDetailView(),binding: UserBindings()),
   ];
 }

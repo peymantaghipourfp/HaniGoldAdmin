@@ -63,11 +63,12 @@ class OrderUpdateController extends GetxController{
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   Timer? debounce;
 
-  final RxInt orderId=0.obs;
+  var orderId=0.obs;
   var maxItemSell=0.obs;
   var maxItemBuy=0.obs;
   var manualPriceChecked = false.obs;
   var notLimitChecked = false.obs;
+  final Rxn<OrderModel> getOneOrder = Rxn<OrderModel>();
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
     selectedBuySell.value = newValue;
@@ -79,7 +80,6 @@ class OrderUpdateController extends GetxController{
   void changeSelectedItem(ItemModel? newValue) {
     clearListChangeItem();
     selectedItem.value = newValue;
-
     selectedBuySell.value?.id==0 ?
     priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',') :
     priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
@@ -87,11 +87,14 @@ class OrderUpdateController extends GetxController{
     maxItemSell.value=newValue!.maxSell!;
     maxItemBuy.value=newValue.maxBuy!;
   }
-  void changeSelectedAccount(AccountModel? newValue) {
+
+  void changeSelectedAccount(AccountModel? newValue){
     selectedAccount.value = newValue;
     getBalanceList(newValue?.id ?? 0);
     isLoadingBalance.value=false;
+    debounce?.cancel();
   }
+
   void updateTotalPrice(){
     double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
     double quantity=double.tryParse(quantityController.text==""? "0" : quantityController.text.toEnglishDigit()) ?? 0.0;
@@ -105,16 +108,24 @@ class OrderUpdateController extends GetxController{
     double quantity=totalPrice / price;
     quantityController.text=quantity.toString();
   }
-  late OrderModel? existingOrder;
+
+  late OrderModel existingOrder;
   @override
-  void onInit(){
-    searchController.addListener(onSearchChanged);
-    fetchItemList();
+  void onInit() async{
+    //searchController.addListener(onSearchChanged);
     fetchAccountList();
-    existingOrder = Get.arguments as OrderModel?;
-    if (existingOrder != null) {
-      setOrderDetails(existingOrder!);
-      getBalanceList(existingOrder?.account?.id ?? 0);
+    fetchItemList();
+    orderId.value = int.parse(Get.parameters['id']!);
+    await fetchGetOneOrder(orderId.value);
+    print(orderId.value);
+    if (getOneOrder.value != null) {
+      existingOrder=getOneOrder.value!;
+      setOrderDetails(existingOrder);
+      if (existingOrder.account != null) {
+        accountList.add(existingOrder.account!);
+        searchedAccounts.add(existingOrder.account!);
+        getBalanceList(existingOrder.account?.id ?? 0);
+      }
     }
     super.onInit();
   }
@@ -122,8 +133,9 @@ class OrderUpdateController extends GetxController{
   @override
   void onClose() {
     debounce?.cancel();
-    searchController.dispose();
-    Get.delete<OrderUpdateController>(force: true);
+    searchController.removeListener(onSearchChanged);
+    //searchController.dispose();
+    //Get.delete<OrderUpdateController>(force: true);
     super.onClose();
   }
 
@@ -136,10 +148,9 @@ class OrderUpdateController extends GetxController{
       itemList.assignAll(fetchedItemList);
       itemList.removeWhere((e) => e.price==null,);
       state.value=PageState.list;
-      //final OrderModel? existingOrder = Get.arguments as OrderModel?;
-      if (existingOrder != null && existingOrder?.item != null) {
+      if (existingOrder != null && existingOrder.item != null) {
         final match = itemList.firstWhereOrNull(
-              (i) => i.id == existingOrder?.item!.id,
+              (i) => i.id == existingOrder.item!.id,
         );
         if (match != null) {
           selectedItem.value = match;
@@ -158,29 +169,24 @@ class OrderUpdateController extends GetxController{
   // لیست کاربران
   Future<void> fetchAccountList() async{
     try{
-      accountList.clear();
-      state.value=PageState.loading;
+      //state.value=PageState.loading;
       var fetchedAccountList=await accountRepository.getAccountList("");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
-      state.value=PageState.list;
-      final OrderModel? existingOrder = Get.arguments as OrderModel?;
-      if (existingOrder != null && existingOrder.account != null) {
-        selectedAccount.value=existingOrder.account;
-
-      }
+      //state.value=PageState.list;
+      //selectedAccount.value=existingOrder.account;
     }
     catch(e){
-      state.value=PageState.err;
+      //state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
-      isLoading.value=false;
+      //isLoading.value=false;
     }
   }
 
   void onSearchChanged(){
     if (debounce?.isActive ?? false) debounce!.cancel();
-    debounce=Timer(const Duration(seconds: 4), () async {
+    debounce=Timer(const Duration(milliseconds: 800), () async {
       await searchAccountList(searchController.text.trim());
 
     });
@@ -193,13 +199,35 @@ class OrderUpdateController extends GetxController{
       } else {
         final results = await accountRepository.searchAccountList(name,"");
         searchedAccounts.assignAll(results);
-        state.value=PageState.list;
       }
+      state.value=PageState.list;
     } catch (e) {
       Get.snackbar('خطا', 'خطا در جستجوی کاربران');
     } finally {
       isLoading.value = false;
     }
+  }
+
+  // getOne order
+  Future<OrderModel?> fetchGetOneOrder(int id)async{
+    try {
+      state.value=PageState.loading;
+      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+      var fetchedGetOne = await orderRepository.getOneOrder(id);
+      if(fetchedGetOne!=null){
+        getOneOrder.value = fetchedGetOne;
+        selectedAccount.value=getOneOrder.value?.account;
+        state.value=PageState.list;
+        //EasyLoading.dismiss();
+      }else{
+        state.value=PageState.empty;
+      }
+    }
+    catch(e){
+      state.value=PageState.err;
+      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
+    }
+    return null;
   }
 
 
@@ -212,7 +240,7 @@ class OrderUpdateController extends GetxController{
       isLoading.value = true;
 
       //String gregorianDate = convertJalaliToGregorian(dateController.text);
-      Gregorian date=existingOrder!.date!.toGregorian();
+      Gregorian date=existingOrder.date!.toGregorian();
      var response = await orderRepository.updateOrder(
         orderId: orderId.value,
         date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
@@ -256,14 +284,15 @@ class OrderUpdateController extends GetxController{
         : OrderTypeModel(id: 0, name: 'فروش به کاربر');
     //selectedItem.value = itemList.firstWhereOrNull((item) => item.id == order.item?.id);
     //selectedAccount.value = accountList.firstWhereOrNull((account) => account.id == order.account?.id);
-
     dateController.text = order.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
     priceController.text = order.price?.toString().seRagham(separator: ',') ?? '';
     quantityController.text = order.quantity?.toString() ?? '';
     totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
     isLoadingBalance.value=true;
+    selectedAccount.value=order.account;
     print("تاریخ ست:::${dateController.text}");
+
   }
 
   // لیست بالانس
@@ -312,6 +341,7 @@ class OrderUpdateController extends GetxController{
     notLimitChecked.value=false;
   }
   void resetAccountSearch() {
+    debounce?.cancel();
     searchController.clear();
     searchedAccounts.assignAll(accountList);
   }

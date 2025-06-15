@@ -2325,8 +2325,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                           );
                                                         } else {*/
                                                         Get.toNamed(
-                                                            '/withdrawUpdate',
-                                                            arguments: withdraws);
+                                                            '/withdrawUpdate',parameters:{"id":withdraws.id.toString()});
                                                         // }
                                                       },
                                                       child: Row(
@@ -3026,8 +3025,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                               onTap: () {
                                                                                 if ( depositRequests.paidAmount! < depositRequests.amount!) {
                                                                                   Get.toNamed(
-                                                                                      '/depositCreate',
-                                                                                      arguments: depositRequests);
+                                                                                      '/depositCreate', arguments: depositRequests);
                                                                                 } else {
                                                                                   Get
                                                                                       .defaultDialog(
@@ -3874,7 +3872,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                               textCancel: 'بستن',
                             );
                           } else {*/
-                              Get.toNamed('/withdrawUpdate', arguments: withdraw);
+                              Get.toNamed('/withdrawUpdate',parameters:{"id":withdraw.id.toString()});
                               //}
                             },
                             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,

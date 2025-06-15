@@ -220,7 +220,7 @@ class OrderController extends GetxController{
         startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
-      orderList.addAll(response.orders??[]);
+      orderList.assignAll(response.orders??[]);
       paginated.value=response.paginated;
       state.value=PageState.list;
 

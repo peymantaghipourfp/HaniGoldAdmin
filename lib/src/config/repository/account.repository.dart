@@ -40,7 +40,8 @@ class AccountRepository{
         }
       };
       final response=await accountDio.post('Account/get',data: options);
-      //print(response);
+      print("request getAccountList : $options" );
+      print("response getAccountList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((account)=>AccountModel.fromJson(account)).toList();
@@ -104,6 +105,8 @@ class AccountRepository{
       };
 
       final response = await accountDio.post('Account/get', data: options);
+      print("response searchAccountList : ${response.data}" );
+      print("request searchAccountList : $options" );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((account) => AccountModel.fromJson(account)).toList();
@@ -159,6 +162,8 @@ class AccountRepository{
       };
 
       final response = await accountDio.post('Account/get', data: options);
+      print("response searchAccountListNew : ${response.data}" );
+      print("request searchAccountListNew : $options" );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((account) => AccountModel.fromJson(account)).toList();
@@ -195,7 +200,8 @@ class AccountRepository{
         "ToIndex": 25
       }}};
       final response=await accountDio.post('Account/getCandidateChild',data: options);
-      //print(response);
+      print("response getCandidateChild : ${response.data}" );
+      print("request getCandidateChild : $options" );
       if(response.statusCode==200){
         return ListUserModel.fromJson(response.data);
       }else{

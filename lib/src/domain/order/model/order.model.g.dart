@@ -38,6 +38,11 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
       registered: json['registered'] as bool?,
       notLimit: json['notLimit'] as bool?,
       manualPrice: json['manualPrice'] as bool?,
+      accountParent: json['accountParent'] == null
+          ? null
+          : AccountParent.fromJson(
+              json['accountParent'] as Map<String, dynamic>),
+      extraAmount: (json['extraAmount'] as num?)?.toDouble(),
     );
 
 Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
@@ -64,6 +69,8 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'registered': instance.registered,
       'notLimit': instance.notLimit,
       'manualPrice': instance.manualPrice,
+      'accountParent': instance.accountParent,
+      'extraAmount': instance.extraAmount,
     };
 
 Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(
@@ -76,4 +83,32 @@ Map<String, dynamic> _$BalanceToJson(Balance instance) => <String, dynamic>{
       'balance': instance.balance,
       'itemName': instance.itemName,
       'unitName': instance.unitName,
+    };
+
+AccountParent _$AccountParentFromJson(Map<String, dynamic> json) =>
+    AccountParent(
+      code: json['code'] as String?,
+      name: json['name'] as String?,
+      contactInfo: json['contactInfo'] as String?,
+      accountGroup: json['accountGroup'] == null
+          ? null
+          : AccountGroupModel.fromJson(
+              json['accountGroup'] as Map<String, dynamic>),
+      accountSubGroup: json['accountSubGroup'] == null
+          ? null
+          : AccountSubGroupModel.fromJson(
+              json['accountSubGroup'] as Map<String, dynamic>),
+      id: (json['id'] as num?)?.toInt(),
+      infos: json['infos'] as List<dynamic>?,
+    );
+
+Map<String, dynamic> _$AccountParentToJson(AccountParent instance) =>
+    <String, dynamic>{
+      'code': instance.code,
+      'name': instance.name,
+      'contactInfo': instance.contactInfo,
+      'accountGroup': instance.accountGroup,
+      'accountSubGroup': instance.accountSubGroup,
+      'id': instance.id,
+      'infos': instance.infos,
     };
