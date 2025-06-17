@@ -73,7 +73,7 @@ class InventoryUpdateReceiveController extends GetxController{
   var inventoryDetailId=0.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<WalletModel> selectedWalletAccount=Rxn<WalletModel>();
-  final Rxn<WalletModel> selectedWalletAccount2=Rxn<WalletModel>();
+  //final Rxn<WalletModel> selectedWalletAccount2=Rxn<WalletModel>();
   final Rxn<LaboratoryModel> selectedLaboratory=Rxn<LaboratoryModel>();
   RxInt selectedTabIndex = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
@@ -115,27 +115,19 @@ class InventoryUpdateReceiveController extends GetxController{
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
     selectedLaboratory.value=newValue;
   }
-
   late InventoryDetailModel? inventoryDetail;
+  late InventoryModel? inventoryModel;
 
   @override
   void onInit() async{
-     inventoryDetail=Get.arguments;
-    if(inventoryDetail!=null) {
-      await fetchGetOneInventory(inventoryDetail!.inventoryId!);
-      setInventoryDetail(inventoryDetail!);
-      inventoryId.value=inventoryDetail?.inventoryId ?? 0;
-      inventoryDetailId.value=inventoryDetail?.id ?? 0;
-      accountId.value = inventoryDetail!.wallet!.account!.id!;
-      accountName.value = inventoryDetail!.wallet!.account!.name!;
-      selectedWalletAccount2.value=inventoryDetail?.wallet;
-      getWalletAccount(accountId.value);
-      getBalanceList(accountId.value);
-      print(accountId.value);
-      print(inventoryDetail?.wallet?.id);
+     //inventoryDetail=Get.arguments;
+     inventoryDetailId.value=int.parse(Get.parameters['id']!);
+
+    if(inventoryDetailId.value!=null) {
+      //inventoryDetail=getOneInventory.value;
+      await fetchGetOneInventory(inventoryDetailId.value,Get.parameters['index']!);
 
     }
-
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
     quantityController.addListener(updateW750);
@@ -149,17 +141,7 @@ class InventoryUpdateReceiveController extends GetxController{
     "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";*/
     super.onInit();
   }
-  @override
-  void onReady() async {
-    await fetchAccountList();
-    final InventoryDetailModel? inventoryDetail=Get.arguments;
 
-    if(inventoryDetail!=null){
-      inventoryId.value=inventoryDetail.inventoryId ?? 0;
-    }
-
-    super.onReady();
-  }
   @override
   void onClose() {
     debounce?.cancel();
@@ -252,16 +234,12 @@ class InventoryUpdateReceiveController extends GetxController{
       state.value=PageState.loading;
       var fetchedWalletAccountList=await walletRepository.getWalletList(walletAccountReqModel!);
       walletAccountList.assignAll(fetchedWalletAccountList);
-      state.value=PageState.list;
-      final InventoryDetailModel? inventoryDetail = Get.arguments ;
-      if (inventoryDetail?.wallet != null) {
-        final walletMatch = walletAccountList.firstWhereOrNull(
-              (b) => b.id == inventoryDetail?.wallet?.id,
-        );
-        if (walletMatch != null) {
-          selectedWalletAccount.value = walletMatch;
+      for(int i=0;i<walletAccountList.length;i++){
+        if(walletAccountList[i].id==inventoryDetail?.wallet?.id){
+          selectedWalletAccount.value=walletAccountList[i];
         }
       }
+      state.value=PageState.list;
       if(walletAccountList.isEmpty){
         state.value=PageState.empty;
       }
@@ -272,7 +250,6 @@ class InventoryUpdateReceiveController extends GetxController{
     }
     //print(fetchWalletAccountList());
   }
-
   // لیست آزمایشگاه ها
   Future<void> fetchLaboratoryList()async{
     try{
@@ -322,13 +299,31 @@ class InventoryUpdateReceiveController extends GetxController{
   }
 
 
-  Future<void> fetchGetOneInventory(int id)async{
-
+  Future<void> fetchGetOneInventory(int id,String index)async{
     try {
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
       if(fetchedGetOneInventory!=null){
         getOneInventory.value = fetchedGetOneInventory;
+        if(index==""){
+          setInventoryDetail(getOneInventory.value!.inventoryDetails!.first);
+          inventoryDetail=getOneInventory.value!.inventoryDetails!.first;
+          inventoryDetailId.value=inventoryDetail?.id ?? 0;
+          accountId.value = inventoryDetail!.wallet!.account!.id!;
+          accountName.value = inventoryDetail!.wallet!.account!.name!;
+          getWalletAccount(accountId.value);
+          getBalanceList(accountId.value);
+        }else{
+          inventoryDetail=getOneInventory.value!.inventoryDetails?[int.parse(index)];
+          setInventoryDetail(inventoryDetail!);
+          inventoryDetailId.value=inventoryDetail?.id ?? 0;
+          accountId.value = inventoryDetail!.wallet!.account!.id!;
+          accountName.value = inventoryDetail!.wallet!.account!.name!;
+          getWalletAccount(accountId.value);
+          getBalanceList(accountId.value);
+        }
+        print(accountId.value);
+        print("wallet::::${inventoryDetail?.wallet?.item?.name}");
         stateGetOne.value=PageState.list;
       }else{
         stateGetOne.value=PageState.empty;
@@ -345,7 +340,6 @@ class InventoryUpdateReceiveController extends GetxController{
       final List<XFile?> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
         selectedImagesDesktop.addAll(images);
-
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
@@ -498,7 +492,6 @@ class InventoryUpdateReceiveController extends GetxController{
     selectedLaboratory.value=inventoryDetail.laboratory;
     dateController.text = inventoryDetail.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
     getImage(inventoryDetail.recId ?? '', "InventoryDetail");
-    //selectedWalletAccount.value=inventoryDetail.wallet;
   }
 
   // لیست بالانس

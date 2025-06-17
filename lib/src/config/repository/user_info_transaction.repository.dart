@@ -29,8 +29,8 @@ class UserInfoTransactionRepository{
       };
       final response=await userInfoTransactionDio.get('Transaction/getTransactionsHeader',queryParameters: option);
       print("url : Transaction/getTransactionsHeader" );
-      print("request : $option" );
-      print("response : ${response.data}" );
+      print("request getHeaderUserInfoTransaction : $option" );
+      print("response getHeaderUserInfoTransaction : ${response.data}" );
       if(response.statusCode==200){
 
         return HeaderInfoUserTransactionModel.fromJson(response.data);
@@ -49,8 +49,8 @@ class UserInfoTransactionRepository{
       };
       final response=await userInfoTransactionDio.get('Wallet/getBalance',queryParameters: option);
       print("url : Wallet/getBalance" );
-      print("request : $option" );
-      print("response : ${response.data}" );
+      print("request getBalanceList : $option" );
+      print("response getBalanceList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((balance)=>BalanceItemModel.fromJson(balance)).toList();
@@ -88,7 +88,8 @@ class UserInfoTransactionRepository{
         }}
       };
       final response=await userInfoTransactionDio.post('Transaction/get',data: options);
-      print(response);
+      print("request getTransactionInfoList : $options" );
+      print("response getTransactionInfoList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((transaction)=>TransactionInfoItemModel.fromJson(transaction)).toList();
 
@@ -134,7 +135,8 @@ class UserInfoTransactionRepository{
           }
       ;
       final response=await userInfoTransactionDio.post('Transaction/getWalletBalance',data: options);
-      print(response);
+      print("request getListTransactionInfoList : $options" );
+      print("response getListTransactionInfoList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((transaction)=>ListTransactionInfoItemModel.fromJson(transaction)).toList();
 
@@ -181,7 +183,8 @@ class UserInfoTransactionRepository{
           }
       ;
       final response=await userInfoTransactionDio.post('Transaction/getWalletBalanceWrapper',data: options);
-      print(response);
+      print("request getListTransactionInfoListPager : $options" );
+      print("response getListTransactionInfoListPager : ${response.data}" );
       return ListTransactionInfoModel.fromJson(response.data);
 
     }

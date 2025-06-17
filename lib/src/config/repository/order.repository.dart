@@ -340,11 +340,11 @@ class OrderRepository{
   })async{
     try{
       Map<String,dynamic> orderData={
-        "date": "2023-12-11T18:40:19",
-        "limitDate": "2024-11-13T13:21:23",
+        "date": null,
+        "limitDate": null,
         "account": {
-          "code": "1",
-          "name": "پدیده ارتباطات",
+          "code": null,
+          "name": null,
           "accountGroup": {
             "infos": []
           },
@@ -354,33 +354,33 @@ class OrderRepository{
           "accountPriceGroup": {
             "infos": []
           },
-          "id": 1,
+          "id": null,
           "infos": []
         },
-        "type": 1,
-        "mode": 0,
+        "type": null,
+        "mode": null,
         "item": {
           "itemGroup": {
             "infos": []
           },
           "itemUnit": {
-            "name": "گرم",
-            "id": 1,
+            "name": null,
+            "id": null,
             "infos": []
           },
-          "name": "طلای آبشده",
-          "id": 1,
+          "name": null,
+          "id": null,
           "infos": []
         },
-        "quantity": 1.0000,
-        "price": 40827000.0000,
-        "differentPrice": 92340.3666,
-        "totalPrice": 40827000.0000,
+        "quantity": null,
+        "price": null,
+        "differentPrice": null,
+        "totalPrice": null,
         "status": status,
-        "rowNum": 1,
+        "rowNum": null,
         "id": orderId,
         "attribute": "cus",
-        "recId": "25a39f5d-81c6-4362-b59b-3dc6123a9364",
+        "recId": null,
         "infos": []
       };
 
@@ -402,48 +402,8 @@ class OrderRepository{
   })async{
     try{
       Map<String,dynamic> orderData={
-        "date": "2025-04-07T14:44:29",
-        "account": {
-          "code": "1",
-          "name": "شرکت دیکام",
-          "accountGroup": {
-            "infos": []
-          },
-          "accountItemGroup": {
-            "infos": []
-          },
-          "accountPriceGroup": {
-            "infos": []
-          },
-          "id": 30,
-          "infos": []
-        },
-        "type": 0,
-        "mode": 0,
-        "item": {
-          "itemGroup": {
-            "infos": []
-          },
-          "itemUnit": {
-            "name": "گرم",
-            "id": 1,
-            "infos": []
-          },
-          "name": "طلای آبشده",
-          "id": 1,
-          "infos": []
-        },
-        "quantity": 2.0000,
-        "price": 46970000.0000,
-        "differentPrice": 92340.3666,
-        "totalPrice": 98637000.0000,
-        "status": 1,
-        "rowNum": 1,
         "id": orderId,
         "isDeleted" : isDeleted,
-        "attribute": "cus",
-        "recId": "47d0888e-a1bf-426b-9dff-e266228e0a51",
-        "infos": []
       };
 
       print(orderData);
@@ -451,7 +411,11 @@ class OrderRepository{
       var response=await orderDio.delete('Order/updateToIsDeleted',data: orderData);
       print('Status Code deleteOrder: ${response.statusCode}');
       print('Response Data deleteOrder: ${response.data}');
-      return response.data;
+      if (response.data is List) {
+        return response.data;
+      } else {
+        return [response.data];
+      }
     }
     catch(e){
       throw ErrorException('خطا در حذف:$e');

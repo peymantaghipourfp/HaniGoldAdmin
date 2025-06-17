@@ -302,13 +302,13 @@ class OrderController extends GetxController{
     try{
       isLoading.value = true;
       var response=await orderRepository.deleteOrder(isDeleted: isDeleted, orderId: orderId);
-      if(response!= null){
-        Get.snackbar("موفقیت آمیز","حذف سفارش با موفقیت انجام شد",
-            titleText: Text('موفقیت آمیز',
+      if(response.isNotEmpty){
+        final info = response.first;
+        Get.snackbar(info['title'],info['description'],
+            titleText: Text(info['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text('حذف سفارش با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        Get.back();
+            messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         getOrderListPager();
       }
     }catch(e){
@@ -317,7 +317,6 @@ class OrderController extends GetxController{
     }finally {
       EasyLoading.dismiss();
       isLoading.value = false;
-
     }
     return null;
   }

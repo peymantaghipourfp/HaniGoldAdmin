@@ -280,33 +280,9 @@ class InventoryController extends GetxController{
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
       if(fetchedGetOneInventory!=null){
         getOneInventory.value = fetchedGetOneInventory;
-       /* Get.toNamed('/inventoryDetailUpdateReceive',
-            arguments: fetchedGetOneInventory.inventoryDetails?.first);*/
+
         stateGetOne.value=PageState.list;
-       // print('getOneInventories:  ${getOneInventory[id]?.inventoryDetails?.length}');
-      }else{
-        stateGetOne.value=PageState.empty;
-      }
-    }
-    catch(e){
-      stateGetOne.value=PageState.err;
-      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
-    }finally{
-      isLoading.value=false;
-    }
-  }
-  Future<void> fetchGetOneInventoryForUpdate(int id)async{
-    try {
-      isLoading.value=true;
-      stateGetOne.value=PageState.loading;
-      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
-      if(fetchedGetOneInventory!=null){
-        getOneInventory.value = fetchedGetOneInventory;
-        getOneInventory.value?.type==0 ?
-         Get.toNamed('/inventoryDetailUpdatePayment', arguments: fetchedGetOneInventory.inventoryDetails?.first):
-         Get.toNamed('/inventoryDetailUpdateReceive', arguments: fetchedGetOneInventory.inventoryDetails?.first);
-        stateGetOne.value=PageState.list;
-        // print('getOneInventories:  ${getOneInventory[id]?.inventoryDetails?.length}');
+
       }else{
         stateGetOne.value=PageState.empty;
       }
@@ -324,12 +300,13 @@ class InventoryController extends GetxController{
     try{
       isLoadingDelete.value=true;
       var response=await inventoryRepository.deleteInventory(isDeleted: isDeleted, inventoryId: inventoryId);
-      if(response!= null){
-        Get.snackbar("موفقیت آمیز","حذف دریافت/پرداخت با موفقیت انجام شد",
-            titleText: Text('موفقیت آمیز',
+      if(response.isNotEmpty){
+        final info = response.first;
+        Get.snackbar(info['title'],info['description'],
+            titleText: Text(info['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text('حذف دریافت/پرداخت با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         getInventoryListPager();
       }
     }catch(e){
@@ -367,7 +344,7 @@ class InventoryController extends GetxController{
           itemId: itemId,
           quantity: quantity
       );
-      if(response!= null){
+      if(response.isNotEmpty){
         Get.back();
         Get.snackbar("موفقیت آمیز","حذف با موفقیت انجام شد",
             titleText: Text('موفقیت آمیز',
@@ -411,7 +388,7 @@ class InventoryController extends GetxController{
           itemId: itemId,
           quantity: quantity,
       );
-      if(response!= null){
+      if(response.isNotEmpty){
         Get.back();
         Get.snackbar("موفقیت آمیز","حذف با موفقیت انجام شد",
             titleText: Text('موفقیت آمیز',

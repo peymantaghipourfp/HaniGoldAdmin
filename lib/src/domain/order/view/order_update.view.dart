@@ -188,6 +188,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                               padding: EdgeInsets.only(
                                                   bottom: 5),
                                               child: CustomDropdownWidget(
+                                                enabledChange: false,
                                                 items: orderUpdateController
                                                     .orderTypeList.map((type) =>
                                                 type.name ?? '')

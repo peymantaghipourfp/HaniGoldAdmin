@@ -466,7 +466,6 @@ class WithdrawController extends GetxController{
     depositRequestList.clear();
     try{
       isLoadingDepositRequestList.value = true;
-      depositRequestList.clear();
       var fetchedDepositRequestList=await depositRequestRepository.getDepositRequest(id);
       depositRequestList.assignAll(fetchedDepositRequestList);
       stateDR.value=PageState.list;
@@ -571,12 +570,13 @@ class WithdrawController extends GetxController{
     try{
       isLoading.value = true;
       var response=await withdrawRepository.deleteWithdraw(isDeleted: isDeleted, withdrawId: withdrawId);
-      if(response!= null){
-        Get.snackbar("موفقیت آمیز","حذف درخواست برداشت با موفقیت انجام شد",
-            titleText: Text('موفقیت آمیز',
+      if(response.isNotEmpty){
+        final info = response.first;
+        Get.snackbar(info['title'],info['description'],
+            titleText: Text(info['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text('حذف درخواست برداشت با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         getWithdrawListPager();
       }
     }catch(e){
@@ -614,18 +614,19 @@ class WithdrawController extends GetxController{
     return null;
   }
 
-  Future<List<dynamic>?> deleteDepositRequest(int depositRequestId,bool isDeleted)async{
+  Future<List<dynamic>?> deleteDepositRequest(int withdrawId,int depositRequestId,bool isDeleted)async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await depositRequestRepository.deleteDepositRequest(isDeleted: isDeleted, depositRequestId: depositRequestId);
-      if(response!= null){
-        Get.snackbar("موفقیت آمیز","حذف درخواست واریزی با موفقیت انجام شد",
-            titleText: Text('موفقیت آمیز',
+      if(response.isNotEmpty){
+        final info = response.first;
+        Get.snackbar(info['title'],info['description'],
+            titleText: Text(info['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text('حذف درخواست واریزی با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        fetchDepositRequestList(depositRequestId);
+            messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchDepositRequestList(withdrawId);
         getWithdrawListPager();
       }
     }catch(e){

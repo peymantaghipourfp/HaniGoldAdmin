@@ -336,12 +336,13 @@ class DepositController extends GetxController{
     try{
       isLoading.value = true;
       var response=await depositRepository.deleteDeposit(isDeleted: isDeleted, depositId: depositId);
-      if(response!= null){
-        Get.snackbar("موفقیت آمیز","حذف واریزی با موفقیت انجام شد",
-            titleText: Text('موفقیت آمیز',
+      if(response.isNotEmpty){
+        final info = response.first;
+        Get.snackbar(info['title'],info['description'],
+            titleText: Text(info['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text('حذف واریزی با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         getDepositListPager();
       }
     }catch(e){

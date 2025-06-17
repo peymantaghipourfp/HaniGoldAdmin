@@ -137,19 +137,11 @@ class WithdrawUpdateController extends GetxController{
         accountList.add(existingWithdraw!.wallet!.account!);
         searchedAccounts.add(existingWithdraw!.wallet!.account!);
         getBalanceList(existingWithdraw?.wallet?.account?.id ?? 0);
+        selectedWalletId.value=existingWithdraw!.wallet!.id!;
       }
     }
+    fetchAccountList();
     super.onInit();
-  }
-
-  @override
-  void onReady() async {
-    await fetchAccountList();
-    existingWithdraw = Get.arguments as WithdrawModel?;
-    if (existingWithdraw != null) {
-      setWithdrawDetails(existingWithdraw!);
-    }
-    super.onReady();
   }
 
   @override
@@ -304,6 +296,7 @@ class WithdrawUpdateController extends GetxController{
       if (walletList!=null) {
         selectedWalletId.value = walletList?.id ?? 0;
       }
+      print("walletList::::${walletList?.id}");
     }catch(e){
       throw ErrorException('خطا:$e');
     }finally{

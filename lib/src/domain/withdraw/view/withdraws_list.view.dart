@@ -2392,12 +2392,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                     // دکمه نمایش لیست deposit request
                                                     IconButton(
                                                       onPressed: () {
-                                                        withdrawController
-                                                            .fetchDepositRequestList(
-                                                            withdraws.id!);
-                                                        withdrawController
-                                                            .toggleItemExpansion(
-                                                            index);
+                                                        withdrawController.fetchDepositRequestList(withdraws.id!);
+                                                        withdrawController.toggleItemExpansion(index);
                                                       },
                                                       icon: Icon(
                                                         isExpanded ? Icons
@@ -3091,11 +3087,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                           onPressed: () {
                                                                                             Get
                                                                                                 .back();
-                                                                                            withdrawController
-                                                                                                .deleteDepositRequest(
-                                                                                                depositRequests
-                                                                                                    .id!,
-                                                                                                true);
+                                                                                            withdrawController.deleteDepositRequest(withdraws.id!,depositRequests.id!, true);
                                                                                             //withdrawController.fetchWithdrawList();
                                                                                           },
                                                                                           child: Text(
@@ -3358,12 +3350,12 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
             ),
             DataCell(
                 Text("( ${withdraws.first.totalAmountPerDay.toString().seRagham(separator: ',')} )",
-                  style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor.withRed(490),),
+                  style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold),
                 ),
             ),
             DataCell(
               Text("( ${withdraws.first.totalPaidAmountPerDay.toString().seRagham(separator: ',')} )",
-                style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor.withGreen(490),),
+                style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor,fontWeight: FontWeight.bold),
               ),
             ),
             DataCell(SizedBox.shrink()),
@@ -3458,7 +3450,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
               DataCell(
                   Center(
                     child: Text(
-                        "${withdraw.ownerName} (${withdraw.bank?.name})", style: AppTextStyle.bodyText),
+                        "${withdraw.ownerName ?? ""} (${withdraw.bank?.name ?? ""})", style: AppTextStyle.bodyText),
                   )),
               // مبلغ کل
               DataCell(
@@ -4411,11 +4403,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                     onPressed: () {
                                                       Get
                                                           .back();
-                                                      withdrawController
-                                                          .deleteDepositRequest(
-                                                          depositRequests
-                                                              .id!,
-                                                          true);
+                                                      withdrawController.deleteDepositRequest(withdraw.id!,depositRequests.id!, true);
                                                       //withdrawController.fetchWithdrawList();
                                                     },
                                                     child: Text(

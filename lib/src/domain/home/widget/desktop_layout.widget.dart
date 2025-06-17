@@ -253,7 +253,7 @@ Widget _buildMenuButton({
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),
-          hoverColor: AppColor.primaryColor.withOpacity(0.1),
+          hoverColor: AppColor.primaryColor.withOpacity(0.4),
         ),
         if (homeController.isSubMenuOpen(menuKey))
           Padding(

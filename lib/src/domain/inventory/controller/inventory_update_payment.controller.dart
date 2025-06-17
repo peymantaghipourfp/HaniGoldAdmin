@@ -120,19 +120,11 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   @override
   void onInit() async{
 
-    inventoryDetail = Get.arguments;
-    if(inventoryDetail!=null){
-      await fetchGetOneInventory(inventoryDetail!.inventoryId!);
-      setInventoryDetail(inventoryDetail!);
-      inventoryId.value=inventoryDetail?.inventoryId ?? 0;
-      inventoryDetailId.value=inventoryDetail?.id ?? 0;
-      inputItemId.value=inventoryDetail?.inputItemId ?? 0;
-      accountId.value = inventoryDetail!.wallet!.account!.id!;
-      accountName.value = inventoryDetail!.wallet!.account!.name!;
-      getWalletAccount(accountId.value);
-      getBalanceList(accountId.value);
+    //inventoryDetail = Get.arguments;
+    inventoryDetailId.value=int.parse(Get.parameters['id']!);
+    if(inventoryDetailId.value!=null){
+      await fetchGetOneInventory(inventoryDetailId.value,Get.parameters['index']!);
     }
-
     searchController.addListener(onSearchChanged);
     fetchAccountList();
     fetchWalletAccountList();
@@ -236,17 +228,12 @@ class InventoryDetailUpdatePaymentController extends GetxController{
       state.value=PageState.loading;
       var fetchedWalletAccountList=await walletRepository.getWalletList(walletAccountReqModel!);
       walletAccountList.assignAll(fetchedWalletAccountList);
-      state.value=PageState.list;
-      final InventoryDetailModel? inventoryDetail = Get.arguments ;
-      if (inventoryDetail?.wallet != null) {
-        final walletMatch = walletAccountList.firstWhereOrNull(
-              (b) => b.id == inventoryDetail?.wallet?.id,
-        );
-        if (walletMatch != null) {
-          selectedWalletAccount.value = walletMatch;
-          fetchForPaymentList();
+      for(int i=0;i<walletAccountList.length;i++){
+        if(walletAccountList[i].id==inventoryDetail?.wallet?.id){
+          selectedWalletAccount.value=walletAccountList[i];
         }
       }
+      state.value=PageState.list;
       if(walletAccountList.isEmpty){
         state.value=PageState.empty;
       }
@@ -312,12 +299,30 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   }
 
 
-  Future<void> fetchGetOneInventory(int id)async{
+  Future<void> fetchGetOneInventory(int id,String index)async{
     try {
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
       if(fetchedGetOneInventory!=null){
         getOneInventory.value = fetchedGetOneInventory;
+        if(index==""){
+          setInventoryDetail(getOneInventory.value!.inventoryDetails!.first);
+          inventoryDetail=getOneInventory.value!.inventoryDetails!.first;
+          inventoryDetailId.value=inventoryDetail?.id ?? 0;
+          accountId.value = inventoryDetail!.wallet!.account!.id!;
+          accountName.value = inventoryDetail!.wallet!.account!.name!;
+          getWalletAccount(accountId.value);
+          getBalanceList(accountId.value);
+        }else{
+          inventoryDetail=getOneInventory.value!.inventoryDetails?[int.parse(index)];
+          setInventoryDetail(inventoryDetail!);
+          inventoryDetailId.value=inventoryDetail?.id ?? 0;
+          accountId.value = inventoryDetail!.wallet!.account!.id!;
+          accountName.value = inventoryDetail!.wallet!.account!.name!;
+          getWalletAccount(accountId.value);
+          getBalanceList(accountId.value);
+        }
+
         stateGetOne.value=PageState.list;
       }else{
         stateGetOne.value=PageState.empty;

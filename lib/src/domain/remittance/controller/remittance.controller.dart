@@ -689,12 +689,13 @@ Timer? debounceP;
     try{
       isLoadingDelete.value=true;
       var response=await remittanceRepository.deleteRemittance(isDeleted: isDeleted, remittanceId: remittanceId);
-      if(response!= null){
-        Get.snackbar("موفقیت آمیز","حذف حواله با موفقیت انجام شد",
-            titleText: Text("موفقیت آمیز",
+      if(response.isNotEmpty){
+        final info = response.first;
+        Get.snackbar(info['title'],info['description'],
+            titleText: Text(info['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
-            messageText: Text("حذف حواله با موفقیت انجام شد",textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         getRemittanceListPager();
       }
     }catch(e){

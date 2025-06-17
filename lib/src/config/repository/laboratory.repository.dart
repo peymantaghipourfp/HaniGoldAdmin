@@ -189,4 +189,26 @@ class LaboratoryRepository {
     }
   }
 
+  Future<List<dynamic>> deleteLaboratory({
+    required int laboratoryId
+  })async{
+    try{
+      Map<String,dynamic> laboratoryData={
+        "id": laboratoryId,
+      };
+
+      var response=await laboratoryDio.delete('Laboratory/Delete',data: laboratoryData);
+      print('Status Code deleteLaboratory: ${response.statusCode}');
+      print('Response Data deleteLaboratory: ${response.data}');
+      if (response.data is List) {
+        return response.data;
+      } else {
+        return [response.data];
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا در حذف:$e');
+    }
+  }
+
 }

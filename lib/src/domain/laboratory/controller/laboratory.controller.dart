@@ -3,11 +3,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/const/app_color.dart';
+import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/laboratory.repository.dart';
 import '../../../config/repository/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
@@ -163,4 +165,27 @@ class LaboratoryController extends GetxController{
     }
   }
 
+  Future<List<dynamic>?> deleteLaboratory(int laboratoryId)async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      isLoading.value = true;
+      var response=await laboratoryRepository.deleteLaboratory( laboratoryId: laboratoryId);
+      if(response.isNotEmpty){
+        final info = response.first;
+        Get.snackbar(info['title'],info['description'],
+            titleText: Text(info['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchLaboratoryList();
+      }
+    }catch(e){
+      EasyLoading.dismiss();
+      throw ErrorException('خطا در حذف سفارش: $e');
+    }finally {
+      EasyLoading.dismiss();
+      isLoading.value = false;
+    }
+    return null;
+  }
 }

@@ -474,7 +474,11 @@ class DepositRepository{
       var response=await depositDio.delete('Deposit/updateToIsDeleted',data: depositData);
       print('Status Code deleteDeposit: ${response.statusCode}');
       print('Response Data deleteDeposit: ${response.data}');
-      return response.data;
+      if (response.data is List) {
+        return response.data;
+      } else {
+        return [response.data];
+      }
     }
     catch(e){
       throw ErrorException('خطا در حذف:$e');

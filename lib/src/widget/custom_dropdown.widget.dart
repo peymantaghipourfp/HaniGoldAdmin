@@ -18,6 +18,7 @@ class CustomDropdownWidget extends StatelessWidget {
   final bool showHintText;
   final String? Function(String?)? validator;
   final Function(bool)? onMenuStateChange;
+  final bool enabledChange;
 
   const CustomDropdownWidget({
     super.key,
@@ -33,7 +34,8 @@ class CustomDropdownWidget extends StatelessWidget {
     this.borderRadius = 7.0,
     this.showHintText=true,
     this.validator,
-    this.onMenuStateChange
+    this.onMenuStateChange,
+    this.enabledChange = true,
   });
 
   @override
@@ -66,7 +68,7 @@ class CustomDropdownWidget extends StatelessWidget {
         );
       }).toList(),
       value: (selectedValue != null && items!.contains(selectedValue)) ? selectedValue : null,
-      onChanged: onChanged,
+      onChanged: enabledChange ? onChanged : null,
 
       buttonStyleData: ButtonStyleData(
         padding: const EdgeInsets.symmetric(horizontal: 10),

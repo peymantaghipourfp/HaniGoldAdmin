@@ -832,6 +832,42 @@ class LaboratoryView extends GetView<LaboratoryController> {
                         BlendMode.srcIn,
                       )),
                 ),
+                SizedBox(width: 10,),
+                // آیکون حذف آزمایشگاه
+                GestureDetector(
+                  onTap: () {
+                    Get.defaultDialog(
+                        backgroundColor: AppColor.backGroundColor,
+                        title: "حذف آزمایشگاه",
+                        titleStyle: AppTextStyle.smallTitleText,
+                        middleText: "آیا از حذف آزمایشگاه مطمئن هستید؟",
+                        middleTextStyle: AppTextStyle.bodyText,
+                        confirm: ElevatedButton(
+                            style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                    AppColor.primaryColor)),
+                            onPressed: () {
+                              Get.back();
+                              controller.deleteLaboratory(trans.id!);
+                            },
+                            child: Text(
+                              'حذف',
+                              style: AppTextStyle.bodyText,
+                            )));
+                    //}
+                  },
+                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      SvgPicture.asset(
+                          'assets/svg/trash-bin.svg',height: 20,
+                          colorFilter: ColorFilter
+                              .mode(AppColor
+                              .textColor,
+                            BlendMode.srcIn,)
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ))),
       ],
