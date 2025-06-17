@@ -4,9 +4,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/auth/model/user_login.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
 
 import '../network/error/network.error.dart';
 

@@ -10,6 +10,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
+import '../../../widget/pager_widget.dart';
 import '../controller/user_info_detail_transaction.controller.dart';
 import '../controller/user_info_transaction.controller.dart';
 import '../widgets/balance.widget.dart';
@@ -452,11 +453,8 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                   ],
                                                 ))
                                             : SizedBox(),
-                                        controller.accountModel.value!.childs !=
-                                                    null &&
-                                                controller.accountModel.value!
-                                                    .childs!.isNotEmpty
-                                            ? Container(
+
+                                             Container(
                                                 decoration: BoxDecoration(
                                                     borderRadius:
                                                         BorderRadius.circular(
@@ -579,12 +577,13 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                     SizedBox(
                                                       height: 10,
                                                     ),
-                                                    controller.isLoading.value
+                                                    controller.isLoading.value && controller.accountChildList.isNotEmpty
                                                         ? Column(
                                                             crossAxisAlignment:
                                                                 CrossAxisAlignment
                                                                     .center,
                                                             children: [
+                                                              controller.accountChildList.isNotEmpty?
                                                               DataTable(
                                                                 columns: [
                                                                   DataColumn(
@@ -644,6 +643,10 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                       headingRowAlignment:
                                                                           MainAxisAlignment
                                                                               .center),
+                                                                  DataColumn(
+                                                                      label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+                                                                          child: Text('عملیات', style: AppTextStyle.labelText)),
+                                                                      headingRowAlignment: MainAxisAlignment.center),
                                                                 ],
                                                                 border: TableBorder.symmetric(
                                                                     inside: BorderSide(
@@ -651,6 +654,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                             .textColor,
                                                                         width:
                                                                             0.3),
+
                                                                     outside: BorderSide(
                                                                         color: AppColor
                                                                             .textColor,
@@ -662,9 +666,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                 dividerThickness:
                                                                     0.3,
                                                                 rows: controller
-                                                                    .accountModel
-                                                                    .value!
-                                                                    .childs!
+                                                                    .accountChildList
                                                                     .map((trans) =>
                                                                         DataRow(
                                                                           cells: [
@@ -720,6 +722,64 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                                 ),
                                                                               ),
                                                                             )),
+                                                                            DataCell(
+                                                                              Center(
+                                                                                child: Column(
+                                                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                  children: [
+                                                                                    SizedBox(height: 5,),
+                                                                                    //آیکون حذف
+                                                                                    GestureDetector(
+                                                                                      onTap: () {
+                                                                                        Get.defaultDialog(
+                                                                                          backgroundColor: AppColor
+                                                                                              .backGroundColor,
+                                                                                          title: "حذف ",
+                                                                                          titleStyle: AppTextStyle
+                                                                                              .smallTitleText,
+                                                                                          middleText: "آیا از حذف مطمئن هستید؟",
+                                                                                          middleTextStyle: AppTextStyle
+                                                                                              .bodyText,
+                                                                                          confirm: ElevatedButton(
+                                                                                              style: ButtonStyle(
+                                                                                                  backgroundColor: WidgetStatePropertyAll(
+                                                                                                      AppColor.primaryColor)),
+                                                                                              onPressed: () {
+                                                                                                Get.back();
+                                                                                              },
+                                                                                              child: Text(
+                                                                                                'حذف', style: AppTextStyle
+                                                                                                  .labelText
+                                                                                                  .copyWith(
+                                                                                                  color: AppColor
+                                                                                                      .accentColor,fontSize: 11),
+                                                                                              )
+                                                                                          ),
+                                                                                        );
+                                                                                      },
+                                                                                      child: Row(
+                                                                                        children: [
+                                                                                          SvgPicture.asset(
+                                                                                              'assets/svg/trash-bin.svg',height: 20,
+                                                                                              colorFilter: ColorFilter
+                                                                                                  .mode(AppColor
+                                                                                                  .accentColor,
+                                                                                                BlendMode.srcIn,)
+                                                                                          ),
+                                                                                          Text(' حذف',
+                                                                                            style: AppTextStyle
+                                                                                                .labelText
+                                                                                                .copyWith(
+                                                                                                color: AppColor
+                                                                                                    .accentColor,fontSize: 11),),
+                                                                                        ],
+                                                                                      ),
+                                                                                    ),
+                                                                                    SizedBox(height: 5,),
+                                                                                  ],
+                                                                                ),
+                                                                              ),
+                                                                            ),
                                                                           ],
                                                                         ))
                                                                     .toList(),
@@ -733,13 +793,312 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                     90,
                                                                 horizontalMargin:
                                                                     60,
+                                                              ):
+                                                              SizedBox(
+                                                                  height: Get.height * 0.75,
+                                                                  child: SizedBox(
+                                                                      height: 50,
+                                                                      child: Center(child: CircularProgressIndicator())))
+                                                              ,
+                                                              Column(
+                                                                mainAxisAlignment: MainAxisAlignment.end,
+                                                                children: [
+                                                                  controller.paginatedChild.value!=null?   Container(
+                                                                      height: 70,
+                                                                      margin: EdgeInsets.symmetric(horizontal: 70,vertical: 10),
+                                                                      padding: EdgeInsets.symmetric(horizontal: 20),
+                                                                      color: AppColor.appBarColor.withOpacity(0.5),
+                                                                      alignment: Alignment.bottomCenter,
+                                                                      child:PagerWidget(countPage: controller.paginatedChild.value?.totalCount??0, callBack: (int index) {
+                                                                        controller.isChangePage(index);
+                                                                      },)):SizedBox(),
+                                                                ],
                                                               ),
                                                             ],
                                                           )
-                                                        : SizedBox()
+                                                        : SizedBox(),
                                                   ],
-                                                ))
-                                            : SizedBox(),
+                                                )),
+
+
+
+                                             Container(
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                BorderRadius.circular(
+                                                    10),
+                                                color:
+                                                AppColor.appBarColor),
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 20),
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: 30,
+                                                vertical: 15),
+                                            child: Column(
+                                              children: [
+                                                SizedBox(
+                                                  height: 5,
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      "لیست اکانت ها",
+                                                      style: AppTextStyle
+                                                          .labelText
+                                                          .copyWith(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                          FontWeight
+                                                              .bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 15,
+                                                ),
+                                                Row(
+                                                  children: [
+                                                    GestureDetector(
+                                                      child: Container(
+                                                        decoration:
+                                                        BoxDecoration(
+                                                          borderRadius:
+                                                          BorderRadius
+                                                              .circular(
+                                                              6),
+                                                          color: controller
+                                                              .isShowListAccount
+                                                              .value
+                                                              ? AppColor
+                                                              .secondaryColor
+                                                              : AppColor
+                                                              .primaryColor,
+                                                        ),
+                                                        width: 160,
+                                                        height: 40,
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                          children: [
+                                                            Icon(
+                                                              Icons
+                                                                  .checklist_rtl,
+                                                              color: AppColor
+                                                                  .textColor,
+                                                              size: 25,
+                                                            ),
+                                                            SizedBox(
+                                                              width: 5,
+                                                            ),
+                                                            Text(
+                                                              "لیست اکانت ها",
+                                                              style: AppTextStyle.labelText.copyWith(
+                                                                  fontSize:
+                                                                  13,
+                                                                  color: AppColor
+                                                                      .textColor,
+                                                                  fontWeight:
+                                                                  FontWeight
+                                                                      .bold),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      onTap: () {
+                                                        controller
+                                                            .setCheckedAccountList();
+                                                      },
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(
+                                                  height: 10,
+                                                ),
+                                                controller.isShowListAccount.value
+                                                    ? Column(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment
+                                                      .center,
+                                                  children: [
+                                                    controller.accountList.isNotEmpty?
+                                                    DataTable(
+                                                      columns: [
+                                                        DataColumn(
+                                                            label: ConstrainedBox(
+                                                                constraints: BoxConstraints(
+                                                                  maxWidth:
+                                                                  50,
+                                                                ),
+                                                                child: Text('ردیف', style: AppTextStyle.labelText.copyWith(fontSize: 13, color: AppColor.primaryColor, fontWeight: FontWeight.bold))),
+                                                            headingRowAlignment: MainAxisAlignment.center),
+                                                        DataColumn(
+                                                            label: Text(
+                                                                'نام کاربر',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                    fontSize:
+                                                                    13,
+                                                                    color: AppColor
+                                                                        .primaryColor,
+                                                                    fontWeight: FontWeight
+                                                                        .bold)),
+                                                            headingRowAlignment:
+                                                            MainAxisAlignment
+                                                                .center),
+                                                        DataColumn(
+                                                            label:
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                    'موبایل',
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 13, color: AppColor.primaryColor, fontWeight: FontWeight.bold)),
+                                                              ],
+                                                            ),
+                                                            headingRowAlignment:
+                                                            MainAxisAlignment
+                                                                .center),
+                                                        DataColumn(
+                                                            label:
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                    'وضعیت',
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 13, color: AppColor.primaryColor, fontWeight: FontWeight.bold)),
+                                                              ],
+                                                            ),
+                                                            headingRowAlignment:
+                                                            MainAxisAlignment
+                                                                .center),
+                                                        DataColumn(
+                                                            label:
+                                                            Row(
+                                                              children: [
+                                                                Text(
+                                                                    'گروه',
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 13, color: AppColor.primaryColor, fontWeight: FontWeight.bold)),
+                                                              ],
+                                                            ),
+                                                            headingRowAlignment:
+                                                            MainAxisAlignment
+                                                                .center),
+                                                      ],
+                                                      border: TableBorder.symmetric(
+                                                          inside: BorderSide(
+                                                              color: AppColor
+                                                                  .textColor,
+                                                              width:
+                                                              0.3),
+                                                          outside: BorderSide(
+                                                              color: AppColor
+                                                                  .textColor,
+                                                              width:
+                                                              0.3),
+                                                          borderRadius:
+                                                          BorderRadius.circular(
+                                                              8)),
+                                                      dividerThickness:
+                                                      0.3,
+                                                      rows: controller
+                                                          .accountList
+                                                          .map((trans) =>
+                                                          DataRow(
+                                                            cells: [
+                                                              DataCell(Center(
+                                                                child: Text(
+                                                                  "${trans.rowNum}",
+                                                                  style: AppTextStyle.bodyText.copyWith(
+                                                                    color: AppColor.textColor,
+                                                                    fontSize: 14,
+                                                                  ),
+                                                                ),
+                                                              )),
+                                                              DataCell(Center(
+                                                                child: GestureDetector(
+                                                                  onTap: () {},
+                                                                  child: Text(
+                                                                    trans.name ?? "",
+                                                                    style: AppTextStyle.bodyText.copyWith(
+                                                                      color: AppColor.textColor,
+                                                                      fontSize: 13,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              )),
+                                                              DataCell(Center(
+                                                                child: SizedBox(
+                                                                  child: Text(
+                                                                    trans.contactInfo ?? "",
+                                                                    style: AppTextStyle.bodyText.copyWith(
+                                                                      color: AppColor.textColor,
+                                                                      fontSize: 13,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              )),
+                                                              DataCell(Center(
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5)), color: trans.status == 1 ? AppColor.primaryColor : AppColor.accentColor),
+                                                                    child: Text(
+                                                                      trans.status == 1 ? "تایید شده" : "رد شده ",
+                                                                      style: AppTextStyle.bodyText.copyWith(fontSize: 9),
+                                                                    ),
+                                                                  ))),
+                                                              DataCell(Center(
+                                                                child: SizedBox(
+                                                                  child: Text(
+                                                                    trans.accountGroup?.name ?? "",
+                                                                    style: AppTextStyle.bodyText.copyWith(
+                                                                      color: AppColor.textColor,
+                                                                      fontSize: 13,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              )),
+                                                            ],
+                                                          ))
+                                                          .toList(),
+                                                      dataRowMaxHeight:
+                                                      52,
+                                                      //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                                      //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                                      headingRowHeight:
+                                                      50,
+                                                      columnSpacing:
+                                                      90,
+                                                      horizontalMargin:
+                                                      60,
+                                                    ):
+                                                    SizedBox(
+                                                      height: Get.height * 0.75,
+                                                        child: SizedBox(
+                                                            height: 50,
+                                                            child: Center(child: CircularProgressIndicator())))
+                                                    ,
+                                                    Column(
+                                                      mainAxisAlignment: MainAxisAlignment.end,
+                                                      children: [
+                                                        controller.paginated.value!=null?   Container(
+                                                            height: 70,
+                                                            margin: EdgeInsets.symmetric(horizontal: 70,vertical: 10),
+                                                            padding: EdgeInsets.symmetric(horizontal: 20),
+                                                            color: AppColor.appBarColor.withOpacity(0.5),
+                                                            alignment: Alignment.bottomCenter,
+                                                            child:PagerWidget(countPage: controller.paginated.value?.totalCount??0, callBack: (int index) {
+                                                              controller.isChangePageAccount(index);
+                                                            },)):SizedBox(),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                )
+                                                    : SizedBox(),
+                                              ],
+                                            ))
+
                                       ],
                                     ),
                                   ),
@@ -757,6 +1116,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                             ),
                           ),
               ),
+
             ],
           ),
         ));

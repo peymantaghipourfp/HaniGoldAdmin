@@ -31,8 +31,11 @@ class UserDetailController extends GetxController{
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
+  RxInt currentPageAccount = 1.obs;
+  RxInt itemsPerPageAccount = 10.obs;
   var isChecked=false.obs;
   var isLoading=false.obs;
+  var isShowListAccount=false.obs;
   UserRepository userRepository=UserRepository();
   ScrollController scrollController = ScrollController();
   RxList<StateItemModel> stateList=<StateItemModel>[].obs;
@@ -42,7 +45,10 @@ class UserDetailController extends GetxController{
   final Rxn<AccountModel> accountModel=Rxn<AccountModel>();
   var idUser=0.obs;
   var title="".obs;
+  final List<AccountModel> accountChildList=<AccountModel>[].obs;
   final List<AccountModel> accountList=<AccountModel>[].obs;
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
+  final Rxn<PaginatedModel> paginatedChild = Rxn<PaginatedModel>();
   @override
   void onInit() {
     super.onInit();
@@ -50,10 +56,21 @@ class UserDetailController extends GetxController{
     print(idUser.value);
     idUser.value!=0? getOneUser(idUser.value):null;
     idUser.value!=0? fetchAccountList(idUser.value.toString()):null;
-    getStateList();
-    getCityList();
+    idUser.value!=0? fetchChildList(idUser.value.toString()):null;
+    // getStateList();
+    // getCityList();
+  }
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    fetchChildList(idUser.value.toString());
   }
 
+  void isChangePageAccount(int index){
+    currentPageAccount.value=index*10-10;
+    itemsPerPageAccount.value=index*10;
+    fetchAccountList(idUser.value.toString());
+  }
 
   setChecked(){
     isChecked.value=!isChecked.value;
@@ -61,6 +78,10 @@ class UserDetailController extends GetxController{
   }
   setCheckedAccount(){
     isLoading.value=!isLoading.value;
+    update();
+  }
+  setCheckedAccountList(){
+    isShowListAccount.value=!isShowListAccount.value;
     update();
   }
   void changeSelectedState(StateItemModel? newValue) {
@@ -72,60 +93,81 @@ class UserDetailController extends GetxController{
   }
 
 
-  // لیست استان ها
-  Future<void> getStateList() async {
-    print("getStateList : 1");
-    stateList.clear();
-    try {
-      // state.value=PageStateUser.loading;
-      var response = await userRepository.getStateList(
-          startIndex: currentPage.value,
-          toIndex: itemsPerPage.value,
-          );
-       stateList.addAll(response);
-       if(stateList.isNotEmpty){
-         selectedState.value=stateList.first;
-       }
-     //  state.value=PageStateUser.list;
-      update();
-    }
-    catch (e) {
-     // state.value = PageStateUser.err;
-    } finally {}
-  }
-// لیست شهر ها
-  Future<void> getCityList() async {
-    print("getCityList : 1");
-    cityList.clear();
-    try {
-      // state.value=PageStateUser.loading;
-      var response = await userRepository.getCityList(
-          startIndex: currentPage.value,
-          toIndex: itemsPerPage.value,
-          );
-       cityList.addAll(response);
-       if(cityList.isNotEmpty){
-         selectedCity.value=cityList.first;
-       }
-      // state.value=PageStateUser.list;
-      update();
-    }
-    catch (e) {
-   //   state.value = PageStateUser.err;
-    } finally {}
-  }
+//   // لیست استان ها
+//   Future<void> getStateList() async {
+//     print("getStateList : 1");
+//     stateList.clear();
+//     try {
+//       // state.value=PageStateUser.loading;
+//       var response = await userRepository.getStateList(
+//           startIndex: currentPage.value,
+//           toIndex: itemsPerPage.value,
+//           );
+//        stateList.addAll(response);
+//        if(stateList.isNotEmpty){
+//          selectedState.value=stateList.first;
+//        }
+//      //  state.value=PageStateUser.list;
+//       update();
+//     }
+//     catch (e) {
+//      // state.value = PageStateUser.err;
+//     } finally {}
+//   }
+// // لیست شهر ها
+//   Future<void> getCityList() async {
+//     print("getCityList : 1");
+//     cityList.clear();
+//     try {
+//       // state.value=PageStateUser.loading;
+//       var response = await userRepository.getCityList(
+//           startIndex: currentPage.value,
+//           toIndex: itemsPerPage.value,
+//           );
+//        cityList.addAll(response);
+//        if(cityList.isNotEmpty){
+//          selectedCity.value=cityList.first;
+//        }
+//       // state.value=PageStateUser.list;
+//       update();
+//     }
+//     catch (e) {
+//    //   state.value = PageStateUser.err;
+//     } finally {}
+//   }
 
-  // لیست کاربران
+  // لیست کاربران قابل اضافه کردن
   Future<void> fetchAccountList(String parentId) async{
     try{
+      accountList.clear();
       //   state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getCandidateChild(parentId);
+      var fetchedAccountList=await accountRepository.getCandidateChild(parentId,currentPageAccount.value,itemsPerPageAccount.value);
       accountList.assignAll(fetchedAccountList.accounts??[]);
+      paginated.value=fetchedAccountList.paginated;
       //  state.value=PageState.list;
       if(accountList.isEmpty){
         //   state.value=PageState.empty;
       }
       print('تعداد55 :${accountList.length}');
+    }
+    catch(e){
+      //  state.value=PageState.err;
+    }finally{
+    }
+  }
+  // لیست زیر مجوعه ها
+  Future<void> fetchChildList(String parentId) async{
+    try{
+      //   state.value=PageState.loading;
+      var fetchedAccountList=await accountRepository.getChildList(parentId,currentPage.value,itemsPerPage.value);
+      accountChildList.clear();
+      accountChildList.assignAll(fetchedAccountList.accounts??[]);
+      paginatedChild.value=fetchedAccountList.paginated;
+      //  state.value=PageState.list;
+      if(accountChildList.isEmpty){
+        //   state.value=PageState.empty;
+      }
+      print('تعداد55 :${accountChildList.length}');
     }
     catch(e){
       //  state.value=PageState.err;

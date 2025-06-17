@@ -176,7 +176,8 @@ class AccountRepository{
   }
 
 
-  Future<ListUserModel> getCandidateChild(String parentId)async{
+  Future<ListUserModel> getCandidateChild(String parentId,int startIndex,
+      int toIndex,)async{
     try{
       Map<String , dynamic> options=
       {"options" : { "account" :{
@@ -196,12 +197,50 @@ class AccountRepository{
         ],
         "orderBy": "Account.Id",
         "orderByType": "Desc",
-        "StartIndex": 1,
-        "ToIndex": 25
+        "StartIndex": startIndex,
+        "ToIndex": toIndex
       }}};
       final response=await accountDio.post('Account/getCandidateChild',data: options);
       print("response getCandidateChild : ${response.data}" );
       print("request getCandidateChild : $options" );
+      if(response.statusCode==200){
+        return ListUserModel.fromJson(response.data);
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<ListUserModel> getChildList(String parentId,  int startIndex,
+   int toIndex,)async{
+    try{
+      Map<String , dynamic> options=
+      {"options" : { "account" :{
+        "Predicate": [
+          {
+            "innerCondition": 1,
+            "outerCondition": 0,
+            "filters": [
+              {
+                "fieldName": "ParentId",
+                "filterValue": parentId,
+                "filterType": 5,
+                "RefTable": "Account"
+              }
+            ]
+          }
+        ],
+        "orderBy": "Account.StartDate",
+        "orderByType": "desc",
+        "StartIndex": startIndex,
+        "ToIndex": toIndex
+      }}};
+      final response=await accountDio.post('Account/getWrapper',data: options);
+      print("request getChildList : $options" );
+      print("response getChildList : ${response.data}" );
       if(response.statusCode==200){
         return ListUserModel.fromJson(response.data);
       }else{
