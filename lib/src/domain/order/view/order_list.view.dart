@@ -2462,8 +2462,6 @@ class OrderListView extends StatelessWidget {
                               value
                           );
                         }
-                        orderController.getOrderListPager();
-                        //EasyLoading.dismiss();
                       },
                     ),
                     SizedBox(width: 5,),

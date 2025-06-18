@@ -74,6 +74,7 @@ class DepositCreateController extends GetxController{
   var uuid = Uuid();
   RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploadingDesktop = false.obs;
+  var depositRequestId=0.obs;
 
 
 
@@ -102,7 +103,6 @@ class DepositCreateController extends GetxController{
     print(selectedBankAccount.value?.bank?.id);
     print(selectedIndex);
   }
-
   @override
   void onInit() {
     DepositRequestModel depositRequest=Get.arguments;

@@ -280,7 +280,7 @@ class DepositController extends GetxController{
         nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
       );
       isLoading.value=false;
-      depositList.assignAll(response.deposit??[]);
+      depositList.addAll(response.deposit??[]);
       paginated.value=response.paginated;
       state.value=PageState.list;
 
@@ -488,7 +488,7 @@ class DepositController extends GetxController{
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-     // getDepositListPager();
+      getDepositListPager();
         } catch (e) {
       EasyLoading.dismiss();
       throw ErrorException('خطا در ریجیستر: $e');

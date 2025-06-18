@@ -515,6 +515,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     caratController.text=inventoryDetail.carat.toString() ?? '';
     receiptNumberController.text=inventoryDetail.receiptNumber.toString() ?? '';
     inputItemId.value=inventoryDetail.inputItemId ?? 0;
+    descriptionController.text=inventoryDetail.description ?? "";
     dateController.text = inventoryDetail.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
     getImage(inventoryDetail.recId ?? '', "InventoryDetail");
   }

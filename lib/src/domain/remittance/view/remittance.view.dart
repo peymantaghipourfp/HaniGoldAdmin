@@ -1236,8 +1236,6 @@ class _RemittanceViewState extends State<RemittanceView> {
                               value
                           );
                         }
-
-                        //EasyLoading.dismiss();
                       },
                     ),
                     SizedBox(width: 5,),
@@ -1444,202 +1442,48 @@ class _RemittanceViewState extends State<RemittanceView> {
           DataCell(Center(
               child: SizedBox(
                 child: SingleChildScrollView(
-                  child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                  remittance.balancePayer==null?SizedBox() :Column(
-                    children: remittance.balancePayer!
-                        .map((e) => Container(
-                              child: e.unitName == "ریال"
-                                  ? Row(
-                                      children: [
-                                        Text(
-                                          " ${e.itemName} ",
-                                          style: AppTextStyle.bodyText.copyWith(
-                                              fontSize: 10,
-                                              color: AppColor.accentColor),
-                                        ),
-                                        Text(
-                                          e.balance.toString(),
-                                          style: AppTextStyle.bodyText.copyWith(
-                                              fontSize: 11,
-                                              color: AppColor.accentColor),
-                                          textDirection: TextDirection.ltr,
-                                        ),
-                                        Text(
-                                          " ${e.unitName} ",
-                                          style: AppTextStyle.bodyText.copyWith(
-                                              fontSize: 10,
-                                              color: AppColor.accentColor),
-                                        //  textDirection: TextDirection.ltr,
-                                        ),
-
-                                      ],
-                                    )
-                                  : SizedBox(),
-                            ))
-                        .toList(),
-                  ),
-                  remittance.balanceReciept==null?SizedBox() : Column(
-                    children: remittance.balanceReciept!
-                        .map((e) => Container(
-                      child: e.unitName == "ریال"
-                          ? Row(
-                        children: [
-                          Text(
-                            " ${e.itemName} ",
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 10,
-                                color: AppColor.primaryColor),
-                          ),
-                          Text(
-                            e.balance.toString(),
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 11,
-                                color: AppColor.primaryColor),
-                            textDirection: TextDirection.ltr,
-                          ),
-                          Text(
-                            " ${e.unitName} ",
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 10,
-                                color: AppColor.primaryColor),
-                            //  textDirection: TextDirection.ltr,
-                          ),
-
-                        ],
-                      )
-                          : SizedBox(),
-                    ))
-                        .toList(),
-                  ),
-                              ],
-                            ),
-                ),
-              ))),
-          // مانده طلایی
-          DataCell(Center(
-              child: SizedBox(
-                child: SingleChildScrollView(
-                  clipBehavior: Clip.hardEdge,
-                  child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                  remittance.balancePayer==null?SizedBox() : Column(
-                    children: remittance.balancePayer!
-                        .map((e) => Container(
-                      child: e.unitName == "گرم"
-                          ? Row(
-                        children: [
-                          Text(
-                            " ${e.itemName} ",
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 10,
-                                color: AppColor.accentColor),
-                          ),
-                          Text(
-                            e.balance.toString(),
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 11,
-                                color: AppColor.accentColor),
-                            textDirection: TextDirection.ltr,
-                          ),
-                          Text(
-                            " ${e.unitName} ",
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 10,
-                                color: AppColor.accentColor),
-                            //  textDirection: TextDirection.ltr,
-                          ),
-
-                        ],
-                      )
-                          : SizedBox(),
-                    ))
-                        .toList(),
-                  ),
-                  remittance.balanceReciept==null?SizedBox() :  Column(
-                    children: remittance.balanceReciept!
-                        .map((e) => Container(
-                      child: e.unitName == "گرم"
-                          ? Row(
-                        children: [
-                          Text(
-                            " ${e.itemName} ",
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 10,
-                                color: AppColor.primaryColor),
-                          ),
-                          Text(
-                            e.balance.toString(),
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 11,
-                                color: AppColor.primaryColor),
-                            textDirection: TextDirection.ltr,
-                          ),
-                          Text(
-                            " ${e.unitName} ",
-                            style: AppTextStyle.bodyText.copyWith(
-                                fontSize: 10,
-                                color: AppColor.primaryColor),
-                            //  textDirection: TextDirection.ltr,
-                          ),
-
-                        ],
-                      )
-                          : SizedBox(),
-                    ))
-                        .toList(),
-                  ),
-                              ],
-                            ),
-                ),
-              ))),
-          // مانده سکه
-          DataCell(Center(
-              child: SizedBox(
-                child: Scrollbar(
-                  child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
-                    remittance.balancePayer==null?SizedBox() :  Column(
+                    remittance.balancePayer==null?SizedBox() :Column(
                       children: remittance.balancePayer!
                           .map((e) => Container(
-                        child: e.unitName == "عدد"
-                            ? Row(
-                          children: [
-                            Text(
-                              " ${e.itemName} ",
-                              style: AppTextStyle.bodyText.copyWith(
-                                  fontSize: 10,
-                                  color: AppColor.accentColor),
-                            ),
-                            Text(
-                              e.balance.toString(),
-                              style: AppTextStyle.bodyText.copyWith(
-                                  fontSize: 11,
-                                  color: AppColor.accentColor),
-                              textDirection: TextDirection.ltr,
-                            ),
-                            Text(
-                              " ${e.unitName} ",
-                              style: AppTextStyle.bodyText.copyWith(
-                                  fontSize: 10,
-                                  color: AppColor.accentColor),
-                              //  textDirection: TextDirection.ltr,
-                            ),
+                                child: e.unitName == "ریال"
+                                    ? Row(
+                                        children: [
+                                          Text(
+                                            " ${e.itemName} ",
+                                            style: AppTextStyle.bodyText.copyWith(
+                                                fontSize: 10,
+                                                color: AppColor.accentColor),
+                                          ),
+                                          Text(
+                                            e.balance.toString(),
+                                            style: AppTextStyle.bodyText.copyWith(
+                                                fontSize: 11,
+                                                color: AppColor.accentColor),
+                                            textDirection: TextDirection.ltr,
+                                          ),
+                                          Text(
+                                            " ${e.unitName} ",
+                                            style: AppTextStyle.bodyText.copyWith(
+                                                fontSize: 10,
+                                                color: AppColor.accentColor),
+                                          //  textDirection: TextDirection.ltr,
+                                          ),
 
-                          ],
-                        )
-                            : SizedBox(),
-                      ))
+                                        ],
+                                      )
+                                    : SizedBox(),
+                              ))
                           .toList(),
                     ),
                     remittance.balanceReciept==null?SizedBox() : Column(
                       children: remittance.balanceReciept!
                           .map((e) => Container(
-                        child: e.unitName == "عدد"
+                        child: e.unitName == "ریال"
                             ? Row(
                           children: [
                             Text(
@@ -1671,6 +1515,169 @@ class _RemittanceViewState extends State<RemittanceView> {
                     ),
                                 ],
                               ),
+                  ),
+                ),
+              ))),
+          // مانده طلایی
+          DataCell(Center(
+              child: SizedBox(
+                child: SingleChildScrollView(
+                  clipBehavior: Clip.hardEdge,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                    remittance.balancePayer==null?SizedBox() : Column(
+                      children: remittance.balancePayer!
+                          .map((e) => Container(
+                        child: e.unitName == "گرم"
+                            ? Row(
+                          children: [
+                            Text(
+                              " ${e.itemName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.accentColor),
+                            ),
+                            Text(
+                              e.balance.toString(),
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 11,
+                                  color: AppColor.accentColor),
+                              textDirection: TextDirection.ltr,
+                            ),
+                            Text(
+                              " ${e.unitName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.accentColor),
+                              //  textDirection: TextDirection.ltr,
+                            ),
+
+                          ],
+                        )
+                            : SizedBox(),
+                      ))
+                          .toList(),
+                    ),
+                    remittance.balanceReciept==null?SizedBox() :  Column(
+                      children: remittance.balanceReciept!
+                          .map((e) => Container(
+                        child: e.unitName == "گرم"
+                            ? Row(
+                          children: [
+                            Text(
+                              " ${e.itemName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.primaryColor),
+                            ),
+                            Text(
+                              e.balance.toString(),
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 11,
+                                  color: AppColor.primaryColor),
+                              textDirection: TextDirection.ltr,
+                            ),
+                            Text(
+                              " ${e.unitName} ",
+                              style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: 10,
+                                  color: AppColor.primaryColor),
+                              //  textDirection: TextDirection.ltr,
+                            ),
+
+                          ],
+                        )
+                            : SizedBox(),
+                      ))
+                          .toList(),
+                    ),
+                                ],
+                              ),
+                  ),
+                ),
+              ))),
+          // مانده سکه
+          DataCell(Center(
+              child: SizedBox(
+                child: Scrollbar(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 4),
+                      child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                      remittance.balancePayer==null?SizedBox() :  Column(
+                        children: remittance.balancePayer!
+                            .map((e) => Container(
+                          child: e.unitName == "عدد"
+                              ? Row(
+                            children: [
+                              Text(
+                                " ${e.itemName} ",
+                                style: AppTextStyle.bodyText.copyWith(
+                                    fontSize: 10,
+                                    color: AppColor.accentColor),
+                              ),
+                              Text(
+                                e.balance.toString(),
+                                style: AppTextStyle.bodyText.copyWith(
+                                    fontSize: 11,
+                                    color: AppColor.accentColor),
+                                textDirection: TextDirection.ltr,
+                              ),
+                              Text(
+                                " ${e.unitName} ",
+                                style: AppTextStyle.bodyText.copyWith(
+                                    fontSize: 10,
+                                    color: AppColor.accentColor),
+                                //  textDirection: TextDirection.ltr,
+                              ),
+
+                            ],
+                          )
+                              : SizedBox(),
+                        ))
+                            .toList(),
+                      ),
+                      remittance.balanceReciept==null?SizedBox() : Column(
+                        children: remittance.balanceReciept!
+                            .map((e) => Container(
+                          child: e.unitName == "عدد"
+                              ? Row(
+                            children: [
+                              Text(
+                                " ${e.itemName} ",
+                                style: AppTextStyle.bodyText.copyWith(
+                                    fontSize: 10,
+                                    color: AppColor.primaryColor),
+                              ),
+                              Text(
+                                e.balance.toString(),
+                                style: AppTextStyle.bodyText.copyWith(
+                                    fontSize: 11,
+                                    color: AppColor.primaryColor),
+                                textDirection: TextDirection.ltr,
+                              ),
+                              Text(
+                                " ${e.unitName} ",
+                                style: AppTextStyle.bodyText.copyWith(
+                                    fontSize: 10,
+                                    color: AppColor.primaryColor),
+                                //  textDirection: TextDirection.ltr,
+                              ),
+
+                            ],
+                          )
+                              : SizedBox(),
+                        ))
+                            .toList(),
+                      ),
+                                  ],
+                                ),
+                    ),
                   ),
                 ),
               ))),

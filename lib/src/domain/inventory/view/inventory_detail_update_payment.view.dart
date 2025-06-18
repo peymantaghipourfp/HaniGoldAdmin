@@ -295,6 +295,7 @@ class _InventoryDetailUpdatePaymentViewState
                                                                 .circular(
                                                                 10)))),
                                                 onPressed: () async {
+                                                  await inventoryDetailUpdatePaymentController.fetchForPaymentList();
                                                   showForPaymentModal();
                                                   print(
                                                       'idIttttem ${inventoryDetailUpdatePaymentController

@@ -2102,6 +2102,19 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                       ],
                                                     ),
                                                   ),
+                                                  // checkBox
+                                                  Checkbox(
+                                                    value: inventories.registered ?? false,
+                                                    onChanged: (value) async{
+                                                      if (value != null) {
+                                                        //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                                                        await inventoryController.updateRegistered(
+                                                            inventories.id!,
+                                                            value
+                                                        );
+                                                      }
+                                                    },
+                                                  ),
                                                 ],
                                               ),
                                               // فلش نمایش ایتم های دریافت/پرداخت
@@ -2820,8 +2833,6 @@ class _InventoryListViewState extends State<InventoryListView> {
                               value
                           );
                         }
-                        inventoryController.getInventoryListPager();
-                        //EasyLoading.dismiss();
                       },
                     ),
                     SizedBox(width: 5,),
