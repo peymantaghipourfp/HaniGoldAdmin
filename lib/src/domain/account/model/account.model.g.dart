@@ -23,7 +23,7 @@ AccountModel _$AccountModelFromJson(Map<String, dynamic> json) => AccountModel(
           : DateTime.parse(json['startDate'] as String),
       parent: json['parent'] == null
           ? null
-          : Parent.fromJson(json['parent'] as Map<String, dynamic>),
+          : ParentAccountModel.fromJson(json['parent'] as Map<String, dynamic>),
       accountGroup: json['accountGroup'] == null
           ? null
           : AccountGroupModel.fromJson(
@@ -166,7 +166,8 @@ ContactInfoContact _$ContactInfoContactFromJson(Map<String, dynamic> json) =>
     ContactInfoContact(
       account: json['account'] == null
           ? null
-          : Parent.fromJson(json['account'] as Map<String, dynamic>),
+          : ParentAccountModel.fromJson(
+              json['account'] as Map<String, dynamic>),
       id: (json['id'] as num?)?.toInt(),
       infos: json['infos'] as List<dynamic>?,
     );
@@ -223,38 +224,5 @@ Map<String, dynamic> _$ContactAccountToJson(ContactAccount instance) =>
       'name': instance.name,
       'accountGroup': instance.accountGroup,
       'id': instance.id,
-      'infos': instance.infos,
-    };
-
-Parent _$ParentFromJson(Map<String, dynamic> json) => Parent(
-      accountGroup: json['accountGroup'] == null
-          ? null
-          : ParentAccountGroup.fromJson(
-              json['accountGroup'] as Map<String, dynamic>),
-      accountItemGroup: json['accountItemGroup'] == null
-          ? null
-          : ParentAccountGroup.fromJson(
-              json['accountItemGroup'] as Map<String, dynamic>),
-      accountPriceGroup: json['accountPriceGroup'] == null
-          ? null
-          : ParentAccountGroup.fromJson(
-              json['accountPriceGroup'] as Map<String, dynamic>),
-      infos: json['infos'] as List<dynamic>?,
-    );
-
-Map<String, dynamic> _$ParentToJson(Parent instance) => <String, dynamic>{
-      'accountGroup': instance.accountGroup,
-      'accountItemGroup': instance.accountItemGroup,
-      'accountPriceGroup': instance.accountPriceGroup,
-      'infos': instance.infos,
-    };
-
-ParentAccountGroup _$ParentAccountGroupFromJson(Map<String, dynamic> json) =>
-    ParentAccountGroup(
-      infos: json['infos'] as List<dynamic>?,
-    );
-
-Map<String, dynamic> _$ParentAccountGroupToJson(ParentAccountGroup instance) =>
-    <String, dynamic>{
       'infos': instance.infos,
     };

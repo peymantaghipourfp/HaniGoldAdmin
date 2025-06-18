@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:file_saver/file_saver.dart';
@@ -30,49 +28,50 @@ import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
 import '../model/transaction_info_item.model.dart';
 
+enum PageStateUser { loading, err, empty, list }
 
-enum PageStateUser{loading,err,empty,list}
-
-class UserListController extends GetxController{
-
-  Rx<PageStateUser> state=Rx<PageStateUser>(PageStateUser.list);
+class UserListController extends GetxController {
+  Rx<PageStateUser> state = Rx<PageStateUser>(PageStateUser.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;
-  DataPagerController dataPagerController=DataPagerController();
-  UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
-  UserRepository userRepository=UserRepository();
+  DataPagerController dataPagerController = DataPagerController();
+  UserInfoTransactionRepository userInfoTransactionRepository =
+      UserInfoTransactionRepository();
+  UserRepository userRepository = UserRepository();
   ScrollController scrollController = ScrollController();
-  final TextEditingController searchController=TextEditingController();
-  final TextEditingController nameFilterController=TextEditingController();
-  final TextEditingController mobileFilterController=TextEditingController();
-  final TextEditingController dateStartController=TextEditingController();
-  final TextEditingController dateEndController=TextEditingController();
+  final TextEditingController searchController = TextEditingController();
+  final TextEditingController nameFilterController = TextEditingController();
+  final TextEditingController mobileFilterController = TextEditingController();
+  final TextEditingController dateStartController = TextEditingController();
+  final TextEditingController dateEndController = TextEditingController();
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
-   RxList<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
-  RxList<AccountModel> accountList=<AccountModel>[].obs;
+  RxList<BalanceItemModel> balanceList = <BalanceItemModel>[].obs;
+  RxList<AccountModel> accountList = <AccountModel>[].obs;
   PaginatedModel? paginated;
   BalanceModel? balanceModel;
 
   String? indexAccountPayerGet;
-  var isLoading=false.obs;
-  var namePayer="".obs;
-  var mobilePayer="".obs;
+  var isLoading = false.obs;
+  var namePayer = "".obs;
+  var mobilePayer = "".obs;
   var sort = true.obs; // or `false`...
   var sortIndex = 0.obs; // or `false`...
   var id = 0.obs; // or `false`...
-  var startDateFilter=''.obs;
-  var endDateFilter=''.obs;
+  var startDateFilter = ''.obs;
+  var endDateFilter = ''.obs;
 
   onSortColum(int columnIndex, bool ascending) {
     if (columnIndex > 0) {
       if (ascending) {
-        accountList.sort((a, b) => a.name!.toString().compareTo(b.name!.toString()));
+        accountList
+            .sort((a, b) => a.name!.toString().compareTo(b.name!.toString()));
       } else {
-        accountList.sort((a, b) => b.name!.toString().compareTo(a.name!.toString()));
+        accountList
+            .sort((a, b) => b.name!.toString().compareTo(a.name!.toString()));
       }
     }
 
@@ -80,9 +79,9 @@ class UserListController extends GetxController{
     update();
   }
 
-  setSort(int index,bool val){
-    sort.value= val;
-    sortIndex.value= index;
+  setSort(int index, bool val) {
+    sort.value = val;
+    sortIndex.value = index;
     update();
   }
 
@@ -90,56 +89,58 @@ class UserListController extends GetxController{
   void onInit() {
     super.onInit();
     getUserList();
-
   }
+
   void nextPage() {
     if (hasMore.value) {
       currentPageIndex.value++;
-      currentPage.value+=7;
-      itemsPerPage.value+=7;
+      currentPage.value += 7;
+      itemsPerPage.value += 7;
       print(currentPage.value);
       print(itemsPerPage.value);
       getUserList();
-
     }
   }
 
   void previousPage() {
     if (currentPageIndex.value > 1) {
       currentPageIndex.value--;
-      currentPage.value-=7;
-      itemsPerPage.value-=7;
+      currentPage.value -= 7;
+      itemsPerPage.value -= 7;
       print(currentPage.value);
       print(itemsPerPage.value);
       getUserList();
     }
   }
 
-  void isChangePage(int index){
-       currentPage.value=index*10-10;
-       itemsPerPage.value=index*10;
+  void isChangePage(int index) {
+    currentPage.value = index * 10 - 10;
+    itemsPerPage.value = index * 10;
     getUserList();
   }
 
 // آپدیت موقعیت
-  Future<void> updateStatus(int status,int id) async {
+  Future<void> updateStatus(int status, int id) async {
     EasyLoading.show(
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
     );
     try {
-      var response = await userRepository.updateStatus(status: status, id: id
-      );
-      Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
-          titleText: Text(response.infos?.first["title"],
+      var response = await userRepository.updateStatus(status: status, id: id);
+      Get.snackbar(
+          response.infos?.first["title"], response.infos?.first["description"],
+          titleText: Text(
+            response.infos?.first["title"],
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColor.textColor),),
-          messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+            style: TextStyle(color: AppColor.textColor),
+          ),
+          messageText: Text(response.infos?.first["description"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor)));
       getUserList();
       update();
-    }
-    catch (e) {
-     // state.value = PageStateUser.err;
+    } catch (e) {
+      // state.value = PageStateUser.err;
     } finally {
       EasyLoading.dismiss();
     }
@@ -151,22 +152,23 @@ class UserListController extends GetxController{
     isOpenMore.value = false;
     accountList.clear();
     try {
-       state.value=PageStateUser.loading;
+      state.value = PageStateUser.loading;
       var response = await userRepository.getUserList(
-          startIndex: currentPage.value,
-          toIndex: itemsPerPage.value, name: nameFilterController.text, mobile: mobileFilterController.text,
-          );
-      accountList.addAll(response.accounts??[]);
-      paginated=response.paginated;
-       // nameFilterController.text="";
-       // mobileFilterController.text="";
-    //  print(paginated?.totalCount??0);
-       state.value=PageStateUser.list;
+        startIndex: currentPage.value,
+        toIndex: itemsPerPage.value,
+        name: nameFilterController.text,
+        mobile: mobileFilterController.text,
+      );
+      accountList.addAll(response.accounts ?? []);
+      paginated = response.paginated;
+      // nameFilterController.text="";
+      // mobileFilterController.text="";
+      //  print(paginated?.totalCount??0);
+      state.value = PageStateUser.list;
       isOpenMore.value = true;
 
       update();
-    }
-    catch (e) {
+    } catch (e) {
       state.value = PageStateUser.err;
     } finally {}
   }
@@ -190,14 +192,15 @@ class UserListController extends GetxController{
       var response = await userRepository.getUserListExport(
         startIndex: 0,
         toIndex: 100000,
-        startDate: startDateFilter.value, endDate: endDateFilter.value,
+        startDate: startDateFilter.value,
+        endDate: endDateFilter.value,
       );
       for (var user in response.accounts!) {
         sheet.appendRow([
           TextCellValue(user.rowNum.toString()),
           TextCellValue(user.name ?? ''),
           TextCellValue(user.contactInfo ?? ''),
-          TextCellValue(getStatusText(user.status ?? 0 )),
+          TextCellValue(getStatusText(user.status ?? 0)),
           TextCellValue(''),
           TextCellValue(user.startDate?.toPersianDate(twoDigits: true) ?? ''),
         ]);
@@ -208,17 +211,19 @@ class UserListController extends GetxController{
       final uint8List = Uint8List.fromList(fileBytes);
 
       if (kIsWeb) {
-        final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        final blob = html.Blob([
+          uint8List
+        ], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         final url = html.Url.createObjectUrlFromBlob(blob);
         final anchor = html.AnchorElement(href: url)
-          ..setAttribute('download', 'users_${DateTime.now().millisecondsSinceEpoch}.xlsx')
+          ..setAttribute(
+              'download', 'users_${DateTime.now().millisecondsSinceEpoch}.xlsx')
           ..click();
         html.Url.revokeObjectUrl(url);
-      }else {
+      } else {
         final output = await getDownloadsDirectory();
-        final filePath = '${output?.path}/users_${DateTime
-            .now()
-            .millisecondsSinceEpoch}.xlsx';
+        final filePath =
+            '${output?.path}/users_${DateTime.now().millisecondsSinceEpoch}.xlsx';
         final fileBytes = excel.encode();
         if (fileBytes != null) {
           await File(filePath).writeAsBytes(uint8List);
@@ -260,10 +265,12 @@ class UserListController extends GetxController{
       var response = await userRepository.getUserListExport(
         startIndex: 0,
         toIndex: 100000,
-        startDate: startDateFilter.value, endDate: endDateFilter.value,
+        startDate: startDateFilter.value,
+        endDate: endDateFilter.value,
       );
 
-      final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+      final ByteData fontData =
+          await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
       final ttf = pw.Font.ttf(fontData);
 
       final pdf = pw.Document();
@@ -273,19 +280,22 @@ class UserListController extends GetxController{
         pw.MultiPage(
           textDirection: pw.TextDirection.rtl,
           maxPages: 2000,
-          theme: pw.ThemeData.withFont(base: ttf,fontFallback: [ttf],),
+          theme: pw.ThemeData.withFont(
+            base: ttf,
+            fontFallback: [ttf],
+          ),
           header: (pw.Context context) => buildHeaderTable(),
           build: (pw.Context context) => [
             pw.Table(
               border: pw.TableBorder.all(),
               columnWidths: getColumnWidths(),
               children: [
-                for (var user in response.accounts!)
-                  buildDataRow(user),
+                for (var user in response.accounts!) buildDataRow(user),
               ],
             ),
           ],
-          footer: (pw.Context context) => buildPageNumber(context.pageNumber, context.pagesCount),
+          footer: (pw.Context context) =>
+              buildPageNumber(context.pageNumber, context.pagesCount),
         ),
       );
 
@@ -323,6 +333,7 @@ class UserListController extends GetxController{
       5: pw.FlexColumnWidth(1.5),
     };
   }
+
   // ساخت هدر جدول
   pw.Table buildHeaderTable() {
     return pw.Table(
@@ -341,38 +352,52 @@ class UserListController extends GetxController{
           children: [
             pw.Padding(
               padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text('تاریخ درخواست', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+              child: pw.Text('تاریخ درخواست',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontSize: 10)),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text('نقش', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+              child: pw.Text('نقش',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontSize: 10)),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text('وضعیت', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10) ),
+              child: pw.Text('وضعیت',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontSize: 10)),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text('موبایل', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+              child: pw.Text('موبایل',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontSize: 10)),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text('نام کاربر', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+              child: pw.Text('نام کاربر',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontSize: 10)),
             ),
             pw.Padding(
               padding: const pw.EdgeInsets.all(8.0),
-              child: pw.Text('ردیف', textAlign: pw.TextAlign.center,style: pw.TextStyle(fontSize: 10)),
+              child: pw.Text('ردیف',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(fontSize: 10)),
             ),
           ],
         ),
       ],
     );
   }
+
   // ساخت سلول‌های داده
   pw.Padding buildDataCell(String text, {bool isCenter = false}) {
     return pw.Padding(
       padding: const pw.EdgeInsets.all(8.0),
-      child: pw.Text(text,
+      child: pw.Text(
+        text,
         style: pw.TextStyle(fontSize: 9),
         textAlign: isCenter ? pw.TextAlign.center : pw.TextAlign.right,
         textDirection: pw.TextDirection.rtl,
@@ -381,7 +406,8 @@ class UserListController extends GetxController{
   }
 
   pw.TableRow buildDataRow(AccountModel user) {
-    return pw.TableRow(verticalAlignment: pw.TableCellVerticalAlignment.middle,
+    return pw.TableRow(
+      verticalAlignment: pw.TableCellVerticalAlignment.middle,
       children: [
         buildDataCell(user.startDate?.toPersianDate(twoDigits: true) ?? ''),
         buildDataCell(''),
@@ -408,5 +434,4 @@ class UserListController extends GetxController{
     nameFilterController.clear();
     mobileFilterController.clear();
   }
-
 }

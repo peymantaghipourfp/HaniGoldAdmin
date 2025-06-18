@@ -176,30 +176,46 @@ class AccountRepository{
   }
 
 
-  Future<ListUserModel> getCandidateChild(String parentId,int startIndex,
+  Future<ListUserModel> getCandidateChild(String parentId,int startIndex,String name,
       int toIndex,)async{
     try{
-      Map<String , dynamic> options=
-      {"options" : { "account" :{
-        "Predicate": [
-          {
-            "innerCondition": 1,
-            "outerCondition": 0,
-            "filters": [
+      Map<String, dynamic> options = name != ""
+          ? {
+        "options": {
+          "account": {
+            "Predicate": [
               {
-                "fieldName": "ParentId",
-                "filterValue": parentId,
-                "filterType": 6,
-                "RefTable": "Account"
+                "innerCondition": 0,
+                "outerCondition": 0,
+                "filters": [
+                  name != ""
+                      ? {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Account"
+                  }
+                      : []
+                ]
               }
-            ]
+            ],
+            "orderBy": "Account.Name",
+            "orderByType": "asc",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
           }
-        ],
-        "orderBy": "Account.Id",
-        "orderByType": "Desc",
-        "StartIndex": startIndex,
-        "ToIndex": toIndex
-      }}};
+        }
+      }
+          : {
+        "options": {
+          "account": {
+            "orderBy": "Account.Name",
+            "orderByType": "DESC",
+            "StartIndex": startIndex,
+            "ToIndex": toIndex
+          }
+        }
+      };
       final response=await accountDio.post('Account/getCandidateChild',data: options);
       print("response getCandidateChild : ${response.data}" );
       print("request getCandidateChild : $options" );
@@ -232,6 +248,7 @@ class AccountRepository{
               }
             ]
           }
+
         ],
         "orderBy": "Account.StartDate",
         "orderByType": "desc",
@@ -251,4 +268,37 @@ class AccountRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<AccountModel> addChild({
+    required List<AccountModel> status,
+  }) async {
+    try {
+      final response = await accountDio.put('Account/addChilds', data: status.map((e)=>toJson(e)).toList() );
+      print(response);
+      return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<AccountModel> removeChild({
+    required List<AccountModel> status,
+  }) async {
+    try {
+      final response = await accountDio.put('Account/removeChilds', data: status.map((e)=>toJson(e)).toList() );
+      print(response);
+      return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
 }
+
+
+ Map<String, dynamic> toJson(AccountModel instance) =>
+    <String, dynamic>{
+      'parent':  <String, dynamic>{
+        'id': instance.parent?.id,
+      },
+      'id': instance.id,
+    };

@@ -79,6 +79,7 @@
 //   Map<String, dynamic> toJson() => _$AccountModelToJson(this);
 // }
 //
+import 'package:hanigold_admin/src/domain/users/model/parent_account.model.dart';
 import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
@@ -130,7 +131,7 @@ class AccountModel {
   @JsonKey(name: "startDate")
   final DateTime? startDate;
   @JsonKey(name: "parent")
-  final Parent? parent;
+  late  ParentAccountModel? parent;
   @JsonKey(name: "accountGroup")
   final AccountGroupModel? accountGroup;
   @JsonKey(name: "contacts")
@@ -300,7 +301,7 @@ class ContactInfo {
 @JsonSerializable()
 class ContactInfoContact {
   @JsonKey(name: "account")
-  final Parent? account;
+  final ParentAccountModel? account;
   @JsonKey(name: "id")
   final int? id;
   @JsonKey(name: "infos")
@@ -382,43 +383,4 @@ class ContactAccount {
   factory ContactAccount.fromJson(Map<String, dynamic> json) => _$ContactAccountFromJson(json);
 
   Map<String, dynamic> toJson() => _$ContactAccountToJson(this);
-}
-
-@JsonSerializable()
-class Parent {
-  @JsonKey(name: "accountGroup")
-  final ParentAccountGroup? accountGroup;
-  @JsonKey(name: "accountItemGroup")
-  final ParentAccountGroup? accountItemGroup;
-  @JsonKey(name: "accountPriceGroup")
-  final ParentAccountGroup? accountPriceGroup;
-  @JsonKey(name: "infos")
-  final List<dynamic>? infos;
-
-
-  Parent({
-    required this.accountGroup,
-    required this.accountItemGroup,
-    required this.accountPriceGroup,
-    required this.infos,
-
-  });
-
-  factory Parent.fromJson(Map<String, dynamic> json) => _$ParentFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ParentToJson(this);
-}
-
-@JsonSerializable()
-class ParentAccountGroup {
-  @JsonKey(name: "infos")
-  final List<dynamic>? infos;
-
-  ParentAccountGroup({
-    required this.infos,
-  });
-
-  factory ParentAccountGroup.fromJson(Map<String, dynamic> json) => _$ParentAccountGroupFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ParentAccountGroupToJson(this);
 }

@@ -486,9 +486,7 @@ class UserRepository {
         "contact": {
           "account": {
             "name": "احسان 1",
-            "accountGroup": {
-              "infos": []
-            },
+            "accountGroup": {"infos": []},
             "id": 1,
             "infos": []
           },
@@ -521,7 +519,8 @@ class UserRepository {
     required int id,
   }) async {
     try {
-      final response = await userDio.put('Account/updateStatus', data: {"status": status, "id": id});
+      final response = await userDio
+          .put('Account/updateStatus', data: {"status": status, "id": id});
       print(response);
       return AccountModel.fromJson(response.data);
     } catch (e) {

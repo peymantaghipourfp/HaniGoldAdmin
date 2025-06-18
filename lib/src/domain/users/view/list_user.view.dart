@@ -1145,8 +1145,7 @@ class UserListView extends GetView<UserListController> {
 
   List<DataRow> buildDataRows(BuildContext context) {
     return controller.accountList
-        .map((trans) =>
-        DataRow(
+        .map((trans) => DataRow(
               cells: [
                 DataCell(Center(
                   child: Text(
@@ -1157,12 +1156,16 @@ class UserListView extends GetView<UserListController> {
                 DataCell(Center(
                   child: GestureDetector(
                     onTap: () {
-                       Get.toNamed("/userDetail",parameters: {"accountId":trans.id.toString()});
+                      Get.toNamed("/userDetail",
+                          parameters: {"accountId": trans.id.toString()});
                     },
                     child: Text(
                       "${trans.name}",
                       style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.textColor,
+                        color: AppColor.secondary3Color,
+                        decoration: TextDecoration.underline,
+                        decorationColor: AppColor.secondary3Color,
+                        decorationThickness: 2,
                         fontSize: 12,
                       ),
                     ),
@@ -1217,7 +1220,9 @@ class UserListView extends GetView<UserListController> {
                     GestureDetector(
                       onTap: () {
                         print(trans.id.toString());
-                        Get.toNamed("/insertUser",
+                        Get.toNamed(
+                            "/"
+                            "",
                             parameters: {"id": trans.id.toString()});
                       },
                       child: SvgPicture.asset('assets/svg/edit.svg',
