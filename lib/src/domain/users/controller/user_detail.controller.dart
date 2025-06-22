@@ -1,132 +1,118 @@
-
-
 import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
-import 'package:hanigold_admin/src/domain/users/controller/user_list.controller.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import '../../../config/const/app_color.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/user.repository.dart';
-import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
-import '../model/account_child.model.dart';
-import '../model/balance_item.model.dart';
 import '../model/city_item.model.dart';
-import '../model/header_info_user_transaction.model.dart';
-import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
-import '../model/transaction_info_item.model.dart';
 
+enum PageStateUser { loading, err, empty, list }
 
-enum PageStateUser{loading,err,empty,list}
-
-class UserDetailController extends GetxController{
-
-  Rx<PageStateUser> state=Rx<PageStateUser>(PageStateUser.list);
-  final AccountRepository accountRepository=AccountRepository();
+class UserDetailController extends GetxController {
+  Rx<PageStateUser> state = Rx<PageStateUser>(PageStateUser.list);
+  final AccountRepository accountRepository = AccountRepository();
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
   RxInt currentPageAccount = 1.obs;
   RxInt itemsPerPageAccount = 10.obs;
-  var isChecked=false.obs;
-  var isLoading=false.obs;
-  var isShowListAccount=false.obs;
-  UserRepository userRepository=UserRepository();
+  var isChecked = false.obs;
+  var isLoading = false.obs;
+  var isShowListAccount = false.obs;
+  UserRepository userRepository = UserRepository();
   ScrollController scrollController = ScrollController();
-  RxList<StateItemModel> stateList=<StateItemModel>[].obs;
-  RxList<CityItemModel> cityList=<CityItemModel>[].obs;
-  RxList<AccountModel> accountChildModelList=<AccountModel>[].obs;
-  RxList<AccountModel> accountChildModelListRemove=<AccountModel>[].obs;
-  RxList<int> accountIdList=<int>[].obs;
-  late Rxn<StateItemModel> selectedState=Rxn<StateItemModel>();
-  final Rxn<CityItemModel> selectedCity=Rxn<CityItemModel>();
-  final Rxn<AccountModel> accountModel=Rxn<AccountModel>();
-  final TextEditingController searchController=TextEditingController();
-  var idUser=0.obs;
-  var title="".obs;
-  final List<AccountModel> accountChildList=<AccountModel>[].obs;
-  final List<AccountModel> accountList=<AccountModel>[].obs;
+  RxList<StateItemModel> stateList = <StateItemModel>[].obs;
+  RxList<CityItemModel> cityList = <CityItemModel>[].obs;
+  RxList<AccountModel> accountChildModelList = <AccountModel>[].obs;
+  RxList<AccountModel> accountChildModelListRemove = <AccountModel>[].obs;
+  RxList<int> accountIdList = <int>[].obs;
+  late Rxn<StateItemModel> selectedState = Rxn<StateItemModel>();
+  final Rxn<CityItemModel> selectedCity = Rxn<CityItemModel>();
+  final Rxn<AccountModel> accountModel = Rxn<AccountModel>();
+  final TextEditingController searchController = TextEditingController();
+  var idUser = 0.obs;
+  var title = "".obs;
+  final List<AccountModel> accountChildList = <AccountModel>[].obs;
+  final List<AccountModel> accountList = <AccountModel>[].obs;
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   final Rxn<PaginatedModel> paginatedChild = Rxn<PaginatedModel>();
 
   @override
   void onInit() {
     super.onInit();
-    idUser.value=int.parse(Get.parameters["accountId"] as String);
+    idUser.value = int.parse(Get.parameters["accountId"] as String);
     print(idUser.value);
-    idUser.value!=0? getOneUser(idUser.value):null;
-    idUser.value!=0? fetchAccountList(idUser.value.toString()):null;
-    idUser.value!=0? fetchChildList(idUser.value.toString()):null;
+    idUser.value != 0 ? getOneUser(idUser.value) : null;
+    idUser.value != 0 ? fetchAccountList(idUser.value.toString()) : null;
+    idUser.value != 0 ? fetchChildList(idUser.value.toString()) : null;
     // getStateList();
     // getCityList();
   }
 
-  void isChangePage(int index){
-    currentPage.value=index*10-10;
-    itemsPerPage.value=index*10;
+  void isChangePage(int index) {
+    currentPage.value = index * 10 - 10;
+    itemsPerPage.value = index * 10;
     fetchChildList(idUser.value.toString());
   }
 
-  void isChangePageAccount(int index){
-    currentPageAccount.value=index*10-10;
-    itemsPerPageAccount.value=index*10;
+  void isChangePageAccount(int index) {
+    currentPageAccount.value = index * 10 - 10;
+    itemsPerPageAccount.value = index * 10;
     fetchAccountList(idUser.value.toString());
   }
 
-  setChecked(){
-    isChecked.value=!isChecked.value;
+  setChecked() {
+    isChecked.value = !isChecked.value;
     update();
   }
 
-  setAccountChild(AccountModel element){
-    if(accountChildModelList.contains( element)){
+  setAccountChild(AccountModel element) {
+    if (accountChildModelList.contains(element)) {
       accountChildModelList.remove(element);
-    }else{
-      element.parent?.id=accountModel.value?.id;
+    } else {
+      element.parent?.id = accountModel.value?.id;
       accountChildModelList.add(element);
     }
     print(accountChildModelList);
     update();
   }
 
-  setAccountChildAdd(AccountModel element)async{
-    element.parent?.id=accountModel.value?.id;
-      accountChildModelList.add(element);
+  setAccountChildAdd(AccountModel element) async {
+    element.parent?.id = accountModel.value?.id;
+    accountChildModelList.add(element);
     await addChild();
     print(accountChildModelList);
     update();
   }
 
-  setAccountChildRemove(AccountModel element){
-    if(accountChildModelListRemove.contains( element)){
+  setAccountChildRemove(AccountModel element) {
+    if (accountChildModelListRemove.contains(element)) {
       accountChildModelListRemove.remove(element);
-    }else{
+    } else {
       accountChildModelListRemove.add(element);
     }
     print(accountChildModelListRemove);
     update();
   }
 
-  setAccountChildRemoveOne(AccountModel element)async{
+  setAccountChildRemoveOne(AccountModel element) async {
     accountChildModelListRemove.add(element);
-    await  removeChild();
+    await removeChild();
     print(accountChildModelListRemove);
     update();
   }
 
-  setCheckedAccount(){
-    isLoading.value=!isLoading.value;
+  setCheckedAccount() {
+    isLoading.value = !isLoading.value;
     update();
   }
 
-  setCheckedAccountList(){
-    isShowListAccount.value=!isShowListAccount.value;
+  setCheckedAccountList() {
+    isShowListAccount.value = !isShowListAccount.value;
     update();
   }
 
@@ -182,85 +168,87 @@ class UserDetailController extends GetxController{
 //   }
 
   // لیست کاربران قابل اضافه کردن
-  Future<void> fetchAccountList(String parentId) async{
-    try{
+  Future<void> fetchAccountList(String parentId) async {
+    try {
       accountList.clear();
       //   state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getCandidateChild(parentId,currentPageAccount.value,searchController.text,itemsPerPageAccount.value,);
-      accountList.assignAll(fetchedAccountList.accounts??[]);
-      paginated.value=fetchedAccountList.paginated;
+      var fetchedAccountList = await accountRepository.getCandidateChild(
+        parentId,
+        currentPageAccount.value,
+        searchController.text,
+        itemsPerPageAccount.value,
+      );
+      accountList.assignAll(fetchedAccountList.accounts ?? []);
+      paginated.value = fetchedAccountList.paginated;
       //  state.value=PageState.list;
-      if(accountList.isEmpty){
+      if (accountList.isEmpty) {
         //   state.value=PageState.empty;
       }
       print('تعداد55 :${accountList.length}');
-    }
-    catch(e){
+    } catch (e) {
       //  state.value=PageState.err;
-    }finally{
-    }
+    } finally {}
   }
 
-  Future<void> addChild() async{
+  Future<void> addChild() async {
     EasyLoading.show(
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
     );
-    try{
+    try {
       //   state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.addChild(status: accountChildModelList);
+      var fetchedAccountList =
+          await accountRepository.addChild(status: accountChildModelList);
       accountChildModelList.clear();
-     fetchAccountList(idUser.value.toString());
-       fetchChildList(idUser.value.toString());
+      fetchAccountList(idUser.value.toString());
+      fetchChildList(idUser.value.toString());
       //  state.value=PageState.list;
       print('تعداد55 :${accountList.length}');
-    }
-    catch(e){
+    } catch (e) {
       //  state.value=PageState.err;
-    }finally{
+    } finally {
       EasyLoading.dismiss();
     }
   }
 
-  Future<void> removeChild() async{
+  Future<void> removeChild() async {
     EasyLoading.show(
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
     );
-    try{
+    try {
       //   state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.removeChild(status: accountChildModelListRemove);
+      var fetchedAccountList = await accountRepository.removeChild(
+          status: accountChildModelListRemove);
       accountChildModelListRemove.clear();
       fetchAccountList(idUser.value.toString());
       fetchChildList(idUser.value.toString());
       //  state.value=PageState.list;
       print('تعداد55 :${accountList.length}');
-    }
-    catch(e){
+    } catch (e) {
       //  state.value=PageState.err;
-    }finally{
+    } finally {
       EasyLoading.dismiss();
     }
   }
 
   // لیست زیر مجوعه ها
-  Future<void> fetchChildList(String parentId) async{
-    try{
+  Future<void> fetchChildList(String parentId) async {
+    try {
       //   state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getChildList(parentId,currentPage.value,itemsPerPage.value);
+      var fetchedAccountList = await accountRepository.getChildList(
+          parentId, currentPage.value, itemsPerPage.value);
       accountChildList.clear();
-      accountChildList.assignAll(fetchedAccountList.accounts??[]);
-      paginatedChild.value=fetchedAccountList.paginated;
+      accountChildList.assignAll(fetchedAccountList.accounts ?? []);
+      paginatedChild.value = fetchedAccountList.paginated;
       //  state.value=PageState.list;
-      if(accountChildList.isEmpty){
+      if (accountChildList.isEmpty) {
         //   state.value=PageState.empty;
       }
       print('تعداد55 :${accountChildList.length}');
-    }
-    catch(e){
+    } catch (e) {
       //  state.value=PageState.err;
-    }finally{
-    }
+    } finally {}
   }
 
   // کاربر
@@ -270,18 +258,15 @@ class UserDetailController extends GetxController{
     //   dismissOnTap: false,
     // );
     try {
-      state.value=PageStateUser.loading;
-      var response = await userRepository.getOneAccount(id: id
-      );
-      accountModel.value=response;
-      state.value=PageStateUser.list;
+      state.value = PageStateUser.loading;
+      var response = await userRepository.getOneAccount(id: id);
+      accountModel.value = response;
+      state.value = PageStateUser.list;
       update();
-    }
-    catch (e) {
-      state.value=PageStateUser.empty;
+    } catch (e) {
+      state.value = PageStateUser.empty;
     } finally {
-    //  EasyLoading.dismiss();
+      //  EasyLoading.dismiss();
     }
   }
-
 }
