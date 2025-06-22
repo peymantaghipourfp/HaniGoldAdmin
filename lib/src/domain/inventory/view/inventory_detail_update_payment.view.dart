@@ -15,6 +15,7 @@ import '../../../config/repository/url/base_url.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../../widget/pager_widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/inventory_detail_insert_payment.controller.dart';
 import '../controller/inventory_detail_insert_receive.controller.dart';
@@ -295,7 +296,7 @@ class _InventoryDetailUpdatePaymentViewState
                                                                 .circular(
                                                                 10)))),
                                                 onPressed: () async {
-                                                  await inventoryDetailUpdatePaymentController.fetchForPaymentList();
+                                                  await inventoryDetailUpdatePaymentController.getForPaymentListPager();
                                                   showForPaymentModal();
                                                   print(
                                                       'idIttttem ${inventoryDetailUpdatePaymentController
@@ -755,25 +756,51 @@ class _InventoryDetailUpdatePaymentViewState
 
   void showForPaymentModal() {
     Get.dialog(
-      Dialog(
-        backgroundColor: AppColor.backGroundColor,
-        insetPadding: EdgeInsets.all(20),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: 600,
-            maxHeight: Get.height * 0.8,
-          ),
-          child: Column(
-            children: [
-              buildForPaymentDetail(),
-              Spacer(),
-              TextButton(
-                onPressed: () =>
-                    Get.back(),
-                child: Text("بستن", style: AppTextStyle.bodyText,),
-              ),
-              SizedBox(height: 15,),
-            ],
+      SingleChildScrollView(
+        child: Dialog(
+          backgroundColor: AppColor.backGroundColor,
+          insetPadding: EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 600,
+              maxHeight: Get.height * 0.8,
+            ),
+            child: Column(
+              children: [
+                buildForPaymentDetail(),
+                Obx(() {
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        inventoryDetailUpdatePaymentController.paginated.value != null
+                            ? Container(
+                            height: 70,
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 70, vertical: 10),
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            color: AppColor.appBarColor.withOpacity(0.5),
+                            alignment: Alignment.bottomCenter,
+                            child: PagerWidget(
+                              countPage: inventoryDetailUpdatePaymentController
+                                  .paginated.value?.totalCount ?? 0,
+                              callBack: (int index) {
+                                inventoryDetailUpdatePaymentController.isChangePage(
+                                    index);
+                              },))
+                            : SizedBox(),
+                      ],
+                    ),
+                  );
+                }),
+                /*TextButton(
+                  onPressed: () =>
+                      Get.back(),
+                  child: Text("بستن", style: AppTextStyle.bodyText,),
+                ),*/
+                //SizedBox(height: 15,),
+              ],
+            ),
           ),
         ),
       ),
@@ -791,13 +818,24 @@ class _InventoryDetailUpdatePaymentViewState
         ) :
         // لیست ForPayment مربوط به هر ولت
         SizedBox(
-          height: Get.height * 0.7, // تعیین ارتفاع ثابت
+          height: Get.height * 0.65, // تعیین ارتفاع ثابت
           width: Get.width * 0.5,
           child: SingleChildScrollView(
             child: Column(
               children: [
                 SizedBox(height: 12,),
-                Text('لیست دریافتی ها', style: AppTextStyle.smallTitleText),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('لیست دریافتی ها', style: AppTextStyle.smallTitleText),
+                      IconButton(
+                          onPressed: Get.back,
+                          icon: Icon(Icons.close))
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12,),
                 Row(
                   children: [
                     Expanded(
@@ -861,9 +899,10 @@ class _InventoryDetailUpdatePaymentViewState
                     ),
                   ],
                 ),
+                inventoryDetailUpdatePaymentController.forPaymentList.isNotEmpty ?
                 ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxHeight: Get.height * 0.7,
+                    maxHeight: Get.height * 0.65,
                   ),
                   child: ListView.builder(
                     shrinkWrap: true,
@@ -880,28 +919,7 @@ class _InventoryDetailUpdatePaymentViewState
                             inventoryDetailUpdatePaymentController
                                 .selectedForPaymentId.add(forPayment.id!);
                           }
-
-                          inventoryDetailUpdatePaymentController
-                              .selectedInputItem.value = forPayment;
-
-                          inventoryDetailUpdatePaymentController.selectQuantity(
-                              forPayment.quantityRemainded ?? 0.0);
-                          inventoryDetailUpdatePaymentController
-                              .selectedLaboratory.value = forPayment.laboratory;
-                          inventoryDetailUpdatePaymentController
-                              .quantityController.text =
-                              forPayment.quantityRemainded?.toString() ?? '0';
-                          inventoryDetailUpdatePaymentController
-                              .impurityController.text =
-                              forPayment.impurity?.toString() ?? '0';
-                          inventoryDetailUpdatePaymentController
-                              .weight750Controller.text =
-                              forPayment.weight750?.toString() ?? '0';
-                          inventoryDetailUpdatePaymentController.caratController
-                              .text = forPayment.carat?.toString() ?? '0';
-                          inventoryDetailUpdatePaymentController
-                              .receiptNumberController.text =
-                              forPayment.receiptNumber ?? '';
+                          inventoryDetailUpdatePaymentController.selectInputItem(forPayment);
                         },
                         contentPadding: EdgeInsets.zero,
                         title: Card(
@@ -936,7 +954,7 @@ class _InventoryDetailUpdatePaymentViewState
                                   height: 1, color: AppColor.dividerColor,),
                                 SizedBox(height: 5,),
                                 // عیار-وزن 750
-                                Row(
+                                Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                   children: [
                                     Row(
                                       children: [
@@ -952,7 +970,6 @@ class _InventoryDetailUpdatePaymentViewState
                                       ],
                                     ),
                                     SizedBox(width: 15,),
-                                    SizedBox(height: 5,),
                                     Row(
                                       children: [
                                         Text(
@@ -1003,8 +1020,10 @@ class _InventoryDetailUpdatePaymentViewState
                       );
                     },
                   ),
+                ) :
+                Center(
+                  child: CircularProgressIndicator(),
                 ),
-
               ],
             ),
           ),

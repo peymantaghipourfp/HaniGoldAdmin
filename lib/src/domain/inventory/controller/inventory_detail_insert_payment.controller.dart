@@ -26,6 +26,7 @@ import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../../laboratory/model/laboratory.model.dart';
 import '../../users/model/balance_item.model.dart';
+import '../../users/model/paginated.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
@@ -68,6 +69,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
   var isLoading=true.obs;
   var isLoadingBalance=true.obs;
 
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
   var inventoryId=0.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
@@ -90,6 +92,8 @@ class InventoryDetailInsertPaymentController extends GetxController{
   var uuid = Uuid();
   RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploadingDesktop = false.obs;
+  RxInt currentPage = 1.obs;
+  RxInt itemsPerPage = 10.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -101,7 +105,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
     selectedWalletAccount.value = newValue;
     selectedLaboratoryId.value = 0;
     searchLaboratoryController.clear();
-    fetchForPaymentList();
+    getForPaymentListPager();
     print("idItemUnit: ${newValue?.item?.itemUnit?.id}");
 
   }
@@ -134,7 +138,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
     searchController.addListener(onSearchChanged);
     fetchAccountList();
     fetchWalletAccountList();
-    fetchForPaymentList();
+    getForPaymentListPager();
     super.onInit();
   }
 
@@ -259,7 +263,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
     selectedLaboratoryId.value = laboratory.id!;
     searchLaboratoryController.text = laboratory.name!;
     Get.back(); // Close search dialog
-    fetchForPaymentList();
+    getForPaymentListPager();
   }
 
   void clearSearch() {
@@ -267,31 +271,61 @@ class InventoryDetailInsertPaymentController extends GetxController{
     selectedLaboratoryId.value = 0;
     searchLaboratoryController.clear();
     searchedLaboratories.clear();
-    fetchForPaymentList();
+    getForPaymentListPager();
   }
 
   // لیست دریافتی ها
-  Future<void> fetchForPaymentList()async{
-    try{
-      isLoading.value=true;
-      state.value=PageState.loading;
-      var fetchedForPaymentList=await inventoryRepository.getForPaymentlist(
+  // Future<void> fetchForPaymentList()async{
+  //   try{
+  //     isLoading.value=true;
+  //     state.value=PageState.loading;
+  //     var fetchedForPaymentList=await inventoryRepository.getForPaymentlist(
+  //         itemId:selectedWalletAccount.value?.item?.id ?? 0,
+  //         laboratoryId: selectedLaboratoryId.value == 0
+  //             ? null :selectedLaboratoryId.value
+  //     );
+  //     forPaymentList.assignAll(fetchedForPaymentList);
+  //     state.value=PageState.list;
+  //     if(forPaymentList.isEmpty){
+  //       state.value=PageState.empty;
+  //     }
+  //   }
+  //   catch(e){
+  //     state.value=PageState.err;
+  //     errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+  //   }finally{
+  //     isLoading.value=false;
+  //   }
+  // }
+
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    getForPaymentListPager();
+  }
+  // لیست دریافتی ها با صفحه بندی
+  Future<void> getForPaymentListPager() async {
+    print("### getForPaymentListPager ###");
+    //isLoading.value=true;
+    try {
+      //state.value=PageState.loading;
+      var response = await inventoryRepository.getForPaymentlistPager(
+          startIndex: currentPage.value,
+          toIndex: itemsPerPage.value,
           itemId:selectedWalletAccount.value?.item?.id ?? 0,
           laboratoryId: selectedLaboratoryId.value == 0
               ? null :selectedLaboratoryId.value
       );
-      forPaymentList.assignAll(fetchedForPaymentList);
-      state.value=PageState.list;
-      if(forPaymentList.isEmpty){
-        state.value=PageState.empty;
-      }
+      forPaymentList.clear();
+      //isLoading.value=false;
+      forPaymentList.addAll(response.inventories??[]);
+      paginated.value=response.paginated;
+      //state.value=PageState.list;
+      update();
     }
-    catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
-      isLoading.value=false;
-    }
+    catch (e) {
+      //state.value = PageState.err;
+    } finally {}
   }
 
 
@@ -391,7 +425,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
         date: gregorianDate,
         accountId: accountId.value,
         accountName: accountName.value,
-        type: 0,
+        type: 1,
         description: descriptionController.text,
         walletId: selectedWalletAccount.value?.id ?? 0,
         itemId: selectedWalletAccount.value!.item?.id ?? 0,
@@ -404,7 +438,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
         stateMode : 1,
         laboratoryName: selectedLaboratory.value?.name ?? '',
         laboratoryId: selectedLaboratory.value?.id ?? 0,
-        inputItemId: selectedInputItem.value?.id ?? 0,
+        inputItemId: selectedWalletAccount.value!.item?.itemUnit?.id==2 ? selectedInputItem.value?.id : null,
         recId: recId,
       );
       print(response);

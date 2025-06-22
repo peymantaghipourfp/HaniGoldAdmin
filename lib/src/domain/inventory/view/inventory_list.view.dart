@@ -1975,7 +1975,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                       borderRadius: BorderRadius
                                                           .circular(5),
                                                     ),
-                                                    color: inventories.type == 1
+                                                    color: inventories.type == 0
                                                         ? AppColor.primaryColor
                                                         : AppColor.accentColor,
                                                     margin: EdgeInsets
@@ -1986,7 +1986,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                       padding: const EdgeInsets
                                                           .all(2),
                                                       child: Text(
-                                                          inventories.type == 1
+                                                          inventories.type == 0
                                                               ? 'دریافت'
                                                               : 'پرداخت',
                                                           style: AppTextStyle
@@ -2540,7 +2540,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                           //  آیکون ویرایش
                                                                           GestureDetector(
                                                                             onTap: () {
-                                                                              getOneInventories?.type==1 ?
+                                                                              getOneInventories?.type==0 ?
                                                                               Get.toNamed('/inventoryDetailUpdateReceive', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()}):
                                                                               Get.toNamed('/inventoryDetailUpdatePayment', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()});
                                                                             },
@@ -2592,7 +2592,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                       onPressed: () {
                                                                                         Gregorian date=getOneInventories!.date!.toGregorian();
                                                                                         Get.back();
-                                                                                        getOneInventories.type==1 ?
+                                                                                        getOneInventories.type==0 ?
                                                                                         inventoryController.updateDeleteInventoryReceive(
                                                                                           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                                                             inventories.id!,
@@ -2999,7 +2999,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                     borderRadius: BorderRadius
                         .circular(5),
                   ),
-                  color: inventory.type == 1
+                  color: inventory.type == 0
                       ? AppColor.primaryColor
                       : AppColor.accentColor,
                   margin: EdgeInsets
@@ -3010,7 +3010,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                     padding: const EdgeInsets
                         .all(4),
                     child: Text(
-                        inventory.type == 1
+                        inventory.type == 0
                             ? 'دریافت'
                             : 'پرداخت',
                         style: AppTextStyle
@@ -3312,7 +3312,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                   //آیکون اضافه
                   GestureDetector(
                     onTap: () {
-                      inventory.type==1 ?
+                      inventory.type==0 ?
                       Get.toNamed('/inventoryDetailInsertReceive', arguments: inventory ) :
                       Get.toNamed('/inventoryDetailInsertPayment', arguments: inventory );
                     },
@@ -3388,7 +3388,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                   // آیکون ویرایش
                   GestureDetector(
                     onTap: () async{
-                      inventory.type==0 ?
+                      inventory.type==1 ?
                       Get.toNamed('/inventoryDetailUpdatePayment', parameters: {"id":inventory.id.toString(),"index":""}):
                       Get.toNamed('/inventoryDetailUpdateReceive', parameters: {"id":inventory.id.toString(),"index":""});
                     },
@@ -4079,7 +4079,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                     //  آیکون ویرایش
                                     GestureDetector(
                                       onTap: () {
-                                        getOneInventories?.type==1 ?
+                                        getOneInventories?.type==0 ?
                                         Get.toNamed('/inventoryDetailUpdateReceive', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()}):
                                         Get.toNamed('/inventoryDetailUpdatePayment', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()});
                                       },
@@ -4125,7 +4125,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                 onPressed: () {
                                                   Gregorian date=getOneInventories!.date!.toGregorian();
                                                   Get.back();
-                                                  getOneInventories.type==1 ?
+                                                  getOneInventories.type==0 ?
                                                   inventoryController.updateDeleteInventoryReceive(
                                                     "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                       inventory.id!,

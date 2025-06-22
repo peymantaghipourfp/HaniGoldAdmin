@@ -439,7 +439,7 @@ class InventoryUpdateReceiveController extends GetxController{
         date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
         accountId: accountId.value,
         accountName: accountName.value,
-        type: 1,
+        type: 0,
         description: descriptionController.text,
         walletId: selectedWalletAccount.value?.id ?? 0,
         itemId: selectedWalletAccount.value!.item?.id ?? 0,

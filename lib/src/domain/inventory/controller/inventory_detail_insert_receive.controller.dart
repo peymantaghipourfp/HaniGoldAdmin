@@ -385,7 +385,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
         date: gregorianDate,
         accountId: accountId.value,
         accountName: accountName.value,
-        type: 1,
+        type: 0,
         description: descriptionController.text,
         walletId: selectedWalletAccount.value?.id ?? 0,
         itemId: selectedWalletAccount.value!.item?.id ?? 0,

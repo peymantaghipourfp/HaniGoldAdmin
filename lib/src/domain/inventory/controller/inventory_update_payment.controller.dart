@@ -27,6 +27,7 @@ import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../../laboratory/model/laboratory.model.dart';
 import '../../users/model/balance_item.model.dart';
+import '../../users/model/paginated.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
@@ -69,6 +70,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   var isLoading=true.obs;
   var isLoadingBalance=true.obs;
 
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
   var inventoryId=0.obs;
   var inventoryDetailId=0.obs;
@@ -93,6 +95,8 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploadingDesktop = false.obs;
   RxList<String> imageList = <String>[].obs;
+  RxInt currentPage = 1.obs;
+  RxInt itemsPerPage = 10.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -104,7 +108,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     selectedWalletAccount.value = newValue;
     selectedLaboratoryId.value = 0;
     searchLaboratoryController.clear();
-    fetchForPaymentList();
+    getForPaymentListPager();
     print("idItemUnit: ${newValue?.item?.itemUnit?.id}");
 
   }
@@ -114,6 +118,18 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   void selectQuantity(double quantity){
     quantityController.text=quantity.toString();
     update();
+  }
+
+  void selectInputItem(InventoryDetailModel item) {
+    selectedInputItem.value = item;
+    inputItemId.value = item.id ?? 0;
+    selectQuantity(item.quantityRemainded ?? 0.0);
+    selectedLaboratory.value = item.laboratory;
+    quantityController.text = item.quantityRemainded?.toString() ?? '0';
+    impurityController.text = item.impurity?.toString() ?? '0';
+    weight750Controller.text = item.weight750?.toString() ?? '0';
+    caratController.text = item.carat?.toString() ?? '0';
+    receiptNumberController.text = item.receiptNumber ?? '';
   }
 
   late InventoryDetailModel? inventoryDetail;
@@ -128,7 +144,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     searchController.addListener(onSearchChanged);
     fetchAccountList();
     fetchWalletAccountList();
-    fetchForPaymentList();
+    getForPaymentListPager();
     /*var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text =
@@ -263,7 +279,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     selectedLaboratoryId.value = laboratory.id!;
     searchLaboratoryController.text = laboratory.name!;
     Get.back(); // Close search dialog
-    fetchForPaymentList();
+    getForPaymentListPager();
   }
 
   void clearSearch() {
@@ -271,31 +287,62 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     selectedLaboratoryId.value = 0;
     searchLaboratoryController.clear();
     searchedLaboratories.clear();
-    fetchForPaymentList();
+    getForPaymentListPager();
   }
 
   // لیست دریافتی ها
-  Future<void> fetchForPaymentList()async{
-    try{
-      isLoading.value=true;
-      state.value=PageState.loading;
-      var fetchedForPaymentList=await inventoryRepository.getForPaymentlist(
+  // Future<void> fetchForPaymentList()async{
+  //   try{
+  //     isLoading.value=true;
+  //     state.value=PageState.loading;
+  //     var fetchedForPaymentList=await inventoryRepository.getForPaymentlist(
+  //         itemId:selectedWalletAccount.value?.item?.id ?? 0,
+  //         laboratoryId: selectedLaboratoryId.value == 0
+  //             ? null :selectedLaboratoryId.value
+  //     );
+  //     forPaymentList.assignAll(fetchedForPaymentList);
+  //     state.value=PageState.list;
+  //     if(forPaymentList.isEmpty){
+  //       state.value=PageState.empty;
+  //     }
+  //   }
+  //   catch(e){
+  //     state.value=PageState.err;
+  //     errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+  //   }finally{
+  //     isLoading.value=false;
+  //   }
+  // }
+
+  void isChangePage(int index){
+    currentPage.value=index*10-10;
+    itemsPerPage.value=index*10;
+    getForPaymentListPager();
+  }
+
+  // لیست دریافتی ها با صفحه بندی
+  Future<void> getForPaymentListPager() async {
+    print("### getForPaymentListPager ###");
+    //isLoading.value=true;
+    try {
+      //state.value=PageState.loading;
+      var response = await inventoryRepository.getForPaymentlistPager(
+          startIndex: currentPage.value,
+          toIndex: itemsPerPage.value,
           itemId:selectedWalletAccount.value?.item?.id ?? 0,
           laboratoryId: selectedLaboratoryId.value == 0
               ? null :selectedLaboratoryId.value
       );
-      forPaymentList.assignAll(fetchedForPaymentList);
-      state.value=PageState.list;
-      if(forPaymentList.isEmpty){
-        state.value=PageState.empty;
-      }
+      forPaymentList.clear();
+      //isLoading.value=false;
+      forPaymentList.addAll(response.inventories??[]);
+      paginated.value=response.paginated;
+      //state.value=PageState.list;
+      update();
     }
-    catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
-      isLoading.value=false;
-    }
+    catch (e) {
+      //state.value = PageState.err;
+    } finally {}
   }
 
 
@@ -430,7 +477,10 @@ class InventoryDetailUpdatePaymentController extends GetxController{
       //String gregorianDate = convertJalaliToGregorian(dateController.text);
       Gregorian date=inventoryDetail!.date!.toGregorian();
       print(inventoryId.value);
+      print(inventoryDetailId.value);
+      print(accountId.value);
       print(accountName.value);
+      print(inputItemId.value);
       if (selectedInputItem.value?.id != null &&
           !selectedForPaymentId.contains(selectedInputItem.value!.id)) {
         selectedForPaymentId.add(selectedInputItem.value!.id!);
@@ -441,7 +491,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
         accountId: accountId.value,
         accountName: accountName.value,
-        type: 0,
+        type: 1,
         description: descriptionController.text,
         walletId: selectedWalletAccount.value?.id ?? 0,
         itemId: selectedWalletAccount.value!.item?.id ?? 0,
@@ -450,11 +500,12 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         impurity: double.tryParse(impurityController.text.toEnglishDigit()) ?? 0.0,
         weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
         carat: int.tryParse(caratController.text.toEnglishDigit()) ?? 0,
-        receiptNumber: receiptNumberController.text,
+        receiptNumber:receiptNumberController.text,
         stateMode : 2,
-        laboratoryName: selectedLaboratory.value?.name ?? '',
-        laboratoryId: selectedLaboratory.value?.id ?? 0,
-        inputItemId: inputItemId.value,
+        laboratoryName: selectedLaboratory.value?.name,
+        laboratoryId: selectedLaboratory.value?.id,
+        //inputItemId: selectedWalletAccount.value?.item?.itemUnit?.id==2 ? (selectedInputItem.value?.id ?? inputItemId.value) : null,
+        inputItemId: selectedWalletAccount.value?.item?.itemUnit?.id==2 ? ((selectedInputItem.value?.id ?? inputItemId.value) == 0 ? null : (selectedInputItem.value?.id ?? inputItemId.value)) : null,
         recId: inventoryDetail?.recId ?? '',
 
       );
@@ -514,6 +565,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     weight750Controller.text=inventoryDetail.weight750.toString() ?? '';
     caratController.text=inventoryDetail.carat.toString() ?? '';
     receiptNumberController.text=inventoryDetail.receiptNumber.toString() ?? '';
+    selectedLaboratory.value=inventoryDetail.laboratory;
     inputItemId.value=inventoryDetail.inputItemId ?? 0;
     descriptionController.text=inventoryDetail.description ?? "";
     dateController.text = inventoryDetail.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';

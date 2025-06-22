@@ -364,7 +364,7 @@ class InventoryCreateReceiveController extends GetxController{
         wallet: selectedWalletAccount.value!,
         item: selectedWalletAccount.value!.item!,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
-        type: 1,
+        type: 0,
         impurity: double.tryParse(impurityController.text.toEnglishDigit()) ?? 0.0,
         weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
         carat: int.tryParse(caratController.text.toEnglishDigit()) ?? 0,
@@ -408,7 +408,7 @@ class InventoryCreateReceiveController extends GetxController{
           date: gregorianDate,
           accountId: selectedAccount.value?.id ?? 0,
           accountName: selectedAccount.value?.name ?? "",
-          type: 1,
+          type: 0,
           details:tempDetails,
           recId: null
       );

@@ -3,6 +3,7 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
+import 'package:hanigold_admin/src/domain/inventory/model/list_forPayment.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 
 import '../../domain/inventory/model/inventory.model.dart';
@@ -475,6 +476,7 @@ class InventoryRepository {
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code updateDetailInventoryReceive: ${response.statusCode}');
       print('Response Data updateDetailInventoryReceive: ${response.data}');
+      print('inventoryData updateDetailInventoryReceive: $inventoryData');
       return response.data;
 
     }catch(e){
@@ -674,6 +676,62 @@ class InventoryRepository {
     }
   }
 
+  Future<ListForPaymentModel> getForPaymentlistPager({
+    required int startIndex,
+    required int toIndex,
+    required int itemId,
+    int? laboratoryId
+  })async{
+    try{
+      Map<String , dynamic> options=
+          laboratoryId != null ?
+          {
+            "options" : { "inventory" :{
+              "Predicate": [
+                {
+                  "innerCondition": 0,
+                  "outerCondition": 0,
+                  "filters": [
+                    {
+                      "fieldName": "Id",
+                      "filterValue": itemId.toString(),
+                      "filterType": 5,
+                      "RefTable": "Item"
+                    },
+                      {
+                        "fieldName": "Id",
+                        "filterValue": laboratoryId.toString(),
+                        "filterType": 5,
+                        "RefTable": "Laboratory"
+                      },
+                  ]
+                }
+              ],
+              "orderBy": "FilteredDetails.Id",
+              "orderByType": "desc",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          } :
+          {
+            "options" : { "inventory" :{
+              "orderBy": "FilteredDetails.Id",
+              "orderByType": "desc",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          };
+      final response=await inventoryDio.post('Inventory/getForPeymentWrapper',data: options);
+      print("request getForPaymentlistPaper : $options" );
+      print("response getForPaymentlistPaper : ${response.data}" );
+      return ListForPaymentModel.fromJson(response.data);
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 
   Future<Map<String, dynamic>> insertInventoryPayment({
     required String date,
@@ -765,7 +823,7 @@ class InventoryRepository {
     required int carat,
     required String receiptNumber,
     required int stateMode,
-    required int inputItemId,
+    required int? inputItemId,
     required int laboratoryId,
     required String laboratoryName,
     required String recId,
@@ -877,7 +935,7 @@ class InventoryRepository {
     required int accountId,
     required String accountName,
     required int type,
-    required int inputItemId,
+    required int? inputItemId,
     required String? description,
     required int walletId,
     required int itemId,
@@ -886,10 +944,10 @@ class InventoryRepository {
     required double impurity,
     required double weight750,
     required int carat,
-    required String receiptNumber,
+    required String? receiptNumber,
     required int stateMode,
-    required int laboratoryId,
-    required String laboratoryName,
+    required int? laboratoryId,
+    required String? laboratoryName,
     required String recId,
 
   })async{
@@ -968,7 +1026,7 @@ class InventoryRepository {
             "carat": carat,
             "receiptNumber": receiptNumber!='' ? receiptNumber : null,
             "type": type,
-            "inputItemId":inputItemId!=0 ? inputItemId : null,
+            "inputItemId":inputItemId,
             "stateMode":stateMode,
             "id": inventoryDetailId,
             "isDeleted": false,
@@ -987,6 +1045,7 @@ class InventoryRepository {
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
       print('Status Code: ${response.statusCode}');
       print('Response Data updateDetailInventoryPayment: ${response.data}');
+      print('Response Data updateDetailInventoryPayment: $inventoryData');
       return response.data;
 
     }catch(e){

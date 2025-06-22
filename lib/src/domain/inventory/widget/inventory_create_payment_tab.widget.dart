@@ -12,21 +12,27 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../../widget/pager_widget.dart';
 import '../controller/inventory_create_receive.controller.dart';
 import 'item_temp_detail_payment.widget.dart';
+
 typedef SelectCallBack = Function(int id);
+
 class InventoryCreatePaymentTabWidget extends StatefulWidget {
   final SelectCallBack callBack;
+
   InventoryCreatePaymentTabWidget({
     super.key, required this.callBack,
 
   });
 
   @override
-  State<InventoryCreatePaymentTabWidget> createState() => _InventoryCreatePaymentTabWidgetState();
+  State<InventoryCreatePaymentTabWidget> createState() =>
+      _InventoryCreatePaymentTabWidgetState();
 }
 
-class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePaymentTabWidget> {
+class _InventoryCreatePaymentTabWidgetState
+    extends State<InventoryCreatePaymentTabWidget> {
   final formKey = GlobalKey<FormState>();
   InventoryCreatePaymentController inventoryCreatePaymentController = Get.find<
       InventoryCreatePaymentController>();
@@ -95,24 +101,28 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                         ),
                       ),
                     ),
-                    value: inventoryCreatePaymentController.selectedAccount.value,
+                    value: inventoryCreatePaymentController.selectedAccount
+                        .value,
                     validator: (value) {
-                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                      return 'کاربر را انتخاب کنید';
-                    }
-                    return null;
-                  },
+                      if (value == 'انتخاب کنید' || value == null ||
+                          value.isEmpty) {
+                        return 'کاربر را انتخاب کنید';
+                      }
+                      return null;
+                    },
                     showSearchBox: true,
                     items: [
                       'انتخاب کنید',
                       ...inventoryCreatePaymentController.searchedAccounts.map((
                           account) => account.name ?? "")
                     ].toList(),
-                    selectedValue: inventoryCreatePaymentController.selectedAccount
+                    selectedValue: inventoryCreatePaymentController
+                        .selectedAccount
                         .value?.name,
                     onChanged: (String? newValue) {
                       if (newValue == 'انتخاب کنید') {
-                        inventoryCreatePaymentController.changeSelectedAccount(null);
+                        inventoryCreatePaymentController.changeSelectedAccount(
+                            null);
                       } else {
                         var selectedAccount = inventoryCreatePaymentController
                             .searchedAccounts
@@ -161,7 +171,8 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                       ],
                     ),
                     items:
-                    inventoryCreatePaymentController.walletAccountList.map((wallet) {
+                    inventoryCreatePaymentController.walletAccountList.map((
+                        wallet) {
                       return DropdownMenuItem(
                           value: wallet,
                           child: Row(
@@ -171,11 +182,13 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                             ],
                           ));
                     }).toList(),
-                    value: inventoryCreatePaymentController.selectedWalletAccount
+                    value: inventoryCreatePaymentController
+                        .selectedWalletAccount
                         .value,
                     onChanged: (newValue) {
                       if (newValue != null) {
-                        inventoryCreatePaymentController.changeSelectedWalletAccount(
+                        inventoryCreatePaymentController
+                            .changeSelectedWalletAccount(
                             newValue);
                       }
                     },
@@ -215,7 +228,8 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                   ),
                 ),
                 // لیست دریافتی ها
-                inventoryCreatePaymentController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                inventoryCreatePaymentController.selectedWalletAccount.value
+                    ?.item?.itemUnit?.id == 2 ?
                 ElevatedButton(
                   style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
                       isDesktop ? Get.width * 0.10 : Get.width * 0.3,
@@ -233,7 +247,8 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                           borderRadius: BorderRadius.circular(10)))),
                   onPressed: () async {
                     showForPaymentModal();
-                    print('idIttttem ${inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id}');
+                    print('idIttttem ${inventoryCreatePaymentController
+                        .selectedWalletAccount.value?.item?.id}');
                   },
                   child: inventoryCreatePaymentController.isLoading.value
                       ?
@@ -248,7 +263,8 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                 )
                     : SizedBox.shrink(),
                 // مقدار
-                inventoryCreatePaymentController.selectedWalletAccount.value?.item?.itemUnit?.id!=2 ?
+                inventoryCreatePaymentController.selectedWalletAccount.value
+                    ?.item?.itemUnit?.id != 2 ?
                 Column(crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
@@ -266,13 +282,15 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                       IntrinsicHeight(
                         child: TextFormField(
                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                          controller: inventoryCreatePaymentController.quantityController,
+                          controller: inventoryCreatePaymentController
+                              .quantityController,
                           style: AppTextStyle.labelText,
                           keyboardType: TextInputType.numberWithOptions(
                               decimal: true),
                           inputFormatters: [FilteringTextInputFormatter.allow(
                               RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                            TextInputFormatter.withFunction((oldValue, newValue) {
+                            TextInputFormatter.withFunction((oldValue,
+                                newValue) {
                               // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
                               String newText = newValue.text
                                   .replaceAll('٠', '0')
@@ -311,7 +329,7 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                       ),
                     ),
                   ],
-                ): SizedBox.shrink(),
+                ) : SizedBox.shrink(),
                 // تاریخ
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -332,7 +350,8 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                         }
                         return null;
                       },
-                      controller: inventoryCreatePaymentController.dateController,
+                      controller: inventoryCreatePaymentController
+                          .dateController,
                       readOnly: true,
                       style: AppTextStyle.labelText,
                       decoration: InputDecoration(
@@ -382,7 +401,8 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                   padding: EdgeInsets.only(bottom: 5),
                   child:
                   TextFormField(
-                    controller: inventoryCreatePaymentController.descriptionController,
+                    controller: inventoryCreatePaymentController
+                        .descriptionController,
                     maxLines: 4,
                     style: AppTextStyle.labelText,
                     decoration: InputDecoration(
@@ -404,50 +424,60 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                       child: Column(
                         children: [
                           SizedBox(height: 5,),
-                          Text('آیتم‌های موقت (${inventoryCreatePaymentController
-                              .tempDetails.length})',
+                          Text(
+                            'آیتم‌های موقت (${inventoryCreatePaymentController
+                                .tempDetails.length})',
                             style: AppTextStyle.bodyText,),
                           Expanded(
                             child: ListView.builder(
                               shrinkWrap: true,
-                              itemCount: inventoryCreatePaymentController.tempDetails
+                              itemCount: inventoryCreatePaymentController
+                                  .tempDetails
                                   .length,
                               itemBuilder: (context, index) {
                                 final detail = inventoryCreatePaymentController
                                     .tempDetails[index];
                                 return ListTile(
-                                    title:
-                                    ItemTempDetailWidgetPayment(
-                                        detail: detail,
-                                        quantity: detail.quantity ?? 0,
-                                      onQuantityChanged: (newQuantity) { // اضافه شده
-                                        inventoryCreatePaymentController.updateTempDetailQuantity(
+                                  title:
+                                  ItemTempDetailWidgetPayment(
+                                    detail: detail,
+                                    quantity: detail.quantity ?? 0,
+                                    onQuantityChanged: (
+                                        newQuantity) { // اضافه شده
+                                      inventoryCreatePaymentController
+                                          .updateTempDetailQuantity(
+                                        index,
+                                        newQuantity,
+                                      );
+                                    },
+                                    recId: (recId, list) {
+                                      inventoryCreatePaymentController
+                                          .updateDetail(
                                           index,
-                                          newQuantity,
-                                        );
-                                      },
-                                      recId: (recId,list){
-                                          inventoryCreatePaymentController.updateDetail(
-                                              index,
-                                              recId,
-                                              list
-                                          );
-                                          setState(() {
-                                          });
-                                      }, image: detail.listXfile!=null?detail.listXfile!:[],
-                                    ),
-                                    trailing: IconButton(
+                                          recId,
+                                          list
+                                      );
+                                      setState(() {});
+                                    },
+                                    image: detail.listXfile != null ? detail
+                                        .listXfile! : [],
+                                  ),
+                                  trailing: IconButton(
                                       icon: Icon(Icons.delete,
                                         color: AppColor.accentColor,),
                                       onPressed: () {
-                                        final removedDetail = inventoryCreatePaymentController.tempDetails.removeAt(index);
+                                        final removedDetail = inventoryCreatePaymentController
+                                            .tempDetails.removeAt(index);
                                         if (removedDetail.id != null) {
-                                          inventoryCreatePaymentController.selectedForPaymentId.remove(removedDetail.id);
+                                          inventoryCreatePaymentController
+                                              .selectedForPaymentId.remove(
+                                              removedDetail.id);
                                         }
-                                        inventoryCreatePaymentController.fetchForPaymentList();
+                                        inventoryCreatePaymentController
+                                            .getForPaymentListPager();
                                       }
-                                    ),
-                                  );
+                                  ),
+                                );
                               },
                             ),
                           ),
@@ -463,26 +493,33 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                       children: [
                         Checkbox(
                           hoverColor: AppColor.textFieldColor.withOpacity(0.8),
-                          value: inventoryCreatePaymentController.factorChecked.value,
-                          onChanged: (value) async{
-                            inventoryCreatePaymentController.factorChecked.value = value!;
+                          value: inventoryCreatePaymentController.factorChecked
+                              .value,
+                          onChanged: (value) async {
+                            inventoryCreatePaymentController.factorChecked
+                                .value = value!;
                           },
                         ),
                         SizedBox(width: 8,),
-                        Text('ثبت نهایی همراه با صدور فاکتور',style: AppTextStyle.bodyTextBold,)
+                        Text(
+                          'ثبت نهایی همراه با صدور فاکتور', style: AppTextStyle
+                            .bodyTextBold,)
                       ],
                     ),
                     SizedBox(height: 5,),
                     Row(mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // دکمه ثبت
-                        inventoryCreatePaymentController.selectedWalletAccount.value?.item?.itemUnit?.id!=2 ?
+                        inventoryCreatePaymentController.selectedWalletAccount
+                            .value?.item?.itemUnit?.id != 2 ?
                         ElevatedButton(
-                          style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                              isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                              isDesktop ? 50 : 40
-                          ),
-                          ),
+                          style: ButtonStyle(
+                              fixedSize: WidgetStatePropertyAll(Size(
+                                  isDesktop ? Get.width * 0.12 : Get.width *
+                                      0.3,
+                                  isDesktop ? 50 : 40
+                              ),
+                              ),
                               padding: WidgetStatePropertyAll(
                                 EdgeInsets.symmetric(
                                     horizontal: isDesktop ? 20 : 7
@@ -490,15 +527,19 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                               elevation: WidgetStatePropertyAll(5),
                               backgroundColor:
                               WidgetStatePropertyAll(AppColor.buttonColor),
-                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)))),
+                              shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          10)))),
                           onPressed: () {
-                            if(formKey.currentState!.validate()){
+                            if (formKey.currentState!.validate()) {
                               inventoryCreatePaymentController.addToTempList();
-                              inventoryCreatePaymentController.descriptionController.clear();
+                              inventoryCreatePaymentController
+                                  .descriptionController.clear();
                             }
                           },
-                          child: inventoryCreatePaymentController.isLoading.value
+                          child: inventoryCreatePaymentController.isLoading
+                              .value
                               ?
                           CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -512,10 +553,12 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                         SizedBox(width: 10,),
                         // دکمه ثبت نهایی
                         ElevatedButton(
-                          style: ButtonStyle(fixedSize: WidgetStatePropertyAll(Size(
-                              isDesktop ? Get.width * 0.12 : Get.width * 0.3,
-                              isDesktop ? 50 : 40
-                          ),),
+                          style: ButtonStyle(
+                              fixedSize: WidgetStatePropertyAll(Size(
+                                  isDesktop ? Get.width * 0.12 : Get.width *
+                                      0.3,
+                                  isDesktop ? 50 : 40
+                              ),),
                               padding: WidgetStatePropertyAll(
                                 EdgeInsets.symmetric(
                                     horizontal: isDesktop ? 20 : 7
@@ -523,14 +566,20 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                               elevation: WidgetStatePropertyAll(5),
                               backgroundColor:
                               WidgetStatePropertyAll(AppColor.primaryColor),
-                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10)))),
+                              shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                          10)))),
                           onPressed: () async {
-                            if(inventoryCreatePaymentController.tempDetails.isNotEmpty){
-                              await inventoryCreatePaymentController.uploadImagesDesktop( "image", "InventoryDetail");
+                            if (inventoryCreatePaymentController.tempDetails
+                                .isNotEmpty) {
+                              await inventoryCreatePaymentController
+                                  .uploadImagesDesktop(
+                                  "image", "InventoryDetail");
                             }
                           },
-                          child: inventoryCreatePaymentController.isFinalizing.value
+                          child: inventoryCreatePaymentController.isFinalizing
+                              .value
                               ?
                           CircularProgressIndicator(
                             valueColor: AlwaysStoppedAnimation<Color>(
@@ -557,30 +606,57 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
 
   void showForPaymentModal() {
     Get.dialog(
-      Dialog(
-        backgroundColor: AppColor.backGroundColor,
-        insetPadding: EdgeInsets.all(20),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: 600,
-            maxHeight: Get.height * 0.8,
-          ),
-          child: Column(
-            children: [
-              buildForPaymentDetail(),
-              Spacer(),
-              TextButton(
-                onPressed: () =>
-                    Get.back(),
-                child: Text("بستن", style: AppTextStyle.bodyText,),
-              ),
-              SizedBox(height: 15,),
-            ],
+      SingleChildScrollView(
+        child: Dialog(
+          backgroundColor: AppColor.backGroundColor,
+          insetPadding: EdgeInsets.all(20),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: 600,
+              maxHeight: Get.height * 0.8,
+            ),
+            child: Column(
+              children: [
+                buildForPaymentDetail(),
+                Obx(() {
+                  return Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        inventoryCreatePaymentController.paginated.value != null
+                            ? Container(
+                            height: 70,
+                            margin: EdgeInsets.symmetric(
+                                horizontal: 70, vertical: 10),
+                            padding: EdgeInsets.symmetric(horizontal: 20),
+                            color: AppColor.appBarColor.withOpacity(0.5),
+                            alignment: Alignment.bottomCenter,
+                            child: PagerWidget(
+                              countPage: inventoryCreatePaymentController
+                                  .paginated.value?.totalCount ?? 0,
+                              callBack: (int index) {
+                                inventoryCreatePaymentController.isChangePage(
+                                    index);
+                              },))
+                            : SizedBox(),
+                      ],
+                    ),
+                  );
+                }),
+                /*TextButton(
+                  onPressed: () =>
+                      Get.back(),
+                  child: Text("بستن", style: AppTextStyle.bodyText,),
+                ),*/
+                //SizedBox(height: 15,),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+
   Widget buildForPaymentDetail() {
     return Obx(() {
       return
@@ -592,25 +668,38 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
         ) :
         // لیست ForPayment مربوط به هر ولت
         SizedBox(
-          height: Get.height * 0.7, // تعیین ارتفاع ثابت
+          height: Get.height * 0.65, // تعیین ارتفاع ثابت
           width: Get.width * 0.5,
           child: SingleChildScrollView(
             child: Column(
               children: [
                 SizedBox(height: 12,),
-                Text('لیست دریافتی ها', style: AppTextStyle.smallTitleText),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('لیست دریافتی ها', style: AppTextStyle.smallTitleText),
+                      IconButton(
+                          onPressed: Get.back,
+                          icon: Icon(Icons.close))
+                    ],
+                  ),
+                ),
+                SizedBox(height: 12,),
                 Row(
                   children: [
                     Expanded(
                       child: SizedBox(
                         height: 41,
                         child: TextFormField(
-                          controller: inventoryCreatePaymentController.searchLaboratoryController,
+                          controller: inventoryCreatePaymentController
+                              .searchLaboratoryController,
                           style: AppTextStyle.labelText,
                           textInputAction: TextInputAction.search,
                           onFieldSubmitted: (value) async {
                             if (value.isNotEmpty) {
-                              await inventoryCreatePaymentController.searchLaboratory(value);
+                              await inventoryCreatePaymentController
+                                  .searchLaboratory(value);
                               showSearchResults(context);
                             } else {
                               inventoryCreatePaymentController.clearSearch();
@@ -626,23 +715,29 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                             hintStyle: AppTextStyle.labelText,
                             prefixIcon: IconButton(
                                 onPressed: () async {
-                                  if (inventoryCreatePaymentController.searchLaboratoryController
+                                  if (inventoryCreatePaymentController
+                                      .searchLaboratoryController
                                       .text.isNotEmpty) {
-                                    await inventoryCreatePaymentController.searchLaboratory(
-                                      inventoryCreatePaymentController.searchLaboratoryController.text
+                                    await inventoryCreatePaymentController
+                                        .searchLaboratory(
+                                        inventoryCreatePaymentController
+                                            .searchLaboratoryController.text
                                     );
                                     showSearchResults(context);
                                   } else {
-                                    inventoryCreatePaymentController.clearSearch();
+                                    inventoryCreatePaymentController
+                                        .clearSearch();
                                   }
                                 },
                                 icon: Icon(
                                   Icons.search, color: AppColor.textColor,
                                   size: 30,)
                             ),
-                            suffixIcon: inventoryCreatePaymentController.selectedLaboratoryId.value > 0
+                            suffixIcon: inventoryCreatePaymentController
+                                .selectedLaboratoryId.value > 0
                                 ? IconButton(
-                              onPressed: inventoryCreatePaymentController.clearSearch,
+                              onPressed: inventoryCreatePaymentController
+                                  .clearSearch,
                               icon: Icon(
                                   Icons.close, color: AppColor.textColor),
                             )
@@ -653,139 +748,164 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
                     ),
                   ],
                 ),
+                inventoryCreatePaymentController.forPaymentList.isNotEmpty ?
                 ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxHeight: Get.height * 0.7,
+                    maxHeight: Get.height * 0.65,
                   ),
-                  child: ListView.builder(
+                  child:
+                  ListView.builder(
                     shrinkWrap: true,
-                    itemCount: inventoryCreatePaymentController.forPaymentList.length,
+                    itemCount: inventoryCreatePaymentController.forPaymentList
+                        .length,
                     itemBuilder: (context,
                         index) {
-                      final forPayment = inventoryCreatePaymentController.forPaymentList[index];
+                      final forPayment = inventoryCreatePaymentController
+                          .forPaymentList[index];
                       return ListTile(
-                          onTap: () {
-                            Get.back();
-                            if (forPayment.id != null) {
-                              inventoryCreatePaymentController.selectedForPaymentId.add(forPayment.id!);
-                            }
+                        onTap: () {
+                          Get.back();
+                          if (forPayment.id != null) {
+                            inventoryCreatePaymentController
+                                .selectedForPaymentId.add(forPayment.id!);
+                          }
 
-                            inventoryCreatePaymentController.selectedInputItem.value = forPayment;
-                            inventoryCreatePaymentController.clearItemFields();
+                          inventoryCreatePaymentController.selectedInputItem
+                              .value = forPayment;
+                          inventoryCreatePaymentController.clearItemFields();
 
-                            inventoryCreatePaymentController.selectQuantity(forPayment.quantityRemainded ?? 0.0);
-                            inventoryCreatePaymentController.selectedLaboratory.value = forPayment.laboratory;
-                            inventoryCreatePaymentController.quantityController.text = forPayment.quantityRemainded?.toString() ?? '0';
-                            inventoryCreatePaymentController.impurityController.text = forPayment.impurity?.toString() ?? '0';
-                            inventoryCreatePaymentController.weight750Controller.text = forPayment.weight750?.toString() ?? '0';
-                            inventoryCreatePaymentController.caratController.text = forPayment.carat?.toString() ?? '0';
-                            inventoryCreatePaymentController.receiptNumberController.text = forPayment.receiptNumber ?? '';
-                            inventoryCreatePaymentController.addToTempList();
-                            inventoryCreatePaymentController.descriptionController.clear();
-                            inventoryCreatePaymentController.clearItemFields();
-                          },
-                          contentPadding: EdgeInsets.zero,
-                          title: Card(
-                            color:inventoryCreatePaymentController.selectedForPaymentId.contains(forPayment.id)
-                                ? AppColor.textFieldColor
-                                : AppColor.secondaryColor,
-                            child: Padding(
-                              padding: const EdgeInsets
-                                  .only(
-                                  top: 8,
-                                  left: 12,
-                                  right: 12,
-                                  bottom: 8),
-                              child: Column(
-                                children: [
-                                  // آزمایشگاه
-                                  Row(
-                                    children: [
-                                      Text(
-                                          ' آزمایشگاه: ',
-                                          style: AppTextStyle
-                                              .labelText),
-                                      Text(
-                                          forPayment.laboratory?.name ?? '',
-                                          style: AppTextStyle
-                                              .bodyText),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5,),
-                                  Divider(height: 1,color: AppColor.dividerColor,),
-                                  SizedBox(height: 5,),
-                                  // عیار-وزن 750
-                                  Row(
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                              ' عیار: ',
-                                              style: AppTextStyle
-                                                  .labelText),
-                                          Text(
-                                              '${forPayment.carat ??
-                                                  0}',
-                                              style: AppTextStyle
-                                                  .bodyText),
-                                        ],
-                                      ),
-                                      SizedBox(width: 15,),
-                                      SizedBox(height: 5,),
-                                      Row(
-                                        children: [
-                                          Text(
-                                              ' وزن 750: ',
-                                              style: AppTextStyle
-                                                  .bodyText
-                                          ),
-                                          Text(
-                                              '${forPayment.weight750 ?? 0} ${forPayment.itemUnit?.name ?? ""}',
-                                              style: AppTextStyle
-                                                  .bodyText
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 8,),
-                                  // باقیمانده
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                              ' باقیمانده: ',
-                                              style: AppTextStyle
-                                                  .labelText),
-                                          Text(
-                                              '${forPayment.quantityRemainded ?? 0} ${forPayment.itemUnit?.name ?? ""}',
-                                              style: AppTextStyle
-                                                  .bodyText
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 5,),
-                                ],
-                              ),
+                          inventoryCreatePaymentController.selectQuantity(
+                              forPayment.quantityRemainded ?? 0.0);
+                          inventoryCreatePaymentController.selectedLaboratory
+                              .value = forPayment.laboratory;
+                          inventoryCreatePaymentController.quantityController
+                              .text =
+                              forPayment.quantityRemainded?.toString() ?? '0';
+                          inventoryCreatePaymentController.impurityController
+                              .text = forPayment.impurity?.toString() ?? '0';
+                          inventoryCreatePaymentController.weight750Controller
+                              .text = forPayment.weight750?.toString() ?? '0';
+                          inventoryCreatePaymentController.caratController
+                              .text = forPayment.carat?.toString() ?? '0';
+                          inventoryCreatePaymentController
+                              .receiptNumberController.text =
+                              forPayment.receiptNumber ?? '';
+                          inventoryCreatePaymentController.addToTempList();
+                          inventoryCreatePaymentController.descriptionController
+                              .clear();
+                          inventoryCreatePaymentController.clearItemFields();
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        title: Card(
+                          color: inventoryCreatePaymentController
+                              .selectedForPaymentId.contains(forPayment.id)
+                              ? AppColor.textFieldColor
+                              : AppColor.secondaryColor,
+                          child: Padding(
+                            padding: const EdgeInsets
+                                .only(
+                                top: 8,
+                                left: 12,
+                                right: 12,
+                                bottom: 8),
+                            child: Column(
+                              children: [
+                                // آزمایشگاه
+                                Row(
+                                  children: [
+                                    Text(
+                                        ' آزمایشگاه: ',
+                                        style: AppTextStyle
+                                            .labelText),
+                                    Text(
+                                        forPayment.laboratory?.name ?? '',
+                                        style: AppTextStyle
+                                            .bodyText),
+                                  ],
+                                ),
+                                SizedBox(height: 5,),
+                                Divider(
+                                  height: 1, color: AppColor.dividerColor,),
+                                SizedBox(height: 5,),
+                                // عیار-وزن 750
+                                Row(mainAxisAlignment: MainAxisAlignment
+                                    .spaceEvenly,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' عیار: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${forPayment.carat ??
+                                                0}',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    SizedBox(width: 15,),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' وزن 750: ',
+                                            style: AppTextStyle
+                                                .bodyText
+                                        ),
+                                        Text(
+                                            '${forPayment.weight750 ??
+                                                0} ${forPayment.itemUnit
+                                                ?.name ?? ""}',
+                                            style: AppTextStyle
+                                                .bodyText
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 8,),
+                                // باقیمانده
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' باقیمانده: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${forPayment.quantityRemainded ??
+                                                0} ${forPayment.itemUnit
+                                                ?.name ?? ""}',
+                                            style: AppTextStyle
+                                                .bodyText
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: 5,),
+                              ],
                             ),
                           ),
+                        ),
 
-                        );
+                      );
                     },
                   ),
+                ) :
+                Center(
+                  child: CircularProgressIndicator(),
                 ),
-
               ],
             ),
           ),
         );
     });
   }
+
   void showSearchResults(BuildContext context) {
     showDialog(
       context: context,
@@ -793,19 +913,22 @@ class _InventoryCreatePaymentTabWidgetState extends State<InventoryCreatePayment
           AlertDialog(backgroundColor: AppColor.backGroundColor,
             title: Text('انتخاب کنید', style: AppTextStyle.smallTitleText,),
             content: SizedBox(
-              width:Get.width*0.5,
-              height: Get.height*0.5,
+              width: Get.width * 0.5,
+              height: Get.height * 0.5,
               child: ListView.builder(
                 shrinkWrap: true,
-                itemCount: inventoryCreatePaymentController.searchedLaboratories.length,
+                itemCount: inventoryCreatePaymentController.searchedLaboratories
+                    .length,
                 itemBuilder: (context, index) {
-                  final laboratory = inventoryCreatePaymentController.searchedLaboratories[index];
+                  final laboratory = inventoryCreatePaymentController
+                      .searchedLaboratories[index];
                   return ListTile(
-                    title: Text(laboratory.name ?? '',
-                      style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
-                    onTap: () {
-                      inventoryCreatePaymentController.selectLaboratory(laboratory);
-                    }
+                      title: Text(laboratory.name ?? '',
+                        style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
+                      onTap: () {
+                        inventoryCreatePaymentController.selectLaboratory(
+                            laboratory);
+                      }
                   );
                 },
               ),
