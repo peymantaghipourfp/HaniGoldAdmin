@@ -11,6 +11,7 @@ import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
@@ -30,6 +31,7 @@ class WithdrawGetOneView extends StatelessWidget {
       appBar: CustomAppbar1(title: 'مشاهده درخواست برداشت',
         onBackTap: ()=> Get.back(),
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           BackgroundImage(),
@@ -618,6 +620,244 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                                   ),
                                                                                                   // نمایش عکس
                                                                                                   GestureDetector(
+                                                                                                    onTap: () async{
+                                                                                                      await withdrawGetOneController.getImage(getOneDeposit?.recId ??"", "Deposit");
+                                                                                                      Future.delayed(const Duration(milliseconds: 200), () {
+                                                                                                        showDialog(
+                                                                                                          context: context,
+                                                                                                          builder: (BuildContext context) {
+                                                                                                            return Dialog(
+                                                                                                              backgroundColor: AppColor
+                                                                                                                  .backGroundColor,
+                                                                                                              shape: RoundedRectangleBorder(
+                                                                                                                borderRadius: BorderRadius
+                                                                                                                    .circular(
+                                                                                                                    10),
+                                                                                                              ),
+                                                                                                              child: Container(
+                                                                                                                padding: EdgeInsets
+                                                                                                                    .all(
+                                                                                                                    8),
+                                                                                                                child: Column(
+                                                                                                                  mainAxisSize: MainAxisSize
+                                                                                                                      .min,
+                                                                                                                  children: [
+                                                                                                                    // نمایش اسلایدی عکس‌ها
+                                                                                                                    SizedBox(
+                                                                                                                      width: 500,
+                                                                                                                      height: 500,
+                                                                                                                      child: Stack(
+                                                                                                                        children: [
+                                                                                                                          PageView.builder(
+                                                                                                                            controller: withdrawGetOneController
+                                                                                                                                .pageController,
+                                                                                                                            itemCount: withdrawGetOneController.imageList.length,
+                                                                                                                            onPageChanged: (index) =>
+                                                                                                                            withdrawGetOneController
+                                                                                                                                .currentImagePage
+                                                                                                                                .value =
+                                                                                                                                index,
+                                                                                                                            itemBuilder: (context,
+                                                                                                                                index) {
+                                                                                                                              final attachment = withdrawGetOneController.imageList[index];
+                                                                                                                              return Column(
+                                                                                                                                children: [
+                                                                                                                                  if (kIsWeb)
+                                                                                                                                    Padding(
+                                                                                                                                      padding: const EdgeInsets.only(right: 50),
+                                                                                                                                      child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                                                        children: [
+                                                                                                                                          IconButton(
+                                                                                                                                            icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                                                                                                            onPressed: () => withdrawGetOneController.downloadImage(
+                                                                                                                                              attachment,
+                                                                                                                                            ),
+                                                                                                                                          ),
+                                                                                                                                        ],
+                                                                                                                                      ),
+                                                                                                                                    ),
+                                                                                                                                  SizedBox(
+                                                                                                                                    width: 450,
+                                                                                                                                    height: 450,
+                                                                                                                                    child: Image.network(
+                                                                                                                                      "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                                                                                      loadingBuilder: (context,
+                                                                                                                                          child,
+                                                                                                                                          loadingProgress) {
+                                                                                                                                        if (loadingProgress ==
+                                                                                                                                            null)
+                                                                                                                                          return child;
+                                                                                                                                        return Center(
+                                                                                                                                          child: CircularProgressIndicator(),
+                                                                                                                                        );
+                                                                                                                                      },
+                                                                                                                                      errorBuilder: (context,
+                                                                                                                                          error,
+                                                                                                                                          stackTrace) =>
+                                                                                                                                          Icon(
+                                                                                                                                              Icons
+                                                                                                                                                  .error,
+                                                                                                                                              color: Colors
+                                                                                                                                                  .red),
+                                                                                                                                      fit: BoxFit.contain,
+                                                                                                                                    ),
+                                                                                                                                  ),
+                                                                                                                                ],
+                                                                                                                              );
+                                                                                                                            },
+                                                                                                                          ),
+                                                                                                                          SizedBox(
+                                                                                                                            height: 2,),
+                                                                                                                          Obx(() {
+                                                                                                                            return Positioned(
+                                                                                                                                left: 10,
+                                                                                                                                top: 0,
+                                                                                                                                bottom: 0,
+                                                                                                                                child: Visibility(
+                                                                                                                                  visible: withdrawGetOneController
+                                                                                                                                      .currentImagePage.value > 0,
+                                                                                                                                  child: IconButton(
+                                                                                                                                    style: ButtonStyle(
+                                                                                                                                      backgroundColor: WidgetStateProperty
+                                                                                                                                          .all(Colors.black54),
+                                                                                                                                      shape: WidgetStateProperty.all(
+                                                                                                                                          CircleBorder()),
+                                                                                                                                      padding: WidgetStateProperty.all(
+                                                                                                                                          EdgeInsets.all(8)),
+                                                                                                                                    ),
+                                                                                                                                    icon: Icon(Icons.chevron_left,
+                                                                                                                                      color: Colors.white,
+                                                                                                                                      size: 40,
+                                                                                                                                      shadows: [
+                                                                                                                                        Shadow(
+                                                                                                                                          blurRadius: 10,
+                                                                                                                                          color: Colors.black,
+                                                                                                                                          offset: Offset(0, 0),
+                                                                                                                                        )
+                                                                                                                                      ],
+                                                                                                                                    ),
+                                                                                                                                    onPressed: () {
+                                                                                                                                      withdrawGetOneController.pageController
+                                                                                                                                          .previousPage(
+                                                                                                                                        duration: Duration(
+                                                                                                                                            milliseconds: 300),
+                                                                                                                                        curve: Curves.easeInOut,
+                                                                                                                                      );
+                                                                                                                                    },
+                                                                                                                                  ),
+                                                                                                                                )
+                                                                                                                            );
+                                                                                                                          }),
+                                                                                                                          Obx(() {
+                                                                                                                            return Positioned(
+                                                                                                                                right: 10,
+                                                                                                                                top: 0,
+                                                                                                                                bottom: 0,
+                                                                                                                                child: Visibility(
+                                                                                                                                  visible: withdrawGetOneController
+                                                                                                                                      .currentImagePage.value <
+                                                                                                                                      (withdrawGetOneController.imageList.length ?? 1) -
+                                                                                                                                          1,
+                                                                                                                                  child: IconButton(
+                                                                                                                                    style: ButtonStyle(
+                                                                                                                                      backgroundColor: WidgetStateProperty
+                                                                                                                                          .all(Colors.black54),
+                                                                                                                                      shape: WidgetStateProperty.all(
+                                                                                                                                          CircleBorder()),
+                                                                                                                                      padding: WidgetStateProperty.all(
+                                                                                                                                          EdgeInsets.all(8)),
+                                                                                                                                    ),
+                                                                                                                                    icon: Icon(Icons.chevron_right,
+                                                                                                                                      color: Colors.white,
+                                                                                                                                      size: 40,
+                                                                                                                                      shadows: [
+                                                                                                                                        Shadow(
+                                                                                                                                          blurRadius: 10,
+                                                                                                                                          color: Colors.black,
+                                                                                                                                          offset: Offset(0, 0),
+                                                                                                                                        ),
+                                                                                                                                      ],
+                                                                                                                                    ),
+                                                                                                                                    onPressed: () {
+                                                                                                                                      withdrawGetOneController.pageController
+                                                                                                                                          .nextPage(
+                                                                                                                                        duration: Duration(
+                                                                                                                                            milliseconds: 300),
+                                                                                                                                        curve: Curves.easeInOut,
+                                                                                                                                      );
+                                                                                                                                    },
+                                                                                                                                  ),
+                                                                                                                                )
+                                                                                                                            );
+                                                                                                                          }),
+                                                                                                                          SizedBox(
+                                                                                                                            height: 2,),
+                                                                                                                          // نمایش نقاط راهنما
+                                                                                                                          Obx(() =>
+                                                                                                                              Row(
+                                                                                                                                mainAxisAlignment: MainAxisAlignment
+                                                                                                                                    .center,
+                                                                                                                                children: List
+                                                                                                                                    .generate(
+                                                                                                                                  withdrawGetOneController.imageList.length,
+                                                                                                                                      (index) =>
+                                                                                                                                      Container(
+                                                                                                                                        width: 8,
+                                                                                                                                        height: 8,
+                                                                                                                                        margin: EdgeInsets
+                                                                                                                                            .symmetric(
+                                                                                                                                            horizontal: 4),
+                                                                                                                                        decoration: BoxDecoration(
+                                                                                                                                          shape: BoxShape
+                                                                                                                                              .circle,
+                                                                                                                                          color: withdrawGetOneController
+                                                                                                                                              .currentImagePage
+                                                                                                                                              .value ==
+                                                                                                                                              index
+                                                                                                                                              ? Colors
+                                                                                                                                              .blue
+                                                                                                                                              : Colors
+                                                                                                                                              .grey,
+                                                                                                                                        ),
+                                                                                                                                      ),
+                                                                                                                                ),
+                                                                                                                              )),
+                                                                                                                          SizedBox(
+                                                                                                                              height: 10),
+                                                                                                                        ],
+                                                                                                                      ),
+                                                                                                                    ),
+                                                                                                                    TextButton(
+                                                                                                                      onPressed: () =>
+                                                                                                                          Get
+                                                                                                                              .back(),
+                                                                                                                      child: Text(
+                                                                                                                        "بستن",
+                                                                                                                        style: AppTextStyle
+                                                                                                                            .bodyText,),
+                                                                                                                    ),
+                                                                                                                  ],
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                            );
+                                                                                                          },
+                                                                                                        );
+                                                                                                      });
+                                                                                                    },
+                                                                                                    child: Row(
+                                                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                                                      children: [
+                                                                                                        SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                                                                                                            colorFilter: ColorFilter.mode(
+
+                                                                                                              AppColor.textColor,
+
+                                                                                                              BlendMode.srcIn,
+                                                                                                            )),
+                                                                                                      ],
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  /*GestureDetector(
                                                                                                     onTap: () {
                                                                                                       if (getOneDeposit?.attachments == null ||
                                                                                                           getOneDeposit!.attachments!.isEmpty) {
@@ -739,7 +979,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                                         ),
                                                                                                       ],
                                                                                                     ),
-                                                                                                  ),
+                                                                                                  ),*/
                                                                                                 ],
                                                                                               ),
                                                                                             ),

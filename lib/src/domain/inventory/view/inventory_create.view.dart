@@ -10,6 +10,7 @@ import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
@@ -35,13 +36,10 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
     final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ?
+        appBar:
         CustomAppbar1(
-          title: 'دریافت و پرداخت جدید', onBackTap: () => Get.back(),)
-            :
-        CustomAppBar(title: 'دریافت و پرداخت جدید',
-          onBackTap: () => Get.back(),
-        ),
+          title: 'دریافت و پرداخت جدید', onBackTap: () => Get.back(),),
+        drawer: const AppDrawer(),
         body: Stack(
           children: [
             BackgroundImage(),

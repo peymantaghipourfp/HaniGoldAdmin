@@ -14,6 +14,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
@@ -43,12 +44,9 @@ class _InventoryDetailUpdateReceiveViewState
         .isMobile;
     return Obx(() {
       return Scaffold(
-        appBar: isDesktop ?
-        CustomAppbar1(title: 'ویرایش دریافتی', onBackTap: () => Get.back(),)
-            :
-        CustomAppBar(title: 'ویرایش دریافتی',
-          onBackTap: () => Get.back(),
-        ),
+        appBar:
+        CustomAppbar1(title: 'ویرایش دریافتی', onBackTap: () => Get.back(),),
+        drawer: const AppDrawer(),
         body: Stack(
           children: [
             BackgroundImage(),

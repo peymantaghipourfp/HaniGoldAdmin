@@ -379,7 +379,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                                                     ),
                                                                                                     child: Text('نام کالا', style: AppTextStyle.labelText.copyWith(fontSize: 13, color: AppColor.primaryColor, fontWeight: FontWeight.bold))),
                                                                                                 headingRowAlignment: MainAxisAlignment.center),
-                                                                                            DataColumn(label: Text('کاهده خرید', style: AppTextStyle.labelText.copyWith(fontSize: 13, color: AppColor.primaryColor, fontWeight: FontWeight.bold)), headingRowAlignment: MainAxisAlignment.center),
+                                                                                            DataColumn(label: Text('کاهنده خرید', style: AppTextStyle.labelText.copyWith(fontSize: 13, color: AppColor.primaryColor, fontWeight: FontWeight.bold)), headingRowAlignment: MainAxisAlignment.center),
                                                                                             DataColumn(
                                                                                                 label: Row(
                                                                                                   children: [

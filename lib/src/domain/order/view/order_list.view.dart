@@ -18,6 +18,7 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/pager_widget.dart';
 
 class OrderListView extends StatelessWidget {
@@ -30,6 +31,7 @@ class OrderListView extends StatelessWidget {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: CustomAppbar1(title: 'سفارشات',onBackTap: () => Get.offNamed('/home'),),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           BackgroundImageTotal(),

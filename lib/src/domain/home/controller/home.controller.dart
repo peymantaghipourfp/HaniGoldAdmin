@@ -22,6 +22,7 @@ class HomeController extends GetxController{
   final Rxn<UserLoginModel> accountModel=Rxn<UserLoginModel>();
   var activeSubMenu = ''.obs; //
   final box = GetStorage();
+  var bottomNavIndex = 0.obs;
   void toggleSubMenu(String menuName) {
     if (activeSubMenu.value == menuName) {
       activeSubMenu.value = ''; //

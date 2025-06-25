@@ -50,6 +50,7 @@ class WithdrawController extends GetxController{
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
+  ScrollController horizontalScrollController = ScrollController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WithdrawRepository withdrawRepository=WithdrawRepository();
@@ -118,6 +119,26 @@ class WithdrawController extends GetxController{
   bool isItemExpanded(int index) {
     return expandedIndex.value==index;
   }
+  void expandAndScrollHorizontal(int index, int withdrawId) {
+    final isExpanding = expandedIndex.value != index;
+
+    toggleItemExpansion(index);
+    fetchDepositRequestList(withdrawId);
+
+    if (isExpanding) {
+      Future.delayed(const Duration(milliseconds: 380), () {
+        if (horizontalScrollController.hasClients) {
+          horizontalScrollController.animateTo(
+            horizontalScrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
+  }
+
+
 
   void onSort(int columnIndex, bool ascending) {
     sortColumnIndex.value = columnIndex;
@@ -141,6 +162,7 @@ class WithdrawController extends GetxController{
 
   @override void onClose() {
     scrollController.dispose();
+    horizontalScrollController.dispose();
     withdrawList.clear();
     super.onClose();
   }

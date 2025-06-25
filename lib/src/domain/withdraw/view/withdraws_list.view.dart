@@ -12,6 +12,7 @@ import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
@@ -63,6 +64,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
       appBar: CustomAppbar1(title: 'لیست درخواست های برداشت',
         onBackTap: () => Get.offNamed('/home'),
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           BackgroundImageTotal(),
@@ -1876,6 +1878,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                   ),
                                   SizedBox(
                                     child: SingleChildScrollView(
+                                      controller: withdrawController.horizontalScrollController,
                                       scrollDirection: Axis.horizontal,
                                       child: Row(
                                         children: [
@@ -3674,9 +3677,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                         isExpanded ? Icons.expand_less : Icons.expand_more),
                     color: isExpanded ? AppColor.accentColor : AppColor.primaryColor,
                     onPressed: () {
-                      withdrawController.toggleItemExpansion(
-                          withdrawController.withdrawList.indexOf(withdraw));
-                      withdrawController.fetchDepositRequestList(withdraw.id!);
+                      final index = withdrawController.withdrawList.indexOf(withdraw);
+                      withdrawController.expandAndScrollHorizontal(index, withdraw.id!);
                     },
                   ),
                 ),

@@ -15,6 +15,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
@@ -41,6 +42,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
       appBar:
       CustomAppbar1(
         title: 'بروزرسانی قیمت محصولات', onBackTap: () => Get.toNamed('/home'),),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           Positioned.fill(
