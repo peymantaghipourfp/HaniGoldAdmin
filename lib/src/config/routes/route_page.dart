@@ -34,6 +34,7 @@ import 'package:hanigold_admin/src/domain/withdraw/view/withdraw_getOne.view.dar
 import 'package:hanigold_admin/src/domain/withdraw/view/withdraws_list.view.dart';
 import '../../domain/balance/view/trading_balance.view.dart';
 import '../../domain/deposit/view/deposit_update.view.dart';
+import '../../domain/home/view/more.view.dart';
 import '../../domain/inventory/view/inventory_detail_insert_payment.view.dart';
 import '../../domain/inventory/view/inventory_detail_update_payment.view.dart';
 import '../../domain/laboratory/view/laboratory.view.dart';
@@ -53,6 +54,7 @@ class RoutePage{
   static List<GetPage> routePage=[
     GetPage(name: '/splash', page: ()=>SplashView(),binding: SplashBindings()),
     GetPage(name: '/home', page: ()=>HomeView(),binding:HomeBindings()),
+    GetPage(name: '/more', page: ()=>MoreView(),binding:HomeBindings()),
     GetPage(name: '/login', page: ()=>LoginView(),binding: AuthBindings()),
     GetPage(name: '/orderList', page: ()=>OrderListView(),binding: OrderBindings()),
     GetPage(name: '/orderCreate', page: ()=>OrderCreateView(),binding: OrderBindings()),

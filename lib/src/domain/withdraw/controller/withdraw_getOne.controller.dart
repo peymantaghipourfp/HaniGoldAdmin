@@ -12,6 +12,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/withdraw.repository.dart';
 import '../../../config/repository/withdraw_getOne.repository.dart';
@@ -33,6 +34,7 @@ class WithdrawGetOneController extends GetxController{
   final WithdrawRepository withdrawRepository=WithdrawRepository();
   final AccountRepository accountRepository=AccountRepository();
   final WithdrawGetOneRepository withdrawGetOneRepository=WithdrawGetOneRepository();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
 
  var id=0.obs;
   final Rxn<WithdrawModel> getOneWithdraw = Rxn<WithdrawModel>();
@@ -40,6 +42,9 @@ class WithdrawGetOneController extends GetxController{
   var isLoading=true.obs;
   var isLoadingRegister=true.obs;
   var errorMessage=''.obs;
+  RxList<String> imageList = <String>[].obs;
+  final PageController pageController = PageController();
+  RxInt currentImagePage = 0.obs;
 
   final List<AccountModel> filterAccountList=<AccountModel>[].obs;
   var withdrawList=<WithdrawModel>[].obs;
@@ -165,6 +170,24 @@ class WithdrawGetOneController extends GetxController{
     }
 
     return null;
+  }
+
+  // لیست عکس ها
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
   }
 
   void downloadImage(String guidId) async {

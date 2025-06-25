@@ -14,6 +14,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
@@ -64,6 +65,7 @@ class _InventoryListViewState extends State<InventoryListView> {
       appBar: CustomAppbar1(title: 'لیست دریافت/پرداخت',
         onBackTap: () => Get.offNamed('/home'),
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           BackgroundImageTotal(),

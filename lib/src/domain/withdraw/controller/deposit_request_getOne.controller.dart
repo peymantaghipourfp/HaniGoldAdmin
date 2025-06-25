@@ -14,6 +14,7 @@ import 'package:universal_html/html.dart' as html;
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/deposit.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/url/base_url.dart';
 import 'package:path/path.dart' as path;
 
@@ -24,6 +25,7 @@ class DepositRequestGetOneController extends GetxController{
 
   final DepositRequestGetOneRepository depositRequestGetOneRepository=DepositRequestGetOneRepository();
   final DepositRepository depositRepository=DepositRepository();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
 
   var id=0.obs;
   final Rxn<DepositRequestModel> getOneDepositRequest = Rxn<DepositRequestModel>();
@@ -31,6 +33,9 @@ class DepositRequestGetOneController extends GetxController{
   var isLoading=true.obs;
   var isLoadingRegister=true.obs;
   var errorMessage=''.obs;
+  RxList<String> imageList = <String>[].obs;
+  final PageController pageController = PageController();
+  RxInt currentImagePage = 0.obs;
 
   @override
   void onInit() {
@@ -109,6 +114,24 @@ class DepositRequestGetOneController extends GetxController{
     }
 
     return null;
+  }
+
+  // لیست عکس ها
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
   }
 
   void downloadImage(String guidId) async {

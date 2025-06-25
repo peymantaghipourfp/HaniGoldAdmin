@@ -12,6 +12,7 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
@@ -29,6 +30,7 @@ class DepositsListView extends StatelessWidget {
         title: 'واریزی ها',
         onBackTap: () => Get.offNamed('/home'),
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           BackgroundImageTotal(),

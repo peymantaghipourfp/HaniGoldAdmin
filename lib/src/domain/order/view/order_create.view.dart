@@ -11,6 +11,7 @@ import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../account/model/account.model.dart';
@@ -39,6 +40,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
           title: 'ایجاد سفارش جدید', onBackTap: () {
             Get.back();
             orderCreateController.clearList(); }),
+        drawer: const AppDrawer(),
         body: Stack(
           children: [
             BackgroundImage(),

@@ -11,6 +11,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:image/image.dart' as img;
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
@@ -36,6 +37,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
         title: 'ایجاد حواله', onBackTap: () => Get.back(),),
+      drawer: const AppDrawer(),
       body: Stack(
 
         children: [

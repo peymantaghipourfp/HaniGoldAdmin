@@ -11,6 +11,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
@@ -62,6 +63,7 @@ class _RemittanceViewState extends State<RemittanceView> {
             title: 'لیست حواله',
             onBackTap: () => Get.offNamed('/home'),
           ),
+      drawer: const AppDrawer(),
           body: Stack(
             children: [
               BackgroundImageTotal(),

@@ -10,6 +10,7 @@ import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../users/widgets/balance.widget.dart';
@@ -38,6 +39,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
         appBar: CustomAppbar1(title: 'ویرایش سفارش', onBackTap: () {
           Get.toNamed('/orderList');
           orderUpdateController.clearList(); }),
+        drawer: const AppDrawer(),
         body: Stack(
           children: [
             BackgroundImage(),

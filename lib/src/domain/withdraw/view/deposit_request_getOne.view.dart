@@ -12,6 +12,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
@@ -29,6 +30,7 @@ class DepositRequestGetOneView extends StatelessWidget {
       appBar: CustomAppbar1(title: 'اطلاعات واریزی',
           onBackTap: ()=> Get.back(),
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           BackgroundImage(),
@@ -272,117 +274,243 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                               ),
                                                               // نمایش عکس
                                                               GestureDetector(
-                                                                onTap: () {
-                                                                  if (getOneDeposit?.attachments == null ||
-                                                                      getOneDeposit!.attachments!.isEmpty) {
-                                                                    Get
-                                                                        .snackbar(
-                                                                        'پیغام',
-                                                                        'تصویری ثبت نشده است');
-                                                                    return;
-                                                                  }
-
-                                                                  showDialog(
-                                                                    context: context,
-                                                                    builder: (
-                                                                        BuildContext context) {
-                                                                      return Dialog(
-                                                                        backgroundColor: AppColor.backGroundColor,
-                                                                        shape: RoundedRectangleBorder(
-                                                                          borderRadius: BorderRadius.circular(10),
-                                                                        ),
-                                                                        child: Container(
-                                                                          padding: EdgeInsets.all(8),
-                                                                          child: Column(
-                                                                            mainAxisSize: MainAxisSize.min,
-                                                                            children: [
-                                                                              SizedBox(
-                                                                                width: 500,
-                                                                                height: 500,
-                                                                                child: PageView.builder(
-                                                                                  itemCount: getOneDeposit.attachments!.length,
-                                                                                  itemBuilder: (context, index) {
-                                                                                    final attachment = getOneDeposit.attachments![index];
-                                                                                    return Column(
-                                                                                      children: [
-                                                                                        if (kIsWeb)
-                                                                                          Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                onTap: () async{
+                                                                  await depositRequestGetOneController.getImage(getOneDeposit?.recId ??"", "Deposit");
+                                                                  Future.delayed(const Duration(milliseconds: 200), () {
+                                                                    showDialog(
+                                                                      context: context,
+                                                                      builder: (BuildContext context) {
+                                                                        return Dialog(
+                                                                          backgroundColor: AppColor
+                                                                              .backGroundColor,
+                                                                          shape: RoundedRectangleBorder(
+                                                                            borderRadius: BorderRadius
+                                                                                .circular(
+                                                                                10),
+                                                                          ),
+                                                                          child: Container(
+                                                                            padding: EdgeInsets
+                                                                                .all(
+                                                                                8),
+                                                                            child: Column(
+                                                                              mainAxisSize: MainAxisSize
+                                                                                  .min,
+                                                                              children: [
+                                                                                // نمایش اسلایدی عکس‌ها
+                                                                                SizedBox(
+                                                                                  width: 500,
+                                                                                  height: 500,
+                                                                                  child: Stack(
+                                                                                    children: [
+                                                                                      PageView.builder(
+                                                                                        controller: depositRequestGetOneController
+                                                                                            .pageController,
+                                                                                        itemCount: depositRequestGetOneController.imageList.length,
+                                                                                        onPageChanged: (index) =>
+                                                                                        depositRequestGetOneController
+                                                                                            .currentImagePage
+                                                                                            .value =
+                                                                                            index,
+                                                                                        itemBuilder: (context,
+                                                                                            index) {
+                                                                                          final attachment = depositRequestGetOneController.imageList[index];
+                                                                                          return Column(
                                                                                             children: [
-                                                                                              IconButton(
-                                                                                                icon: Icon(Icons.download, color: AppColor.dividerColor),
-                                                                                                onPressed: () => depositRequestGetOneController.downloadImage(
-                                                                                                  attachment.guidId!,
+                                                                                              if (kIsWeb)
+                                                                                                Padding(
+                                                                                                  padding: const EdgeInsets.only(right: 50),
+                                                                                                  child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                    children: [
+                                                                                                      IconButton(
+                                                                                                        icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                                                                        onPressed: () => depositRequestGetOneController.downloadImage(
+                                                                                                          attachment,
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                    ],
+                                                                                                  ),
+                                                                                                ),
+                                                                                              SizedBox(
+                                                                                                width: 450,
+                                                                                                height: 450,
+                                                                                                child: Image.network(
+                                                                                                  "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                                                  loadingBuilder: (context,
+                                                                                                      child,
+                                                                                                      loadingProgress) {
+                                                                                                    if (loadingProgress ==
+                                                                                                        null)
+                                                                                                      return child;
+                                                                                                    return Center(
+                                                                                                      child: CircularProgressIndicator(),
+                                                                                                    );
+                                                                                                  },
+                                                                                                  errorBuilder: (context,
+                                                                                                      error,
+                                                                                                      stackTrace) =>
+                                                                                                      Icon(
+                                                                                                          Icons
+                                                                                                              .error,
+                                                                                                          color: Colors
+                                                                                                              .red),
+                                                                                                  fit: BoxFit.contain,
                                                                                                 ),
                                                                                               ),
                                                                                             ],
-                                                                                          ),
-                                                                                        SizedBox(
-                                                                                          width: 450,
-                                                                                          height: 450,
-                                                                                          child: Image.network(
-                                                                                            "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
-                                                                                            loadingBuilder: (context,
-                                                                                                child,
-                                                                                                loadingProgress) {
-                                                                                              if (loadingProgress ==
-                                                                                                  null) {
-                                                                                                return child;
-                                                                                              }
-                                                                                              return Center(
-                                                                                                child: CircularProgressIndicator(),
-                                                                                              );
-                                                                                            },
-                                                                                            errorBuilder: (context, error, stackTrace) =>
-                                                                                                Icon(Icons.error,
-                                                                                                    color: Colors.red),
-                                                                                            fit: BoxFit.contain,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ],
-                                                                                    );
-                                                                                  },
+                                                                                          );
+                                                                                        },
+                                                                                      ),
+                                                                                      SizedBox(
+                                                                                        height: 2,),
+                                                                                      Obx(() {
+                                                                                        return Positioned(
+                                                                                            left: 10,
+                                                                                            top: 0,
+                                                                                            bottom: 0,
+                                                                                            child: Visibility(
+                                                                                              visible: depositRequestGetOneController
+                                                                                                  .currentImagePage.value > 0,
+                                                                                              child: IconButton(
+                                                                                                style: ButtonStyle(
+                                                                                                  backgroundColor: WidgetStateProperty
+                                                                                                      .all(Colors.black54),
+                                                                                                  shape: WidgetStateProperty.all(
+                                                                                                      CircleBorder()),
+                                                                                                  padding: WidgetStateProperty.all(
+                                                                                                      EdgeInsets.all(8)),
+                                                                                                ),
+                                                                                                icon: Icon(Icons.chevron_left,
+                                                                                                  color: Colors.white,
+                                                                                                  size: 40,
+                                                                                                  shadows: [
+                                                                                                    Shadow(
+                                                                                                      blurRadius: 10,
+                                                                                                      color: Colors.black,
+                                                                                                      offset: Offset(0, 0),
+                                                                                                    )
+                                                                                                  ],
+                                                                                                ),
+                                                                                                onPressed: () {
+                                                                                                  depositRequestGetOneController.pageController
+                                                                                                      .previousPage(
+                                                                                                    duration: Duration(
+                                                                                                        milliseconds: 300),
+                                                                                                    curve: Curves.easeInOut,
+                                                                                                  );
+                                                                                                },
+                                                                                              ),
+                                                                                            )
+                                                                                        );
+                                                                                      }),
+                                                                                      Obx(() {
+                                                                                        return Positioned(
+                                                                                            right: 10,
+                                                                                            top: 0,
+                                                                                            bottom: 0,
+                                                                                            child: Visibility(
+                                                                                              visible: depositRequestGetOneController
+                                                                                                  .currentImagePage.value <
+                                                                                                  (depositRequestGetOneController.imageList.length ?? 1) -
+                                                                                                      1,
+                                                                                              child: IconButton(
+                                                                                                style: ButtonStyle(
+                                                                                                  backgroundColor: WidgetStateProperty
+                                                                                                      .all(Colors.black54),
+                                                                                                  shape: WidgetStateProperty.all(
+                                                                                                      CircleBorder()),
+                                                                                                  padding: WidgetStateProperty.all(
+                                                                                                      EdgeInsets.all(8)),
+                                                                                                ),
+                                                                                                icon: Icon(Icons.chevron_right,
+                                                                                                  color: Colors.white,
+                                                                                                  size: 40,
+                                                                                                  shadows: [
+                                                                                                    Shadow(
+                                                                                                      blurRadius: 10,
+                                                                                                      color: Colors.black,
+                                                                                                      offset: Offset(0, 0),
+                                                                                                    ),
+                                                                                                  ],
+                                                                                                ),
+                                                                                                onPressed: () {
+                                                                                                  depositRequestGetOneController.pageController
+                                                                                                      .nextPage(
+                                                                                                    duration: Duration(
+                                                                                                        milliseconds: 300),
+                                                                                                    curve: Curves.easeInOut,
+                                                                                                  );
+                                                                                                },
+                                                                                              ),
+                                                                                            )
+                                                                                        );
+                                                                                      }),
+                                                                                      SizedBox(
+                                                                                        height: 2,),
+                                                                                      // نمایش نقاط راهنما
+                                                                                      Obx(() =>
+                                                                                          Row(
+                                                                                            mainAxisAlignment: MainAxisAlignment
+                                                                                                .center,
+                                                                                            children: List
+                                                                                                .generate(
+                                                                                              depositRequestGetOneController.imageList.length,
+                                                                                                  (index) =>
+                                                                                                  Container(
+                                                                                                    width: 8,
+                                                                                                    height: 8,
+                                                                                                    margin: EdgeInsets
+                                                                                                        .symmetric(
+                                                                                                        horizontal: 4),
+                                                                                                    decoration: BoxDecoration(
+                                                                                                      shape: BoxShape
+                                                                                                          .circle,
+                                                                                                      color: depositRequestGetOneController
+                                                                                                          .currentImagePage
+                                                                                                          .value ==
+                                                                                                          index
+                                                                                                          ? Colors
+                                                                                                          .blue
+                                                                                                          : Colors
+                                                                                                          .grey,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                            ),
+                                                                                          )),
+                                                                                      SizedBox(
+                                                                                          height: 10),
+                                                                                    ],
+                                                                                  ),
                                                                                 ),
-                                                                              ),
-                                                                              SizedBox(
-                                                                                  height: 10),
-                                                                              TextButton(
-                                                                                onPressed: () =>
-                                                                                    Get
-                                                                                        .back(),
-                                                                                child: Text(
-                                                                                  "بستن",
-                                                                                  style: AppTextStyle
-                                                                                      .bodyText,),
-                                                                              ),
-                                                                            ],
+                                                                                TextButton(
+                                                                                  onPressed: () =>
+                                                                                      Get
+                                                                                          .back(),
+                                                                                  child: Text(
+                                                                                    "بستن",
+                                                                                    style: AppTextStyle
+                                                                                        .bodyText,),
+                                                                                ),
+                                                                              ],
+                                                                            ),
                                                                           ),
-                                                                        ),
-                                                                      );
-                                                                    },
-                                                                  );
+                                                                        );
+                                                                      },
+                                                                    );
+
+                                                                  });
+
+
                                                                 },
                                                                 child: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
                                                                   children: [
-                                                                    Text(
-                                                                      'عکس‌ (${getOneDeposit?.attachments?.length ?? 0}) ',
-                                                                      style: AppTextStyle.bodyText.copyWith(color: AppColor.iconViewColor
-                                                                      ),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      width: 25,
-                                                                      height: 25,
-                                                                      child: SvgPicture
-                                                                          .asset(
-                                                                        'assets/svg/picture.svg',
-                                                                        colorFilter: ColorFilter
-                                                                            .mode(
-                                                                          AppColor
-                                                                              .iconViewColor,
-                                                                          BlendMode
-                                                                              .srcIn,
-                                                                        ),
-                                                                      ),
-                                                                    ),
+                                                                    SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                                                                        colorFilter: ColorFilter.mode(
+
+                                                                          AppColor.textColor,
+
+                                                                          BlendMode.srcIn,
+                                                                        )),
                                                                   ],
                                                                 ),
                                                               ),

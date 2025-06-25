@@ -17,7 +17,7 @@ class HomeView extends GetView<HomeController> {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       backgroundColor: AppColor.backGroundColor,
-      appBar:isDesktop ?
+      appBar:
       AppBar(
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: AppColor.textColor),
@@ -41,8 +41,7 @@ class HomeView extends GetView<HomeController> {
             ),
           ),
         ),
-      ) :
-      CustomAppBar(title: 'خانه', onBackTap: () => Get.toNamed('/login'),),
+      ),
       body: SafeArea(
           child:isDesktop ? buildDesktopLayout() : Padding(
               padding: const EdgeInsets.all(16.0),
@@ -285,7 +284,7 @@ class HomeView extends GetView<HomeController> {
                                   ),
                                 ],
                               ),
-                              
+
                             ),
                           ),
                         ],

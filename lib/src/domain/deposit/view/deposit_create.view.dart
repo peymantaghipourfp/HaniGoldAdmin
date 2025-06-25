@@ -10,6 +10,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
@@ -36,6 +37,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
       return Scaffold(
         appBar:
         CustomAppbar1(title: 'ثبت واریزی', onBackTap: () => Get.back(),),
+        drawer: const AppDrawer(),
         body: Stack(
           children: [
             BackgroundImage(),
