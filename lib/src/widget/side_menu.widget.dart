@@ -171,6 +171,18 @@ class SideMenu extends StatelessWidget {
               ],
             ),
             _buildMenuButton(
+              title: 'تراکنش ها',
+              icon: Icons.replay_circle_filled_outlined,
+              menuKey: 'transaction',
+              subItems: [
+                _buildSubMenuItem(
+                  title: 'لیست تراکنش های کاربران',
+                  icon: Icons.refresh,
+                  route: '/transactionList',
+                ),
+              ],
+            ),
+            _buildMenuButton(
               title: 'تنظیمات',
               icon: Icons.settings,
               menuKey: 'tools',
