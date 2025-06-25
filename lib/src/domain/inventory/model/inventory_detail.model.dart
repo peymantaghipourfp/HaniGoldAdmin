@@ -55,6 +55,8 @@ class InventoryDetailModel {
   final int? id;
   @JsonKey(name: "attribute")
   final String? attribute;
+  @JsonKey(name: "name")
+  final String? name;
   @JsonKey(name: "stateMode")
   final int? stateMode;
   @JsonKey(name: "createdOn")
@@ -94,6 +96,7 @@ class InventoryDetailModel {
     this.rowNum,
     this.id,
     this.attribute,
+    this.name,
     this.stateMode,
     this.createdOn,
     this.modifiedOn,
@@ -125,6 +128,7 @@ class InventoryDetailModel {
     int? rowNum,
     int? id,
     String? attribute,
+    String? name,
     int? stateMode,
     DateTime? createdOn,
     DateTime? modifiedOn,
@@ -155,6 +159,7 @@ class InventoryDetailModel {
       rowNum: rowNum ?? this.rowNum,
       id: id ?? this.id,
       attribute: attribute ?? this.attribute,
+      name: name ?? this.name,
       stateMode: stateMode ?? this.stateMode,
       createdOn: createdOn ?? this.createdOn,
       modifiedOn: modifiedOn ?? this.modifiedOn,
@@ -162,6 +167,7 @@ class InventoryDetailModel {
       infos: infos ?? this.infos,
       description: description ?? this.description,
       inputItemId: inputItemId ?? this.inputItemId,
+
       date: date ?? this.date,
       listXfile: listXfile ?? this.listXfile,
     );

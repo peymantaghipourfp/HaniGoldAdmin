@@ -934,6 +934,90 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
 
+                    //تراکنش ها
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: Row(
+                        children: [
+                          Container(
+                            constraints: isDesktop ? BoxConstraints(maxWidth: 550) : BoxConstraints(maxWidth: 350),
+                            padding: isDesktop
+                                ? const EdgeInsets.symmetric(horizontal: 80)
+                                : const EdgeInsets.only(right: 15),
+                            child: TextButton(
+                              style: ButtonStyle(
+                                elevation: WidgetStateProperty.all(5),
+                                shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide(
+                                        width: 1, color: AppColor.secondaryColor),
+                                  ),
+                                ),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.secondaryColor),
+                              ),
+                              onPressed: () {
+                                controller.toggleSubMenu('transaction');
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        'تراکنش ها',
+                                        style: AppTextStyle.bodyText,
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(color: AppColor.textColor,
+                                      controller.activeSubMenu.value=='transaction'?
+                                      Icons.expand_more:
+                                      Icons.expand_less
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    //لیست تراکنش های کاربران
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: AnimatedSize(
+                        duration: Duration(milliseconds: 350), // سرعت انیمیشن
+                        curve: Curves.easeInOut, // نوع حرکت انیمیشن
+                        child: controller.isSubMenuOpen('transaction')
+                            ? Column(
+                          children: [
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'لیست تراکنش های کاربران',
+                                  style: AppTextStyle.bodyText.copyWith(fontSize: 14),
+                                ),
+                                leading: Icon(Icons.circle,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/transactionList');
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                            : const SizedBox(),
+                      ),
+                    ),
+
                     //تنظیمات
                     ResponsiveRowColumnItem(
                       rowFlex:1,
