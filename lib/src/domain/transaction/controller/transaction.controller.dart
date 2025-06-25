@@ -2,6 +2,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
 import 'package:path_provider/path_provider.dart';
@@ -98,6 +99,7 @@ class TransactionController extends GetxController{
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
     print('تعداد image:');
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
@@ -110,6 +112,7 @@ class TransactionController extends GetxController{
       //  state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
+      EasyLoading.dismiss();
     }
   }
 

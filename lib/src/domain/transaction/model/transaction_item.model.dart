@@ -47,6 +47,8 @@ class TransactionModel {
   final List<InventoryDetailModel>? details;
   @JsonKey(name: "rowNum")
   final int? rowNum;
+  @JsonKey(name: "recId")
+  final String? recId;
   @JsonKey(name: "id")
   final int? id;
   @JsonKey(name: "infos")
@@ -67,6 +69,7 @@ class TransactionModel {
     required this.tobalances,
     required this.details,
     required this.rowNum,
+    required this.recId,
     required this.id,
     required this.infos,
   });
