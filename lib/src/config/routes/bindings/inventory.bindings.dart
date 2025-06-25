@@ -6,6 +6,7 @@ import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_detail_insert_receive.controller.dart';
 
+import '../../../domain/home/controller/home.controller.dart';
 import '../../../domain/inventory/controller/inventory_create_payment.controller.dart';
 import '../../../domain/inventory/controller/inventory_detail_insert_payment.controller.dart';
 import '../../../domain/inventory/controller/inventory_update_payment.controller.dart';
@@ -22,6 +23,7 @@ class InventoryBindings implements Bindings{
     Get.lazyPut(()=>InventoryDetailInsertPaymentController());
     Get.lazyPut(()=>InventoryDetailUpdatePaymentController());
     Get.lazyPut(()=>InventoryCreateLayoutController());
+    Get.lazyPut(()=>HomeController());
   }
 
 }

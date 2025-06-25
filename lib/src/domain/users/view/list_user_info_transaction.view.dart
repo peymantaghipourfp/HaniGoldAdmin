@@ -7,6 +7,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
@@ -24,6 +25,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
         title: 'مانده کاربران',
         onBackTap: () => Get.toNamed("/home"),
       ),
+      drawer: const AppDrawer(),
       body:Stack(
         children: [
           BackgroundImageTotal(),

@@ -6,6 +6,7 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../controller/user_info_detail_transaction.controller.dart';
@@ -30,6 +31,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
         title: 'جزییات تراکنش کاربر',
         onBackTap: () => Get.offNamed("/listUserInfoTransaction"),
       ),
+      drawer: const AppDrawer(),
       body: Stack(
         children: [
           BackgroundImageTotal(),
