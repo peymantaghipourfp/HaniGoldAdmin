@@ -105,7 +105,7 @@ Widget _buildStatCard(String title, String value, IconData icon) {
   );
 }
 
-void _showExitDialog() {
+/*void _showExitDialog() {
   Get.dialog(
     AlertDialog(
       backgroundColor: AppColor.secondaryColor,
@@ -134,8 +134,9 @@ void _showExitDialog() {
       ],
     ),
   );
-}
+}*/
 
+/*
 var controller=Get.find<HomeController>();
 void _showChangePassword() {
   Get.dialog(
@@ -266,4 +267,4 @@ void _showChangePassword() {
       ],
     ),
   );
-}
+}*/

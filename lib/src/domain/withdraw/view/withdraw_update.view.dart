@@ -41,6 +41,7 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
         appBar: CustomAppbar1(title: 'ویرایش درخواست برداشت',
           onBackTap: () {
             Get.back();
+            withdrawUpdateController.clearList();
           },
         ),
         drawer: const AppDrawer(),

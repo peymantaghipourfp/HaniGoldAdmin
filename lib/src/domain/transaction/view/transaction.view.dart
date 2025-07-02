@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/order/widget/filter.widget.dart';
+import 'package:hanigold_admin/src/domain/transaction/model/transaction_item.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -10,8 +12,10 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
+import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../controller/transaction.controller.dart';
@@ -29,6 +33,31 @@ class _TransactionViewState extends State<TransactionView> {
   final Map<int, GlobalKey> _rowKeys = {};
 
   @override
+  void initState() {
+    super.initState();
+    controller.transactionList.listen((list) {
+      _prepareScreenshotKeys(list);
+      if (mounted) {
+        setState(() {});
+      }
+    });
+    _prepareScreenshotKeys(controller.transactionList);
+  }
+
+  void _prepareScreenshotKeys(List<TransactionModel> transactions) {
+    final newKeys = <int>{};
+    for (var transaction in transactions) {
+      if (transaction.id != null) {
+        newKeys.add(transaction.id!);
+        if (!_rowKeys.containsKey(transaction.id)) {
+          _rowKeys[transaction.id!] = GlobalKey(debugLabel: 'row_${transaction.id}');
+        }
+      }
+    }
+    _rowKeys.removeWhere((key, value) => !newKeys.contains(key));
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
@@ -36,6 +65,7 @@ class _TransactionViewState extends State<TransactionView> {
         title: 'لیست تراکنش های کاربران',
         onBackTap: () => Get.back(),
       ),
+      drawer: const AppDrawer(),
       body:  Stack(
         children: [
           BackgroundImageTotal(),
@@ -63,8 +93,8 @@ class _TransactionViewState extends State<TransactionView> {
                         textInputAction: TextInputAction.search,
                         onFieldSubmitted: (value) async {
                           if (value.isNotEmpty) {
-                            // await controller.searchAccounts(value);
-                            // showSearchResults(context);
+                             await controller.searchAccounts(value);
+                             showSearchResults(context);
                           } else {
                             controller.clearSearch();
                           }
@@ -79,6 +109,16 @@ class _TransactionViewState extends State<TransactionView> {
                           hintStyle: AppTextStyle.labelText,
                           prefixIcon: IconButton(
                               onPressed: ()async{
+                                if (controller.searchController
+                                    .text.isNotEmpty) {
+                                  await controller.searchAccounts(
+                                      controller.searchController
+                                          .text
+                                  );
+                                  showSearchResults(context);
+                                } else {
+                                  controller.clearSearch();
+                                }
                               },
                               icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
                           ),
@@ -292,7 +332,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                         borderRadius: BorderRadius.circular(5)))),
                                                                 onPressed: () async {
-                                                                  //controller.exportToExcel();
+                                                                  controller.exportToExcel();
                                                                   Get.back();
                                                                 },
                                                                 child: controller.isLoading.value?
@@ -320,7 +360,7 @@ class _TransactionViewState extends State<TransactionView> {
                                         ),
                                         SizedBox(width: 5,),
                                         // خروجی pdf
-                                        ElevatedButton(
+                                        /*ElevatedButton(
                                           style: ButtonStyle(
                                               padding:isDesktop ? WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23,vertical: 19)):
                                               WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 21,vertical: 17)),
@@ -530,7 +570,7 @@ class _TransactionViewState extends State<TransactionView> {
                                             'خروجی pdf',
                                             style: AppTextStyle.labelText,
                                           ),
-                                        ),
+                                        ),*/
                                       ],
                                     ),
                                   ],
@@ -557,7 +597,9 @@ class _TransactionViewState extends State<TransactionView> {
                                             Animation animation,
                                             Animation secondaryAnimation) {
                                           return Center(
-                                            child: Material(
+                                            child:
+                                              FilterWidget(),
+                                            /*Material(
                                               color: Colors.transparent,
                                               child: Container(
                                                 decoration: BoxDecoration(
@@ -598,8 +640,8 @@ class _TransactionViewState extends State<TransactionView> {
                                                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                         borderRadius: BorderRadius.circular(5)))),
                                                                 onPressed: () async {
-                                                                  // controller.clearFilter();
-                                                                  // controller.getRemittanceListPager();
+                                                                  controller.clearFilter();
+                                                                  controller.fetchTransactionList();
                                                                   Get.back();
                                                                 },
                                                                 child: Text(
@@ -624,18 +666,18 @@ class _TransactionViewState extends State<TransactionView> {
                                                               CrossAxisAlignment.start,
                                                               children: [
                                                                 Text(
-                                                                  'نام بدهکار',
+                                                                  'نام کاربر',
                                                                   style: AppTextStyle.labelText.copyWith(
                                                                       fontSize: 11,
                                                                       fontWeight: FontWeight.normal,
                                                                       color: AppColor.textColor),
                                                                 ),
-                                                                SizedBox(height: 10,),
+                                                                SizedBox(height: 8,),
                                                                 IntrinsicHeight(
                                                                   child: TextFormField(
                                                                     autovalidateMode: AutovalidateMode
                                                                         .onUserInteraction,
-                                                                    controller: controller.namePayerController,
+                                                                    controller: controller.nameFilterController,
                                                                     style: AppTextStyle.labelText.copyWith(fontSize: 15),
                                                                     textAlign: TextAlign.start,
                                                                     keyboardType:TextInputType.text,
@@ -657,100 +699,50 @@ class _TransactionViewState extends State<TransactionView> {
                                                                 ),
                                                               ],
                                                             ),
-                                                            SizedBox(height: 8,),
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                              CrossAxisAlignment.start,
+                                                            SizedBox(height: 8),
+                                                            Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                               children: [
                                                                 Text(
-                                                                  'نام بستانکار',
+                                                                  'نوع',
                                                                   style: AppTextStyle.labelText.copyWith(
                                                                       fontSize: 11,
                                                                       fontWeight: FontWeight.normal,
                                                                       color: AppColor.textColor),
                                                                 ),
-                                                                SizedBox(height: 10,),
-                                                                IntrinsicHeight(
-                                                                  child: TextFormField(
-                                                                    autovalidateMode: AutovalidateMode
-                                                                        .onUserInteraction,
-                                                                    controller: controller.nameRecieptController,
-                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                                                    textAlign: TextAlign.start,
-                                                                    keyboardType:TextInputType.text,
-                                                                    decoration: InputDecoration(
-                                                                      contentPadding:
-                                                                      const EdgeInsets.symmetric(
-                                                                          vertical: 11,horizontal: 15
-                                                                      ),
-                                                                      isDense: true,
-                                                                      border: OutlineInputBorder(
-                                                                        borderRadius:
-                                                                        BorderRadius.circular(6),
-                                                                      ),
-                                                                      filled: true,
-                                                                      fillColor: AppColor.textFieldColor,
-                                                                      errorMaxLines: 1,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            SizedBox(height: 8,),
-                                                            Column(
-                                                              crossAxisAlignment:
-                                                              CrossAxisAlignment.start,
-                                                              children: [
-                                                                Text(
-                                                                  'شماره تماس',
-                                                                  style: AppTextStyle.labelText.copyWith(
-                                                                      fontSize: 11,
-                                                                      fontWeight: FontWeight.normal,
-                                                                      color: AppColor.textColor),
-                                                                ),
-                                                                SizedBox(height: 10,),
-                                                                IntrinsicHeight(
-                                                                  child: TextFormField(
-                                                                    autovalidateMode: AutovalidateMode
-                                                                        .onUserInteraction,
-                                                                    controller: controller.mobileFilterController,
-                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                                                    textAlign: TextAlign.center,
-                                                                    keyboardType:TextInputType.phone,
-                                                                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                                      TextInputFormatter.withFunction((oldValue, newValue) {
-                                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                                        String newText = newValue.text
-                                                                            .replaceAll('٠', '0')
-                                                                            .replaceAll('١', '1')
-                                                                            .replaceAll('٢', '2')
-                                                                            .replaceAll('٣', '3')
-                                                                            .replaceAll('٤', '4')
-                                                                            .replaceAll('٥', '5')
-                                                                            .replaceAll('٦', '6')
-                                                                            .replaceAll('٧', '7')
-                                                                            .replaceAll('٨', '8')
-                                                                            .replaceAll('٩', '9');
+                                                                SizedBox(height: 8),
+                                                                Container(
+                                                                  padding: EdgeInsets.only(
+                                                                      bottom: 5),
+                                                                  child: CustomDropdownWidget(
+                                                                    validator: (value) {
+                                                                      if (value == 'انتخاب کنید' ||
+                                                                          value == null ||
+                                                                          value.isEmpty) {
+                                                                        return 'نوع را انتخاب کنید';
+                                                                      }
+                                                                      return null;
+                                                                    },
+                                                                    items: [
+                                                                      'انتخاب کنید',
+                                                                      ...controller.typeList.where((type) =>
+                                                                      type.type != null)
+                                                                          .map((type) =>
+                                                                      type.name ?? '')
+                                                                    ].toList(),
+                                                                    selectedValue: controller
+                                                                        .typeFilter ?? '',
+                                                                    onChanged: (String? newValue) {
+                                                                      controller.changeSelectedType(newValue!);
+                                                                      setState(() {
 
-                                                                        return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
-                                                                      }),
-                                                                    ],
-                                                                    decoration: InputDecoration(
-                                                                      contentPadding:
-                                                                      const EdgeInsets.symmetric(
-                                                                          vertical: 11,horizontal: 15
-
-                                                                      ),
-                                                                      isDense: true,
-                                                                      border: OutlineInputBorder(
-                                                                        borderRadius:
-                                                                        BorderRadius.circular(6),
-                                                                      ),
-
-                                                                      filled: true,
-                                                                      fillColor: AppColor.textFieldColor,
-                                                                      errorMaxLines: 1,
-                                                                    ),
+                                                                      });
+                                                                    },
+                                                                    backgroundColor: AppColor
+                                                                        .textFieldColor,
+                                                                    borderRadius: 7,
+                                                                    borderColor: AppColor
+                                                                        .secondaryColor,
+                                                                    hideUnderline: true,
                                                                   ),
                                                                 ),
                                                               ],
@@ -764,6 +756,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                                   style: AppTextStyle.labelText.copyWith(fontSize: 13,
                                                                       fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                                                 ),
+                                                                SizedBox(height: 8,),
                                                                 Container(
                                                                   //height: 50,
                                                                   padding: EdgeInsets.only(bottom: 5),
@@ -819,6 +812,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                                   style: AppTextStyle.labelText.copyWith(fontSize: 13,
                                                                       fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                                                 ),
+                                                                SizedBox(height: 8,),
                                                                 Container(
                                                                   //height: 50,
                                                                   padding: EdgeInsets.only(bottom: 5),
@@ -885,9 +879,8 @@ class _TransactionViewState extends State<TransactionView> {
                                                               shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                   borderRadius: BorderRadius.circular(5)))),
                                                           onPressed: () async {
-                                                            // controller.getRemittanceListPager();
+                                                            controller.fetchTransactionList();
                                                             Get.back();
-
                                                           },
                                                           child: controller.isLoading.value?
                                                           CircularProgressIndicator(
@@ -903,7 +896,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                   ),
                                                 ),
                                               ),
-                                            ),
+                                            ),*/
                                           );
                                         });
                                   },
@@ -915,7 +908,7 @@ class _TransactionViewState extends State<TransactionView> {
                                           colorFilter:
                                           ColorFilter
                                               .mode(
-                                            controller.namePayerController.text!="" || controller.nameRecieptController.text!="" ||  controller.mobileFilterController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!="" ?AppColor.accentColor:  AppColor
+                                            controller.nameFilterController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!=""|| controller.typeFilter1!="" ?AppColor.accentColor:  AppColor
                                                 .textColor,
                                             BlendMode
                                                 .srcIn,
@@ -930,7 +923,7 @@ class _TransactionViewState extends State<TransactionView> {
                                             .copyWith(
                                             fontSize: isDesktop
                                                 ? 12
-                                                : 10,color:  controller.namePayerController.text!="" || controller.nameRecieptController.text!="" ||  controller.mobileFilterController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                : 10,color:  controller.nameFilterController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!=""|| controller.typeFilter1!="" ?AppColor.accentColor: AppColor.textColor),
                                       ),
                                     ],
                                   ),
@@ -986,8 +979,8 @@ class _TransactionViewState extends State<TransactionView> {
             )
                 : ErrPage(
               callback: () {
-                // controller.clearFilter();
-                // controller.getRemittanceListPager();
+                controller.clearFilter();
+                controller.fetchTransactionList();
               },
               title: "خطا در دریافت لیست تراکنش ها",
               des: 'برای دریافت لیست تراکنش ها مجددا تلاش کنید',
@@ -1012,6 +1005,37 @@ class _TransactionViewState extends State<TransactionView> {
     ));
   }
 
+  void showSearchResults(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) =>
+          AlertDialog(backgroundColor: AppColor.backGroundColor,
+            title: Text('انتخاب کنید', style: AppTextStyle.smallTitleText,),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: controller.searchedAccounts.length,
+                itemBuilder: (context, index) {
+                  final account = controller.searchedAccounts[index];
+                  return ListTile(
+                    title: Text(account.name ?? '',
+                      style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
+                    onTap: () => controller.selectAccount(account),
+                  );
+                },
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: Text('بستن', style: AppTextStyle.bodyText,),
+              ),
+            ],
+          ),
+    );
+  }
+
   List<DataColumn> buildDataColumns() {
     return [
       DataColumn(
@@ -1029,10 +1053,7 @@ class _TransactionViewState extends State<TransactionView> {
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
-            print(columnIndex);
-            controller.setSort(columnIndex,ascending);
-
-           // controller.onSortColum(columnIndex, ascending);
+            controller.onSort(columnIndex, ascending);
           },
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
@@ -1040,25 +1061,21 @@ class _TransactionViewState extends State<TransactionView> {
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
-
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('کاربر',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
-          onSort: (columnIndex, ascending) {
-            print(ascending);
-            controller.setSort(columnIndex,ascending);
-
-           // controller.onSortColum(columnIndex, ascending);
-          },
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('شرح',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
+          onSort: (columnIndex, ascending) {
+            controller.onSort(columnIndex, ascending);
+          },
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مقدار',
@@ -1171,11 +1188,16 @@ class _TransactionViewState extends State<TransactionView> {
               SizedBox(
                 width: 5,
               ),
-              SvgPicture.asset('assets/svg/camera.svg',
-                colorFilter: ColorFilter.mode(
-                  AppColor.iconViewColor,
-                  BlendMode.srcIn,
-                ),height: 18,),
+              GestureDetector(
+                onTap: () {
+                  controller.captureRowScreenshot(trans, _dataTableKey, _rowKeys);
+                },
+                child: SvgPicture.asset('assets/svg/camera.svg',
+                  colorFilter: ColorFilter.mode(
+                    AppColor.iconViewColor,
+                    BlendMode.srcIn,
+                  ),height: 18,),
+              ),
               // SizedBox(
               //   width: 20,
               // ),
@@ -1220,6 +1242,7 @@ class _TransactionViewState extends State<TransactionView> {
         DataCell(Center(
           child: trans.details!.isEmpty
               ? Column(
+            key: _rowKeys[trans.id],
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -1314,10 +1337,7 @@ class _TransactionViewState extends State<TransactionView> {
                             fontWeight: FontWeight.normal,
                             fontSize: 10),
                       ),
-                      Text(
-                          "${trans.price ?? 0}"
-                              .seRagham() +
-                              "  ریال  ",
+                      Text("${trans.price ?? 0}".seRagham() + "  ریال  ",
                           style: AppTextStyle.bodyText.copyWith(
                               color: AppColor.textColor,
                               fontWeight: FontWeight.normal,
@@ -1375,6 +1395,7 @@ class _TransactionViewState extends State<TransactionView> {
             ],
           )
               : Column(
+            key: _rowKeys[trans.id],
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: trans.details!

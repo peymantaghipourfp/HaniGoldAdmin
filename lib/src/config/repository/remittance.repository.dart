@@ -88,7 +88,6 @@ class RemittanceRepository{
   })async{
     try{
       Map<String , dynamic> options=
-      accountId != null?
       {
         "options" : { "remittance" : {
           "Predicate": [
@@ -96,12 +95,34 @@ class RemittanceRepository{
               "innerCondition": 0,
               "outerCondition": 0,
               "filters": [
+                if(accountId != null)
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
                   "filterType": 5,
                   "RefTable": "Users"
                 },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Remittance"
+                  },
+                if(namePayer!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": namePayer,
+                    "filterType": 0,
+                    "RefTable": "AccountPayer"
+                  },
+                if(nameReciept!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameReciept,
+                    "filterType": 0,
+                    "RefTable": "AccountReciept"
+                  },
               ],
             }
           ],
@@ -111,81 +132,6 @@ class RemittanceRepository{
           "ToIndex": toIndex
         }
         }
-      }:startDate!=""? {
-        "options" : { "remittance" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
-                {
-                  "fieldName": "Date",
-                  "filterValue": "$startDate|$endDate",
-                  "filterType": 25,
-                  "RefTable": "Remittance"
-                }
-              ]
-            }
-          ],
-          "orderBy": "Remittance.Id",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
-      }:namePayer!="" ?
-      {
-        "options" : { "remittance" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
-                {
-                  "fieldName": "Name",
-                  "filterValue": namePayer,
-                  "filterType": 0,
-                  "RefTable": "AccountPayer"
-                },
-              ],
-            }
-          ],
-          "orderBy": "Remittance.Id",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }
-        }
-      }:nameReciept!="" ?
-      {
-        "options" : { "remittance" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
-                {
-                  "fieldName": "Name",
-                  "filterValue": nameReciept,
-                  "filterType": 0,
-                  "RefTable": "AccountReciept"
-                },
-              ],
-            }
-          ],
-          "orderBy": "Remittance.Id",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }
-        }
-      } :
-      {
-        "options" : { "remittance" : {
-          "orderBy": "Remittance.Id",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
       };
       final response=await remittanceDio.post('Remittance/getWrapper',data: options);
       print("url getRemittanceListPager : Remittance/get" );

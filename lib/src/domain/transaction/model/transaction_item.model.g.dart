@@ -38,7 +38,7 @@ TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
           ?.map((e) => InventoryDetailModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
-          recId: json['recId'] as String?,
+      recId: json['recId'] as String?,
       id: (json['id'] as num?)?.toInt(),
       infos: json['infos'] as List<dynamic>?,
     );
@@ -59,6 +59,7 @@ Map<String, dynamic> _$TransactionModelToJson(TransactionModel instance) =>
       'tobalances': instance.tobalances,
       'details': instance.details,
       'rowNum': instance.rowNum,
+      'recId': instance.recId,
       'id': instance.id,
       'infos': instance.infos,
     };

@@ -308,129 +308,139 @@ void _showExitDialog() {
   );
 }
 
-var controller = Get.find<HomeController>();
 void _showChangePassword() {
+  final HomeController controller = Get.find<HomeController>();
+  final formKey = GlobalKey<FormState>();
   Get.dialog(
-    AlertDialog(
-      backgroundColor: AppColor.secondaryColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Text('تغییر رمز عبور',
-          style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor)),
-      content: SizedBox(
-        height: Get.height * 0.5,
-        child: Column(
-          children: [
-            const SizedBox(height: 24),
-            TextFormField(
-              style: AppTextStyle.bodyText.copyWith(
-                fontSize: 13,
-              ),
-              textDirection: TextDirection.rtl,
-              controller: controller.passwordOldController,
-              autofillHints: const [AutofillHints.password],
-              obscureText: true,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 16,
+    Form(
+      key: formKey,
+      child: AlertDialog(
+        backgroundColor: AppColor.secondaryColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text('تغییر رمز عبور',
+            style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor)),
+        content: SizedBox(
+          height: Get.height * 0.5,
+          child: Column(
+            children: [
+              const SizedBox(height: 24),
+              TextFormField(
+                style: AppTextStyle.bodyText.copyWith(
+                  fontSize: 13,
                 ),
-                labelText: 'رمز عبور قبلی',
-                labelStyle: TextStyle(color: AppColor.textColor),
-                prefixIcon: const Icon(Icons.lock_outline_rounded),
-                prefixIconColor: AppColor.textColor,
-                border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
+                textDirection: TextDirection.rtl,
+                controller: controller.passwordOldController,
+                autofillHints: const [AutofillHints.password],
+                obscureText: true,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 16,
+                  ),
+                  labelText: 'رمز عبور قبلی',
+                  labelStyle: TextStyle(color: AppColor.textColor),
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  prefixIconColor: AppColor.textColor,
+                  border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'لطفا رمز عبور را وارد کنید';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'لطفا رمز عبور را وارد کنید';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-            // وارد کردن پسورد
-            TextFormField(
-              style: AppTextStyle.bodyText.copyWith(
-                fontSize: 13,
-              ),
-              textDirection: TextDirection.rtl,
-              controller: controller.passwordController,
-              autofillHints: const [AutofillHints.password],
-              obscureText: true,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 16,
+              // وارد کردن پسورد
+              TextFormField(
+                style: AppTextStyle.bodyText.copyWith(
+                  fontSize: 13,
                 ),
-                labelText: 'رمز عبور جدید',
-                labelStyle: TextStyle(color: AppColor.textColor),
-                prefixIcon: const Icon(Icons.lock_outline_rounded),
-                prefixIconColor: AppColor.textColor,
-                border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'لطفا رمز عبور را وارد کنید';
-                }
-                return null;
-              },
-            ),
-            const SizedBox(height: 24),
-            TextFormField(
-              style: AppTextStyle.bodyText.copyWith(
-                fontSize: 13,
-              ),
-              textDirection: TextDirection.rtl,
-              controller: controller.retypePasswordController,
-              autofillHints: const [AutofillHints.password],
-              obscureText: true,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(
-                  vertical: 16,
-                  horizontal: 16,
+                textDirection: TextDirection.rtl,
+                controller: controller.passwordController,
+                autofillHints: const [AutofillHints.password],
+                obscureText: true,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 16,
+                  ),
+                  labelText: 'رمز عبور جدید',
+                  labelStyle: TextStyle(color: AppColor.textColor),
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  prefixIconColor: AppColor.textColor,
+                  border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                 ),
-                labelText: 'تکرار رمز عبور جدید',
-                labelStyle: TextStyle(color: AppColor.textColor),
-                prefixIcon: const Icon(Icons.lock_outline_rounded),
-                prefixIconColor: AppColor.textColor,
-                border:
-                OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                floatingLabelBehavior: FloatingLabelBehavior.always,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'لطفا رمز عبور را وارد کنید';
+                  }
+                  return null;
+                },
               ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'لطفا رمز عبور را وارد کنید';
-                }
-                return null;
-              },
-            ),
-          ],
-        ),
-      ),
-      actions: [
-        TextButton(
-          child:
-          Text('انصراف', style: TextStyle(color: AppColor.primaryColor)),
-          onPressed: () => Get.back(),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColor.primaryColor,
-            shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              const SizedBox(height: 24),
+              TextFormField(
+                style: AppTextStyle.bodyText.copyWith(
+                  fontSize: 13,
+                ),
+                textDirection: TextDirection.rtl,
+                controller: controller.retypePasswordController,
+                autofillHints: const [AutofillHints.password],
+                obscureText: true,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 16,
+                  ),
+                  labelText: 'تکرار رمز عبور جدید',
+                  labelStyle: TextStyle(color: AppColor.textColor),
+                  prefixIcon: const Icon(Icons.lock_outline_rounded),
+                  prefixIconColor: AppColor.textColor,
+                  border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'لطفا رمز عبور را وارد کنید';
+                  }
+                  return null;
+                },
+              ),
+            ],
           ),
-          child: const Text('تغییر رمز', style: TextStyle(color: Colors.white)),
-          onPressed: () {
-            controller.changePassword();
-            Get.back();
-          },
         ),
-      ],
+        actions: [
+          TextButton(
+            child:
+            Text('انصراف', style: TextStyle(color: AppColor.primaryColor)),
+            onPressed: () {
+              Get.back();
+              controller.clearChangePasswordForm();
+            },
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.primaryColor,
+              shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            child: const Text('تغییر رمز', style: TextStyle(color: Colors.white)),
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                controller.changePassword();
+                controller.clearChangePasswordForm();
+                Get.back();
+              }
+            },
+          ),
+        ],
+      ),
     ),
   );
 }

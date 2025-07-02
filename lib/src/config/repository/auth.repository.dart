@@ -49,7 +49,7 @@ class AuthRepository{
       throw ErrorException('خطا:$e');
     }
   }
-Future<UserLoginModel> forgetPasswordVerify(String mobile,String code)async{
+Future<Map<String , dynamic>> forgetPasswordVerify(String mobile,String code)async{
     try{
       Map<String , dynamic> options={
         "VerificationCode" : code,
@@ -60,7 +60,8 @@ Future<UserLoginModel> forgetPasswordVerify(String mobile,String code)async{
       final response=await authDio.post('Login/checkVerificationForgetPassword',data: options);
       print("request : $options" );
       print("response : ${response.data}" );
-      return UserLoginModel.fromJson(response.data);
+      return response.data;
+      //return UserLoginModel.fromJson(response.data);
     }
     catch(e){
       throw ErrorException('خطا:$e');
@@ -68,7 +69,7 @@ Future<UserLoginModel> forgetPasswordVerify(String mobile,String code)async{
   }
 
 
-  Future<UserLoginModel> changePassword(String mobile,String password,String oldPassword,int id)async{
+  Future<Map<String , dynamic>> changePassword(String mobile,String password,String oldPassword,int id)async{
     try{
       Map<String , dynamic> options={
         "password" : password,
@@ -82,7 +83,7 @@ Future<UserLoginModel> forgetPasswordVerify(String mobile,String code)async{
       final response=await authDio.post('Login/changePassword',data: options);
       print("request : $options" );
       print("response : ${response.data}" );
-      return UserLoginModel.fromJson(response.data);
+      return response.data;
     }
     catch(e){
       throw ErrorException('خطا:$e');

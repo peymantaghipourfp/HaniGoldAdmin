@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
+import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import '../../domain/order/model/list_order.model.dart';
 import '../network/error/network.error.dart';
 
@@ -79,7 +80,6 @@ class OrderRepository{
   }) async{
     try{
       Map<String, dynamic> options =
-      accountId != null?
       {
         "options" : { "order" : {
           "Predicate": [
@@ -87,50 +87,21 @@ class OrderRepository{
               "innerCondition": 0,
               "outerCondition": 0,
               "filters": [
+                if(accountId != null)
                 {
                   "fieldName": "AccountId",
                   "filterValue": accountId.toString(),
                   "filterType": 5,
                   "RefTable": "Orders"
                 },
-              ],
-            }
-          ],
-          "orderBy": "Orders.date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-          }
-        }
-      }:startDate!=""? {
-        "options" : { "order" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
+                if(startDate!="")
                 {
                   "fieldName": "Date",
                   "filterValue": "$startDate|$endDate",
                   "filterType": 25,
                   "RefTable": "Orders"
-                }
-              ]
-            }
-          ],
-          "orderBy": "Orders.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
-      }:name!="" ?
-      {
-        "options" : { "order" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
+                },
+                if(name!="")
                 {
                   "fieldName": "Name",
                   "filterValue": name,
@@ -144,16 +115,8 @@ class OrderRepository{
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
+          }
         }
-        }
-      }:
-      {
-        "options" : { "order" : {
-          "orderBy": "Orders.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
       };
       final response=await orderDio.post('Order/getWrapper',data: options);
       print("request getOrderListPager : $options" );
@@ -440,6 +403,20 @@ class OrderRepository{
     }
     catch(e){
       throw ErrorException('خطا در ریجیستر:$e');
+    }
+  }
+
+  Future<List<TotalBalanceModel>> getTotalBalanceList()async{
+    try{
+      final response=await orderDio.get('Order/OrderBalanceDay');
+      print('Status Code getBalanceList: ${response.statusCode}');
+      print("response getBalanceList : ${response.data}" );
+      List<dynamic> data=response.data;
+      return data.map((totalBalance)=>TotalBalanceModel.fromJson(totalBalance)).toList();
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
     }
   }
 }

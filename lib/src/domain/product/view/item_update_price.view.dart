@@ -98,12 +98,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                           ),
                           Obx(() {
                             if (productController.state.value == PageState.loading) {
-                              EasyLoading.show(status: 'لطفا منتظر بمانید...');
+                              //EasyLoading.show(status: 'لطفا منتظر بمانید...');
                             return Center(
                             child: CircularProgressIndicator());
                             } else
                             if (productController.state.value == PageState.empty) {
-                              EasyLoading.dismiss();
+                              //EasyLoading.dismiss();
                             return EmptyPage(
                             title: 'درخواستی وجود ندارد',
                             callback: () {

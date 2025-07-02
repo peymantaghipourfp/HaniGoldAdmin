@@ -38,10 +38,10 @@ class AuthController extends GetxController{
      }else if(fetch.infos.first[""]=="2022"){
         Get.dialog(
             ForgetPasswordPage());
-
       }
     }
     catch(e){
+      Get.snackbar('خطا', 'کاربری یا رمز عبور اشتباه می باشد');
       //  state.value=PageState.err;
     }finally{
       EasyLoading.dismiss();
@@ -69,12 +69,12 @@ class AuthController extends GetxController{
     }
   }
 
-  Future<void> forgetPasswordVerify(BuildContext context) async{
+  Future<Map<String , dynamic>?> forgetPasswordVerify(BuildContext context) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       var fetch=await authRepository.forgetPasswordVerify(mobileController.text,code.value);
-      if(fetch.infos!.isNotEmpty){
-        Get.snackbar(fetch.infos!.first["title"].toString(), fetch.infos!.first["description"].toString());
+      if(fetch["infos"].isNotEmpty){
+        Get.snackbar(fetch["infos"][0]["title"], fetch["infos"][0]["description"]);
       }
      // if(fetch.user?.id!=null){
        Navigator.pop(context);
@@ -87,5 +87,6 @@ class AuthController extends GetxController{
     }finally{
       EasyLoading.dismiss();
     }
+    return null;
   }
 }

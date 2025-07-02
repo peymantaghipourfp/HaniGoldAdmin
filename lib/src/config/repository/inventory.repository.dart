@@ -81,7 +81,6 @@ class InventoryRepository {
  })async{
     try{
       Map<String , dynamic> options=
-      accountId != null?
       {
         "options" : { "inventory" : {
           "Predicate": [
@@ -89,51 +88,21 @@ class InventoryRepository {
               "innerCondition": 0,
               "outerCondition": 0,
               "filters": [
+                if(accountId != null)
                 {
                   "fieldName": "Account_Id",
                   "filterValue": accountId.toString(),
                   "filterType": 5,
                   "RefTable": "JoinedData"
                 },
-              ],
-            }
-          ],
-          "orderBy": "JoinedData.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
-      }:
-      startDate!=""? {
-        "options" : { "inventory" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
-                {
-                  "fieldName": "Date",
-                  "filterValue": "$startDate|$endDate",
-                  "filterType": 25,
-                  "RefTable": "JoinedData"
-                }
-              ]
-            }
-          ],
-          "orderBy": "JoinedData.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
-      }:
-      name!="" ?
-      {
-        "options" : { "inventory" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "JoinedData"
+                  },
+                if(name!="")
                 {
                   "fieldName": "Account_Name",
                   "filterValue": name,
@@ -143,15 +112,6 @@ class InventoryRepository {
               ],
             }
           ],
-          "orderBy": "JoinedData.date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }
-        }
-      }:
-      {
-        "options" : { "inventory" : {
           "orderBy": "JoinedData.Date",
           "orderByType": "desc",
           "StartIndex": startIndex,

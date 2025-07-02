@@ -1,4 +1,6 @@
 
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -35,17 +37,19 @@ class HomeController extends GetxController{
     return activeSubMenu.value == menuName;
   }
 
-  Future<void> changePassword() async{
+  Future<Map<String , dynamic>?> changePassword() async{
 
     if(passwordController.text==retypePasswordController.text){
       try{
         EasyLoading.show(status: 'لطفا منتظر بمانید');
         var fetch=await authRepository.changePassword(box.read("mobile"),passwordController.text,passwordOldController.text,box.read("id")as int);
-        Get.snackbar(fetch.infos!.first["title"].toString(), fetch.infos!.first["description"].toString());
-        accountModel.value=fetch;
+        print(fetch["infos"][0]["title"]);
         Get.back();
+        Get.snackbar(fetch["infos"][0]["title"], fetch["infos"][0]["description"]);
       }
       catch(e){
+        print("خطا در تغییر رمز عبور: $e");
+        Get.snackbar("خطا", "خطا در تغییر رمز عبور: $e");
         //  state.value=PageState.err;
       }finally{
         EasyLoading.dismiss();
@@ -53,6 +57,13 @@ class HomeController extends GetxController{
     }else{
       Get.snackbar("رمز عبور", "عدم تطابق رمز عبور و تکرار آن");
     }
+    return null;
 
+  }
+
+  void clearChangePasswordForm() {
+    passwordController.clear();
+    passwordOldController.clear();
+    retypePasswordController.clear();
   }
 }

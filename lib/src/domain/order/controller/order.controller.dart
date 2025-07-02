@@ -11,6 +11,7 @@ import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
+import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
@@ -59,6 +60,8 @@ class OrderController extends GetxController{
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
 
+  final List<TotalBalanceModel> totalBalanceList=<TotalBalanceModel>[].obs;
+
   void setError(String message){
     state.value=PageState.err;
     errorMessage.value=message;
@@ -104,6 +107,7 @@ class OrderController extends GetxController{
   void onInit() {
     getOrderListPager();
     setupScrollListener();
+    fetchTotalBalanceList();
     super.onInit();
   }
   @override void onClose() {
@@ -229,6 +233,26 @@ class OrderController extends GetxController{
     catch (e) {
       state.value = PageState.err;
     } finally {}
+  }
+
+  //لیست بالانس ها
+  Future<void> fetchTotalBalanceList() async{
+    try{
+      state.value=PageState.loading;
+      var fetchedTotalBalanceList=await orderRepository.getTotalBalanceList();
+      totalBalanceList.assignAll(fetchedTotalBalanceList);
+      print("totalBalanceListLength::::::${totalBalanceList.length}");
+      state.value=PageState.list;
+      if(totalBalanceList.isEmpty){
+        state.value=PageState.empty;
+      }
+    }
+    catch(e){
+      state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      isLoading.value=false;
+    }
   }
 
   // Future<List<OrderModel>> fetchOrderList() async{

@@ -732,12 +732,12 @@ class UserListView extends GetView<UserListController> {
                                                                       .backGroundColor),
                                                               width: isDesktop
                                                                   ? Get.width *
-                                                                      0.15
-                                                                  : Get.height *
+                                                                      0.2
+                                                                  : Get.width *
                                                                       0.5,
                                                               height: isDesktop
                                                                   ? Get.height *
-                                                                      0.35
+                                                                      0.5
                                                                   : Get.height *
                                                                       0.7,
                                                               padding:

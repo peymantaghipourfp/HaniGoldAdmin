@@ -79,7 +79,6 @@ Future<ListWithdrawModel> getWithdrawListPager({
 })async{
     try{
       Map<String , dynamic> options=
-          accountId != null?
       {
           "options" : { "withdrawrequest" : {
           "Predicate": [
@@ -87,12 +86,27 @@ Future<ListWithdrawModel> getWithdrawListPager({
               "innerCondition": 0,
               "outerCondition": 0,
                 "filters": [
+                  if(accountId != null)
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
                   "filterType": 5,
                   "RefTable": "Account"
                 },
+                  if(startDate!="")
+                    {
+                      "fieldName": "RequestDate",
+                      "filterValue": "$startDate|$endDate",
+                      "filterType": 25,
+                      "RefTable": "WithdrawRequest"
+                    },
+                  if(name!="")
+                    {
+                      "fieldName": "Name",
+                      "filterValue": name,
+                      "filterType": 0,
+                      "RefTable": "Account"
+                    },
               ],
             }
           ],
@@ -101,58 +115,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
           "StartIndex": startIndex,
           "ToIndex": toIndex
         }}
-      }:startDate!=""? {
-            "options" : { "withdrawrequest" : {
-              "Predicate": [
-                {
-                  "innerCondition": 0,
-                  "outerCondition": 0,
-                  "filters": [
-                    {
-                      "fieldName": "RequestDate",
-                      "filterValue": "$startDate|$endDate",
-                      "filterType": 25,
-                      "RefTable": "WithdrawRequest"
-                    }
-                  ]
-                }
-              ],
-              "orderBy": "withdrawrequest.requestDate",
-              "orderByType": "desc",
-              "StartIndex": startIndex,
-              "ToIndex": toIndex
-            }}
-          }: name!="" ?
-          {
-            "options" : { "withdrawrequest" : {
-              "Predicate": [
-                {
-                  "innerCondition": 0,
-                  "outerCondition": 0,
-                  "filters": [
-                    {
-                      "fieldName": "Name",
-                      "filterValue": name,
-                      "filterType": 0,
-                      "RefTable": "Account"
-                    },
-                  ],
-                }
-              ],
-              "orderBy": "withdrawrequest.requestDate",
-              "orderByType": "desc",
-              "StartIndex": startIndex,
-              "ToIndex": toIndex
-            }}
-          } :
-          {
-            "options" : { "withdrawrequest" : {
-              "orderBy": "withdrawrequest.requestDate",
-              "orderByType": "desc",
-              "StartIndex": startIndex,
-              "ToIndex": toIndex
-            }}
-          };
+      };
       final response=await withdrawDio.post('WithdrawRequest/getWrapper',data: options);
       print("request getWithdrawListPager : $options" );
       print("response getWithdrawListPager : ${response.data}" );

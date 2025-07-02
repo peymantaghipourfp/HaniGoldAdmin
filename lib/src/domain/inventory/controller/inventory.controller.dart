@@ -184,7 +184,7 @@ class InventoryController extends GetxController{
         return;
       }
 
-      final accounts = await AccountRepository().searchAccountList(name,"");
+      final accounts = await accountRepository.searchAccountList(name,"");
       searchedAccounts.assignAll(accounts);
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");

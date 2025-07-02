@@ -78,7 +78,6 @@ class DepositRepository{
  })async{
     try{
       Map<String, dynamic> options =
-      accountId != null?
       {
         "options" : { "deposit" : {
           "Predicate": [
@@ -86,73 +85,28 @@ class DepositRepository{
               "innerCondition": 0,
               "outerCondition": 0,
               "filters": [
+                if(accountId != null)
                 {
                   "fieldName": "Id",
                   "filterValue": accountId.toString(),
                   "filterType": 5,
                   "RefTable": "AccountDeposit"
                 },
-              ],
-            }
-          ],
-          "orderBy": "deposit.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }
-        }
-      }:startDate!=""? {
-        "options" : { "deposit" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
+                if(startDate!="")
                 {
                   "fieldName": "Date",
                   "filterValue": "$startDate|$endDate",
                   "filterType": 25,
                   "RefTable": "Deposit"
-                }
-              ]
-            }
-          ],
-          "orderBy": "deposit.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
-      }:nameDeposit!="" ?
-      {
-        "options" : { "deposit" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
+                },
+                if(nameDeposit!="")
                 {
                   "fieldName": "Name",
                   "filterValue": nameDeposit,
                   "filterType": 0,
                   "RefTable": "AccountDeposit"
                 },
-              ],
-            }
-          ],
-          "orderBy": "deposit.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }
-        }
-      }:nameRequest!="" ?
-      {
-        "options" : { "deposit" : {
-          "Predicate": [
-            {
-              "innerCondition": 0,
-              "outerCondition": 0,
-              "filters": [
+                if(nameRequest!="")
                 {
                   "fieldName": "Name",
                   "filterValue": nameRequest,
@@ -168,14 +122,6 @@ class DepositRepository{
           "ToIndex": toIndex
         }
         }
-      } :
-      {
-        "options" : { "deposit" : {
-          "orderBy": "deposit.Date",
-          "orderByType": "desc",
-          "StartIndex": startIndex,
-          "ToIndex": toIndex
-        }}
       };
       final response=await depositDio.post('Deposit/getWrapper',data: options);
       print("request getDepositListPager : $options" );

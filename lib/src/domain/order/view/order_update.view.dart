@@ -18,7 +18,7 @@ import '../controller/order_update.controller.dart';
 import '../model/order.model.dart';
 
 class OrderUpdateView extends StatefulWidget {
-  OrderUpdateView({super.key});
+  const OrderUpdateView({super.key});
 
   @override
   State<OrderUpdateView> createState() => _OrderUpdateViewState();
@@ -37,7 +37,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
     return Obx(() {
       return Scaffold(
         appBar: CustomAppbar1(title: 'ویرایش سفارش', onBackTap: () {
-          Get.toNamed('/orderList');
+          Get.back();
           orderUpdateController.clearList(); }),
         drawer: const AppDrawer(),
         body: Stack(

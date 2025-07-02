@@ -39,7 +39,7 @@ InventoryDetailModel _$InventoryDetailModelFromJson(
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
       attribute: json['attribute'] as String?,
-          name: json['name'] as String?,
+      name: json['name'] as String?,
       stateMode: (json['stateMode'] as num?)?.toInt(),
       createdOn: json['createdOn'] == null
           ? null

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../domain/home/controller/home.controller.dart';
 import '../../../domain/transaction/controller/transaction.controller.dart';
 import '../../../domain/users/controller/insert_user.controller.dart';
 import '../../../domain/users/controller/user_detail.controller.dart';
@@ -10,5 +11,6 @@ class TransactionBindings implements Bindings{
   @override
   void dependencies() {
     Get.lazyPut(()=>TransactionController());
+    Get.lazyPut(()=>HomeController());
   }
 }
