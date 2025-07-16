@@ -16,6 +16,7 @@ class PagerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<String> listStr = (countPage/10).toString().split('.');
     return Padding(
         padding: const EdgeInsets.all(8.0),
         child:   SizedBox(
@@ -37,7 +38,7 @@ class PagerWidget extends StatelessWidget {
                 callBack(value+1);
               },
               delegate: DataPagerDelegate(),
-              direction: Axis.horizontal, pageCount: (countPage/10).toDouble(),
+              direction: Axis.horizontal, pageCount:listStr.length>1? ((countPage.toDouble()/10)+1):(countPage.toDouble()/10),
             ),
           ):SizedBox(),
         )

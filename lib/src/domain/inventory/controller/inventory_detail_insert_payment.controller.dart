@@ -154,7 +154,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
   Future<void> fetchAccountList() async{
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList("1");
+      var fetchedAccountList=await accountRepository.getAccountList("");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -191,7 +191,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
         state.value = PageState.list;
         return;
       }
-      final results = await accountRepository.searchAccountList(name,"1");
+      final results = await accountRepository.searchAccountList(name,"");
       searchedAccounts.assignAll(results);
       state.value = searchedAccounts.isEmpty ? PageState.empty : PageState.list;
     } catch (e) {

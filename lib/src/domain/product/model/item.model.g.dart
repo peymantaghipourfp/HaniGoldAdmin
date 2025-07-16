@@ -14,12 +14,19 @@ ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
           ? null
           : ItemUnitModel.fromJson(json['itemUnit'] as Map<String, dynamic>),
       price: (json['price'] as num?)?.toDouble(),
+      mesghalPrice: (json['mesghalPrice'] as num?)?.toDouble(),
       differentPrice: (json['differentPrice'] as num?)?.toDouble(),
+      mesghalDifferentPrice:
+          (json['mesghalDifferentPrice'] as num?)?.toDouble(),
       name: json['name'] as String?,
       isDefault: json['isDefault'] as bool?,
       status: json['status'] as bool?,
       sellStatus: json['sellStatus'] as bool?,
       buyStatus: json['buyStatus'] as bool?,
+      hasWage: json['hasWage'] as bool?,
+      wage: (json['wage'] as num?)?.toInt(),
+      isCard: json['isCard'] as bool?,
+      cardPrice: (json['cardPrice'] as num?)?.toDouble(),
       maxSell: (json['maxSell'] as num?)?.toInt(),
       maxBuy: (json['maxBuy'] as num?)?.toInt(),
       w750: (json['w750'] as num?)?.toDouble(),
@@ -34,18 +41,27 @@ ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
       infos: json['infos'] as List<dynamic>?,
       salesRange: (json['salesRange'] as num?)?.toDouble(),
       buyRange: (json['buyRange'] as num?)?.toDouble(),
+      refrence: json['refrence'] == null
+          ? null
+          : Refrence.fromJson(json['refrence'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ItemModelToJson(ItemModel instance) => <String, dynamic>{
       'itemGroup': instance.itemGroup,
       'itemUnit': instance.itemUnit,
       'price': instance.price,
+      'mesghalPrice': instance.mesghalPrice,
       'differentPrice': instance.differentPrice,
+      'mesghalDifferentPrice': instance.mesghalDifferentPrice,
       'name': instance.name,
       'isDefault': instance.isDefault,
       'status': instance.status,
       'sellStatus': instance.sellStatus,
       'buyStatus': instance.buyStatus,
+      'hasWage': instance.hasWage,
+      'wage': instance.wage,
+      'isCard': instance.isCard,
+      'cardPrice': instance.cardPrice,
       'maxSell': instance.maxSell,
       'maxBuy': instance.maxBuy,
       'salesRange': instance.salesRange,
@@ -59,5 +75,26 @@ Map<String, dynamic> _$ItemModelToJson(ItemModel instance) => <String, dynamic>{
       'id': instance.id,
       'attribute': instance.attribute,
       'recId': instance.recId,
+      'infos': instance.infos,
+      'refrence': instance.refrence,
+    };
+
+Refrence _$RefrenceFromJson(Map<String, dynamic> json) => Refrence(
+      itemGroup: json['itemGroup'] == null
+          ? null
+          : ItemGroupModel.fromJson(json['itemGroup'] as Map<String, dynamic>),
+      itemUnit: json['itemUnit'] == null
+          ? null
+          : ItemUnitModel.fromJson(json['itemUnit'] as Map<String, dynamic>),
+      name: json['name'] as String?,
+      id: (json['id'] as num?)?.toInt(),
+      infos: json['infos'] as List<dynamic>?,
+    );
+
+Map<String, dynamic> _$RefrenceToJson(Refrence instance) => <String, dynamic>{
+      'itemGroup': instance.itemGroup,
+      'itemUnit': instance.itemUnit,
+      'name': instance.name,
+      'id': instance.id,
       'infos': instance.infos,
     };

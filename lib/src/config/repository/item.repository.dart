@@ -58,6 +58,7 @@ class ItemRepository{
     required int itemId,
     required double price,
     required double differentPrice,
+    required int itemUnitId,
   })async{
     try{
       Map<String, dynamic> itemData = {
@@ -66,7 +67,8 @@ class ItemRepository{
         "differentPrice": differentPrice,
         "rowNum": 1,
         "attribute": "sys",
-        "infos": []
+        "infos": [],
+        "itemUnitId":itemUnitId
       };
 
       var response=await itemDio.post('ItemPrice/insert',data: itemData);
@@ -82,6 +84,7 @@ class ItemRepository{
     required int itemId,
     required double differentPrice,
     required double price,
+    required int itemUnitId,
   })async{
     try{
       Map<String, dynamic> itemData = {
@@ -90,7 +93,8 @@ class ItemRepository{
         "price": price,
         "rowNum": 1,
         "attribute": "sys",
-        "infos": []
+        "infos": [],
+        "itemUnitId":itemUnitId
       };
 
       var response=await itemDio.post('ItemPrice/insert',data: itemData);

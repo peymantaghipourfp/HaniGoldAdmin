@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
+import 'package:hanigold_admin/src/config/const/socket.service.dart';
 import 'package:hanigold_admin/src/config/routes/route_page.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -16,6 +17,7 @@ void main() async{
   await GetStorage.init();
   EasyLoading.init();
   configLoading();
+  await Get.putAsync(() async => SocketService());
   runApp(const MyApp());
 }
 

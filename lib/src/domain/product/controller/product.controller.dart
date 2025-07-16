@@ -1,13 +1,20 @@
 
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/config/const/socket.service.dart';
+import 'package:hanigold_admin/src/config/repository/web_socket.repository.dart';
+import 'package:hanigold_admin/src/domain/product/model/socket_item.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/item.repository.dart';
+import '../../../config/repository/url/web_socket_url.dart';
 import '../model/item.model.dart';
 
 enum PageState{loading,err,empty,list}
@@ -34,9 +41,34 @@ class ProductController extends GetxController{
   var errorMessage=''.obs;
   var isLoading=false.obs;
   bool isLoadingActive=false;
-
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
   final Rxn<ItemModel> getOneItem = Rxn<ItemModel>();
+
+
+  final SocketService socketService = Get.find();
+  StreamSubscription? _socketSubscription;
+  /*final WebSocketRepository webSocketRepository=WebSocketRepository();
+  final RxString _status = 'disconnected'.obs;
+  final RxList<String> _messages = <String>[].obs;
+  final RxString _error = ''.obs;
+  String? _url; // ذخیره URL برای reconnect
+  // Getterها
+  String get status => _status.value;
+  List<String> get messages => _messages;
+  String get error => _error.value;*/
+
+  @override
+  void onInit() {
+    //connect(WebSocketUrl.webSocketUrl);
+    _listenToSocket();
+    fetchActiveItemList();
+    fetchInactiveItemList();
+    /*if(getOneItem.value!=null) {
+      itemController.text = getOneItem.value!.name!;
+    }*/
+    super.onInit();
+  }
+
 
   void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
@@ -47,15 +79,24 @@ class ProductController extends GetxController{
     }
   }
 
-  @override
-  void onInit() {
-    fetchActiveItemList();
-    fetchInactiveItemList();
-    /*if(getOneItem.value!=null) {
-      itemController.text = getOneItem.value!.name!;
-    }*/
-    super.onInit();
+  void _listenToSocket() {
+    _socketSubscription = socketService.messageStream.listen((message) {
+      if (message is String) {
+        try {
+          final data = json.decode(message);
+          if (data['channel'] == 'itemPrice') {
+            fetchActiveItemList();
+            fetchInactiveItemList();
+          }
+        } catch (e) {
+          Get.log('Error processing socket message in ProductController: $e');
+        }
+      }
+    }, onError: (error) {
+      Get.log('Socket stream error in ProductController: $error');
+    });
   }
+
 
   // لیست محصولات
   Future<List<ItemModel>> fetchActiveItemList() async{
@@ -123,7 +164,7 @@ class ProductController extends GetxController{
     }return null;
   }
 
-  Future<bool> insertPriceItem(int id, double price, double different )async{
+  Future<bool> insertPriceItem(int id, double price, double different,int itemUnitId )async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
@@ -131,6 +172,7 @@ class ProductController extends GetxController{
           itemId: id ,
           price: price,
         differentPrice: different,
+        itemUnitId: itemUnitId
       );
       print(response);
       if (response != null) {
@@ -144,6 +186,7 @@ class ProductController extends GetxController{
         activeItemList.clear();
         clearList();
         fetchActiveItemList();
+        fetchInactiveItemList();
       }
       return false;
     }catch(e){
@@ -155,7 +198,7 @@ class ProductController extends GetxController{
     }
   }
 
-  Future<bool> insertDifferentPriceItem(int id, double different, double price )async{
+  Future<bool> insertDifferentPriceItem(int id, double different, double price,int itemUnitId )async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
@@ -163,6 +206,7 @@ class ProductController extends GetxController{
         itemId: id ,
         differentPrice: different,
         price: price,
+        itemUnitId: itemUnitId
       );
       print(response);
       if (response != null) {
@@ -176,7 +220,7 @@ class ProductController extends GetxController{
         activeItemList.clear();
         clearList();
         fetchActiveItemList();
-
+        fetchInactiveItemList();
       }
       return false;
     }catch(e){
@@ -252,5 +296,101 @@ class ProductController extends GetxController{
     selectedItem.value=null;
 
   }
+
+  @override
+  void onClose() {
+    _socketSubscription?.cancel();
+    super.onClose();
+  }
+
+  //--------- اتصال به سوکت
+  /*Future<void> connect(String url) async {
+    try {
+      _url = url; // ذخیره URL برای reconnect
+      _status.value = 'connecting';
+      _error.value = '';
+
+      final channel = webSocketRepository.connect(url);
+
+      webSocketRepository.listen(
+            (data) => _handleData(data),
+        onError: (err) => _handleError(err),
+        onDone: () => _handleDone(),
+      );
+
+      _status.value = 'connected';
+    } catch (e) {
+      _handleError(e);
+    }
+  }*/
+
+  /*void _handleData(dynamic data) {
+    print("webSocket:::::::::::::::${data}");
+    if (data is String) {
+      try {
+        final decodedData = jsonDecode(data);
+        final updatedItem = SocketItemModel.fromJson(decodedData);
+
+        activeItemList.assignAll(
+          itemList.where((item) => item.status == true).toList(),
+        );
+        inactiveItemList.assignAll(
+          itemList.where((item) => item.status == false).toList(),
+        );
+
+        Get.snackbar('تغییر قیمت', 'قیمت ${updatedItem.name} تغییر کرد.',
+          titleText: Text('تغییر قیمت',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+          messageText: Text(
+            'قیمت ${updatedItem.name} تغییر کرد.', textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+        );
+      } catch (e) {
+        _messages.add('دریافت پیام غیر مرتبط: $data');
+      }
+      fetchActiveItemList();
+      fetchInactiveItemList();
+    }
+  }*/
+
+  /*void _handleError(dynamic err) {
+    _error.value = 'Error: ${err.toString()}';
+    _status.value = 'error';
+    _reconnect();
+  }*/
+
+  /*void _handleDone() {
+    _status.value = 'disconnected';
+    _reconnect();
+  }*/
+
+  // ارسال پیام
+  /*void sendMessage(String message) {
+    if (status == 'connected') {
+      webSocketRepository.sendMessage(message);
+    }
+  }*/
+
+  // اتصال مجدد خودکار
+  /*void _reconnect() {
+    if (_status.value != 'connecting' && _url != null) {
+      _status.value = 'reconnecting';
+      Future.delayed(const Duration(seconds: 3), () => connect(_url!));
+    }
+  }*/
+
+  // قطع اتصال
+  /*void disconnect() {
+    webSocketRepository.disconnect();
+    _status.value = 'disconnected';
+  }*/
+
+  // پاکسازی منابع
+  /*@override
+  void onClose() {
+    disconnect();
+    super.onClose();
+  }*/
 
 }

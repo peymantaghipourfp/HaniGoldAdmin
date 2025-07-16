@@ -12,12 +12,13 @@ class PriceDifferentWidget extends StatefulWidget {
   final String differentPrice1;
   final String differentPrice2;
   final String differentPrice3;
-  final double price;
+  final double mesghalPrice;
   final int id;
+  final int itemUnitId;
 
   const PriceDifferentWidget({
 
-    super.key, required this.differentPrice1, required this.differentPrice2, required this.differentPrice3, required this.price, required this.id,
+    super.key, required this.differentPrice1, required this.differentPrice2, required this.differentPrice3, required this.mesghalPrice, required this.id, required this.itemUnitId
   });
 
 
@@ -122,7 +123,8 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
           )
               .toEnglishDigit(),
         ),
-        widget.price,
+        widget.mesghalPrice,
+        widget.itemUnitId
       );
     } finally {
       setState(() => isLoading = false);

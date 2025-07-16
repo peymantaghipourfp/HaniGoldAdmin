@@ -270,7 +270,7 @@ Widget _buildSubMenuItem({
         title,
         style: AppTextStyle.bodyText.copyWith(fontSize: 14),
       ),
-      onTap: onTap ?? () => Get.toNamed(route!),
+      onTap: onTap ?? () => Get.offNamed(route!),
       hoverColor: AppColor.primaryColor.withOpacity(0.05),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),

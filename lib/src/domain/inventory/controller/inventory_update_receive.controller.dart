@@ -101,7 +101,7 @@ class InventoryUpdateReceiveController extends GetxController{
       int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
       double quantity = double.tryParse(quantityController.text=="" ? "0"  :  quantityController.text.toEnglishDigit()) ?? 0;
       double w750 = (carat * quantity)/750;
-      weight750Controller.text = w750.toString().toPersianDigit();
+      weight750Controller.text = w750.toStringAsFixed(2).toPersianDigit();
 
   }
 

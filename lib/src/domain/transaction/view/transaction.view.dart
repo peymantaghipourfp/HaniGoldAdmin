@@ -63,7 +63,7 @@ class _TransactionViewState extends State<TransactionView> {
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
         title: 'لیست تراکنش های کاربران',
-        onBackTap: () => Get.back(),
+        onBackTap: () => Get.toNamed('/home'),
       ),
       drawer: const AppDrawer(),
       body:  Stack(

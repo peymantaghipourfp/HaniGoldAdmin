@@ -35,6 +35,8 @@ InventoryModel _$InventoryModelFromJson(Map<String, dynamic> json) =>
           ?.map((e) => Balance.fromJson(e as Map<String, dynamic>))
           .toList(),
       registered: json['registered'] as bool?,
+      confirmByAdmin: json['confirmByAdmin'] as bool?,
+      recipient: json['recipient'] as String?,
     );
 
 Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
@@ -55,6 +57,8 @@ Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
       'inventoryDetailsCount': instance.inventoryDetailsCount,
       'balances': instance.balances,
       'registered': instance.registered,
+      'confirmByAdmin': instance.confirmByAdmin,
+      'recipient': instance.recipient,
     };
 
 Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(

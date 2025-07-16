@@ -1,4 +1,6 @@
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:excel/excel.dart';
@@ -11,6 +13,7 @@ import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
+import 'package:hanigold_admin/src/domain/order/model/socket_order.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
@@ -25,6 +28,7 @@ import 'package:file_saver/file_saver.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../config/const/app_color.dart';
+import '../../../config/const/socket.service.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../account/model/account.model.dart';
 import '../../users/model/paginated.model.dart';
@@ -53,14 +57,27 @@ class OrderController extends GetxController{
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
+  Rx<PageState> stateBalance=Rx<PageState>(PageState.list);
 
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
 
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
+  RxMap<int, bool> expandedStates = <int, bool>{}.obs;
 
   final List<TotalBalanceModel> totalBalanceList=<TotalBalanceModel>[].obs;
+
+  final SocketService socketService = Get.find();
+  StreamSubscription? _socketSubscription;
+
+  void toggleBalanceExpanded(int index) {
+    if (expandedStates.containsKey(index)) {
+      expandedStates[index] = !expandedStates[index]!;
+    } else {
+      expandedStates[index] = true;
+    }
+  }
 
   void setError(String message){
     state.value=PageState.err;
@@ -90,11 +107,18 @@ class OrderController extends GetxController{
       });
     }else if (columnIndex == 5) { // Name column
       orderList.sort((a, b) {
+        final aMesghalPrice = a.mesghalPrice ?? 0;
+        final bMesghalPrice = b.mesghalPrice ?? 0;
+        return ascending ? aMesghalPrice.compareTo(bMesghalPrice) : bMesghalPrice.compareTo(aMesghalPrice);
+      });
+    }else if (columnIndex == 6) { // Name column
+      orderList.sort((a, b) {
         final aPrice = a.price ?? 0;
         final bPrice = b.price ?? 0;
         return ascending ? aPrice.compareTo(bPrice) : bPrice.compareTo(aPrice);
       });
-    }else if (columnIndex == 6) { // Name column
+    }
+    else if (columnIndex == 7) { // Name column
       orderList.sort((a, b) {
         final aTotalPrice = a.totalPrice ?? 0;
         final bTotalPrice = b.totalPrice ?? 0;
@@ -105,6 +129,7 @@ class OrderController extends GetxController{
 
   @override
   void onInit() {
+    _listenToSocket();
     getOrderListPager();
     setupScrollListener();
     fetchTotalBalanceList();
@@ -114,6 +139,25 @@ class OrderController extends GetxController{
     scrollController.dispose();
     super.onClose();
   }
+
+  void _listenToSocket() {
+    _socketSubscription = socketService.messageStream.listen((message) {
+      if (message is String) {
+        try {
+          final data = json.decode(message);
+          if (data['channel'] == 'order') {
+            getOrderListPager();
+            fetchTotalBalanceList();
+          }
+        } catch (e) {
+          Get.log('Error processing socket message in ProductController: $e');
+        }
+      }
+    }, onError: (error) {
+      Get.log('Socket stream error in ProductController: $error');
+    });
+  }
+
 
   void setupScrollListener() {
     scrollController.addListener(() {
@@ -237,23 +281,27 @@ class OrderController extends GetxController{
 
   //لیست بالانس ها
   Future<void> fetchTotalBalanceList() async{
+
     try{
-      state.value=PageState.loading;
-      var fetchedTotalBalanceList=await orderRepository.getTotalBalanceList();
-      totalBalanceList.assignAll(fetchedTotalBalanceList);
-      print("totalBalanceListLength::::::${totalBalanceList.length}");
-      state.value=PageState.list;
+      stateBalance.value=PageState.loading;
+      List<TotalBalanceModel> fetchedTotalBalanceList=await orderRepository.getTotalBalanceList();
+      if(fetchedTotalBalanceList.isNotEmpty) {
+        totalBalanceList.assignAll(fetchedTotalBalanceList);
+      }
+      print("totalBalanceListLength::::::${fetchedTotalBalanceList.length}");
+      stateBalance.value=PageState.list;
       if(totalBalanceList.isEmpty){
-        state.value=PageState.empty;
+        stateBalance.value=PageState.empty;
       }
     }
     catch(e){
-      state.value=PageState.err;
+      stateBalance.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
       isLoading.value=false;
     }
   }
+
 
   // Future<List<OrderModel>> fetchOrderList() async{
   //   try{
@@ -309,6 +357,7 @@ class OrderController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         getOrderListPager();
+        fetchTotalBalanceList();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -334,6 +383,7 @@ class OrderController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         getOrderListPager();
+        fetchTotalBalanceList();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -365,7 +415,7 @@ class OrderController extends GetxController{
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
       getOrderListPager();
-
+      //fetchTotalBalanceList();
     } catch (e) {
       EasyLoading.dismiss();
       throw ErrorException('خطا در ریجیستر: $e');
@@ -377,8 +427,51 @@ class OrderController extends GetxController{
     return null;
   }
 
+  //فایل اکسل
+  Future<void> getOrderExcel() async{
+    try{
+      EasyLoading.show(status: 'در حال دریافت فایل اکسل...');
+      isLoading.value = true;
+
+      Uint8List excelBytes = await orderRepository.getOrderExcel(
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      );
+
+      String fileName = 'orders_${DateTime.now().toIso8601String()}.xlsx';
+
+      if (kIsWeb) {
+        final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', fileName)
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: fileName,
+          bytes: excelBytes,
+          ext: 'xlsx',
+          mimeType: MimeType.microsoftExcel,
+        );
+      }
+      EasyLoading.showSuccess('فایل اکسل با موفقیت دانلود شد');
+    }
+    catch(e){
+      EasyLoading.dismiss();
+      state.value = PageState.err;
+      errorMessage.value = "خطا در دریافت فایل اکسل: ${e.toString()}";
+      Get.snackbar(
+        'خطا',
+        'خطا در دریافت فایل اکسل',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }finally{
+      isLoading.value=false;
+    }
+  }
+
   // خروجی اکسل
-  Future<void> exportToExcel() async {
+  /*Future<void> exportToExcel() async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
       final excel = Excel.createExcel();
@@ -459,7 +552,7 @@ class OrderController extends GetxController{
       EasyLoading.dismiss();
       print(e.toString());
     }
-  }
+  }*/
 
   String getSellBuyText(int type) {
     switch (type) {

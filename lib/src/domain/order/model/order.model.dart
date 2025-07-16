@@ -28,13 +28,15 @@ class OrderModel {
   @JsonKey(name: "item")
   final ItemModel? item;
   @JsonKey(name: "quantity")
-  final double? quantity;
+  late double? quantity;
   @JsonKey(name: "price")
-  final double? price;
+  late double? price;
+  @JsonKey(name: "mesghalPrice")
+  final double? mesghalPrice;
   @JsonKey(name: "differentPrice")
   final double? differentPrice;
   @JsonKey(name: "totalPrice")
-  final double? totalPrice;
+  late double? totalPrice;
   @JsonKey(name: "status")
   final int? status;
   @JsonKey(name: "balances")
@@ -73,6 +75,7 @@ class OrderModel {
     required this.item,
     required this.quantity,
     required this.price,
+    required this.mesghalPrice,
     required this.differentPrice,
     required this.totalPrice,
     required this.status,

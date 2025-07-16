@@ -45,6 +45,10 @@ class InventoryModel {
   final List<Balance>? balances;
   @JsonKey(name: "registered")
   final bool? registered;
+  @JsonKey(name: "confirmByAdmin")
+  final bool? confirmByAdmin;
+  @JsonKey(name: "recipient")
+  final String? recipient;
 
   InventoryModel({
     required this.date,
@@ -62,7 +66,9 @@ class InventoryModel {
     required this.description,
     required this.inventoryDetailsCount,
     required this.balances,
-    required this.registered
+    required this.registered,
+    required this.confirmByAdmin,
+    required this.recipient,
   });
 
   factory InventoryModel.fromJson(Map<String, dynamic> json) => _$InventoryModelFromJson(json);

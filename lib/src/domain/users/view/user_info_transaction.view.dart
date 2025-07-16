@@ -1,18 +1,28 @@
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+import 'package:shamsi_date/shamsi_date.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../../widget/err_page.dart';
+import '../../../widget/pager_widget.dart';
 import '../controller/user_info_detail_transaction.controller.dart';
 import '../controller/user_info_transaction.controller.dart';
 import '../widgets/balance.widget.dart';
 import '../widgets/tabel_info.widget.dart';
+import 'dart:ui' as ui;
+
+import 'package:flutter/services.dart';
 
 class UserInfoTransactionView extends StatefulWidget {
   const UserInfoTransactionView({super.key});
@@ -23,6 +33,8 @@ class UserInfoTransactionView extends StatefulWidget {
 
 class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
   var controller=Get.find<UserInfoDetailTransactionController>();
+  final GlobalKey _balanceKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
@@ -82,7 +94,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                               ),
                               Row(
                                 children: [
-                                  Container(
+                                  /*Container(
                                     width: 80,
                                     height: 35,
                                     padding: EdgeInsets
@@ -165,15 +177,16 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                         ),
                                       ],
                                     ),
-                                  ),
+                                  ),*/
                                 ],
                               ),
                               SizedBox(
                                 height: 10,
+                                width: 15,
                               ),
                               Row(
                                 children: [
-                                  Container(
+                                  /*Container(
                                     width: 120,
                                     height: 35,
                                     padding: EdgeInsets
@@ -210,52 +223,411 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  Container(
-                                    width: 120,
-                                    height: 35,
-                                    padding: EdgeInsets
-                                        .symmetric(
-                                        horizontal: 10,
-                                        vertical: 7),
-                                    margin: EdgeInsets
-                                        .symmetric(
-                                        horizontal: 5,
-                                        vertical: 0),
-                                    decoration: BoxDecoration(
-                                        borderRadius:
-                                        BorderRadius
-                                            .circular(
-                                            7),
-                                        color: AppColor
-                                            .secondary2Color),
-                                    child: Row(
-                                      children: [
-                                        SvgPicture.asset(
-                                            'assets/svg/fileExcel.svg',
-                                            height: 20,
-                                            colorFilter:
-                                            ColorFilter
-                                                .mode(
-                                              AppColor
-                                                  .textColor,
-                                              BlendMode
-                                                  .srcIn,
-                                            )),
-                                        SizedBox(
-                                          width: 0,
+                                  ),*/
+                                  // خروجی اکسل
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                          EdgeInsets
+                                              .symmetric(
+                                              horizontal: 15,
+                                              vertical: 7
+                                          ),
                                         ),
-                                        Text(
-                                          'خروجی اکسل',
-                                          style: AppTextStyle
-                                              .labelText
-                                              .copyWith(
-                                              fontSize: isDesktop
-                                                  ? 12
-                                                  : 10),
-                                        ),
-                                      ],
+                                        fixedSize: WidgetStatePropertyAll(
+                                            Size(100, 40)),
+                                        elevation: WidgetStatePropertyAll(
+                                            5),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(
+                                            AppColor
+                                                .secondary3Color),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                borderRadius: BorderRadius
+                                                    .circular(
+                                                    5)))),
+                                    onPressed: () {
+                                      showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          barrierLabel: MaterialLocalizations
+                                              .of(context)
+                                              .modalBarrierDismissLabel,
+                                          barrierColor: Colors
+                                              .black45,
+                                          transitionDuration: const Duration(
+                                              milliseconds: 200),
+                                          pageBuilder: (
+                                              BuildContext buildContext,
+                                              Animation animation,
+                                              Animation secondaryAnimation) {
+                                            return Center(
+                                              child: Material(
+                                                color: Colors
+                                                    .transparent,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius
+                                                          .circular(
+                                                          8),
+                                                      color: AppColor
+                                                          .backGroundColor
+                                                  ),
+                                                  width: isDesktop
+                                                      ? Get
+                                                      .width *
+                                                      0.2
+                                                      : Get
+                                                      .height *
+                                                      0.5,
+                                                  height: isDesktop
+                                                      ? Get
+                                                      .height *
+                                                      0.5
+                                                      : Get
+                                                      .height *
+                                                      0.7,
+                                                  padding: EdgeInsets
+                                                      .all(
+                                                      20),
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets
+                                                            .all(
+                                                            8.0),
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment
+                                                              .center,
+                                                          children: [
+                                                            Text(
+                                                              'خروجی اکسل',
+                                                              style: AppTextStyle
+                                                                  .labelText
+                                                                  .copyWith(
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight
+                                                                    .normal,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        color: AppColor
+                                                            .textColor,
+                                                        height: 0.2,
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 10),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(
+                                                                height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment
+                                                                  .start,
+                                                              children: [
+                                                                Text(
+                                                                  'از تاریخ',
+                                                                  style: AppTextStyle
+                                                                      .labelText
+                                                                      .copyWith(
+                                                                      fontSize: 13,
+                                                                      fontWeight: FontWeight
+                                                                          .normal,
+                                                                      color: AppColor
+                                                                          .textColor),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets
+                                                                      .only(
+                                                                      bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (
+                                                                          value) {
+                                                                        if (value ==
+                                                                            null ||
+                                                                            value
+                                                                                .isEmpty) {
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: controller
+                                                                          .dateStartController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle
+                                                                          .labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(
+                                                                            Icons
+                                                                                .calendar_month,
+                                                                            color: AppColor
+                                                                                .textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius
+                                                                              .circular(
+                                                                              10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor
+                                                                            .textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali
+                                                                              .now(),
+                                                                          firstDate: Jalali(
+                                                                              1400,
+                                                                              1,
+                                                                              1),
+                                                                          lastDate: Jalali(
+                                                                              1450,
+                                                                              12,
+                                                                              29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode
+                                                                              .calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode
+                                                                              .day,
+                                                                          locale: Locale(
+                                                                              "fa",
+                                                                              "IR"),
+                                                                        );
+                                                                        Gregorian gregorian = pickedDate!
+                                                                            .toGregorian();
+                                                                        controller
+                                                                            .startDateFilter
+                                                                            .value =
+                                                                        "${gregorian
+                                                                            .year}-${gregorian
+                                                                            .month
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}-${gregorian
+                                                                            .day
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}";
+
+                                                                        controller
+                                                                            .dateStartController
+                                                                            .text =
+                                                                        "${pickedDate
+                                                                            .year}/${pickedDate
+                                                                            .month
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}/${pickedDate
+                                                                            .day
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}";
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(
+                                                                height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment
+                                                                  .start,
+                                                              children: [
+                                                                Text(
+                                                                  'تا تاریخ',
+                                                                  style: AppTextStyle
+                                                                      .labelText
+                                                                      .copyWith(
+                                                                      fontSize: 13,
+                                                                      fontWeight: FontWeight
+                                                                          .normal,
+                                                                      color: AppColor
+                                                                          .textColor),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets
+                                                                      .only(
+                                                                      bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (
+                                                                          value) {
+                                                                        if (value ==
+                                                                            null ||
+                                                                            value
+                                                                                .isEmpty) {
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: controller
+                                                                          .dateEndController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle
+                                                                          .labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(
+                                                                            Icons
+                                                                                .calendar_month,
+                                                                            color: AppColor
+                                                                                .textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius
+                                                                              .circular(
+                                                                              10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor
+                                                                            .textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali
+                                                                              .now(),
+                                                                          firstDate: Jalali(
+                                                                              1400,
+                                                                              1,
+                                                                              1),
+                                                                          lastDate: Jalali(
+                                                                              1450,
+                                                                              12,
+                                                                              29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode
+                                                                              .calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode
+                                                                              .day,
+                                                                          locale: Locale(
+                                                                              "fa",
+                                                                              "IR"),
+                                                                        );
+                                                                        // DateTime date=DateTime.now();
+                                                                        Gregorian gregorian = pickedDate!
+                                                                            .toGregorian();
+                                                                        controller
+                                                                            .endDateFilter
+                                                                            .value =
+                                                                        "${gregorian
+                                                                            .year}-${gregorian
+                                                                            .month
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}-${gregorian
+                                                                            .day
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}";
+
+                                                                        controller
+                                                                            .dateEndController
+                                                                            .text =
+                                                                        "${pickedDate
+                                                                            .year}/${pickedDate
+                                                                            .month
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}/${pickedDate
+                                                                            .day
+                                                                            .toString()
+                                                                            .padLeft(
+                                                                            2,
+                                                                            '0')}";
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      Container(
+                                                        margin: EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 20,
+                                                            vertical: 10),
+                                                        width: double
+                                                            .infinity,
+                                                        height: 40,
+                                                        child: ElevatedButton(
+                                                          style: ButtonStyle(
+                                                              padding: WidgetStatePropertyAll(
+                                                                  EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal: 23,
+                                                                      vertical: 19)),
+                                                              // elevation: WidgetStatePropertyAll(5),
+                                                              backgroundColor:
+                                                              WidgetStatePropertyAll(
+                                                                  AppColor
+                                                                      .appBarColor),
+                                                              shape: WidgetStatePropertyAll(
+                                                                  RoundedRectangleBorder(
+                                                                      side: BorderSide(
+                                                                          color: AppColor
+                                                                              .textColor),
+                                                                      borderRadius: BorderRadius
+                                                                          .circular(
+                                                                          5)))),
+                                                          onPressed: () async {
+                                                            controller.getUserInfoTransactionDetailExcel();
+                                                            Get.back();
+                                                          },
+                                                          child: controller
+                                                              .isLoading
+                                                              .value
+                                                              ?
+                                                          CircularProgressIndicator(
+                                                            valueColor: AlwaysStoppedAnimation<
+                                                                Color>(
+                                                                AppColor
+                                                                    .textColor),
+                                                          )
+                                                              :
+                                                          Text(
+                                                            'ثبت',
+                                                            style: AppTextStyle
+                                                                .labelText
+                                                                .copyWith(
+                                                                fontSize: isDesktop
+                                                                    ? 12
+                                                                    : 10),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          });
+                                    },
+                                    child: Text(
+                                      'خروجی اکسل',
+                                      style: AppTextStyle
+                                          .labelText,
                                     ),
+                                    //onPressed: () => orderController.getOrderExcel(),
                                   ),
                                 ],
                               ),
@@ -661,11 +1033,28 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                   )
                                 ],
                               ),
-                              BalanceWidget(
-                                listBalance:
-                                controller.balanceList,
-                                size: Get.width * 0.4,
-                              )
+                              Row(mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  IconButton(
+                                    icon: SvgPicture.asset(
+                                      'assets/svg/camera.svg',
+                                      height: 24,
+                                      colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),
+                                    ),
+                                    tooltip: 'گرفتن اسکرین شات',
+                                    onPressed: () => controller.captureBalanceScreenshot(context, _balanceKey),
+                                  ),
+                                  RepaintBoundary(
+                                    key: _balanceKey,
+                                    child: BalanceWidget(title: "${controller.headerInfoUserTransactionModel?.accountName} ${Jalali.now().year}/${Jalali.now().month.toString().padLeft(2, '0')}/${Jalali.now().day.toString().padLeft(2, '0')}",
+                                      listBalance:
+                                      controller.balanceList,
+                                      size: Get.width * 0.4,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                           SizedBox(
@@ -733,7 +1122,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                   Row(
                                     children: [
                                       Text(
-                                        'حساب کاربری محمود نصرالهی',
+                                        ' حساب کاربری ${controller.headerInfoUserTransactionModel?.accountName ?? ""}',
                                         style: AppTextStyle
                                             .labelText
                                             .copyWith(
@@ -749,7 +1138,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                   ),
                                   Row(
                                     children: [
-                                      Row(
+                                      /*Row(
                                         children: [
                                           Container(
                                             width: 80,
@@ -840,13 +1229,14 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                             ),
                                           ),
                                         ],
-                                      ),
+                                      ),*/
                                       SizedBox(
                                         height: 10,
+                                          width: 10,
                                       ),
                                       Row(
                                         children: [
-                                          Container(
+                                          /*Container(
                                             width: 100,
                                             height: 35,
                                             padding: EdgeInsets
@@ -885,54 +1275,411 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                          Container(
-                                            width: 100,
-                                            height: 35,
-                                            padding: EdgeInsets
-                                                .symmetric(
-                                                horizontal:
-                                                10,
-                                                vertical:
-                                                7),
-                                            margin: EdgeInsets
-                                                .symmetric(
-                                                horizontal:
-                                                5,
-                                                vertical:
-                                                0),
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                BorderRadius
-                                                    .circular(
-                                                    7),
-                                                color: AppColor
-                                                    .secondary2Color),
-                                            child: Row(
-                                              children: [
-                                                SvgPicture.asset(
-                                                    'assets/svg/fileExcel.svg',
-                                                    height:
-                                                    20,
-                                                    colorFilter:
-                                                    ColorFilter.mode(
-                                                      AppColor
-                                                          .textColor,
-                                                      BlendMode
-                                                          .srcIn,
-                                                    )),
-                                                SizedBox(
-                                                  width: 0,
+                                          ),*/
+                                          // خروجی اکسل
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                                padding: WidgetStatePropertyAll(
+                                                  EdgeInsets
+                                                      .symmetric(
+                                                      horizontal: 15,
+                                                      vertical: 7
+                                                  ),
                                                 ),
-                                                Text(
-                                                  'خروجی اکسل',
-                                                  style: AppTextStyle
-                                                      .labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop ? 12 : 10),
-                                                ),
-                                              ],
+                                                fixedSize: WidgetStatePropertyAll(
+                                                    Size(100, 40)),
+                                                elevation: WidgetStatePropertyAll(
+                                                    5),
+                                                backgroundColor:
+                                                WidgetStatePropertyAll(
+                                                    AppColor
+                                                        .secondary3Color),
+                                                shape: WidgetStatePropertyAll(
+                                                    RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(
+                                                            5)))),
+                                            onPressed: () {
+                                              showGeneralDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  barrierLabel: MaterialLocalizations
+                                                      .of(context)
+                                                      .modalBarrierDismissLabel,
+                                                  barrierColor: Colors
+                                                      .black45,
+                                                  transitionDuration: const Duration(
+                                                      milliseconds: 200),
+                                                  pageBuilder: (
+                                                      BuildContext buildContext,
+                                                      Animation animation,
+                                                      Animation secondaryAnimation) {
+                                                    return Center(
+                                                      child: Material(
+                                                        color: Colors
+                                                            .transparent,
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                              borderRadius: BorderRadius
+                                                                  .circular(
+                                                                  8),
+                                                              color: AppColor
+                                                                  .backGroundColor
+                                                          ),
+                                                          width: isDesktop
+                                                              ? Get
+                                                              .width *
+                                                              0.2
+                                                              : Get
+                                                              .height *
+                                                              0.5,
+                                                          height: isDesktop
+                                                              ? Get
+                                                              .height *
+                                                              0.5
+                                                              : Get
+                                                              .height *
+                                                              0.7,
+                                                          padding: EdgeInsets
+                                                              .all(
+                                                              20),
+                                                          child: Column(
+                                                            children: [
+                                                              Padding(
+                                                                padding: const EdgeInsets
+                                                                    .all(
+                                                                    8.0),
+                                                                child: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment
+                                                                      .center,
+                                                                  children: [
+                                                                    Text(
+                                                                      'خروجی اکسل',
+                                                                      style: AppTextStyle
+                                                                          .labelText
+                                                                          .copyWith(
+                                                                        fontSize: 15,
+                                                                        fontWeight: FontWeight
+                                                                            .normal,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                color: AppColor
+                                                                    .textColor,
+                                                                height: 0.2,
+                                                              ),
+                                                              Padding(
+                                                                padding: const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal: 10),
+                                                                child: Column(
+                                                                  children: [
+                                                                    SizedBox(
+                                                                        height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment
+                                                                          .start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'از تاریخ',
+                                                                          style: AppTextStyle
+                                                                              .labelText
+                                                                              .copyWith(
+                                                                              fontSize: 13,
+                                                                              fontWeight: FontWeight
+                                                                                  .normal,
+                                                                              color: AppColor
+                                                                                  .textColor),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets
+                                                                              .only(
+                                                                              bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (
+                                                                                  value) {
+                                                                                if (value ==
+                                                                                    null ||
+                                                                                    value
+                                                                                        .isEmpty) {
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: controller
+                                                                                  .dateStartController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle
+                                                                                  .labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(
+                                                                                    Icons
+                                                                                        .calendar_month,
+                                                                                    color: AppColor
+                                                                                        .textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius
+                                                                                      .circular(
+                                                                                      10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor
+                                                                                    .textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali
+                                                                                      .now(),
+                                                                                  firstDate: Jalali(
+                                                                                      1400,
+                                                                                      1,
+                                                                                      1),
+                                                                                  lastDate: Jalali(
+                                                                                      1450,
+                                                                                      12,
+                                                                                      29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode
+                                                                                      .calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode
+                                                                                      .day,
+                                                                                  locale: Locale(
+                                                                                      "fa",
+                                                                                      "IR"),
+                                                                                );
+                                                                                Gregorian gregorian = pickedDate!
+                                                                                    .toGregorian();
+                                                                                controller
+                                                                                    .startDateFilter
+                                                                                    .value =
+                                                                                "${gregorian
+                                                                                    .year}-${gregorian
+                                                                                    .month
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}-${gregorian
+                                                                                    .day
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}";
+
+                                                                                controller
+                                                                                    .dateStartController
+                                                                                    .text =
+                                                                                "${pickedDate
+                                                                                    .year}/${pickedDate
+                                                                                    .month
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}/${pickedDate
+                                                                                    .day
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}";
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(
+                                                                        height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment
+                                                                          .start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'تا تاریخ',
+                                                                          style: AppTextStyle
+                                                                              .labelText
+                                                                              .copyWith(
+                                                                              fontSize: 13,
+                                                                              fontWeight: FontWeight
+                                                                                  .normal,
+                                                                              color: AppColor
+                                                                                  .textColor),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets
+                                                                              .only(
+                                                                              bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (
+                                                                                  value) {
+                                                                                if (value ==
+                                                                                    null ||
+                                                                                    value
+                                                                                        .isEmpty) {
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: controller
+                                                                                  .dateEndController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle
+                                                                                  .labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(
+                                                                                    Icons
+                                                                                        .calendar_month,
+                                                                                    color: AppColor
+                                                                                        .textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius
+                                                                                      .circular(
+                                                                                      10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor
+                                                                                    .textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali
+                                                                                      .now(),
+                                                                                  firstDate: Jalali(
+                                                                                      1400,
+                                                                                      1,
+                                                                                      1),
+                                                                                  lastDate: Jalali(
+                                                                                      1450,
+                                                                                      12,
+                                                                                      29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode
+                                                                                      .calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode
+                                                                                      .day,
+                                                                                  locale: Locale(
+                                                                                      "fa",
+                                                                                      "IR"),
+                                                                                );
+                                                                                // DateTime date=DateTime.now();
+                                                                                Gregorian gregorian = pickedDate!
+                                                                                    .toGregorian();
+                                                                                controller
+                                                                                    .endDateFilter
+                                                                                    .value =
+                                                                                "${gregorian
+                                                                                    .year}-${gregorian
+                                                                                    .month
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}-${gregorian
+                                                                                    .day
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}";
+
+                                                                                controller
+                                                                                    .dateEndController
+                                                                                    .text =
+                                                                                "${pickedDate
+                                                                                    .year}/${pickedDate
+                                                                                    .month
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}/${pickedDate
+                                                                                    .day
+                                                                                    .toString()
+                                                                                    .padLeft(
+                                                                                    2,
+                                                                                    '0')}";
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Spacer(),
+                                                              Container(
+                                                                margin: EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal: 20,
+                                                                    vertical: 10),
+                                                                width: double
+                                                                    .infinity,
+                                                                height: 40,
+                                                                child: ElevatedButton(
+                                                                  style: ButtonStyle(
+                                                                      padding: WidgetStatePropertyAll(
+                                                                          EdgeInsets
+                                                                              .symmetric(
+                                                                              horizontal: 23,
+                                                                              vertical: 19)),
+                                                                      // elevation: WidgetStatePropertyAll(5),
+                                                                      backgroundColor:
+                                                                      WidgetStatePropertyAll(
+                                                                          AppColor
+                                                                              .appBarColor),
+                                                                      shape: WidgetStatePropertyAll(
+                                                                          RoundedRectangleBorder(
+                                                                              side: BorderSide(
+                                                                                  color: AppColor
+                                                                                      .textColor),
+                                                                              borderRadius: BorderRadius
+                                                                                  .circular(
+                                                                                  5)))),
+                                                                  onPressed: () async {
+                                                                    controller.getUserInfoTransactionDetailExcel();
+                                                                    Get.back();
+                                                                  },
+                                                                  child: controller
+                                                                      .isLoading
+                                                                      .value
+                                                                      ?
+                                                                  CircularProgressIndicator(
+                                                                    valueColor: AlwaysStoppedAnimation<
+                                                                        Color>(
+                                                                        AppColor
+                                                                            .textColor),
+                                                                  )
+                                                                      :
+                                                                  Text(
+                                                                    'ثبت',
+                                                                    style: AppTextStyle
+                                                                        .labelText
+                                                                        .copyWith(
+                                                                        fontSize: isDesktop
+                                                                            ? 12
+                                                                            : 10),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  });
+                                            },
+                                            child: Text(
+                                              'خروجی اکسل',
+                                              style: AppTextStyle
+                                                  .labelText,
                                             ),
+                                            //onPressed: () => orderController.getOrderExcel(),
                                           ),
                                         ],
                                       ),
@@ -1314,10 +2061,27 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                 SizedBox(
                                   height: 10,
                                 ),
-                                BalanceWidget(
-                                  listBalance: controller
-                                      .balanceList,
-                                  size: Get.width * 0.9,
+                                Row(mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    IconButton(
+                                      icon: SvgPicture.asset(
+                                        'assets/svg/camera.svg',
+                                        height: 24,
+                                        colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),
+                                      ),
+                                      tooltip: 'گرفتن اسکرین شات',
+                                      onPressed: () => controller.captureBalanceScreenshot(context, _balanceKey),
+                                    ),
+                                    RepaintBoundary(
+                                      key: _balanceKey,
+                                      child: BalanceWidget(title:"${controller.headerInfoUserTransactionModel?.accountName} ${Jalali.now().year}/${Jalali.now().month.toString().padLeft(2, '0')}/${Jalali.now().day.toString().padLeft(2, '0')}",
+                                        listBalance: controller
+                                            .balanceList,
+                                        size: Get.width * 0.75,
+                                      ),
+                                    ),
+                                  ],
                                 )
                               ],
                             ),
@@ -1385,61 +2149,83 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                 child: CircularProgressIndicator(),
                                               ),
                         )
-                        : SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      controller:
-                      controller.scrollController,
-                      physics: ClampingScrollPhysics(),
-                      child: Row(
-                        children: [
-                          SingleChildScrollView(
-                            child: Column(
-                              children: [
-                                DataTable(
-                                  columns:
-                                  buildDataColumns(),
-                                  sortColumnIndex: controller.sortIndex.value,
-                                  sortAscending: controller.sort.value,
-                                  border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                    outside: BorderSide(color: AppColor.textColor,width: 0.3),
-                                    borderRadius: BorderRadius.circular(8),
+                        : Container(
+                      margin: EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 40),
+                      color:
+                      AppColor.appBarColor.withOpacity(0.5),
+                          child: SingleChildScrollView(
+                                                scrollDirection: Axis.horizontal,
+                                                controller:
+                                                controller.scrollController,
+                                                physics: ClampingScrollPhysics(),
+                                                child: Row(
+                          children: [
+                            SingleChildScrollView(
+                              child: Column(
+                                children: [
+                                  DataTable(
+                                    columns:
+                                    buildDataColumns(),
+                                    sortColumnIndex: controller.sortIndex.value,
+                                    sortAscending: controller.sort.value,
+                                    border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                      outside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    dividerThickness: 0.3,
+                                    rows: buildDataRows(
+                                        context),
+                                    dataRowMaxHeight: 110,
+                                    //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+                                    headingRowHeight: 70,
+                                    columnSpacing: 40,
+                                    horizontalMargin: 0,
                                   ),
-                                  dividerThickness: 0.3,
-                                  rows: buildDataRows(
-                                      context),
-                                  dataRowMaxHeight: 110,
-                                  //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                  //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                  headingRowHeight: 70,
-                                  columnSpacing: 40,
-                                  horizontalMargin: 0,
-                                ),
 
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
+                          ],
+                                                ),
+                                              ),
+                        ),
 
                     SizedBox(height: 50,)
                   ],
                 ),
               ),
             )
-                : Center(
-              child: Text(
-                'خطا در سمت سرور رخ داده',
-                style: AppTextStyle.labelText.copyWith(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+                :
+            ErrPage(
+              callback: () {
+                //controller.clearFilter();
+                controller.getTransactionInfoListPager(controller.id.value.toString());
+              },
+              title: "خطا در دریافت لیست حواله",
+              des: 'برای دریافت لیست حواله ها مجددا تلاش کنید',
             ),
           ),
-          Align(
-              alignment: Alignment.bottomCenter,
-              child: buildPaginationControls()),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              controller.paginated.value != null ? Container(
+                  height: 70,
+                  margin: EdgeInsets.symmetric(
+                      horizontal: 50, vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: 20),
+                  color: AppColor.appBarColor.withOpacity(0.5),
+                  alignment: Alignment.bottomCenter,
+                  child: PagerWidget(
+                    countPage: controller.paginated.value
+                        ?.totalCount ?? 0, callBack: (int index) {
+                    controller.isChangePage(index);
+                  },)) : SizedBox(),
+            ],
+          ),
         ],
       ),
     ));
@@ -2188,7 +2974,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
         .toList();
   }
 
-  Widget buildPaginationControls() {
+  /*Widget buildPaginationControls() {
     return Obx(() => Padding(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -2212,6 +2998,6 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
         ],
       ),
     ));
-  }
+  }*/
 }
 

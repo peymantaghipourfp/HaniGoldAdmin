@@ -27,7 +27,7 @@ class _UserInfoTransactionViewState extends State<TradingBalanceView> {
     return Obx(() => Scaffold(
       appBar: CustomAppbar1(
         title: 'تراز معاملاتی',
-        onBackTap: () => Get.back(),
+        onBackTap: () => Get.toNamed('/home'),
       ),
       drawer: const AppDrawer(),
       body: Stack(

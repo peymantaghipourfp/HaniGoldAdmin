@@ -14,12 +14,13 @@ class PriceSellWidget extends StatefulWidget {
   final String price2;
   final String price3;
   final String price4;
-  final double different;
+  final double mesghalDifferent;
   final int id;
+  final int itemUnitId;
 
   const PriceSellWidget({
 
-    super.key, required this.price1, required this.price2, required this.price3, required this.price4, required this.different, required this.id,
+    super.key, required this.price1, required this.price2, required this.price3, required this.price4, required this.mesghalDifferent, required this.id, required this.itemUnitId
   });
 
 
@@ -142,7 +143,8 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
               "${priceController1.text.length==1 ? '00${priceController1.text}':priceController1.text.length==2 ? '0${priceController1.text}':priceController1.text}"
           ).toEnglishDigit(),
         ),
-        widget.different,
+        widget.mesghalDifferent,
+        widget.itemUnitId
       );
       //productController.clearList();
     } finally {

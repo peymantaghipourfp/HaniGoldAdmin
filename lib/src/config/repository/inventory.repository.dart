@@ -1,5 +1,7 @@
 
 
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
@@ -697,9 +699,11 @@ class InventoryRepository {
     required String date,
     required int accountId,
     required String accountName,
+    required String recipient,
     required int type,
     required List<InventoryDetailModel>? details,
     required String? recId,
+    required bool? confirmByAdmin,
   })async{
     try{
       Map<String, dynamic> inventoryData= {
@@ -720,6 +724,7 @@ class InventoryRepository {
           "infos": []
         },
         "type": type,
+        "confirmByAdmin":confirmByAdmin,
         "isDeleted": false,
         "inventoryDetails":details?.map((detail)=>{
           "inventoryId": 1,
@@ -751,7 +756,7 @@ class InventoryRepository {
           "infos": [],
           "description": detail.description,
         }).toList(),
-
+        "recipient":recipient,
         "rowNum": 1,
         "id": 1,
         "attribute": "cus",
@@ -888,6 +893,7 @@ class InventoryRepository {
       throw ErrorException('خطا در آپدیت اطلاعات:$e');
     }
   }
+
   Future<Map<String, dynamic>> updateDetailInventoryPayment({
     required int id,
     required int inventoryDetailId,
@@ -1033,4 +1039,31 @@ class InventoryRepository {
       throw ErrorException('خطا در ریجیستر:$e');
     }
   }
+
+  Future<bool> sendVerificationCode(int accountId)async{
+    try {
+      final response = await inventoryDio.get(
+          'Inventory/getCode', queryParameters: {'accountId': accountId});
+      print('Status Code sendVerificationCode: ${response.statusCode}');
+      print('Response Data sendVerificationCode: ${response.data}');
+      //Map<String, dynamic> data=response.data;
+      return response.data;
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<bool> checkVerificationCode(int accountId,int code)async{
+    try {
+      final response = await inventoryDio.get(
+          'Inventory/checkCode', queryParameters: {'accountId': accountId,'code':code});
+      print('Status Code checkVerificationCode: ${response.statusCode}');
+      print('Response Data checkVerificationCode: ${response.data}');
+      //Map<String, dynamic> data=response.data;
+      return response.data;
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 }

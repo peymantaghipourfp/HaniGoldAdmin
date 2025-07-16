@@ -25,7 +25,7 @@ class InsertUserView extends GetView<InsertUserController> {
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
         title: ' ${controller.title.value} کاربر جدید ',
-        onBackTap: () => Get.back(),
+        onBackTap: () => Get.toNamed('/home'),
       ),
       drawer: const AppDrawer(),
       body: Stack(

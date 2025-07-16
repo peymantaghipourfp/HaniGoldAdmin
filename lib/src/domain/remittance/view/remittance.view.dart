@@ -354,7 +354,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                                                                                   shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                                       borderRadius: BorderRadius.circular(5)))),
                                                                               onPressed: () async {
-                                                                                controller.exportToExcel();
+                                                                                controller.getRemittanceExcel();
                                                                                 Get.back();
                                                                               },
                                                                               child: controller.isLoading.value?

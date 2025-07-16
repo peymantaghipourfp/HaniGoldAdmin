@@ -10,6 +10,7 @@ import 'package:hanigold_admin/src/domain/remittance/model/list_remittance.model
 import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 
 import '../../domain/remittance/model/image_guid_model.dart';
+import 'dart:typed_data';
 
 class RemittanceRepository{
 
@@ -147,6 +148,50 @@ class RemittanceRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<Uint8List> getRemittanceExcel({
+    required String startDate,
+    required String endDate
+  }) async{
+    try{
+      Map<String, dynamic> options =
+      {
+        "options" : { "remittance" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Remittance"
+                  },
+              ]
+            }
+          ],
+          "orderBy": "Remittance.Id",
+          "orderByType": "desc",
+          "StartIndex": 1,
+          "ToIndex": 100000
+        }
+        }
+      };
+      final response=await remittanceDio.post(
+          'Remittance/getExcel',
+          data: options,
+          options: Options(responseType: ResponseType.bytes));
+      print("request getRemittanceExcel : $options" );
+      print("response getRemittanceExcel : ${response.data}" );
+      return Uint8List.fromList(response.data);
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+
   Future<RemittanceModel> insertRemittance({
     required String date,
     required int accountIdPayer,

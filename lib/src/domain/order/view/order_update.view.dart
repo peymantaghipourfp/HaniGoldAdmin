@@ -65,7 +65,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                               ?
                           Center(child: CircularProgressIndicator(),)
                               :
-                          BalanceWidget(
+                          BalanceWidget(title: orderUpdateController.selectedAccount.value?.name,
                             listBalance: orderUpdateController.balanceList,
                             size: 400,),
                         ),
@@ -442,6 +442,23 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                 ],
                                               ),
                                             ),
+                                            // قیمت به گرم
+                                            SizedBox(height: 3),
+                                            orderUpdateController.selectedItem.value?.itemUnit?.name == 'گرم' ?
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  ' قیمت به گرم: ',
+                                                  style: AppTextStyle
+                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                Text(orderUpdateController.priceTemp.value.seRagham(separator: ','),
+                                                  style: AppTextStyle.bodyText
+                                                      .copyWith(color: AppColor
+                                                      .primaryColor.withOpacity(0.5)),),
+
+                                              ],
+                                            ) :
+                                            SizedBox(),
                                             // گرم/عدد
                                             Container(
                                               padding: EdgeInsets.only(
@@ -680,6 +697,27 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                 ),
                                               ),
                                             ),
+                                            SizedBox(height: 3),
+                                            orderUpdateController.selectedItem.value?.id==10 ||
+                                                orderUpdateController.selectedItem.value?.id==14 ||
+                                                orderUpdateController.selectedItem.value?.id==15 ||
+                                                orderUpdateController.selectedItem.value?.id==16 ||
+                                                orderUpdateController.selectedItem.value?.id==37 ||
+                                                orderUpdateController.selectedItem.value?.id==38 ||
+                                                orderUpdateController.selectedItem.value?.id==39  ?
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  ' وزن: ',
+                                                  style: AppTextStyle
+                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                Text("${orderUpdateController.selectedItem.value?.w750} گرم ",
+                                                  style: AppTextStyle.bodyText
+                                                      .copyWith(color: AppColor
+                                                      .primaryColor.withOpacity(0.5)),)
+                                              ],
+                                            ) :
+                                            SizedBox(),
                                             orderUpdateController
                                                 .selectedBuySell.value?.name ==
                                                 'فروش به کاربر' ?
@@ -1197,7 +1235,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                               ?
                           Center(child: CircularProgressIndicator(),)
                               :
-                          BalanceWidget(
+                          BalanceWidget(title: orderUpdateController.selectedAccount.value?.name,
                             listBalance: orderUpdateController.balanceList,
                             size: 400,),
                         ),

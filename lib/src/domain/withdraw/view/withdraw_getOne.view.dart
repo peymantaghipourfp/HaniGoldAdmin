@@ -132,23 +132,47 @@ class WithdrawGetOneView extends StatelessWidget {
                                                           'وضعیت: ',
                                                           style: AppTextStyle.bodyText,
                                                         ),
+                                                        // وضعیت
                                                         Card(
                                                           shape: RoundedRectangleBorder(
-                                                            borderRadius: BorderRadius.circular(5),
+                                                            borderRadius: BorderRadius
+                                                                .circular(
+                                                                5),
                                                           ),
-                                                          color: (getWithdraw.status == 0)
-                                                              ? AppColor.accentColor
-                                                              : AppColor.primaryColor,
-                                                          margin: EdgeInsets.symmetric(
-                                                              vertical: 0, horizontal: 5),
+                                                          color: getWithdraw.status ==
+                                                              2
+                                                              ? AppColor
+                                                              .accentColor
+                                                              : getWithdraw
+                                                              .status ==
+                                                              1
+                                                              ? AppColor
+                                                              .primaryColor
+                                                              : AppColor
+                                                              .secondaryColor
+                                                          ,
+                                                          margin: EdgeInsets
+                                                              .symmetric(
+                                                              vertical: 0,
+                                                              horizontal: 5),
                                                           child: Padding(
-                                                            padding: const EdgeInsets.all(2),
+                                                            padding: const EdgeInsets
+                                                                .all(
+                                                                2),
                                                             child: Text(
-                                                                (getWithdraw.status == 0)
+                                                                getWithdraw
+                                                                    .status ==
+                                                                    2
                                                                     ? 'تایید نشده'
-                                                                    : 'تایید شده',
-                                                                style: AppTextStyle.labelText,
-                                                                textAlign: TextAlign.center),
+                                                                    : getWithdraw
+                                                                    .status ==
+                                                                    1
+                                                                    ? 'تایید شده'
+                                                                    : 'نامشخص',
+                                                                style: AppTextStyle
+                                                                    .labelText,
+                                                                textAlign: TextAlign
+                                                                    .center),
                                                           ),
                                                         ),
                                                       ],
@@ -472,6 +496,49 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                                             ],
                                                                                                           ),
                                                                                                         ),
+                                                                                                        // وضعیت
+                                                                                                        Card(
+                                                                                                          shape: RoundedRectangleBorder(
+                                                                                                            borderRadius: BorderRadius
+                                                                                                                .circular(
+                                                                                                                5),
+                                                                                                          ),
+                                                                                                          color: getOneDepositRequest?.status ==
+                                                                                                              2
+                                                                                                              ? AppColor
+                                                                                                              .accentColor
+                                                                                                              : getOneDepositRequest
+                                                                                                              ?.status ==
+                                                                                                              1
+                                                                                                              ? AppColor
+                                                                                                              .primaryColor
+                                                                                                              : AppColor
+                                                                                                              .secondaryColor
+                                                                                                          ,
+                                                                                                          margin: EdgeInsets
+                                                                                                              .symmetric(
+                                                                                                              vertical: 0,
+                                                                                                              horizontal: 5),
+                                                                                                          child: Padding(
+                                                                                                            padding: const EdgeInsets
+                                                                                                                .all(
+                                                                                                                2),
+                                                                                                            child: Text(
+                                                                                                                getOneDepositRequest
+                                                                                                                    ?.status ==
+                                                                                                                    2
+                                                                                                                    ? 'تایید نشده'
+                                                                                                                    : getOneDepositRequest
+                                                                                                                    ?.status ==
+                                                                                                                    1
+                                                                                                                    ? 'تایید شده'
+                                                                                                                    : 'نامشخص',
+                                                                                                                style: AppTextStyle
+                                                                                                                    .labelText,
+                                                                                                                textAlign: TextAlign
+                                                                                                                    .center),
+                                                                                                          ),
+                                                                                                        ),
                                                                                                         //SizedBox(),
                                                                                                       ],
                                                                                                     ),
@@ -618,6 +685,29 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                                       ),
                                                                                                     ),
                                                                                                   ),
+                                                                                                  // وضعیت
+                                                                                                  getOneDeposit
+                                                                                                      ?.status ==
+                                                                                                      1 ?
+                                                                                                  SvgPicture.asset('assets/svg/check-mark-circle.svg',width: 16,height: 16,
+                                                                                                      colorFilter: ColorFilter.mode(
+                                                                                                        AppColor.primaryColor,
+                                                                                                        BlendMode.srcIn,
+                                                                                                      )):
+                                                                                                  getOneDeposit
+                                                                                                      ?.status ==
+                                                                                                      2 ?
+                                                                                                  SvgPicture.asset('assets/svg/close-circle1.svg',width: 16,height: 16,
+                                                                                                      colorFilter: ColorFilter.mode(
+                                                                                                        AppColor.accentColor,
+                                                                                                        BlendMode.srcIn,
+                                                                                                      )) :
+                                                                                                  SvgPicture.asset('assets/svg/unknown.svg',width: 16,height: 16,
+                                                                                                      colorFilter: ColorFilter.mode(
+                                                                                                        AppColor.dividerColor,
+                                                                                                        BlendMode.srcIn,
+                                                                                                      )),
+                                                                                                  SizedBox(width: 4,),
                                                                                                   // نمایش عکس
                                                                                                   GestureDetector(
                                                                                                     onTap: () async{
@@ -1125,23 +1215,47 @@ class WithdrawGetOneView extends StatelessWidget {
                                                 'وضعیت: ',
                                                 style: AppTextStyle.bodyText,
                                               ),
+                                              // وضعیت
                                               Card(
                                                 shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(5),
+                                                  borderRadius: BorderRadius
+                                                      .circular(
+                                                      5),
                                                 ),
-                                                color: (getWithdraw.status == 0)
-                                                    ? AppColor.accentColor
-                                                    : AppColor.primaryColor,
-                                                margin: EdgeInsets.symmetric(
-                                                    vertical: 0, horizontal: 5),
+                                                color: getWithdraw.status ==
+                                                    2
+                                                    ? AppColor
+                                                    .accentColor
+                                                    : getWithdraw
+                                                    .status ==
+                                                    1
+                                                    ? AppColor
+                                                    .primaryColor
+                                                    : AppColor
+                                                    .secondaryColor
+                                                ,
+                                                margin: EdgeInsets
+                                                    .symmetric(
+                                                    vertical: 0,
+                                                    horizontal: 5),
                                                 child: Padding(
-                                                  padding: const EdgeInsets.all(2),
+                                                  padding: const EdgeInsets
+                                                      .all(
+                                                      2),
                                                   child: Text(
-                                                      (getWithdraw.status == 0)
+                                                      getWithdraw
+                                                          .status ==
+                                                          2
                                                           ? 'تایید نشده'
-                                                          : 'تایید شده',
-                                                      style: AppTextStyle.labelText,
-                                                      textAlign: TextAlign.center),
+                                                          : getWithdraw
+                                                          .status ==
+                                                          1
+                                                          ? 'تایید شده'
+                                                          : 'نامشخص',
+                                                      style: AppTextStyle
+                                                          .labelText,
+                                                      textAlign: TextAlign
+                                                          .center),
                                                 ),
                                               ),
                                             ],
@@ -1474,18 +1588,69 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                         ),
                                                                       ),
                                                                       // مبلغ کل
-                                                                      Padding(
-                                                                        padding: const EdgeInsets.only(
-                                                                            top: 4),
-                                                                        child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                          children: [
-                                                                            Text(
-                                                                              'مبلغ کل: ${getOneDepositRequest?.amount == null ? 0 : getOneDepositRequest?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
-                                                                              style:
-                                                                              AppTextStyle.bodyText,
+                                                                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.only(
+                                                                                top: 4),
+                                                                            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                              children: [
+                                                                                Text(
+                                                                                  'مبلغ کل: ${getOneDepositRequest?.amount == null ? 0 : getOneDepositRequest?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
+                                                                                  style:
+                                                                                  AppTextStyle.bodyText,
+                                                                                ),
+                                                                              ],
                                                                             ),
-                                                                          ],
-                                                                        ),
+                                                                          ),
+                                                                          // وضعیت
+                                                                          Padding(
+                                                                            padding: const EdgeInsets.only(
+                                                                                top: 4),
+                                                                            child: Card(
+                                                                              shape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius
+                                                                                    .circular(
+                                                                                    5),
+                                                                              ),
+                                                                              color: getOneDepositRequest?.status ==
+                                                                                  2
+                                                                                  ? AppColor
+                                                                                  .accentColor
+                                                                                  : getOneDepositRequest
+                                                                                  ?.status ==
+                                                                                  1
+                                                                                  ? AppColor
+                                                                                  .primaryColor
+                                                                                  : AppColor
+                                                                                  .secondaryColor
+                                                                              ,
+                                                                              margin: EdgeInsets
+                                                                                  .symmetric(
+                                                                                  vertical: 0,
+                                                                                  horizontal: 5),
+                                                                              child: Padding(
+                                                                                padding: const EdgeInsets
+                                                                                    .all(
+                                                                                    2),
+                                                                                child: Text(
+                                                                                    getOneDepositRequest
+                                                                                        ?.status ==
+                                                                                        2
+                                                                                        ? 'تایید نشده'
+                                                                                        : getOneDepositRequest
+                                                                                        ?.status ==
+                                                                                        1
+                                                                                        ? 'تایید شده'
+                                                                                        : 'نامشخص',
+                                                                                    style: AppTextStyle
+                                                                                        .labelText,
+                                                                                    textAlign: TextAlign
+                                                                                        .center),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
                                                                       ),
                                                                       // مبلغ واریز شده
                                                                       Padding(
@@ -1641,129 +1806,145 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                           ],
                                                                         ),
                                                                       ),
-                                                                      // نمایش عکس
-                                                                      GestureDetector(
-                                                                        onTap: () {
-                                                                          if (getOneDeposit?.attachments == null ||
-                                                                              getOneDeposit!.attachments!.isEmpty) {
-                                                                            Get
-                                                                                .snackbar(
-                                                                                'پیغام',
-                                                                                'تصویری ثبت نشده است');
-                                                                            return;
-                                                                          }
+                                                                      // وضعیت و نمایش تصویر
+                                                                      Row(
+                                                                        children: [
+                                                                          // وضعیت
+                                                                          getOneDeposit
+                                                                              ?.status ==
+                                                                              1 ?
+                                                                          SvgPicture.asset('assets/svg/check-mark-circle.svg',width: 16,height: 16,
+                                                                              colorFilter: ColorFilter.mode(
+                                                                                AppColor.primaryColor,
+                                                                                BlendMode.srcIn,
+                                                                              )):
+                                                                          getOneDeposit
+                                                                              ?.status ==
+                                                                              2 ?
+                                                                          SvgPicture.asset('assets/svg/close-circle1.svg',width: 16,height: 16,
+                                                                              colorFilter: ColorFilter.mode(
+                                                                                AppColor.accentColor,
+                                                                                BlendMode.srcIn,
+                                                                              )) :
+                                                                          SvgPicture.asset('assets/svg/unknown.svg',width: 16,height: 16,
+                                                                              colorFilter: ColorFilter.mode(
+                                                                                AppColor.dividerColor,
+                                                                                BlendMode.srcIn,
+                                                                              )),
+                                                                          SizedBox(width: 4,),
+                                                                          // نمایش عکس
+                                                                          GestureDetector(
+                                                                            onTap: () {
+                                                                              if (getOneDeposit?.attachments == null ||
+                                                                                  getOneDeposit!.attachments!.isEmpty) {
+                                                                                Get
+                                                                                    .snackbar(
+                                                                                    'پیغام',
+                                                                                    'تصویری ثبت نشده است');
+                                                                                return;
+                                                                              }
 
-                                                                          showDialog(
-                                                                            context: context,
-                                                                            builder: (
-                                                                                BuildContext context) {
-                                                                              return Dialog(
-                                                                                backgroundColor: AppColor.backGroundColor,
-                                                                                shape: RoundedRectangleBorder(
-                                                                                  borderRadius: BorderRadius.circular(10),
-                                                                                ),
-                                                                                child: Container(
-                                                                                  padding: EdgeInsets.all(8),
-                                                                                  child: Column(
-                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                    children: [
-                                                                                      SizedBox(
-                                                                                        width: 500,
-                                                                                        height: 500,
-                                                                                        child: PageView.builder(
-                                                                                          itemCount: getOneDeposit.attachments!.length,
-                                                                                          itemBuilder: (context, index) {
-                                                                                            final attachment = getOneDeposit.attachments![index];
-                                                                                            return Column(
-                                                                                              children: [
-                                                                                                Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                              showDialog(
+                                                                                context: context,
+                                                                                builder: (
+                                                                                    BuildContext context) {
+                                                                                  return Dialog(
+                                                                                    backgroundColor: AppColor.backGroundColor,
+                                                                                    shape: RoundedRectangleBorder(
+                                                                                      borderRadius: BorderRadius.circular(10),
+                                                                                    ),
+                                                                                    child: Container(
+                                                                                      padding: EdgeInsets.all(8),
+                                                                                      child: Column(
+                                                                                        mainAxisSize: MainAxisSize.min,
+                                                                                        children: [
+                                                                                          SizedBox(
+                                                                                            width: 500,
+                                                                                            height: 500,
+                                                                                            child: PageView.builder(
+                                                                                              itemCount: getOneDeposit.attachments!.length,
+                                                                                              itemBuilder: (context, index) {
+                                                                                                final attachment = getOneDeposit.attachments![index];
+                                                                                                return Column(
                                                                                                   children: [
-                                                                                                    IconButton(
-                                                                                                      icon: Icon(Icons.download, color: AppColor.dividerColor),
-                                                                                                      onPressed: () => withdrawGetOneController.downloadImage(
-                                                                                                        attachment.guidId!,
+                                                                                                    Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                      children: [
+                                                                                                        IconButton(
+                                                                                                          icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                                                                          onPressed: () => withdrawGetOneController.downloadImage(
+                                                                                                            attachment.guidId!,
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                      ],
+                                                                                                    ),
+                                                                                                    SizedBox(
+                                                                                                      width: 450,
+                                                                                                      height: 450,
+                                                                                                      child: Image.network(
+                                                                                                        "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
+                                                                                                        loadingBuilder: (context,
+                                                                                                            child,
+                                                                                                            loadingProgress) {
+                                                                                                          if (loadingProgress ==
+                                                                                                              null) {
+                                                                                                            return child;
+                                                                                                          }
+                                                                                                          return Center(
+                                                                                                            child: CircularProgressIndicator(),
+                                                                                                          );
+                                                                                                        },
+                                                                                                        errorBuilder: (context, error, stackTrace) =>
+                                                                                                            Icon(Icons.error,
+                                                                                                                color: Colors.red),
+                                                                                                        fit: BoxFit.contain,
                                                                                                       ),
                                                                                                     ),
+
                                                                                                   ],
-                                                                                                ),
-                                                                                                SizedBox(
-                                                                                                  width: 450,
-                                                                                                  height: 450,
-                                                                                                  child: Image.network(
-                                                                                                    "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
-                                                                                                    loadingBuilder: (context,
-                                                                                                        child,
-                                                                                                        loadingProgress) {
-                                                                                                      if (loadingProgress ==
-                                                                                                          null) {
-                                                                                                        return child;
-                                                                                                      }
-                                                                                                      return Center(
-                                                                                                        child: CircularProgressIndicator(),
-                                                                                                      );
-                                                                                                    },
-                                                                                                    errorBuilder: (context, error, stackTrace) =>
-                                                                                                        Icon(Icons.error,
-                                                                                                            color: Colors.red),
-                                                                                                    fit: BoxFit.contain,
-                                                                                                  ),
-                                                                                                ),
+                                                                                                );
+                                                                                              },
+                                                                                            ),
+                                                                                          ),
 
-                                                                                              ],
-                                                                                            );
-                                                                                          },
-                                                                                        ),
+                                                                                          SizedBox(
+                                                                                              height: 10),
+                                                                                          TextButton(
+                                                                                            onPressed: () =>
+                                                                                                Get
+                                                                                                    .back(),
+                                                                                            child: Text(
+                                                                                              "بستن",
+                                                                                              style: AppTextStyle
+                                                                                                  .bodyText,),
+                                                                                          ),
+                                                                                        ],
                                                                                       ),
-
-                                                                                      SizedBox(
-                                                                                          height: 10),
-                                                                                      TextButton(
-                                                                                        onPressed: () =>
-                                                                                            Get
-                                                                                                .back(),
-                                                                                        child: Text(
-                                                                                          "بستن",
-                                                                                          style: AppTextStyle
-                                                                                              .bodyText,),
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
+                                                                                    ),
+                                                                                  );
+                                                                                },
                                                                               );
                                                                             },
-                                                                          );
-                                                                        },
-                                                                        child: Row(
-                                                                          children: [
-                                                                            SizedBox(
-                                                                              width: 25,
-                                                                              height: 25,
-                                                                              child: SvgPicture
-                                                                                  .asset(
-                                                                                'assets/svg/picture.svg',
-                                                                                colorFilter: ColorFilter
-                                                                                    .mode(
-                                                                                  AppColor
-                                                                                      .iconViewColor,
-                                                                                  BlendMode
-                                                                                      .srcIn,
+                                                                            child: Row(
+                                                                              children: [
+                                                                                SizedBox(
+                                                                                  width: 25,
+                                                                                  height: 25,
+                                                                                  child: SvgPicture
+                                                                                      .asset(
+                                                                                    'assets/svg/picture.svg',
+                                                                                    colorFilter: ColorFilter
+                                                                                        .mode(
+                                                                                      AppColor
+                                                                                          .iconViewColor,
+                                                                                      BlendMode
+                                                                                          .srcIn,
+                                                                                    ),
+                                                                                  ),
                                                                                 ),
-                                                                              ),
+                                                                              ],
                                                                             ),
-                                                                            Text(
-                                                                              ' (${getOneDeposit
-                                                                                  ?.attachments
-                                                                                  ?.length ??
-                                                                                  0}) ',
-                                                                              style: AppTextStyle
-                                                                                  .bodyText
-                                                                                  .copyWith(
-                                                                                  color: AppColor
-                                                                                      .iconViewColor
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
+                                                                          ),
+                                                                        ],
                                                                       ),
                                                                     ],
                                                                   ),

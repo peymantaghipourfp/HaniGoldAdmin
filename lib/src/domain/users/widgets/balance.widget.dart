@@ -39,9 +39,14 @@ class _BalanceWidgetState extends State<BalanceWidget> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                '  تراز کاربر ${widget.title??""}',
+                ' تراز کاربر ',
                 style: AppTextStyle.labelText.copyWith(fontSize: 14,
                   fontWeight: FontWeight.bold, ),
+              ),
+              Text(
+                widget.title??"",
+                style: AppTextStyle.labelText.copyWith(fontSize: 13,color: AppColor.secondary3Color,
+                  fontWeight: FontWeight.normal, ),
               ),
             ],
           ),

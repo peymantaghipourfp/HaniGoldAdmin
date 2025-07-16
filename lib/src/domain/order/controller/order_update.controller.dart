@@ -1,5 +1,6 @@
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -13,8 +14,10 @@ import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
+import '../../../config/const/socket.service.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
+import '../../product/model/socket_item.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../model/order.model.dart';
 import 'order.controller.dart';
@@ -69,24 +72,98 @@ class OrderUpdateController extends GetxController{
   var manualPriceChecked = false.obs;
   var notLimitChecked = false.obs;
   final Rxn<OrderModel> getOneOrder = Rxn<OrderModel>();
+  var priceTemp=''.obs;
+
+  /*final SocketService socketService = Get.find();
+  StreamSubscription? _socketSubscription;*/
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
     selectedBuySell.value = newValue;
-    selectedBuySell.value?.id==0 ?
-    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',') :
-    priceController.text=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
-
+    if(selectedItem.value!=null){
+      if(selectedItem.value?.itemUnit?.name=='گرم'){
+        if(selectedBuySell.value?.id==0){
+          priceController.text=selectedItem.value!.mesghalPrice.toString().seRagham(separator: ',');
+          priceTemp.value=selectedItem.value!.price.toString().seRagham(separator: ',');
+        }else{
+          priceController.text=(((selectedItem.value!.mesghalPrice!)-(selectedItem.value!.mesghalDifferentPrice!)).toDouble()).toString().seRagham(separator: ',');
+          priceTemp.value=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
+        }
+      }else{
+        if(selectedBuySell.value?.id==0){
+          priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',');
+          priceTemp.value=selectedItem.value!.price.toString().seRagham(separator: ',');
+        }else{
+          priceController.text=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
+          priceTemp.value=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
+        }
+      }
+    }
   }
   void changeSelectedItem(ItemModel? newValue) {
     clearListChangeItem();
     selectedItem.value = newValue;
-    selectedBuySell.value?.id==0 ?
-    priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',') :
-    priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
-
+    if(newValue?.itemUnit?.name=='گرم'){
+      if(selectedBuySell.value?.id==0){
+        priceController.text=selectedItem.value!.mesghalPrice.toString().seRagham(separator: ',');
+        priceTemp.value=selectedItem.value!.price.toString().seRagham(separator: ',');
+      }else{
+        priceController.text=(selectedItem.value!.mesghalPrice!-selectedItem.value!.mesghalDifferentPrice!.toDouble()).toString().seRagham(separator: ',');
+        priceTemp.value=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
+      }
+    }else{
+      if(selectedBuySell.value?.id==0){
+        priceController.text=selectedItem.value!.price.toString().seRagham(separator: ',');
+        priceTemp.value=selectedItem.value!.price.toString().seRagham(separator: ',');
+      }else{
+        priceController.text=(selectedItem.value!.price!-selectedItem.value!.differentPrice!.toDouble()).toString().seRagham(separator: ',');
+        priceTemp.value=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
+      }
+    }
     maxItemSell.value=newValue!.maxSell!;
     maxItemBuy.value=newValue.maxBuy!;
   }
+
+  /*void _listenToSocket() {
+    _socketSubscription = socketService.messageStream.listen((message) {
+      if (message is String) {
+        try {
+          final data = json.decode(message);
+          if (data['channel'] == 'itemPrice') {
+            final socketItem = SocketItemModel.fromJson(data);
+            Get.snackbar('تغییر قیمت', 'قیمت ${socketItem.name} تغییر کرد.',
+              titleText: Text('تغییر قیمت',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(
+                'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+            );
+            print("sssssss:::${socketItem.mesghalPrice}");
+            changePriceItem(socketItem);
+          }
+        } catch (e) {
+          Get.log('Error processing socket message in ProductController: $e');
+        }
+      }
+    }, onError: (error) {
+      Get.log('Socket stream error in ProductController: $error');
+    });
+  }*/
+
+  /*void changePriceItem(SocketItemModel socketItem){
+    for(int i=0 ; i<itemList.length ; i++){
+      if(itemList[i].id==socketItem.id){
+        itemList[i].mesghalPrice=socketItem.mesghalPrice;
+      }
+    }
+    if(selectedItem.value!=null){
+      if(selectedItem.value?.id==socketItem.id){
+        selectedItem.value?.mesghalPrice=socketItem.mesghalPrice;
+        priceController.text=socketItem.mesghalPrice.toString().seRagham(separator: ',');
+      }
+    }
+    update();
+  }*/
 
   void changeSelectedAccount(AccountModel? newValue){
     selectedAccount.value = newValue;
@@ -96,17 +173,33 @@ class OrderUpdateController extends GetxController{
   }
 
   void updateTotalPrice(){
-    double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
-    double quantity=double.tryParse(quantityController.text==""? "0" : quantityController.text.toEnglishDigit()) ?? 0.0;
-    double totalPrice= price * quantity;
-    totalPriceController.text=totalPrice.toString().toPersianDigit().seRagham();
+    if(selectedItem.value?.itemUnit?.name=='گرم'){
+      double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit())!/4.3318;
+      double quantity=double.tryParse(quantityController.text==""? "0" : quantityController.text.toEnglishDigit()) ?? 0.0;
+      double totalPrice= price * quantity;
+      totalPriceController.text=totalPrice.toStringAsFixed(0).toPersianDigit().seRagham();
+      priceTemp.value=price.toString();
+    }else{
+      double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+      double quantity=double.tryParse(quantityController.text==""? "0" : quantityController.text.toEnglishDigit()) ?? 0.0;
+      double totalPrice= price * quantity;
+      totalPriceController.text=totalPrice.toStringAsFixed(0).toPersianDigit().seRagham();
+    }
   }
 
   void updateQuantity(){
-    double totalPrice=double.tryParse(totalPriceController.text ==""?"0" : totalPriceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
-    double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
-    double quantity=totalPrice / price;
-    quantityController.text=quantity.toString();
+    if(selectedItem.value?.itemUnit?.name=='گرم'){
+      double totalPrice=double.tryParse(totalPriceController.text ==""?"0" : totalPriceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+      double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+      double mesghal=totalPrice / price; // مثقال
+      double quantity=mesghal*4.3318;
+      quantityController.text=quantity.toStringAsFixed(2);
+    }else{
+      double totalPrice=double.tryParse(totalPriceController.text ==""?"0" : totalPriceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+      double price=double.tryParse(priceController.text ==""?"0" : priceController.text.replaceAll(',', '').toEnglishDigit()) ?? 0;
+      double quantity=totalPrice / price;
+      quantityController.text=quantity.toStringAsFixed(2);
+    }
   }
 
   late OrderModel existingOrder;
@@ -127,6 +220,7 @@ class OrderUpdateController extends GetxController{
         getBalanceList(existingOrder.account?.id ?? 0);
       }
     }
+    //_listenToSocket();
     super.onInit();
   }
 
@@ -249,7 +343,7 @@ class OrderUpdateController extends GetxController{
         type: selectedBuySell.value?.id ?? 0,
         itemId: selectedItem.value?.id ?? 0,
         itemName: selectedItem.value?.name ?? "",
-        price: double.parse(priceController.text.replaceAll(',', '').toEnglishDigit()),
+        price: double.parse(priceTemp.value.replaceAll(',', '').toEnglishDigit()),
         quantity: double.parse(quantityController.text.toEnglishDigit()),
         description: descriptionController.text,
         notLimit:notLimitChecked.value,
@@ -265,6 +359,7 @@ class OrderUpdateController extends GetxController{
              style: TextStyle(color: AppColor.textColor),),
            messageText: Text(orderResponse.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
        orderController.getOrderListPager();
+       orderController.fetchTotalBalanceList();
        balanceList.clear();
        clearList();
      }
@@ -285,11 +380,12 @@ class OrderUpdateController extends GetxController{
     //selectedItem.value = itemList.firstWhereOrNull((item) => item.id == order.item?.id);
     //selectedAccount.value = accountList.firstWhereOrNull((account) => account.id == order.account?.id);
     dateController.text = order.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
-    priceController.text = order.price?.toString().seRagham(separator: ',') ?? '';
-    quantityController.text = order.quantity?.toString() ?? '';
-    totalPriceController.text = order.totalPrice?.toString().seRagham(separator: ',') ?? '';
+    priceController.text = order.mesghalPrice?.toStringAsFixed(0).seRagham(separator: ',') ?? '';
+    quantityController.text = order.quantity?.toStringAsFixed(2) ?? '';
+    totalPriceController.text = order.totalPrice?.toStringAsFixed(0).seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
     isLoadingBalance.value=true;
+    priceTemp.value=order.price!.toStringAsFixed(0).seRagham(separator: ',');
     selectedAccount.value=order.account;
     print("تاریخ ست:::${dateController.text}");
 

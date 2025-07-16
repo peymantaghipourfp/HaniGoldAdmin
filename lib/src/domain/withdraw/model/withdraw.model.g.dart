@@ -25,8 +25,10 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
       undividedAmount: (json['undividedAmount'] as num?)?.toDouble(),
       paidAmount: (json['paidAmount'] as num?)?.toDouble(),
       totalAmountPerDay: (json['totalAmountPerDay'] as num?)?.toDouble(),
-      totalPaidAmountPerDay:
-          (json['totalPaidAmountPerDay'] as num?)?.toDouble(),
+      totalPaidAmountPerDay: (json['totalPaidAmountPerDay'] as num?)?.toDouble(),
+      totalDepositRequestAmountPerDay: (json['totalDepositRequestAmountPerDay'] as num?)?.toDouble(),
+      totalUndepositedAmountPerDay: (json['totalUndepositedAmountPerDay'] as num?)?.toDouble(),
+      totalUndividedAmountPerDay: (json['totalUndividedAmountPerDay'] as num?)?.toDouble(),
       requestDate: json['requestDate'] == null
           ? null
           : DateTime.parse(json['requestDate'] as String),
@@ -53,6 +55,7 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
       attribute: json['attribute'] as String?,
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
+      refrenceId: (json['refrenceId'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
@@ -68,6 +71,9 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'paidAmount': instance.paidAmount,
       'totalAmountPerDay': instance.totalAmountPerDay,
       'totalPaidAmountPerDay': instance.totalPaidAmountPerDay,
+      'totalDepositRequestAmountPerDay': instance.totalDepositRequestAmountPerDay,
+      'totalUndepositedAmountPerDay': instance.totalUndepositedAmountPerDay,
+      'totalUndividedAmountPerDay': instance.totalUndividedAmountPerDay,
       'requestDate': instance.requestDate?.toIso8601String(),
       'confirmDate': instance.confirmDate?.toIso8601String(),
       'datePersianToString': instance.datePersianToString,
@@ -86,4 +92,5 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'attribute': instance.attribute,
       'infos': instance.infos,
       'description': instance.description,
+      'refrenceId': instance.refrenceId,
     };

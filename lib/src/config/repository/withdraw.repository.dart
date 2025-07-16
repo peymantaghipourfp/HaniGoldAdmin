@@ -7,6 +7,7 @@ import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 
 import '../../domain/remittance/model/list_withdraw.model.dart';
 import '../network/error/network.error.dart';
+import 'dart:typed_data';
 
 class WithdrawRepository{
   Dio withdrawDio=Dio();
@@ -123,6 +124,48 @@ Future<ListWithdrawModel> getWithdrawListPager({
 
     }
     catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<Uint8List> getWithdrawExcel({
+    required String startDate,
+    required String endDate
+  }) async{
+    try{
+      Map<String, dynamic> options =
+      {
+        "options" : { "withdrawrequest" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(startDate!="")
+                  {
+                    "fieldName": "RequestDate",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "WithdrawRequest"
+                  },
+              ]
+            }
+          ],
+          "orderBy": "withdrawrequest.requestDate",
+          "orderByType": "desc",
+          "StartIndex": 1,
+          "ToIndex": 100000
+        }
+        }
+      };
+      final response=await withdrawDio.post(
+          'WithdrawRequest/getExcel',
+          data: options,
+          options: Options(responseType: ResponseType.bytes));
+      print("request getWithdrawExcel : $options" );
+      print("response getWithdrawExcel : ${response.data}" );
+      return Uint8List.fromList(response.data);
+    }catch(e){
       throw ErrorException('خطا:$e');
     }
   }
@@ -397,7 +440,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
 
       print(withdrawData);
 
-      var response=await withdrawDio.put('WithdrawRequest/updateDate',data: withdrawData);
+      var response=await withdrawDio.post('WithdrawRequest/insertRefrence',data: withdrawData);
       print('Status Code updateRequestDateWithdraw: ${response.statusCode}');
       print('Response Data updateRequestDateWithdraw: ${response.data}');
       return response.data;

@@ -542,32 +542,39 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                 ):
                 SizedBox.shrink(),
 
-                // شماره قبض
-                Container(
-                  padding: EdgeInsets.only(bottom: 3, top: 5),
-                  child: Text(
-                    'شماره قبض',
-                    style: AppTextStyle.labelText,
-                  ),
-                ),
-                // شماره قبض
-                Container(
-                  height: 40,
-                  padding: EdgeInsets.only(bottom: 5),
-                  child:
-                  TextFormField(
-                    controller: inventoryCreateReceiveController
-                        .receiptNumberController,
-                    style: AppTextStyle.labelText,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      filled: true,
-                      fillColor: AppColor.textFieldColor,
-                    ),
-                  ),
-                ),
+                inventoryCreateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                    Column(crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // شماره قبض
+                        Container(
+                          padding: EdgeInsets.only(bottom: 3, top: 5),
+                          child: Text(
+                            'شماره قبض',
+                            style: AppTextStyle.labelText,
+                          ),
+                        ),
+                        // شماره قبض
+                        Container(
+                          height: 40,
+                          padding: EdgeInsets.only(bottom: 5),
+                          child:
+                          TextFormField(
+                            controller: inventoryCreateReceiveController
+                                .receiptNumberController,
+                            style: AppTextStyle.labelText,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              filled: true,
+                              fillColor: AppColor.textFieldColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ):
+                    SizedBox.shrink(),
+
                 // تاریخ
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -710,6 +717,19 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                       children: [
                         Checkbox(
                           hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                          value: inventoryCreateReceiveController.factorBalanceChecked.value,
+                          onChanged: (value) async{
+                            inventoryCreateReceiveController.factorBalanceChecked.value = value!;
+                          },
+                        ),
+                        SizedBox(width: 8,),
+                        Text('ثبت نهایی همراه با صدور فاکتور + مانده',style: AppTextStyle.bodyTextBold,)
+                      ],
+                    ),
+                    Row(mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                           value: inventoryCreateReceiveController.factorChecked.value,
                           onChanged: (value) async{
                             inventoryCreateReceiveController.factorChecked.value = value!;
@@ -719,7 +739,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                         Text('ثبت نهایی همراه با صدور فاکتور',style: AppTextStyle.bodyTextBold,)
                       ],
                     ),
-                    SizedBox(height: 5,),
+                    SizedBox(height: 6,),
                     Row(mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // دکمه ثبت

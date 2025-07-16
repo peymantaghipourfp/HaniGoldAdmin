@@ -39,7 +39,7 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
               quarterTurns: 1,
               child:  Text(
                 widget.title,
-                style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 11),
+                style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 9),
               ),
             ),
           ),

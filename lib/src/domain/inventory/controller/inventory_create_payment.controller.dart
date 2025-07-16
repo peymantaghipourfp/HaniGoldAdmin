@@ -40,11 +40,14 @@ import 'dart:typed_data';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:flutter_svg/svg.dart';
 
+import 'inventory_create_layout.controller.dart';
+
 enum PageState{loading,err,empty,list}
 
 class InventoryCreatePaymentController extends GetxController{
 
   final InventoryController inventoryController=Get.find<InventoryController>();
+  final InventoryCreateLayoutController inventoryCreateLayoutController = Get.find<InventoryCreateLayoutController>();
 
   final TextEditingController searchController = TextEditingController();
   final TextEditingController searchLaboratoryController=TextEditingController();
@@ -55,6 +58,8 @@ class InventoryCreatePaymentController extends GetxController{
   final TextEditingController receiptNumberController=TextEditingController();
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
+  final TextEditingController verificationCodeController=TextEditingController();
+  final TextEditingController recipientNameController=TextEditingController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WalletRepository walletRepository=WalletRepository();
@@ -97,8 +102,15 @@ class InventoryCreatePaymentController extends GetxController{
   var recordId="".obs;
   var uuid = Uuid();
   var factorChecked = false.obs;
+  var factorBalanceChecked = false.obs;
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
+  RxBool isVerification = false.obs;
+  RxBool isCodeVerified = false.obs;
+  Timer? _timer;
+  final RxInt countdownSeconds = 180.obs;
+  final RxBool isTimerActive = false.obs;
+  var verificationChecked = false.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -163,6 +175,7 @@ class InventoryCreatePaymentController extends GetxController{
   }
   @override
   void onClose() {
+    _timer?.cancel();
     debounce?.cancel();
     searchController.dispose();
     searchLaboratoryController.dispose();
@@ -173,7 +186,7 @@ class InventoryCreatePaymentController extends GetxController{
   Future<void> fetchAccountList() async{
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList("1");
+      var fetchedAccountList=await accountRepository.getAccountList("");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -210,7 +223,7 @@ class InventoryCreatePaymentController extends GetxController{
         state.value = PageState.list;
         return;
       }
-      final results = await accountRepository.searchAccountList(name,"1");
+      final results = await accountRepository.searchAccountList(name,"");
       searchedAccounts.assignAll(results);
       state.value = searchedAccounts.isEmpty ? PageState.empty : PageState.list;
     } catch (e) {
@@ -264,7 +277,6 @@ class InventoryCreatePaymentController extends GetxController{
   }
 
   // لیست آزمایشگاه ها
-
 
   Future<void> searchLaboratory(String name) async {
     try {
@@ -439,6 +451,133 @@ class InventoryCreatePaymentController extends GetxController{
     }
   }
 
+  // تایمر
+  void startTimer() {
+    isTimerActive.value = true;
+    countdownSeconds.value = 180;
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (countdownSeconds.value > 0) {
+        countdownSeconds.value--;
+      } else {
+        isTimerActive.value = false;
+        timer.cancel();
+      }
+    });
+  }
+
+  void stopTimer() {
+    _timer?.cancel();
+    isTimerActive.value = false;
+    countdownSeconds.value = 180;
+  }
+
+//ارسال کد
+  Future<void> sendVerificationCode(int accountId) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      isVerification.value=false;
+      isCodeVerified.value=false;
+      var response=await inventoryRepository.sendVerificationCode(accountId);
+      isVerification.value=true;
+      print("sendVerificationCode");
+      if (response == true) {
+        startTimer();
+        Get.snackbar(
+          "موفقیت",
+          "کد با موفقیت ارسال شد",
+          titleText: Text(
+            "موفقیت",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+          messageText: Text(
+            "کد با موفقیت ارسال شد",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+        );
+      } else {
+        Get.snackbar(
+          "خطا",
+          "خطا در ارسال کد",
+          titleText: Text(
+            "خطا",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+          messageText: Text(
+            "خطا در ارسال کد",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+        );
+      }
+      update();
+    }
+    catch(e){
+      EasyLoading.dismiss();
+      throw ErrorException('خطا:$e');
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }
+
+  // چک کد
+  Future<void> checkVerificationCode(int accountId,int code) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      //isVerification.value=true;
+      var response=await inventoryRepository.checkVerificationCode(accountId,code);
+      //isVerification.value=false;
+      print("checkVerificationCode");
+      if (response == true) {
+        isCodeVerified.value = true;
+        isVerification.value = false;
+        stopTimer();
+        verificationCodeController.clear();
+        Get.snackbar(
+          "موفقیت",
+          "کد با موفقیت ثبت شد",
+          titleText: Text(
+            "موفقیت",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+          messageText: Text(
+            "کد با موفقیت ثبت شد",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+        );
+      } else {
+        Get.snackbar(
+          "خطا",
+          "کد نامعبر",
+          titleText: Text(
+            "خطا",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+          messageText: Text(
+            "کد نامعتبر",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+        );
+      }
+      update();
+    }
+    catch(e){
+      EasyLoading.dismiss();
+      throw ErrorException('خطا:$e');
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }
+
+
+// ثبت نهایی
   Future<InventoryModel?> submitFinalInventory()async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
@@ -447,15 +586,17 @@ class InventoryCreatePaymentController extends GetxController{
       }
       isLoading.value=true;
       isFinalizing.value=true;
-
       String gregorianDate = convertJalaliToGregorian(dateController.text);
+      print('verificationChecked.value:::${verificationChecked.value}');
       var response=await inventoryRepository.insertInventoryPayment(
         date: gregorianDate,
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
         type: 1,
         details:tempDetails,
-        recId: null
+        recId: null,
+        confirmByAdmin: verificationChecked.value,
+        recipient: recipientNameController.text,
       );
       print(response);
       if (response != null) {
@@ -472,9 +613,58 @@ class InventoryCreatePaymentController extends GetxController{
             style: TextStyle(color: AppColor.textColor),),
         );
         inventoryController.getInventoryListPager();
-
+        int accountId = selectedAccount.value?.id ?? 0;
+        await inventoryCreateLayoutController.getBalanceList(accountId);
         // صدور فاکتور
-        if(factorChecked.value==true){
+        if(factorBalanceChecked.value==true){
+
+          final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+          final ttf = pw.Font.ttf(fontData);
+          final pdf = pw.Document();
+
+          pdf.addPage(
+            pw.MultiPage(
+              pageFormat: PdfPageFormat.a4,
+              textDirection: pw.TextDirection.rtl,
+              theme: pw.ThemeData.withFont(base: ttf, fontFallback: [ttf]),
+              build: (pw.Context context) {
+                return [
+                  buildInvoiceHeader(responseData),
+                  pw.SizedBox(height: 20),
+                  pw.Table(
+                    border: pw.TableBorder.all(),
+                    columnWidths: getInvoiceColumnWidths(),
+                    children: [
+                      buildInvoiceTableHeader(),
+                      for (var i = 0; i < inventoryDetails!.length; i++)
+                        buildInvoiceDataRow(inventoryDetails[i], i),
+                    ],
+                  ),
+                  pw.SizedBox(height: 10),
+                  buildBalanceWidget(inventoryCreateLayoutController.balanceList),
+                  pw.SizedBox(height: 20),
+                  buildInvoiceFooter(inventoryDetails),
+                ];
+              },
+              footer: (context) => buildPageNumber(context.pageNumber, context.pagesCount),
+            ),
+          );
+          final bytes = await pdf.save();
+          if (kIsWeb) {
+            final blob = html.Blob([bytes], 'application/pdf');
+            final url = html.Url.createObjectUrlFromBlob(blob);
+            html.AnchorElement(href: url)
+              ..download = 'factorInventoryPayment_${DateTime.now().millisecondsSinceEpoch}.pdf'
+              ..click();
+            html.Url.revokeObjectUrl(url);
+          } else {
+            await Printing.sharePdf(
+              bytes: bytes,
+              filename: 'factorInventoryPayment.pdf',
+            );
+          }
+        }
+        else if(factorChecked.value==true){
 
           final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
           final ttf = pw.Font.ttf(fontData);
@@ -520,7 +710,7 @@ class InventoryCreatePaymentController extends GetxController{
             );
           }
         }
-          Get.toNamed('/inventoryList');
+          Get.offNamed('/inventoryList');
           clearList();
       }
     }catch(e){
@@ -551,7 +741,7 @@ class InventoryCreatePaymentController extends GetxController{
         ),*/
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center,
           children:[
-            pw.Text('فاکتور مشتری', style: pw.TextStyle(fontSize: 17)),
+            pw.Text('فاکتور مشتری ${responseData.account?.name ?? '-'}', style: pw.TextStyle(fontSize: 15)),
           ]
         ),
         pw.Row(
@@ -564,7 +754,7 @@ class InventoryCreatePaymentController extends GetxController{
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
-            pw.Text('نام مشتری: ${responseData.account?.name ?? '-'}',style: pw.TextStyle(fontSize: 12)),
+            pw.Text('نام تحویل گیرنده: ${responseData.recipient ?? '-'}',style: pw.TextStyle(fontSize: 12)),
             pw.Text('شناسه مشتری: ${selectedAccount.value?.id ?? '-'}',style: pw.TextStyle(fontSize: 12)),
           ],
         ),
@@ -604,7 +794,7 @@ class InventoryCreatePaymentController extends GetxController{
   pw.TableRow buildInvoiceDataRow(InventoryDetailModel detail, int index) {
     return pw.TableRow(
       children: [
-        buildDataCell(detail.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(detail.itemUnit?.id==2 ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
         buildDataCell(detail.item?.name ?? ''),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
@@ -658,9 +848,62 @@ class InventoryCreatePaymentController extends GetxController{
     );
   }
 
+  pw.Widget buildBalanceWidget(List<BalanceItemModel> balanceList) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('مانده فعلی', style: pw.TextStyle(fontSize: 12,)),
+        pw.SizedBox(height: 5),
+        pw.Table(
+          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
+          columnWidths: {
+            0: pw.FlexColumnWidth(1),
+            1: pw.FlexColumnWidth(2),
+            2: pw.FlexColumnWidth(3),
+          },
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.grey300),
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مقدار', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('واحد', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('نام محصول', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+              ],
+            ),
+            ...balanceList.map((e) => pw.TableRow(
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text((e.item?.itemUnit?.name=='ریال' ? e.balance.toString().seRagham(separator: ',') : e.balance ?? 0.0).toString(), style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text(e.item?.itemUnit?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text(e.item?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+              ],
+            )).toList(),
+          ],
+        ),
+      ],
+    );
+  }
+
 
   // لیست بالانس
-  Future<void> getBalanceList(int id) async{
+  /*Future<void> getBalanceList(int id) async{
     print("getBalanceList : $id");
     balanceList.clear();
     try{
@@ -679,19 +922,22 @@ class InventoryCreatePaymentController extends GetxController{
       state.value=PageState.err;
     }finally{
     }
-  }
+  }*/
 
   void clearList() {
     dateController.clear();
     quantityController.clear();
     descriptionController.clear();
     receiptNumberController.clear();
+    recipientNameController.clear();
     impurityController.clear();
     weight750Controller.clear();
     caratController.clear();
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    factorBalanceChecked.value=false;
+    factorChecked.value=false;
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
@@ -701,12 +947,15 @@ class InventoryCreatePaymentController extends GetxController{
     quantityController.clear();
     descriptionController.clear();
     receiptNumberController.clear();
+    recipientNameController.clear();
     impurityController.clear();
     weight750Controller.clear();
     caratController.clear();
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    factorBalanceChecked.value=false;
+    factorChecked.value=false;
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
@@ -717,6 +966,7 @@ class InventoryCreatePaymentController extends GetxController{
     weight750Controller.clear();
     caratController.clear();
     receiptNumberController.clear();
+    //recipientNameController.clear();
     selectedLaboratory.value = null;
   }
   void resetAccountSearch() {

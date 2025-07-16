@@ -330,6 +330,49 @@ class _InventoryCreatePaymentTabWidgetState
                     ),
                   ],
                 ) : SizedBox.shrink(),
+                // نام تحویل گیرنده
+                Container(
+                  padding: EdgeInsets.only(
+                      bottom: 3, top: 5),
+                  child: Text(
+                    'نام تحویل گیرنده',
+                    style: AppTextStyle.labelText
+                        .copyWith(
+                        fontSize: isDesktop
+                            ? 12
+                            : 10),
+                  ),
+                ),
+                // نام تحویل گیرنده
+                Container(
+                  //height: 40,
+                  padding: EdgeInsets.only(
+                      bottom: 5),
+                  child:
+                  IntrinsicHeight(
+                    child: TextFormField(
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty) {
+                          return 'لطفا نام صاحب حساب را وارد کنید';
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      controller: inventoryCreatePaymentController.recipientNameController,
+                      style: AppTextStyle.bodyText,
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius
+                              .circular(10),
+                        ),
+                        filled: true,
+                        fillColor: AppColor
+                            .textFieldColor,
+                      ),
+                    ),
+                  ),
+                ),
                 // تاریخ
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -388,6 +431,139 @@ class _InventoryCreatePaymentTabWidgetState
                     ),
                   ),
                 ),
+                // verification code
+                SizedBox(height: 5,),
+
+                (() {
+                  if (inventoryCreatePaymentController.verificationChecked.value == false) {
+                    if (!inventoryCreatePaymentController.isVerification.value) {
+                      return Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: inventoryCreatePaymentController.isTimerActive.value
+                                  ? Colors.grey
+                                  : AppColor.primaryColor,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                            onPressed: inventoryCreatePaymentController.isTimerActive.value
+                                ? null
+                                : () {
+                              print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
+                              inventoryCreatePaymentController.sendVerificationCode(inventoryCreatePaymentController.selectedAccount.value?.id ?? 0);
+                            },
+                            child: Text(
+                              inventoryCreatePaymentController.isTimerActive.value
+                                  ? '${inventoryCreatePaymentController.countdownSeconds.value} ثانیه'
+                                  : 'درخواست کد',
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                          if (inventoryCreatePaymentController.isCodeVerified.value)
+                            Padding(
+                              padding: const EdgeInsets.only(right: 8.0),
+                              child: Icon(Icons.check_circle, color: Colors.green, size: 28),
+                            ),
+                        ],
+                      );
+                    } else if (!inventoryCreatePaymentController.isCodeVerified.value) {
+                      return Form(
+                        child: Row(
+                          children: [
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: inventoryCreatePaymentController.isTimerActive.value
+                                    ? Colors.grey
+                                    : AppColor.primaryColor,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
+                              onPressed: inventoryCreatePaymentController.isTimerActive.value
+                                  ? null
+                                  : () {
+                                print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
+                                inventoryCreatePaymentController.sendVerificationCode(inventoryCreatePaymentController.selectedAccount.value?.id ?? 0);
+                              },
+                              child: Text(
+                                inventoryCreatePaymentController.isTimerActive.value
+                                    ? '${inventoryCreatePaymentController.countdownSeconds.value} ثانیه'
+                                    : 'درخواست کد',
+                                style: AppTextStyle.bodyText,
+                              ),
+                            ),
+                            SizedBox(width: 10,),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColor.primaryColor,
+                                  padding: EdgeInsets.all(0),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10)),
+                                  fixedSize: Size(65, 20)
+                              ),
+                              child: Text('ثبت کد',
+                                  style: AppTextStyle.bodyText),
+                              onPressed: () {
+                                  print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
+                                  inventoryCreatePaymentController.checkVerificationCode(
+                                    inventoryCreatePaymentController.selectedAccount.value?.id ?? 0,
+                                    int.parse(inventoryCreatePaymentController.verificationCodeController.text),
+                                  );
+                              },
+                            ),
+                            SizedBox(width: 10,),
+                            Container(
+                              height: 60,
+                              width: 70,
+                              padding: EdgeInsets.only(bottom: 5, top: 15),
+                              child: TextFormField(
+                                maxLength: 6,
+                                controller: inventoryCreatePaymentController.verificationCodeController,
+                                maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                                keyboardType: TextInputType.number,
+                                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                style: AppTextStyle.labelText,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(5),
+                                  ),
+                                  filled: true,
+                                  fillColor: AppColor.textFieldColor,
+                                  counterText: '',
+                                  hoverColor: AppColor.appBarColor,
+                                  isDense: true,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    } else {
+                      return SizedBox.shrink();
+                    }
+                  } else if (inventoryCreatePaymentController.verificationChecked.value == true) {
+                    return Text('مسئولیت به عهده کاربر می باشد.',style: AppTextStyle.bodyText,);
+                  } else {
+                    return SizedBox.shrink();
+                  }
+                })(),
+
+                Row(
+                  children: [
+                    Checkbox(
+                      hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                      value: inventoryCreatePaymentController.verificationChecked
+                          .value,
+                      onChanged: (value) async {
+                        inventoryCreatePaymentController.verificationChecked
+                            .value = value!;
+                      },
+                    ),
+                    Text('ضمانت کاربر',style: AppTextStyle.bodyText,)
+                  ],
+                ),
+                SizedBox(height: 5,),
                 // توضیحات
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -493,6 +669,23 @@ class _InventoryCreatePaymentTabWidgetState
                       children: [
                         Checkbox(
                           hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                          value: inventoryCreatePaymentController.factorBalanceChecked
+                              .value,
+                          onChanged: (value) async {
+                            inventoryCreatePaymentController.factorBalanceChecked
+                                .value = value!;
+                          },
+                        ),
+                        SizedBox(width: 8,),
+                        Text(
+                          'ثبت نهایی همراه با صدور فاکتور با مانده', style: AppTextStyle
+                            .bodyTextBold,)
+                      ],
+                    ),
+                    Row(mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Checkbox(
+                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                           value: inventoryCreatePaymentController.factorChecked
                               .value,
                           onChanged: (value) async {
@@ -502,11 +695,11 @@ class _InventoryCreatePaymentTabWidgetState
                         ),
                         SizedBox(width: 8,),
                         Text(
-                          'ثبت نهایی همراه با صدور فاکتور', style: AppTextStyle
+                          'ثبت نهایی همراه با صدور فاکتور بدون مانده', style: AppTextStyle
                             .bodyTextBold,)
                       ],
                     ),
-                    SizedBox(height: 5,),
+                    SizedBox(height: 6,),
                     Row(mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // دکمه ثبت
@@ -943,4 +1136,5 @@ class _InventoryCreatePaymentTabWidgetState
     );
   }
 }
+
 

@@ -116,19 +116,37 @@ class DepositRequestGetOneView extends StatelessWidget {
                                               shape: RoundedRectangleBorder(
                                                 borderRadius: BorderRadius.circular(5),
                                               ),
-                                              color: (getDepositRequest.status == 0)
-                                                  ? AppColor.accentColor
-                                                  : AppColor.primaryColor,
+                                              color: getDepositRequest
+                                                  .status ==
+                                                  2
+                                                  ? AppColor
+                                                  .accentColor
+                                                  : getDepositRequest
+                                                  .status ==
+                                                  1
+                                                  ? AppColor
+                                                  .primaryColor
+                                                  : AppColor
+                                                  .secondaryColor
+                                              ,
                                               margin: EdgeInsets.symmetric(
                                                   vertical: 0, horizontal: 5),
                                               child: Padding(
                                                 padding: const EdgeInsets.all(2),
                                                 child: Text(
-                                                    (getDepositRequest.status == 0)
+                                                    getDepositRequest
+                                                        .status ==
+                                                        2
                                                         ? 'تایید نشده'
-                                                        : 'تایید شده',
-                                                    style: AppTextStyle.labelText,
-                                                    textAlign: TextAlign.center),
+                                                        : getDepositRequest
+                                                        .status ==
+                                                        1
+                                                        ? 'تایید شده'
+                                                        : 'نامشخص',
+                                                    style: AppTextStyle
+                                                        .labelText,
+                                                    textAlign: TextAlign
+                                                        .center),
                                               ),
                                             ),
                                           ],
@@ -524,6 +542,49 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                 top: 5, bottom: 2),
                                                           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                             children: [
+                                                              // وضعیت
+                                                              Card(
+                                                                shape: RoundedRectangleBorder(
+                                                                  borderRadius: BorderRadius
+                                                                      .circular(
+                                                                      5),
+                                                                ),
+                                                                color: getOneDeposit?.status ==
+                                                                    2
+                                                                    ? AppColor
+                                                                    .accentColor
+                                                                    : getOneDeposit
+                                                                    ?.status ==
+                                                                    1
+                                                                    ? AppColor
+                                                                    .primaryColor
+                                                                    : AppColor
+                                                                    .secondaryColor
+                                                                ,
+                                                                margin: EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical: 0,
+                                                                    horizontal: 5),
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                      .all(
+                                                                      2),
+                                                                  child: Text(
+                                                                      getOneDeposit
+                                                                          ?.status ==
+                                                                          2
+                                                                          ? 'تایید نشده'
+                                                                          : getOneDeposit
+                                                                          ?.status ==
+                                                                          1
+                                                                          ? 'تایید شده'
+                                                                          : 'نامشخص',
+                                                                      style: AppTextStyle
+                                                                          .labelText,
+                                                                      textAlign: TextAlign
+                                                                          .center),
+                                                                ),
+                                                              ),
                                                               // کد رهگیری
                                                               Row(
                                                                 children: [
@@ -752,19 +813,37 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                   shape: RoundedRectangleBorder(
                                                     borderRadius: BorderRadius.circular(5),
                                                   ),
-                                                  color: (getDepositRequest.status == 0)
-                                                      ? AppColor.accentColor
-                                                      : AppColor.primaryColor,
+                                                  color: getDepositRequest
+                                                      .status ==
+                                                      2
+                                                      ? AppColor
+                                                      .accentColor
+                                                      : getDepositRequest
+                                                      .status ==
+                                                      1
+                                                      ? AppColor
+                                                      .primaryColor
+                                                      : AppColor
+                                                      .secondaryColor
+                                                  ,
                                                   margin: EdgeInsets.symmetric(
                                                       vertical: 0, horizontal: 5),
                                                   child: Padding(
                                                     padding: const EdgeInsets.all(2),
                                                     child: Text(
-                                                        (getDepositRequest.status == 0)
+                                                        getDepositRequest
+                                                            .status ==
+                                                            2
                                                             ? 'تایید نشده'
-                                                            : 'تایید شده',
-                                                        style: AppTextStyle.labelText,
-                                                        textAlign: TextAlign.center),
+                                                            : getDepositRequest
+                                                            .status ==
+                                                            1
+                                                            ? 'تایید شده'
+                                                            : 'نامشخص',
+                                                        style: AppTextStyle
+                                                            .labelText,
+                                                        textAlign: TextAlign
+                                                            .center),
                                                   ),
                                                 ),
                                               ],
@@ -901,6 +980,19 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                   top: 2, bottom: 2),
                                                               child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                 children: [
+                                                                  Checkbox(
+                                                                    value: getOneDeposit?.registered ?? false,
+                                                                    onChanged: (value) async{
+                                                                      if (value != null) {
+                                                                        //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                                                                        await depositRequestGetOneController.updateRegistered(
+                                                                            getOneDeposit!.id!,
+                                                                            value
+                                                                        );
+                                                                      }
+                                                                      //EasyLoading.dismiss();
+                                                                    },
+                                                                  ),
                                                                   Text(
                                                                     'مبلغ: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                                     style:
@@ -1038,6 +1130,49 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                   top: 10, bottom: 2),
                                                               child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                 children: [
+                                                                  // وضعیت
+                                                                  Card(
+                                                                    shape: RoundedRectangleBorder(
+                                                                      borderRadius: BorderRadius
+                                                                          .circular(
+                                                                          5),
+                                                                    ),
+                                                                    color: getOneDeposit?.status ==
+                                                                        2
+                                                                        ? AppColor
+                                                                        .accentColor
+                                                                        : getOneDeposit
+                                                                        ?.status ==
+                                                                        1
+                                                                        ? AppColor
+                                                                        .primaryColor
+                                                                        : AppColor
+                                                                        .secondaryColor
+                                                                    ,
+                                                                    margin: EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical: 0,
+                                                                        horizontal: 5),
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .all(
+                                                                          2),
+                                                                      child: Text(
+                                                                          getOneDeposit
+                                                                              ?.status ==
+                                                                              2
+                                                                              ? 'تایید نشده'
+                                                                              : getOneDeposit
+                                                                              ?.status ==
+                                                                              1
+                                                                              ? 'تایید شده'
+                                                                              : 'نامشخص',
+                                                                          style: AppTextStyle
+                                                                              .labelText,
+                                                                          textAlign: TextAlign
+                                                                              .center),
+                                                                    ),
+                                                                  ),
                                                                   // کد رهگیری
                                                                   Row(
                                                                     children: [

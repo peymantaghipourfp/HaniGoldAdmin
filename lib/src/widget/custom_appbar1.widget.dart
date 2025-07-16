@@ -27,7 +27,7 @@ class CustomAppbar1 extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 IconButton(
                   icon: Icon(Icons.arrow_forward, color: AppColor.textColor),
-                  onPressed: () => Get.back(),
+                  onPressed: onBackTap,
                 ),
                 IconButton(
                   icon: const Icon(Icons.home),

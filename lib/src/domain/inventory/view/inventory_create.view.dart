@@ -38,7 +38,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
       return Scaffold(
         appBar:
         CustomAppbar1(
-          title: 'دریافت و پرداخت جدید', onBackTap: () => Get.back(),),
+          title: 'دریافت و پرداخت جدید', onBackTap: () => Get.toNamed('/home'),),
         drawer: const AppDrawer(),
         body: Stack(
           children: [

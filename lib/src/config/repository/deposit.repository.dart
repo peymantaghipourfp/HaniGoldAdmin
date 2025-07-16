@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 
 import '../../domain/deposit/model/list_deposit.model.dart';
 import '../network/error/network.error.dart';
+import 'dart:typed_data';
 
 class DepositRepository{
   Dio depositDio=Dio();
@@ -129,6 +130,48 @@ class DepositRepository{
       return ListDepositModel.fromJson(response.data);
     }
     catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<Uint8List> getDepositExcel({
+    required String startDate,
+    required String endDate
+  }) async{
+    try{
+      Map<String, dynamic> options =
+      {
+        "options" : { "deposit" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Deposit"
+                  },
+              ]
+            }
+          ],
+          "orderBy": "deposit.Date",
+          "orderByType": "desc",
+          "StartIndex": 1,
+          "ToIndex": 100000
+        }
+        }
+      };
+      final response=await depositDio.post(
+          'Deposit/getExcel',
+          data: options,
+          options: Options(responseType: ResponseType.bytes));
+      print("request getDepositExcel : $options" );
+      print("response getDepositExcel : ${response.data}" );
+      return Uint8List.fromList(response.data);
+    }catch(e){
       throw ErrorException('خطا:$e');
     }
   }

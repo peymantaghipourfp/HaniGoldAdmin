@@ -19,9 +19,13 @@ class ItemModel {
   @JsonKey(name: "itemUnit")
   final ItemUnitModel? itemUnit;
   @JsonKey(name: "price")
-  final double? price;
+  late double? price;
+  @JsonKey(name: "mesghalPrice")
+  late double? mesghalPrice;
   @JsonKey(name: "differentPrice")
-  final double? differentPrice;
+  late double? differentPrice;
+  @JsonKey(name: "mesghalDifferentPrice")
+  late double? mesghalDifferentPrice;
   @JsonKey(name: "name")
   final String? name;
   @JsonKey(name: "isDefault")
@@ -32,6 +36,14 @@ class ItemModel {
   final bool? sellStatus;
   @JsonKey(name: "buyStatus")
   final bool? buyStatus;
+  @JsonKey(name: "hasWage")
+  final bool? hasWage;
+  @JsonKey(name: "wage")
+  final int? wage;
+  @JsonKey(name: "isCard")
+  final bool? isCard;
+  @JsonKey(name: "cardPrice")
+  final double? cardPrice;
   @JsonKey(name: "maxSell")
   final int? maxSell;
   @JsonKey(name: "maxBuy")
@@ -60,17 +72,25 @@ class ItemModel {
   final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "refrence")
+  final Refrence? refrence;
 
   ItemModel({
     required this.itemGroup,
     required this.itemUnit,
     required this.price,
+    required this.mesghalPrice,
     required this.differentPrice,
+    required this.mesghalDifferentPrice,
     required this.name,
     required this.isDefault,
     required this.status,
     required this.sellStatus,
     required this.buyStatus,
+    required this.hasWage,
+    required this.wage,
+    required this.isCard,
+    required this.cardPrice,
     required this.maxSell,
     required this.maxBuy,
     required this.w750,
@@ -85,9 +105,36 @@ class ItemModel {
     required this.infos,
     required this.salesRange,
     required this.buyRange,
+    required this.refrence,
   });
 
   factory ItemModel.fromJson(Map<String, dynamic> json) => _$ItemModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ItemModelToJson(this);
+}
+
+@JsonSerializable()
+class Refrence {
+  @JsonKey(name: "itemGroup")
+  final ItemGroupModel? itemGroup;
+  @JsonKey(name: "itemUnit")
+  final ItemUnitModel? itemUnit;
+  @JsonKey(name: "name")
+  final String? name;
+  @JsonKey(name: "id")
+  final int? id;
+  @JsonKey(name: "infos")
+  final List<dynamic>? infos;
+
+  Refrence({
+    required this.itemGroup,
+    required this.itemUnit,
+    required this.name,
+    required this.id,
+    required this.infos,
+  });
+
+  factory Refrence.fromJson(Map<String, dynamic> json) => _$RefrenceFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RefrenceToJson(this);
 }

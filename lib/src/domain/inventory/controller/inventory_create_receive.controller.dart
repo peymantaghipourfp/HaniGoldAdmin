@@ -30,6 +30,7 @@ import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../../laboratory/model/laboratory.model.dart';
 import '../../users/model/balance_item.model.dart';
+import '../../users/widgets/balance.widget.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
@@ -37,11 +38,14 @@ import '../../withdraw/model/predicate.model.dart';
 import 'dart:typed_data';
 import 'package:pdf/widgets.dart' as pw;
 
+import 'inventory_create_layout.controller.dart';
+
 enum PageState{loading,err,empty,list}
 
 class InventoryCreateReceiveController extends GetxController{
 
   final InventoryController inventoryController=Get.find<InventoryController>();
+  final InventoryCreateLayoutController inventoryCreateLayoutController = Get.find<InventoryCreateLayoutController>();
 
 
   final TextEditingController searchController = TextEditingController();
@@ -88,6 +92,7 @@ class InventoryCreateReceiveController extends GetxController{
   RxBool isUploadingDesktop = false.obs;
   List<Uint8List> selectedImagesBytes = [];
   List<String> selectedFileNames = [];
+  var factorBalanceChecked = false.obs;
   var factorChecked = false.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
@@ -103,7 +108,7 @@ class InventoryCreateReceiveController extends GetxController{
       int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
       double quantity = double.tryParse(quantityController.text=="" ? "0" : quantityController.text.toEnglishDigit()) ?? 0;
       double w750 = (carat * quantity)/750;
-      weight750Controller.text = w750.toString().toPersianDigit();
+      weight750Controller.text = w750.toStringAsFixed(2).toPersianDigit();
     } else {
       weight750Controller.clear();
     }
@@ -111,7 +116,7 @@ class InventoryCreateReceiveController extends GetxController{
   void changeSelectedWalletAccount(WalletModel? newValue) {
     selectedWalletAccount.value = newValue;
     if (newValue?.item?.itemUnit?.id == 2) {
-    caratController.text = '750';
+    caratController.text = '';
     updateW750();
     } else {
       weight750Controller.clear();
@@ -168,7 +173,7 @@ class InventoryCreateReceiveController extends GetxController{
   Future<void> fetchAccountList() async{
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList("1");
+      var fetchedAccountList=await accountRepository.getAccountList("");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -205,7 +210,7 @@ class InventoryCreateReceiveController extends GetxController{
         state.value = PageState.list;
         return;
       }
-        final results = await accountRepository.searchAccountList(name,"1");
+        final results = await accountRepository.searchAccountList(name,"");
         searchedAccounts.assignAll(results);
       state.value = searchedAccounts.isEmpty ? PageState.empty : PageState.list;
     } catch (e) {
@@ -414,7 +419,7 @@ class InventoryCreateReceiveController extends GetxController{
       );
       print(response);
       if (response != null) {
-        Get.back();
+        //Get.back();
         tempDetails.clear();
         InventoryModel responseData=InventoryModel.fromJson(response);
         var inventoryDetails=responseData.inventoryDetails;
@@ -427,8 +432,10 @@ class InventoryCreateReceiveController extends GetxController{
                 style: TextStyle(color: AppColor.textColor),),
         );
         inventoryController.getInventoryListPager();
-        if(factorChecked.value==true){
+        int accountId = selectedAccount.value?.id ?? 0;
+        await inventoryCreateLayoutController.getBalanceList(accountId);
 
+        if(factorBalanceChecked.value==true){
           final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
           final ttf = pw.Font.ttf(fontData);
           final pdf = pw.Document();
@@ -442,6 +449,54 @@ class InventoryCreateReceiveController extends GetxController{
                 return [
                   buildInvoiceHeader(responseData),
                   pw.SizedBox(height: 20),
+                  pw.Table(
+                    border: pw.TableBorder.all(),
+                    columnWidths: getInvoiceColumnWidths(),
+                    children: [
+                      buildInvoiceTableHeader(),
+                      for (var i = 0; i < inventoryDetails!.length; i++)
+                        buildInvoiceDataRow(inventoryDetails[i], i),
+                    ],
+                  ),
+                  pw.SizedBox(height: 10),
+                  buildBalanceWidget(inventoryCreateLayoutController.balanceList),
+                  pw.SizedBox(height: 20),
+                  buildInvoiceFooter(inventoryDetails),
+                ];
+              },
+              footer: (context) => buildPageNumber(context.pageNumber, context.pagesCount),
+            ),
+          );
+
+          final bytes = await pdf.save();
+          if (kIsWeb) {
+            final blob = html.Blob([bytes], 'application/pdf');
+            final url = html.Url.createObjectUrlFromBlob(blob);
+            html.AnchorElement(href: url)
+              ..download = 'factorInventoryReceive_${DateTime.now().millisecondsSinceEpoch}.pdf'
+              ..click();
+            html.Url.revokeObjectUrl(url);
+          } else {
+            await Printing.sharePdf(
+              bytes: bytes,
+              filename: 'factorInventoryReceive.pdf',
+            );
+          }
+        }
+        else if(factorChecked.value==true){
+          final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+          final ttf = pw.Font.ttf(fontData);
+          final pdf = pw.Document();
+
+          pdf.addPage(
+            pw.MultiPage(
+              pageFormat: PdfPageFormat.a4,
+              textDirection: pw.TextDirection.rtl,
+              theme: pw.ThemeData.withFont(base: ttf, fontFallback: [ttf]),
+              build: (pw.Context context) {
+                return [
+                  buildInvoiceHeader(responseData),
+                  pw.SizedBox(height: 10),
                   pw.Table(
                     border: pw.TableBorder.all(),
                     columnWidths: getInvoiceColumnWidths(),
@@ -474,7 +529,7 @@ class InventoryCreateReceiveController extends GetxController{
             );
           }
         }
-        Get.toNamed('/inventoryList');
+        Get.offNamed('/inventoryList');
         clearList();
       }
     }catch(e){
@@ -505,7 +560,7 @@ class InventoryCreateReceiveController extends GetxController{
         ),*/
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center,
             children:[
-              pw.Text('فاکتور مشتری', style: pw.TextStyle(fontSize: 17)),
+              pw.Text('فاکتور مشتری ${responseData.account?.name ?? '-'}', style: pw.TextStyle(fontSize: 17)),
             ]
         ),
         pw.Row(
@@ -558,7 +613,7 @@ class InventoryCreateReceiveController extends GetxController{
   pw.TableRow buildInvoiceDataRow(InventoryDetailModel detail, int index) {
     return pw.TableRow(
       children: [
-        buildDataCell(detail.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(detail.itemUnit?.id==2 ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
         buildDataCell(detail.item?.name ?? ''),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
@@ -612,8 +667,61 @@ class InventoryCreateReceiveController extends GetxController{
     );
   }
 
+  pw.Widget buildBalanceWidget(List<BalanceItemModel> balanceList) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('مانده فعلی', style: pw.TextStyle(fontSize: 12,)),
+        pw.SizedBox(height: 5),
+        pw.Table(
+          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
+          columnWidths: {
+            0: pw.FlexColumnWidth(1),
+            1: pw.FlexColumnWidth(2),
+            2: pw.FlexColumnWidth(3),
+          },
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.grey300),
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مقدار', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('واحد', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('نام محصول', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+              ],
+            ),
+            ...balanceList.map((e) => pw.TableRow(
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text((e.item?.itemUnit?.name=='ریال' ? e.balance.toString().seRagham(separator: ',') : e.balance ?? 0.0).toString(), style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text(e.item?.itemUnit?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text(e.item?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+              ],
+            )).toList(),
+          ],
+        ),
+      ],
+    );
+  }
+
   // لیست بالانس
-  Future<void> getBalanceList(int id) async{
+  /*Future<void> getBalanceList(int id) async{
     print("getBalanceList : $id");
     balanceList.clear();
     try{
@@ -632,7 +740,7 @@ class InventoryCreateReceiveController extends GetxController{
       state.value=PageState.err;
     }finally{
     }
-  }
+  }*/
 
   void clearList() {
     dateController.clear();
@@ -646,6 +754,7 @@ class InventoryCreateReceiveController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     selectedImagesDesktop.clear();
+    factorBalanceChecked.value=false;
     factorChecked.value=false;
     var now = Jalali.now();
     DateTime date=DateTime.now();
@@ -663,6 +772,7 @@ class InventoryCreateReceiveController extends GetxController{
     selectedAccount.value = null;
     selectedLaboratory.value=null;
     selectedImagesDesktop.clear();
+    factorBalanceChecked.value=false;
     factorChecked.value=false;
     var now = Jalali.now();
     DateTime date=DateTime.now();

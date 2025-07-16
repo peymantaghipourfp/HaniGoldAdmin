@@ -36,7 +36,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
-        title: 'ایجاد حواله', onBackTap: () => Get.back(),),
+        title: 'ایجاد حواله', onBackTap: () => Get.toNamed('/home'),),
       drawer: const AppDrawer(),
       body: Stack(
 

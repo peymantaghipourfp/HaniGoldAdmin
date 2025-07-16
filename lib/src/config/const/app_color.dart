@@ -9,7 +9,7 @@ class AppColor{
   static const Color primaryColor=Color(0xff1bc06e);
   static const Color secondaryColor=Color(0xFF2D3541);
   static const Color accentColor=Color(0xffe91e63);
-  //static const Color accentColor=Color(0xffce2525);
+  static const Color purpleColor=Color(0xff6605b6);
   static const Color buttonColor=Color(0xff02807e);
   static const Color circleColor=Color(0xff2f2b44);
   static const Color iconViewColor=Color(0xff969696);

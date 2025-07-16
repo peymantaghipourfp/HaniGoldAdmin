@@ -38,7 +38,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
       return Scaffold(
         appBar:CustomAppbar1(
           title: 'ایجاد سفارش جدید', onBackTap: () {
-            Get.back();
+            Get.toNamed('/home');
             orderCreateController.clearList(); }),
         drawer: const AppDrawer(),
         body: Stack(
@@ -66,7 +66,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                           orderCreateController.isLoadingBalance.value==false ?
                           Center(child: CircularProgressIndicator(),)
                               :
-                          BalanceWidget(
+                          BalanceWidget(title: orderCreateController.selectedAccount.value?.name,
                             listBalance: orderCreateController.balanceList,
                             size: 400,),
                         ),
@@ -443,8 +443,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                   Flexible(fit: FlexFit.loose,
                                                     child: TextFormField(
                                                       readOnly: !orderCreateController.manualPriceChecked.value,
-                                                      controller: orderCreateController
-                                                          .priceController,
+                                                      controller: orderCreateController.priceController,
                                                       style: AppTextStyle.labelText,
                                                       keyboardType: TextInputType
                                                           .number,
@@ -453,9 +452,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         String cleanedValue = value
                                                             .replaceAll(',', '');
                                                         if (cleanedValue.isNotEmpty) {
-                                                          orderCreateController
-                                                              .priceController.text =
-                                                              cleanedValue
+                                                          orderCreateController.priceController.text = cleanedValue
                                                                   .toPersianDigit()
                                                                   .seRagham();
                                                           orderCreateController
@@ -493,6 +490,22 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 ],
                                               ),
                                             ),
+                                            // قیمت به گرم
+                                            SizedBox(height: 3),
+                                            orderCreateController.selectedItem.value?.itemUnit?.name == 'گرم' ?
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  ' قیمت به گرم: ',
+                                                  style: AppTextStyle
+                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                Text(orderCreateController.priceTemp.value.seRagham(separator: ','),
+                                                  style: AppTextStyle.bodyText
+                                                      .copyWith(color: AppColor
+                                                      .primaryColor.withOpacity(0.5)),)
+                                              ],
+                                            ) :
+                                                SizedBox(),
                                             // گرم/عدد
                                             Container(
                                               padding: EdgeInsets.only(
@@ -726,6 +739,27 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 ),
                                               ),
                                             ),
+                                            SizedBox(height: 3),
+                                            orderCreateController.selectedItem.value?.id==10 ||
+                                            orderCreateController.selectedItem.value?.id==14 ||
+                                            orderCreateController.selectedItem.value?.id==15 ||
+                                            orderCreateController.selectedItem.value?.id==16 ||
+                                            orderCreateController.selectedItem.value?.id==37 ||
+                                            orderCreateController.selectedItem.value?.id==38 ||
+                                            orderCreateController.selectedItem.value?.id==39  ?
+                                            Row(
+                                              children: [
+                                                Text(
+                                                  ' وزن: ',
+                                                  style: AppTextStyle
+                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                Text("${orderCreateController.selectedItem.value?.w750} گرم ",
+                                                  style: AppTextStyle.bodyText
+                                                      .copyWith(color: AppColor
+                                                      .primaryColor.withOpacity(0.5)),)
+                                              ],
+                                            ) :
+                                            SizedBox(),
                                             orderCreateController
                                                 .selectedBuySell.value?.name ==
                                                 'فروش به کاربر' ?
@@ -1205,7 +1239,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                               orderCreateController.isLoadingBalance.value==false ?
                                   Center(child: CircularProgressIndicator(),)
                                   :
-                          BalanceWidget(
+                          BalanceWidget(title: orderCreateController.selectedAccount.value?.name,
                             listBalance: orderCreateController.balanceList,
                             size: 400,),
                         ),

@@ -617,13 +617,15 @@ class WithdrawController extends GetxController{
     try{
       isLoading.value = true;
       var response=await withdrawRepository.updateRequestDateWithdraw(withdrawId: withdrawId);
-      if(response!= null){
-        WithdrawModel updateDateResponse=WithdrawModel.fromJson(response);
-        Get.snackbar(updateDateResponse.infos!.first['title'],updateDateResponse.infos!.first["description"],
-            titleText: Text(updateDateResponse.infos!.first['title'],
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(updateDateResponse.infos!.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+      WithdrawModel updateDateResponse=WithdrawModel.fromJson(response);
+      if(response.isNotEmpty){
+        if(updateDateResponse.infos!=null){
+          Get.snackbar(updateDateResponse.infos!.first['title'],updateDateResponse.infos!.first["description"],
+              titleText: Text(updateDateResponse.infos!.first['title'],
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(updateDateResponse.infos!.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        }
         getWithdrawListPager();
       }
     }catch(e){
@@ -684,8 +686,52 @@ class WithdrawController extends GetxController{
     searchedAccounts.assignAll(accountList);
   }
 
+
+  //فایل اکسل
+  Future<void> getWithdrawExcel() async{
+    try{
+      EasyLoading.show(status: 'در حال دریافت فایل اکسل...');
+      isLoading.value = true;
+
+      Uint8List excelBytes = await withdrawRepository.getWithdrawExcel(
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      );
+
+      String fileName = 'withdraw_${DateTime.now().toIso8601String()}.xlsx';
+
+      if (kIsWeb) {
+        final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', fileName)
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: fileName,
+          bytes: excelBytes,
+          ext: 'xlsx',
+          mimeType: MimeType.microsoftExcel,
+        );
+      }
+      EasyLoading.showSuccess('فایل اکسل با موفقیت دانلود شد');
+    }
+    catch(e){
+      EasyLoading.dismiss();
+      state.value = PageState.err;
+      errorMessage.value = "خطا در دریافت فایل اکسل: ${e.toString()}";
+      Get.snackbar(
+        'خطا',
+        'خطا در دریافت فایل اکسل',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }finally{
+      isLoading.value=false;
+    }
+  }
+
   // خروجی اکسل
-  Future<void> exportToExcel() async {
+  /*Future<void> exportToExcel() async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
       final excel = Excel.createExcel();
@@ -757,7 +803,7 @@ class WithdrawController extends GetxController{
       Get.snackbar('خطا', 'خطا در دریافت فایل اکسل: ${e.toString()}');
       print(e.toString());
     }
-  }
+  }*/
 
   String getStatusText(int status) {
     switch (status) {

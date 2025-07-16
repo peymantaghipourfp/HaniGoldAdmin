@@ -31,7 +31,7 @@ class AuthController extends GetxController{
         Get.snackbar(fetch.infos.first["title"].toString(), fetch.infos.first["description"].toString());
       }
       if(fetch.id!=0){
-      Get.toNamed('/home');
+      Get.offNamed('/home');
         box.write('id', fetch.user.id);
         box.write('mobile', mobileController.text);
 

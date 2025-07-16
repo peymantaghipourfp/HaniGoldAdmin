@@ -123,6 +123,12 @@ class InventoryController extends GetxController{
         final bName = b.account?.name ?? '';
         return ascending ? aName.compareTo(bName) : bName.compareTo(aName);
       });
+    }else if (columnIndex == 3) { // Name column
+      inventoryList.sort((a, b) {
+        final aRecipientName = a.recipient ?? '';
+        final bRecipientName = b.recipient ?? '';
+        return ascending ? aRecipientName.compareTo(bRecipientName) : bRecipientName.compareTo(aRecipientName);
+      });
     }
   }
 

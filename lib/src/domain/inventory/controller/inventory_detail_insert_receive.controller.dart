@@ -99,7 +99,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
       int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
       double quantity = double.tryParse(quantityController.text=="" ? "0" : quantityController.text.toEnglishDigit()) ?? 0;
       double w750 = (carat * quantity)/750;
-      weight750Controller.text = w750.toString().toPersianDigit();
+      weight750Controller.text = w750.toStringAsFixed(2).toPersianDigit();
     } else {
       weight750Controller.clear();
     }
@@ -107,7 +107,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
   void changeSelectedWalletAccount(WalletModel? newValue) {
     selectedWalletAccount.value = newValue;
     if (newValue?.item?.itemUnit?.id == 2) {
-      caratController.text = '750';
+      caratController.text = '';
       updateW750();
     } else {
       weight750Controller.clear();
@@ -159,7 +159,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
   Future<void> fetchAccountList() async{
     try{
       state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.getAccountList("1");
+      var fetchedAccountList=await accountRepository.getAccountList("");
       accountList.assignAll(fetchedAccountList);
       searchedAccounts.assignAll(fetchedAccountList);
       state.value=PageState.list;
@@ -196,7 +196,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
         state.value = PageState.list;
         return;
       }
-      final results = await accountRepository.searchAccountList(name,"1");
+      final results = await accountRepository.searchAccountList(name,"");
       searchedAccounts.assignAll(results);
       state.value = searchedAccounts.isEmpty ? PageState.empty : PageState.list;
     } catch (e) {

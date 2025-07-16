@@ -746,40 +746,46 @@ class _InventoryDetailUpdateReceiveViewState
                                               ):
                                               SizedBox.shrink(),
 
-                                              // شماره قبض
-                                              Container(
-                                                padding: EdgeInsets.only(
-                                                    bottom: 3, top: 5),
-                                                child: Text(
-                                                  'شماره قبض',
-                                                  style: AppTextStyle.labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop
-                                                          ? 12
-                                                          : 10),
-                                                ),
-                                              ),
-                                              // شماره قبض
-                                              Container(
-                                                height: 40,
-                                                padding: EdgeInsets.only(
-                                                    bottom: 5),
-                                                child:
-                                                TextFormField(
-                                                  controller: inventoryUpdateReceiveController
-                                                      .receiptNumberController,
-                                                  style: AppTextStyle.labelText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
-                                                  ),
-                                                ),
-                                              ),
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                                                  Column(
+                                                    children: [
+                                                      // شماره قبض
+                                                      Container(
+                                                        padding: EdgeInsets.only(
+                                                            bottom: 3, top: 5),
+                                                        child: Text(
+                                                          'شماره قبض',
+                                                          style: AppTextStyle.labelText
+                                                              .copyWith(
+                                                              fontSize: isDesktop
+                                                                  ? 12
+                                                                  : 10),
+                                                        ),
+                                                      ),
+                                                      // شماره قبض
+                                                      Container(
+                                                        height: 40,
+                                                        padding: EdgeInsets.only(
+                                                            bottom: 5),
+                                                        child:
+                                                        TextFormField(
+                                                          controller: inventoryUpdateReceiveController
+                                                              .receiptNumberController,
+                                                          style: AppTextStyle.labelText,
+                                                          decoration: InputDecoration(
+                                                            border: OutlineInputBorder(
+                                                              borderRadius: BorderRadius
+                                                                  .circular(10),
+                                                            ),
+                                                            filled: true,
+                                                            fillColor: AppColor
+                                                                .textFieldColor,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ):
+                                                  SizedBox.shrink(),
                                               // تاریخ
                                               Container(
                                                 padding: EdgeInsets.only(

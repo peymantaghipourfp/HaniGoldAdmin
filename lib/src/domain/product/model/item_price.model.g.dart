@@ -19,6 +19,7 @@ ItemPriceModel _$ItemPriceModelFromJson(Map<String, dynamic> json) =>
       attribute: json['attribute'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
+      itemUnitId: (json['itemUnitId'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$ItemPriceModelToJson(ItemPriceModel instance) =>
@@ -34,4 +35,5 @@ Map<String, dynamic> _$ItemPriceModelToJson(ItemPriceModel instance) =>
       'attribute': instance.attribute,
       'recId': instance.recId,
       'infos': instance.infos,
+      'itemUnitId': instance.itemUnitId,
     };

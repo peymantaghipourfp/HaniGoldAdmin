@@ -32,6 +32,8 @@ class ItemPriceModel {
   final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "itemUnitId")
+  final int? itemUnitId;
 
   ItemPriceModel({
     required this.itemId,
@@ -45,6 +47,7 @@ class ItemPriceModel {
     required this.attribute,
     required this.recId,
     required this.infos,
+    required this.itemUnitId,
   });
 
   factory ItemPriceModel.fromJson(Map<String, dynamic> json) => _$ItemPriceModelFromJson(json);

@@ -38,7 +38,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
       return Scaffold(
         appBar:
         CustomAppbar1(
-          title: 'ایجاد درخواست برداشت', onBackTap: () => Get.back(),),
+          title: 'ایجاد درخواست برداشت', onBackTap: () => Get.toNamed('/home'),),
         drawer: const AppDrawer(),
         body: Stack(
           children: [

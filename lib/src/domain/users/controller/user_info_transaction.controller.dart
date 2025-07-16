@@ -62,6 +62,7 @@ class UserInfoTransactionController extends GetxController{
     sortIndex.value= index;
     update();
   }
+
   void isChangePage(int index) {
     currentPage.value = index * 10 - 10;
     itemsPerPage.value = index * 10;
@@ -76,7 +77,6 @@ class UserInfoTransactionController extends GetxController{
   void onInit() {
     super.onInit();
     getListTransactionInfoPager();
-
   }
 
   // void goToPage(int page) {
@@ -150,4 +150,5 @@ class UserInfoTransactionController extends GetxController{
     }finally{
     }
   }
+
 }

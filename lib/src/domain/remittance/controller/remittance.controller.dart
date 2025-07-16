@@ -707,6 +707,51 @@ Timer? debounceP;
     return null;
   }
 
+
+  //فایل اکسل
+  Future<void> getRemittanceExcel() async{
+    try{
+      EasyLoading.show(status: 'در حال دریافت فایل اکسل...');
+      isLoading.value = true;
+
+      Uint8List excelBytes = await remittanceRepository.getRemittanceExcel(
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      );
+
+      String fileName = 'remittance_${DateTime.now().toIso8601String()}.xlsx';
+
+      if (kIsWeb) {
+        final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', fileName)
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: fileName,
+          bytes: excelBytes,
+          ext: 'xlsx',
+          mimeType: MimeType.microsoftExcel,
+        );
+      }
+      EasyLoading.showSuccess('فایل اکسل با موفقیت دانلود شد');
+    }
+    catch(e){
+      EasyLoading.dismiss();
+      state.value = PageState.err;
+      errorMessage.value = "خطا در دریافت فایل اکسل: ${e.toString()}";
+      Get.snackbar(
+        'خطا',
+        'خطا در دریافت فایل اکسل',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }finally{
+      isLoading.value=false;
+    }
+  }
+
+
   // خروجی اکسل
   Future<void> exportToExcel() async {
     try {

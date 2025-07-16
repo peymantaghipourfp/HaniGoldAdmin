@@ -138,12 +138,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                         columns: buildDataColumnsActive(),
 
                                                         rows: buildDataRowsActive(context),
-                                                    dataRowMaxHeight: 50,
+                                                    dataRowMaxHeight: 65,
                                                     //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                                     //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                                     headingRowHeight: 40,
-                                                    columnSpacing: 90,
-                                                    horizontalMargin: 30,
+                                                    columnSpacing: 100,
+                                                    horizontalMargin: 50,
                                                         ),
                                                   ],
                                                 ),
@@ -170,12 +170,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                     columns: buildDataColumnsInactive(),
 
                                                     rows: buildDataRowsInactive(context),
-                                                    dataRowMaxHeight: 50,
+                                                    dataRowMaxHeight: 65,
                                                     //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                                     //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                                     headingRowHeight: 40,
-                                                    columnSpacing: 90,
-                                                    horizontalMargin: 30,
+                                                    columnSpacing: 100,
+                                                    horizontalMargin: 50,
                                                   ),
                                                 ],
                                               ),
@@ -686,7 +686,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         DataCell(
           Text(
             textAlign: TextAlign.center,
-            (((activeList.price?.toDouble() ?? 0)-(activeList.differentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+            (((activeList.mesghalPrice?.toDouble() ?? 0)-(activeList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
             style: AppTextStyle.bodyText,
           ),
         ),
@@ -694,7 +694,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         DataCell(
               () {
             String price = activeList
-                .price
+                .mesghalPrice
                 .toString()
                 .replaceAll(
                 RegExp(
@@ -743,11 +743,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               price2: price2,
               price3: price3,
               price4: price4,
-              different: activeList
-                  .differentPrice ??
+              mesghalDifferent: activeList
+                  .mesghalDifferentPrice ??
                   0,
               id: activeList
                   .id!,
+              itemUnitId: activeList.itemUnit?.id ?? 0,
 
             );
           }(),
@@ -756,7 +757,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         DataCell(
               () {
             String differentPrice = activeList
-                .differentPrice
+                .mesghalDifferentPrice
                 .toString()
                 .replaceAll(
                 RegExp(
@@ -803,10 +804,11 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               differentPrice1: differentPrice1,
               differentPrice2: differentPrice2,
               differentPrice3: differentPrice3,
-              price: activeList
-                  .price ?? 0,
+              mesghalPrice: activeList
+                  .mesghalPrice ?? 0,
               id: activeList
                   .id!,
+              itemUnitId: activeList.itemUnit?.id ?? 0,
             );
           }(),
         ),
@@ -1051,29 +1053,38 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         .map((inActiveList) => DataRow(
       cells: [
         DataCell(
-          Text(
-            textAlign: TextAlign
-                .center,
-            "${inActiveList
-                .name}",
-            style: AppTextStyle
-                .bodyTextBold,
+          Row(
+            children: [
+              inActiveList.icon!=null ?
+              Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${inActiveList.icon}',
+                width: 30,
+                height: 30,) :
+              SvgPicture.asset(
+                'assets/svg/gold.svg',
+                width: 25,
+                height: 25,),
+              SizedBox(width: 5,),
+              Text(
+                textAlign: TextAlign
+                    .center,
+                "${inActiveList.name}",
+                style: AppTextStyle.bodyText,
+              ),
+            ],
           ),
         ),
         DataCell(
           Text(
-            textAlign: TextAlign
-                .center,
-            (((inActiveList.price?.toDouble() ?? 0)-(inActiveList.differentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
-            style: AppTextStyle
-                .bodyTextBold,
+            textAlign: TextAlign.center,
+            (((inActiveList.mesghalPrice?.toDouble() ?? 0)-(inActiveList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+            style: AppTextStyle.bodyText,
           ),
         ),
         // price
         DataCell(
               () {
             String price = inActiveList
-                .price.toString()
+                .mesghalPrice.toString()
                 .replaceAll(
                 RegExp(
                     r'[^0-9]'),
@@ -1119,11 +1130,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               price2: price2,
               price3: price3,
               price4: price4,
-              different: inActiveList
-                  .differentPrice ??
+              mesghalDifferent: inActiveList
+                  .mesghalDifferentPrice ??
                   0,
               id: inActiveList
                   .id!,
+              itemUnitId: inActiveList.itemUnit?.id ?? 0,
 
             );
           }(),
@@ -1132,7 +1144,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         DataCell(
               () {
             String differentPrice = inActiveList
-                .differentPrice
+                .mesghalDifferentPrice
                 .toString()
                 .replaceAll(
                 RegExp(
@@ -1176,10 +1188,11 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               differentPrice1: differentPrice1,
               differentPrice2: differentPrice2,
               differentPrice3: differentPrice3,
-              price: inActiveList
-                  .price ?? 0,
+              mesghalPrice: inActiveList
+                  .mesghalPrice ?? 0,
               id: inActiveList
                   .id!,
+              itemUnitId: inActiveList.itemUnit?.id ?? 0,
             );
           }(),
         ),

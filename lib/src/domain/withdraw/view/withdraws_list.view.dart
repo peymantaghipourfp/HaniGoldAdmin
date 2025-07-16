@@ -415,7 +415,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                               shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                   borderRadius: BorderRadius.circular(5)))),
                                                           onPressed: () async {
-                                                            withdrawController.exportToExcel();
+                                                            withdrawController.getWithdrawExcel();
                                                             Get.back();
                                                           },
                                                           child: withdrawController.isLoading.value?
@@ -1267,7 +1267,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                         shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                             borderRadius: BorderRadius.circular(5)))),
                                                                     onPressed: () async {
-                                                                      withdrawController.exportToExcel();
+                                                                      withdrawController.getWithdrawExcel();
                                                                       Get.back();
                                                                     },
                                                                     child: withdrawController.isLoading.value?
@@ -1895,7 +1895,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                     dataRowMaxHeight: double.infinity,
                                                     dividerThickness: 0.3,
                                                     border: TableBorder.symmetric(
-                                                        inside: BorderSide(color: AppColor.textColor,width: 0.3),
+                                                        inside: BorderSide(color: AppColor.iconViewColor,width: 0.3),
                                                         outside: BorderSide(color: AppColor.textColor,width: 0.3),
                                                         borderRadius: BorderRadius.circular(8)
                                                     ),
@@ -1961,31 +1961,39 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                 //  تاریخ
                                                 Row(
                                                   mainAxisAlignment: MainAxisAlignment
-                                                      .center,
+                                                      .spaceEvenly,
                                                   children: [
-                                                    Text(withdraws.status == 0
-                                                        ?
-                                                    withdraws.requestDate
-                                                        ?.toPersianDate(
-                                                      twoDigits: true,
-                                                      showTime: true,
-                                                      timeSeprator: '-',) ??
-                                                        'نامشخص'
-                                                        :
-                                                    withdraws.confirmDate
-                                                        ?.toPersianDate(
-                                                      twoDigits: true,
-                                                      showTime: true,
-                                                      timeSeprator: '-',) ??
-                                                        'نامشخص'
-                                                      ,
-                                                      style:
-                                                      AppTextStyle.bodyText,
-                                                    ),
+                                                        Text(withdraws.status == 0
+                                                            ?
+                                                        withdraws.requestDate
+                                                            ?.toPersianDate(
+                                                          twoDigits: true,
+                                                          showTime: true,
+                                                          timeSeprator: '-',) ??
+                                                            'نامشخص'
+                                                            :
+                                                        withdraws.confirmDate
+                                                            ?.toPersianDate(
+                                                          twoDigits: true,
+                                                          showTime: true,
+                                                          timeSeprator: '-',) ??
+                                                            'نامشخص'
+                                                          ,
+                                                          style:
+                                                          AppTextStyle.bodyText,
+                                                        ),
+                                                        Row(mainAxisAlignment:MainAxisAlignment.end ,
+                                                          children: [
+                                                            Text('رفرنس: ' , style: AppTextStyle.labelText,),
+                                                            withdraws.refrenceId!=null ?
+                                                            Icon(Icons.check,color: AppColor.primaryColor,size: 20,) :
+                                                            Icon(Icons.close,color: AppColor.accentColor,size: 20,)
+                                                          ],
+                                                        )
                                                   ],
                                                 ),
                                                 SizedBox(height: 5,),
-                                                SizedBox(width: 100,
+                                                SizedBox(width: 250,
                                                   child: Divider(
                                                     height: 1, color: AppColor
                                                       .dividerColor,),),
@@ -2678,11 +2686,11 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                     children: [
 
                                                                       // تاریخ و وضعیت
-                                                                      /*Row(
+                                                                      Row(
                                                                         mainAxisAlignment: MainAxisAlignment
                                                                             .spaceBetween,
                                                                         children: [
-                                                                          Row(
+                                                                          /*Row(
                                                                             children: [
                                                                               Text(
                                                                                   'تاریخ:',
@@ -2713,7 +2721,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                     .bodyText,
                                                                               ),
                                                                             ],
-                                                                          ),
+                                                                          ),*/
 
                                                                           // وضعیت
                                                                           Card(
@@ -2761,7 +2769,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                           ),
                                                                         ],
                                                                       ),
-                                                                      SizedBox(height: 5,),*/
+                                                                      SizedBox(height: 5,),
                                                                       // نام کاربر و مبلغ کل
                                                                       Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                                         children: [
@@ -2847,7 +2855,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                         ],
                                                                       ) : Text(""),*/
                                                                       //  تعیین وضعیت
-                                                                      /*Container(
+                                                                      Container(
                                                                         alignment: Alignment
                                                                             .centerLeft,
                                                                         padding: const EdgeInsets
@@ -2999,7 +3007,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                             ),
                                                                           ),
                                                                         ),
-                                                                      ),*/
+                                                                      ),
 
                                                                       SizedBox(
                                                                         height: 4,),
@@ -3309,6 +3317,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
           child: Text('مبلغ مانده', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('مبلغ واریز شده', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('رفرنس', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('مبلغ تایید نشده', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -3326,7 +3336,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
     groupedWithdraws.forEach((date, withdraws) {
       rows.add(
         DataRow(
-          color: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
+          color: WidgetStatePropertyAll(AppColor.iconViewColor),
           cells: [
             DataCell(SizedBox.shrink()),
             DataCell(
@@ -3337,12 +3347,12 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                       children: [
                         Text(date,
                           style: AppTextStyle.bodyText.copyWith(
-                            color: AppColor.dividerColor,
+                            color: Color(0xff6A1B9A), fontWeight: FontWeight.bold,fontSize: 14
                           ),
                         ),
                         Text(withdraws.first.dateMiladiToString ?? "",
                           style: AppTextStyle.bodyText.copyWith(
-                            color: AppColor.dividerColor,
+                            color: Color(0xff6A1B9A), fontWeight: FontWeight.bold,fontSize: 14
                           ),
                         ),
                       ],
@@ -3352,17 +3362,55 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
               ),
             ),
             DataCell(
-                Text("( ${withdraws.first.totalAmountPerDay.toString().seRagham(separator: ',')} )",
-                  style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Text('ج کل',style: AppTextStyle.labelText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold)),
+                    Text(" ( ${withdraws.first.totalAmountPerDay.toString().seRagham(separator: ',')} )",
+                      style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold,fontSize: 13),
+                    ),
+                  ],
                 ),
             ),
             DataCell(
-              Text("( ${withdraws.first.totalPaidAmountPerDay.toString().seRagham(separator: ',')} )",
-                style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+              Row(
+                children: [
+                  Text('ج واریز',style: AppTextStyle.labelText.copyWith(color: Color(0xff2E7D32),fontWeight: FontWeight.bold)),
+                  Text(" ( ${withdraws.first.totalPaidAmountPerDay.toString().seRagham(separator: ',')} )",
+                    style: AppTextStyle.bodyText.copyWith(color: Color(0xff2E7D32),fontWeight: FontWeight.bold,fontSize: 14),
+                  ),
+                ],
               ),
             ),
-            DataCell(SizedBox.shrink()),
-            DataCell(SizedBox.shrink()),
+            DataCell(
+              Row(
+                children: [
+                  Text('ج تقسیم',style: AppTextStyle.labelText.copyWith(color: Color(0xffdc4b00),fontWeight: FontWeight.bold)),
+                  Text(" ( ${withdraws.first.totalDepositRequestAmountPerDay.toString().seRagham(separator: ',')} )",
+                    style: AppTextStyle.bodyText.copyWith(color: Color(0xffdc4b00),fontWeight: FontWeight.bold,fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            DataCell(
+              Row(
+                children: [
+                  Text('تقسیم شده واریز شده',style: AppTextStyle.labelText.copyWith(color: Color(0xff1B5E20),fontWeight: FontWeight.bold)),
+                  Text(" ( ${withdraws.first.totalUndepositedAmountPerDay.toString().seRagham(separator: ',')} )",
+                    style: AppTextStyle.bodyText.copyWith(color: Color(0xff1B5E20),fontWeight: FontWeight.bold,fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
+            DataCell(
+              Row(
+                children: [
+                  Text('مانده بدون تقسیم',style: AppTextStyle.labelText.copyWith(color: Color(0xffC62828),fontWeight: FontWeight.bold)),
+                  Text(" ( ${withdraws.first.totalUndividedAmountPerDay.toString().seRagham(separator: ',')} )",
+                    style: AppTextStyle.bodyText.copyWith(color: Color(0xffC62828),fontWeight: FontWeight.bold,fontSize: 13),
+                  ),
+                ],
+              ),
+            ),
             DataCell(SizedBox.shrink()),
             DataCell(SizedBox.shrink()),
             DataCell(SizedBox.shrink()),
@@ -3476,6 +3524,13 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                     child: Text(
                       "${withdraw.paidAmount?.toInt().toString().seRagham(separator: ',')} ریال",
                       style: AppTextStyle.bodyText,),
+                  )),
+              // رفرنس
+              DataCell(
+                  Center(
+                    child:withdraw.refrenceId!=null ?
+                    Icon(Icons.check,color: AppColor.primaryColor,size: 20,) :
+                    Icon(Icons.close,color: AppColor.accentColor,size: 20,)
                   )),
               // مبلغ تایید نشده
               /*DataCell(
@@ -3675,7 +3730,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                   child: IconButton(
                     icon: Icon(
                         isExpanded ? Icons.expand_less : Icons.expand_more),
-                    color: isExpanded ? AppColor.accentColor : AppColor.primaryColor,
+                    color: isExpanded ? AppColor.accentColor : AppColor.secondary2Color,
                     onPressed: () {
                       final index = withdrawController.withdrawList.indexOf(withdraw);
                       withdrawController.expandAndScrollHorizontal(index, withdraw.id!);
@@ -3971,11 +4026,11 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                               children: [
 
                                 // تاریخ و وضعیت
-                                /*Row(
+                                Row(
                                   mainAxisAlignment: MainAxisAlignment
                                       .spaceBetween,
                                   children: [
-                                    Row(
+                                    /*Row(
                                       children: [
                                         Text(
                                             'تاریخ:',
@@ -4006,7 +4061,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                               .bodyText,
                                         ),
                                       ],
-                                    ),
+                                    ),*/
 
                                     // وضعیت
                                     Card(
@@ -4053,7 +4108,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                       ),
                                     ),
                                   ],
-                                ),*/
+                                ),
                                 SizedBox(
                                   height: 5,),
                                 // نام کاربر
@@ -4161,7 +4216,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                 ) :
                                 Text(""),*/
                                 //  تعیین وضعیت
-                                /*Container(
+                                Container(
                                   alignment: Alignment
                                       .centerLeft,
                                   padding: const EdgeInsets
@@ -4313,7 +4368,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                       ),
                                     ),
                                   ),
-                                ),*/
+                                ),
 
                                 SizedBox(
                                   height: 4,),

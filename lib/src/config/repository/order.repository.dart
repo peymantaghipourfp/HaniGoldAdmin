@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import '../../domain/order/model/list_order.model.dart';
 import '../network/error/network.error.dart';
+import 'dart:typed_data';
 
 class OrderRepository{
   Dio orderDio=Dio();
@@ -127,6 +128,49 @@ class OrderRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<Uint8List> getOrderExcel({
+    required String startDate,
+    required String endDate
+}) async{
+    try{
+      Map<String, dynamic> options =
+      {
+        "options" : { "order" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Orders"
+                  }
+              ]
+            }
+          ],
+          "orderBy": "Orders.date",
+          "orderByType": "desc",
+          "StartIndex": 1,
+          "ToIndex": 100000
+        }
+        }
+      };
+      final response=await orderDio.post(
+          'Order/getExcel',
+          data: options,
+          options: Options(responseType: ResponseType.bytes));
+      print("request getOrderExcel : $options" );
+      print("response getOrderExcel : ${response.data}" );
+      return Uint8List.fromList(response.data);
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 
   Future<OrderModel> getOneOrder(int orderId)async{
     try {
@@ -412,7 +456,7 @@ class OrderRepository{
       print('Status Code getBalanceList: ${response.statusCode}');
       print("response getBalanceList : ${response.data}" );
       List<dynamic> data=response.data;
-      return data.map((totalBalance)=>TotalBalanceModel.fromJson(totalBalance)).toList();
+      return data.isNotEmpty ? data.map((totalBalance)=>TotalBalanceModel.fromJson(totalBalance)).toList() : [];
 
     }
     catch(e){

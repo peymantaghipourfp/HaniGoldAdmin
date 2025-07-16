@@ -1954,7 +1954,6 @@ class _InventoryListViewState extends State<InventoryListView> {
                                           .spaceEvenly,
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-
                                         ListTile(
                                           title: Column(
                                             children: [
@@ -2007,20 +2006,41 @@ class _InventoryListViewState extends State<InventoryListView> {
                                               // نام ثبت کننده
                                               Row(
                                                 mainAxisAlignment: MainAxisAlignment
-                                                    .start,
+                                                    .spaceBetween,
                                                 children: [
-
-                                                  Text('نام ثبت کننده:  ',
-                                                    style: AppTextStyle
-                                                        .labelText,),
-                                                  SizedBox(height: 2,),
-                                                  Text(inventories.account
-                                                      ?.name ?? "",
-                                                    style: AppTextStyle
-                                                        .bodyText,),
-
+                                                  Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [
+                                                      Text('نام ثبت کننده:  ',
+                                                        style: AppTextStyle
+                                                            .labelText,),
+                                                      SizedBox(height: 2,),
+                                                      Text(inventories.account
+                                                          ?.name ?? "",
+                                                        style: AppTextStyle
+                                                            .bodyText,),
+                                                    ],
+                                                  ),
+                                                  Row(
+                                                    children: [
+                                                      Text('ضمانت کاربر: ',style: AppTextStyle.labelText,),
+                                                      Center(
+                                                        child:
+                                                        inventories.type==0 ? Text('ندارد',style: AppTextStyle.labelText,) :
+                                                        inventories.confirmByAdmin==true ?
+                                                        SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                                                            colorFilter: ColorFilter.mode(
+                                                              AppColor.primaryColor,
+                                                              BlendMode.srcIn,
+                                                            )) :
+                                                        SvgPicture.asset('assets/svg/close-circle1.svg',
+                                                            colorFilter: ColorFilter.mode(
+                                                              AppColor.accentColor,
+                                                              BlendMode.srcIn,
+                                                            )),
+                                                      ),
+                                                    ],
+                                                  )
                                                 ],
-
                                               ),
                                               SizedBox(height: 12,),
                                               // آیکون ها
@@ -2758,6 +2778,14 @@ class _InventoryListViewState extends State<InventoryListView> {
       ),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('نام تحویل گیرنده', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            inventoryController.onSort(columnIndex, ascending);
+          }
+      ),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('محصول', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
@@ -2776,6 +2804,10 @@ class _InventoryListViewState extends State<InventoryListView> {
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('الصاق تصاویر', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),*/
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('ضمانت کاربر', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('نمایش تصاویر', style: AppTextStyle.labelText)),
@@ -2859,6 +2891,13 @@ class _InventoryListViewState extends State<InventoryListView> {
                 child: Text(inventory.account?.name ?? "",
                     style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor,fontWeight: FontWeight.normal,fontSize: 11)
 
+                ),
+              )),
+          // نام تحویل گیرنده
+          DataCell(
+              Center(
+                child: Text(inventory.recipient ?? "",
+                    style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor,fontWeight: FontWeight.normal,fontSize: 11)
                 ),
               )),
           // محصول
@@ -3021,6 +3060,23 @@ class _InventoryListViewState extends State<InventoryListView> {
                             .center,),
                   ),
                 ),
+              )),
+          // ضمانت کاربر
+          DataCell(
+              Center(
+                child:
+                    inventory.type==0 ? Text('ندارد',style: AppTextStyle.labelText,) :
+                inventory.confirmByAdmin==true ?
+                SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                    colorFilter: ColorFilter.mode(
+                      AppColor.primaryColor,
+                      BlendMode.srcIn,
+                    )) :
+                SvgPicture.asset('assets/svg/close-circle1.svg',
+                    colorFilter: ColorFilter.mode(
+                      AppColor.accentColor,
+                      BlendMode.srcIn,
+                    )),
               )),
           // الصاق تصاویر
           /*DataCell(
@@ -3272,8 +3328,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                               ),
                               TextButton(
                                 onPressed: () =>
-                                    Get
-                                        .back(),
+                                    Get.back(),
                                 child: Text(
                                   "بستن",
                                   style: AppTextStyle
@@ -3584,8 +3639,7 @@ class _InventoryListViewState extends State<InventoryListView> {
           ),
           child: Column(
             children: [
-              buildInventoryDetail(inventory),
-              Spacer(),
+              Expanded(child: buildInventoryDetail(inventory)),
               TextButton(
                 onPressed: () =>
                     Get.back(),
@@ -3626,7 +3680,6 @@ class _InventoryListViewState extends State<InventoryListView> {
                   ),
                   child: ListView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
                     itemCount: inventoryController.getOneInventory.value?.inventoryDetails?.length,
                     itemBuilder: (context,
                         index) {

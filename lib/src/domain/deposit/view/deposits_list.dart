@@ -352,7 +352,7 @@ class DepositsListView extends StatelessWidget {
                                                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                         borderRadius: BorderRadius.circular(5)))),
                                                                 onPressed: () async {
-                                                                  depositController.exportToExcel();
+                                                                  depositController.getDepositExcel();
                                                                   Get.back();
                                                                 },
                                                                 child: depositController.isLoading.value?
@@ -1226,7 +1226,7 @@ class DepositsListView extends StatelessWidget {
                                                                                           shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                                               borderRadius: BorderRadius.circular(5)))),
                                                                                       onPressed: () async {
-                                                                                        depositController.exportToExcel();
+                                                                                        depositController.getDepositExcel();
                                                                                         Get.back();
                                                                                       },
                                                                                       child: depositController.isLoading.value?
@@ -2599,7 +2599,7 @@ class DepositsListView extends StatelessWidget {
                           : AppColor.textColor,
                     ),
                   ),
-                  /*SizedBox(height: 6,),
+                  SizedBox(height: 6,),
                   Container(
                     padding: const EdgeInsets
                         .symmetric(
@@ -2625,7 +2625,7 @@ class DepositsListView extends StatelessWidget {
                               deposit.id!,
                               value, 0);
                         }
-                        depositController.fetchDepositList();
+                        depositController.getDepositListPager();
                       },
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius
@@ -2716,7 +2716,7 @@ class DepositsListView extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 6,),
-                  deposit.status==2 ?
+                 /* deposit.status==2 ?
                   Wrap(
                     children: [
                       Text('به دلیل ',

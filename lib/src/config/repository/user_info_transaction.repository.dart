@@ -15,6 +15,9 @@ import '../../domain/users/model/list_transaction_info.model.dart';
 import '../../domain/users/model/list_transaction_info_item.model.dart';
 import '../../domain/users/model/state_item.model.dart';
 import '../../domain/users/model/transaction_info_item.model.dart';
+import 'dart:typed_data';
+
+import '../../domain/users/model/transaction_info_item_list_pager.model.dart';
 
 class UserInfoTransactionRepository{
 
@@ -63,7 +66,7 @@ class UserInfoTransactionRepository{
     }
   }
 
-  Future<List<TransactionInfoItemModel>> getTransactionInfoList({required int startIndex, required int toIndex,required String accountId,})async{
+  Future<TransactionInfoItemListPagerModel> getTransactionInfoListPager({required int startIndex, required int toIndex,required String accountId,})async{
     try{
       Map<String , dynamic> options={
         "options" : { "transaction" :{
@@ -87,11 +90,11 @@ class UserInfoTransactionRepository{
           "ToIndex": toIndex
         }}
       };
-      final response=await userInfoTransactionDio.post('Transaction/get',data: options);
-      print("request getTransactionInfoList : $options" );
-      print("response getTransactionInfoList : ${response.data}" );
-      List<dynamic> data=response.data;
-      return data.map((transaction)=>TransactionInfoItemModel.fromJson(transaction)).toList();
+      final response=await userInfoTransactionDio.post('Transaction/getWrapper',data: options);
+      print("request getTransactionInfoListPager : $options" );
+      print("response getTransactionInfoListPager : ${response.data}" );
+
+      return TransactionInfoItemListPagerModel.fromJson(response.data);
 
     }
     catch(e){
@@ -150,7 +153,6 @@ class UserInfoTransactionRepository{
   Future<ListTransactionInfoModel> getListTransactionInfoListPager({required int startIndex, required int toIndex,required String name})async{
     try{
       Map<String , dynamic> options=
-          name!=""?
       {
         "options" : { "transaction" :{
              "Predicate": [
@@ -158,6 +160,7 @@ class UserInfoTransactionRepository{
               "innerCondition": 0,
               "outerCondition": 0,
               "filters": [
+                if(name!="")
                 {
                   "fieldName": "accountName",
                   "filterValue": name,
@@ -172,15 +175,7 @@ class UserInfoTransactionRepository{
           "StartIndex": startIndex,
           "ToIndex": toIndex
         }}
-      }:
-          {
-            "options" : { "transaction" :{
-              "orderBy": "AccountValues.CurrencyValue",
-              "orderByType": "DESC",
-              "StartIndex": startIndex,
-              "ToIndex": toIndex
-            }}
-          }
+      }
       ;
       final response=await userInfoTransactionDio.post('Transaction/getWalletBalanceWrapper',data: options);
       print("request getListTransactionInfoListPager : $options" );
@@ -189,6 +184,55 @@ class UserInfoTransactionRepository{
 
     }
     catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<Uint8List> getUserInfoTransactionDetailExcel({
+    int? accountId,
+    required String startDate,
+    required String endDate
+}) async{
+    try{
+      Map<String, dynamic> options =
+      {
+        "options" : { "transaction" :{
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if (accountId != null)
+                  {
+                    "fieldName": "AccountId",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "at"
+                  },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "at"
+                  }
+              ]
+            }
+          ],
+          "orderBy": "at.Date",
+          "orderByType": "DESC",
+          "StartIndex": 1,
+          "ToIndex": 100000
+        }}
+      };
+      final response=await userInfoTransactionDio.post(
+          'Transaction/getExcel',
+          data: options,
+          options: Options(responseType: ResponseType.bytes));
+      print("request userInfoTransactionDetailExcel : $options" );
+      print("response userInfoTransactionDetailExcel : ${response.data}" );
+      return Uint8List.fromList(response.data);
+    }catch(e){
       throw ErrorException('خطا:$e');
     }
   }
