@@ -6,6 +6,7 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 
 import '../../domain/remittance/model/list_withdraw.model.dart';
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 import 'dart:typed_data';
 
@@ -14,7 +15,7 @@ class WithdrawRepository{
 
   WithdrawRepository(){
     withdrawDio.options.baseUrl=BaseUrl.baseUrl;
-
+    withdrawDio.interceptors.add(DioInterceptor());
   }
   Future<List<WithdrawModel>> getWithdrawList({
     required int startIndex,
@@ -77,6 +78,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
     required String startDate,
     required String endDate,
   required String name,
+  required String ownerName,
+  required String paidAmount,
 })async{
     try{
       Map<String , dynamic> options=
@@ -108,6 +111,20 @@ Future<ListWithdrawModel> getWithdrawListPager({
                       "filterType": 0,
                       "RefTable": "Account"
                     },
+                  if(ownerName!="")
+                    {
+                      "fieldName": "OwnerName",
+                      "filterValue": ownerName,
+                      "filterType": 0,
+                      "RefTable": "WithdrawRequest"
+                    },
+                  if(paidAmount!="")
+                    {
+                      "fieldName": "PaidAmount",
+                      "filterValue": paidAmount,
+                      "filterType": 0,
+                      "RefTable": "WithdrawRequest"
+                    },
               ],
             }
           ],
@@ -121,6 +138,69 @@ Future<ListWithdrawModel> getWithdrawListPager({
       print("request getWithdrawListPager : $options" );
       print("response getWithdrawListPager : ${response.data}" );
         return ListWithdrawModel.fromJson(response.data);
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+  Future<ListWithdrawModel> getWithdrawListPendingPager({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate,
+    required String name,
+  })async{
+    try{
+      Map<String , dynamic> options=
+      {
+        "options" : { "withdrawrequest" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(accountId != null)
+                  {
+                    "fieldName": "Id",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "Account"
+                  },
+                if(startDate!="")
+                  {
+                    "fieldName": "RequestDate",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "WithdrawRequest"
+                  },
+                if(name!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Account"
+                  },
+                {
+                  "fieldName": "Status",
+                  "filterValue": "0",
+                  "filterType": 5,
+                  "RefTable": "WithdrawRequest"
+                }
+              ],
+            }
+          ],
+          "orderBy": "withdrawrequest.requestDate",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      };
+      final response=await withdrawDio.post('WithdrawRequest/getWrapper',data: options);
+      print("request getWithdrawListPager : $options" );
+      print("response getWithdrawListPager : ${response.data}" );
+      return ListWithdrawModel.fromJson(response.data);
 
     }
     catch(e){
@@ -187,6 +267,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
     required String? description,
     required String date,
     required int status,
+    required String recId,
 })async{
     try{
       Map<String,dynamic> withdrawData={
@@ -238,7 +319,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "status":status,
         "attribute": "cus",
         "infos": [],
-        "description": description
+        "description": description,
+        "recId": recId,
       };
       print(withdrawData);
       
@@ -314,7 +396,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "cardNumber": cardNumber,
         "sheba": sheba,
         "amount": amount,
-        "undividedAmount": 100.000,
+        //"undividedAmount": 100.000,
         "requestDate": date,
         "confirmDate": date,
         "rowNum": 1,
@@ -400,6 +482,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
 
       var response=await withdrawDio.put('WithdrawRequest/updateStatus',data: withdrawData);
       print('Status Code updateStatusWithdraw: ${response.statusCode}');
+      print('Status Code updateStatusWithdraw: $withdrawData');
       print('Response Data updateStatusWithdraw: ${response.data}');
       return response.data;
     }

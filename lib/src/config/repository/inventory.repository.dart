@@ -10,6 +10,7 @@ import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 
 import '../../domain/inventory/model/inventory.model.dart';
 import '../../domain/inventory/model/list_inventory.model.dart';
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 
 class InventoryRepository {
@@ -17,6 +18,7 @@ class InventoryRepository {
   InventoryRepository(){
     inventoryDio.options.baseUrl=BaseUrl.baseUrl;
     inventoryDio.options.connectTimeout=Duration(seconds: 10);
+    inventoryDio.interceptors.add(DioInterceptor());
   }
 
   Future<List<InventoryModel>> getInventoryList({
@@ -92,35 +94,35 @@ class InventoryRepository {
               "filters": [
                 if(accountId != null)
                 {
-                  "fieldName": "Account_Id",
+                  "fieldName": "AccountId",
                   "filterValue": accountId.toString(),
                   "filterType": 5,
-                  "RefTable": "JoinedData"
+                  "RefTable": "Inventory"
                 },
                 if(startDate!="")
                   {
                     "fieldName": "Date",
                     "filterValue": "$startDate|$endDate",
                     "filterType": 25,
-                    "RefTable": "JoinedData"
+                    "RefTable": "Inventory"
                   },
                 if(name!="")
                 {
                   "fieldName": "Account_Name",
                   "filterValue": name,
                   "filterType": 0,
-                  "RefTable": "JoinedData"
+                  "RefTable": "Inventory"
                 },
               ],
             }
           ],
-          "orderBy": "JoinedData.Date",
+          "orderBy": "inventory.Date",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
         }}
       };
-      final response=await inventoryDio.post('Inventory/getWithFirstRowWrapper',data: options);
+      final response=await inventoryDio.post('Inventory/getWrapper',data: options);
       print("request getInventoryListPager : $options" );
       print("response getInventoryListPager : ${response.data}" );
       return ListInventoryModel.fromJson(response.data);
@@ -174,7 +176,8 @@ class InventoryRepository {
             "id":detail.laboratory?.id,
           },
           "stateMode": detail.stateMode,
-          "quantity": detail.quantity,
+          "quantity": detail.weight750,
+          "weight":detail.quantity,
           "impurity":detail.impurity,
           "weight750":detail.weight750,
           "carat":detail.carat,
@@ -446,13 +449,13 @@ class InventoryRepository {
     }
   }
 
-  Future<InventoryModel> getOneInventory(int inventoryId)async{
+  Future<List<InventoryDetailModel>> getInventoryDetail(int inventoryId)async{
     try{
-      final response=await inventoryDio.get('Inventory/getOne',queryParameters: {"id":inventoryId});
-      print('Status Code getOneInventory: ${response.statusCode}');
-      print('Response Data getOneInventory: ${response.data}');
-      Map<String, dynamic> data=response.data;
-      return InventoryModel.fromJson(data);
+      final response=await inventoryDio.get('Inventory/getInventoryDetail',queryParameters: {"id":inventoryId});
+      print('Status Code getInventoryDetail: ${response.statusCode}');
+      print('Response Data getInventoryDetail: ${response.data}');
+      List<dynamic> data=response.data;
+      return data.map((inventoryDetail)=>InventoryDetailModel.fromJson(inventoryDetail)).toList();
     }catch(e){
       throw ErrorException('خطا:$e');
     }
@@ -642,11 +645,11 @@ class InventoryRepository {
     required int startIndex,
     required int toIndex,
     required int itemId,
-    int? laboratoryId
+    //int? laboratoryId,
   })async{
     try{
       Map<String , dynamic> options=
-          laboratoryId != null ?
+          //laboratoryId != null ?
           {
             "options" : { "inventory" :{
               "Predicate": [
@@ -654,40 +657,41 @@ class InventoryRepository {
                   "innerCondition": 0,
                   "outerCondition": 0,
                   "filters": [
+                    //if (itemId != null)
                     {
                       "fieldName": "Id",
                       "filterValue": itemId.toString(),
                       "filterType": 5,
                       "RefTable": "Item"
                     },
-                      {
+                     /* {
                         "fieldName": "Id",
                         "filterValue": laboratoryId.toString(),
                         "filterType": 5,
                         "RefTable": "Laboratory"
-                      },
+                      },*/
                   ]
                 }
               ],
-              "orderBy": "FilteredDetails.Id",
-              "orderByType": "desc",
-              "StartIndex": startIndex,
-              "ToIndex": toIndex
-            }}
-          } :
-          {
-            "options" : { "inventory" :{
-              "orderBy": "FilteredDetails.Id",
+              "orderBy": "FilteredDetails.quantityRemainded",
               "orderByType": "desc",
               "StartIndex": startIndex,
               "ToIndex": toIndex
             }}
           };
+          //:
+          /*{
+            "options" : { "inventory" :{
+              "orderBy": "FilteredDetails.Quantity",
+              "orderByType": "desc",
+              "StartIndex": startIndex,
+              "ToIndex": toIndex
+            }}
+          };*/
       final response=await inventoryDio.post('Inventory/getForPeymentWrapper',data: options);
       print("request getForPaymentlistPaper : $options" );
       print("response getForPaymentlistPaper : ${response.data}" );
       return ListForPaymentModel.fromJson(response.data);
-
     }
     catch(e){
       throw ErrorException('خطا:$e');
@@ -741,7 +745,8 @@ class InventoryRepository {
             "id":detail.laboratory?.id,
           },
           "stateMode": detail.stateMode,
-          "quantity": detail.quantity,
+          "weight": detail.quantity,
+          "quantity" :detail.weight,
           "impurity":detail.impurity,
           "weight750":detail.weight750,
           "carat":detail.carat,
@@ -763,6 +768,7 @@ class InventoryRepository {
         "infos": [],
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
+      print('Request Data insertInventoryPayment: $inventoryData');
       print('Status Code: ${response.statusCode}');
       print('Response Data insertInventoryPayment: ${response.data}');
       return response.data;

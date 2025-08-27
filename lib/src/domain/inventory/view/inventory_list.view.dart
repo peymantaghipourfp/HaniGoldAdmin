@@ -20,6 +20,8 @@ import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
+import '../../transaction/widgets/balance_dialog.widget.dart';
 
 class InventoryListView extends StatefulWidget {
   InventoryListView({super.key});
@@ -2147,7 +2149,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                   IconButton(
                                                     onPressed: () async {
                                                       await inventoryController
-                                                          .fetchGetOneInventory(
+                                                          .fetchGetInventoryDetail(
                                                           inventories.id!);
                                                       inventoryController
                                                           .toggleItemExpansion(
@@ -2197,7 +2199,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                             Color>(
                                                             AppColor.textColor),
                                                       )
-                                                          : inventoryController.getOneInventory.value==null ?
+                                                          : inventoryController.getInventoryDetail.value==null ?
                                                             Text(
                                                             'اطلاعاتی موجود نیست',
                                                             style: AppTextStyle
@@ -2206,10 +2208,10 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                         child: ListView.builder(
                                                           shrinkWrap: true,
                                                           physics: NeverScrollableScrollPhysics(),
-                                                          itemCount: inventoryController.getOneInventory.value?.inventoryDetails?.length,
+                                                          itemCount: inventoryController.getInventoryDetail.length,
                                                           itemBuilder: (context,
                                                               index) {
-                                                            var getOneInventories = inventoryController.getOneInventory.value?.inventoryDetails?[index];
+                                                            var getInventoryDetails = inventoryController.getInventoryDetail[index];
                                                             return ListTile(
                                                               title: Card(
                                                                 color: AppColor
@@ -2236,7 +2238,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                             onTap: () =>
                                                                                 inventoryController
                                                                                     .pickImage(
-                                                                                    getOneInventories!
+                                                                                    getInventoryDetails!
                                                                                         .recId
                                                                                         .toString(),
                                                                                     "image",
@@ -2272,7 +2274,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                   style: AppTextStyle
                                                                                       .labelText),
                                                                               Text(
-                                                                                  getOneInventories
+                                                                                  getInventoryDetails
                                                                                       ?.item
                                                                                       ?.name ??
                                                                                       "",
@@ -2290,9 +2292,9 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                       .bodyText
                                                                               ),
                                                                               Text(
-                                                                                  '${getOneInventories
+                                                                                  '${getInventoryDetails
                                                                                       ?.quantity ??
-                                                                                      0} ${getOneInventories
+                                                                                      0} ${getInventoryDetails
                                                                                       ?.itemUnit
                                                                                       ?.name ??
                                                                                       ""}',
@@ -2317,7 +2319,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                   style: AppTextStyle
                                                                                       .labelText),
                                                                               Text(
-                                                                                  '${getOneInventories
+                                                                                  '${getInventoryDetails
                                                                                       ?.carat ??
                                                                                       0}',
                                                                                   style: AppTextStyle
@@ -2331,7 +2333,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                   style: AppTextStyle
                                                                                       .labelText),
                                                                               Text(
-                                                                                  '${getOneInventories
+                                                                                  '${getInventoryDetails
                                                                                       ?.weight750 ??
                                                                                       0} گرم ',
                                                                                   style: AppTextStyle
@@ -2345,7 +2347,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                   style: AppTextStyle
                                                                                       .labelText),
                                                                               Text(
-                                                                                  '${getOneInventories
+                                                                                  '${getInventoryDetails
                                                                                       ?.impurity ??
                                                                                       0} گرم ',
                                                                                   style: AppTextStyle
@@ -2363,7 +2365,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                               style: AppTextStyle
                                                                                   .labelText),
                                                                           Text(
-                                                                              getOneInventories
+                                                                              getInventoryDetails
                                                                                   ?.description ?? '',
                                                                               style: AppTextStyle
                                                                                   .bodyText),
@@ -2384,10 +2386,10 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                           // نمایش عکس
                                                                           GestureDetector(
                                                                             onTap: () {
-                                                                              if (getOneInventories
+                                                                              if (getInventoryDetails
                                                                                   ?.attachments ==
                                                                                   null ||
-                                                                                  getOneInventories!
+                                                                                  getInventoryDetails!
                                                                                       .attachments!
                                                                                       .isEmpty) {
                                                                                 Get
@@ -2427,7 +2429,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                                     .builder(
                                                                                                   controller: inventoryController
                                                                                                       .pageController,
-                                                                                                  itemCount: getOneInventories
+                                                                                                  itemCount: getInventoryDetails
                                                                                                       .attachments!
                                                                                                       .length,
                                                                                                   onPageChanged: (
@@ -2439,7 +2441,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                                   itemBuilder: (
                                                                                                       context,
                                                                                                       index) {
-                                                                                                    final attachment = getOneInventories
+                                                                                                    final attachment = getInventoryDetails
                                                                                                         .attachments![index];
                                                                                                     return Image
                                                                                                         .network(
@@ -2482,7 +2484,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                                     .center,
                                                                                                 children: List
                                                                                                     .generate(
-                                                                                                  getOneInventories
+                                                                                                  getInventoryDetails
                                                                                                       .attachments!
                                                                                                       .length,
                                                                                                       (
@@ -2530,7 +2532,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                             child: Row(
                                                                               children: [
                                                                                 Text(
-                                                                                  'عکس‌ها (${getOneInventories
+                                                                                  'عکس‌ها (${getInventoryDetails
                                                                                       ?.attachments
                                                                                       ?.length ??
                                                                                       0}) ',
@@ -2562,9 +2564,9 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                           //  آیکون ویرایش
                                                                           GestureDetector(
                                                                             onTap: () {
-                                                                              getOneInventories?.type==0 ?
-                                                                              Get.toNamed('/inventoryDetailUpdateReceive', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()}):
-                                                                              Get.toNamed('/inventoryDetailUpdatePayment', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()});
+                                                                              getInventoryDetails?.type==0 ?
+                                                                              Get.toNamed('/inventoryDetailUpdateReceive', parameters: {"id":getInventoryDetails!.inventoryId.toString(),"index":index.toString()}):
+                                                                              Get.toNamed('/inventoryDetailUpdatePayment', parameters: {"id":getInventoryDetails!.inventoryId.toString(),"index":index.toString()});
                                                                             },
                                                                             child: Row(
                                                                               children: [
@@ -2612,26 +2614,26 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                               AppColor
                                                                                                   .primaryColor)),
                                                                                       onPressed: () {
-                                                                                        Gregorian date=getOneInventories!.date!.toGregorian();
+                                                                                        Gregorian date=getInventoryDetails!.date!.toGregorian();
                                                                                         Get.back();
-                                                                                        getOneInventories.type==0 ?
+                                                                                        getInventoryDetails.type==0 ?
                                                                                         inventoryController.updateDeleteInventoryReceive(
                                                                                           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                                                             inventories.id!,
-                                                                                            getOneInventories.id!, 3,0,
+                                                                                            getInventoryDetails.id!, 3,0,
                                                                                             inventories.account!.id!,
-                                                                                          getOneInventories.wallet!.id!,
-                                                                                            getOneInventories.item!.id!,
-                                                                                          getOneInventories.quantity!,
+                                                                                          getInventoryDetails.wallet!.id!,
+                                                                                            getInventoryDetails.item!.id!,
+                                                                                          getInventoryDetails.quantity!,
                                                                                         )
                                                                                             : inventoryController.updateDeleteInventoryPayment(
                                                                                           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
                                                                                             inventories.id!,
-                                                                                            getOneInventories!.id!, 3,1,
+                                                                                            getInventoryDetails!.id!, 3,1,
                                                                                             inventories.account!.id!,
-                                                                                          getOneInventories.wallet!.id!,
-                                                                                          getOneInventories.item!.id!,
-                                                                                          getOneInventories.quantity!,
+                                                                                          getInventoryDetails.wallet!.id!,
+                                                                                          getInventoryDetails.item!.id!,
+                                                                                          getInventoryDetails.quantity!,
                                                                                         );
                                                                                       },
                                                                                       child: Text(
@@ -2722,6 +2724,17 @@ class _InventoryListViewState extends State<InventoryListView> {
           ),)
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 
@@ -2778,6 +2791,14 @@ class _InventoryListViewState extends State<InventoryListView> {
       ),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('نام کاربر', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center,
+          onSort: (columnIndex, ascending) {
+            inventoryController.onSort(columnIndex, ascending);
+          }
+      ),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('نام تحویل گیرنده', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center,
           onSort: (columnIndex, ascending) {
@@ -2792,10 +2813,10 @@ class _InventoryListViewState extends State<InventoryListView> {
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('مقدار', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+      /*DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('شرح', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('دریافت/پرداخت', style: AppTextStyle.labelText)),
@@ -2808,24 +2829,27 @@ class _InventoryListViewState extends State<InventoryListView> {
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('ضمانت کاربر', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+      /*DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('نمایش تصاویر', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+          headingRowAlignment: MainAxisAlignment.center),*/
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      /*DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('عملیات', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('اطلاعات کامل', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('مانده سکه', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('مانده ریالی', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-          child: Text('مانده طلایی', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+
+      /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده سکه', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
+      /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده ریالی', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
+      /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده طلایی', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
     ];
   }
 
@@ -2838,6 +2862,7 @@ class _InventoryListViewState extends State<InventoryListView> {
           DataCell(
               Center(
                 child: Row(
+                  key: _rowKeys[inventory.id],
                   children: [
                     GestureDetector(
                       onTap: () {
@@ -2888,6 +2913,14 @@ class _InventoryListViewState extends State<InventoryListView> {
           // نام ثبت کننده
           DataCell(
               Center(
+                child: Text(inventory.createdBy?.name ?? "",
+                    style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor,fontWeight: FontWeight.normal,fontSize: 11)
+
+                ),
+              )),
+          // نام کاربر
+          DataCell(
+              Center(
                 child: Text(inventory.account?.name ?? "",
                     style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor,fontWeight: FontWeight.normal,fontSize: 11)
 
@@ -2905,14 +2938,14 @@ class _InventoryListViewState extends State<InventoryListView> {
               Center(
                 child: Row(
                   children: [
-                    inventory.inventoryDetails!.isNotEmpty?
-                    Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${inventory.inventoryDetails!.first.item?.icon}',
+                    inventory.item?.id!=null?
+                    Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${inventory.item?.icon}',
                       width: 25,
                       height: 25,):SizedBox(),
                     SizedBox(width: 5,),
                     Text(
-                      inventory.inventoryDetails?.isNotEmpty == true
-                          ? inventory.inventoryDetails!.first.item?.name ?? ""
+                        inventory.item?.id != null
+                          ? inventory.item?.name ?? ""
                           : "",
                         style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor,fontWeight: FontWeight.normal,fontSize: 11)
                     ),
@@ -2924,15 +2957,15 @@ class _InventoryListViewState extends State<InventoryListView> {
           DataCell(
               Center(
                 child: Text(
-                    inventory.inventoryDetails?.first !=null
-                        ? '${inventory.inventoryDetails!.first.quantity ?? 0} ${inventory.inventoryDetails!.first.itemUnit?.name ?? ""}'
+                    inventory.id !=null
+                        ? '${inventory.totalQuantity.toString().seRagham() ?? 0} ${inventory.item?.itemUnit?.name ?? ""}'
                         : "",
                     style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor,fontWeight: FontWeight.bold)
                 ),
               )
           ),
           // شرح
-          DataCell(
+          /*DataCell(
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: Column(
@@ -3031,7 +3064,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                     ),
                   ],
                 ),
-              )),
+              )),*/
           // دریافت/پرداخت
           DataCell(
               Center(
@@ -3109,7 +3142,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                 ),
               )),*/
           // نمایش تصاویر
-          DataCell(
+          /*DataCell(
             GestureDetector(
               onTap: () async{
                 await inventoryController.getImage(inventory.recId??"", "Inventory");
@@ -3197,14 +3230,6 @@ class _InventoryListViewState extends State<InventoryListView> {
                                         );
                                       },
                                     ),
-                                    /*Row(mainAxisAlignment: MainAxisAlignment.start,
-                                      children: [
-                                        IconButton(
-                                          icon: Icon(Icons.download, color: AppColor.dividerColor),
-                                          onPressed: () => inventoryController.downloadImage(attachment,),
-                                        ),
-                                      ],
-                                    ),*/
                                     SizedBox(
                                       height: 2,),
                                     Obx(() {
@@ -3358,9 +3383,47 @@ class _InventoryListViewState extends State<InventoryListView> {
                 ],
               ),
             ),
+          ),*/
+          // مانده
+          DataCell(
+              Center(
+                child:
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return BalanceDialog(
+                            entityId: inventory.recordId ?? 0,
+                            entityType: inventory.type == 0 ? 'receive' : 'payment',
+                            entityName: inventory.account?.name ?? 'نامشخص',
+                            isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                          );
+                        },
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.account_balance_wallet,
+                          size: 20,
+                          color: AppColor.buttonColor,
+                        ),
+                        Text(' مانده',
+                          style: AppTextStyle
+                              .labelText
+                              .copyWith(
+                              color: AppColor.buttonColor, fontSize: 11,fontWeight: FontWeight.bold),),
+                      ],
+                    ),
+                  ),
+                ),
+              )
           ),
           // آیکون های عملیات
-          DataCell(
+          /*DataCell(
             Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -3473,13 +3536,14 @@ class _InventoryListViewState extends State<InventoryListView> {
                 ],
               ),
             ),
-          ),
+          ),*/
           // نمایش کامل واریزی
           DataCell(
             Center(
-              child: inventory.inventoryDetailsCount == 1 ?
+              child:
+              /*inventory.inventoryDetailsCount == 1 ?
               SizedBox(width: 100,)
-                  :
+                  :*/
               SizedBox(
                 width: 130,
                 child: TextButton(
@@ -3489,14 +3553,14 @@ class _InventoryListViewState extends State<InventoryListView> {
                       color: AppColor.textColor,fontSize: 11)),
                   onPressed: () {
                     showInventoryDetailsModal(inventory);
-                    inventoryController.fetchGetOneInventory(inventory.id!);
+                    inventoryController.fetchGetInventoryDetail(inventory.id!);
                   },
                 ),
               ),
             ),
           ),
           // مانده سکه
-          DataCell(
+          /*DataCell(
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Center(
@@ -3539,9 +3603,9 @@ class _InventoryListViewState extends State<InventoryListView> {
                   ),
                 ),
               )
-          ),
+          ),*/
           // مانده ریالی
-          DataCell(
+          /*DataCell(
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Center(
@@ -3581,9 +3645,9 @@ class _InventoryListViewState extends State<InventoryListView> {
                   ) : SizedBox.shrink(),
                 ),
               )
-          ),
+          ),*/
           // مانده طلایی
-          DataCell(
+          /*DataCell(
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Center(
@@ -3621,7 +3685,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                   ) : SizedBox.shrink(),
                 ),
               )
-          ),
+          ),*/
         ],
       );
     }).toList();
@@ -3631,11 +3695,12 @@ class _InventoryListViewState extends State<InventoryListView> {
     Get.dialog(
       Dialog(
         backgroundColor: AppColor.backGroundColor,
+        elevation: 10,
         insetPadding: EdgeInsets.all(20),
         child: ConstrainedBox(
           constraints: BoxConstraints(
             maxWidth: 800,
-            maxHeight: Get.height * 0.9,
+            maxHeight: Get.height * 0.8,
           ),
           child: Column(
             children: [
@@ -3656,593 +3721,663 @@ class _InventoryListViewState extends State<InventoryListView> {
   Widget buildInventoryDetail(InventoryModel inventory) {
     return Obx(() {
       if (inventoryController.isLoading.value) {
-        return Center(child: CircularProgressIndicator());
-      }
-      return
-        inventoryController.isLoading.value ?
-        CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<
-              Color>(
-              AppColor.textColor),
-        ) :
-        // لیست deposit request مربوط به هر درخواست برداشت
-        SizedBox(
-          height: Get.height * 0.8, // تعیین ارتفاع ثابت
-          width: Get.width * 0.8,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 12,),
-                Text('لیست دریافت/پرداخت', style: AppTextStyle.smallTitleText),
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxHeight: Get.height * 0.7,
-                  ),
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: inventoryController.getOneInventory.value?.inventoryDetails?.length,
-                    itemBuilder: (context,
-                        index) {
-                      var getOneInventories = inventoryController.getOneInventory.value?.inventoryDetails?[index];
-                      return ListTile(
-                        title: Card(
-                          elevation: 5,
-                          color: AppColor
-                              .backGroundColor,
-                          child: Padding(
-                            padding: const EdgeInsets
-                                .only(
-                                top: 8,
-                                left: 12,
-                                right: 12,
-                                bottom: 8),
-                            child: Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .spaceBetween,
-                                  children: [
-                                    Text(
-                                      inventoryController.getOneInventory.value?.date?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? 'نامشخص',
-                                      style: AppTextStyle.bodyText,
-                                    ),
-                                    /*GestureDetector(
-                                      onTap: () =>
-                                          inventoryController
-                                              .pickImageDesktop(
-                                              getOneInventories!
-                                                  .recId
-                                                  .toString(),
-                                              "image",
-                                              "Inventory",
-                                              inventoryId: inventory.id!),
-                                      child: Row(
-                                        children: [
-                                          Text(
-                                            'الصاق تصویر  ',
-                                            style: AppTextStyle.labelText.copyWith(color: AppColor.iconViewColor),),
-                                          SvgPicture
-                                                .asset(
-                                              'assets/svg/camera.svg',
-                                              width: 25,
-                                              height: 25,
-                                              colorFilter: ColorFilter
-                                                  .mode(
-                                                  AppColor
-                                                      .iconViewColor,
-                                                  BlendMode
-                                                      .srcIn),),
-                                        ],
-                                      ),
-                                    ),*/
-                                    /*Obx(() {
-                                      if (inventoryController
-                                          .isUploadingDesktop
-                                          .value) {
-                                        return CircularProgressIndicator();
-                                      }
-                                      return Wrap(
-                                        children: inventoryController
-                                            .selectedImagesDesktop
-                                            .asMap()
-                                            .entries
-                                            .map((entry) =>
-                                            Chip(
-                                              label: Text(
-                                                  'تصویر ${entry
-                                                      .key +
-                                                      1}'),
-                                              deleteIcon: inventoryController
-                                                  .uploadStatusesDesktop[entry
-                                                  .key]
-                                                  ? Icon(
-                                                  Icons
-                                                      .check)
-                                                  : Icon(
-                                                  Icons
-                                                      .close),
-                                              onDeleted: () {},
-                                            ))
-                                            .toList(),
-                                      );
-                                    }),*/
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 10,),
-                                // آیتم- مقدار
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                            ' آیتم: ',
-                                            style: AppTextStyle
-                                                .labelText),
-                                        Text(
-                                            getOneInventories
-                                                ?.item
-                                                ?.name ??
-                                                "",
-                                            style: AppTextStyle
-                                                .bodyText),
-                                      ],
-                                    ),
-                                    SizedBox(
-                                      width: 4,),
-                                    Row(
-                                      children: [
-                                        Text(
-                                            ' مقدار: ',
-                                            style: AppTextStyle
-                                                .bodyText
-                                        ),
-                                        Text(
-                                            '${getOneInventories
-                                                ?.quantity ??
-                                                0} ${getOneInventories
-                                                ?.itemUnit
-                                                ?.name ??
-                                                ""}',
-                                            style: AppTextStyle
-                                                .bodyText
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 8,),
-                                // عیار - وزن750- ناخالصی
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                            ' عیار: ',
-                                            style: AppTextStyle
-                                                .labelText),
-                                        Text(
-                                            '${getOneInventories
-                                                ?.carat ??
-                                                0}',
-                                            style: AppTextStyle
-                                                .bodyText),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                            ' وزن 750: ',
-                                            style: AppTextStyle
-                                                .labelText),
-                                        Text(
-                                            '${getOneInventories
-                                                ?.weight750 ??
-                                                0} گرم ',
-                                            style: AppTextStyle
-                                                .bodyText),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        Text(
-                                            '  ناخالصی: ',
-                                            style: AppTextStyle
-                                                .labelText),
-                                        Text(
-                                            '${getOneInventories
-                                                ?.impurity ??
-                                                0} گرم ',
-                                            style: AppTextStyle
-                                                .bodyText),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 4,),
-                                Row(
-                                  children: [
-                                    Text(
-                                        ' توضیحات: ',
-                                        style: AppTextStyle
-                                            .labelText),
-                                    Text(
-                                        '${getOneInventories
-                                            ?.description ??
-                                            0}',
-                                        style: AppTextStyle
-                                            .bodyText),
-                                  ],
-                                ),
-                                SizedBox(
-                                  height: 4,),
-                                Divider(
-                                  height: 1,
-                                  color: AppColor
-                                      .secondaryColor,),
-                                SizedBox(
-                                  height: 5,),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .spaceBetween,
-                                  children: [
-                                    // نمایش عکس
-                                    GestureDetector(
-                                      onTap: () async{
-                                        await inventoryController.getImage(getOneInventories?.recId??"", "InventoryDetail");
-
-                                        Future.delayed(const Duration(milliseconds: 200), () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return Dialog(
-                                                backgroundColor: AppColor
-                                                    .backGroundColor,
-                                                shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius
-                                                      .circular(
-                                                      10),
-                                                ),
-                                                child: Container(
-                                                  padding: EdgeInsets
-                                                      .all(
-                                                      8),
-                                                  child: Column(
-                                                    mainAxisSize: MainAxisSize
-                                                        .min,
-                                                    children: [
-                                                      // نمایش اسلایدی عکس‌ها
-                                                      SizedBox(
-                                                        width: 500,
-                                                        height: 500,
-                                                        child: Stack(
-                                                          children: [
-                                                            PageView.builder(
-                                                              controller: inventoryController
-                                                                  .pageController,
-                                                              itemCount: inventoryController.imageList.length,
-                                                              onPageChanged: (index) =>
-                                                              inventoryController
-                                                                  .currentImagePage
-                                                                  .value =
-                                                                  index,
-                                                              itemBuilder: (context,
-                                                                  index) {
-                                                                final attachment = inventoryController.imageList[index];
-                                                                return Column(
-                                                                  children: [
-                                                                    if (kIsWeb)
-                                                                      Padding(
-                                                                        padding: const EdgeInsets.only(right: 50),
-                                                                        child: Row(mainAxisAlignment: MainAxisAlignment.start,
-                                                                          children: [
-                                                                            IconButton(
-                                                                              icon: Icon(Icons.download, color: AppColor.dividerColor),
-                                                                              onPressed: () => inventoryController.downloadImage(
-                                                                                attachment,
-                                                                              ),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
-                                                                    SizedBox(
-                                                                      width: 450,
-                                                                      height: 450,
-                                                                      child: Image.network(
-                                                                        "${BaseUrl
-                                                                            .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
-                                                                        loadingBuilder: (context,
-                                                                            child,
-                                                                            loadingProgress) {
-                                                                          if (loadingProgress ==
-                                                                              null)
-                                                                            return child;
-                                                                          return Center(
-                                                                            child: CircularProgressIndicator(),
-                                                                          );
-                                                                        },
-                                                                        errorBuilder: (context,
-                                                                            error,
-                                                                            stackTrace) =>
-                                                                            Icon(
-                                                                                Icons
-                                                                                    .error,
-                                                                                color: Colors
-                                                                                    .red),
-                                                                        fit: BoxFit.contain,
-                                                                      ),
-                                                                    ),
-                                                                  ],
-                                                                );
-                                                              },
-                                                            ),
-                                                            SizedBox(
-                                                              height: 2,),
-                                                            Obx(() {
-                                                              return Positioned(
-                                                                  left: 10,
-                                                                  top: 0,
-                                                                  bottom: 0,
-                                                                  child: Visibility(
-                                                                    visible: inventoryController
-                                                                        .currentImagePage.value > 0,
-                                                                    child: IconButton(
-                                                                      style: ButtonStyle(
-                                                                        backgroundColor: WidgetStateProperty
-                                                                            .all(Colors.black54),
-                                                                        shape: WidgetStateProperty.all(
-                                                                            CircleBorder()),
-                                                                        padding: WidgetStateProperty.all(
-                                                                            EdgeInsets.all(8)),
-                                                                      ),
-                                                                      icon: Icon(Icons.chevron_left,
-                                                                        color: Colors.white,
-                                                                        size: 40,
-                                                                        shadows: [
-                                                                          Shadow(
-                                                                            blurRadius: 10,
-                                                                            color: Colors.black,
-                                                                            offset: Offset(0, 0),
-                                                                          )
-                                                                        ],
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        inventoryController.pageController
-                                                                            .previousPage(
-                                                                          duration: Duration(
-                                                                              milliseconds: 300),
-                                                                          curve: Curves.easeInOut,
-                                                                        );
-                                                                      },
-                                                                    ),
-                                                                  )
-                                                              );
-                                                            }),
-                                                            Obx(() {
-                                                              return Positioned(
-                                                                  right: 10,
-                                                                  top: 0,
-                                                                  bottom: 0,
-                                                                  child: Visibility(
-                                                                    visible: inventoryController
-                                                                        .currentImagePage.value <
-                                                                        (inventoryController.imageList.length ?? 1) -
-                                                                            1,
-                                                                    child: IconButton(
-                                                                      style: ButtonStyle(
-                                                                        backgroundColor: WidgetStateProperty
-                                                                            .all(Colors.black54),
-                                                                        shape: WidgetStateProperty.all(
-                                                                            CircleBorder()),
-                                                                        padding: WidgetStateProperty.all(
-                                                                            EdgeInsets.all(8)),
-                                                                      ),
-                                                                      icon: Icon(Icons.chevron_right,
-                                                                        color: Colors.white,
-                                                                        size: 40,
-                                                                        shadows: [
-                                                                          Shadow(
-                                                                            blurRadius: 10,
-                                                                            color: Colors.black,
-                                                                            offset: Offset(0, 0),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                      onPressed: () {
-                                                                        inventoryController.pageController
-                                                                            .nextPage(
-                                                                          duration: Duration(
-                                                                              milliseconds: 300),
-                                                                          curve: Curves.easeInOut,
-                                                                        );
-                                                                      },
-                                                                    ),
-                                                                  )
-                                                              );
-                                                            }),
-                                                            SizedBox(
-                                                              height: 2,),
-                                                            // نمایش نقاط راهنما
-                                                            Obx(() =>
-                                                                Row(
-                                                                  mainAxisAlignment: MainAxisAlignment
-                                                                      .center,
-                                                                  children: List
-                                                                      .generate(
-                                                                    inventoryController.imageList.length,
-                                                                        (index) =>
-                                                                        Container(
-                                                                          width: 8,
-                                                                          height: 8,
-                                                                          margin: EdgeInsets
-                                                                              .symmetric(
-                                                                              horizontal: 4),
-                                                                          decoration: BoxDecoration(
-                                                                            shape: BoxShape
-                                                                                .circle,
-                                                                            color: inventoryController
-                                                                                .currentImagePage
-                                                                                .value ==
-                                                                                index
-                                                                                ? Colors
-                                                                                .blue
-                                                                                : Colors
-                                                                                .grey,
-                                                                          ),
-                                                                        ),
-                                                                  ),
-                                                                )),
-                                                            SizedBox(
-                                                                height: 10),
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      TextButton(
-                                                        onPressed: () =>
-                                                            Get
-                                                                .back(),
-                                                        child: Text(
-                                                          "بستن",
-                                                          style: AppTextStyle
-                                                              .bodyText,),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              );
-                                            },
-                                          );
-
-                                        });
-
-
-                                      },
-                                      child: SvgPicture.asset('assets/svg/picture.svg',height: 20,
-                                          colorFilter: ColorFilter.mode(
-
-                                            AppColor.textColor,
-
-                                            BlendMode.srcIn,
-                                          )),
-                                    ),
-                                    //  آیکون ویرایش
-                                    GestureDetector(
-                                      onTap: () {
-                                        getOneInventories?.type==0 ?
-                                        Get.toNamed('/inventoryDetailUpdateReceive', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()}):
-                                        Get.toNamed('/inventoryDetailUpdatePayment', parameters: {"id":getOneInventories!.inventoryId.toString(),"index":index.toString()});
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Text('ویرایش  ',
-                                            style: AppTextStyle.bodyText
-                                                .copyWith(color: AppColor
-                                                .iconViewColor),),
-                                          Container(
-                                            width: 25,
-                                            height: 25,
-                                            child: SvgPicture
-                                                .asset(
-                                                'assets/svg/edit.svg',
-                                                colorFilter: ColorFilter
-                                                    .mode(
-                                                  AppColor
-                                                      .iconViewColor,
-                                                  BlendMode
-                                                      .srcIn,)
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    // آیکون حذف
-                                    GestureDetector(
-                                      onTap: () {
-                                        Get.defaultDialog(
-                                            backgroundColor: AppColor
-                                                .backGroundColor,
-                                            title: "حذف",
-                                            titleStyle: AppTextStyle
-                                                .smallTitleText,
-                                            middleText: "آیا از حذف مطمئن هستید؟",
-                                            middleTextStyle: AppTextStyle
-                                                .bodyText,
-                                            confirm: ElevatedButton(
-                                                style: ButtonStyle(
-                                                    backgroundColor: WidgetStatePropertyAll(
-                                                        AppColor.primaryColor)),
-                                                onPressed: () {
-                                                  Gregorian date=getOneInventories!.date!.toGregorian();
-                                                  Get.back();
-                                                  getOneInventories.type==0 ?
-                                                  inventoryController.updateDeleteInventoryReceive(
-                                                    "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
-                                                      inventory.id!,
-                                                      getOneInventories.id!, 3 ,1,
-                                                      inventory.account!.id!,
-                                                      getOneInventories.wallet!.id!,
-                                                      getOneInventories.item!.id!,
-                                                      getOneInventories.quantity!,
-                                                  )
-                                                      : inventoryController.updateDeleteInventoryPayment(
-                                                    "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
-                                                      inventory.id!,
-                                                      getOneInventories.id!, 3 ,0,
-                                                      inventory.account!.id!,
-                                                      getOneInventories.wallet!.id!,
-                                                      getOneInventories.item!.id!,
-                                                      getOneInventories.quantity!,
-                                                  );
-                                                },
-                                                child: Text(
-                                                  'حذف',
-                                                  style: AppTextStyle.bodyText,
-                                                )));
-                                      },
-                                      child: Row(
-                                        children: [
-                                          Text('حذف  ',
-                                            style: AppTextStyle.bodyText
-                                                .copyWith(
-                                                color: AppColor.accentColor),),
-                                          Container(
-                                            width: 25,
-                                            height: 25,
-                                            child: SvgPicture
-                                                .asset(
-                                                'assets/svg/trash-bin.svg',
-                                                colorFilter: ColorFilter
-                                                    .mode(
-                                                  AppColor
-                                                      .accentColor,
-                                                  BlendMode
-                                                      .srcIn,)
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-
-              ],
-            ),
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'در حال بارگذاری اطلاعات...',
+                style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor),
+              ),
+            ],
           ),
         );
+      }
+
+      if (inventoryController.getInventoryDetail.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.inventory_2_outlined,
+                size: 64,
+                color: AppColor.textColor.withOpacity(0.5),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'اطلاعاتی موجود نیست',
+                style: AppTextStyle.labelText.copyWith(
+                  color: AppColor.textColor.withOpacity(0.7),
+                  fontSize: 16,
+                ),
+              ),
+            ],
+          ),
+        );
+      }
+
+      return Container(
+        height: Get.height * 0.75,
+        width: Get.width * 0.75,
+        decoration: BoxDecoration(
+          color: AppColor.backGroundColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            // Header
+            Container(
+              padding: EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColor.appBarColor.withOpacity(0.1),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(12),
+                  topRight: Radius.circular(12),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.inventory_2,
+                    color: AppColor.primaryColor,
+                    size: 24,
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'لیست دریافت/پرداخت',
+                      style: AppTextStyle.smallTitleText.copyWith(
+                        color: AppColor.primaryColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColor.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '${inventoryController.getInventoryDetail.length} مورد',
+                      style: AppTextStyle.labelText.copyWith(
+                        color: AppColor.primaryColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Content
+            Expanded(
+              child: ListView.builder(
+                padding: EdgeInsets.all(16),
+                itemCount: inventoryController.getInventoryDetail.length,
+                itemBuilder: (context, index) {
+                  var getInventoryDetails = inventoryController.getInventoryDetail[index];
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 16),
+                    decoration: BoxDecoration(
+                      color: AppColor.textFieldColor,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Header section with date and type
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColor.appBarColor.withOpacity(0.05),
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(12),
+                              topRight: Radius.circular(12),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.access_time,
+                                color: AppColor.textColor.withOpacity(0.7),
+                                size: 18,
+                              ),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  getInventoryDetails.date?.toPersianDate(
+                                      twoDigits: true,
+                                      showTime: true,
+                                      timeSeprator: '-'
+                                  ) ?? 'نامشخص',
+                                  style: AppTextStyle.bodyText.copyWith(
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: getInventoryDetails.type == 0
+                                      ? AppColor.primaryColor.withOpacity(0.1)
+                                      : AppColor.accentColor.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
+                                  getInventoryDetails.type == 0 ? 'دریافت' : 'پرداخت',
+                                  style: AppTextStyle.labelText.copyWith(
+                                    color: getInventoryDetails.type == 0
+                                        ? AppColor.primaryColor
+                                        : AppColor.accentColor,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Content section
+                        Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Item and Quantity row
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: _buildInfoCard(
+                                      icon: Icons.inventory,
+                                      label: 'آیتم',
+                                      value: getInventoryDetails.item?.name ?? 'نامشخص',
+                                      color: AppColor.primaryColor,
+                                    ),
+                                  ),
+                                  SizedBox(width: 12),
+                                  Expanded(
+                                    child: _buildInfoCard(
+                                      icon: Icons.scale,
+                                      label: 'مقدار',
+                                      value: '${getInventoryDetails.weight.toString().seRagham() ?? 0} ${getInventoryDetails.item?.itemUnit?.name ?? ""}',
+                                      color: AppColor.buttonColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+
+                              // Gold-specific details (only for gold items)
+                              if (getInventoryDetails.item?.itemUnit?.id == 2) ...[
+                                SizedBox(height: 12),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: _buildInfoCard(
+                                        icon: Icons.diamond,
+                                        label: 'عیار',
+                                        value: '${getInventoryDetails.carat ?? 0}',
+                                        color: AppColor.accentColor,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: _buildInfoCard(
+                                        icon: Icons.monitor_weight,
+                                        label: 'وزن 750',
+                                        value: '${getInventoryDetails.weight750 ?? 0} گرم',
+                                        color: AppColor.secondary3Color,
+                                      ),
+                                    ),
+                                    SizedBox(width: 12),
+                                    Expanded(
+                                      child: _buildInfoCard(
+                                        icon: Icons.remove_circle_outline,
+                                        label: 'ناخالصی',
+                                        value: '${getInventoryDetails.impurity ?? 0} گرم',
+                                        color: AppColor.textColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+
+                              // Description
+                              if (getInventoryDetails.description?.isNotEmpty == true) ...[
+                                SizedBox(height: 12),
+                                Container(
+                                  width: double.infinity,
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.backGroundColor,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColor.textColor.withOpacity(0.2),
+                                    ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Icon(
+                                            Icons.description,
+                                            color: AppColor.textColor.withOpacity(0.7),
+                                            size: 16,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'توضیحات',
+                                            style: AppTextStyle.labelText.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        getInventoryDetails.description ?? "",
+                                        style: AppTextStyle.bodyText.copyWith(
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+
+                        // Actions section
+                        Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColor.appBarColor.withOpacity(0.05),
+                            borderRadius: BorderRadius.only(
+                              bottomLeft: Radius.circular(12),
+                              bottomRight: Radius.circular(12),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              // View Images
+                              _buildActionButton(
+                                icon: 'assets/svg/picture.svg',
+                                label: 'عکس‌ها',
+                                color: AppColor.iconViewColor,
+                                onTap: () async {
+                                  await inventoryController.getImage(
+                                      getInventoryDetails.recId ?? "",
+                                      "InventoryDetail"
+                                  );
+                                  _showImageGallery(context);
+                                },
+                              ),
+
+                              // Edit
+                              /*_buildActionButton(
+                                icon: 'assets/svg/edit.svg',
+                                label: 'ویرایش',
+                                color: AppColor.iconViewColor,
+                                onTap: () {
+                                  getInventoryDetails.type == 0
+                                      ? Get.toNamed('/inventoryDetailUpdateReceive',
+                                      parameters: {
+                                        "id": getInventoryDetails.inventoryId.toString(),
+                                        "index": index.toString()
+                                      })
+                                      : Get.toNamed('/inventoryDetailUpdatePayment',
+                                      parameters: {
+                                        "id": getInventoryDetails.inventoryId.toString(),
+                                        "index": index.toString()
+                                      });
+                                },
+                              ),*/
+
+                              // Delete
+                              /*_buildActionButton(
+                                icon: 'assets/svg/trash-bin.svg',
+                                label: 'حذف',
+                                color: AppColor.accentColor,
+                                onTap: () => _showDeleteConfirmation(getInventoryDetails, inventory, index),
+                              ),*/
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      );
     });
   }
+
+  Widget _buildInfoCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withOpacity(0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                icon,
+                color: color,
+                size: 16,
+              ),
+              SizedBox(width: 6),
+              Text(
+                label,
+                style: AppTextStyle.labelText.copyWith(
+                  color: color,
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 6),
+          Text(
+            value,
+            style: AppTextStyle.bodyText.copyWith(
+              color: AppColor.textColor,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required String icon,
+    required String label,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return
+      GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: color.withOpacity(0.3),
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SvgPicture.asset(
+              icon,
+              height: 16,
+              colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+            ),
+            SizedBox(width: 6),
+            Text(
+              label,
+              style: AppTextStyle.labelText.copyWith(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showImageGallery(BuildContext context) {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: AppColor.backGroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.photo_library,
+                        color: AppColor.primaryColor,
+                        size: 24,
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'گالری تصاویر',
+                        style: AppTextStyle.smallTitleText.copyWith(
+                          color: AppColor.primaryColor,
+                        ),
+                      ),
+                      Spacer(),
+                      IconButton(
+                        onPressed: () => Get.back(),
+                        icon: Icon(Icons.close, color: AppColor.textColor),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+
+                  // Image viewer
+                  SizedBox(
+                    width: 500,
+                    height: 500,
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          controller: inventoryController.pageController,
+                          itemCount: inventoryController.imageList.length,
+                          onPageChanged: (index) =>
+                          inventoryController.currentImagePage.value = index,
+                          itemBuilder: (context, index) {
+                            final attachment = inventoryController.imageList[index];
+                            return Column(
+                              children: [
+                                if (kIsWeb)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 50),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                          onPressed: () => inventoryController.downloadImage(attachment),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: Image.network(
+                                    "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(child: CircularProgressIndicator());
+                                    },
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Icon(Icons.error, color: Colors.red),
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+
+                        // Navigation arrows
+                        Obx(() => Positioned(
+                          left: 10,
+                          top: 0,
+                          bottom: 0,
+                          child: Visibility(
+                            visible: inventoryController.currentImagePage.value > 0,
+                            child: IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(Colors.black54),
+                                shape: WidgetStateProperty.all(CircleBorder()),
+                                padding: WidgetStateProperty.all(EdgeInsets.all(8)),
+                              ),
+                              icon: Icon(Icons.chevron_left, color: Colors.white, size: 40),
+                              onPressed: () {
+                                inventoryController.pageController.previousPage(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                            ),
+                          ),
+                        )),
+
+                        Obx(() => Positioned(
+                          right: 10,
+                          top: 0,
+                          bottom: 0,
+                          child: Visibility(
+                            visible: inventoryController.currentImagePage.value <
+                                (inventoryController.imageList.length - 1),
+                            child: IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(Colors.black54),
+                                shape: WidgetStateProperty.all(CircleBorder()),
+                                padding: WidgetStateProperty.all(EdgeInsets.all(8)),
+                              ),
+                              icon: Icon(Icons.chevron_right, color: Colors.white, size: 40),
+                              onPressed: () {
+                                inventoryController.pageController.nextPage(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                            ),
+                          ),
+                        )),
+                      ],
+                    ),
+                  ),
+
+                  // Page indicators
+                  SizedBox(height: 16),
+                  Obx(() => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      inventoryController.imageList.length,
+                          (index) => Container(
+                        width: 8,
+                        height: 8,
+                        margin: EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: inventoryController.currentImagePage.value == index
+                              ? AppColor.primaryColor
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  )),
+
+                  SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text("بستن", style: AppTextStyle.bodyText),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
+  }
+
+  /*void _showDeleteConfirmation(dynamic getInventoryDetails, InventoryModel inventory, int index) {
+    Get.defaultDialog(
+      backgroundColor: AppColor.backGroundColor,
+      title: "حذف آیتم",
+      titleStyle: AppTextStyle.smallTitleText.copyWith(color: AppColor.accentColor),
+      middleText: "آیا از حذف این آیتم مطمئن هستید؟",
+      middleTextStyle: AppTextStyle.bodyText,
+      confirm: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(AppColor.accentColor),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          ),
+        ),
+        onPressed: () {
+          Gregorian date = getInventoryDetails!.date!.toGregorian();
+          Get.back();
+          getInventoryDetails.type == 0
+              ? inventoryController.updateDeleteInventoryReceive(
+            "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+            inventory.id!,
+            getInventoryDetails.id!,
+            3,
+            1,
+            inventory.account!.id!,
+            getInventoryDetails.wallet!.id!,
+            getInventoryDetails.item!.id!,
+            getInventoryDetails.quantity!,
+          )
+              : inventoryController.updateDeleteInventoryPayment(
+            "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+            inventory.id!,
+            getInventoryDetails.id!,
+            3,
+            0,
+            inventory.account!.id!,
+            getInventoryDetails.wallet!.id!,
+            getInventoryDetails.item!.id!,
+            getInventoryDetails.quantity!,
+          );
+        },
+        child: Text('حذف', style: AppTextStyle.bodyText.copyWith(color: Colors.white)),
+      ),
+      cancel: TextButton(
+        onPressed: () => Get.back(),
+        child: Text('انصراف', style: AppTextStyle.bodyText),
+      ),
+    );
+  }*/
 }

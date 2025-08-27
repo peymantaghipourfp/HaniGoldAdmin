@@ -6,12 +6,14 @@ import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 
 import '../../domain/users/model/list_user.model.dart';
+import '../network/dio_Interceptor.dart';
 
 class AccountRepository{
 
   Dio accountDio=Dio();
   AccountRepository(){
     accountDio.options.baseUrl=BaseUrl.baseUrl;
+    accountDio.interceptors.add(DioInterceptor());
   }
   Future<List<AccountModel>> getAccountList(String status)async{
     try{
@@ -32,8 +34,8 @@ class AccountRepository{
                 ]
               }
             ] : [],
-          "orderBy": "Account.Name",
-          "orderByType": "asc",
+          "orderBy": "Account.StartDate",
+          "orderByType": "desc",
           "StartIndex": 1,
           "ToIndex": 100000
         }
@@ -96,8 +98,8 @@ class AccountRepository{
                 ]
               }
             ],
-            "orderBy": "Account.Name",
-            "orderByType": "asc",
+            "orderBy": "Account.StartDate",
+            "orderByType": "desc",
             "StartIndex": 1,
             "ToIndex": 1000000
           }
@@ -144,8 +146,8 @@ class AccountRepository{
                 ]
               }
             ],
-            "orderBy": "Account.Name",
-            "orderByType": "asc",
+            "orderBy": "Account.StartDate",
+            "orderByType": "desc",
             "StartIndex": 1,
             "ToIndex": 1000000
           }
@@ -153,7 +155,7 @@ class AccountRepository{
       }:{
         "options" : {
           "account" :{
-            "orderBy": "Account.Name",
+            "orderBy": "Account.StartDate",
             "orderByType": "asc",
             "StartIndex": 1,
             "ToIndex": 100000
@@ -200,7 +202,7 @@ class AccountRepository{
               }
             ],
             "orderBy": "Account.Name",
-            "orderByType": "asc",
+            "orderByType": "desc",
             "StartIndex": startIndex,
             "ToIndex": toIndex
           }
@@ -209,7 +211,7 @@ class AccountRepository{
           : {
         "options": {
           "account": {
-            "orderBy": "Account.Name",
+            "orderBy": "Account.StartDate",
             "orderByType": "DESC",
             "StartIndex": startIndex,
             "ToIndex": toIndex

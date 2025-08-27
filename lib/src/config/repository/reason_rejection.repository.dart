@@ -5,11 +5,14 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
 
+import '../network/dio_Interceptor.dart';
+
 class ReasonRejectionRepository{
   Dio reasonRejectionDio=Dio();
 
   ReasonRejectionRepository(){
     reasonRejectionDio.options.baseUrl=BaseUrl.baseUrl;
+    reasonRejectionDio.interceptors.add(DioInterceptor());
   }
   
   Future<List<ReasonRejectionModel>> getReasonRejectionList(ReasonRejectionReqModel reasonRejectionReqModel)async{

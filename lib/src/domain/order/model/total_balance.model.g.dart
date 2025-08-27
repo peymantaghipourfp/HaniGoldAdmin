@@ -22,7 +22,8 @@ TotalBalanceModel _$TotalBalanceModelFromJson(Map<String, dynamic> json) =>
       buyPercent: (json['buyPercent'] as num?)?.toDouble(),
       totalBalanceQuantity: (json['totalBalanceQuantity'] as num?)?.toDouble(),
       balanceQuantity: (json['balanceQuantity'] as num?)?.toDouble(),
-      avaragePridicate: (json['avaragePridicate'] as num?)?.toDouble(),
+      averagePrediction: (json['averagePrediction'] as num?)?.toDouble(),
+      profitAfterBalancing: (json['profitAfterBalancing'] as num?)?.toDouble(),
       profit: (json['profit'] as num?)?.toDouble(),
     );
 
@@ -42,6 +43,7 @@ Map<String, dynamic> _$TotalBalanceModelToJson(TotalBalanceModel instance) =>
       'buyPercent': instance.buyPercent,
       'totalBalanceQuantity': instance.totalBalanceQuantity,
       'balanceQuantity': instance.balanceQuantity,
-      'avaragePridicate': instance.avaragePridicate,
+      'averagePrediction': instance.averagePrediction,
+      'profitAfterBalancing': instance.profitAfterBalancing,
       'profit': instance.profit,
     };

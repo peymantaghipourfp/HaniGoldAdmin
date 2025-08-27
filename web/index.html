@@ -31,8 +31,90 @@
 
   <title>hanigold_admin</title>
   <link rel="manifest" href="manifest.json">
+  <!-- Audio preload for web -->
+  <script>
+    // Global audio context for web audio support
+    let audioContext = null;
+    let audioEnabled = false;
+
+    // Function to enable audio context (called on user interaction)
+    function enableAudio() {
+      if (audioEnabled) return;
+
+      try {
+        // Create audio context on first user interaction
+        if (!audioContext) {
+          audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+
+        // Resume audio context if suspended
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        audioEnabled = true;
+        console.log('Web audio enabled successfully');
+
+        // Store in localStorage to remember user preference
+        localStorage.setItem('audioEnabled', 'true');
+      } catch (error) {
+        console.error('Error enabling web audio:', error);
+      }
+    }
+    // Preload all audio assets for better web performance
+    window.addEventListener('load', function() {
+      // List of all sound files in the sounds folder
+      const soundFiles = [
+        'assets/sounds/notification.mp3',
+        'assets/sounds/notificationAll.mp3'
+        // Add more sound files here as needed:
+        // 'assets/sounds/other-sound.mp3',
+        // 'assets/sounds/another-sound.mp3'
+      ];
+
+      // Preload all sound files
+      soundFiles.forEach(function(soundFile) {
+        const audio = new Audio();
+        audio.preload = 'auto';
+        audio.src = soundFile;
+
+        // Handle preload events
+        audio.addEventListener('canplaythrough', function() {
+          console.log('Audio preloaded successfully:', soundFile);
+        });
+
+        audio.addEventListener('error', function(e) {
+          console.warn('Audio preload failed:', soundFile, e);
+        });
+      });
+
+      // Check if audio was previously enabled
+      if (localStorage.getItem('audioEnabled') === 'true') {
+        enableAudio();
+      }
+    });
+
+    // Enable audio on any user interaction
+    document.addEventListener('click', enableAudio, { once: true });
+    document.addEventListener('touchstart', enableAudio, { once: true });
+    document.addEventListener('keydown', enableAudio, { once: true });
+
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden && audioContext && audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+    });
+  </script>
 </head>
 <body>
-  <script src="flutter_bootstrap.js" async></script>
+<script>
+  window.addEventListener('wheel', function(event) {
+    if (event.ctrlKey) {
+      event.preventDefault();
+    }
+  }, { passive: false });
+</script>
+<script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

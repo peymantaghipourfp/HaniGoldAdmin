@@ -20,7 +20,7 @@ class CustomAppbar1 extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       centerTitle: true,
       actions: [
-        if(scaffold.hasDrawer)
+        //if(scaffold.hasDrawer)
           Padding(
             padding: const EdgeInsets.only(left: 15),
             child: Row(

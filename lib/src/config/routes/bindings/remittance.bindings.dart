@@ -2,12 +2,14 @@ import 'package:get/get.dart';
 import '../../../domain/auth/controller/auth.controller.dart';
 import '../../../domain/home/controller/home.controller.dart';
 import '../../../domain/remittance/controller/remittance.controller.dart';
+import '../../../domain/remittance/controller/remittance_pending.controller.dart';
 
 class RemittanceBindings implements Bindings{
   @override
   void dependencies() {
     Get.lazyPut(()=>RemittanceController());
-    Get.lazyPut(()=>HomeController());
+    Get.lazyPut(()=>RemittancePendingController());
+    //Get.lazyPut(()=>HomeController());
   }
 
 }

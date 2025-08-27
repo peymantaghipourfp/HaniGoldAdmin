@@ -19,9 +19,12 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../model/item.model.dart';
 import '../widget/buy_range.widget.dart';
+import '../widget/buy_status.widget.dart';
 import '../widget/sale_range.widget.dart';
+import '../widget/sell_status.widget.dart';
 
 class ProductUpdatePriceView extends StatefulWidget {
   ProductUpdatePriceView({super.key});
@@ -34,6 +37,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
   final formKey = GlobalKey<FormState>();
 
   ProductController productController = Get.find<ProductController>();
+
+  @override
+  void dispose() {
+    productController.socketSubscription?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -558,6 +567,17 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 
@@ -588,7 +608,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 .smallTitleText,),
         ),
       ),
-      DataColumn(
+
+      /*DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
         label: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 150,),
@@ -633,7 +654,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             style: AppTextStyle
                 .smallTitleText,),
         ),
-      ),
+      ),*/
+
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
 
@@ -644,6 +666,18 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 .smallTitleText,),
         ),
       ),
+      DataColumn(
+          label: Text('ویرایش',
+              style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: Text('وضعیت خرید',
+              style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: Text('وضعیت فروش',
+              style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+          headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -693,16 +727,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         // price
         DataCell(
               () {
-            String price = activeList
-                .mesghalPrice
-                .toString()
-                .replaceAll(
-                RegExp(
-                    r'[^0-9]'),
-                '');
-            List<
-                String> parts = [
-            ];
+            String price = activeList.mesghalPrice.toString().replaceAll(RegExp(r'[^0-9]'), '');
+            List<String> parts = [];
             String remaining = price;
             int count = 0;
             while (remaining
@@ -728,15 +754,15 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             String price1 = parts
                 .isNotEmpty
                 ? parts[0]
-                : '';
+                : '0';
             String price2 = parts
                 .length >= 2
                 ? parts[1]
-                : '';
+                : '0';
             String price3 = parts
                 .length >= 3
                 ? parts[2]
-                : '';
+                : '0';
             String price4 = remaining;
             return PriceSellWidget(
               price1: price1,
@@ -749,12 +775,13 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               id: activeList
                   .id!,
               itemUnitId: activeList.itemUnit?.id ?? 0,
+              refrence:activeList.refrence,
 
             );
           }(),
         ),
         //different
-        DataCell(
+        /*DataCell(
               () {
             String differentPrice = activeList
                 .mesghalDifferentPrice
@@ -811,9 +838,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               itemUnitId: activeList.itemUnit?.id ?? 0,
             );
           }(),
-        ),
+        ),*/
         // max sell
-        DataCell(
+        /*DataCell(
               () {
             String maxSell = activeList
                 .maxSell
@@ -827,9 +854,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // max buy
-        DataCell(
+        /*DataCell(
               () {
             String maxBuy = activeList
                 .maxBuy
@@ -843,9 +870,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // sale range
-        DataCell(
+        /*DataCell(
               () {
             String salesRange = activeList
                 .salesRange
@@ -859,15 +886,15 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // buy range
-        DataCell(
+        /*DataCell(
               () {
             String buyRange = activeList
                 .buyRange
                 .toString();
             return BuyRangeWidget(
-              maxBuy: activeList.maxSell ?? 0,
+              maxBuy: activeList.maxBuy ?? 0,
               maxSell: activeList.maxSell ?? 0,
               saleRange: activeList.salesRange ?? 0,
               buyRange: buyRange,
@@ -875,7 +902,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // status
         DataCell(
           Card(
@@ -911,8 +938,32 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             ),
           ),
         ),
+        // edit
+        DataCell(
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                Get.toNamed('/productEdit', parameters: {"id": activeList.id.toString()});
+                print('activeListId:::::::::${activeList.id}');
+              },
+              child: Icon(
+                Icons.edit,
+                color: AppColor.iconViewColor,
+              ),
+            ),
+          ),
+        ),
+        // وضعیت خرید
+        DataCell(
+          BuyStatusWidget(item: activeList),
+        ),
+        // وضعیت فروش
+        DataCell(
+          SellStatusWidget(item: activeList),
+        ),
         // change status
-        DataCell(Center(
+        DataCell(
+            Center(
             child: Row(
               children: [
                 SizedBox(
@@ -920,7 +971,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 ),
                 GestureDetector(
                   onTap: (){
-                    productController.updateStatusItem(activeList.id??0,false);
+                    productController.updateStatusItem(activeList.id??0,false,false,false);
                   },
                   child: SvgPicture.asset('assets/svg/close-circle1.svg',
                       colorFilter: ColorFilter.mode(
@@ -933,7 +984,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 ),
                 GestureDetector(
                   onTap: (){
-                    productController.updateStatusItem(activeList.id??0,true);
+                    productController.updateStatusItem(activeList.id??0,true,true,true);
                   },
                   child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
                       colorFilter: ColorFilter.mode(
@@ -945,7 +996,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                   width: 20,
                 ),
               ],
-            ))),
+            ))
+        ),
       ],
     ))
         .toList();
@@ -978,7 +1030,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 .smallTitleText,),
         ),
       ),
-      DataColumn(
+
+      /*DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
         label: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 150,),
@@ -1023,7 +1076,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             style: AppTextStyle
                 .smallTitleText,),
         ),
-      ),
+      ),*/
+
       DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
 
@@ -1034,6 +1088,10 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 .smallTitleText,),
         ),
       ),
+      DataColumn(
+          label: Text('ویرایش',
+              style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+          headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -1115,15 +1173,15 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             String price1 = parts
                 .isNotEmpty
                 ? parts[0]
-                : '';
+                : '0';
             String price2 = parts
                 .length >= 2
                 ? parts[1]
-                : '';
+                : '0';
             String price3 = parts
                 .length >= 3
                 ? parts[2]
-                : '';
+                : '0';
             String price4 = remaining;
             return PriceSellWidget(
               price1: price1,
@@ -1136,12 +1194,12 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               id: inActiveList
                   .id!,
               itemUnitId: inActiveList.itemUnit?.id ?? 0,
-
+              refrence:inActiveList.refrence,
             );
           }(),
         ),
         //different
-        DataCell(
+        /*DataCell(
               () {
             String differentPrice = inActiveList
                 .mesghalDifferentPrice
@@ -1195,9 +1253,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               itemUnitId: inActiveList.itemUnit?.id ?? 0,
             );
           }(),
-        ),
+        ),*/
         // max sell
-        DataCell(
+        /*DataCell(
               () {
             String maxSell = inActiveList
                 .maxSell
@@ -1211,9 +1269,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // max buy
-        DataCell(
+        /*DataCell(
               () {
             String maxBuy = inActiveList
                 .maxBuy
@@ -1227,9 +1285,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // sale range
-        DataCell(
+        /*DataCell(
               () {
             String salesRange = inActiveList
                 .salesRange
@@ -1243,15 +1301,15 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // buy range
-        DataCell(
+        /*DataCell(
               () {
             String buyRange = inActiveList
                 .buyRange
                 .toString();
             return BuyRangeWidget(
-              maxBuy: inActiveList.maxSell ?? 0,
+              maxBuy: inActiveList.maxBuy ?? 0,
               maxSell: inActiveList.maxSell ?? 0,
               saleRange: inActiveList.salesRange ?? 0,
               buyRange: buyRange,
@@ -1259,7 +1317,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
             );
           }(),
-        ),
+        ),*/
         // status
         DataCell(
           Card(
@@ -1293,6 +1351,20 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             ),
           ),
         ),
+        // edit
+        DataCell(
+          Center(
+            child: GestureDetector(
+              onTap: () {
+                Get.toNamed('/productEdit', parameters: {"id": inActiveList.id.toString()});
+              },
+              child: Icon(
+                Icons.edit,
+                color: AppColor.iconViewColor,
+              ),
+            ),
+          ),
+        ),
         // change status
         DataCell(Center(
             child: Row(
@@ -1302,7 +1374,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 ),
                 GestureDetector(
                   onTap: (){
-                    productController.updateStatusItem(inActiveList.id??0,false);
+                    productController.updateStatusItem(inActiveList.id??0,false,false,false);
                   },
                   child: SvgPicture.asset('assets/svg/close-circle1.svg',
                       colorFilter: ColorFilter.mode(
@@ -1315,7 +1387,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                 ),
                 GestureDetector(
                   onTap: (){
-                    productController.updateStatusItem(inActiveList.id??0,true);
+                    productController.updateStatusItem(inActiveList.id??0,true,true,true);
                   },
                   child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
                       colorFilter: ColorFilter.mode(
@@ -1332,6 +1404,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
     ))
         .toList();
   }
+
 }
 
 

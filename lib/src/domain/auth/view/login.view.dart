@@ -24,6 +24,7 @@ class _LoginViewState extends State<LoginView> {
 
   final formKey = GlobalKey<FormState>();
   var controller=Get.find<AuthController>() ;
+  bool showPassword = true;
 
   @override
   void initState() {
@@ -37,7 +38,7 @@ class _LoginViewState extends State<LoginView> {
     return Scaffold(
       appBar: isDesktop ? null : AppBar(
         automaticallyImplyLeading: false,
-        actions: [
+        /*actions: [
           IconButton(
             icon: SvgPicture.asset(
               'assets/svg/exit.svg',
@@ -50,7 +51,7 @@ class _LoginViewState extends State<LoginView> {
             ),
             onPressed: () => FlutterExitApp.exitApp(),
           ),
-        ],
+        ],*/
       ),
       backgroundColor: AppColor.backGroundColor,
 
@@ -171,7 +172,7 @@ class _LoginViewState extends State<LoginView> {
                               textDirection: TextDirection.rtl,
                               controller: controller.passwordController,
                               autofillHints: [AutofillHints.password],
-                              obscureText: true,
+                              obscureText: showPassword,
                               decoration: InputDecoration(
                                 contentPadding: EdgeInsets.symmetric(
                                   vertical: isDesktop ? 20 : 16,
@@ -181,7 +182,17 @@ class _LoginViewState extends State<LoginView> {
                                 labelStyle: TextStyle(color: AppColor.textColor),
                                 prefixIcon: const Icon(Icons.lock_outline_rounded),
                                 prefixIconColor: AppColor.textColor,
-
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    showPassword ? Icons.visibility_off : Icons.visibility,
+                                    color: AppColor.textColor,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      showPassword = !showPassword;
+                                    });
+                                  },
+                                ),
                                 border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12)),
                                 floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -228,10 +239,10 @@ class _LoginViewState extends State<LoginView> {
                                   backgroundColor: AppColor.buttonColor,
                                 ),
                                 onPressed: () {
-                                  Get.toNamed('/home');
-                                  /*if (formKey.currentState!.validate()) {
+                                  //Get.toNamed('/home');
+                                  if (formKey.currentState!.validate()) {
                                     controller.login();
-                                  }*/
+                                  }
                                 },
                                 child: Text(
                                   'ورود',

@@ -37,8 +37,10 @@ class TotalBalanceModel {
   final double? totalBalanceQuantity;
   @JsonKey(name: "balanceQuantity")
   final double? balanceQuantity;
-  @JsonKey(name: "avaragePridicate")
-  final double? avaragePridicate;
+  @JsonKey(name: "averagePrediction")
+  final double? averagePrediction;
+  @JsonKey(name: "profitAfterBalancing")
+  final double? profitAfterBalancing;
   @JsonKey(name: "profit")
   final double? profit;
 
@@ -57,7 +59,8 @@ class TotalBalanceModel {
     required this.buyPercent,
     required this.totalBalanceQuantity,
     required this.balanceQuantity,
-    required this.avaragePridicate,
+    required this.averagePrediction,
+    required this.profitAfterBalancing,
     required this.profit,
   });
 

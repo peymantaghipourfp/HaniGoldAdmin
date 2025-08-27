@@ -242,20 +242,20 @@ class TotalBalanceWidget extends StatelessWidget {
                       ),
                       Row(mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          totalBalance.avaragePridicate!>0 ?
-                          Text(' ${totalBalance.avaragePridicate?.toStringAsFixed(4).seRagham(separator: ',') ?? 0} ریال ',style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor,fontWeight: FontWeight.bold),) :
-                          totalBalance.avaragePridicate!<0 ?
+                          totalBalance.averagePrediction!>0 ?
+                          Text(' ${totalBalance.averagePrediction?.toStringAsFixed(0).seRagham(separator: ',') ?? 0} ریال ',style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor,fontWeight: FontWeight.bold),) :
+                          totalBalance.averagePrediction!<0 ?
                           Row(
                             children: [
-                              Text(' ${totalBalance.avaragePridicate?.toStringAsFixed(4).seRagham(separator: ',') ?? 0}',style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold),textDirection: TextDirection.ltr,),
+                              Text(' ${totalBalance.averagePrediction?.toStringAsFixed(0).seRagham(separator: ',') ?? 0}',style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold),textDirection: TextDirection.ltr,),
                               Text('ریال',style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor),),
                             ],
                           ) :
-                          Text(' ${totalBalance.avaragePridicate?.toStringAsFixed(0) ?? 0} ریال ',style: AppTextStyle.bodyText,),
+                          Text(' ${totalBalance.averagePrediction?.toStringAsFixed(0) ?? 0} ریال ',style: AppTextStyle.bodyText,),
                           SizedBox(height: 1,),
-                          totalBalance.avaragePridicate!>0 ?
+                          totalBalance.averagePrediction!>0 ?
                           Icon(Icons.arrow_drop_up_sharp,color: AppColor.primaryColor,size: 20,) :
-                          totalBalance.avaragePridicate!<0 ?
+                          totalBalance.averagePrediction!<0 ?
                           Icon(Icons.arrow_drop_down,color: AppColor.accentColor,size: 20,) :
                           SizedBox()
                         ],

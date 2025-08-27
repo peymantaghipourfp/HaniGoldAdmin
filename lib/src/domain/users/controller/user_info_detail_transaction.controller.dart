@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../model/balance_item.model.dart';
 import '../model/header_info_user_transaction.model.dart';
@@ -20,6 +21,10 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:path/path.dart' as path;
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+
 
 
 enum PageStateDe{loading,err,empty,list}
@@ -41,6 +46,7 @@ class UserInfoDetailTransactionController extends GetxController{
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
    RxList<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   RxList<TransactionInfoItemModel> transactionInfoList=<TransactionInfoItemModel>[].obs;
+  RxList<TransactionInfoItemModel> transactionInfoListPdf=<TransactionInfoItemModel>[].obs;
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   BalanceModel? balanceModel;
   String? indexAccountPayerGet;
@@ -149,7 +155,7 @@ class UserInfoDetailTransactionController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getTransactionInfoListPager(id.value.toString());
   }
@@ -164,7 +170,9 @@ class UserInfoDetailTransactionController extends GetxController{
       var response = await userInfoTransactionRepository.getTransactionInfoListPager(
           startIndex: currentPage.value,
           toIndex: itemsPerPage.value,
-          accountId: id);
+          accountId: id,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      );
       isOpenMore.value=false;
       transactionInfoList.addAll(response.transactionInfoItems ?? []);
       print(transactionInfoList.length);
@@ -251,4 +259,192 @@ class UserInfoDetailTransactionController extends GetxController{
     }
   }
 
+  String getTypeText(String type) {
+    switch (type) {
+      case 'issue':
+        return 'حواله';
+      case "payment":
+        return 'پرداخت';
+      case "receive":
+        return 'دریافت';
+      case "reciept":
+        return 'برگشت';
+      case "sell":
+        return 'فروش';
+      case "buy":
+        return 'خرید';
+      case "deposit":
+        return 'واریز';
+      case "withdraw":
+        return 'برداشت';
+      default:
+        return 'نامعتبر';
+    }
+  }
+
+  // خروجی Pdf
+  Future<void> exportToPdf(String id) async {
+    try {
+
+      WidgetsFlutterBinding.ensureInitialized();
+      EasyLoading.show(status: 'دریافت فایل PDF...');
+
+      var response = await userInfoTransactionRepository.getTransactionInfoListForPdf(
+        startIndex: 1,
+        toIndex: 100000,
+        accountId: id,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      );
+      transactionInfoListPdf.assignAll(response.transactionInfoItems ?? []);
+      final List<TransactionInfoItemModel> allTransactions = transactionInfoListPdf;
+      final ByteData fontData = await rootBundle.load('assets/fonts/IRANSansX-Regular.ttf');
+      final ttf = pw.Font.ttf(fontData);
+      final pdf = pw.Document();
+      pdf.addPage(
+        pw.MultiPage(
+          pageFormat: PdfPageFormat.a4.landscape,
+          textDirection: pw.TextDirection.rtl,
+          maxPages: 2000,
+          theme: pw.ThemeData.withFont(base: ttf, fontFallback: [ttf]),
+          header: (pw.Context context) => buildHeaderTablePdf(),
+          build: (pw.Context context) => [
+            pw.Table(
+              border: pw.TableBorder.all(),
+              columnWidths: getColumnWidthsPdf(),
+              children: [
+                for (var tx in allTransactions)
+                  buildDataRowPdf(tx),
+              ],
+            ),
+          ],
+          footer: (pw.Context context) => buildPageNumberPdf(context.pageNumber, context.pagesCount),
+        ),
+      );
+
+      final bytes = await pdf.save();
+      final fileName = 'user_transactions_${headerInfoUserTransactionModel?.accountName ?? ''}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      if (kIsWeb) {
+        final blob = html.Blob([bytes], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: url)
+          ..download = fileName
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await Printing.sharePdf(
+          bytes: bytes,
+          filename: fileName,
+        );
+      }
+      EasyLoading.dismiss();
+      Get.snackbar('موفق', 'فایل PDF با موفقیت دریافت شد');
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar('خطا', 'خطا در دریافت فایل PDF: \n${e.toString()}');
+      print(e.toString());
+  }
+  }
+
+  Map<int, pw.TableColumnWidth> getColumnWidthsPdf() {
+    return {
+
+      0: pw.FlexColumnWidth(2.5), // مانده سکه
+      1: pw.FlexColumnWidth(2.5), // مانده ریالی
+      2: pw.FlexColumnWidth(2.5), // مانده طلایی
+      3: pw.FlexColumnWidth(2.5), // به مظنه
+      4: pw.FlexColumnWidth(3), // به حساب
+      5: pw.FlexColumnWidth(3), // از حساب
+      6: pw.FlexColumnWidth(3), // توضیحات
+      7: pw.FlexColumnWidth(3), // مبلغ
+      8: pw.FlexColumnWidth(3), // شرح
+      9: pw.FlexColumnWidth(2.5), // نوع تراکنش
+      10: pw.FlexColumnWidth(3), // تاریخ
+      11: pw.FlexColumnWidth(1.7), // ردیف
+    };
+  }
+
+  pw.Table buildHeaderTablePdf() {
+    return pw.Table(
+      columnWidths: getColumnWidthsPdf(),
+      border: pw.TableBorder.all(),
+      children: [
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColors.grey300),
+          children: [
+            buildDataCellPdf('مانده سکه', isCenter: true),
+            buildDataCellPdf('مانده ریالی', isCenter: true),
+            buildDataCellPdf('مانده طلایی', isCenter: true),
+            buildDataCellPdf('به مظنه', isCenter: true),
+            buildDataCellPdf('به حساب', isCenter: true),
+            buildDataCellPdf('از حساب', isCenter: true),
+            buildDataCellPdf('توضیحات', isCenter: true),
+            buildDataCellPdf('مبلغ', isCenter: true),
+            buildDataCellPdf('شرح', isCenter: true),
+            buildDataCellPdf('نوع', isCenter: true),
+            buildDataCellPdf('تاریخ', isCenter: true),
+            buildDataCellPdf('ردیف', isCenter: true),
+          ],
+        ),
+      ],
+    );
+  }
+
+  pw.Padding buildDataCellPdf(String text, {bool isCenter = false}) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(5.0),
+      child: pw.Text(text,
+        style: pw.TextStyle(fontSize: 8),
+        textAlign: isCenter ? pw.TextAlign.center : pw.TextAlign.right,
+        textDirection: pw.TextDirection.rtl,
+      ),
+    );
+  }
+
+  pw.TableRow buildDataRowPdf(TransactionInfoItemModel tx) {
+    String goldBalance = tx.balances?.where((b) => b.unitName == "گرم").map((b) => "${b.balance ?? ''} ${b.unitName ?? ''} ${b.itemName ?? ''}").join(", ") ?? '';
+    String rialBalance = tx.balances?.where((b) => b.unitName == "ریال").map((b) => "${b.balance?.toInt().toString().seRagham(separator: ',') ?? ''} ${b.unitName ?? ''} ${b.itemName ?? ''}").join(", ") ?? '';
+    String coinBalance = tx.balances?.where((b) => b.unitName == "عدد").map((b) => "${b.balance ?? ''} ${b.unitName ?? ''} ${b.itemName ?? ''}").join(", ") ?? '';
+
+    String price = '';
+
+    if (tx.type == 'sell' || tx.type == 'buy') {
+      price = tx.price?.toString().seRagham(separator: ',') ?? '';
+    }
+
+    return pw.TableRow(
+      children: [
+        buildDataCellPdf(coinBalance,isCenter: true),
+        buildDataCellPdf(rialBalance,isCenter: true),
+        buildDataCellPdf(goldBalance,isCenter: true),
+        buildDataCellPdf(price,isCenter: true),
+        buildDataCellPdf(tx.toWallet?.account?.name ?? '',isCenter: true),
+        buildDataCellPdf(tx.wallet?.account?.name ?? '',isCenter: true),
+        buildDataCellPdf(tx.description ?? '',isCenter: true),
+        buildDataCellPdf(tx.amount?.toString().seRagham(separator: ',') ?? '',isCenter: true),
+        buildDataCellPdf(tx.details != null && tx.details!.isNotEmpty ? tx.details!.map((e) => "عیار: ${e.carat ?? 0} مقدار: ${e.quantity ?? 0}وزن: ${e.weight ?? 0} ناخالصی: ${e.impurity ?? 0} نام آزمایشگاه: ${e.laboratoryName ?? ''} شماره آزمایشگاه: ${e.laboratoryId ?? 0}").join(' | ') : (tx.item?.itemUnit?.id == 1 ? "${tx.amount} عدد ${tx.item?.name ?? ''}" : tx.item?.itemUnit?.id == 2 ? "${tx.amount} گرم ${tx.item?.name ?? ''}" : "${tx.amount.toString().seRagham().toPersianDigit()} ریال ${tx.item?.name ?? ''}")),
+        buildDataCellPdf(getTypeText(tx.type ?? ''),isCenter: true),
+        buildDataCellPdf(tx.date?.toPersianDate() ?? '',isCenter: true),
+        buildDataCellPdf((tx.rowNum ?? '').toString(),isCenter: true),
+      ],
+    );
+  }
+
+  pw.Widget buildPageNumberPdf(int currentPage, int totalPages) {
+    return pw.Container(
+      alignment: pw.Alignment.center,
+      margin: const pw.EdgeInsets.only(top: 20),
+      child: pw.Text(
+          'صفحه${currentPage.toString().toPersianDigit()} از ${totalPages.toString().toPersianDigit()}',
+      style: pw.TextStyle(fontSize: 8),
+    ),
+    );
+  }
+
+  void clearFilter() {
+    paginated.value==null;
+    dateStartController.clear();
+    dateEndController.clear();
+    startDateFilter.value="";
+    endDateFilter.value="";
+  }
 }

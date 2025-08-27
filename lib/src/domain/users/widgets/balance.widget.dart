@@ -52,7 +52,49 @@ class _BalanceWidgetState extends State<BalanceWidget> {
           ),
           const Divider(height: 10.0,color: Colors.white,thickness: 0.5,),
           Column(
-            children: widget.listBalance.map((e)=>
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 5,
+                        backgroundColor: AppColor.textColor,
+                      ),
+                      SizedBox(width: 5,),
+                      Text(
+                        "مانده طلایی",
+                        style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                            fontWeight: FontWeight.normal,color: AppColor.iconViewColor ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                        Text(widget.listBalance.where((balance) => balance.item?.itemUnit?.name == 'گرم')
+                            .fold(0.0, (sum, balance) => sum + (balance.balance ?? 0)).toStringAsFixed(3),
+                          style: AppTextStyle.labelText.copyWith(fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                              color:widget.listBalance.where((balance) => balance.item?.itemUnit?.name == 'گرم')
+                                .fold(0.0, (sum, balance) => sum + (balance.balance ?? 0))>0?AppColor.primaryColor: AppColor.accentColor ),
+                          textDirection: TextDirection.ltr,),
+                      SizedBox(width: 8,),
+                      Text(
+                        "گرم",
+                        style: AppTextStyle.labelText.copyWith(fontSize: 10,
+                            fontWeight: FontWeight.normal,color: AppColor.textColor ),textDirection: TextDirection.ltr,
+                      ),
+                    ],
+                  ),
+                ],
+              )
+            ]
+          ),
+          SizedBox(height: 5,),
+          Column(
+            children:
+            widget.listBalance.map((e)=>
                 Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -72,11 +114,20 @@ class _BalanceWidgetState extends State<BalanceWidget> {
                 ),
                 Row(
                   children: [
+                    e.item?.itemUnit?.name=="ریال" ?
+                    Text(
+                "${e.balance?.toStringAsFixed(0)??0.0}".seRagham(),
+                      style: AppTextStyle.labelText.copyWith(fontSize: 14,
+                          //fontWeight: FontWeight.normal,color:e.balance!>0?AppColor.primaryColor: AppColor.accentColor ),textDirection: TextDirection.ltr,
+                          fontWeight: FontWeight.normal,color:(e.balance ?? 0.0) > 0?AppColor.primaryColor: AppColor.accentColor ),textDirection: TextDirection.ltr,
+                    ):
                     Text(
                       "${e.balance??0.0}".seRagham(),
                       style: AppTextStyle.labelText.copyWith(fontSize: 14,
-                          fontWeight: FontWeight.normal,color:e.balance!>0?AppColor.primaryColor: AppColor.accentColor ),textDirection: TextDirection.ltr,
+                          //fontWeight: FontWeight.normal,color:e.balance!>0?AppColor.primaryColor: AppColor.accentColor ),textDirection: TextDirection.ltr,
+                          fontWeight: FontWeight.normal,color:(e.balance ?? 0.0) > 0?AppColor.primaryColor: AppColor.accentColor ),textDirection: TextDirection.ltr,
                     ),
+
                     SizedBox(width: 8,),
                     Text(
                       e.item?.itemUnit?.name??"",

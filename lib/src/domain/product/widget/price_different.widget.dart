@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -24,10 +26,10 @@ class PriceDifferentWidget extends StatefulWidget {
 
   @override
 
-  State<PriceDifferentWidget> createState() => _PriceDifferentWidgetState();
+  State<PriceDifferentWidget> createState() => PriceDifferentWidgetState();
 }
 
-class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
+class PriceDifferentWidgetState extends State<PriceDifferentWidget> {
   TextEditingController differentPriceController1=TextEditingController();
   TextEditingController differentPriceController2=TextEditingController();
   TextEditingController differentPriceController3=TextEditingController();
@@ -40,7 +42,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
   String initialDifferentPrice2 = '';
   String initialDifferentPrice3 = '';
 
-  ProductController productController=Get.find<ProductController>();
+  ProductEditController productController=Get.find<ProductEditController>();
   bool isLoading=false;
   bool isSubmitting = false;
 
@@ -106,7 +108,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
     super.dispose();
   }
 
-  Future<void> submitDifferentPrice() async {
+  Future<void> submitDifferentPrice({bool showSnackbar = true}) async {
     if (isSubmitting || isLoading) return;
 
     isSubmitting = true;
@@ -124,7 +126,8 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
               .toEnglishDigit(),
         ),
         widget.mesghalPrice,
-        widget.itemUnitId
+        widget.itemUnitId,
+        showSnackbar: showSnackbar,
       );
     } finally {
       setState(() => isLoading = false);
@@ -136,12 +139,15 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Get.width < 600;
     return Row(
       children: [
         isLoading ?
         CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
-        SizedBox(height: 26,width: 43,
+        SizedBox(
+          height: 26,
+          width: isMobile ? 40 : 43,
           child: ElevatedButton(
             style: ButtonStyle(
                 padding: WidgetStatePropertyAll(
@@ -151,7 +157,7 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
                 WidgetStatePropertyAll(AppColor.primaryColor),
                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)))),
-            onPressed: submitDifferentPrice,
+            onPressed: () => submitDifferentPrice(showSnackbar: true),
             child: Text(
               'تایید',
               style: AppTextStyle.labelText,
@@ -160,72 +166,105 @@ class _PriceDifferentWidgetState extends State<PriceDifferentWidget> {
           ),
         ),
         SizedBox(width: 3,),
-        SizedBox(
-          height: 28,
-          width: 45,
-          child: TextFormField(
-            maxLength: 3,
-            controller: differentPriceController1,
-            focusNode: focusNode1,
-            style: AppTextStyle.labelText,
-            onFieldSubmitted: (value) => submitDifferentPrice(),
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: SizedBox(
+            height: 30,
+            width: isMobile ? 45 : 60,
+            child: TextFormField(
+              textAlign: TextAlign.center,
+              maxLength: 3,
+              controller: differentPriceController1,
+              focusNode: focusNode1,
+              style: AppTextStyle.labelText,
+              onFieldSubmitted: (value) => submitDifferentPrice(showSnackbar: true),
+              onTap: () {
+                differentPriceController1.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: differentPriceController1.text.length,
+                );
+              },
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                filled: true,
+                fillColor: AppColor.backGroundColor,
+                counterText: '',
+                hoverColor: AppColor.textFieldColor,
+                isDense: true,
               ),
-              filled: true,
-              fillColor: AppColor.textFieldColor,
-              counterText: '',
-              hoverColor: AppColor.backGroundColor,
-              isDense: true,
             ),
           ),
         ),
-        SizedBox(
-          height: 28,
-          width: 45,
-          child: TextFormField(
-            maxLength: 3,
-            controller: differentPriceController2,
-            focusNode: focusNode2,
-            style: AppTextStyle.labelText,
-            onFieldSubmitted: (value) => submitDifferentPrice(),
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: SizedBox(
+            height: 30,
+            width: isMobile ? 45 : 60,
+            child: TextFormField(
+              textAlign: TextAlign.center,
+              maxLength: 3,
+              controller: differentPriceController2,
+              focusNode: focusNode2,
+              style: AppTextStyle.labelText,
+              onFieldSubmitted: (value) => submitDifferentPrice(),
+              onTap: () {
+                differentPriceController2.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: differentPriceController2.text.length,
+                );
+              },
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                filled: true,
+                fillColor: AppColor.backGroundColor,
+                counterText: '',
+                hoverColor: AppColor.textFieldColor,
+                isDense: true,
               ),
-              filled: true,
-              fillColor: AppColor.textFieldColor,
-              counterText: '',
-              hoverColor: AppColor.backGroundColor,
-              isDense: true,
             ),
           ),
         ),
-        SizedBox(
-          height: 28,
-          width: 45,
-          child: TextFormField(
-            maxLength: 3,
-            controller: differentPriceController3,
-            focusNode: focusNode3,
-            style: AppTextStyle.labelText,
-            onFieldSubmitted: (value) => submitDifferentPrice(),
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.search,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 1),
+          child: SizedBox(
+            height: 30,
+            width: isMobile ? 45 : 60,
+            child: TextFormField(
+              textAlign: TextAlign.center,
+              maxLength: 3,
+              controller: differentPriceController3,
+              focusNode: focusNode3,
+              style: AppTextStyle.labelText,
+              onFieldSubmitted: (value) => submitDifferentPrice(),
+              onTap: () {
+                differentPriceController3.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: differentPriceController3.text.length,
+                );
+              },
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                filled: true,
+                fillColor: AppColor.backGroundColor,
+                counterText: '',
+                hoverColor: AppColor.textFieldColor,
+                isDense: true,
               ),
-              filled: true,
-              fillColor: AppColor.textFieldColor,
-              counterText: '',
-              hoverColor: AppColor.backGroundColor,
-              isDense: true,
             ),
           ),
         ),

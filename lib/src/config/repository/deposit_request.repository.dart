@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 
 class DepositRequestRepository{
@@ -12,6 +13,7 @@ class DepositRequestRepository{
 
   DepositRequestRepository(){
     depositRequestDio.options.baseUrl=BaseUrl.baseUrl;
+    depositRequestDio.interceptors.add(DioInterceptor());
   }
 
   Future<List<DepositRequestModel>> getDepositRequest(int withdrawId)async{
@@ -32,6 +34,7 @@ class DepositRequestRepository{
     required int? withdrawId,
     required int? walletId,
     required int? accountId,
+    required int? status,
     required double? amount,
     required double? requestAmount,
   })async{
@@ -110,10 +113,10 @@ class DepositRequestRepository{
         },
         "amount": amount,
         "requestAmount": requestAmount,
-        "paidAmount": 75.000,
-        "notPaidAmount": 0.000,
-        "status": 0,
-        "date": "2025-02-20T15:41:55",
+        /*"paidAmount": 75.000,
+        "notPaidAmount": 0.000,*/
+        "status": status,
+        //"date": "2025-02-20T15:41:55",
         "deposits": [],
         "rowNum": 1,
         "id": 1,
@@ -135,6 +138,7 @@ class DepositRequestRepository{
     required int? depositRequestId,
     required double? amount,
     required double? requestAmount,
+    required String? date,
   })async{
     try{
       Map<String , dynamic> depositRequestData={
@@ -150,10 +154,10 @@ class DepositRequestRepository{
         },
         "amount": amount,
         "requestAmount": requestAmount,
-        "paidAmount": 75.000,
-        "notPaidAmount": 0.000,
-        "status": 0,
-        "date": "2025-02-20T15:41:55",
+        /*"paidAmount": 75.000,
+        "notPaidAmount": 0.000,*/
+        "status": 1,
+        "date": date,
         "deposits": [],
         "rowNum": 1,
         "id": depositRequestId,

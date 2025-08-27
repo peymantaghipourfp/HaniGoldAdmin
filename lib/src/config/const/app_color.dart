@@ -9,7 +9,7 @@ class AppColor{
   static const Color primaryColor=Color(0xff1bc06e);
   static const Color secondaryColor=Color(0xFF2D3541);
   static const Color accentColor=Color(0xffe91e63);
-  static const Color purpleColor=Color(0xff6605b6);
+  static const Color purpleColor=Color(0xff50068d);
   static const Color buttonColor=Color(0xff02807e);
   static const Color circleColor=Color(0xff2f2b44);
   static const Color iconViewColor=Color(0xff969696);
@@ -17,4 +17,7 @@ class AppColor{
   static const Color dividerColor=Color(0xffe3c477);
   static const Color secondary2Color=Color(0xff499fa2);
   static const Color secondary3Color=Color(0xff40b6ca);
+  static const Color accent2Color=Color(0xFFFA114E);
+  static const Color successColor=Color(0xff4CAF50);
+  static const Color errorColor=Color(0xfff44336);
 }

@@ -2,6 +2,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/bank.repository.dart';
 import 'package:hanigold_admin/src/config/repository/bank_account.repository.dart';
@@ -9,16 +10,20 @@ import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
 import 'package:hanigold_admin/src/config/repository/withdraw.repository.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
+import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank_account_req.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
@@ -31,8 +36,10 @@ class WithdrawCreateController extends GetxController{
   //final formKey = GlobalKey<FormState>();
 
   final WithdrawController withdrawController=Get.find<WithdrawController>();
+  final WithdrawPendingController withdrawPendingController=Get.find<WithdrawPendingController>();
 
   final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController amountController=TextEditingController();
   final TextEditingController numberController=TextEditingController();
@@ -46,6 +53,7 @@ class WithdrawCreateController extends GetxController{
   final WithdrawRepository withdrawRepository=WithdrawRepository();
   final WalletRepository walletRepository=WalletRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<BankModel> bankList=<BankModel>[].obs;
@@ -67,6 +75,12 @@ class WithdrawCreateController extends GetxController{
   Rx<String> selectedBankName = Rx<String>("");
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   Timer? debounce;
+  final ImagePicker _picker = ImagePicker();
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  var recordId="".obs;
+  var uuid = Uuid();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  RxBool isUploadingDesktop = false.obs;
 
 
 
@@ -126,11 +140,76 @@ class WithdrawCreateController extends GetxController{
     fetchBankList();
     super.onInit();
   }
+  void onDropdownMenuStateChange(bool isOpen) {
+    if (isOpen) {
+      // Add a small delay to ensure the dropdown is fully opened
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchFocusNode.requestFocus();
+      });
+    } else {
+      resetAccountSearch();
+    }
+  }
   @override
   void onClose() {
     debounce?.cancel();
     searchController.dispose();
+    searchFocusNode.dispose();
     super.onClose();
+  }
+
+  Future<void> pickImageDesktop( ) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.addAll(images);
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> uploadImagesDesktop( String type, String entityType,) async {
+
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      insertWithdraw(recordId.value);
+    } else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          insertWithdraw(recordId.value);
+          Get.back();
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
+      }
+    }
+
   }
 
   // لیست کاربران
@@ -258,7 +337,8 @@ Future<void> fetchWallet(int id)async{
 }
 
   // درج درخواست
-Future<WithdrawModel?> insertWithdraw()async{
+Future<WithdrawModel?> insertWithdraw(String recId)async{
+  EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoading.value = true;
       var response = await withdrawRepository.insertWithdraw(
@@ -277,11 +357,12 @@ Future<WithdrawModel?> insertWithdraw()async{
           sheba: shebaController.text,
           description: descriptionController.text,
         date: DateTime.now().toIso8601String(),
-        status: 0,
+        status: 1,
+        recId:recId,
       );
       //print(response);
       if (response != null) {
-        Get.toNamed('/withdrawsList');
+        //Get.toNamed('/withdrawsList');
         Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
@@ -290,13 +371,16 @@ Future<WithdrawModel?> insertWithdraw()async{
                 'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor)));
         withdrawController.getWithdrawListPager();
+        withdrawPendingController.getWithdrawListStatusPager();
         balanceList.clear();
         clearList();
       }
     }
     catch(e){
+      EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
     }finally{
+      EasyLoading.dismiss();
       isLoading.value=false;
     }
     return null;

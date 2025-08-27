@@ -3,10 +3,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
+import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../model/item.model.dart';
 
 
 class PriceSellWidget extends StatefulWidget {
@@ -17,18 +19,19 @@ class PriceSellWidget extends StatefulWidget {
   final double mesghalDifferent;
   final int id;
   final int itemUnitId;
+  final Refrence? refrence;
 
   const PriceSellWidget({
 
-    super.key, required this.price1, required this.price2, required this.price3, required this.price4, required this.mesghalDifferent, required this.id, required this.itemUnitId
+    super.key, required this.price1, required this.price2, required this.price3, required this.price4, required this.mesghalDifferent, required this.id, required this.itemUnitId, required this.refrence
   });
 
 
   @override
-  State<PriceSellWidget> createState() => _PriceSellWidgetState();
+  State<PriceSellWidget> createState() => PriceSellWidgetState();
 }
 
-class _PriceSellWidgetState extends State<PriceSellWidget> {
+class PriceSellWidgetState extends State<PriceSellWidget> {
   TextEditingController priceController1 = TextEditingController();
   TextEditingController priceController2 = TextEditingController();
   TextEditingController priceController3 = TextEditingController();
@@ -127,7 +130,7 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
     super.dispose();
   }
 
-  Future<void> submitPrice() async {
+  Future<void> submitPrice({bool showSnackbar = true}) async {
     if (isSubmitting || isLoading) return;
     isSubmitting = true;
     setState(() => isLoading = true);
@@ -144,9 +147,9 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
           ).toEnglishDigit(),
         ),
         widget.mesghalDifferent,
-        widget.itemUnitId
+        widget.itemUnitId,
+        showSnackbar: showSnackbar,
       );
-      //productController.clearList();
     } finally {
       setState(() {
         isLoading = false;
@@ -159,122 +162,190 @@ class _PriceSellWidgetState extends State<PriceSellWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-        children: [
-          isLoading ?
-          CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
-          SizedBox(height: 27,width: 45,
-            child: ElevatedButton(
-              style: ButtonStyle(
-                  padding: WidgetStatePropertyAll(
-                      EdgeInsets.symmetric(horizontal: 4)),
-                  elevation: WidgetStatePropertyAll(5),
-                  backgroundColor:
-                  WidgetStatePropertyAll(AppColor.primaryColor),
-                  shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)))),
-              onPressed:submitPrice,
-              child: Text(
-                'تایید',
-                style: AppTextStyle.labelText,
-              ),
-
-            ),
-          ),
-          SizedBox(width: 3,),
-          SizedBox(
-            height: 28,
-            width: 45,
-            child: TextFormField(
-              maxLength: 3,
-              controller: priceController1,
-              focusNode: focusNode1,
-              maxLengthEnforcement: MaxLengthEnforcement.enforced,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: AppTextStyle.labelText,
-              onFieldSubmitted: (value) => submitPrice(),
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+    return FocusTraversalGroup(
+      policy: OrderedTraversalPolicy(),
+      child: Row(
+          children: [
+            isLoading ?
+            CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
+            SizedBox(height: 27,width: 45,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                    padding: WidgetStatePropertyAll(
+                        EdgeInsets.symmetric(horizontal: 4)),
+                    elevation: WidgetStatePropertyAll(5),
+                    backgroundColor:
+                    widget.refrence==null ? WidgetStatePropertyAll(AppColor.primaryColor) : WidgetStatePropertyAll(AppColor.iconViewColor),
+                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)))),
+                onPressed: () {
+                  widget.refrence==null ?
+                    submitPrice(showSnackbar: true):
+                      SizedBox.shrink();
+                },
+                child: Text(
+                  'تایید',
+                  style: AppTextStyle.labelText,
                 ),
-                filled: true,
-                fillColor: AppColor.textFieldColor,
-                counterText: '',
-                hoverColor: AppColor.backGroundColor,
-                isDense: true,
+      
               ),
             ),
-          ),
-          SizedBox(
-            height: 28,
-            width: 45,
-            child: TextFormField(
-              maxLength: 3,
-              controller: priceController2,
-              focusNode: focusNode2,
-              style: AppTextStyle.labelText,
-              onFieldSubmitted: (value) => submitPrice(),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+            SizedBox(width: 3,),
+            FocusTraversalOrder(
+              order: const NumericFocusOrder(4),
+              child: SizedBox(
+                height: 35,
+                width: 60,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 3,bottom: 1),
+                  child: TextFormField(
+                    textAlign: TextAlign.center,
+                    maxLength: 3,
+                    controller: priceController1,
+                    focusNode: focusNode1,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: AppTextStyle.labelText,
+                    onFieldSubmitted: (value) => submitPrice(showSnackbar: true),
+                    onTap: () {
+                      priceController1.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: priceController1.text.length,
+                      );
+                    },
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      filled: true,
+                      fillColor: AppColor.backGroundColor,
+                      counterText: '',
+                      hoverColor: AppColor.textFieldColor,
+                      isDense: true,
+                    ),
+                  ),
                 ),
-                filled: true,
-                fillColor: AppColor.textFieldColor,
-                counterText: '',
-                hoverColor: AppColor.backGroundColor,
-                isDense: true,
               ),
             ),
-          ),
-          SizedBox(
-            height: 28,
-            width: 45,
-            child: TextFormField(
-              maxLength: 3,
-              controller: priceController3,
-              focusNode: focusNode3,
-              style: AppTextStyle.labelText,
-              onFieldSubmitted: (value) => submitPrice(),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+            SizedBox(width: 1,),
+            FocusTraversalOrder(
+              order: const NumericFocusOrder(3),
+              child: SizedBox(
+                height: 35,
+                width: 60,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 3,bottom: 1),
+                  child: TextFormField(
+                    textAlign: TextAlign.center,
+                    maxLength: 3,
+                    controller: priceController2,
+                    focusNode: focusNode2,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: AppTextStyle.labelText,
+                    onFieldSubmitted: (value) => submitPrice(),
+                    onTap: () {
+                      priceController2.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: priceController2.text.length,
+                      );
+                    },
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      filled: true,
+                      fillColor: AppColor.backGroundColor,
+                      counterText: '',
+                      hoverColor: AppColor.textFieldColor,
+                      isDense: true,
+                    ),
+                  ),
                 ),
-                filled: true,
-                fillColor: AppColor.textFieldColor,
-                counterText: '',
-                hoverColor: AppColor.backGroundColor,
-                isDense: true,
               ),
             ),
-          ),
-          SizedBox(
-            height: 28,
-            width: 45,
-            child: TextFormField(
-              maxLength: 3,
-              controller: priceController4,
-              focusNode: focusNode4,
-              style: AppTextStyle.labelText,
-              onFieldSubmitted: (value) => submitPrice(),
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+            SizedBox(width: 1,),
+            FocusTraversalOrder(
+              order: const NumericFocusOrder(2),
+              child: SizedBox(
+                height: 35,
+                width: 60,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 3,bottom: 1),
+                  child: TextFormField(
+                    textAlign: TextAlign.center,
+                    maxLength: 3,
+                    controller: priceController3,
+                    focusNode: focusNode3,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: AppTextStyle.labelText,
+                    onFieldSubmitted: (value) => submitPrice(),
+                    /*onTap: () {
+                      priceController3.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: priceController3.text.length,
+                      );
+                    },*/
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      filled: true,
+                      fillColor: AppColor.backGroundColor,
+                      counterText: '',
+                      hoverColor: AppColor.textFieldColor,
+                      isDense: true,
+                    ),
+                  ),
                 ),
-                filled: true,
-                fillColor: AppColor.textFieldColor,
-                counterText: '',
-                hoverColor: AppColor.backGroundColor,
-                isDense: true,
               ),
             ),
-          ),
-        ],
-      );
+            SizedBox(width: 1,),
+            FocusTraversalOrder(
+              order: const NumericFocusOrder(1),
+              child: SizedBox(
+                height: 35,
+                width: 60,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 3,bottom: 1),
+                  child: TextFormField(
+                    textAlign: TextAlign.center,
+                    maxLength: 3,
+                    controller: priceController4,
+                    focusNode: focusNode4,
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    style: AppTextStyle.labelText,
+                    onFieldSubmitted: (value) => submitPrice(),
+                    onTap: () {
+                      priceController4.selection = TextSelection(
+                        baseOffset: 0,
+                        extentOffset: priceController4.text.length,
+                      );
+                    },
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      filled: true,
+                      fillColor: AppColor.backGroundColor,
+                      counterText: '',
+                      hoverColor: AppColor.textFieldColor,
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+    );
 
   }
 }

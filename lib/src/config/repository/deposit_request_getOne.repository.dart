@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 
 class DepositRequestGetOneRepository{
@@ -11,6 +12,7 @@ class DepositRequestGetOneRepository{
 
   DepositRequestGetOneRepository(){
     depositRequestGetOneDio.options.baseUrl=BaseUrl.baseUrl;
+    depositRequestGetOneDio.interceptors.add(DioInterceptor());
   }
 
   Future<DepositRequestModel> getOneDepositRequest(int depositRequestId)async{

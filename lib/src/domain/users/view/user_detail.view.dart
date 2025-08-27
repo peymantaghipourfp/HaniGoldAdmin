@@ -12,6 +12,7 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/user_info_detail_transaction.controller.dart';
 import '../controller/user_info_transaction.controller.dart';
 import '../model/account_child.model.dart';
@@ -1267,6 +1268,17 @@ class _UserDetailViewState extends State<UserDetailView> {
               ),
             ],
           ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         ));
   }
 }

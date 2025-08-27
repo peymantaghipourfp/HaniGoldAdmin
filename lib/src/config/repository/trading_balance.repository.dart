@@ -13,12 +13,14 @@ import '../../domain/users/model/balance_item.model.dart';
 import '../../domain/users/model/header_info_user_transaction.model.dart';
 import '../../domain/users/model/list_transaction_info_item.model.dart';
 import '../../domain/users/model/transaction_info_item.model.dart';
+import '../network/dio_Interceptor.dart';
 
 class TradingBalanceRepository{
 
   Dio tradingBalanceDio=Dio();
   TradingBalanceRepository(){
     tradingBalanceDio.options.baseUrl=BaseUrl.baseUrl;
+    tradingBalanceDio.interceptors.add(DioInterceptor());
   }
 
   Future<List<BalanceTradingModel>> getTradingBalanceList()async{

@@ -13,6 +13,7 @@ import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/order_update.controller.dart';
 import '../model/order.model.dart';
@@ -256,6 +257,38 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                 hideUnderline: true,
                                               ),
                                             ),
+                                            // کارتخوان
+                                            orderUpdateController.selectedBuySell.value?.id==0 && orderUpdateController.selectedItem.value?.hasCard==true ?
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                  bottom: 5),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text('کارتخوان', style: AppTextStyle.labelText
+                                                      .copyWith(
+                                                      fontSize: isDesktop ? 12 : 10,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: AppColor.primaryColor
+                                                  ),),
+                                                  SizedBox(width: 3),
+                                                  Checkbox(
+                                                    hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                                                    value: orderUpdateController.isCardChecked.value,
+                                                    onChanged: (value) async{
+                                                      orderUpdateController.isCardChecked.value = value!;
+                                                      if(value){
+                                                        orderUpdateController.priceController.text=((orderUpdateController.selectedItem.value!.mesghalPrice)!+(orderUpdateController.selectedItem.value?.cardPrice)!.toDouble()).toString().seRagham(separator: ',');
+                                                      }else{
+                                                        orderUpdateController.priceController.text=(orderUpdateController.selectedItem.value!.mesghalPrice).toString().seRagham(separator: ',');
+                                                      }
+                                                      orderUpdateController.updateTotalPrice();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ) :
+                                            SizedBox.shrink(),
                                             // کاربر
                                             Container(
                                               padding: EdgeInsets.only(
@@ -297,6 +330,8 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                                 .bodyText,
                                                             controller: orderUpdateController
                                                                 .searchController,
+                                                            focusNode: orderUpdateController
+                                                                .searchFocusNode,
                                                             decoration: InputDecoration(
                                                               isDense: true,
                                                               contentPadding:
@@ -324,26 +359,40 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                         ...orderUpdateController
                                                             .searchedAccounts
                                                             .map((account) =>
-                                                        account.name ?? "")
+                                                        '${account.id}:${account.name ?? ""}')
                                                       ].toList(),
                                                       selectedValue: orderUpdateController
-                                                          .selectedAccount.value
-                                                          ?.name,
+                                                          .selectedAccount.value != null
+                                                          ? '${orderUpdateController.selectedAccount.value!.id}:${orderUpdateController.selectedAccount.value!.name}'
+                                                          : null,
                                                       onChanged: (String? newValue) {
-                                                        var selectedAccount = orderUpdateController
-                                                            .searchedAccounts
-                                                            .firstWhere((account) =>
-                                                        account.name == newValue);
-                                                        orderUpdateController.changeSelectedAccount(selectedAccount);
+                                                        if (newValue ==
+                                                            'انتخاب کنید') {
+                                                          orderUpdateController
+                                                              .changeSelectedAccount(
+                                                              null);
+                                                        } else {
+                                                          var accountId = int.tryParse(newValue!.split(':')[0]);
+                                                          if (accountId != null) {
+                                                            var selectedAccount = orderUpdateController
+                                                                .searchedAccounts
+                                                                .firstWhere((account) =>
+                                                            account.id == accountId);
+                                                            orderUpdateController
+                                                                .changeSelectedAccount(
+                                                                selectedAccount);
+                                                          }
+                                                        }
                                                       },
-                                                      onMenuStateChange: (isOpen) {
+                                                      /*onMenuStateChange: (isOpen) {
                                                         if (isOpen) {
                                                           orderUpdateController.fetchAccountList();
                                                         }
                                                         if (!isOpen) {
                                                           orderUpdateController.resetAccountSearch();
                                                         }
-                                                      },
+                                                      },*/
+                                                      onMenuStateChange: orderUpdateController.onDropdownMenuStateChange,
                                                       backgroundColor: AppColor
                                                           .textFieldColor,
                                                       borderRadius: 7,
@@ -352,8 +401,8 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                       hideUnderline: true,
                                                     ),
                                                   ),
-                                                  SizedBox(width: 3),
-                                                  GestureDetector(
+                                                  /*SizedBox(width: 3),*/
+                                                  /*GestureDetector(
                                                     onTap: () {
                                                       Get.toNamed('/insertUser',parameters: {'id':0.toString()});
                                                     },
@@ -363,7 +412,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                       colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn),
 
                                                     ),
-                                                  ),
+                                                  ),*/
                                                 ],
                                               ),
                                             ),
@@ -397,6 +446,9 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                       style: AppTextStyle.labelText,
                                                       keyboardType: TextInputType
                                                           .number,
+                                                      inputFormatters: [
+                                                        FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                                      ],
                                                       onChanged: (value) {
                                                         // حذف کاماهای قبلی و فرمت جدید
                                                         String cleanedValue = value
@@ -970,6 +1022,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                                 .circular(
                                                                 10)))),
                                                 onPressed: (){
+                                                  if(orderUpdateController.selectedAccount.value!=null){
                                                     Get.defaultDialog(
                                                       backgroundColor: AppColor.backGroundColor,
                                                       title: "ویرایش سفارش خرید",
@@ -985,6 +1038,16 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                               Text('جزئیات خرید ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
                                                               SizedBox(height: 2,),
                                                               Divider(height: 1,color: AppColor.dividerColor,),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderUpdateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
                                                               SizedBox(height: 5,),
                                                               Row(
                                                                 children: [
@@ -1063,6 +1126,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                         ),
                                                       ),
                                                     );
+                                                  }
                                                 },
                                                 child: orderUpdateController
                                                     .isLoading.value
@@ -1103,99 +1167,111 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                                 .circular(
                                                                 10)))),
                                                 onPressed: () {
-                                                  Get.defaultDialog(
-                                                    backgroundColor: AppColor.backGroundColor,
-                                                    title: "ویرایش سفارش فروش",
-                                                    titleStyle: AppTextStyle.smallTitleText,
-                                                    middleText: "آیا از ویرایش سفارش مطمئن هستید؟",
-                                                    middleTextStyle: AppTextStyle.bodyText,
-                                                    content: Card(
-                                                      color: AppColor.backGroundColor,
-                                                      child: Padding(
-                                                        padding: const EdgeInsets.all(8.0),
-                                                        child: Column(
-                                                          children: [
-                                                            Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                            SizedBox(height: 2,),
-                                                            Divider(height: 1,color: AppColor.dividerColor,),
-                                                            SizedBox(height: 5,),
-                                                            Row(
-                                                              children: [
-                                                                SizedBox(width: 5,),
-                                                                Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                SizedBox(width: 2,),
-                                                                Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                Text(orderUpdateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
-                                                              ],
-                                                            ),
-                                                            SizedBox(height: 5,),
-                                                            Row(
-                                                              children: [
-                                                                SizedBox(width: 5,),
-                                                                Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                SizedBox(width: 2,),
-                                                                Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                Text(formatQuantity(double.parse(orderUpdateController.quantityController.text)), style: AppTextStyle.bodyText,),
-                                                              ],
-                                                            ),
-                                                            SizedBox(height: 5,),
-                                                            Row(
-                                                              children: [
-                                                                SizedBox(width: 5,),
-                                                                Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                SizedBox(width: 2,),
-                                                                Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                Text(orderUpdateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
-                                                              ],
-                                                            ),
-                                                            SizedBox(height: 5,),
-                                                            Row(
-                                                              children: [
-                                                                SizedBox(width: 5,),
-                                                                Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                SizedBox(width: 2,),
-                                                                Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                Text(orderUpdateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
-                                                              ],
-                                                            ),
-                                                            SizedBox(height: 5,),
-                                                            Row(
-                                                              children: [
-                                                                SizedBox(width: 5,),
-                                                                Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                SizedBox(width: 2,),
-                                                                Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                Text(orderUpdateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
-                                                              ],
-                                                            ),
-                                                          ],
+                                                  if(orderUpdateController.selectedAccount.value!=null){
+                                                    Get.defaultDialog(
+                                                      backgroundColor: AppColor.backGroundColor,
+                                                      title: "ویرایش سفارش فروش",
+                                                      titleStyle: AppTextStyle.smallTitleText,
+                                                      middleText: "آیا از ویرایش سفارش مطمئن هستید؟",
+                                                      middleTextStyle: AppTextStyle.bodyText,
+                                                      content: Card(
+                                                        color: AppColor.backGroundColor,
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: Column(
+                                                            children: [
+                                                              Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                              SizedBox(height: 2,),
+                                                              Divider(height: 1,color: AppColor.dividerColor,),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderUpdateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderUpdateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(formatQuantity(double.parse(orderUpdateController.quantityController.text)), style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderUpdateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderUpdateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                ],
+                                                              ),
+                                                              SizedBox(height: 5,),
+                                                              Row(
+                                                                children: [
+                                                                  SizedBox(width: 5,),
+                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                  SizedBox(width: 2,),
+                                                                  Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  Text(orderUpdateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
+                                                                ],
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    confirm: ElevatedButton(
-                                                      style: ButtonStyle(
-                                                          backgroundColor: WidgetStatePropertyAll(
-                                                              AppColor.primaryColor)),
-                                                      onPressed: () async {
-                                                        await orderUpdateController.updateOrder();
-                                                      },
-                                                      child: Text(
-                                                        'ویرایش',
-                                                        style: AppTextStyle
-                                                            .bodyText,
+                                                      confirm: ElevatedButton(
+                                                        style: ButtonStyle(
+                                                            backgroundColor: WidgetStatePropertyAll(
+                                                                AppColor.primaryColor)),
+                                                        onPressed: () async {
+                                                          await orderUpdateController.updateOrder();
+                                                        },
+                                                        child: Text(
+                                                          'ویرایش',
+                                                          style: AppTextStyle
+                                                              .bodyText,
+                                                        ),
                                                       ),
-                                                    ),
-                                                    cancel: ElevatedButton(
-                                                      style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
-                                                      onPressed: ()  {
-                                                        Get.back();
-                                                      },
-                                                      child: Text(
-                                                        'لغو',
-                                                        style: AppTextStyle.bodyText,
+                                                      cancel: ElevatedButton(
+                                                        style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
+                                                        onPressed: ()  {
+                                                          Get.back();
+                                                        },
+                                                        child: Text(
+                                                          'لغو',
+                                                          style: AppTextStyle.bodyText,
+                                                        ),
                                                       ),
-                                                    ),
-                                                  );
+                                                    );
+                                                  }
                                                 },
                                                 child: orderUpdateController.isLoading.value
                                                     ?
@@ -1246,6 +1322,17 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }

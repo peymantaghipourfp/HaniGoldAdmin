@@ -10,7 +10,7 @@ class TradingBalanceBindings implements Bindings{
   @override
   void dependencies() {
     Get.lazyPut(()=>TradingBalanceController());
-    Get.lazyPut(()=>HomeController());
+    //Get.lazyPut(()=>HomeController());
   }
 
 }

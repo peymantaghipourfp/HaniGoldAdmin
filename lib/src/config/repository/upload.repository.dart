@@ -5,13 +5,15 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 
+import '../network/dio_Interceptor.dart';
+
 class UploadRepository{
 
   final Dio uploadDio=Dio();
 
   UploadRepository(){
     uploadDio.options.baseUrl=BaseUrl.baseUrl;
-
+    uploadDio.interceptors.add(DioInterceptor());
   }
 
   Future<String> uploadImage({
@@ -52,6 +54,7 @@ class UploadRepositoryDesktop{
 
   UploadRepositoryDesktop(){
     uploadDio.options.baseUrl=BaseUrl.baseUrl;
+    uploadDio.interceptors.add(DioInterceptor());
   }
 
   Future<String> uploadImageDesktop({

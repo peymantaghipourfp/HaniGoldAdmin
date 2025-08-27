@@ -9,8 +9,8 @@ part of 'transaction_info_item_list_pager.model.dart';
 TransactionInfoItemListPagerModel _$TransactionInfoItemListPagerModelFromJson(
         Map<String, dynamic> json) =>
     TransactionInfoItemListPagerModel(
-      transactionInfoItems: (json['transactionReports'] as List<dynamic>)
-          .map((e) =>
+      transactionInfoItems: (json['transactionReports'] as List<dynamic>?)
+          ?.map((e) =>
               TransactionInfoItemModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       paginated:

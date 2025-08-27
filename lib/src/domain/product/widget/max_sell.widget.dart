@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
+import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -20,15 +21,15 @@ class MaxSellWidget extends StatefulWidget {
   });
 
   @override
-  State<MaxSellWidget> createState() => _MaxSellWidgetState();
+  State<MaxSellWidget> createState() => MaxSellWidgetState();
 }
 
-class _MaxSellWidgetState extends State<MaxSellWidget> {
+class MaxSellWidgetState extends State<MaxSellWidget> {
   TextEditingController maxSellController = TextEditingController();
   late FocusNode focusNode1;
   String? initialMaxSell;
 
-  ProductController productController = Get.find<ProductController>();
+  ProductEditController productController = Get.find<ProductEditController>();
   bool isLoading=false;
   bool isSubmitting = false;
 
@@ -62,7 +63,7 @@ class _MaxSellWidgetState extends State<MaxSellWidget> {
     super.dispose();
   }
 
-  Future<void> submitMaxSell() async {
+  Future<void> submitMaxSell({bool showSnackbar = true}) async {
     if (isSubmitting || isLoading) return;
     isSubmitting = true;
     setState(() => isLoading = true);
@@ -78,8 +79,8 @@ class _MaxSellWidgetState extends State<MaxSellWidget> {
         widget.maxBuy,
         widget.saleRange,
         widget.buyRange,
+        showSnackbar: showSnackbar,
       );
-      //productController.clearList();
     } finally {
       setState(() {
         isLoading = false;
@@ -92,12 +93,13 @@ class _MaxSellWidgetState extends State<MaxSellWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = Get.width < 600;
     return Row(
       children: [
         isLoading ?
         CircularProgressIndicator(
             valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
-        SizedBox(height: 27,width: 45,
+        SizedBox(height: 27,width: isMobile ? 40 : 45,
           child: ElevatedButton(
             style: ButtonStyle(
                 padding: WidgetStatePropertyAll(
@@ -107,7 +109,7 @@ class _MaxSellWidgetState extends State<MaxSellWidget> {
                 WidgetStatePropertyAll(AppColor.primaryColor),
                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)))),
-            onPressed:submitMaxSell,
+            onPressed: () => submitMaxSell(showSnackbar: true),
             child: Text(
               'تایید',
               style: AppTextStyle.labelText,
@@ -117,26 +119,36 @@ class _MaxSellWidgetState extends State<MaxSellWidget> {
         ),
         SizedBox(width: 3,),
         SizedBox(
-          height: 28,
-          width: 60,
-          child: TextFormField(
-            maxLength: 4,
-            controller: maxSellController,
-            focusNode: focusNode1,
-            maxLengthEnforcement: MaxLengthEnforcement.enforced,
-            keyboardType: TextInputType.number,
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            style: AppTextStyle.labelText,
-            onFieldSubmitted: (value) => submitMaxSell(),
-            decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(5),
+          height: 35,
+          width: isMobile ? 55 : 70,
+          child: Padding(
+            padding: const EdgeInsets.only(top: 3,bottom: 1),
+            child: TextFormField(
+              textAlign: TextAlign.center,
+              maxLength: 4,
+              controller: maxSellController,
+              focusNode: focusNode1,
+              maxLengthEnforcement: MaxLengthEnforcement.enforced,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              style: AppTextStyle.labelText,
+              onFieldSubmitted: (value) => submitMaxSell(showSnackbar: true),
+              onTap: () {
+                maxSellController.selection = TextSelection(
+                  baseOffset: 0,
+                  extentOffset: maxSellController.text.length,
+                );
+              },
+              decoration: InputDecoration(
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                filled: true,
+                fillColor: AppColor.backGroundColor,
+                counterText: '',
+                hoverColor: AppColor.textFieldColor,
+                isDense: true,
               ),
-              filled: true,
-              fillColor: AppColor.textFieldColor,
-              counterText: '',
-              hoverColor: AppColor.backGroundColor,
-              isDense: true,
             ),
           ),
         ),

@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
@@ -28,20 +29,23 @@ import 'package:file_saver/file_saver.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../config/const/app_color.dart';
+import '../../../config/const/audio.service.dart';
 import '../../../config/const/socket.service.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../account/model/account.model.dart';
 import '../../users/model/paginated.model.dart';
+import '../../base/base_controller.dart';
 
 
 
 enum PageState{loading,err,empty,list}
-class OrderController extends GetxController{
+class OrderController extends BaseController{
 
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
+  ScrollController balanceScrollController = ScrollController();
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
@@ -68,8 +72,8 @@ class OrderController extends GetxController{
 
   final List<TotalBalanceModel> totalBalanceList=<TotalBalanceModel>[].obs;
 
-  final SocketService socketService = Get.find();
-  StreamSubscription? _socketSubscription;
+  //SocketService socketService = Get.find<SocketService>();
+  StreamSubscription? socketSubscription;
 
   void toggleBalanceExpanded(int index) {
     if (expandedStates.containsKey(index)) {
@@ -129,6 +133,7 @@ class OrderController extends GetxController{
 
   @override
   void onInit() {
+    socketSubscription?.cancel();
     _listenToSocket();
     getOrderListPager();
     setupScrollListener();
@@ -136,25 +141,37 @@ class OrderController extends GetxController{
     super.onInit();
   }
   @override void onClose() {
+    socketSubscription?.cancel();
     scrollController.dispose();
+    balanceScrollController.dispose();
     super.onClose();
   }
 
   void _listenToSocket() {
-    _socketSubscription = socketService.messageStream.listen((message) {
+    socketSubscription?.cancel();
+    socketSubscription = socketService.messageStream.listen((message) {
       if (message is String) {
         try {
           final data = json.decode(message);
           if (data['channel'] == 'order') {
+            final socketOrder = SocketOrderModel.fromJson(data);
+            /*Get.snackbar('سفارش جدید', 'یک سفارش جدید ثبت شد.',
+              titleText: Text('سفارش جدید',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(
+                'یک سفارش جدید ثبت شد.', textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+            );*/
             getOrderListPager();
             fetchTotalBalanceList();
           }
         } catch (e) {
-          Get.log('Error processing socket message in ProductController: $e');
+          Get.log('Error processing socket message in OrderController: $e');
         }
       }
     }, onError: (error) {
-      Get.log('Socket stream error in ProductController: $error');
+      Get.log('Socket stream error in OrderController: $error');
     });
   }
 
@@ -268,7 +285,7 @@ class OrderController extends GetxController{
         startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
-      orderList.addAll(response.orders??[]);
+      orderList.assignAll(response.orders??[]);
       paginated.value=response.paginated;
       state.value=PageState.list;
 
@@ -396,7 +413,7 @@ class OrderController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getOrderListPager();
   }
@@ -567,7 +584,7 @@ class OrderController extends GetxController{
   String getStatusText(int status) {
     switch (status) {
       case 0:
-        return 'نامشخص';
+        return 'در انتظار';
       case 1:
         return 'تایید شده';
       case 2:

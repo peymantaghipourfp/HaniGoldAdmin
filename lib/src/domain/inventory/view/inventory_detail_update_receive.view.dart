@@ -18,6 +18,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 
 class InventoryDetailUpdateReceiveView extends StatefulWidget {
@@ -263,7 +264,7 @@ class _InventoryDetailUpdateReceiveViewState
                                                   ),
                                                 ),
                                               ),
-                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==1 ?
                                               // آزمایشگاه
                                               Column(
                                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,6 +382,97 @@ class _InventoryDetailUpdateReceiveViewState
                                               ):
                                                   SizedBox.shrink(),
 
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==1 ?
+                                              // شماره قبض
+                                              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  // شماره قبض
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'شماره قبض',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
+                                                    ),
+                                                  ),
+                                                  // شماره قبض
+                                                  Container(
+                                                    //height: 40,
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    TextFormField(
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty) {
+                                                          return 'لطفا شماره قبض را وارد کنید';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      controller: inventoryUpdateReceiveController
+                                                          .receiptNumberController,
+                                                      style: AppTextStyle.labelText,
+                                                      keyboardType: TextInputType
+                                                          .numberWithOptions(
+                                                          decimal: true),
+                                                      inputFormatters: [
+                                                        FilteringTextInputFormatter
+                                                            .allow(RegExp(
+                                                            r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                        TextInputFormatter
+                                                            .withFunction((
+                                                            oldValue, newValue) {
+                                                          // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                          String newText = newValue
+                                                              .text
+                                                              .replaceAll(
+                                                              '٠', '0')
+                                                              .replaceAll(
+                                                              '١', '1')
+                                                              .replaceAll(
+                                                              '٢', '2')
+                                                              .replaceAll(
+                                                              '٣', '3')
+                                                              .replaceAll(
+                                                              '٤', '4')
+                                                              .replaceAll(
+                                                              '٥', '5')
+                                                              .replaceAll(
+                                                              '٦', '6')
+                                                              .replaceAll(
+                                                              '٧', '7')
+                                                              .replaceAll(
+                                                              '٨', '8')
+                                                              .replaceAll(
+                                                              '٩', '9');
+
+                                                          return newValue
+                                                              .copyWith(
+                                                              text: newText,
+                                                              selection: TextSelection
+                                                                  .collapsed(
+                                                                  offset: newText
+                                                                      .length));
+                                                        }),
+                                                      ],
+                                                      decoration: InputDecoration(
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius
+                                                              .circular(10),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor
+                                                            .textFieldColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
                                               // مقدار
                                               Container(
                                                 padding: EdgeInsets.only(
@@ -474,14 +566,14 @@ class _InventoryDetailUpdateReceiveViewState
                                               ),
 
                                               inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
-                                              // ناخالصی
+                                              // عیار
                                               Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Container(
                                                     padding: EdgeInsets.only(
                                                         bottom: 3, top: 5),
                                                     child: Text(
-                                                      'ناخالصی',
+                                                      'عیار',
                                                       style: AppTextStyle.labelText
                                                           .copyWith(
                                                           fontSize: isDesktop
@@ -489,7 +581,7 @@ class _InventoryDetailUpdateReceiveViewState
                                                               : 10),
                                                     ),
                                                   ),
-                                                  // ناخالصی
+                                                  // عیار
                                                   Container(
                                                     //height: 50,
                                                     padding: EdgeInsets.only(
@@ -497,10 +589,17 @@ class _InventoryDetailUpdateReceiveViewState
                                                     child:
                                                     IntrinsicHeight(
                                                       child: TextFormField(
+                                                        validator: (value) {
+                                                          if (value == null ||
+                                                              value.isEmpty) {
+                                                            return 'لطفا عیار را وارد کنید';
+                                                          }
+                                                          return null;
+                                                        },
                                                         autovalidateMode: AutovalidateMode
                                                             .onUserInteraction,
                                                         controller: inventoryUpdateReceiveController
-                                                            .impurityController,
+                                                            .caratController,
                                                         style: AppTextStyle
                                                             .labelText,
                                                         keyboardType: TextInputType
@@ -656,14 +755,14 @@ class _InventoryDetailUpdateReceiveViewState
                                               SizedBox.shrink(),
 
                                               inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
-                                              // عیار
+                                              // ناخالصی
                                               Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Container(
                                                     padding: EdgeInsets.only(
                                                         bottom: 3, top: 5),
                                                     child: Text(
-                                                      'عیار',
+                                                      'ناخالصی',
                                                       style: AppTextStyle.labelText
                                                           .copyWith(
                                                           fontSize: isDesktop
@@ -671,7 +770,7 @@ class _InventoryDetailUpdateReceiveViewState
                                                               : 10),
                                                     ),
                                                   ),
-                                                  // عیار
+                                                  // ناخالصی
                                                   Container(
                                                     //height: 50,
                                                     padding: EdgeInsets.only(
@@ -682,7 +781,7 @@ class _InventoryDetailUpdateReceiveViewState
                                                         autovalidateMode: AutovalidateMode
                                                             .onUserInteraction,
                                                         controller: inventoryUpdateReceiveController
-                                                            .caratController,
+                                                            .impurityController,
                                                         style: AppTextStyle
                                                             .labelText,
                                                         keyboardType: TextInputType
@@ -746,46 +845,6 @@ class _InventoryDetailUpdateReceiveViewState
                                               ):
                                               SizedBox.shrink(),
 
-                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
-                                                  Column(
-                                                    children: [
-                                                      // شماره قبض
-                                                      Container(
-                                                        padding: EdgeInsets.only(
-                                                            bottom: 3, top: 5),
-                                                        child: Text(
-                                                          'شماره قبض',
-                                                          style: AppTextStyle.labelText
-                                                              .copyWith(
-                                                              fontSize: isDesktop
-                                                                  ? 12
-                                                                  : 10),
-                                                        ),
-                                                      ),
-                                                      // شماره قبض
-                                                      Container(
-                                                        height: 40,
-                                                        padding: EdgeInsets.only(
-                                                            bottom: 5),
-                                                        child:
-                                                        TextFormField(
-                                                          controller: inventoryUpdateReceiveController
-                                                              .receiptNumberController,
-                                                          style: AppTextStyle.labelText,
-                                                          decoration: InputDecoration(
-                                                            border: OutlineInputBorder(
-                                                              borderRadius: BorderRadius
-                                                                  .circular(10),
-                                                            ),
-                                                            filled: true,
-                                                            fillColor: AppColor
-                                                                .textFieldColor,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ):
-                                                  SizedBox.shrink(),
                                               // تاریخ
                                               Container(
                                                 padding: EdgeInsets.only(
@@ -1127,6 +1186,17 @@ class _InventoryDetailUpdateReceiveViewState
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }

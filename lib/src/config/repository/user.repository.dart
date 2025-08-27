@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
@@ -10,11 +11,13 @@ import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
 import '../../domain/users/model/city_item.model.dart';
 import '../../domain/users/model/list_user_account.model.dart';
 import '../../domain/users/model/state_item.model.dart';
+import '../network/dio_Interceptor.dart';
 
 class UserRepository {
   Dio userDio = Dio();
   UserRepository() {
     userDio.options.baseUrl = BaseUrl.baseUrl;
+    userDio.interceptors.add(DioInterceptor());
   }
 
   Future<ListUserModel> getUserListExport(
@@ -42,7 +45,7 @@ class UserRepository {
                     : [],
               }
             ],
-            "orderBy": "Account.Name",
+            "orderBy": "Account.StartDate",
             "orderByType": "DESC",
             "StartIndex": startIndex,
             "ToIndex": toIndex
@@ -50,7 +53,8 @@ class UserRepository {
         }
       };
       final response = await userDio.post('Account/getWrapper', data: options);
-      print(response);
+      print("request getUserListExport : $options" );
+      print("response getUserListExport : ${response.data}" );
       return ListUserModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -101,7 +105,7 @@ class UserRepository {
           : {
               "options": {
                 "account": {
-                  "orderBy": "Account.Name",
+                  "orderBy": "Account.StartDate",
                   "orderByType": "DESC",
                   "StartIndex": startIndex,
                   "ToIndex": toIndex
@@ -109,7 +113,8 @@ class UserRepository {
               }
             };
       final response = await userDio.post('Account/getWrapper', data: options);
-      print(response);
+      print("request getUserList : $options" );
+      print("response getUserList : ${response.data}" );
       return ListUserModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -173,7 +178,7 @@ class UserRepository {
               }
             ],
             "orderBy": "users.Id",
-            "orderByType": "asc",
+            "orderByType": "desc",
             "StartIndex": startIndex,
             "ToIndex": toIndex
           }
@@ -181,7 +186,8 @@ class UserRepository {
       };
 
       final response = await userDio.post('User/getWrapper', data: options);
-      print(response);
+      print("request getUserAccountListPager : $options" );
+      print("response getUserAccountListPager : ${response.data}" );
       return ListUserAccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -204,7 +210,8 @@ class UserRepository {
         }
       };
       final response = await userDio.post('City/get', data: options);
-      print(response);
+      print("request getCityList : $options" );
+      print("response getCityList : ${response.data}" );
       List<dynamic> data = response.data;
       return data.map((city) => CityItemModel.fromJson(city)).toList();
     } catch (e) {
@@ -228,7 +235,8 @@ class UserRepository {
         }
       };
       final response = await userDio.post('State/get', data: options);
-      print(response);
+      print("request getStateList : $options" );
+      print("response getStateList : ${response.data}" );
       List<dynamic> data = response.data;
       return data.map((state) => StateItemModel.fromJson(state)).toList();
     } catch (e) {
@@ -236,14 +244,36 @@ class UserRepository {
     }
   }
 
+  Future<List<AccountGroupModel>> getAccountGroup() async {
+    try {
+      Map<String, dynamic> options = {
+        "options" : { "accountGroup" :{
+          "orderBy": "AccountGroup.Name",
+          "orderByType": "asc",
+          "StartIndex": 1,
+          "ToIndex": 1000000
+        }}
+      };
+      final response = await userDio.post('AccountGroup/get', data: options);
+      print("request getAccountGroup : $options" );
+      print("response getAccountGroup : ${response.data}" );
+      List<dynamic> data = response.data;
+      return data.map((group) => AccountGroupModel.fromJson(group)).toList();
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+
   Future<AccountModel> insertUser({
+    required int accountGroupId,
     required String name,
     required String mobile,
     required String phoneNumber,
     required String email,
     required String user,
     required bool hasDeposit,
-    required String password,
+    //required String password,
     required String state,
     required int idState,
     required String city,
@@ -253,10 +283,14 @@ class UserRepository {
     try {
       Map<String, dynamic> options = {
         "type": 1,
-        "code": "1",
+        "code": null,
         "hasDeposit": hasDeposit,
         "name": name,
         "parent": {"infos": []},
+        "accountGroup": {
+          "id": accountGroupId,
+          "infos": []
+        },
         "addresses": [
           {
             "StateMode": 1,
@@ -330,7 +364,9 @@ class UserRepository {
         "infos": []
       };
       final response = await userDio.post('Account/insert', data: options);
-      print(response);
+      print('Status Code insertUser: ${response.statusCode}');
+      print("request insertUser : $options" );
+      print("response insertUser : ${response.data}" );
       return AccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -338,6 +374,7 @@ class UserRepository {
   }
 
   Future<AccountModel> updateUser({
+    required int accountGroupId,
     required String name,
     required int id,
     required String mobile,
@@ -345,7 +382,7 @@ class UserRepository {
     required String email,
     required String user,
     required bool hasDeposit,
-    required String password,
+    //required String password,
     required String state,
     required int idState,
     required String city,
@@ -359,6 +396,10 @@ class UserRepository {
         "hasDeposit": hasDeposit,
         "name": name,
         "parent": {"infos": []},
+        "accountGroup": {
+          "id": accountGroupId,
+          "infos": []
+        },
         "addresses": [
           {
             "StateMode": 1,
@@ -432,7 +473,9 @@ class UserRepository {
         "infos": []
       };
       final response = await userDio.put('Account/Update', data: options);
-      print(response);
+      print('Status Code updateUser: ${response.statusCode}');
+      print("request updateUser : $options" );
+      print("response updateUser : ${response.data}" );
       return AccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -470,7 +513,9 @@ class UserRepository {
         "infos": []
       };
       final response = await userDio.put('User/update', data: options);
-      print(response);
+      print('Status Code updateUserAccount: ${response.statusCode}');
+      print("request updateUserAccount : $options" );
+      print("response updateUserAccount : ${response.data}" );
       return AccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -507,7 +552,9 @@ class UserRepository {
         "infos": []
       };
       final response = await userDio.put('User/updateStatus', data: options);
-      print(response);
+      print('Status Code updateStatusUserAccount: ${response.statusCode}');
+      print("request updateStatusUserAccount : $options" );
+      print("response updateStatusUserAccount : ${response.data}" );
       return AccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -521,7 +568,8 @@ class UserRepository {
     try {
       final response = await userDio
           .put('Account/updateStatus', data: {"status": status, "id": id});
-      print(response);
+      print('Status Code updateStatus: ${response.statusCode}');
+      print("response updateStatus : ${response.data}" );
       return AccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');
@@ -534,7 +582,8 @@ class UserRepository {
     try {
       final response =
           await userDio.get('Account/getOne', queryParameters: {"id": id});
-      print(response);
+      print('Status Code getOneAccount: ${response.statusCode}');
+      print("response getOneAccount : ${response.data}" );
       return AccountModel.fromJson(response.data);
     } catch (e) {
       throw ErrorException('خطا:$e');

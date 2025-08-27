@@ -8,6 +8,8 @@ part of 'transaction_item.model.dart';
 
 TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
     TransactionModel(
+      toId: (json['toId'] as num?)?.toInt(),
+      fromId: (json['fromId'] as num?)?.toInt(),
       amount: (json['amount'] as num?)?.toInt(),
       date: json['date'] as String?,
       type: json['type'] as String?,
@@ -28,6 +30,9 @@ TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
       item: json['item'] == null
           ? null
           : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
+      toItem: json['toItem'] == null
+          ? null
+          : ItemModel.fromJson(json['toItem'] as Map<String, dynamic>),
       balances: (json['balances'] as List<dynamic>?)
           ?.map((e) => BalanceModel.fromJson(e as Map<String, dynamic>))
           .toList(),
@@ -40,11 +45,14 @@ TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
       rowNum: (json['rowNum'] as num?)?.toInt(),
       recId: json['recId'] as String?,
       id: (json['id'] as num?)?.toInt(),
+      isCard: json['isCard'] as bool?,
       infos: json['infos'] as List<dynamic>?,
     );
 
 Map<String, dynamic> _$TransactionModelToJson(TransactionModel instance) =>
     <String, dynamic>{
+      'toId': instance.toId,
+      'fromId': instance.fromId,
       'amount': instance.amount,
       'date': instance.date,
       'type': instance.type,
@@ -55,11 +63,13 @@ Map<String, dynamic> _$TransactionModelToJson(TransactionModel instance) =>
       'toWallet': instance.toWallet,
       'toAccount': instance.toAccount,
       'item': instance.item,
+      'toItem': instance.toItem,
       'balances': instance.balances,
       'tobalances': instance.tobalances,
       'details': instance.details,
       'rowNum': instance.rowNum,
       'recId': instance.recId,
       'id': instance.id,
+      'isCard': instance.isCard,
       'infos': instance.infos,
     };

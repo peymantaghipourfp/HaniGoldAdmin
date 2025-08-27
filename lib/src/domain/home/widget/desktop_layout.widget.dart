@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
+import 'package:hanigold_admin/src/widget/side_menu_fix.widget.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -13,7 +14,7 @@ Widget buildDesktopLayout() {
   return Row(
     children: [
         // Navigation Rail
-        SideMenu(),
+        SideMenuFix(),
         // Main Content Area
         Expanded(
           child: _MainContent(),
@@ -64,9 +65,9 @@ Widget _buildStatsGrid() {
       crossAxisSpacing: 15,
       childAspectRatio: 1.3,
       children: [
-        _buildStatCard('سفارشات امروز', '۱۲۳', Icons.shopping_basket),
-        _buildStatCard('تراز', '۵۰۰٬۰۰۰ تومان', Icons.account_balance),
-        _buildStatCard('کاربران فعال', '1', Icons.people_alt),
+        _buildStatCard('سفارشات امروز', '', Icons.shopping_basket),
+        _buildStatCard('تراز', '', Icons.account_balance),
+        _buildStatCard('کاربران فعال', '', Icons.people_alt),
       ],
     ),
   );

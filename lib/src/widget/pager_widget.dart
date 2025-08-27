@@ -27,7 +27,7 @@ class PagerWidget extends StatelessWidget {
                 selectedItemColor: AppColor.secondary3Color,
                 backgroundColor: AppColor.backGroundColor,
                 itemTextStyle:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
-                disabledItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.appBarColor.withOpacity(0.5)),
+                disabledItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor.withOpacity(0.5)),
                 selectedItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
                 itemBorderColor: AppColor.textColor
             ),

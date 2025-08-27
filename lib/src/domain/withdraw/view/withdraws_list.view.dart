@@ -1,4 +1,5 @@
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -12,12 +13,14 @@ import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import 'deposit_request_update.view.dart';
 
 class WithdrawsListView extends StatefulWidget {
@@ -220,6 +223,26 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                     },
                                     child: Text(
                                       'برداشت جدید',
+                                      style: AppTextStyle.labelText,
+                                    ),
+                                  ),
+                                  SizedBox(width: 5,),
+                                  // لیست برداشت های در انتظار
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(horizontal: 7)),
+                                        elevation: WidgetStatePropertyAll(5),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(AppColor.purpleColor),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5)))),
+                                    onPressed: () {
+                                      Get.toNamed('/withdrawsPendingList');
+                                    },
+                                    child: Text(
+                                      'برداشت های در انتظار',
                                       style: AppTextStyle.labelText,
                                     ),
                                   ),
@@ -788,7 +811,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                             CrossAxisAlignment.start,
                                                             children: [
                                                               Text(
-                                                                'شماره تماس',
+                                                                'نام دارنده حساب',
                                                                 style: AppTextStyle.labelText.copyWith(
                                                                     fontSize: 11,
                                                                     fontWeight: FontWeight.normal,
@@ -799,40 +822,20 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                 child: TextFormField(
                                                                   autovalidateMode: AutovalidateMode
                                                                       .onUserInteraction,
-                                                                  controller: withdrawController.mobileFilterController,
+                                                                  controller: withdrawController.ownerNameFilterController,
                                                                   style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                                                  textAlign: TextAlign.center,
-                                                                  keyboardType:TextInputType.phone,
-                                                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                                    TextInputFormatter.withFunction((oldValue, newValue) {
-                                                                      // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                                      String newText = newValue.text
-                                                                          .replaceAll('٠', '0')
-                                                                          .replaceAll('١', '1')
-                                                                          .replaceAll('٢', '2')
-                                                                          .replaceAll('٣', '3')
-                                                                          .replaceAll('٤', '4')
-                                                                          .replaceAll('٥', '5')
-                                                                          .replaceAll('٦', '6')
-                                                                          .replaceAll('٧', '7')
-                                                                          .replaceAll('٨', '8')
-                                                                          .replaceAll('٩', '9');
-
-                                                                      return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
-                                                                    }),
-                                                                  ],
+                                                                  textAlign: TextAlign.start,
+                                                                  keyboardType:TextInputType.text,
                                                                   decoration: InputDecoration(
                                                                     contentPadding:
                                                                     const EdgeInsets.symmetric(
                                                                         vertical: 11,horizontal: 15
-
                                                                     ),
                                                                     isDense: true,
                                                                     border: OutlineInputBorder(
                                                                       borderRadius:
                                                                       BorderRadius.circular(6),
                                                                     ),
-
                                                                     filled: true,
                                                                     fillColor: AppColor.textFieldColor,
                                                                     errorMaxLines: 1,
@@ -841,7 +844,46 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                               ),
                                                             ],
                                                           ),
-                                                          SizedBox(height: 8),
+                                                          SizedBox(height: 8,),
+                                                          /*Column(
+                                                            crossAxisAlignment:
+                                                            CrossAxisAlignment.start,
+                                                            children: [
+                                                              Text(
+                                                                'مبلغ',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                    fontSize: 11,
+                                                                    fontWeight: FontWeight.normal,
+                                                                    color: AppColor.textColor),
+                                                              ),
+                                                              SizedBox(height: 10,),
+                                                              IntrinsicHeight(
+                                                                child: TextFormField(
+                                                                  autovalidateMode: AutovalidateMode
+                                                                      .onUserInteraction,
+                                                                  controller: withdrawController.paidAmountFilterController,
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                  textAlign: TextAlign.start,
+                                                                  keyboardType:TextInputType.text,
+                                                                  decoration: InputDecoration(
+                                                                    contentPadding:
+                                                                    const EdgeInsets.symmetric(
+                                                                        vertical: 11,horizontal: 15
+                                                                    ),
+                                                                    isDense: true,
+                                                                    border: OutlineInputBorder(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(6),
+                                                                    ),
+                                                                    filled: true,
+                                                                    fillColor: AppColor.textFieldColor,
+                                                                    errorMaxLines: 1,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                          SizedBox(height: 8,),*/
                                                           Column(
                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
@@ -1001,7 +1043,11 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                         colorFilter:
                                         ColorFilter
                                             .mode(
-                                          withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
+                                          withdrawController.nameFilterController.text!="" ||
+                                              withdrawController.ownerNameFilterController.text!="" ||
+                                              withdrawController.paidAmountFilterController.text!="" ||
+                                              withdrawController.dateStartController.text!="" ||
+                                              withdrawController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                               .textColor,
                                           BlendMode
                                               .srcIn,
@@ -1016,7 +1062,11 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                           .copyWith(
                                           fontSize: isDesktop
                                               ? 12
-                                              : 10,color:  withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                              : 10,color:  withdrawController.nameFilterController.text!="" ||
+                                          withdrawController.ownerNameFilterController.text!="" ||
+                                          withdrawController.paidAmountFilterController.text!="" ||
+                                          withdrawController.dateStartController.text!="" ||
+                                          withdrawController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                     ),
                                   ],
                                 ),
@@ -1072,6 +1122,26 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                               },
                                               child: Text(
                                                 'ایجاد درخواست برداشت جدید',
+                                                style: AppTextStyle.labelText,
+                                              ),
+                                            ),
+                                            SizedBox(width: 5,),
+                                            // لیست برداشت های در انتظار
+                                            ElevatedButton(
+                                              style: ButtonStyle(
+                                                  padding: WidgetStatePropertyAll(
+                                                      EdgeInsets.symmetric(horizontal: 7)),
+                                                  elevation: WidgetStatePropertyAll(5),
+                                                  backgroundColor:
+                                                  WidgetStatePropertyAll(AppColor.purpleColor),
+                                                  shape: WidgetStatePropertyAll(
+                                                      RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius.circular(5)))),
+                                              onPressed: () {
+                                                Get.toNamed('/withdrawsPendingList');
+                                              },
+                                              child: Text(
+                                                'لیست برداشت های در انتظار',
                                                 style: AppTextStyle.labelText,
                                               ),
                                             ),
@@ -1640,7 +1710,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                       CrossAxisAlignment.start,
                                                                       children: [
                                                                         Text(
-                                                                          'شماره تماس',
+                                                                          'نام دارنده حساب',
                                                                           style: AppTextStyle.labelText.copyWith(
                                                                               fontSize: 11,
                                                                               fontWeight: FontWeight.normal,
@@ -1651,40 +1721,20 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                           child: TextFormField(
                                                                             autovalidateMode: AutovalidateMode
                                                                                 .onUserInteraction,
-                                                                            controller: withdrawController.mobileFilterController,
+                                                                            controller: withdrawController.ownerNameFilterController,
                                                                             style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                                                            textAlign: TextAlign.center,
-                                                                            keyboardType:TextInputType.phone,
-                                                                            inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                                              TextInputFormatter.withFunction((oldValue, newValue) {
-                                                                                // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                                                String newText = newValue.text
-                                                                                    .replaceAll('٠', '0')
-                                                                                    .replaceAll('١', '1')
-                                                                                    .replaceAll('٢', '2')
-                                                                                    .replaceAll('٣', '3')
-                                                                                    .replaceAll('٤', '4')
-                                                                                    .replaceAll('٥', '5')
-                                                                                    .replaceAll('٦', '6')
-                                                                                    .replaceAll('٧', '7')
-                                                                                    .replaceAll('٨', '8')
-                                                                                    .replaceAll('٩', '9');
-
-                                                                                return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
-                                                                              }),
-                                                                            ],
+                                                                            textAlign: TextAlign.start,
+                                                                            keyboardType:TextInputType.text,
                                                                             decoration: InputDecoration(
                                                                               contentPadding:
                                                                               const EdgeInsets.symmetric(
                                                                                   vertical: 11,horizontal: 15
-
                                                                               ),
                                                                               isDense: true,
                                                                               border: OutlineInputBorder(
                                                                                 borderRadius:
                                                                                 BorderRadius.circular(6),
                                                                               ),
-
                                                                               filled: true,
                                                                               fillColor: AppColor.textFieldColor,
                                                                               errorMaxLines: 1,
@@ -1693,7 +1743,46 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                         ),
                                                                       ],
                                                                     ),
-                                                                    SizedBox(height: 8),
+                                                                    SizedBox(height: 8,),
+                                                                    /*Column(
+                                                                      crossAxisAlignment:
+                                                                      CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'مبلغ',
+                                                                          style: AppTextStyle.labelText.copyWith(
+                                                                              fontSize: 11,
+                                                                              fontWeight: FontWeight.normal,
+                                                                              color: AppColor.textColor),
+                                                                        ),
+                                                                        SizedBox(height: 10,),
+                                                                        IntrinsicHeight(
+                                                                          child: TextFormField(
+                                                                            autovalidateMode: AutovalidateMode
+                                                                                .onUserInteraction,
+                                                                            controller: withdrawController.paidAmountFilterController,
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                            textAlign: TextAlign.start,
+                                                                            keyboardType:TextInputType.text,
+                                                                            decoration: InputDecoration(
+                                                                              contentPadding:
+                                                                              const EdgeInsets.symmetric(
+                                                                                  vertical: 11,horizontal: 15
+                                                                              ),
+                                                                              isDense: true,
+                                                                              border: OutlineInputBorder(
+                                                                                borderRadius:
+                                                                                BorderRadius.circular(6),
+                                                                              ),
+                                                                              filled: true,
+                                                                              fillColor: AppColor.textFieldColor,
+                                                                              errorMaxLines: 1,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8,),*/
                                                                     Column(
                                                                       crossAxisAlignment: CrossAxisAlignment.start,
                                                                       children: [
@@ -1853,7 +1942,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                   colorFilter:
                                                   ColorFilter
                                                       .mode(
-                                                    withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
+                                                    withdrawController.nameFilterController.text!="" || withdrawController.ownerNameFilterController.text!="" || withdrawController.paidAmountFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor:  AppColor
                                                         .textColor,
                                                     BlendMode
                                                         .srcIn,
@@ -1868,7 +1957,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                     .copyWith(
                                                     fontSize: isDesktop
                                                         ? 12
-                                                        : 10,color:  withdrawController.nameFilterController.text!="" ||  withdrawController.mobileFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                        : 10,color:  withdrawController.nameFilterController.text!="" || withdrawController.ownerNameFilterController.text!="" || withdrawController.paidAmountFilterController.text!="" || withdrawController.dateStartController.text!="" || withdrawController.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
                                               ),
                                             ],
                                           ),
@@ -2038,13 +2127,29 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                   mainAxisAlignment: MainAxisAlignment
                                                       .spaceEvenly,
                                                   children: [
-                                                    //  مبلغ کل و مبلغ تایید نشده
+                                                    // مبلغ درخواستی و مبلغ کل و مبلغ تایید نشده
                                                     Row(
                                                       crossAxisAlignment: CrossAxisAlignment
                                                           .center,
                                                       mainAxisAlignment: MainAxisAlignment
                                                           .spaceBetween,
                                                       children: [
+                                                        Row(
+                                                          children: [
+                                                            Text('مبلغ درخواستی: ',
+                                                              style: AppTextStyle
+                                                                  .labelText,),
+                                                            SizedBox(width: 3,),
+                                                            Text("${withdraws
+                                                                .requestAmount?.toInt()
+                                                                .toString()
+                                                                .seRagham(
+                                                                separator: ',') ?? 0} ریال",
+                                                              style: AppTextStyle
+                                                                  .bodyText,),
+                                                          ],
+                                                        ),
+                                                        SizedBox(height: 4,),
                                                         Row(
                                                           children: [
                                                             Text('مبلغ کل: ',
@@ -2173,7 +2278,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                 .backGroundColor,
                                                             textCancel: 'بستن',
                                                           );
-                                                        } else {
+                                                        } else
+                                                        {
                                                           withdrawController.balanceList.clear();
                                                           showModalBottomSheet(
                                                             enableDrag: true,
@@ -2334,7 +2440,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                 .backGroundColor,
                                                             textCancel: 'بستن',
                                                           );
-                                                        } else {*/
+                                                        } else
+                                                        {*/
                                                         Get.toNamed(
                                                             '/withdrawUpdate',parameters:{"id":withdraws.id.toString()});
                                                         // }
@@ -2377,7 +2484,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                         Text(
                                                           '${withdraws.status ==
                                                               0
-                                                              ? 'نامشخص'
+                                                              ? 'در انتظار'
                                                               : withdraws
                                                               .status == 1
                                                               ? 'تایید شده'
@@ -2401,6 +2508,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                     ),
 
                                                     // دکمه نمایش لیست deposit request
+                                                    withdraws.status==0 ?
+                                                        SizedBox.shrink() :
                                                     IconButton(
                                                       onPressed: () {
                                                         withdrawController.fetchDepositRequestList(withdraws.id!);
@@ -2426,34 +2535,49 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                           int>(
                                                         splashRadius: 10,
                                                         tooltip: 'تعیین وضعیت',
-                                                        onSelected: (
-                                                            value) async {
+                                                        onSelected: (value) async {
                                                           if (value == 2) {
-                                                            await withdrawController
-                                                                .showReasonRejectionDialog(
-                                                                "WithdrawRequest");
-                                                            if (withdrawController
-                                                                .selectedReasonRejection
-                                                                .value ==
-                                                                null) {
-                                                              return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
-                                                            }
-                                                            await withdrawController
-                                                                .updateStatusWithdraw(
-                                                              withdraws.id!,
-                                                              value,
-                                                              withdrawController
+                                                            if (withdraws.depositRequestCount != 0 || withdraws.depositCount != 0) {
+                                                              Get.defaultDialog(
+                                                                title: 'هشدار',
+                                                                middleText: 'به دلیل داشتن زیر مجموعه قابل رد نیست',
+                                                                titleStyle: AppTextStyle
+                                                                    .smallTitleText,
+                                                                middleTextStyle: AppTextStyle
+                                                                    .bodyText,
+                                                                backgroundColor: AppColor
+                                                                    .backGroundColor,
+                                                                textCancel: 'بستن',
+                                                              );
+                                                            } else {
+                                                              await withdrawController
+                                                                  .showReasonRejectionDialog(
+                                                                  "WithdrawRequest");
+                                                              if (withdrawController
                                                                   .selectedReasonRejection
-                                                                  .value!.id!,
-                                                            );
+                                                                  .value ==
+                                                                  null) {
+                                                                return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                                                              }
+                                                              await withdrawController
+                                                                  .updateStatusWithdraw(
+                                                                withdraws.id!,
+                                                                value,
+                                                                withdrawController
+                                                                    .selectedReasonRejection
+                                                                    .value!.id!,
+                                                              );
+                                                              withdrawController
+                                                                  .getWithdrawListPager();
+                                                            }
                                                           } else {
                                                             await withdrawController
                                                                 .updateStatusWithdraw(
                                                                 withdraws.id!,
                                                                 value, 0);
+                                                            withdrawController
+                                                                .getWithdrawListPager();
                                                           }
-                                                          withdrawController
-                                                              .getWithdrawListPager();
                                                         },
                                                         shape: const RoundedRectangleBorder(
                                                           borderRadius: BorderRadius
@@ -2760,7 +2884,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                       .status ==
                                                                                       1
                                                                                       ? 'تایید شده'
-                                                                                      : 'نامشخص',
+                                                                                      : 'در انتظار',
                                                                                   style: AppTextStyle
                                                                                       .labelText,
                                                                                   textAlign: TextAlign
@@ -2832,7 +2956,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                         height: 4,),
 
                                                                       // دلیل رد
-                                                                      /*depositRequests
+                                                                      depositRequests
                                                                           .status ==
                                                                           2 ?
                                                                       Row(
@@ -2853,7 +2977,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                             style: AppTextStyle
                                                                                 .bodyText,),
                                                                         ],
-                                                                      ) : Text(""),*/
+                                                                      ) : Text(""),
                                                                       //  تعیین وضعیت
                                                                       Container(
                                                                         alignment: Alignment
@@ -2866,29 +2990,45 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                             int>(
                                                                           splashRadius: 10,
                                                                           tooltip: 'تعیین وضعیت',
-                                                                          onSelected: (
-                                                                              value) async {
-                                                                            if (value ==
-                                                                                2) {
-                                                                              await withdrawController
-                                                                                  .showReasonRejectionDialog(
-                                                                                  "DepositRequest");
-                                                                              if (withdrawController
-                                                                                  .selectedReasonRejection
-                                                                                  .value ==
-                                                                                  null) {
-                                                                                return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
-                                                                              }
-                                                                              await withdrawController
-                                                                                  .updateStatusDepositRequest(
-                                                                                depositRequests
-                                                                                    .id!,
-                                                                                value,
-                                                                                withdrawController
+                                                                          onSelected: (value) async {
+                                                                            if (value == 2) {
+                                                                              if (depositRequests.depositCount != 0) {
+                                                                                Get
+                                                                                    .defaultDialog(
+                                                                                  title: 'هشدار',
+                                                                                  middleText: 'به دلیل داشتن زیر مجموعه قابل رد نیست',
+                                                                                  titleStyle: AppTextStyle
+                                                                                      .smallTitleText,
+                                                                                  middleTextStyle: AppTextStyle
+                                                                                      .bodyText,
+                                                                                  backgroundColor: AppColor
+                                                                                      .backGroundColor,
+                                                                                  textCancel: 'بستن',
+                                                                                );
+                                                                              } else {
+                                                                                await withdrawController
+                                                                                    .showReasonRejectionDialog(
+                                                                                    "DepositRequest");
+                                                                                if (withdrawController
                                                                                     .selectedReasonRejection
-                                                                                    .value!
-                                                                                    .id!,
-                                                                              );
+                                                                                    .value ==
+                                                                                    null) {
+                                                                                  return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                                                                                }
+                                                                                await withdrawController
+                                                                                    .updateStatusDepositRequest(
+                                                                                  depositRequests
+                                                                                      .id!,
+                                                                                  value,
+                                                                                  withdrawController
+                                                                                      .selectedReasonRejection
+                                                                                      .value!
+                                                                                      .id!,
+                                                                                );
+                                                                                withdrawController
+                                                                                    .fetchDepositRequestList(
+                                                                                    withdraws.id!);
+                                                                              }
                                                                             } else {
                                                                               await withdrawController
                                                                                   .updateStatusDepositRequest(
@@ -2896,11 +3036,10 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                       .id!,
                                                                                   value,
                                                                                   0);
+                                                                              withdrawController
+                                                                                  .fetchDepositRequestList(
+                                                                                  withdraws.id!);
                                                                             }
-                                                                            withdrawController
-                                                                                .fetchDepositRequestList(
-                                                                                withdraws
-                                                                                    .id!);
                                                                           },
                                                                           shape: const RoundedRectangleBorder(
                                                                             borderRadius: BorderRadius
@@ -3160,7 +3299,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                         .backGroundColor,
                                                                                     textCancel: 'بستن',
                                                                                   );
-                                                                                } else {*/
+                                                                                } else
+                                                                                {*/
                                                                                 withdrawController.setDepositRequestDetail(depositRequests);
                                                                                 showModalBottomSheet(
                                                                                   enableDrag: true,
@@ -3187,7 +3327,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                   withdrawController
                                                                                       .clearList();
                                                                                 });
-                                                                                // }
+                                                                                //}
                                                                               },
                                                                               child: SvgPicture
                                                                                   .asset(
@@ -3259,6 +3399,17 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
           ),)
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 
@@ -3297,20 +3448,22 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
     return [
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('ردیف', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
-      DataColumn(
+      /*DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('تاریخ تراکنش', style: AppTextStyle.labelText)),
           headingRowAlignment:MainAxisAlignment.center,
         onSort: (columnIndex, ascending) {
           withdrawController.onSort(columnIndex, ascending);
         },
-      ),
+      ),*/
       /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('تاریخ', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('نام کاربر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('دارنده حساب', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مبلغ درخواستی', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('مبلغ کل', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -3323,6 +3476,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
           child: Text('مبلغ تایید نشده', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('وضعیت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('تصاویر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('درخواست ها', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -3362,9 +3517,10 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
               ),
             ),
             DataCell(
-                Row(
+                Column(
                   children: [
                     Text('ج کل',style: AppTextStyle.labelText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold)),
+                    SizedBox(height: 2,),
                     Text(" ( ${withdraws.first.totalAmountPerDay.toString().seRagham(separator: ',')} )",
                       style: AppTextStyle.bodyText.copyWith(color: AppColor.accentColor,fontWeight: FontWeight.bold,fontSize: 13),
                     ),
@@ -3372,9 +3528,10 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                 ),
             ),
             DataCell(
-              Row(
+              Column(
                 children: [
                   Text('ج واریز',style: AppTextStyle.labelText.copyWith(color: Color(0xff2E7D32),fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2,),
                   Text(" ( ${withdraws.first.totalPaidAmountPerDay.toString().seRagham(separator: ',')} )",
                     style: AppTextStyle.bodyText.copyWith(color: Color(0xff2E7D32),fontWeight: FontWeight.bold,fontSize: 14),
                   ),
@@ -3382,9 +3539,10 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
               ),
             ),
             DataCell(
-              Row(
+              Column(
                 children: [
                   Text('ج تقسیم',style: AppTextStyle.labelText.copyWith(color: Color(0xffdc4b00),fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2,),
                   Text(" ( ${withdraws.first.totalDepositRequestAmountPerDay.toString().seRagham(separator: ',')} )",
                     style: AppTextStyle.bodyText.copyWith(color: Color(0xffdc4b00),fontWeight: FontWeight.bold,fontSize: 13),
                   ),
@@ -3392,9 +3550,10 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
               ),
             ),
             DataCell(
-              Row(
+              Column(
                 children: [
                   Text('تقسیم شده واریز شده',style: AppTextStyle.labelText.copyWith(color: Color(0xff1B5E20),fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2,),
                   Text(" ( ${withdraws.first.totalUndepositedAmountPerDay.toString().seRagham(separator: ',')} )",
                     style: AppTextStyle.bodyText.copyWith(color: Color(0xff1B5E20),fontWeight: FontWeight.bold,fontSize: 13),
                   ),
@@ -3402,9 +3561,10 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
               ),
             ),
             DataCell(
-              Row(
+              Column(
                 children: [
                   Text('مانده بدون تقسیم',style: AppTextStyle.labelText.copyWith(color: Color(0xffC62828),fontWeight: FontWeight.bold)),
+                  SizedBox(height: 2,),
                   Text(" ( ${withdraws.first.totalUndividedAmountPerDay.toString().seRagham(separator: ',')} )",
                     style: AppTextStyle.bodyText.copyWith(color: Color(0xffC62828),fontWeight: FontWeight.bold,fontSize: 13),
                   ),
@@ -3415,6 +3575,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
             DataCell(SizedBox.shrink()),
             DataCell(SizedBox.shrink()),
             DataCell(SizedBox.shrink()),
+            DataCell(SizedBox.shrink()),
+            //DataCell(SizedBox.shrink()),
           ],
         ),
       );
@@ -3461,7 +3623,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                     ),
                   )),
               // تاریخ تراکنش
-              DataCell(
+              /*DataCell(
                   Center(
                     child: Row(
                       children: [
@@ -3476,11 +3638,13 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                           onTap: () {
                             withdrawController.updateRequestDateWithdraw(withdraw.id ?? 0);
                           },
-                            child: SvgPicture.asset('assets/svg/arrow.svg',colorFilter: ColorFilter.mode(AppColor.dividerColor, BlendMode.srcIn),),
+                            child:
+                                withdraw.amount==withdraw.paidAmount || withdraw.undividedAmount==0 ? SizedBox.shrink() :
+                            SvgPicture.asset('assets/svg/arrow.svg',colorFilter: ColorFilter.mode(AppColor.dividerColor, BlendMode.srcIn),),
                         ),
                       ],
                     ),
-                  )),
+                  )),*/
               // تاریخ
               /*DataCell(
                   Center(
@@ -3502,6 +3666,14 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                   Center(
                     child: Text(
                         "${withdraw.ownerName ?? ""} (${withdraw.bank?.name ?? ""})", style: AppTextStyle.bodyText),
+                  )),
+              // مبلغ درخواستی
+              DataCell(
+                  Center(
+                    child: Text(
+                        "${withdraw.requestAmount?.toInt().toString().seRagham(separator: ',') ?? 0} ریال",
+                        style: AppTextStyle.bodyText
+                    ),
                   )),
               // مبلغ کل
               DataCell(
@@ -3548,7 +3720,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                     children: [
                       SizedBox(height: 5,),
                       Text(
-                        '${withdraw.status == 0 ? 'نامشخص' : withdraw.status == 1
+                        '${withdraw.status == 0 ? 'در انتظار' : withdraw.status == 1
                             ? 'تایید شده'
                             : 'تایید نشده'} ',
                         style: AppTextStyle
@@ -3570,34 +3742,49 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                             int>(
                           splashRadius: 10,
                           tooltip: 'تعیین وضعیت',
-                          onSelected: (
-                              value) async {
+                          onSelected: (value) async {
                             if (value == 2) {
-                              await withdrawController
-                                  .showReasonRejectionDialog(
-                                  "WithdrawRequest");
-                              if (withdrawController
-                                  .selectedReasonRejection
-                                  .value ==
-                                  null) {
-                                return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
-                              }
-                              await withdrawController
-                                  .updateStatusWithdraw(
-                                withdraw.id!,
-                                value,
-                                withdrawController
+                              if (withdraw.depositRequestCount != 0 || withdraw.depositCount != 0) {
+                                Get.defaultDialog(
+                                  title: 'هشدار',
+                                  middleText: 'به دلیل داشتن زیر مجموعه قابل رد نیست',
+                                  titleStyle: AppTextStyle
+                                      .smallTitleText,
+                                  middleTextStyle: AppTextStyle
+                                      .bodyText,
+                                  backgroundColor: AppColor
+                                      .backGroundColor,
+                                  textCancel: 'بستن',
+                                );
+                              } else {
+                                await withdrawController
+                                    .showReasonRejectionDialog(
+                                    "WithdrawRequest");
+                                if (withdrawController
                                     .selectedReasonRejection
-                                    .value!.id!,
-                              );
+                                    .value ==
+                                    null) {
+                                  return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                                }
+                                await withdrawController
+                                    .updateStatusWithdraw(
+                                  withdraw.id!,
+                                  value,
+                                  withdrawController
+                                      .selectedReasonRejection
+                                      .value!.id!,
+                                );
+                                withdrawController
+                                    .getWithdrawListPager();
+                              }
                             } else {
                               await withdrawController
                                   .updateStatusWithdraw(
                                   withdraw.id!,
                                   value, 0);
+                              withdrawController
+                                  .getWithdrawListPager();
                             }
-                            withdrawController
-                                .getWithdrawListPager();
                           },
                           shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius
@@ -3724,7 +3911,256 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                   ),
                 ),
               ),
+              // نمایش تصاویر
+              DataCell(
+                  Center(
+                    child:
+                    GestureDetector(
+                      onTap: () async{
+                        await withdrawController.getImage(withdraw.recId ??"", "WithdrawRequest");
+                        Future.delayed(const Duration(milliseconds: 200), () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Dialog(
+                                backgroundColor: AppColor
+                                    .backGroundColor,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius
+                                      .circular(
+                                      10),
+                                ),
+                                child: Container(
+                                  padding: EdgeInsets
+                                      .all(
+                                      8),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize
+                                        .min,
+                                    children: [
+                                      // نمایش اسلایدی عکس‌ها
+                                      SizedBox(
+                                        width: 500,
+                                        height: 500,
+                                        child: Stack(
+                                          children: [
+                                            PageView.builder(
+                                              controller: withdrawController
+                                                  .pageController,
+                                              itemCount: withdrawController.imageList.length,
+                                              onPageChanged: (index) =>
+                                              withdrawController
+                                                  .currentImagePage
+                                                  .value =
+                                                  index,
+                                              itemBuilder: (context,
+                                                  index) {
+                                                final attachment = withdrawController.imageList[index];
+                                                return Column(
+                                                  children: [
+                                                    if (kIsWeb)
+                                                      Padding(
+                                                        padding: const EdgeInsets.only(right: 50),
+                                                        child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                          children: [
+                                                            IconButton(
+                                                              icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                              onPressed: () => withdrawController.downloadImage(
+                                                                attachment,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    SizedBox(
+                                                      width: 450,
+                                                      height: 450,
+                                                      child: Image.network(
+                                                        "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                        loadingBuilder: (context,
+                                                            child,
+                                                            loadingProgress) {
+                                                          if (loadingProgress ==
+                                                              null)
+                                                            return child;
+                                                          return Center(
+                                                            child: CircularProgressIndicator(),
+                                                          );
+                                                        },
+                                                        errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                            Icon(
+                                                                Icons
+                                                                    .error,
+                                                                color: Colors
+                                                                    .red),
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
+                                              },
+                                            ),
+                                            SizedBox(
+                                              height: 2,),
+                                            Obx(() {
+                                              return Positioned(
+                                                  left: 10,
+                                                  top: 0,
+                                                  bottom: 0,
+                                                  child: Visibility(
+                                                    visible: withdrawController
+                                                        .currentImagePage.value > 0,
+                                                    child: IconButton(
+                                                      style: ButtonStyle(
+                                                        backgroundColor: WidgetStateProperty
+                                                            .all(Colors.black54),
+                                                        shape: WidgetStateProperty.all(
+                                                            CircleBorder()),
+                                                        padding: WidgetStateProperty.all(
+                                                            EdgeInsets.all(8)),
+                                                      ),
+                                                      icon: Icon(Icons.chevron_left,
+                                                        color: Colors.white,
+                                                        size: 40,
+                                                        shadows: [
+                                                          Shadow(
+                                                            blurRadius: 10,
+                                                            color: Colors.black,
+                                                            offset: Offset(0, 0),
+                                                          )
+                                                        ],
+                                                      ),
+                                                      onPressed: () {
+                                                        withdrawController.pageController
+                                                            .previousPage(
+                                                          duration: Duration(
+                                                              milliseconds: 300),
+                                                          curve: Curves.easeInOut,
+                                                        );
+                                                      },
+                                                    ),
+                                                  )
+                                              );
+                                            }),
+                                            Obx(() {
+                                              return Positioned(
+                                                  right: 10,
+                                                  top: 0,
+                                                  bottom: 0,
+                                                  child: Visibility(
+                                                    visible: withdrawController
+                                                        .currentImagePage.value <
+                                                        (withdrawController.imageList.length ?? 1) - 1,
+                                                    child: IconButton(
+                                                      style: ButtonStyle(
+                                                        backgroundColor: WidgetStateProperty
+                                                            .all(Colors.black54),
+                                                        shape: WidgetStateProperty.all(
+                                                            CircleBorder()),
+                                                        padding: WidgetStateProperty.all(
+                                                            EdgeInsets.all(8)),
+                                                      ),
+                                                      icon: Icon(Icons.chevron_right,
+                                                        color: Colors.white,
+                                                        size: 40,
+                                                        shadows: [
+                                                          Shadow(
+                                                            blurRadius: 10,
+                                                            color: Colors.black,
+                                                            offset: Offset(0, 0),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      onPressed: () {
+                                                        withdrawController.pageController
+                                                            .nextPage(
+                                                          duration: Duration(
+                                                              milliseconds: 300),
+                                                          curve: Curves.easeInOut,
+                                                        );
+                                                      },
+                                                    ),
+                                                  )
+                                              );
+                                            }),
+                                            SizedBox(
+                                              height: 2,),
+                                            // نمایش نقاط راهنما
+                                            Obx(() =>
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment
+                                                      .center,
+                                                  children: List
+                                                      .generate(
+                                                    withdrawController.imageList.length,
+                                                        (index) =>
+                                                        Container(
+                                                          width: 8,
+                                                          height: 8,
+                                                          margin: EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 4),
+                                                          decoration: BoxDecoration(
+                                                            shape: BoxShape
+                                                                .circle,
+                                                            color: withdrawController
+                                                                .currentImagePage
+                                                                .value ==
+                                                                index
+                                                                ? Colors
+                                                                .blue
+                                                                : Colors
+                                                                .grey,
+                                                          ),
+                                                        ),
+                                                  ),
+                                                )),
+                                            SizedBox(
+                                                height: 10),
+                                          ],
+                                        ),
+                                      ),
+                                      TextButton(
+                                        onPressed: () =>
+                                            Get
+                                                .back(),
+                                        child: Text(
+                                          "بستن",
+                                          style: AppTextStyle
+                                              .bodyText,),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+
+                        });
+
+
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                              colorFilter: ColorFilter.mode(
+
+                                AppColor.textColor,
+
+                                BlendMode.srcIn,
+                              )),
+                        ],
+                      ),
+                    ),
+                  )),
               // نمایش درخواست های واریزی
+              withdraw.status==0 ?
+              DataCell(Center(
+                child: SizedBox.shrink(),
+              )) :
               DataCell(
                 Center(
                   child: IconButton(
@@ -3739,6 +4175,77 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                 ),
               ),
               // آیکون های عملیات
+              withdraw.status==0 ?
+                  DataCell(
+                      Padding(
+                        padding: const EdgeInsets.only(left: 6),
+                        child: // آیکون حذف کردن
+                        Row(mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                if (withdraw.depositRequestCount != 0 || withdraw.depositCount != 0) {
+                                  Get.defaultDialog(
+                                    title: 'هشدار',
+                                    middleText: 'به دلیل داشتن زیر مجموعه قابل حذف نیست',
+                                    titleStyle: AppTextStyle
+                                        .smallTitleText,
+                                    middleTextStyle: AppTextStyle
+                                        .bodyText,
+                                    backgroundColor: AppColor
+                                        .backGroundColor,
+                                    textCancel: 'بستن',
+                                  );
+                                } else {
+                                  Get.defaultDialog(
+                                      backgroundColor: AppColor
+                                          .backGroundColor,
+                                      title: "حذف درخواست برداشت",
+                                      titleStyle: AppTextStyle
+                                          .smallTitleText,
+                                      middleText: "آیا از حذف درخواست برداشت مطمئن هستید؟",
+                                      middleTextStyle: AppTextStyle
+                                          .bodyText,
+                                      confirm: ElevatedButton(
+                                          style: ButtonStyle(
+                                              backgroundColor: WidgetStatePropertyAll(
+                                                  AppColor
+                                                      .primaryColor)),
+                                          onPressed: () {
+                                            Get.back();
+                                            withdrawController.deleteWithdraw(withdraw.id!, true);
+                                          },
+                                          child: Text(
+                                            'حذف',
+                                            style: AppTextStyle
+                                                .bodyText,
+                                          )));
+                                  //withdrawController.fetchWithdrawList();
+                                }
+                              },
+                              child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SvgPicture.asset(
+                                      'assets/svg/trash-bin.svg',width: 20,height: 20,
+                                      colorFilter: ColorFilter
+                                          .mode(AppColor
+                                          .accentColor,
+                                        BlendMode
+                                            .srcIn,)
+                                  ),
+                                  Text(' حذف',
+                                    style: AppTextStyle
+                                        .bodyText
+                                        .copyWith(
+                                        color: AppColor
+                                            .accentColor,fontSize: 12),),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                  ) :
               DataCell(
                 Padding(
                   padding: const EdgeInsets.only(left: 6),
@@ -3920,7 +4427,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                   .backGroundColor,
                               textCancel: 'بستن',
                             );
-                          } else {*/
+                          } else
+                          {*/
                               Get.toNamed('/withdrawUpdate',parameters:{"id":withdraw.id.toString()});
                               //}
                             },
@@ -4100,7 +4608,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                 .status ==
                                                 1
                                                 ? 'تایید شده'
-                                                : 'نامشخص',
+                                                : 'در انتظار',
                                             style: AppTextStyle
                                                 .labelText,
                                             textAlign: TextAlign
@@ -4192,7 +4700,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                 SizedBox(height: 4,),
 
                                 // دلیل رد
-                                /* depositRequests
+                                 depositRequests
                                     .status ==
                                     2 ?
                                 Row(
@@ -4214,7 +4722,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                           .bodyText,),
                                   ],
                                 ) :
-                                Text(""),*/
+                                Text(""),
                                 //  تعیین وضعیت
                                 Container(
                                   alignment: Alignment
@@ -4227,29 +4735,45 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                       int>(
                                     splashRadius: 10,
                                     tooltip: 'تعیین وضعیت',
-                                    onSelected: (
-                                        value) async {
-                                      if (value ==
-                                          2) {
-                                        await withdrawController
-                                            .showReasonRejectionDialog(
-                                            "DepositRequest");
-                                        if (withdrawController
-                                            .selectedReasonRejection
-                                            .value ==
-                                            null) {
-                                          return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
-                                        }
-                                        await withdrawController
-                                            .updateStatusDepositRequest(
-                                          depositRequests
-                                              .id!,
-                                          value,
-                                          withdrawController
+                                    onSelected: (value) async {
+                                      if (value == 2) {
+                                        if (depositRequests.depositCount != 0) {
+                                          Get
+                                              .defaultDialog(
+                                            title: 'هشدار',
+                                            middleText: 'به دلیل داشتن زیر مجموعه قابل رد نیست',
+                                            titleStyle: AppTextStyle
+                                                .smallTitleText,
+                                            middleTextStyle: AppTextStyle
+                                                .bodyText,
+                                            backgroundColor: AppColor
+                                                .backGroundColor,
+                                            textCancel: 'بستن',
+                                          );
+                                        } else {
+                                          await withdrawController
+                                              .showReasonRejectionDialog(
+                                              "DepositRequest");
+                                          if (withdrawController
                                               .selectedReasonRejection
-                                              .value!
-                                              .id!,
-                                        );
+                                              .value ==
+                                              null) {
+                                            return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                                          }
+                                          await withdrawController
+                                              .updateStatusDepositRequest(
+                                            depositRequests
+                                                .id!,
+                                            value,
+                                            withdrawController
+                                                .selectedReasonRejection
+                                                .value!
+                                                .id!,
+                                          );
+                                          withdrawController
+                                              .fetchDepositRequestList(
+                                              withdraw.id!);
+                                        }
                                       } else {
                                         await withdrawController
                                             .updateStatusDepositRequest(
@@ -4257,11 +4781,10 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                 .id!,
                                             value,
                                             0);
+                                        withdrawController
+                                            .fetchDepositRequestList(
+                                            withdraw.id!);
                                       }
-                                      withdrawController
-                                          .fetchDepositRequestList(
-                                          withdraw
-                                              .id!);
                                     },
                                     shape: const RoundedRectangleBorder(
                                       borderRadius: BorderRadius
@@ -4548,7 +5071,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                             withdrawController
                                                 .clearList();
                                           });
-
+                                          //}
                                         },
                                         child: SvgPicture
                                             .asset(

@@ -19,12 +19,18 @@ class BalanceTradingModel {
   final String? itemGroup;
   @JsonKey(name: "dateName")
   final String? dateName;
+  @JsonKey(name: "startDate")
+  final String? startDate;
+  @JsonKey(name: "endDate")
+  final String? endDate;
   @JsonKey(name: "balances")
   final List<BalanceTradingItemModel>? balances;
 
   BalanceTradingModel({
     required this.itemGroup,
     required this.dateName,
+    required this.startDate,
+    required this.endDate,
     required this.balances,
   });
 

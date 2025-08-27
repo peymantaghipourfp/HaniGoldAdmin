@@ -12,11 +12,14 @@ import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart
 import '../../domain/remittance/model/image_guid_model.dart';
 import 'dart:typed_data';
 
+import '../network/dio_Interceptor.dart';
+
 class RemittanceRepository{
 
   Dio remittanceDio=Dio();
   RemittanceRepository(){
     remittanceDio.options.baseUrl=BaseUrl.baseUrl;
+    remittanceDio.interceptors.add(DioInterceptor());
   }
   Future<List<RemittanceModel>> getRemittanceList({required String startDate,
     required String endDate,})async{
@@ -60,6 +63,7 @@ class RemittanceRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
  Future<ImageGuidModel> getImage({required String fileName,
     required String type,})async{
     try{
@@ -127,7 +131,7 @@ class RemittanceRepository{
               ],
             }
           ],
-          "orderBy": "Remittance.Id",
+          "orderBy": "Remittance.Date",
           "orderByType": "desc",
           "StartIndex": startIndex,
           "ToIndex": toIndex
@@ -138,6 +142,83 @@ class RemittanceRepository{
       print("url getRemittanceListPager : Remittance/get" );
       print("request getRemittanceListPager : $options" );
       print("response getRemittanceListPager : ${response.data}" );
+      if(response.statusCode==200){
+        return ListRemittanceModel.fromJson(response.data);
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<ListRemittanceModel> getRemittanceListPendingPager({
+    required int startIndex,
+    required int toIndex,
+    required String startDate,
+    required String endDate,
+    int? accountId,
+    required String namePayer,
+    required String nameReciept,
+  })async{
+    try{
+      Map<String , dynamic> options=
+      {
+        "options" : { "remittance" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(accountId != null)
+                  {
+                    "fieldName": "Id",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "Users"
+                  },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Remittance"
+                  },
+                if(namePayer!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": namePayer,
+                    "filterType": 0,
+                    "RefTable": "AccountPayer"
+                  },
+                if(nameReciept!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameReciept,
+                    "filterType": 0,
+                    "RefTable": "AccountReciept"
+                  },
+                {
+                  "fieldName": "Status",
+                  "filterValue": "0",
+                  "filterType": 5,
+                  "RefTable": "Remittance"
+                }
+              ],
+            }
+          ],
+          "orderBy": "Remittance.Id",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      };
+      final response=await remittanceDio.post('Remittance/getWrapper',data: options);
+      print("url getRemittanceListPendingPager : Remittance/get" );
+      print("request getRemittanceListPendingPager : $options" );
+      print("response getRemittanceListPendingPager : ${response.data}" );
       if(response.statusCode==200){
         return ListRemittanceModel.fromJson(response.data);
       }else{
@@ -498,6 +579,33 @@ class RemittanceRepository{
     }
     catch(e){
       throw ErrorException('خطا در حذف:$e');
+    }
+  }
+
+  Future<Map<String , dynamic>> updateStatusRemittance({
+    required int status,
+    required int remittanceId,
+    int? reasonRejectionId,
+  })async{
+    try{
+      Map<String,dynamic> remittanceData={
+
+        "status": status,
+        if (reasonRejectionId != null) "reasonRejection":{
+          "id": reasonRejectionId,
+        },
+        "id": remittanceId,
+
+      };
+      print(remittanceData);
+
+      var response=await remittanceDio.put('Remittance/updateStatus',data: remittanceData);
+      print('Status Code updateStatusRemittance: ${response.statusCode}');
+      print('Response Data updateStatusRemittance: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در تغییر وضعیت:$e');
     }
   }
 }

@@ -49,7 +49,9 @@ class InventoryCreateReceiveController extends GetxController{
 
 
   final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   final TextEditingController searchLaboratoryController=TextEditingController();
+  final FocusNode searchLaboratoryFocusNode = FocusNode();
   final TextEditingController quantityController=TextEditingController();
   final TextEditingController impurityController=TextEditingController();
   final TextEditingController weight750Controller=TextEditingController();
@@ -94,8 +96,26 @@ class InventoryCreateReceiveController extends GetxController{
   List<String> selectedFileNames = [];
   var factorBalanceChecked = false.obs;
   var factorChecked = false.obs;
+  var itemCountTemp=''.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
+    if (tempDetails.isNotEmpty) {
+      Get.snackbar(
+        "هشدار",
+        "امکان تغییر کاربر وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+        titleText: Text(
+          "هشدار",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "امکان تغییر کاربر وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+      return;
+    }
     selectedAccount.value = newValue;
     selectedWalletAccount.value = null;
     getWalletAccount(selectedAccount.value?.id ?? 0);
@@ -113,21 +133,66 @@ class InventoryCreateReceiveController extends GetxController{
       weight750Controller.clear();
     }
   }
+
+
   void changeSelectedWalletAccount(WalletModel? newValue) {
+    // Check if there are items in tempDetails and prevent changing wallet account
+    if (tempDetails.isNotEmpty) {
+      Get.snackbar(
+        "هشدار",
+        "امکان تغییر حساب wallet وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+        titleText: Text(
+          "هشدار",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "امکان تغییر حساب wallet وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+      return;
+    }
     selectedWalletAccount.value = newValue;
     if (newValue?.item?.itemUnit?.id == 2) {
-    caratController.text = '';
-    updateW750();
+      if(newValue?.item?.id==10 ||
+          newValue?.item?.id==12 ||
+          newValue?.item?.id==15 ||
+          newValue?.item?.id==16){
+        caratController.text = '900';
+        updateW750();
+      }else if(newValue?.item?.id==13){
+        caratController.text = '750';
+        updateW750();
+      }
+      else{
+        caratController.text = '';
+        updateW750();
+      }
     } else {
       weight750Controller.clear();
       caratController.clear();
     }
-
+    /*if(newValue?.item?.id==2 || newValue?.item?.id==3 || newValue?.item?.id==4 || newValue?.item?.id==5
+        || newValue?.item?.id==10 || newValue?.item?.id==13 || newValue?.item?.id==15 || newValue?.item?.id==16){
+      double quantity=double.tryParse(quantityController.text==""? "0" :quantityController.text.toEnglishDigit()) ?? 0;
+      itemCountTemp.value=(quantity/9.5).toString();
+    }*/
+    viewCountItem();
     print(selectedWalletAccount.value?.item?.id);
     print(selectedWalletAccount.value?.item?.name);
   }
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
     selectedLaboratory.value=newValue;
+  }
+
+  void viewCountItem(){
+    if(selectedWalletAccount.value?.item?.id==10 || selectedWalletAccount.value?.item?.id==13 || selectedWalletAccount.value?.item?.id==15 || selectedWalletAccount.value?.item?.id==16){
+      double? w750=selectedWalletAccount.value?.item?.w750;
+      double quantity=double.tryParse(quantityController.text==""? "0" :quantityController.text.toEnglishDigit()) ?? 0;
+      itemCountTemp.value=(quantity/w750!).round().toString();
+    }
   }
 
   void updateDetail(int index, String recId,List<XFile> listXfile) {
@@ -161,11 +226,33 @@ class InventoryCreateReceiveController extends GetxController{
     "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     super.onInit();
   }
+
+  void onDropdownMenuStateChange(bool isOpen) {
+    if (isOpen) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchFocusNode.requestFocus();
+      });
+    } else {
+      resetAccountSearch();
+    }
+  }
+
+  void onLaboratoryDropdownMenuStateChange(bool isOpen) {
+    if (isOpen) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchLaboratoryFocusNode.requestFocus();
+      });
+    } else {
+      resetLaboratorySearch();
+    }
+  }
   @override
   void onClose() {
     debounce?.cancel();
     searchController.dispose();
+    searchFocusNode.dispose();
     searchLaboratoryController.dispose();
+    searchLaboratoryFocusNode.dispose();
     super.onClose();
   }
 
@@ -369,9 +456,15 @@ class InventoryCreateReceiveController extends GetxController{
         wallet: selectedWalletAccount.value!,
         item: selectedWalletAccount.value!.item!,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
+        weight: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
         type: 0,
         impurity: double.tryParse(impurityController.text.toEnglishDigit()) ?? 0.0,
-        weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
+        weight750:selectedWalletAccount.value!.item?.id==1 ||
+            selectedWalletAccount.value!.item?.id==10 ||
+            selectedWalletAccount.value!.item?.id==12 ||
+            selectedWalletAccount.value!.item?.id==15 ||
+            selectedWalletAccount.value!.item?.id==16 ||
+            selectedWalletAccount.value!.item?.id==14 ? double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0  : double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0 ,
         carat: int.tryParse(caratController.text.toEnglishDigit()) ?? 0,
         receiptNumber: receiptNumberController.text,
         laboratory: selectedLaboratory.value,
@@ -386,9 +479,13 @@ class InventoryCreateReceiveController extends GetxController{
       receiptNumberController.clear();
       descriptionController.clear();
       impurityController.clear();
-      weight750Controller.clear();
-      caratController.clear();
-      selectedWalletAccount.value = null;
+      if(selectedWalletAccount.value!.item?.id!=10 ||
+          selectedWalletAccount.value!.item?.id!=12 ||
+          selectedWalletAccount.value!.item?.id!=15 ||
+          selectedWalletAccount.value!.item?.id!=16 ){
+        weight750Controller.clear();
+        caratController.clear();
+      }
       selectedLaboratory.value=null;
 
       Get.snackbar("موفق", "آیتم به لیست موقت اضافه شد");
@@ -459,7 +556,14 @@ class InventoryCreateReceiveController extends GetxController{
                     ],
                   ),
                   pw.SizedBox(height: 10),
-                  buildBalanceWidget(inventoryCreateLayoutController.balanceList),
+                  pw.Row(mainAxisAlignment: pw.MainAxisAlignment.start,
+                    children: [
+                      pw.Container(
+                        width: 250,
+                        child: buildBalanceWidget(inventoryCreateLayoutController.balanceList),
+                      )
+                    ]
+                  ),
                   pw.SizedBox(height: 20),
                   buildInvoiceFooter(inventoryDetails),
                 ];
@@ -547,17 +651,6 @@ class InventoryCreateReceiveController extends GetxController{
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        /*pw.Row(
-          children: [
-            pw.Image(
-              pw.MemoryImage(logoBytes),
-              width: 100,
-              height: 50,
-            ),
-            pw.SizedBox(width: 20),
-            pw.Text('فاکتور رسمی', style: pw.TextStyle(fontSize: 24)),
-          ],
-        ),*/
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center,
             children:[
               pw.Text('فاکتور مشتری ${responseData.account?.name ?? '-'}', style: pw.TextStyle(fontSize: 17)),
@@ -613,8 +706,11 @@ class InventoryCreateReceiveController extends GetxController{
   pw.TableRow buildInvoiceDataRow(InventoryDetailModel detail, int index) {
     return pw.TableRow(
       children: [
-        buildDataCell(detail.itemUnit?.id==2 ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
-        buildDataCell(detail.item?.name ?? ''),
+        buildDataCell(detail.item?.id==1  ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  :
+    detail.itemUnit?.id==2 && detail.item?.id!=1 && detail.item?.id!=10 && detail.item?.id!=13 && detail.item?.id!=15 && detail.item?.id!=16 ? " گرم ${detail.quantity}, عیار: ${detail.carat}" :
+    detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
+        " عدد ${itemCountTemp.value.toString()}" ?? '' : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(" (دریافت) ${detail.item?.name}" ?? ''),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
     );
@@ -676,9 +772,9 @@ class InventoryCreateReceiveController extends GetxController{
         pw.Table(
           border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
           columnWidths: {
-            0: pw.FlexColumnWidth(1),
-            1: pw.FlexColumnWidth(2),
-            2: pw.FlexColumnWidth(3),
+            0: pw.FlexColumnWidth(2.5),
+            1: pw.FlexColumnWidth(1),
+            2: pw.FlexColumnWidth(2),
           },
           children: [
             pw.TableRow(

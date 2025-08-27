@@ -5,6 +5,7 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet_account_req.model.dart';
 
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 
 class WalletRepository{
@@ -12,6 +13,7 @@ class WalletRepository{
 
   WalletRepository(){
     walletDio.options.baseUrl=BaseUrl.baseUrl;
+    walletDio.interceptors.add(DioInterceptor());
   }
 
   Future<WalletModel> getWalletCurrency(int accountId)async{

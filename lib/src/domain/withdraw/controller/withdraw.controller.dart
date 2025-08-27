@@ -1,6 +1,9 @@
 
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:ui' as ui;
+import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -16,6 +19,7 @@ import 'package:hanigold_admin/src/config/repository/reason_rejection.repository
 import 'package:hanigold_admin/src/config/repository/withdraw.repository.dart';
 import 'package:hanigold_admin/src/config/repository/withdraw_getOne.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/base/base_controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_getOne.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
@@ -23,7 +27,9 @@ import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
+import 'package:hanigold_admin/src/domain/withdraw/model/socket_withdraw.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -32,6 +38,8 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../users/model/balance_item.model.dart';
 import 'package:universal_html/html.dart' as html;
@@ -44,7 +52,7 @@ import '../../users/model/paginated.model.dart';
 
 
 enum PageState{loading,err,empty,list}
-class WithdrawController extends GetxController{
+class WithdrawController extends BaseController{
 
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
@@ -57,21 +65,29 @@ class WithdrawController extends GetxController{
   final DepositRequestRepository depositRequestRepository=DepositRequestRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
 
   final TextEditingController amountController=TextEditingController();
   final TextEditingController requestAmountController=TextEditingController();
   final TextEditingController searchController=TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
   final TextEditingController nameFilterController=TextEditingController();
+  final TextEditingController ownerNameFilterController=TextEditingController();
+  final TextEditingController paidAmountFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
   RxList<WithdrawModel> withdrawList = RxList([]);
+  RxList<WithdrawModel> withdrawListStatus = RxList([]);
   var depositRequestList=<DepositRequestModel>[].obs;
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<AccountModel> filterAccountList=<AccountModel>[].obs;
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
   final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
+  RxList<String> imageList = <String>[].obs;
+  final PageController pageController = PageController();
+  RxInt currentImagePage = 0.obs;
   var errorMessage=''.obs;
   var isLoading=true.obs;
   RxBool isLoadingDepositRequestList=RxBool(true);
@@ -93,12 +109,14 @@ class WithdrawController extends GetxController{
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
 
+  StreamSubscription? socketSubscription;
+
   void setError(String message){
     state.value=PageState.err;
     errorMessage.value=message;
   }
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getWithdrawListPager();
   }
@@ -154,17 +172,53 @@ class WithdrawController extends GetxController{
 
   @override
   void onInit() {
+    socketSubscription?.cancel();
+    _listenToSocket();
     getWithdrawListPager();
     fetchAccountList();
     setupScrollListener();
+    getWithdrawListStatusPager();
     super.onInit();
   }
 
+  void onDropdownMenuStateChange(bool isOpen) {
+    if (isOpen) {
+      // Add a small delay to ensure the dropdown is fully opened
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchFocusNode.requestFocus();
+      });
+    } else {
+      resetAccountSearch();
+    }
+  }
+
   @override void onClose() {
+    socketSubscription?.cancel();
     scrollController.dispose();
     horizontalScrollController.dispose();
+    searchFocusNode.dispose();
     withdrawList.clear();
     super.onClose();
+  }
+
+  void _listenToSocket() {
+    socketSubscription?.cancel();
+    socketSubscription = socketService.messageStream.listen((message) {
+      if (message is String) {
+        try {
+          final data = json.decode(message);
+          if (data['channel'] == 'withdrawRequest') {
+            final socketWithdraw = SocketWithdrawModel.fromJson(data);
+
+            getWithdrawListPager();
+          }
+        } catch (e) {
+          Get.log('Error processing socket message in WithdrawController: $e');
+        }
+      }
+    }, onError: (error) {
+      Get.log('Socket stream error in WithdrawController: $error');
+    });
   }
 
   void setupScrollListener() {
@@ -305,7 +359,69 @@ class WithdrawController extends GetxController{
   //   }
   // }
 
-  // لیست دریافت ها با صفحه بندی
+  // لیست عکس ها
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
+  }
+
+  void downloadImage(String guidId) async {
+    if (kIsWeb){
+      final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+      final anchor = html.AnchorElement(href: url)
+        ..download = "image_$guidId"
+        ..style.display = 'none';
+
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+    }else{
+      try {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) return;
+
+        final dio = Dio();
+        final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access downloads directory');
+        }
+        String fileExtension = path.extension(guidId);
+        if(fileExtension.isEmpty) fileExtension = '.png';
+        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+        final savePath = path.join(downloadsDir.path, fileName);
+        /*final dir = await getApplicationDocumentsDirectory();
+        final path = '${dir.path}/images_$guidId.png';*/
+        await dio.download(url, savePath);
+        print(savePath);
+        Get.snackbar(
+          'موفقیت',
+          'تصویر با موفقیت ذخیره شد',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'خطا',
+          'خطا در دانلود تصویر: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
+  }
+
+  // لیست درخواست ها با صفحه بندی
   Future<void> getWithdrawListPager() async {
     print("### getWithdrawListPager ###");
     withdrawList.clear();
@@ -315,10 +431,40 @@ class WithdrawController extends GetxController{
       var response = await withdrawRepository.getWithdrawListPager(
         startIndex: currentPage.value,accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
         name: nameFilterController.text,
+        ownerName: ownerNameFilterController.text,
+        paidAmount: paidAmountFilterController.text,
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
       withdrawList.assignAll(response.withdrawRequests??[]);
+      paginated.value=response.paginated;
+      state.value=PageState.list;
+
+      update();
+    }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {}
+  }
+
+  // لیستدرخواست های در انتظار با صفحه بندی
+  Future<void> getWithdrawListStatusPager() async {
+    print("### getWithdrawListStatusPager ###");
+    withdrawListStatus.clear();
+    isLoading.value=true;
+    try {
+      state.value=PageState.loading;
+      var response = await withdrawRepository.getWithdrawListPager(
+        startIndex: currentPage.value,accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        name: nameFilterController.text,
+        ownerName: ownerNameFilterController.text,
+        paidAmount: paidAmountFilterController.text,
+        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
+      );
+      isLoading.value=false;
+      // فیلتر کردن فقط درخواست های در انتظار (status == 0)
+      var pendingWithdraws = response.withdrawRequests?.where((withdraw) => withdraw.status == 0).toList() ?? [];
+      withdrawListStatus.assignAll(pendingWithdraws);
       paginated.value=response.paginated;
       state.value=PageState.list;
 
@@ -512,6 +658,7 @@ class WithdrawController extends GetxController{
         withdrawId: id ,
           walletId: walletId,
           accountId: selectedAccount.value?.id ?? 0,
+          status: 1,
           amount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit()),
           requestAmount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit())
       );
@@ -541,7 +688,7 @@ class WithdrawController extends GetxController{
     return null;
   }
 
-  Future<DepositRequestModel?> updateDepositRequest(int withdrawId,int depositRequestId)async{
+  Future<DepositRequestModel?> updateDepositRequest(int withdrawId,DepositRequestModel depositRequest)async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
@@ -550,7 +697,8 @@ class WithdrawController extends GetxController{
           accountId: selectedAccount.value?.id ?? 0,
           amount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit()),
           requestAmount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit()),
-          depositRequestId: depositRequestId,
+          depositRequestId: depositRequest.id,
+        date: "${depositRequest.date?.year}-${depositRequest.date?.month.toString().padLeft(2, '0')}-${depositRequest.date?.day.toString().padLeft(2, '0')}T${depositRequest.date?.hour.toString().padLeft(2, '0')}:${depositRequest.date?.minute.toString().padLeft(2, '0')}:${depositRequest.date?.second.toString().padLeft(2, '0')}",
       );
       print(response);
       if(response!=null){
@@ -583,7 +731,7 @@ class WithdrawController extends GetxController{
           (account) => account.id == depositRequest.account?.id,
     );
    await getBalanceList(depositRequest.account?.id ?? 0);
-    requestAmountController.text = depositRequest.requestAmount?.toString() ?? '';
+    requestAmountController.text = depositRequest.requestAmount?.toString().seRagham(separator: ',') ?? '';
     print("accountIdddd: ${depositRequest.account?.id}");
   }
 
@@ -599,7 +747,9 @@ class WithdrawController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        expandedIndex.value=null;
         getWithdrawListPager();
+
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -808,7 +958,7 @@ class WithdrawController extends GetxController{
   String getStatusText(int status) {
     switch (status) {
       case 0:
-        return 'نامشخص';
+        return 'در انتظار';
       case 1:
         return 'تایید شده';
       case 2:
@@ -988,7 +1138,8 @@ class WithdrawController extends GetxController{
 
   void clearFilter() {
     nameFilterController.clear();
-    mobileFilterController.clear();
+    ownerNameFilterController.clear();
+    paidAmountFilterController.clear();
     dateStartController.clear();
     dateEndController.clear();
     startDateFilter.value="";

@@ -71,7 +71,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   var isLoadingBalance=true.obs;
 
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
-  final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
+  RxList<InventoryDetailModel> getOneInventory=<InventoryDetailModel>[].obs;
   var inventoryId=0.obs;
   var inventoryDetailId=0.obs;
   var inputItemId=0.obs;
@@ -138,9 +138,9 @@ class InventoryDetailUpdatePaymentController extends GetxController{
 
     //inventoryDetail = Get.arguments;
     inventoryDetailId.value=int.parse(Get.parameters['id']!);
-    if(inventoryDetailId.value!=null){
+    /*if(inventoryDetailId.value!=null){
       await fetchGetOneInventory(inventoryDetailId.value,Get.parameters['index']!);
-    }
+    }*/
     searchController.addListener(onSearchChanged);
     fetchAccountList();
     fetchWalletAccountList();
@@ -315,7 +315,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   // }
 
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getForPaymentListPager();
   }
@@ -330,8 +330,8 @@ class InventoryDetailUpdatePaymentController extends GetxController{
           startIndex: currentPage.value,
           toIndex: itemsPerPage.value,
           itemId:selectedWalletAccount.value?.item?.id ?? 0,
-          laboratoryId: selectedLaboratoryId.value == 0
-              ? null :selectedLaboratoryId.value
+          /*laboratoryId: selectedLaboratoryId.value == 0
+              ? null :selectedLaboratoryId.value*/
       );
       forPaymentList.clear();
       //isLoading.value=false;
@@ -346,22 +346,22 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   }
 
 
-  Future<void> fetchGetOneInventory(int id,String index)async{
+  /*Future<void> fetchGetOneInventory(int id,String index)async{
     try {
       stateGetOne.value=PageState.loading;
-      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
+      var fetchedGetOneInventory = await inventoryRepository.getInventoryDetail(id);
       if(fetchedGetOneInventory!=null){
         getOneInventory.value = fetchedGetOneInventory;
         if(index==""){
-          setInventoryDetail(getOneInventory.value!.inventoryDetails!.first);
-          inventoryDetail=getOneInventory.value!.inventoryDetails!.first;
+          setInventoryDetail(getOneInventory.value);
+          inventoryDetail=getOneInventory;
           inventoryDetailId.value=inventoryDetail?.id ?? 0;
           accountId.value = inventoryDetail!.wallet!.account!.id!;
           accountName.value = inventoryDetail!.wallet!.account!.name!;
           getWalletAccount(accountId.value);
           getBalanceList(accountId.value);
         }else{
-          inventoryDetail=getOneInventory.value!.inventoryDetails?[int.parse(index)];
+          inventoryDetail=getOneInventory;
           setInventoryDetail(inventoryDetail!);
           inventoryDetailId.value=inventoryDetail?.id ?? 0;
           accountId.value = inventoryDetail!.wallet!.account!.id!;
@@ -379,7 +379,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
       stateGetOne.value=PageState.err;
       errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
     }
-  }
+  }*/
 
   Future<void> pickImageDesktop( ) async {
     try{
@@ -521,7 +521,7 @@ class InventoryDetailUpdatePaymentController extends GetxController{
             responseData.infos?.first["description"], textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
-        inventoryController.fetchGetOneInventory(responseData.id ?? 0);
+        inventoryController.fetchGetInventoryDetail(responseData.id ?? 0);
         inventoryController.getInventoryListPager();
         Get.back();
         clearList();

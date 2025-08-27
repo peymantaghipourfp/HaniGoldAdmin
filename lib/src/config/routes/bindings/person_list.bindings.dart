@@ -12,7 +12,7 @@ class PersonListBindings implements Bindings{
   @override
   void dependencies() {
     Get.lazyPut(()=>PersonListController());
-    Get.lazyPut(()=>HomeController());
+    //Get.lazyPut(()=>HomeController());
   }
 
 }

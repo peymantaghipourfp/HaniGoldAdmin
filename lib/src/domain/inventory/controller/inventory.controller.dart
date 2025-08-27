@@ -1,10 +1,15 @@
 
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hanigold_admin/src/domain/base/base_controller.dart';
+import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
+import 'package:hanigold_admin/src/domain/inventory/model/socket_inventory.model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -37,7 +42,7 @@ import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 
 enum PageState{loading,err,empty,list}
-class InventoryController extends GetxController{
+class InventoryController extends BaseController{
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
@@ -79,7 +84,7 @@ class InventoryController extends GetxController{
   RxBool showArrows = false.obs;
   RxList<String> imageList = <String>[].obs;
 
-  Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
+  RxList<InventoryDetailModel> getInventoryDetail=<InventoryDetailModel>[].obs;
 
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
@@ -90,6 +95,8 @@ class InventoryController extends GetxController{
 
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
+
+  StreamSubscription? socketSubscription;
 
 
   void setError(String message){
@@ -123,26 +130,42 @@ class InventoryController extends GetxController{
         final bName = b.account?.name ?? '';
         return ascending ? aName.compareTo(bName) : bName.compareTo(aName);
       });
-    }else if (columnIndex == 3) { // Name column
-      inventoryList.sort((a, b) {
-        final aRecipientName = a.recipient ?? '';
-        final bRecipientName = b.recipient ?? '';
-        return ascending ? aRecipientName.compareTo(bRecipientName) : bRecipientName.compareTo(aRecipientName);
-      });
     }
   }
 
   @override
   void onInit() {
+    socketSubscription?.cancel();
+    _listenToSocket();
     getInventoryListPager();
     setupScrollListener();
     super.onInit();
   }
   @override void onClose() {
+    socketSubscription?.cancel();
     scrollController.dispose();
     super.onClose();
   }
 
+  void _listenToSocket() {
+    socketSubscription?.cancel();
+    socketSubscription = socketService.messageStream.listen((message) {
+      if (message is String) {
+        try {
+          final data = json.decode(message);
+          if (data['channel'] == 'inventory') {
+            final socketInventory = SocketInventoryModel.fromJson(data);
+
+            getInventoryListPager();
+          }
+        } catch (e) {
+          Get.log('Error processing socket message in InventoryController: $e');
+        }
+      }
+    }, onError: (error) {
+      Get.log('Socket stream error in InventoryController: $error');
+    });
+  }
 
   void setupScrollListener() {
     scrollController.addListener(() {
@@ -206,6 +229,7 @@ class InventoryController extends GetxController{
   }
 
   void clearSearch() {
+    paginated.value=null;
     currentPage.value = 1;
     selectedAccountId.value = 0;
     searchController.clear();
@@ -267,7 +291,7 @@ class InventoryController extends GetxController{
         startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
-      inventoryList.addAll(response.inventories??[]);
+      inventoryList.assignAll(response.inventories??[]);
       paginated.value=response.paginated;
       state.value=PageState.list;
       update();
@@ -279,13 +303,13 @@ class InventoryController extends GetxController{
 
 
 
-  Future<void> fetchGetOneInventory(int id)async{
+  Future<void> fetchGetInventoryDetail(int id)async{
     try {
       isLoading.value=true;
       stateGetOne.value=PageState.loading;
-      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
-      if(fetchedGetOneInventory!=null){
-        getOneInventory.value = fetchedGetOneInventory;
+      var fetchedGetInventoryDetail = await inventoryRepository.getInventoryDetail(id);
+      if(fetchedGetInventoryDetail!=null){
+        getInventoryDetail.value = fetchedGetInventoryDetail;
 
         stateGetOne.value=PageState.list;
 
@@ -530,7 +554,7 @@ class InventoryController extends GetxController{
         EasyLoading.dismiss();
         Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
         getInventoryListPager();
-        await fetchGetOneInventory(inventoryId);
+        await fetchGetInventoryDetail(inventoryId);
       }
     } finally {
       EasyLoading.dismiss();
@@ -570,7 +594,7 @@ class InventoryController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getInventoryListPager();
   }

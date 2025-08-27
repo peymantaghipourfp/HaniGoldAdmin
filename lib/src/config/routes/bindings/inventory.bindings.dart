@@ -23,7 +23,7 @@ class InventoryBindings implements Bindings{
     Get.lazyPut(()=>InventoryDetailInsertPaymentController());
     Get.lazyPut(()=>InventoryDetailUpdatePaymentController());
     Get.lazyPut(()=>InventoryCreateLayoutController());
-    Get.lazyPut(()=>HomeController());
+    //Get.lazyPut(()=>HomeController());
   }
 
 }

@@ -9,6 +9,7 @@ import 'package:hanigold_admin/src/domain/order/controller/order.controller.dart
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import 'package:hanigold_admin/src/domain/product/view/item_update_price.view.dart';
+import 'package:hanigold_admin/src/domain/transaction/widgets/balance_date_dialog.widget.dart';
 import 'package:hanigold_admin/src/widget/background_image_total.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
@@ -21,6 +22,8 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
+import '../../transaction/widgets/balance_dialog.widget.dart';
 import '../widget/total_balance.widget.dart';
 
 class OrderListView extends StatelessWidget {
@@ -64,7 +67,7 @@ class OrderListView extends StatelessWidget {
                                 scrollDirection: isDesktop
                                     ? Axis.horizontal
                                     : Axis.vertical,
-                                controller: orderController.scrollController,
+                                controller: orderController.balanceScrollController,
                                 itemCount: orderController.totalBalanceList
                                     .length,
                                 itemBuilder: (context, index) {
@@ -122,72 +125,15 @@ class OrderListView extends StatelessWidget {
                                           0.5),
                                       alignment: Alignment.center,
                                       height: 70,
-                                      child: TextFormField(
-                                        controller: orderController
-                                            .searchController,
-                                        style: AppTextStyle.labelText,
-                                        textInputAction: TextInputAction.search,
-                                        onFieldSubmitted: (value) async {
-                                          if (value.isNotEmpty) {
-                                            await orderController
-                                                .searchAccounts(value);
-                                            showSearchResults(context);
-                                          } else {
-                                            orderController.clearSearch();
-                                          }
-                                        },
-                                        decoration: InputDecoration(
-                                          contentPadding: EdgeInsets.symmetric(
-                                            vertical: isDesktop ? 16 : 12,
-                                            horizontal: 16,
-                                          ),
-                                          border: OutlineInputBorder(
-                                            borderRadius: BorderRadius.circular(
-                                                10),
-                                          ),
-                                          filled: true,
-                                          fillColor: AppColor.textFieldColor,
-                                          hintText: "جستجوی سفارش ... ",
-                                          hintStyle: AppTextStyle.labelText,
-                                          prefixIcon: IconButton(
-                                              onPressed: () async {
-                                                if (orderController
-                                                    .searchController.text
-                                                    .isNotEmpty) {
-                                                  await orderController
-                                                      .searchAccounts(
-                                                      orderController
-                                                          .searchController.text
-                                                  );
-                                                  showSearchResults(context);
-                                                } else {
-                                                  orderController.clearSearch();
-                                                }
-                                              },
-                                              icon: Icon(
-                                                Icons.search,
-                                                color: AppColor.textColor,
-                                                size: 30,)
-                                          ),
-                                          suffixIcon: IconButton(
-                                            onPressed: orderController
-                                                .clearSearch,
-                                            icon: Icon(
-                                                Icons.close,
-                                                color: AppColor.textColor),
-                                          ),
+                                      child: TextSelectionTheme(
+                                        data: TextSelectionThemeData(
+                                          selectionColor: Colors.white.withOpacity(0.4),
                                         ),
-                                      ),
-                                    );
-                                  } else {
-                                    return Column(
-                                      children: [
-                                        TextFormField(
+                                        child: TextFormField(
                                           controller: orderController
                                               .searchController,
                                           style: AppTextStyle.labelText,
-                                          textInputAction: TextInputAction
-                                              .search,
+                                          textInputAction: TextInputAction.search,
                                           onFieldSubmitted: (value) async {
                                             if (value.isNotEmpty) {
                                               await orderController
@@ -198,14 +144,13 @@ class OrderListView extends StatelessWidget {
                                             }
                                           },
                                           decoration: InputDecoration(
-                                            contentPadding: EdgeInsets
-                                                .symmetric(
+                                            contentPadding: EdgeInsets.symmetric(
                                               vertical: isDesktop ? 16 : 12,
                                               horizontal: 16,
                                             ),
                                             border: OutlineInputBorder(
-                                              borderRadius: BorderRadius
-                                                  .circular(10),
+                                              borderRadius: BorderRadius.circular(
+                                                  10),
                                             ),
                                             filled: true,
                                             fillColor: AppColor.textFieldColor,
@@ -214,18 +159,16 @@ class OrderListView extends StatelessWidget {
                                             prefixIcon: IconButton(
                                                 onPressed: () async {
                                                   if (orderController
-                                                      .searchController
-                                                      .text.isNotEmpty) {
+                                                      .searchController.text
+                                                      .isNotEmpty) {
                                                     await orderController
                                                         .searchAccounts(
                                                         orderController
-                                                            .searchController
-                                                            .text
+                                                            .searchController.text
                                                     );
                                                     showSearchResults(context);
                                                   } else {
-                                                    orderController
-                                                        .clearSearch();
+                                                    orderController.clearSearch();
                                                   }
                                                 },
                                                 icon: Icon(
@@ -239,6 +182,76 @@ class OrderListView extends StatelessWidget {
                                               icon: Icon(
                                                   Icons.close,
                                                   color: AppColor.textColor),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return Column(
+                                      children: [
+                                        TextSelectionTheme(
+                                          data: TextSelectionThemeData(
+                                            selectionColor: Colors.white.withOpacity(0.4),
+                                          ),
+                                          child: TextFormField(
+                                            controller: orderController
+                                                .searchController,
+                                            style: AppTextStyle.labelText,
+                                            textInputAction: TextInputAction
+                                                .search,
+                                            onFieldSubmitted: (value) async {
+                                              if (value.isNotEmpty) {
+                                                await orderController
+                                                    .searchAccounts(value);
+                                                showSearchResults(context);
+                                              } else {
+                                                orderController.clearSearch();
+                                              }
+                                            },
+                                            decoration: InputDecoration(
+                                              contentPadding: EdgeInsets
+                                                  .symmetric(
+                                                vertical: isDesktop ? 16 : 12,
+                                                horizontal: 16,
+                                              ),
+                                              border: OutlineInputBorder(
+                                                borderRadius: BorderRadius
+                                                    .circular(10),
+                                              ),
+                                              filled: true,
+                                              fillColor: AppColor.textFieldColor,
+                                              hintText: "جستجوی سفارش ... ",
+                                              hintStyle: AppTextStyle.labelText,
+                                              prefixIcon: IconButton(
+                                                  onPressed: () async {
+                                                    if (orderController
+                                                        .searchController
+                                                        .text.isNotEmpty) {
+                                                      await orderController
+                                                          .searchAccounts(
+                                                          orderController
+                                                              .searchController
+                                                              .text
+                                                      );
+                                                      showSearchResults(context);
+                                                    } else {
+                                                      orderController
+                                                          .clearSearch();
+                                                    }
+                                                  },
+                                                  icon: Icon(
+                                                    Icons.search,
+                                                    color: AppColor.textColor,
+                                                    size: 30,)
+                                              ),
+                                              suffixIcon: IconButton(
+                                                onPressed: orderController
+                                                    .clearSearch,
+                                                icon: Icon(
+                                                    Icons.close,
+                                                    color: AppColor.textColor),
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -387,93 +400,98 @@ class OrderListView extends StatelessWidget {
                                                                                 .only(
                                                                                 bottom: 5),
                                                                             child: IntrinsicHeight(
-                                                                              child: TextFormField(
-                                                                                validator: (
-                                                                                    value) {
-                                                                                  if (value ==
-                                                                                      null ||
-                                                                                      value
-                                                                                          .isEmpty) {
-                                                                                    return 'لطفا تاریخ را انتخاب کنید';
-                                                                                  }
-                                                                                  return null;
-                                                                                },
-                                                                                controller: orderController
-                                                                                    .dateStartController,
-                                                                                readOnly: true,
-                                                                                style: AppTextStyle
-                                                                                    .labelText,
-                                                                                decoration: InputDecoration(
-                                                                                  suffixIcon: Icon(
-                                                                                      Icons
-                                                                                          .calendar_month,
-                                                                                      color: AppColor
-                                                                                          .textColor),
-                                                                                  border: OutlineInputBorder(
-                                                                                    borderRadius: BorderRadius
-                                                                                        .circular(
-                                                                                        10),
-                                                                                  ),
-                                                                                  filled: true,
-                                                                                  fillColor: AppColor
-                                                                                      .textFieldColor,
-                                                                                  errorMaxLines: 1,
+                                                                              child: TextSelectionTheme(
+                                                                                data: TextSelectionThemeData(
+                                                                                  selectionColor: Colors.white.withOpacity(0.4),
                                                                                 ),
-                                                                                onTap: () async {
-                                                                                  Jalali? pickedDate = await showPersianDatePicker(
-                                                                                    context: context,
-                                                                                    initialDate: Jalali
-                                                                                        .now(),
-                                                                                    firstDate: Jalali(
-                                                                                        1400,
-                                                                                        1,
-                                                                                        1),
-                                                                                    lastDate: Jalali(
-                                                                                        1450,
-                                                                                        12,
-                                                                                        29),
-                                                                                    initialEntryMode: PersianDatePickerEntryMode
-                                                                                        .calendar,
-                                                                                    initialDatePickerMode: PersianDatePickerMode
-                                                                                        .day,
-                                                                                    locale: Locale(
-                                                                                        "fa",
-                                                                                        "IR"),
-                                                                                  );
-                                                                                  Gregorian gregorian = pickedDate!
-                                                                                      .toGregorian();
-                                                                                  orderController
-                                                                                      .startDateFilter
-                                                                                      .value =
-                                                                                  "${gregorian
-                                                                                      .year}-${gregorian
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}-${gregorian
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                      
-                                                                                  orderController
-                                                                                      .dateStartController
-                                                                                      .text =
-                                                                                  "${pickedDate
-                                                                                      .year}/${pickedDate
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}/${pickedDate
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                                                                },
+                                                                                child: TextFormField(
+                                                                                  validator: (
+                                                                                      value) {
+                                                                                    if (value ==
+                                                                                        null ||
+                                                                                        value
+                                                                                            .isEmpty) {
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: orderController
+                                                                                      .dateStartController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle
+                                                                                      .labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(
+                                                                                        Icons
+                                                                                            .calendar_month,
+                                                                                        color: AppColor
+                                                                                            .textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius
+                                                                                          .circular(
+                                                                                          10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor
+                                                                                        .textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali
+                                                                                          .now(),
+                                                                                      firstDate: Jalali(
+                                                                                          1400,
+                                                                                          1,
+                                                                                          1),
+                                                                                      lastDate: Jalali(
+                                                                                          1450,
+                                                                                          12,
+                                                                                          29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode
+                                                                                          .calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode
+                                                                                          .day,
+                                                                                      locale: Locale(
+                                                                                          "fa",
+                                                                                          "IR"),
+                                                                                    );
+                                                                                    Gregorian gregorian = pickedDate!
+                                                                                        .toGregorian();
+                                                                                    orderController
+                                                                                        .startDateFilter
+                                                                                        .value =
+                                                                                    "${gregorian
+                                                                                        .year}-${gregorian
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}-${gregorian
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+
+                                                                                    orderController
+                                                                                        .dateStartController
+                                                                                        .text =
+                                                                                    "${pickedDate
+                                                                                        .year}/${pickedDate
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}/${pickedDate
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+                                                                                  },
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -502,94 +520,99 @@ class OrderListView extends StatelessWidget {
                                                                                 .only(
                                                                                 bottom: 5),
                                                                             child: IntrinsicHeight(
-                                                                              child: TextFormField(
-                                                                                validator: (
-                                                                                    value) {
-                                                                                  if (value ==
-                                                                                      null ||
-                                                                                      value
-                                                                                          .isEmpty) {
-                                                                                    return 'لطفا تاریخ را انتخاب کنید';
-                                                                                  }
-                                                                                  return null;
-                                                                                },
-                                                                                controller: orderController
-                                                                                    .dateEndController,
-                                                                                readOnly: true,
-                                                                                style: AppTextStyle
-                                                                                    .labelText,
-                                                                                decoration: InputDecoration(
-                                                                                  suffixIcon: Icon(
-                                                                                      Icons
-                                                                                          .calendar_month,
-                                                                                      color: AppColor
-                                                                                          .textColor),
-                                                                                  border: OutlineInputBorder(
-                                                                                    borderRadius: BorderRadius
-                                                                                        .circular(
-                                                                                        10),
-                                                                                  ),
-                                                                                  filled: true,
-                                                                                  fillColor: AppColor
-                                                                                      .textFieldColor,
-                                                                                  errorMaxLines: 1,
+                                                                              child: TextSelectionTheme(
+                                                                                data: TextSelectionThemeData(
+                                                                                  selectionColor: Colors.white.withOpacity(0.4),
                                                                                 ),
-                                                                                onTap: () async {
-                                                                                  Jalali? pickedDate = await showPersianDatePicker(
-                                                                                    context: context,
-                                                                                    initialDate: Jalali
-                                                                                        .now(),
-                                                                                    firstDate: Jalali(
-                                                                                        1400,
-                                                                                        1,
-                                                                                        1),
-                                                                                    lastDate: Jalali(
-                                                                                        1450,
-                                                                                        12,
-                                                                                        29),
-                                                                                    initialEntryMode: PersianDatePickerEntryMode
-                                                                                        .calendar,
-                                                                                    initialDatePickerMode: PersianDatePickerMode
-                                                                                        .day,
-                                                                                    locale: Locale(
-                                                                                        "fa",
-                                                                                        "IR"),
-                                                                                  );
-                                                                                  // DateTime date=DateTime.now();
-                                                                                  Gregorian gregorian = pickedDate!
-                                                                                      .toGregorian();
-                                                                                  orderController
-                                                                                      .endDateFilter
-                                                                                      .value =
-                                                                                  "${gregorian
-                                                                                      .year}-${gregorian
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}-${gregorian
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                      
-                                                                                  orderController
-                                                                                      .dateEndController
-                                                                                      .text =
-                                                                                  "${pickedDate
-                                                                                      .year}/${pickedDate
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}/${pickedDate
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                                                                },
+                                                                                child: TextFormField(
+                                                                                  validator: (
+                                                                                      value) {
+                                                                                    if (value ==
+                                                                                        null ||
+                                                                                        value
+                                                                                            .isEmpty) {
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: orderController
+                                                                                      .dateEndController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle
+                                                                                      .labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(
+                                                                                        Icons
+                                                                                            .calendar_month,
+                                                                                        color: AppColor
+                                                                                            .textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius
+                                                                                          .circular(
+                                                                                          10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor
+                                                                                        .textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali
+                                                                                          .now(),
+                                                                                      firstDate: Jalali(
+                                                                                          1400,
+                                                                                          1,
+                                                                                          1),
+                                                                                      lastDate: Jalali(
+                                                                                          1450,
+                                                                                          12,
+                                                                                          29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode
+                                                                                          .calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode
+                                                                                          .day,
+                                                                                      locale: Locale(
+                                                                                          "fa",
+                                                                                          "IR"),
+                                                                                    );
+                                                                                    // DateTime date=DateTime.now();
+                                                                                    Gregorian gregorian = pickedDate!
+                                                                                        .toGregorian();
+                                                                                    orderController
+                                                                                        .endDateFilter
+                                                                                        .value =
+                                                                                    "${gregorian
+                                                                                        .year}-${gregorian
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}-${gregorian
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+
+                                                                                    orderController
+                                                                                        .dateEndController
+                                                                                        .text =
+                                                                                    "${pickedDate
+                                                                                        .year}/${pickedDate
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}/${pickedDate
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+                                                                                  },
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -780,93 +803,98 @@ class OrderListView extends StatelessWidget {
                                                                                 .only(
                                                                                 bottom: 5),
                                                                             child: IntrinsicHeight(
-                                                                              child: TextFormField(
-                                                                                validator: (
-                                                                                    value) {
-                                                                                  if (value ==
-                                                                                      null ||
-                                                                                      value
-                                                                                          .isEmpty) {
-                                                                                    return 'لطفا تاریخ را انتخاب کنید';
-                                                                                  }
-                                                                                  return null;
-                                                                                },
-                                                                                controller: orderController
-                                                                                    .dateStartController,
-                                                                                readOnly: true,
-                                                                                style: AppTextStyle
-                                                                                    .labelText,
-                                                                                decoration: InputDecoration(
-                                                                                  suffixIcon: Icon(
-                                                                                      Icons
-                                                                                          .calendar_month,
-                                                                                      color: AppColor
-                                                                                          .textColor),
-                                                                                  border: OutlineInputBorder(
-                                                                                    borderRadius: BorderRadius
-                                                                                        .circular(
-                                                                                        10),
-                                                                                  ),
-                                                                                  filled: true,
-                                                                                  fillColor: AppColor
-                                                                                      .textFieldColor,
-                                                                                  errorMaxLines: 1,
+                                                                              child: TextSelectionTheme(
+                                                                                data: TextSelectionThemeData(
+                                                                                  selectionColor: Colors.white.withOpacity(0.4),
                                                                                 ),
-                                                                                onTap: () async {
-                                                                                  Jalali? pickedDate = await showPersianDatePicker(
-                                                                                    context: context,
-                                                                                    initialDate: Jalali
-                                                                                        .now(),
-                                                                                    firstDate: Jalali(
-                                                                                        1400,
-                                                                                        1,
-                                                                                        1),
-                                                                                    lastDate: Jalali(
-                                                                                        1450,
-                                                                                        12,
-                                                                                        29),
-                                                                                    initialEntryMode: PersianDatePickerEntryMode
-                                                                                        .calendar,
-                                                                                    initialDatePickerMode: PersianDatePickerMode
-                                                                                        .day,
-                                                                                    locale: Locale(
-                                                                                        "fa",
-                                                                                        "IR"),
-                                                                                  );
-                                                                                  Gregorian gregorian = pickedDate!
-                                                                                      .toGregorian();
-                                                                                  orderController
-                                                                                      .startDateFilter
-                                                                                      .value =
-                                                                                  "${gregorian
-                                                                                      .year}-${gregorian
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}-${gregorian
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                      
-                                                                                  orderController
-                                                                                      .dateStartController
-                                                                                      .text =
-                                                                                  "${pickedDate
-                                                                                      .year}/${pickedDate
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}/${pickedDate
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                                                                },
+                                                                                child: TextFormField(
+                                                                                  validator: (
+                                                                                      value) {
+                                                                                    if (value ==
+                                                                                        null ||
+                                                                                        value
+                                                                                            .isEmpty) {
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: orderController
+                                                                                      .dateStartController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle
+                                                                                      .labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(
+                                                                                        Icons
+                                                                                            .calendar_month,
+                                                                                        color: AppColor
+                                                                                            .textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius
+                                                                                          .circular(
+                                                                                          10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor
+                                                                                        .textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali
+                                                                                          .now(),
+                                                                                      firstDate: Jalali(
+                                                                                          1400,
+                                                                                          1,
+                                                                                          1),
+                                                                                      lastDate: Jalali(
+                                                                                          1450,
+                                                                                          12,
+                                                                                          29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode
+                                                                                          .calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode
+                                                                                          .day,
+                                                                                      locale: Locale(
+                                                                                          "fa",
+                                                                                          "IR"),
+                                                                                    );
+                                                                                    Gregorian gregorian = pickedDate!
+                                                                                        .toGregorian();
+                                                                                    orderController
+                                                                                        .startDateFilter
+                                                                                        .value =
+                                                                                    "${gregorian
+                                                                                        .year}-${gregorian
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}-${gregorian
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+
+                                                                                    orderController
+                                                                                        .dateStartController
+                                                                                        .text =
+                                                                                    "${pickedDate
+                                                                                        .year}/${pickedDate
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}/${pickedDate
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+                                                                                  },
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -895,94 +923,99 @@ class OrderListView extends StatelessWidget {
                                                                                 .only(
                                                                                 bottom: 5),
                                                                             child: IntrinsicHeight(
-                                                                              child: TextFormField(
-                                                                                validator: (
-                                                                                    value) {
-                                                                                  if (value ==
-                                                                                      null ||
-                                                                                      value
-                                                                                          .isEmpty) {
-                                                                                    return 'لطفا تاریخ را انتخاب کنید';
-                                                                                  }
-                                                                                  return null;
-                                                                                },
-                                                                                controller: orderController
-                                                                                    .dateEndController,
-                                                                                readOnly: true,
-                                                                                style: AppTextStyle
-                                                                                    .labelText,
-                                                                                decoration: InputDecoration(
-                                                                                  suffixIcon: Icon(
-                                                                                      Icons
-                                                                                          .calendar_month,
-                                                                                      color: AppColor
-                                                                                          .textColor),
-                                                                                  border: OutlineInputBorder(
-                                                                                    borderRadius: BorderRadius
-                                                                                        .circular(
-                                                                                        10),
-                                                                                  ),
-                                                                                  filled: true,
-                                                                                  fillColor: AppColor
-                                                                                      .textFieldColor,
-                                                                                  errorMaxLines: 1,
+                                                                              child: TextSelectionTheme(
+                                                                                data: TextSelectionThemeData(
+                                                                                  selectionColor: Colors.white.withOpacity(0.4),
                                                                                 ),
-                                                                                onTap: () async {
-                                                                                  Jalali? pickedDate = await showPersianDatePicker(
-                                                                                    context: context,
-                                                                                    initialDate: Jalali
-                                                                                        .now(),
-                                                                                    firstDate: Jalali(
-                                                                                        1400,
-                                                                                        1,
-                                                                                        1),
-                                                                                    lastDate: Jalali(
-                                                                                        1450,
-                                                                                        12,
-                                                                                        29),
-                                                                                    initialEntryMode: PersianDatePickerEntryMode
-                                                                                        .calendar,
-                                                                                    initialDatePickerMode: PersianDatePickerMode
-                                                                                        .day,
-                                                                                    locale: Locale(
-                                                                                        "fa",
-                                                                                        "IR"),
-                                                                                  );
-                                                                                  // DateTime date=DateTime.now();
-                                                                                  Gregorian gregorian = pickedDate!
-                                                                                      .toGregorian();
-                                                                                  orderController
-                                                                                      .endDateFilter
-                                                                                      .value =
-                                                                                  "${gregorian
-                                                                                      .year}-${gregorian
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}-${gregorian
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                      
-                                                                                  orderController
-                                                                                      .dateEndController
-                                                                                      .text =
-                                                                                  "${pickedDate
-                                                                                      .year}/${pickedDate
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}/${pickedDate
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                                                                },
+                                                                                child: TextFormField(
+                                                                                  validator: (
+                                                                                      value) {
+                                                                                    if (value ==
+                                                                                        null ||
+                                                                                        value
+                                                                                            .isEmpty) {
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: orderController
+                                                                                      .dateEndController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle
+                                                                                      .labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(
+                                                                                        Icons
+                                                                                            .calendar_month,
+                                                                                        color: AppColor
+                                                                                            .textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius
+                                                                                          .circular(
+                                                                                          10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor
+                                                                                        .textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali
+                                                                                          .now(),
+                                                                                      firstDate: Jalali(
+                                                                                          1400,
+                                                                                          1,
+                                                                                          1),
+                                                                                      lastDate: Jalali(
+                                                                                          1450,
+                                                                                          12,
+                                                                                          29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode
+                                                                                          .calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode
+                                                                                          .day,
+                                                                                      locale: Locale(
+                                                                                          "fa",
+                                                                                          "IR"),
+                                                                                    );
+                                                                                    // DateTime date=DateTime.now();
+                                                                                    Gregorian gregorian = pickedDate!
+                                                                                        .toGregorian();
+                                                                                    orderController
+                                                                                        .endDateFilter
+                                                                                        .value =
+                                                                                    "${gregorian
+                                                                                        .year}-${gregorian
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}-${gregorian
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+
+                                                                                    orderController
+                                                                                        .dateEndController
+                                                                                        .text =
+                                                                                    "${pickedDate
+                                                                                        .year}/${pickedDate
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}/${pickedDate
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+                                                                                  },
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -1219,37 +1252,42 @@ class OrderListView extends StatelessWidget {
                                                                           SizedBox(
                                                                             height: 10,),
                                                                           IntrinsicHeight(
-                                                                            child: TextFormField(
-                                                                              autovalidateMode: AutovalidateMode
-                                                                                  .onUserInteraction,
-                                                                              controller: orderController
-                                                                                  .nameFilterController,
-                                                                              style: AppTextStyle
-                                                                                  .labelText
-                                                                                  .copyWith(
-                                                                                  fontSize: 15),
-                                                                              textAlign: TextAlign
-                                                                                  .start,
-                                                                              keyboardType: TextInputType
-                                                                                  .text,
-                                                                              decoration: InputDecoration(
-                                                                                contentPadding:
-                                                                                const EdgeInsets
-                                                                                    .symmetric(
-                                                                                    vertical: 11,
-                                                                                    horizontal: 15
+                                                                            child: TextSelectionTheme(
+                                                                              data: TextSelectionThemeData(
+                                                                                selectionColor: Colors.white.withOpacity(0.4),
+                                                                              ),
+                                                                              child: TextFormField(
+                                                                                autovalidateMode: AutovalidateMode
+                                                                                    .onUserInteraction,
+                                                                                controller: orderController
+                                                                                    .nameFilterController,
+                                                                                style: AppTextStyle
+                                                                                    .labelText
+                                                                                    .copyWith(
+                                                                                    fontSize: 15),
+                                                                                textAlign: TextAlign
+                                                                                    .start,
+                                                                                keyboardType: TextInputType
+                                                                                    .text,
+                                                                                decoration: InputDecoration(
+                                                                                  contentPadding:
+                                                                                  const EdgeInsets
+                                                                                      .symmetric(
+                                                                                      vertical: 11,
+                                                                                      horizontal: 15
+                                                                                  ),
+                                                                                  isDense: true,
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius:
+                                                                                    BorderRadius
+                                                                                        .circular(
+                                                                                        6),
+                                                                                  ),
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor
+                                                                                      .textFieldColor,
+                                                                                  errorMaxLines: 1,
                                                                                 ),
-                                                                                isDense: true,
-                                                                                border: OutlineInputBorder(
-                                                                                  borderRadius:
-                                                                                  BorderRadius
-                                                                                      .circular(
-                                                                                      6),
-                                                                                ),
-                                                                                filled: true,
-                                                                                fillColor: AppColor
-                                                                                    .textFieldColor,
-                                                                                errorMaxLines: 1,
                                                                               ),
                                                                             ),
                                                                           ),
@@ -1276,91 +1314,96 @@ class OrderListView extends StatelessWidget {
                                                                           SizedBox(
                                                                             height: 10,),
                                                                           IntrinsicHeight(
-                                                                            child: TextFormField(
-                                                                              autovalidateMode: AutovalidateMode
-                                                                                  .onUserInteraction,
-                                                                              controller: orderController
-                                                                                  .mobileFilterController,
-                                                                              style: AppTextStyle
-                                                                                  .labelText
-                                                                                  .copyWith(
-                                                                                  fontSize: 15),
-                                                                              textAlign: TextAlign
-                                                                                  .center,
-                                                                              keyboardType: TextInputType
-                                                                                  .phone,
-                                                                              inputFormatters: [
-                                                                                FilteringTextInputFormatter
-                                                                                    .allow(
-                                                                                    RegExp(
-                                                                                        r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                                                TextInputFormatter
-                                                                                    .withFunction((
-                                                                                    oldValue,
-                                                                                    newValue) {
-                                                                                  // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                                                  String newText = newValue
-                                                                                      .text
-                                                                                      .replaceAll(
-                                                                                      '٠',
-                                                                                      '0')
-                                                                                      .replaceAll(
-                                                                                      '١',
-                                                                                      '1')
-                                                                                      .replaceAll(
-                                                                                      '٢',
-                                                                                      '2')
-                                                                                      .replaceAll(
-                                                                                      '٣',
-                                                                                      '3')
-                                                                                      .replaceAll(
-                                                                                      '٤',
-                                                                                      '4')
-                                                                                      .replaceAll(
-                                                                                      '٥',
-                                                                                      '5')
-                                                                                      .replaceAll(
-                                                                                      '٦',
-                                                                                      '6')
-                                                                                      .replaceAll(
-                                                                                      '٧',
-                                                                                      '7')
-                                                                                      .replaceAll(
-                                                                                      '٨',
-                                                                                      '8')
-                                                                                      .replaceAll(
-                                                                                      '٩',
-                                                                                      '9');
-                                      
-                                                                                  return newValue
-                                                                                      .copyWith(
-                                                                                      text: newText,
-                                                                                      selection: TextSelection
-                                                                                          .collapsed(
-                                                                                          offset: newText
-                                                                                              .length));
-                                                                                }),
-                                                                              ],
-                                                                              decoration: InputDecoration(
-                                                                                contentPadding:
-                                                                                const EdgeInsets
-                                                                                    .symmetric(
-                                                                                    vertical: 11,
-                                                                                    horizontal: 15
-                                      
+                                                                            child: TextSelectionTheme(
+                                                                              data: TextSelectionThemeData(
+                                                                                selectionColor: Colors.white.withOpacity(0.4),
+                                                                              ),
+                                                                              child: TextFormField(
+                                                                                autovalidateMode: AutovalidateMode
+                                                                                    .onUserInteraction,
+                                                                                controller: orderController
+                                                                                    .mobileFilterController,
+                                                                                style: AppTextStyle
+                                                                                    .labelText
+                                                                                    .copyWith(
+                                                                                    fontSize: 15),
+                                                                                textAlign: TextAlign
+                                                                                    .center,
+                                                                                keyboardType: TextInputType
+                                                                                    .phone,
+                                                                                inputFormatters: [
+                                                                                  FilteringTextInputFormatter
+                                                                                      .allow(
+                                                                                      RegExp(
+                                                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                                  TextInputFormatter
+                                                                                      .withFunction((
+                                                                                      oldValue,
+                                                                                      newValue) {
+                                                                                    // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                                    String newText = newValue
+                                                                                        .text
+                                                                                        .replaceAll(
+                                                                                        '٠',
+                                                                                        '0')
+                                                                                        .replaceAll(
+                                                                                        '١',
+                                                                                        '1')
+                                                                                        .replaceAll(
+                                                                                        '٢',
+                                                                                        '2')
+                                                                                        .replaceAll(
+                                                                                        '٣',
+                                                                                        '3')
+                                                                                        .replaceAll(
+                                                                                        '٤',
+                                                                                        '4')
+                                                                                        .replaceAll(
+                                                                                        '٥',
+                                                                                        '5')
+                                                                                        .replaceAll(
+                                                                                        '٦',
+                                                                                        '6')
+                                                                                        .replaceAll(
+                                                                                        '٧',
+                                                                                        '7')
+                                                                                        .replaceAll(
+                                                                                        '٨',
+                                                                                        '8')
+                                                                                        .replaceAll(
+                                                                                        '٩',
+                                                                                        '9');
+
+                                                                                    return newValue
+                                                                                        .copyWith(
+                                                                                        text: newText,
+                                                                                        selection: TextSelection
+                                                                                            .collapsed(
+                                                                                            offset: newText
+                                                                                                .length));
+                                                                                  }),
+                                                                                ],
+                                                                                decoration: InputDecoration(
+                                                                                  contentPadding:
+                                                                                  const EdgeInsets
+                                                                                      .symmetric(
+                                                                                      vertical: 11,
+                                                                                      horizontal: 15
+
+                                                                                  ),
+                                                                                  isDense: true,
+                                                                                  border: OutlineInputBorder(
+                                                                                    borderRadius:
+                                                                                    BorderRadius
+                                                                                        .circular(
+                                                                                        6),
+                                                                                  ),
+
+                                                                                  filled: true,
+                                                                                  fillColor: AppColor
+                                                                                      .textFieldColor,
+                                                                                  errorMaxLines: 1,
                                                                                 ),
-                                                                                isDense: true,
-                                                                                border: OutlineInputBorder(
-                                                                                  borderRadius:
-                                                                                  BorderRadius
-                                                                                      .circular(
-                                                                                      6),
-                                                                                ),
-                                      
-                                                                                filled: true,
-                                                                                fillColor: AppColor
-                                                                                    .textFieldColor,
-                                                                                errorMaxLines: 1,
                                                                               ),
                                                                             ),
                                                                           ),
@@ -1389,93 +1432,98 @@ class OrderListView extends StatelessWidget {
                                                                                 .only(
                                                                                 bottom: 5),
                                                                             child: IntrinsicHeight(
-                                                                              child: TextFormField(
-                                                                                validator: (
-                                                                                    value) {
-                                                                                  if (value ==
-                                                                                      null ||
-                                                                                      value
-                                                                                          .isEmpty) {
-                                                                                    return 'لطفا تاریخ را انتخاب کنید';
-                                                                                  }
-                                                                                  return null;
-                                                                                },
-                                                                                controller: orderController
-                                                                                    .dateStartController,
-                                                                                readOnly: true,
-                                                                                style: AppTextStyle
-                                                                                    .labelText,
-                                                                                decoration: InputDecoration(
-                                                                                  suffixIcon: Icon(
-                                                                                      Icons
-                                                                                          .calendar_month,
-                                                                                      color: AppColor
-                                                                                          .textColor),
-                                                                                  border: OutlineInputBorder(
-                                                                                    borderRadius: BorderRadius
-                                                                                        .circular(
-                                                                                        10),
-                                                                                  ),
-                                                                                  filled: true,
-                                                                                  fillColor: AppColor
-                                                                                      .textFieldColor,
-                                                                                  errorMaxLines: 1,
+                                                                              child: TextSelectionTheme(
+                                                                                data: TextSelectionThemeData(
+                                                                                  selectionColor: Colors.white.withOpacity(0.4),
                                                                                 ),
-                                                                                onTap: () async {
-                                                                                  Jalali? pickedDate = await showPersianDatePicker(
-                                                                                    context: context,
-                                                                                    initialDate: Jalali
-                                                                                        .now(),
-                                                                                    firstDate: Jalali(
-                                                                                        1400,
-                                                                                        1,
-                                                                                        1),
-                                                                                    lastDate: Jalali(
-                                                                                        1450,
-                                                                                        12,
-                                                                                        29),
-                                                                                    initialEntryMode: PersianDatePickerEntryMode
-                                                                                        .calendar,
-                                                                                    initialDatePickerMode: PersianDatePickerMode
-                                                                                        .day,
-                                                                                    locale: Locale(
-                                                                                        "fa",
-                                                                                        "IR"),
-                                                                                  );
-                                                                                  Gregorian gregorian = pickedDate!
-                                                                                      .toGregorian();
-                                                                                  orderController
-                                                                                      .startDateFilter
-                                                                                      .value =
-                                                                                  "${gregorian
-                                                                                      .year}-${gregorian
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}-${gregorian
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                      
-                                                                                  orderController
-                                                                                      .dateStartController
-                                                                                      .text =
-                                                                                  "${pickedDate
-                                                                                      .year}/${pickedDate
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}/${pickedDate
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                                                                },
+                                                                                child: TextFormField(
+                                                                                  validator: (
+                                                                                      value) {
+                                                                                    if (value ==
+                                                                                        null ||
+                                                                                        value
+                                                                                            .isEmpty) {
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: orderController
+                                                                                      .dateStartController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle
+                                                                                      .labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(
+                                                                                        Icons
+                                                                                            .calendar_month,
+                                                                                        color: AppColor
+                                                                                            .textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius
+                                                                                          .circular(
+                                                                                          10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor
+                                                                                        .textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali
+                                                                                          .now(),
+                                                                                      firstDate: Jalali(
+                                                                                          1400,
+                                                                                          1,
+                                                                                          1),
+                                                                                      lastDate: Jalali(
+                                                                                          1450,
+                                                                                          12,
+                                                                                          29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode
+                                                                                          .calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode
+                                                                                          .day,
+                                                                                      locale: Locale(
+                                                                                          "fa",
+                                                                                          "IR"),
+                                                                                    );
+                                                                                    Gregorian gregorian = pickedDate!
+                                                                                        .toGregorian();
+                                                                                    orderController
+                                                                                        .startDateFilter
+                                                                                        .value =
+                                                                                    "${gregorian
+                                                                                        .year}-${gregorian
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}-${gregorian
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+
+                                                                                    orderController
+                                                                                        .dateStartController
+                                                                                        .text =
+                                                                                    "${pickedDate
+                                                                                        .year}/${pickedDate
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}/${pickedDate
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+                                                                                  },
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -1504,94 +1552,99 @@ class OrderListView extends StatelessWidget {
                                                                                 .only(
                                                                                 bottom: 5),
                                                                             child: IntrinsicHeight(
-                                                                              child: TextFormField(
-                                                                                validator: (
-                                                                                    value) {
-                                                                                  if (value ==
-                                                                                      null ||
-                                                                                      value
-                                                                                          .isEmpty) {
-                                                                                    return 'لطفا تاریخ را انتخاب کنید';
-                                                                                  }
-                                                                                  return null;
-                                                                                },
-                                                                                controller: orderController
-                                                                                    .dateEndController,
-                                                                                readOnly: true,
-                                                                                style: AppTextStyle
-                                                                                    .labelText,
-                                                                                decoration: InputDecoration(
-                                                                                  suffixIcon: Icon(
-                                                                                      Icons
-                                                                                          .calendar_month,
-                                                                                      color: AppColor
-                                                                                          .textColor),
-                                                                                  border: OutlineInputBorder(
-                                                                                    borderRadius: BorderRadius
-                                                                                        .circular(
-                                                                                        10),
-                                                                                  ),
-                                                                                  filled: true,
-                                                                                  fillColor: AppColor
-                                                                                      .textFieldColor,
-                                                                                  errorMaxLines: 1,
+                                                                              child: TextSelectionTheme(
+                                                                                data: TextSelectionThemeData(
+                                                                                  selectionColor: Colors.white.withOpacity(0.4),
                                                                                 ),
-                                                                                onTap: () async {
-                                                                                  Jalali? pickedDate = await showPersianDatePicker(
-                                                                                    context: context,
-                                                                                    initialDate: Jalali
-                                                                                        .now(),
-                                                                                    firstDate: Jalali(
-                                                                                        1400,
-                                                                                        1,
-                                                                                        1),
-                                                                                    lastDate: Jalali(
-                                                                                        1450,
-                                                                                        12,
-                                                                                        29),
-                                                                                    initialEntryMode: PersianDatePickerEntryMode
-                                                                                        .calendar,
-                                                                                    initialDatePickerMode: PersianDatePickerMode
-                                                                                        .day,
-                                                                                    locale: Locale(
-                                                                                        "fa",
-                                                                                        "IR"),
-                                                                                  );
-                                                                                  // DateTime date=DateTime.now();
-                                                                                  Gregorian gregorian = pickedDate!
-                                                                                      .toGregorian();
-                                                                                  orderController
-                                                                                      .endDateFilter
-                                                                                      .value =
-                                                                                  "${gregorian
-                                                                                      .year}-${gregorian
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}-${gregorian
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                      
-                                                                                  orderController
-                                                                                      .dateEndController
-                                                                                      .text =
-                                                                                  "${pickedDate
-                                                                                      .year}/${pickedDate
-                                                                                      .month
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}/${pickedDate
-                                                                                      .day
-                                                                                      .toString()
-                                                                                      .padLeft(
-                                                                                      2,
-                                                                                      '0')}";
-                                                                                },
+                                                                                child: TextFormField(
+                                                                                  validator: (
+                                                                                      value) {
+                                                                                    if (value ==
+                                                                                        null ||
+                                                                                        value
+                                                                                            .isEmpty) {
+                                                                                      return 'لطفا تاریخ را انتخاب کنید';
+                                                                                    }
+                                                                                    return null;
+                                                                                  },
+                                                                                  controller: orderController
+                                                                                      .dateEndController,
+                                                                                  readOnly: true,
+                                                                                  style: AppTextStyle
+                                                                                      .labelText,
+                                                                                  decoration: InputDecoration(
+                                                                                    suffixIcon: Icon(
+                                                                                        Icons
+                                                                                            .calendar_month,
+                                                                                        color: AppColor
+                                                                                            .textColor),
+                                                                                    border: OutlineInputBorder(
+                                                                                      borderRadius: BorderRadius
+                                                                                          .circular(
+                                                                                          10),
+                                                                                    ),
+                                                                                    filled: true,
+                                                                                    fillColor: AppColor
+                                                                                        .textFieldColor,
+                                                                                    errorMaxLines: 1,
+                                                                                  ),
+                                                                                  onTap: () async {
+                                                                                    Jalali? pickedDate = await showPersianDatePicker(
+                                                                                      context: context,
+                                                                                      initialDate: Jalali
+                                                                                          .now(),
+                                                                                      firstDate: Jalali(
+                                                                                          1400,
+                                                                                          1,
+                                                                                          1),
+                                                                                      lastDate: Jalali(
+                                                                                          1450,
+                                                                                          12,
+                                                                                          29),
+                                                                                      initialEntryMode: PersianDatePickerEntryMode
+                                                                                          .calendar,
+                                                                                      initialDatePickerMode: PersianDatePickerMode
+                                                                                          .day,
+                                                                                      locale: Locale(
+                                                                                          "fa",
+                                                                                          "IR"),
+                                                                                    );
+                                                                                    // DateTime date=DateTime.now();
+                                                                                    Gregorian gregorian = pickedDate!
+                                                                                        .toGregorian();
+                                                                                    orderController
+                                                                                        .endDateFilter
+                                                                                        .value =
+                                                                                    "${gregorian
+                                                                                        .year}-${gregorian
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}-${gregorian
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+
+                                                                                    orderController
+                                                                                        .dateEndController
+                                                                                        .text =
+                                                                                    "${pickedDate
+                                                                                        .year}/${pickedDate
+                                                                                        .month
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}/${pickedDate
+                                                                                        .day
+                                                                                        .toString()
+                                                                                        .padLeft(
+                                                                                        2,
+                                                                                        '0')}";
+                                                                                  },
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
@@ -1927,93 +1980,98 @@ class OrderListView extends StatelessWidget {
                                                                                       .only(
                                                                                       bottom: 5),
                                                                                   child: IntrinsicHeight(
-                                                                                    child: TextFormField(
-                                                                                      validator: (
-                                                                                          value) {
-                                                                                        if (value ==
-                                                                                            null ||
-                                                                                            value
-                                                                                                .isEmpty) {
-                                                                                          return 'لطفا تاریخ را انتخاب کنید';
-                                                                                        }
-                                                                                        return null;
-                                                                                      },
-                                                                                      controller: orderController
-                                                                                          .dateStartController,
-                                                                                      readOnly: true,
-                                                                                      style: AppTextStyle
-                                                                                          .labelText,
-                                                                                      decoration: InputDecoration(
-                                                                                        suffixIcon: Icon(
-                                                                                            Icons
-                                                                                                .calendar_month,
-                                                                                            color: AppColor
-                                                                                                .textColor),
-                                                                                        border: OutlineInputBorder(
-                                                                                          borderRadius: BorderRadius
-                                                                                              .circular(
-                                                                                              10),
-                                                                                        ),
-                                                                                        filled: true,
-                                                                                        fillColor: AppColor
-                                                                                            .textFieldColor,
-                                                                                        errorMaxLines: 1,
+                                                                                    child: TextSelectionTheme(
+                                                                                      data: TextSelectionThemeData(
+                                                                                        selectionColor: Colors.white.withOpacity(0.4),
                                                                                       ),
-                                                                                      onTap: () async {
-                                                                                        Jalali? pickedDate = await showPersianDatePicker(
-                                                                                          context: context,
-                                                                                          initialDate: Jalali
-                                                                                              .now(),
-                                                                                          firstDate: Jalali(
-                                                                                              1400,
-                                                                                              1,
-                                                                                              1),
-                                                                                          lastDate: Jalali(
-                                                                                              1450,
-                                                                                              12,
-                                                                                              29),
-                                                                                          initialEntryMode: PersianDatePickerEntryMode
-                                                                                              .calendar,
-                                                                                          initialDatePickerMode: PersianDatePickerMode
-                                                                                              .day,
-                                                                                          locale: Locale(
-                                                                                              "fa",
-                                                                                              "IR"),
-                                                                                        );
-                                                                                        Gregorian gregorian = pickedDate!
-                                                                                            .toGregorian();
-                                                                                        orderController
-                                                                                            .startDateFilter
-                                                                                            .value =
-                                                                                        "${gregorian
-                                                                                            .year}-${gregorian
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}-${gregorian
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                      
-                                                                                        orderController
-                                                                                            .dateStartController
-                                                                                            .text =
-                                                                                        "${pickedDate
-                                                                                            .year}/${pickedDate
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}/${pickedDate
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                                                                      },
+                                                                                      child: TextFormField(
+                                                                                        validator: (
+                                                                                            value) {
+                                                                                          if (value ==
+                                                                                              null ||
+                                                                                              value
+                                                                                                  .isEmpty) {
+                                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                                          }
+                                                                                          return null;
+                                                                                        },
+                                                                                        controller: orderController
+                                                                                            .dateStartController,
+                                                                                        readOnly: true,
+                                                                                        style: AppTextStyle
+                                                                                            .labelText,
+                                                                                        decoration: InputDecoration(
+                                                                                          suffixIcon: Icon(
+                                                                                              Icons
+                                                                                                  .calendar_month,
+                                                                                              color: AppColor
+                                                                                                  .textColor),
+                                                                                          border: OutlineInputBorder(
+                                                                                            borderRadius: BorderRadius
+                                                                                                .circular(
+                                                                                                10),
+                                                                                          ),
+                                                                                          filled: true,
+                                                                                          fillColor: AppColor
+                                                                                              .textFieldColor,
+                                                                                          errorMaxLines: 1,
+                                                                                        ),
+                                                                                        onTap: () async {
+                                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                                            context: context,
+                                                                                            initialDate: Jalali
+                                                                                                .now(),
+                                                                                            firstDate: Jalali(
+                                                                                                1400,
+                                                                                                1,
+                                                                                                1),
+                                                                                            lastDate: Jalali(
+                                                                                                1450,
+                                                                                                12,
+                                                                                                29),
+                                                                                            initialEntryMode: PersianDatePickerEntryMode
+                                                                                                .calendar,
+                                                                                            initialDatePickerMode: PersianDatePickerMode
+                                                                                                .day,
+                                                                                            locale: Locale(
+                                                                                                "fa",
+                                                                                                "IR"),
+                                                                                          );
+                                                                                          Gregorian gregorian = pickedDate!
+                                                                                              .toGregorian();
+                                                                                          orderController
+                                                                                              .startDateFilter
+                                                                                              .value =
+                                                                                          "${gregorian
+                                                                                              .year}-${gregorian
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}-${gregorian
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+
+                                                                                          orderController
+                                                                                              .dateStartController
+                                                                                              .text =
+                                                                                          "${pickedDate
+                                                                                              .year}/${pickedDate
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}/${pickedDate
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+                                                                                        },
+                                                                                      ),
                                                                                     ),
                                                                                   ),
                                                                                 ),
@@ -2042,94 +2100,99 @@ class OrderListView extends StatelessWidget {
                                                                                       .only(
                                                                                       bottom: 5),
                                                                                   child: IntrinsicHeight(
-                                                                                    child: TextFormField(
-                                                                                      validator: (
-                                                                                          value) {
-                                                                                        if (value ==
-                                                                                            null ||
-                                                                                            value
-                                                                                                .isEmpty) {
-                                                                                          return 'لطفا تاریخ را انتخاب کنید';
-                                                                                        }
-                                                                                        return null;
-                                                                                      },
-                                                                                      controller: orderController
-                                                                                          .dateEndController,
-                                                                                      readOnly: true,
-                                                                                      style: AppTextStyle
-                                                                                          .labelText,
-                                                                                      decoration: InputDecoration(
-                                                                                        suffixIcon: Icon(
-                                                                                            Icons
-                                                                                                .calendar_month,
-                                                                                            color: AppColor
-                                                                                                .textColor),
-                                                                                        border: OutlineInputBorder(
-                                                                                          borderRadius: BorderRadius
-                                                                                              .circular(
-                                                                                              10),
-                                                                                        ),
-                                                                                        filled: true,
-                                                                                        fillColor: AppColor
-                                                                                            .textFieldColor,
-                                                                                        errorMaxLines: 1,
+                                                                                    child: TextSelectionTheme(
+                                                                                      data: TextSelectionThemeData(
+                                                                                        selectionColor: Colors.white.withOpacity(0.4),
                                                                                       ),
-                                                                                      onTap: () async {
-                                                                                        Jalali? pickedDate = await showPersianDatePicker(
-                                                                                          context: context,
-                                                                                          initialDate: Jalali
-                                                                                              .now(),
-                                                                                          firstDate: Jalali(
-                                                                                              1400,
-                                                                                              1,
-                                                                                              1),
-                                                                                          lastDate: Jalali(
-                                                                                              1450,
-                                                                                              12,
-                                                                                              29),
-                                                                                          initialEntryMode: PersianDatePickerEntryMode
-                                                                                              .calendar,
-                                                                                          initialDatePickerMode: PersianDatePickerMode
-                                                                                              .day,
-                                                                                          locale: Locale(
-                                                                                              "fa",
-                                                                                              "IR"),
-                                                                                        );
-                                                                                        // DateTime date=DateTime.now();
-                                                                                        Gregorian gregorian = pickedDate!
-                                                                                            .toGregorian();
-                                                                                        orderController
-                                                                                            .endDateFilter
-                                                                                            .value =
-                                                                                        "${gregorian
-                                                                                            .year}-${gregorian
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}-${gregorian
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                      
-                                                                                        orderController
-                                                                                            .dateEndController
-                                                                                            .text =
-                                                                                        "${pickedDate
-                                                                                            .year}/${pickedDate
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}/${pickedDate
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                                                                      },
+                                                                                      child: TextFormField(
+                                                                                        validator: (
+                                                                                            value) {
+                                                                                          if (value ==
+                                                                                              null ||
+                                                                                              value
+                                                                                                  .isEmpty) {
+                                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                                          }
+                                                                                          return null;
+                                                                                        },
+                                                                                        controller: orderController
+                                                                                            .dateEndController,
+                                                                                        readOnly: true,
+                                                                                        style: AppTextStyle
+                                                                                            .labelText,
+                                                                                        decoration: InputDecoration(
+                                                                                          suffixIcon: Icon(
+                                                                                              Icons
+                                                                                                  .calendar_month,
+                                                                                              color: AppColor
+                                                                                                  .textColor),
+                                                                                          border: OutlineInputBorder(
+                                                                                            borderRadius: BorderRadius
+                                                                                                .circular(
+                                                                                                10),
+                                                                                          ),
+                                                                                          filled: true,
+                                                                                          fillColor: AppColor
+                                                                                              .textFieldColor,
+                                                                                          errorMaxLines: 1,
+                                                                                        ),
+                                                                                        onTap: () async {
+                                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                                            context: context,
+                                                                                            initialDate: Jalali
+                                                                                                .now(),
+                                                                                            firstDate: Jalali(
+                                                                                                1400,
+                                                                                                1,
+                                                                                                1),
+                                                                                            lastDate: Jalali(
+                                                                                                1450,
+                                                                                                12,
+                                                                                                29),
+                                                                                            initialEntryMode: PersianDatePickerEntryMode
+                                                                                                .calendar,
+                                                                                            initialDatePickerMode: PersianDatePickerMode
+                                                                                                .day,
+                                                                                            locale: Locale(
+                                                                                                "fa",
+                                                                                                "IR"),
+                                                                                          );
+                                                                                          // DateTime date=DateTime.now();
+                                                                                          Gregorian gregorian = pickedDate!
+                                                                                              .toGregorian();
+                                                                                          orderController
+                                                                                              .endDateFilter
+                                                                                              .value =
+                                                                                          "${gregorian
+                                                                                              .year}-${gregorian
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}-${gregorian
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+
+                                                                                          orderController
+                                                                                              .dateEndController
+                                                                                              .text =
+                                                                                          "${pickedDate
+                                                                                              .year}/${pickedDate
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}/${pickedDate
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+                                                                                        },
+                                                                                      ),
                                                                                     ),
                                                                                   ),
                                                                                 ),
@@ -2333,93 +2396,98 @@ class OrderListView extends StatelessWidget {
                                                                                       .only(
                                                                                       bottom: 5),
                                                                                   child: IntrinsicHeight(
-                                                                                    child: TextFormField(
-                                                                                      validator: (
-                                                                                          value) {
-                                                                                        if (value ==
-                                                                                            null ||
-                                                                                            value
-                                                                                                .isEmpty) {
-                                                                                          return 'لطفا تاریخ را انتخاب کنید';
-                                                                                        }
-                                                                                        return null;
-                                                                                      },
-                                                                                      controller: orderController
-                                                                                          .dateStartController,
-                                                                                      readOnly: true,
-                                                                                      style: AppTextStyle
-                                                                                          .labelText,
-                                                                                      decoration: InputDecoration(
-                                                                                        suffixIcon: Icon(
-                                                                                            Icons
-                                                                                                .calendar_month,
-                                                                                            color: AppColor
-                                                                                                .textColor),
-                                                                                        border: OutlineInputBorder(
-                                                                                          borderRadius: BorderRadius
-                                                                                              .circular(
-                                                                                              10),
-                                                                                        ),
-                                                                                        filled: true,
-                                                                                        fillColor: AppColor
-                                                                                            .textFieldColor,
-                                                                                        errorMaxLines: 1,
+                                                                                    child: TextSelectionTheme(
+                                                                                      data: TextSelectionThemeData(
+                                                                                        selectionColor: Colors.white.withOpacity(0.4),
                                                                                       ),
-                                                                                      onTap: () async {
-                                                                                        Jalali? pickedDate = await showPersianDatePicker(
-                                                                                          context: context,
-                                                                                          initialDate: Jalali
-                                                                                              .now(),
-                                                                                          firstDate: Jalali(
-                                                                                              1400,
-                                                                                              1,
-                                                                                              1),
-                                                                                          lastDate: Jalali(
-                                                                                              1450,
-                                                                                              12,
-                                                                                              29),
-                                                                                          initialEntryMode: PersianDatePickerEntryMode
-                                                                                              .calendar,
-                                                                                          initialDatePickerMode: PersianDatePickerMode
-                                                                                              .day,
-                                                                                          locale: Locale(
-                                                                                              "fa",
-                                                                                              "IR"),
-                                                                                        );
-                                                                                        Gregorian gregorian = pickedDate!
-                                                                                            .toGregorian();
-                                                                                        orderController
-                                                                                            .startDateFilter
-                                                                                            .value =
-                                                                                        "${gregorian
-                                                                                            .year}-${gregorian
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}-${gregorian
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                      
-                                                                                        orderController
-                                                                                            .dateStartController
-                                                                                            .text =
-                                                                                        "${pickedDate
-                                                                                            .year}/${pickedDate
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}/${pickedDate
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                                                                      },
+                                                                                      child: TextFormField(
+                                                                                        validator: (
+                                                                                            value) {
+                                                                                          if (value ==
+                                                                                              null ||
+                                                                                              value
+                                                                                                  .isEmpty) {
+                                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                                          }
+                                                                                          return null;
+                                                                                        },
+                                                                                        controller: orderController
+                                                                                            .dateStartController,
+                                                                                        readOnly: true,
+                                                                                        style: AppTextStyle
+                                                                                            .labelText,
+                                                                                        decoration: InputDecoration(
+                                                                                          suffixIcon: Icon(
+                                                                                              Icons
+                                                                                                  .calendar_month,
+                                                                                              color: AppColor
+                                                                                                  .textColor),
+                                                                                          border: OutlineInputBorder(
+                                                                                            borderRadius: BorderRadius
+                                                                                                .circular(
+                                                                                                10),
+                                                                                          ),
+                                                                                          filled: true,
+                                                                                          fillColor: AppColor
+                                                                                              .textFieldColor,
+                                                                                          errorMaxLines: 1,
+                                                                                        ),
+                                                                                        onTap: () async {
+                                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                                            context: context,
+                                                                                            initialDate: Jalali
+                                                                                                .now(),
+                                                                                            firstDate: Jalali(
+                                                                                                1400,
+                                                                                                1,
+                                                                                                1),
+                                                                                            lastDate: Jalali(
+                                                                                                1450,
+                                                                                                12,
+                                                                                                29),
+                                                                                            initialEntryMode: PersianDatePickerEntryMode
+                                                                                                .calendar,
+                                                                                            initialDatePickerMode: PersianDatePickerMode
+                                                                                                .day,
+                                                                                            locale: Locale(
+                                                                                                "fa",
+                                                                                                "IR"),
+                                                                                          );
+                                                                                          Gregorian gregorian = pickedDate!
+                                                                                              .toGregorian();
+                                                                                          orderController
+                                                                                              .startDateFilter
+                                                                                              .value =
+                                                                                          "${gregorian
+                                                                                              .year}-${gregorian
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}-${gregorian
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+
+                                                                                          orderController
+                                                                                              .dateStartController
+                                                                                              .text =
+                                                                                          "${pickedDate
+                                                                                              .year}/${pickedDate
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}/${pickedDate
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+                                                                                        },
+                                                                                      ),
                                                                                     ),
                                                                                   ),
                                                                                 ),
@@ -2448,94 +2516,99 @@ class OrderListView extends StatelessWidget {
                                                                                       .only(
                                                                                       bottom: 5),
                                                                                   child: IntrinsicHeight(
-                                                                                    child: TextFormField(
-                                                                                      validator: (
-                                                                                          value) {
-                                                                                        if (value ==
-                                                                                            null ||
-                                                                                            value
-                                                                                                .isEmpty) {
-                                                                                          return 'لطفا تاریخ را انتخاب کنید';
-                                                                                        }
-                                                                                        return null;
-                                                                                      },
-                                                                                      controller: orderController
-                                                                                          .dateEndController,
-                                                                                      readOnly: true,
-                                                                                      style: AppTextStyle
-                                                                                          .labelText,
-                                                                                      decoration: InputDecoration(
-                                                                                        suffixIcon: Icon(
-                                                                                            Icons
-                                                                                                .calendar_month,
-                                                                                            color: AppColor
-                                                                                                .textColor),
-                                                                                        border: OutlineInputBorder(
-                                                                                          borderRadius: BorderRadius
-                                                                                              .circular(
-                                                                                              10),
-                                                                                        ),
-                                                                                        filled: true,
-                                                                                        fillColor: AppColor
-                                                                                            .textFieldColor,
-                                                                                        errorMaxLines: 1,
+                                                                                    child: TextSelectionTheme(
+                                                                                      data: TextSelectionThemeData(
+                                                                                        selectionColor: Colors.white.withOpacity(0.4),
                                                                                       ),
-                                                                                      onTap: () async {
-                                                                                        Jalali? pickedDate = await showPersianDatePicker(
-                                                                                          context: context,
-                                                                                          initialDate: Jalali
-                                                                                              .now(),
-                                                                                          firstDate: Jalali(
-                                                                                              1400,
-                                                                                              1,
-                                                                                              1),
-                                                                                          lastDate: Jalali(
-                                                                                              1450,
-                                                                                              12,
-                                                                                              29),
-                                                                                          initialEntryMode: PersianDatePickerEntryMode
-                                                                                              .calendar,
-                                                                                          initialDatePickerMode: PersianDatePickerMode
-                                                                                              .day,
-                                                                                          locale: Locale(
-                                                                                              "fa",
-                                                                                              "IR"),
-                                                                                        );
-                                                                                        // DateTime date=DateTime.now();
-                                                                                        Gregorian gregorian = pickedDate!
-                                                                                            .toGregorian();
-                                                                                        orderController
-                                                                                            .endDateFilter
-                                                                                            .value =
-                                                                                        "${gregorian
-                                                                                            .year}-${gregorian
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}-${gregorian
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                      
-                                                                                        orderController
-                                                                                            .dateEndController
-                                                                                            .text =
-                                                                                        "${pickedDate
-                                                                                            .year}/${pickedDate
-                                                                                            .month
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}/${pickedDate
-                                                                                            .day
-                                                                                            .toString()
-                                                                                            .padLeft(
-                                                                                            2,
-                                                                                            '0')}";
-                                                                                      },
+                                                                                      child: TextFormField(
+                                                                                        validator: (
+                                                                                            value) {
+                                                                                          if (value ==
+                                                                                              null ||
+                                                                                              value
+                                                                                                  .isEmpty) {
+                                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                                          }
+                                                                                          return null;
+                                                                                        },
+                                                                                        controller: orderController
+                                                                                            .dateEndController,
+                                                                                        readOnly: true,
+                                                                                        style: AppTextStyle
+                                                                                            .labelText,
+                                                                                        decoration: InputDecoration(
+                                                                                          suffixIcon: Icon(
+                                                                                              Icons
+                                                                                                  .calendar_month,
+                                                                                              color: AppColor
+                                                                                                  .textColor),
+                                                                                          border: OutlineInputBorder(
+                                                                                            borderRadius: BorderRadius
+                                                                                                .circular(
+                                                                                                10),
+                                                                                          ),
+                                                                                          filled: true,
+                                                                                          fillColor: AppColor
+                                                                                              .textFieldColor,
+                                                                                          errorMaxLines: 1,
+                                                                                        ),
+                                                                                        onTap: () async {
+                                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                                            context: context,
+                                                                                            initialDate: Jalali
+                                                                                                .now(),
+                                                                                            firstDate: Jalali(
+                                                                                                1400,
+                                                                                                1,
+                                                                                                1),
+                                                                                            lastDate: Jalali(
+                                                                                                1450,
+                                                                                                12,
+                                                                                                29),
+                                                                                            initialEntryMode: PersianDatePickerEntryMode
+                                                                                                .calendar,
+                                                                                            initialDatePickerMode: PersianDatePickerMode
+                                                                                                .day,
+                                                                                            locale: Locale(
+                                                                                                "fa",
+                                                                                                "IR"),
+                                                                                          );
+                                                                                          // DateTime date=DateTime.now();
+                                                                                          Gregorian gregorian = pickedDate!
+                                                                                              .toGregorian();
+                                                                                          orderController
+                                                                                              .endDateFilter
+                                                                                              .value =
+                                                                                          "${gregorian
+                                                                                              .year}-${gregorian
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}-${gregorian
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+
+                                                                                          orderController
+                                                                                              .dateEndController
+                                                                                              .text =
+                                                                                          "${pickedDate
+                                                                                              .year}/${pickedDate
+                                                                                              .month
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}/${pickedDate
+                                                                                              .day
+                                                                                              .toString()
+                                                                                              .padLeft(
+                                                                                              2,
+                                                                                              '0')}";
+                                                                                        },
+                                                                                      ),
                                                                                     ),
                                                                                   ),
                                                                                 ),
@@ -2783,37 +2856,42 @@ class OrderListView extends StatelessWidget {
                                                                               SizedBox(
                                                                                 height: 10,),
                                                                               IntrinsicHeight(
-                                                                                child: TextFormField(
-                                                                                  autovalidateMode: AutovalidateMode
-                                                                                      .onUserInteraction,
-                                                                                  controller: orderController
-                                                                                      .nameFilterController,
-                                                                                  style: AppTextStyle
-                                                                                      .labelText
-                                                                                      .copyWith(
-                                                                                      fontSize: 15),
-                                                                                  textAlign: TextAlign
-                                                                                      .start,
-                                                                                  keyboardType: TextInputType
-                                                                                      .text,
-                                                                                  decoration: InputDecoration(
-                                                                                    contentPadding:
-                                                                                    const EdgeInsets
-                                                                                        .symmetric(
-                                                                                        vertical: 11,
-                                                                                        horizontal: 15
+                                                                                child: TextSelectionTheme(
+                                                                                  data: TextSelectionThemeData(
+                                                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                                                  ),
+                                                                                  child: TextFormField(
+                                                                                    autovalidateMode: AutovalidateMode
+                                                                                        .onUserInteraction,
+                                                                                    controller: orderController
+                                                                                        .nameFilterController,
+                                                                                    style: AppTextStyle
+                                                                                        .labelText
+                                                                                        .copyWith(
+                                                                                        fontSize: 15),
+                                                                                    textAlign: TextAlign
+                                                                                        .start,
+                                                                                    keyboardType: TextInputType
+                                                                                        .text,
+                                                                                    decoration: InputDecoration(
+                                                                                      contentPadding:
+                                                                                      const EdgeInsets
+                                                                                          .symmetric(
+                                                                                          vertical: 11,
+                                                                                          horizontal: 15
+                                                                                      ),
+                                                                                      isDense: true,
+                                                                                      border: OutlineInputBorder(
+                                                                                        borderRadius:
+                                                                                        BorderRadius
+                                                                                            .circular(
+                                                                                            6),
+                                                                                      ),
+                                                                                      filled: true,
+                                                                                      fillColor: AppColor
+                                                                                          .textFieldColor,
+                                                                                      errorMaxLines: 1,
                                                                                     ),
-                                                                                    isDense: true,
-                                                                                    border: OutlineInputBorder(
-                                                                                      borderRadius:
-                                                                                      BorderRadius
-                                                                                          .circular(
-                                                                                          6),
-                                                                                    ),
-                                                                                    filled: true,
-                                                                                    fillColor: AppColor
-                                                                                        .textFieldColor,
-                                                                                    errorMaxLines: 1,
                                                                                   ),
                                                                                 ),
                                                                               ),
@@ -2840,91 +2918,96 @@ class OrderListView extends StatelessWidget {
                                                                               SizedBox(
                                                                                 height: 10,),
                                                                               IntrinsicHeight(
-                                                                                child: TextFormField(
-                                                                                  autovalidateMode: AutovalidateMode
-                                                                                      .onUserInteraction,
-                                                                                  controller: orderController
-                                                                                      .mobileFilterController,
-                                                                                  style: AppTextStyle
-                                                                                      .labelText
-                                                                                      .copyWith(
-                                                                                      fontSize: 15),
-                                                                                  textAlign: TextAlign
-                                                                                      .center,
-                                                                                  keyboardType: TextInputType
-                                                                                      .phone,
-                                                                                  inputFormatters: [
-                                                                                    FilteringTextInputFormatter
-                                                                                        .allow(
-                                                                                        RegExp(
-                                                                                            r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                                                    TextInputFormatter
-                                                                                        .withFunction((
-                                                                                        oldValue,
-                                                                                        newValue) {
-                                                                                      // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                                                      String newText = newValue
-                                                                                          .text
-                                                                                          .replaceAll(
-                                                                                          '٠',
-                                                                                          '0')
-                                                                                          .replaceAll(
-                                                                                          '١',
-                                                                                          '1')
-                                                                                          .replaceAll(
-                                                                                          '٢',
-                                                                                          '2')
-                                                                                          .replaceAll(
-                                                                                          '٣',
-                                                                                          '3')
-                                                                                          .replaceAll(
-                                                                                          '٤',
-                                                                                          '4')
-                                                                                          .replaceAll(
-                                                                                          '٥',
-                                                                                          '5')
-                                                                                          .replaceAll(
-                                                                                          '٦',
-                                                                                          '6')
-                                                                                          .replaceAll(
-                                                                                          '٧',
-                                                                                          '7')
-                                                                                          .replaceAll(
-                                                                                          '٨',
-                                                                                          '8')
-                                                                                          .replaceAll(
-                                                                                          '٩',
-                                                                                          '9');
-                                      
-                                                                                      return newValue
-                                                                                          .copyWith(
-                                                                                          text: newText,
-                                                                                          selection: TextSelection
-                                                                                              .collapsed(
-                                                                                              offset: newText
-                                                                                                  .length));
-                                                                                    }),
-                                                                                  ],
-                                                                                  decoration: InputDecoration(
-                                                                                    contentPadding:
-                                                                                    const EdgeInsets
-                                                                                        .symmetric(
-                                                                                        vertical: 11,
-                                                                                        horizontal: 15
-                                      
+                                                                                child: TextSelectionTheme(
+                                                                                  data: TextSelectionThemeData(
+                                                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                                                  ),
+                                                                                  child: TextFormField(
+                                                                                    autovalidateMode: AutovalidateMode
+                                                                                        .onUserInteraction,
+                                                                                    controller: orderController
+                                                                                        .mobileFilterController,
+                                                                                    style: AppTextStyle
+                                                                                        .labelText
+                                                                                        .copyWith(
+                                                                                        fontSize: 15),
+                                                                                    textAlign: TextAlign
+                                                                                        .center,
+                                                                                    keyboardType: TextInputType
+                                                                                        .phone,
+                                                                                    inputFormatters: [
+                                                                                      FilteringTextInputFormatter
+                                                                                          .allow(
+                                                                                          RegExp(
+                                                                                              r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                                      TextInputFormatter
+                                                                                          .withFunction((
+                                                                                          oldValue,
+                                                                                          newValue) {
+                                                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                                        String newText = newValue
+                                                                                            .text
+                                                                                            .replaceAll(
+                                                                                            '٠',
+                                                                                            '0')
+                                                                                            .replaceAll(
+                                                                                            '١',
+                                                                                            '1')
+                                                                                            .replaceAll(
+                                                                                            '٢',
+                                                                                            '2')
+                                                                                            .replaceAll(
+                                                                                            '٣',
+                                                                                            '3')
+                                                                                            .replaceAll(
+                                                                                            '٤',
+                                                                                            '4')
+                                                                                            .replaceAll(
+                                                                                            '٥',
+                                                                                            '5')
+                                                                                            .replaceAll(
+                                                                                            '٦',
+                                                                                            '6')
+                                                                                            .replaceAll(
+                                                                                            '٧',
+                                                                                            '7')
+                                                                                            .replaceAll(
+                                                                                            '٨',
+                                                                                            '8')
+                                                                                            .replaceAll(
+                                                                                            '٩',
+                                                                                            '9');
+
+                                                                                        return newValue
+                                                                                            .copyWith(
+                                                                                            text: newText,
+                                                                                            selection: TextSelection
+                                                                                                .collapsed(
+                                                                                                offset: newText
+                                                                                                    .length));
+                                                                                      }),
+                                                                                    ],
+                                                                                    decoration: InputDecoration(
+                                                                                      contentPadding:
+                                                                                      const EdgeInsets
+                                                                                          .symmetric(
+                                                                                          vertical: 11,
+                                                                                          horizontal: 15
+
+                                                                                      ),
+                                                                                      isDense: true,
+                                                                                      border: OutlineInputBorder(
+                                                                                        borderRadius:
+                                                                                        BorderRadius
+                                                                                            .circular(
+                                                                                            6),
+                                                                                      ),
+
+                                                                                      filled: true,
+                                                                                      fillColor: AppColor
+                                                                                          .textFieldColor,
+                                                                                      errorMaxLines: 1,
                                                                                     ),
-                                                                                    isDense: true,
-                                                                                    border: OutlineInputBorder(
-                                                                                      borderRadius:
-                                                                                      BorderRadius
-                                                                                          .circular(
-                                                                                          6),
-                                                                                    ),
-                                      
-                                                                                    filled: true,
-                                                                                    fillColor: AppColor
-                                                                                        .textFieldColor,
-                                                                                    errorMaxLines: 1,
                                                                                   ),
                                                                                 ),
                                                                               ),
@@ -2953,93 +3036,98 @@ class OrderListView extends StatelessWidget {
                                                                                     .only(
                                                                                     bottom: 5),
                                                                                 child: IntrinsicHeight(
-                                                                                  child: TextFormField(
-                                                                                    validator: (
-                                                                                        value) {
-                                                                                      if (value ==
-                                                                                          null ||
-                                                                                          value
-                                                                                              .isEmpty) {
-                                                                                        return 'لطفا تاریخ را انتخاب کنید';
-                                                                                      }
-                                                                                      return null;
-                                                                                    },
-                                                                                    controller: orderController
-                                                                                        .dateStartController,
-                                                                                    readOnly: true,
-                                                                                    style: AppTextStyle
-                                                                                        .labelText,
-                                                                                    decoration: InputDecoration(
-                                                                                      suffixIcon: Icon(
-                                                                                          Icons
-                                                                                              .calendar_month,
-                                                                                          color: AppColor
-                                                                                              .textColor),
-                                                                                      border: OutlineInputBorder(
-                                                                                        borderRadius: BorderRadius
-                                                                                            .circular(
-                                                                                            10),
-                                                                                      ),
-                                                                                      filled: true,
-                                                                                      fillColor: AppColor
-                                                                                          .textFieldColor,
-                                                                                      errorMaxLines: 1,
+                                                                                  child: TextSelectionTheme(
+                                                                                    data: TextSelectionThemeData(
+                                                                                      selectionColor: Colors.white.withOpacity(0.4),
                                                                                     ),
-                                                                                    onTap: () async {
-                                                                                      Jalali? pickedDate = await showPersianDatePicker(
-                                                                                        context: context,
-                                                                                        initialDate: Jalali
-                                                                                            .now(),
-                                                                                        firstDate: Jalali(
-                                                                                            1400,
-                                                                                            1,
-                                                                                            1),
-                                                                                        lastDate: Jalali(
-                                                                                            1450,
-                                                                                            12,
-                                                                                            29),
-                                                                                        initialEntryMode: PersianDatePickerEntryMode
-                                                                                            .calendar,
-                                                                                        initialDatePickerMode: PersianDatePickerMode
-                                                                                            .day,
-                                                                                        locale: Locale(
-                                                                                            "fa",
-                                                                                            "IR"),
-                                                                                      );
-                                                                                      Gregorian gregorian = pickedDate!
-                                                                                          .toGregorian();
-                                                                                      orderController
-                                                                                          .startDateFilter
-                                                                                          .value =
-                                                                                      "${gregorian
-                                                                                          .year}-${gregorian
-                                                                                          .month
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}-${gregorian
-                                                                                          .day
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}";
-                                      
-                                                                                      orderController
-                                                                                          .dateStartController
-                                                                                          .text =
-                                                                                      "${pickedDate
-                                                                                          .year}/${pickedDate
-                                                                                          .month
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}/${pickedDate
-                                                                                          .day
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}";
-                                                                                    },
+                                                                                    child: TextFormField(
+                                                                                      validator: (
+                                                                                          value) {
+                                                                                        if (value ==
+                                                                                            null ||
+                                                                                            value
+                                                                                                .isEmpty) {
+                                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                                        }
+                                                                                        return null;
+                                                                                      },
+                                                                                      controller: orderController
+                                                                                          .dateStartController,
+                                                                                      readOnly: true,
+                                                                                      style: AppTextStyle
+                                                                                          .labelText,
+                                                                                      decoration: InputDecoration(
+                                                                                        suffixIcon: Icon(
+                                                                                            Icons
+                                                                                                .calendar_month,
+                                                                                            color: AppColor
+                                                                                                .textColor),
+                                                                                        border: OutlineInputBorder(
+                                                                                          borderRadius: BorderRadius
+                                                                                              .circular(
+                                                                                              10),
+                                                                                        ),
+                                                                                        filled: true,
+                                                                                        fillColor: AppColor
+                                                                                            .textFieldColor,
+                                                                                        errorMaxLines: 1,
+                                                                                      ),
+                                                                                      onTap: () async {
+                                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                                          context: context,
+                                                                                          initialDate: Jalali
+                                                                                              .now(),
+                                                                                          firstDate: Jalali(
+                                                                                              1400,
+                                                                                              1,
+                                                                                              1),
+                                                                                          lastDate: Jalali(
+                                                                                              1450,
+                                                                                              12,
+                                                                                              29),
+                                                                                          initialEntryMode: PersianDatePickerEntryMode
+                                                                                              .calendar,
+                                                                                          initialDatePickerMode: PersianDatePickerMode
+                                                                                              .day,
+                                                                                          locale: Locale(
+                                                                                              "fa",
+                                                                                              "IR"),
+                                                                                        );
+                                                                                        Gregorian gregorian = pickedDate!
+                                                                                            .toGregorian();
+                                                                                        orderController
+                                                                                            .startDateFilter
+                                                                                            .value =
+                                                                                        "${gregorian
+                                                                                            .year}-${gregorian
+                                                                                            .month
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}-${gregorian
+                                                                                            .day
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}";
+
+                                                                                        orderController
+                                                                                            .dateStartController
+                                                                                            .text =
+                                                                                        "${pickedDate
+                                                                                            .year}/${pickedDate
+                                                                                            .month
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}/${pickedDate
+                                                                                            .day
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}";
+                                                                                      },
+                                                                                    ),
                                                                                   ),
                                                                                 ),
                                                                               ),
@@ -3068,94 +3156,99 @@ class OrderListView extends StatelessWidget {
                                                                                     .only(
                                                                                     bottom: 5),
                                                                                 child: IntrinsicHeight(
-                                                                                  child: TextFormField(
-                                                                                    validator: (
-                                                                                        value) {
-                                                                                      if (value ==
-                                                                                          null ||
-                                                                                          value
-                                                                                              .isEmpty) {
-                                                                                        return 'لطفا تاریخ را انتخاب کنید';
-                                                                                      }
-                                                                                      return null;
-                                                                                    },
-                                                                                    controller: orderController
-                                                                                        .dateEndController,
-                                                                                    readOnly: true,
-                                                                                    style: AppTextStyle
-                                                                                        .labelText,
-                                                                                    decoration: InputDecoration(
-                                                                                      suffixIcon: Icon(
-                                                                                          Icons
-                                                                                              .calendar_month,
-                                                                                          color: AppColor
-                                                                                              .textColor),
-                                                                                      border: OutlineInputBorder(
-                                                                                        borderRadius: BorderRadius
-                                                                                            .circular(
-                                                                                            10),
-                                                                                      ),
-                                                                                      filled: true,
-                                                                                      fillColor: AppColor
-                                                                                          .textFieldColor,
-                                                                                      errorMaxLines: 1,
+                                                                                  child: TextSelectionTheme(
+                                                                                    data: TextSelectionThemeData(
+                                                                                      selectionColor: Colors.white.withOpacity(0.4),
                                                                                     ),
-                                                                                    onTap: () async {
-                                                                                      Jalali? pickedDate = await showPersianDatePicker(
-                                                                                        context: context,
-                                                                                        initialDate: Jalali
-                                                                                            .now(),
-                                                                                        firstDate: Jalali(
-                                                                                            1400,
-                                                                                            1,
-                                                                                            1),
-                                                                                        lastDate: Jalali(
-                                                                                            1450,
-                                                                                            12,
-                                                                                            29),
-                                                                                        initialEntryMode: PersianDatePickerEntryMode
-                                                                                            .calendar,
-                                                                                        initialDatePickerMode: PersianDatePickerMode
-                                                                                            .day,
-                                                                                        locale: Locale(
-                                                                                            "fa",
-                                                                                            "IR"),
-                                                                                      );
-                                                                                      // DateTime date=DateTime.now();
-                                                                                      Gregorian gregorian = pickedDate!
-                                                                                          .toGregorian();
-                                                                                      orderController
-                                                                                          .endDateFilter
-                                                                                          .value =
-                                                                                      "${gregorian
-                                                                                          .year}-${gregorian
-                                                                                          .month
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}-${gregorian
-                                                                                          .day
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}";
-                                      
-                                                                                      orderController
-                                                                                          .dateEndController
-                                                                                          .text =
-                                                                                      "${pickedDate
-                                                                                          .year}/${pickedDate
-                                                                                          .month
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}/${pickedDate
-                                                                                          .day
-                                                                                          .toString()
-                                                                                          .padLeft(
-                                                                                          2,
-                                                                                          '0')}";
-                                                                                    },
+                                                                                    child: TextFormField(
+                                                                                      validator: (
+                                                                                          value) {
+                                                                                        if (value ==
+                                                                                            null ||
+                                                                                            value
+                                                                                                .isEmpty) {
+                                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                                        }
+                                                                                        return null;
+                                                                                      },
+                                                                                      controller: orderController
+                                                                                          .dateEndController,
+                                                                                      readOnly: true,
+                                                                                      style: AppTextStyle
+                                                                                          .labelText,
+                                                                                      decoration: InputDecoration(
+                                                                                        suffixIcon: Icon(
+                                                                                            Icons
+                                                                                                .calendar_month,
+                                                                                            color: AppColor
+                                                                                                .textColor),
+                                                                                        border: OutlineInputBorder(
+                                                                                          borderRadius: BorderRadius
+                                                                                              .circular(
+                                                                                              10),
+                                                                                        ),
+                                                                                        filled: true,
+                                                                                        fillColor: AppColor
+                                                                                            .textFieldColor,
+                                                                                        errorMaxLines: 1,
+                                                                                      ),
+                                                                                      onTap: () async {
+                                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                                          context: context,
+                                                                                          initialDate: Jalali
+                                                                                              .now(),
+                                                                                          firstDate: Jalali(
+                                                                                              1400,
+                                                                                              1,
+                                                                                              1),
+                                                                                          lastDate: Jalali(
+                                                                                              1450,
+                                                                                              12,
+                                                                                              29),
+                                                                                          initialEntryMode: PersianDatePickerEntryMode
+                                                                                              .calendar,
+                                                                                          initialDatePickerMode: PersianDatePickerMode
+                                                                                              .day,
+                                                                                          locale: Locale(
+                                                                                              "fa",
+                                                                                              "IR"),
+                                                                                        );
+                                                                                        // DateTime date=DateTime.now();
+                                                                                        Gregorian gregorian = pickedDate!
+                                                                                            .toGregorian();
+                                                                                        orderController
+                                                                                            .endDateFilter
+                                                                                            .value =
+                                                                                        "${gregorian
+                                                                                            .year}-${gregorian
+                                                                                            .month
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}-${gregorian
+                                                                                            .day
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}";
+
+                                                                                        orderController
+                                                                                            .dateEndController
+                                                                                            .text =
+                                                                                        "${pickedDate
+                                                                                            .year}/${pickedDate
+                                                                                            .month
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}/${pickedDate
+                                                                                            .day
+                                                                                            .toString()
+                                                                                            .padLeft(
+                                                                                            2,
+                                                                                            '0')}";
+                                                                                      },
+                                                                                    ),
                                                                                   ),
                                                                                 ),
                                                                               ),
@@ -3424,13 +3517,42 @@ class OrderListView extends StatelessWidget {
                                                           height: 2,
                                                         ),
                                                         // نام کاربر
-                                                        funcOrderDetail(
-                                                          'assets/svg/user.svg',
-                                                          'نام کاربر:',
-                                                          orders.account
-                                                              ?.name ??
-                                                              "نامشخص",
-                                                        ),
+                                                            funcOrderDetail(
+                                                              'assets/svg/user.svg',
+                                                              'نام کاربر:',
+                                                              orders.account
+                                                                  ?.name ??
+                                                                  "نامشخص",
+                                                            ),
+                                                            /*GestureDetector(
+                                                              onTap: () {
+                                                                showDialog(
+                                                                  context: context,
+                                                                  builder: (BuildContext context) {
+                                                                    return BalanceDialog(
+                                                                      entityId: orders.id ?? 0,
+                                                                      entityType: orders.type==0 ? "sell" : "buy",
+                                                                      entityName: orders.account?.name ?? 'نامشخص',
+                                                                      isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                                                                    );
+                                                                  },
+                                                                );
+                                                              },
+                                                              child: Row(
+                                                                children: [
+                                                                  *//*Icon(
+                                                                    Icons.account_balance_wallet,
+                                                                    size: 15,
+                                                                    color: AppColor.buttonColor,
+                                                                  ),*//*
+                                                                  Text(' مانده',
+                                                                    style: AppTextStyle
+                                                                        .labelText
+                                                                        .copyWith(
+                                                                        color: AppColor.buttonColor, fontSize: 11),),
+                                                                ],
+                                                              ),
+                                                            ),*/
                                                         // محصول
                                                         funcOrderDetail(
                                                           'assets/svg/product.svg',
@@ -3626,6 +3748,17 @@ class OrderListView extends StatelessWidget {
                 ),)
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }
@@ -3802,6 +3935,7 @@ class OrderListView extends StatelessWidget {
                         width: 5,
                       ),
                       //دکمه ادیت جزئیات سفارش
+                      orders.status==1?
                       OutlinedButton(
                         onPressed: () {
                           Get.offAllNamed('/orderUpdate',
@@ -3819,7 +3953,8 @@ class OrderListView extends StatelessWidget {
                           colorFilter: ColorFilter.mode(
                               AppColor.textColor, BlendMode.srcIn),
                         ),
-                      ),
+                      ):
+                          SizedBox.shrink(),
                       SizedBox(
                         width: 5,
                       ),
@@ -4032,10 +4167,18 @@ class OrderListView extends StatelessWidget {
             orderController.onSort(columnIndex, ascending);
           }
       ),
-      DataColumn(
+      /*DataColumn(
         label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
             child: Text('اضافه مبلغ', style: AppTextStyle.labelText)),
-      ),
+      ),*/
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('توسط ادمین', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('کارتخوان', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('خرید/فروش', style: AppTextStyle.labelText)),
@@ -4050,16 +4193,20 @@ class OrderListView extends StatelessWidget {
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
-              child: Text('مانده سکه', style: AppTextStyle.labelText)),
+              child: Text('مانده', style: AppTextStyle.labelText)),
           headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+      /*DataColumn(
+          label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+              child: Text('مانده سکه', style: AppTextStyle.labelText)),
+          headingRowAlignment: MainAxisAlignment.center),*/
+      /*DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('مانده ریالی', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+          headingRowAlignment: MainAxisAlignment.center),*/
+      /*DataColumn(
           label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
               child: Text('مانده طلایی', style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
     ];
   }
 
@@ -4190,7 +4337,7 @@ class OrderListView extends StatelessWidget {
             ),
           ),
           // اضافه مبلغ
-          DataCell(
+          /*DataCell(
               Center(
                 child: Text(
                   "${order.extraAmount?.toString().seRagham(separator: ",") ??
@@ -4198,6 +4345,38 @@ class OrderListView extends StatelessWidget {
                   style:
                   AppTextStyle.bodyText.copyWith(fontSize: 11),
                 ),
+              )),*/
+          // توسط ادمین
+          DataCell(
+              Center(
+                child:
+                order.byAdmin==true ?
+                SvgPicture.asset('assets/svg/shield-check.svg',
+                    colorFilter: ColorFilter.mode(
+                      AppColor.primaryColor,
+                      BlendMode.srcIn,
+                    ),) :
+                SvgPicture.asset('assets/svg/shield-close.svg',
+                    colorFilter: ColorFilter.mode(
+                      AppColor.accentColor,
+                      BlendMode.srcIn,
+                    ),),
+              )),
+          // کارتخوان
+          DataCell(
+              Center(
+                child:
+                order.isCard==true ?
+                SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                    colorFilter: ColorFilter.mode(
+                      AppColor.primaryColor,
+                      BlendMode.srcIn,
+                    )) :
+                SvgPicture.asset('assets/svg/close-circle1.svg',
+                    colorFilter: ColorFilter.mode(
+                      AppColor.accentColor,
+                      BlendMode.srcIn,
+                    )),
               )),
           // خرید/فروش
           DataCell(
@@ -4231,7 +4410,7 @@ class OrderListView extends StatelessWidget {
                   children: [
                     SizedBox(height: 5,),
                     Text(
-                      '${order.status == 0 ? 'نامشخص' : order.status == 1
+                      '${order.status == 0 ? 'در انتظار' : order.status == 1
                           ? 'تایید شده'
                           : 'تایید نشده'} ',
                       style: AppTextStyle
@@ -4396,10 +4575,10 @@ class OrderListView extends StatelessWidget {
                     height: 5,
                   ),
                   //دکمه ادیت جزئیات سفارش
+                  order.status==1 ?
                   OutlinedButton(
                     onPressed: () {
-                      Get.toNamed('/orderUpdate', parameters: {"id": order.id
-                          .toString()});
+                      Get.toNamed('/orderUpdate', parameters: {"id": order.id.toString()});
                     },
                     style: ButtonStyle(
                       shape: WidgetStatePropertyAll(
@@ -4413,7 +4592,8 @@ class OrderListView extends StatelessWidget {
                       colorFilter: ColorFilter.mode(
                           AppColor.iconViewColor, BlendMode.srcIn),
                     ),
-                  ),
+                  ) :
+                      SizedBox.shrink(),
                   SizedBox(
                     width: 5,
                     height: 5,
@@ -4422,12 +4602,63 @@ class OrderListView extends StatelessWidget {
               ),
             ),
           ),
-          // مانده سکه
+          // مانده
           DataCell(
+            Center(
+              child:
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    order.status==2 ?
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BalanceDateDialog(
+                            accountId: order.account?.id ?? 0,
+                            accountName: order.account?.name ?? "",
+                            initialDate: order.date.toString(),
+                            isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),);
+                      },
+                    )
+                        :
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BalanceDialog(
+                          entityId: order.id ?? 0,
+                          entityType: order.type==0 ? "sell" : "buy",
+                          entityName: order.account?.name ?? 'نامشخص',
+                          isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        size: 20,
+                        color: AppColor.buttonColor,
+                      ),
+                      Text(' مانده',
+                        style: AppTextStyle
+                            .labelText
+                            .copyWith(
+                            color: AppColor.buttonColor, fontSize: 11,fontWeight: FontWeight.bold),),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ),
+          // مانده سکه
+          /*DataCell(
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Center(
-                  child: Column(
+                  child:
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       order.balances != null ?
@@ -4476,9 +4707,9 @@ class OrderListView extends StatelessWidget {
                   ),
                 ),
               )
-          ),
+          ),*/
           // مانده ریالی
-          DataCell(
+          /*DataCell(
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 5),
               child: Center(
@@ -4536,9 +4767,9 @@ class OrderListView extends StatelessWidget {
                 ),
               ),
             ),
-          ),
+          ),*/
           // مانده طلایی
-          DataCell(
+          /*DataCell(
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5),
                 child: Center(
@@ -4591,7 +4822,7 @@ class OrderListView extends StatelessWidget {
                   ),
                 ),
               )
-          ),
+          ),*/
         ],
       );
     }).toList();

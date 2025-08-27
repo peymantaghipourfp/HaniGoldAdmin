@@ -72,7 +72,7 @@ class LaboratoryController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     fetchLaboratoryList();
   }
@@ -138,7 +138,7 @@ class LaboratoryController extends GetxController{
   Future<void> updateLaboratory(int id,BuildContext context)async{
 
     try{
-      isLoading.value=true;
+      isLoading.value=false;
       //state.value=PageStateLob.loading;
       var response=await laboratoryRepository.updateLaboratory(name: nameController.text,
           phone: phoneController.text,
@@ -149,7 +149,7 @@ class LaboratoryController extends GetxController{
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-      isLoading.value=false;
+      isLoading.value=true;
       nameController.text="";
       phoneController.text="";
       addressController.text="";
@@ -177,6 +177,7 @@ class LaboratoryController extends GetxController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(info['description'],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        clearSearch();
         fetchLaboratoryList();
       }
     }catch(e){

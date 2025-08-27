@@ -17,6 +17,7 @@ import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/inventory_detail_insert_payment.controller.dart';
 import '../controller/inventory_detail_insert_receive.controller.dart';
@@ -33,6 +34,7 @@ class InventoryDetailUpdatePaymentView extends StatefulWidget {
 class _InventoryDetailUpdatePaymentViewState
     extends State<InventoryDetailUpdatePaymentView>
     with TickerProviderStateMixin {
+  final formKey = GlobalKey<FormState>();
   InventoryDetailUpdatePaymentController inventoryDetailUpdatePaymentController = Get
       .find<InventoryDetailUpdatePaymentController>();
 
@@ -146,6 +148,7 @@ class _InventoryDetailUpdatePaymentViewState
                                             horizontal: 24),
                                         child:
                                         Form(
+                                          key: formKey,
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment
                                                 .start,
@@ -266,7 +269,7 @@ class _InventoryDetailUpdatePaymentViewState
                                               // لیست دریافتی ها
                                               inventoryDetailUpdatePaymentController
                                                   .selectedWalletAccount.value
-                                                  ?.item?.itemUnit?.id == 2 ?
+                                                  ?.item?.id == 1 ?
                                               ElevatedButton(
                                                 style: ButtonStyle(
                                                     fixedSize: WidgetStatePropertyAll(
@@ -343,6 +346,13 @@ class _InventoryDetailUpdatePaymentViewState
                                                     child:
                                                     IntrinsicHeight(
                                                       child: TextFormField(
+                                                        validator: (value) {
+                                                          if (value == null ||
+                                                              value.isEmpty) {
+                                                            return 'لطفا مقدار را وارد کنید';
+                                                          }
+                                                          return null;
+                                                        },
                                                         autovalidateMode: AutovalidateMode
                                                             .onUserInteraction,
                                                         controller: inventoryDetailUpdatePaymentController
@@ -698,7 +708,12 @@ class _InventoryDetailUpdatePaymentViewState
                                                                   .circular(
                                                                   10)))),
                                                   onPressed: () async {
-                                                    inventoryDetailUpdatePaymentController.uploadImagesDesktopUpdate( "image", "InventoryDetail");
+
+                                                    if(formKey.currentState!.validate()){
+                                                      if(inventoryDetailUpdatePaymentController.selectedWalletAccount.value!=null){
+                                                        inventoryDetailUpdatePaymentController.uploadImagesDesktopUpdate( "image", "InventoryDetail");
+                                                      }
+                                                    }
                                                   },
                                                   child: inventoryDetailUpdatePaymentController
                                                       .isLoading.value
@@ -748,6 +763,17 @@ class _InventoryDetailUpdatePaymentViewState
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }

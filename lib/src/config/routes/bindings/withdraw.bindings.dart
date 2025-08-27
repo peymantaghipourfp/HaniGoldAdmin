@@ -5,6 +5,7 @@ import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_ge
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_create.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_getOne.controller.dart';
+import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_update.controller.dart';
 
 import '../../../domain/home/controller/home.controller.dart';
@@ -13,12 +14,13 @@ class WithdrawBindings implements Bindings{
   @override
   void dependencies() {
     Get.lazyPut(()=>WithdrawController());
+    Get.lazyPut(()=>WithdrawPendingController());
     Get.lazyPut(()=>WithdrawCreateController());
     Get.lazyPut(()=>WithdrawUpdateController());
     Get.lazyPut(()=>WithdrawGetOneController());
     Get.lazyPut(()=>DepositRequestGetOneController());
     Get.lazyPut(()=>DepositController());
-    Get.lazyPut(()=>HomeController());
+    //Get.lazyPut(()=>HomeController());
   }
 
 }

@@ -3,6 +3,7 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import '../../domain/order/model/list_order.model.dart';
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 import 'dart:typed_data';
 
@@ -12,7 +13,7 @@ class OrderRepository{
   OrderRepository(){
     orderDio.options.baseUrl=BaseUrl.baseUrl;
     orderDio.options.connectTimeout=Duration(seconds: 30);
-
+    orderDio.interceptors.add(DioInterceptor());
   }
   Future<List<OrderModel>> getOrderList({
     required int startIndex,
@@ -197,6 +198,7 @@ class OrderRepository{
     required String? description,
     required bool? notLimit,
     required bool? manualPrice,
+    required bool? isCard,
 })async{
     try{
       Map<String, dynamic> orderData = {
@@ -245,9 +247,11 @@ class OrderRepository{
         "description": description,
         "manualPrice":manualPrice,
         "notLimit":notLimit,
+        "isCard":isCard,
       };
 
       var response=await orderDio.post('Order/insert',data: orderData);
+      print('request insertOrder: $orderData');
       print('Status Code insertOrder: ${response.statusCode}');
       print('Response Data insertOrder: ${response.data}');
       /*if(response.statusCode==200){
@@ -275,6 +279,7 @@ class OrderRepository{
     required String? description,
     required bool? notLimit,
     required bool? manualPrice,
+    required bool? isCard,
 })async{
     try{
       Map<String, dynamic> orderData = {
@@ -323,8 +328,10 @@ class OrderRepository{
         "description": description,
         "manualPrice":manualPrice,
         "notLimit":notLimit,
+        "isCard":isCard,
       };
       var response=await orderDio.put('Order/update',data: orderData );
+      print('request updateOrder: $orderData');
       print('Status Code updateOrder: ${response.statusCode}');
       print('Response Data updateOrder: ${response.data}');
       // if(response.statusCode==200){
@@ -457,7 +464,6 @@ class OrderRepository{
       print("response getBalanceList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.isNotEmpty ? data.map((totalBalance)=>TotalBalanceModel.fromJson(totalBalance)).toList() : [];
-
     }
     catch(e){
       throw ErrorException('خطا:$e');

@@ -22,6 +22,8 @@ class WithdrawModel {
   final ReasonRejectionModel? reasonRejection;
   @JsonKey(name: "ownerName")
   final String? ownerName;
+  @JsonKey(name: "requestAmount")
+  final double? requestAmount;
   @JsonKey(name: "amount")
   final double? amount;
   @JsonKey(name: "dividedAmount")
@@ -80,12 +82,15 @@ class WithdrawModel {
   final String? description;
   @JsonKey(name: "refrenceId")
   final int? refrenceId;
+  @JsonKey(name: "recId")
+  final String? recId;
 
   WithdrawModel({
     required this.bank,
     required this.wallet,
     required this.reasonRejection,
     required this.ownerName,
+    required this.requestAmount,
     required this.amount,
     required this.dividedAmount,
     required this.notConfirmedAmount,
@@ -115,6 +120,7 @@ class WithdrawModel {
     required this.infos,
     required this.description,
     required this.refrenceId,
+    required this.recId,
   });
 
   factory WithdrawModel.fromJson(Map<String, dynamic> json) => _$WithdrawModelFromJson(json);

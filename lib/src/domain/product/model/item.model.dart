@@ -30,18 +30,22 @@ class ItemModel {
   final String? name;
   @JsonKey(name: "isDefault")
   final bool? isDefault;
+  @JsonKey(name: "isDecimal")
+  final bool? isDecimal;
   @JsonKey(name: "status")
-  final bool? status;
+  late bool? status;
+  @JsonKey(name: "showMarket")
+  final bool? showMarket;
   @JsonKey(name: "sellStatus")
-  final bool? sellStatus;
+  late  bool? sellStatus;
   @JsonKey(name: "buyStatus")
-  final bool? buyStatus;
+  late  bool? buyStatus;
   @JsonKey(name: "hasWage")
   final bool? hasWage;
   @JsonKey(name: "wage")
-  final int? wage;
-  @JsonKey(name: "isCard")
-  final bool? isCard;
+  final double? wage;
+  @JsonKey(name: "hasCard")
+  final bool? hasCard;
   @JsonKey(name: "cardPrice")
   final double? cardPrice;
   @JsonKey(name: "maxSell")
@@ -58,6 +62,8 @@ class ItemModel {
   final int? initBalance;
   @JsonKey(name: "openPrice")
   final double? openPrice;
+  @JsonKey(name: "openPriceValue")
+  final double? openPriceValue;
   @JsonKey(name: "symbol")
   final String? symbol;
   @JsonKey(name: "icon")
@@ -84,18 +90,21 @@ class ItemModel {
     required this.mesghalDifferentPrice,
     required this.name,
     required this.isDefault,
+    required this.isDecimal,
     required this.status,
+    required this.showMarket,
     required this.sellStatus,
     required this.buyStatus,
     required this.hasWage,
     required this.wage,
-    required this.isCard,
+    required this.hasCard,
     required this.cardPrice,
     required this.maxSell,
     required this.maxBuy,
     required this.w750,
     required this.initBalance,
     required this.openPrice,
+    required this.openPriceValue,
     required this.symbol,
     required this.icon,
     required this.rowNum,

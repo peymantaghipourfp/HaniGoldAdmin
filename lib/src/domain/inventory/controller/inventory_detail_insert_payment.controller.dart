@@ -70,7 +70,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
   var isLoadingBalance=true.obs;
 
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
-  final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
+  RxList<InventoryDetailModel> getOneInventory=<InventoryDetailModel>[].obs;
   var inventoryId=0.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<WalletModel> selectedWalletAccount=Rxn<WalletModel>();
@@ -299,7 +299,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
   // }
 
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getForPaymentListPager();
   }
@@ -313,8 +313,8 @@ class InventoryDetailInsertPaymentController extends GetxController{
           startIndex: currentPage.value,
           toIndex: itemsPerPage.value,
           itemId:selectedWalletAccount.value?.item?.id ?? 0,
-          laboratoryId: selectedLaboratoryId.value == 0
-              ? null :selectedLaboratoryId.value
+          /*laboratoryId: selectedLaboratoryId.value == 0
+              ? null :selectedLaboratoryId.value*/
       );
       forPaymentList.clear();
       //isLoading.value=false;
@@ -391,7 +391,7 @@ class InventoryDetailInsertPaymentController extends GetxController{
   Future<void> fetchGetOneInventory(int id)async{
     try {
       stateGetOne.value=PageState.loading;
-      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
+      var fetchedGetOneInventory = await inventoryRepository.getInventoryDetail(id);
       if(fetchedGetOneInventory!=null){
         getOneInventory.value = fetchedGetOneInventory;
         stateGetOne.value=PageState.list;

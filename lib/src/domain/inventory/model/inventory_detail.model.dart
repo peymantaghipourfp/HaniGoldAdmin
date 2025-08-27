@@ -1,4 +1,5 @@
 
+import 'package:hanigold_admin/src/domain/inventory/model/createdBy.model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
@@ -27,6 +28,10 @@ class InventoryDetailModel {
   final LaboratoryModel? laboratory;
   @JsonKey(name: "itemUnit")
   final ItemUnitModel? itemUnit;
+  @JsonKey(name: "itemName")
+  final String? itemName;
+  @JsonKey(name: "itemUnitName")
+  final String? itemUnitName;
   @JsonKey(name: "quantity")
   final double? quantity;
   @JsonKey(name: "impurity")
@@ -35,6 +40,10 @@ class InventoryDetailModel {
   final double? weight750;
   @JsonKey(name: "quantityRemainded")
   final double? quantityRemainded;
+  @JsonKey(name: "weight")
+  final double? weight;
+  @JsonKey(name: "weightRemainded")
+  final double? weightRemainded;
   @JsonKey(name: "carat")
   final int? carat;
   @JsonKey(name: "receiptNumber")
@@ -73,6 +82,8 @@ class InventoryDetailModel {
   final int? inputItemId;
   @JsonKey(name: "date")
   final DateTime? date;
+  /*@JsonKey(name: "createdBy")
+  final CreatedByModel? createdBy;*/
   @JsonKey(ignore: true)
    late List<XFile>? listXfile;
 
@@ -82,10 +93,14 @@ class InventoryDetailModel {
     this.item,
     this.laboratory,
     this.itemUnit,
+    this.itemName,
+    this.itemUnitName,
     this.quantity,
     this.impurity,
     this.weight750,
     this.quantityRemainded,
+    this.weight,
+    this.weightRemainded,
     this.carat,
     this.receiptNumber,
     this.price,
@@ -105,7 +120,8 @@ class InventoryDetailModel {
     this.description,
     this.inputItemId,
     this.date,
-    this.listXfile
+    //required this.createdBy,
+    this.listXfile,
   });
 
   InventoryDetailModel copyWith({
@@ -114,10 +130,14 @@ class InventoryDetailModel {
     ItemModel? item,
     LaboratoryModel? laboratory,
     ItemUnitModel? itemUnit,
+    String? itemName,
+    String? itemUnitName,
     double? quantity,
     double? impurity,
     double? weight750,
     double? quantityRemainded,
+    double? weight,
+    double? weightRemainded,
     int? carat,
     String? receiptNumber,
     int? price,
@@ -145,10 +165,14 @@ class InventoryDetailModel {
       item: item ?? this.item,
       laboratory: laboratory ?? this.laboratory,
       itemUnit: itemUnit ?? this.itemUnit,
+      itemName: itemName ?? this.itemName,
+      itemUnitName: itemUnitName ?? this.itemUnitName,
       quantity: quantity ?? this.quantity,
       impurity: impurity ?? this.impurity,
       weight750: weight750 ?? this.weight750,
       quantityRemainded: quantityRemainded ?? this.quantityRemainded,
+      weight: weight ?? this.weight,
+      weightRemainded: weightRemainded ?? this.weightRemainded,
       carat: carat ?? this.carat,
       receiptNumber: receiptNumber ?? this.receiptNumber,
       price: price ?? this.price,
@@ -167,7 +191,6 @@ class InventoryDetailModel {
       infos: infos ?? this.infos,
       description: description ?? this.description,
       inputItemId: inputItemId ?? this.inputItemId,
-
       date: date ?? this.date,
       listXfile: listXfile ?? this.listXfile,
     );

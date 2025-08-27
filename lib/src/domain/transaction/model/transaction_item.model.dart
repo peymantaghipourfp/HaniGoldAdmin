@@ -19,6 +19,10 @@ String transactionItemModelToJson(TransactionModel data) => json.encode(data.toJ
 
 @JsonSerializable()
 class TransactionModel {
+  @JsonKey(name: "toId")
+  final int? toId;
+  @JsonKey(name: "fromId")
+  final int? fromId;
   @JsonKey(name: "amount")
   final int? amount;
   @JsonKey(name: "date")
@@ -39,6 +43,8 @@ class TransactionModel {
   final AccountModel? toAccount;
   @JsonKey(name: "item")
   final ItemModel? item;
+  @JsonKey(name: "toItem")
+  final ItemModel? toItem;
   @JsonKey(name: "balances")
   final List<BalanceModel>? balances;
   @JsonKey(name: "tobalances")
@@ -51,10 +57,14 @@ class TransactionModel {
   final String? recId;
   @JsonKey(name: "id")
   final int? id;
+  @JsonKey(name: "isCard")
+  final bool? isCard;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
 
   TransactionModel({
+    required this.toId,
+    required this.fromId,
     required this.amount,
     required this.date,
     required this.type,
@@ -65,12 +75,14 @@ class TransactionModel {
     required this.toWallet,
     required this.toAccount,
     required this.item,
+    required this.toItem,
     required this.balances,
     required this.tobalances,
     required this.details,
     required this.rowNum,
     required this.recId,
     required this.id,
+    required this.isCard,
     required this.infos,
   });
 

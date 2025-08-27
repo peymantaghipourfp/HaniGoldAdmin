@@ -19,7 +19,7 @@ RemittanceModel _$RemittanceModelFromJson(Map<String, dynamic> json) =>
       item: json['item'] == null
           ? null
           : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
-      quantity: (json['quantity'] as num?)?.toInt(),
+      quantity: (json['quantity'] as num?)?.toDouble(),
       status: (json['status'] as num?)?.toInt(),
       isDeleted: json['isDeleted'] as bool?,
       attachments: (json['attachments'] as List<dynamic>?)
@@ -39,6 +39,10 @@ RemittanceModel _$RemittanceModelFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
+      reasonRejection: json['reasonRejection'] == null
+          ? null
+          : ReasonRejectionModel.fromJson(
+              json['reasonRejection'] as Map<String, dynamic>),
       registered: json['registered'] as bool?,
       rowNum: (json['rowNum'] as num?)?.toInt(),
     );
@@ -61,6 +65,7 @@ Map<String, dynamic> _$RemittanceModelToJson(RemittanceModel instance) =>
       'description': instance.description,
       'recId': instance.recId,
       'infos': instance.infos,
+      'reasonRejection': instance.reasonRejection,
       'registered': instance.registered,
       'rowNum': instance.rowNum,
     };

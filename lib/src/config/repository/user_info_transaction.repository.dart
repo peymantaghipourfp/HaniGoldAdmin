@@ -2,28 +2,22 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
-import 'package:hanigold_admin/src/domain/users/model/city_item.model.dart';
-
-import '../../domain/inventory/model/inventory.model.dart';
+import 'package:hanigold_admin/src/domain/users/model/transaction_info_footer.model.dart';
 import '../../domain/users/model/balance_item.model.dart';
 import '../../domain/users/model/header_info_user_transaction.model.dart';
 import '../../domain/users/model/list_transaction_info.model.dart';
 import '../../domain/users/model/list_transaction_info_item.model.dart';
-import '../../domain/users/model/state_item.model.dart';
-import '../../domain/users/model/transaction_info_item.model.dart';
 import 'dart:typed_data';
 
 import '../../domain/users/model/transaction_info_item_list_pager.model.dart';
+import '../network/dio_Interceptor.dart';
 
 class UserInfoTransactionRepository{
 
   Dio userInfoTransactionDio=Dio();
   UserInfoTransactionRepository(){
     userInfoTransactionDio.options.baseUrl=BaseUrl.baseUrl;
+    userInfoTransactionDio.interceptors.add(DioInterceptor());
   }
   Future<HeaderInfoUserTransactionModel> getHeaderUserInfoTransaction(int id)async{
     try{
@@ -55,6 +49,9 @@ class UserInfoTransactionRepository{
       print("request getBalanceList : $option" );
       print("response getBalanceList : ${response.data}" );
       if(response.statusCode==200){
+        if(response.data == null) {
+          return <BalanceItemModel>[];
+        }
         List<dynamic> data=response.data;
         return data.map((balance)=>BalanceItemModel.fromJson(balance)).toList();
       }else{
@@ -66,7 +63,13 @@ class UserInfoTransactionRepository{
     }
   }
 
-  Future<TransactionInfoItemListPagerModel> getTransactionInfoListPager({required int startIndex, required int toIndex,required String accountId,})async{
+  Future<TransactionInfoItemListPagerModel> getTransactionInfoListPager({
+    required int startIndex,
+    required int toIndex,
+    required String accountId,
+    required String startDate,
+    required String endDate,
+  })async{
     try{
       Map<String , dynamic> options={
         "options" : { "transaction" :{
@@ -75,12 +78,20 @@ class UserInfoTransactionRepository{
               "innerCondition": 0,
               "outerCondition": 0,
               "filters": [
+                if(accountId != null)
                 {
                   "fieldName": "AccountId",
                   "filterValue": accountId,
                   "filterType": 5,
                   "RefTable": "at"
-                }
+                },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "at"
+                  },
               ]
             }
           ],
@@ -96,6 +107,53 @@ class UserInfoTransactionRepository{
 
       return TransactionInfoItemListPagerModel.fromJson(response.data);
 
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<TransactionInfoItemListPagerModel> getTransactionInfoListForPdf({
+    required int startIndex,
+    required int toIndex,
+    required String accountId,
+    required String startDate,
+    required String endDate
+  })async{
+    try{
+      Map<String , dynamic> options={
+        "options" : { "transaction" :{
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "AccountId",
+                  "filterValue": accountId,
+                  "filterType": 5,
+                  "RefTable": "at"
+                },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "at"
+                  }
+              ]
+            }
+          ],
+          "orderBy": "at.Date",
+          "orderByType": "DESC",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      };
+      final response=await userInfoTransactionDio.post('Transaction/getWrapper',data: options);
+      print("request getTransactionInfoListPager : $options" );
+      print("response getTransactionInfoListPager : ${response.data}" );
+      return TransactionInfoItemListPagerModel.fromJson(response.data);
     }
     catch(e){
       throw ErrorException('خطا:$e');
@@ -150,7 +208,11 @@ class UserInfoTransactionRepository{
   }
 
 
-  Future<ListTransactionInfoModel> getListTransactionInfoListPager({required int startIndex, required int toIndex,required String name})async{
+  Future<ListTransactionInfoModel> getListTransactionInfoListPager({
+    required int startIndex,
+    required int toIndex,
+    required String name,
+  })async{
     try{
       Map<String , dynamic> options=
       {
@@ -181,6 +243,49 @@ class UserInfoTransactionRepository{
       print("request getListTransactionInfoListPager : $options" );
       print("response getListTransactionInfoListPager : ${response.data}" );
       return ListTransactionInfoModel.fromJson(response.data);
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<List<TransactionInfoFooterModel>> getTransactionInfoFooter({
+    required int startIndex,
+    required int toIndex,
+    required String name,
+  })async{
+    try{
+      Map<String , dynamic> options=
+      {
+        "options" : { "transaction" :{
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(name!="")
+                  {
+                    "fieldName": "accountName",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "AccountValues"
+                  }
+              ]
+            }
+          ],
+          "orderBy": "ABS(AccountValues.CurrencyValue)",
+          "orderByType": "DESC",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      }
+      ;
+      final response=await userInfoTransactionDio.post('Transaction/getWalletBalanceFooter',data: options);
+      print("request getTransactionInfoFooter : $options" );
+      print("response getTransactionInfoFooter : ${response.data}" );
+      List<dynamic> data=response.data;
+      return data.map((transaction)=>TransactionInfoFooterModel.fromJson(transaction)).toList();
 
     }
     catch(e){
@@ -237,6 +342,29 @@ class UserInfoTransactionRepository{
     }
   }
 
+  Future<Uint8List> getListUserInfoTransactionExcel() async{
+    try{
+      Map<String, dynamic> options =
+      {
+        "options" : { "transaction" :{
+
+          "orderBy": "ABS(CurrencyValue)",
+          "orderByType": "DESC",
+          "StartIndex": 1,
+          "ToIndex": 10000000
+        }}
+      };
+      final response=await userInfoTransactionDio.post(
+          'Transaction/getExcelWalletBalance',
+          data: options,
+          options: Options(responseType: ResponseType.bytes));
+      print("request getListUserInfoTransactionExcel : $options" );
+      print("response getListUserInfoTransactionExcel : ${response.data}" );
+      return Uint8List.fromList(response.data);
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
 
 
   // Future<RemittanceModel> insertRemittance({

@@ -14,6 +14,7 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../widgets/filter_user_list.widget.dart';
 
 class PersonListView extends GetView<PersonListController> {
@@ -266,6 +267,17 @@ class PersonListView extends GetView<PersonListController> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }
   List<DataColumn> buildDataColumns() {
@@ -457,7 +469,7 @@ class PersonListView extends GetView<PersonListController> {
                                         mainAxisAlignment: MainAxisAlignment.start,
                                         children: [
                                           Text(
-                                            'ویرایش آزمایشگاه جدید',
+                                            'ویرایش کاربر',
                                             style: AppTextStyle.labelText.copyWith(
                                               fontSize: 15,
                                               fontWeight: FontWeight.normal,

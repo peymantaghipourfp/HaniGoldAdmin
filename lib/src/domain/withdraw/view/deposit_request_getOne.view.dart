@@ -17,6 +17,7 @@ import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 
 class DepositRequestGetOneView extends StatelessWidget {
   DepositRequestGetOneView({super.key});
@@ -142,7 +143,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                         .status ==
                                                         1
                                                         ? 'تایید شده'
-                                                        : 'نامشخص',
+                                                        : 'در انتظار',
                                                     style: AppTextStyle
                                                         .labelText,
                                                     textAlign: TextAlign
@@ -252,6 +253,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                             depositRequestGetOneController.getOneDepositRequest.value?.deposits?[index];
                                             return Column(
                                               children: [
+
                                                 Card(
                                                   color: AppColor.secondaryColor,
                                                   elevation: 0,
@@ -270,7 +272,8 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                         Padding(
                                                           padding: const EdgeInsets.only(
                                                               top: 2, bottom: 2),
-                                                          child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                          child:
+                                                          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                             children: [
                                                               Checkbox(
                                                                 value: getOneDeposit?.registered ?? false,
@@ -578,7 +581,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                           ?.status ==
                                                                           1
                                                                           ? 'تایید شده'
-                                                                          : 'نامشخص',
+                                                                          : 'در انتظار',
                                                                       style: AppTextStyle
                                                                           .labelText,
                                                                       textAlign: TextAlign
@@ -839,7 +842,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                             .status ==
                                                             1
                                                             ? 'تایید شده'
-                                                            : 'نامشخص',
+                                                            : 'در انتظار',
                                                         style: AppTextStyle
                                                             .labelText,
                                                         textAlign: TextAlign
@@ -1166,7 +1169,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                               ?.status ==
                                                                               1
                                                                               ? 'تایید شده'
-                                                                              : 'نامشخص',
+                                                                              : 'در انتظار',
                                                                           style: AppTextStyle
                                                                               .labelText,
                                                                           textAlign: TextAlign
@@ -1327,6 +1330,17 @@ class DepositRequestGetOneView extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }

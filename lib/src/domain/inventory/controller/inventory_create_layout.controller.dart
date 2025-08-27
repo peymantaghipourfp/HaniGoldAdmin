@@ -10,7 +10,7 @@ class InventoryCreateLayoutController extends GetxController{
 
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   final List<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
-  var isLoadingBalance=false.obs;
+  var isLoadingBalance=true.obs;
 
   Rx<PageState> state=Rx<PageState>(PageState.list);
 
@@ -18,7 +18,7 @@ class InventoryCreateLayoutController extends GetxController{
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
     print("getBalanceList : $id");
-    isLoadingBalance.value=true;
+    isLoadingBalance.value=false;
     balanceList.clear();
     try{
       state.value=PageState.loading;
@@ -26,7 +26,7 @@ class InventoryCreateLayoutController extends GetxController{
       balanceList.addAll(response);
       balanceList.removeWhere((r)=>r.balance==0);
       state.value=PageState.list;
-      isLoadingBalance.value=false;
+      isLoadingBalance.value=true;
       if(balanceList.isEmpty){
         state.value=PageState.empty;
       }

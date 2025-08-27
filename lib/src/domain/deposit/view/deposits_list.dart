@@ -16,6 +16,8 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
+import '../../transaction/widgets/balance_dialog.widget.dart';
 
 class DepositsListView extends StatelessWidget {
   DepositsListView({super.key});
@@ -161,6 +163,26 @@ class DepositsListView extends StatelessWidget {
                                   children: [
                                     Row(
                                       children: [
+                                        //لیست واریز های در انتظار
+                                        ElevatedButton(
+                                          style: ButtonStyle(
+                                              padding: WidgetStatePropertyAll(
+                                                  EdgeInsets.symmetric(horizontal: 7)),
+                                              elevation: WidgetStatePropertyAll(5),
+                                              backgroundColor:
+                                              WidgetStatePropertyAll(AppColor.purpleColor),
+                                              shape: WidgetStatePropertyAll(
+                                                  RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(5)))),
+                                          onPressed: () {
+                                            Get.toNamed('/depositsPendingList');
+                                          },
+                                          child: Text(
+                                            'واریز های در انتظار',
+                                            style: AppTextStyle.labelText,
+                                          ),
+                                        ),
+                                        SizedBox(width: 5,),
                                         // خروجی اکسل
                                         ElevatedButton(
                                           style: ButtonStyle(
@@ -1035,6 +1057,26 @@ class DepositsListView extends StatelessWidget {
                                                         children: [
                                                           Row(
                                                             children: [
+                                                              //لیست واریز های در انتظار
+                                                              ElevatedButton(
+                                                                style: ButtonStyle(
+                                                                    padding: WidgetStatePropertyAll(
+                                                                        EdgeInsets.symmetric(horizontal: 7)),
+                                                                    elevation: WidgetStatePropertyAll(5),
+                                                                    backgroundColor:
+                                                                    WidgetStatePropertyAll(AppColor.purpleColor),
+                                                                    shape: WidgetStatePropertyAll(
+                                                                        RoundedRectangleBorder(
+                                                                            borderRadius: BorderRadius.circular(5)))),
+                                                                onPressed: () {
+                                                                  Get.toNamed('/depositsPendingList');
+                                                                },
+                                                                child: Text(
+                                                                  'واریز های در انتظار',
+                                                                  style: AppTextStyle.labelText,
+                                                                ),
+                                                              ),
+                                                              SizedBox(width: 5,),
                                                               // خروجی اکسل
                                                               ElevatedButton(
                                                                 style: ButtonStyle(
@@ -2112,7 +2154,7 @@ class DepositsListView extends StatelessWidget {
                                                         ),
 
                                                         // تعیین وضعیت
-                                                        /*Row(
+                                                        Row(
                                                           mainAxisAlignment:
                                                               MainAxisAlignment.spaceBetween,
                                                           children: [
@@ -2121,7 +2163,7 @@ class DepositsListView extends StatelessWidget {
                                                                 Text('وضعیت: ',style: AppTextStyle
                                                                     .bodyText),
                                                                 Text(
-                                                                  '${deposits.status == 0 ? 'نامشخص' : deposits.status == 1 ? 'تایید شده' : 'تایید نشده'} ',
+                                                                  '${deposits.status == 0 ? 'در انتظار' : deposits.status == 1 ? 'تایید شده' : 'تایید نشده'} ',
                                                                   style: AppTextStyle
                                                                       .bodyText.copyWith(
                                                                     color: deposits.status == 1
@@ -2159,7 +2201,7 @@ class DepositsListView extends StatelessWidget {
                                                                         deposits.id!,
                                                                         value, 0);
                                                                   }
-                                                                  depositController.fetchDepositList();
+                                                                  depositController.getDepositListPager();
                                                                 },
                                                                 shape: const RoundedRectangleBorder(
                                                                   borderRadius: BorderRadius
@@ -2251,7 +2293,7 @@ class DepositsListView extends StatelessWidget {
                                                             ),
                                                           ],
                                                         ),
-                                                        SizedBox(height: 8,),*/
+                                                        SizedBox(height: 8,),
                                                         Row(mainAxisAlignment: MainAxisAlignment
                                                             .spaceBetween,
                                                           children: [
@@ -2398,7 +2440,17 @@ class DepositsListView extends StatelessWidget {
           ),)
         ],
       ),
-
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 
@@ -2465,6 +2517,8 @@ class DepositsListView extends StatelessWidget {
           child: Text('مشاهده در خواست', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('وضعیت', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
+      DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
+          child: Text('مانده', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),
       /*DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
           child: Text('الصاق تصویر', style: AppTextStyle.labelText)),headingRowAlignment:MainAxisAlignment.center ),*/
       DataColumn(label: ConstrainedBox(constraints: BoxConstraints(maxWidth: 80),
@@ -2587,7 +2641,7 @@ class DepositsListView extends StatelessWidget {
                 children: [
                   SizedBox(height: 5,),
                   Text(
-                    '${deposit.status == 0 ? 'نامشخص' : deposit.status == 1
+                    '${deposit.status == 0 ? 'در انتظار' : deposit.status == 1
                         ? 'تایید شده'
                         : 'تایید نشده'} ',
                     style: AppTextStyle
@@ -2716,7 +2770,7 @@ class DepositsListView extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 6,),
-                 /* deposit.status==2 ?
+                  deposit.status==2 ?
                   Wrap(
                     children: [
                       Text('به دلیل ',
@@ -2731,10 +2785,48 @@ class DepositsListView extends StatelessWidget {
                         style: AppTextStyle
                             .labelText,),
                     ],
-                  ) : Text(""),*/
+                  ) : Text(""),
                 ],
               ),
             ),
+          ),
+          // مانده
+          DataCell(
+              Center(
+                child:
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return BalanceDialog(
+                            entityId: deposit.id ?? 0,
+                            entityType: "deposit",
+                            entityName: deposit.wallet?.account?.name ?? 'نامشخص',
+                            isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                          );
+                        },
+                      );
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.account_balance_wallet,
+                          size: 20,
+                          color: AppColor.buttonColor,
+                        ),
+                        Text(' مانده',
+                          style: AppTextStyle
+                              .labelText
+                              .copyWith(
+                              color: AppColor.buttonColor, fontSize: 11,fontWeight: FontWeight.bold),),
+                      ],
+                    ),
+                  ),
+                ),
+              )
           ),
           //الصاق تصویر
           /*DataCell(

@@ -19,16 +19,21 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
           : ReasonRejectionModel.fromJson(
               json['reasonRejection'] as Map<String, dynamic>),
       ownerName: json['ownerName'] as String?,
+      requestAmount: (json['requestAmount'] as num?)?.toDouble(),
       amount: (json['amount'] as num?)?.toDouble(),
       dividedAmount: (json['dividedAmount'] as num?)?.toDouble(),
       notConfirmedAmount: (json['notConfirmedAmount'] as num?)?.toDouble(),
       undividedAmount: (json['undividedAmount'] as num?)?.toDouble(),
       paidAmount: (json['paidAmount'] as num?)?.toDouble(),
       totalAmountPerDay: (json['totalAmountPerDay'] as num?)?.toDouble(),
-      totalPaidAmountPerDay: (json['totalPaidAmountPerDay'] as num?)?.toDouble(),
-      totalDepositRequestAmountPerDay: (json['totalDepositRequestAmountPerDay'] as num?)?.toDouble(),
-      totalUndepositedAmountPerDay: (json['totalUndepositedAmountPerDay'] as num?)?.toDouble(),
-      totalUndividedAmountPerDay: (json['totalUndividedAmountPerDay'] as num?)?.toDouble(),
+      totalPaidAmountPerDay:
+          (json['totalPaidAmountPerDay'] as num?)?.toDouble(),
+      totalDepositRequestAmountPerDay:
+          (json['totalDepositRequestAmountPerDay'] as num?)?.toDouble(),
+      totalUndepositedAmountPerDay:
+          (json['totalUndepositedAmountPerDay'] as num?)?.toDouble(),
+      totalUndividedAmountPerDay:
+          (json['totalUndividedAmountPerDay'] as num?)?.toDouble(),
       requestDate: json['requestDate'] == null
           ? null
           : DateTime.parse(json['requestDate'] as String),
@@ -56,6 +61,7 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
       refrenceId: (json['refrenceId'] as num?)?.toInt(),
+      recId: json['recId'] as String?,
     );
 
 Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
@@ -64,6 +70,7 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'bank': instance.bank,
       'reasonRejection': instance.reasonRejection,
       'ownerName': instance.ownerName,
+      'requestAmount': instance.requestAmount,
       'amount': instance.amount,
       'dividedAmount': instance.dividedAmount,
       'notConfirmedAmount': instance.notConfirmedAmount,
@@ -71,7 +78,8 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'paidAmount': instance.paidAmount,
       'totalAmountPerDay': instance.totalAmountPerDay,
       'totalPaidAmountPerDay': instance.totalPaidAmountPerDay,
-      'totalDepositRequestAmountPerDay': instance.totalDepositRequestAmountPerDay,
+      'totalDepositRequestAmountPerDay':
+          instance.totalDepositRequestAmountPerDay,
       'totalUndepositedAmountPerDay': instance.totalUndepositedAmountPerDay,
       'totalUndividedAmountPerDay': instance.totalUndividedAmountPerDay,
       'requestDate': instance.requestDate?.toIso8601String(),
@@ -93,4 +101,5 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'infos': instance.infos,
       'description': instance.description,
       'refrenceId': instance.refrenceId,
+      'recId': instance.recId,
     };

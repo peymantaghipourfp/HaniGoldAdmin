@@ -13,6 +13,6 @@ class OrderBindings implements Bindings{
     Get.lazyPut(()=>OrderController());
     Get.lazyPut(()=>OrderCreateController());
     Get.lazyPut(()=>OrderUpdateController());
-    Get.lazyPut(()=>HomeController());
+    //Get.lazyPut(()=>HomeController());
   }
 }

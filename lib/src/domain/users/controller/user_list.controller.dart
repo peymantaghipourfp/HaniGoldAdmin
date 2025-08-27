@@ -114,7 +114,7 @@ class UserListController extends GetxController {
   }
 
   void isChangePage(int index) {
-    currentPage.value = index * 10 - 10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value = index * 10;
     getUserList();
   }

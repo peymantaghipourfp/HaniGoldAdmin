@@ -14,6 +14,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/deposit_update.controller.dart';
 
@@ -503,6 +504,9 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                         .labelText,
                                                     keyboardType: TextInputType
                                                         .number,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                                    ],
                                                     onChanged: (value) {
                                                       // حذف کاماهای قبلی و فرمت جدید
                                                       String cleanedValue = value
@@ -560,6 +564,49 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                     controller: depositUpdateController.trackingNumberController,
                                                     style: AppTextStyle
                                                         .bodyText,
+                                                    keyboardType: TextInputType
+                                                        .numberWithOptions(
+                                                        decimal: true),
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter
+                                                          .allow(RegExp(
+                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                      TextInputFormatter
+                                                          .withFunction((
+                                                          oldValue, newValue) {
+                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                        String newText = newValue
+                                                            .text
+                                                            .replaceAll(
+                                                            '٠', '0')
+                                                            .replaceAll(
+                                                            '١', '1')
+                                                            .replaceAll(
+                                                            '٢', '2')
+                                                            .replaceAll(
+                                                            '٣', '3')
+                                                            .replaceAll(
+                                                            '٤', '4')
+                                                            .replaceAll(
+                                                            '٥', '5')
+                                                            .replaceAll(
+                                                            '٦', '6')
+                                                            .replaceAll(
+                                                            '٧', '7')
+                                                            .replaceAll(
+                                                            '٨', '8')
+                                                            .replaceAll(
+                                                            '٩', '9');
+
+                                                        return newValue
+                                                            .copyWith(
+                                                            text: newText,
+                                                            selection: TextSelection
+                                                                .collapsed(
+                                                                offset: newText
+                                                                    .length));
+                                                      }),
+                                                    ],
                                                     decoration: InputDecoration(
                                                       border: OutlineInputBorder(
                                                         borderRadius: BorderRadius
@@ -695,7 +742,8 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                   padding: EdgeInsets.only(
                                                       bottom: 5),
                                                   child: IntrinsicHeight(
-                                                    child: TextFormField(
+                                                    child:
+                                                    TextFormField(
                                                       validator: (value) {
                                                         if (value == null ||
                                                             value.isEmpty) {
@@ -986,6 +1034,17 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }

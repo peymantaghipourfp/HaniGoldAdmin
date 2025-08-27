@@ -15,6 +15,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../account/model/account.model.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 
 class OrderCreateView extends StatefulWidget {
@@ -30,6 +31,13 @@ class _OrderCreateViewState extends State<OrderCreateView> {
   OrderCreateController orderCreateController =
   Get.find<OrderCreateController>();
 
+@override
+  void initState() {
+  var now = Jalali.now();
+  DateTime date=DateTime.now();
+  orderCreateController.dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
@@ -289,6 +297,38 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 hideUnderline: true,
                                               ),
                                             ),
+                                            // کارتخوان
+                                            orderCreateController.selectedBuySell.value?.id==0 && orderCreateController.selectedItem.value?.hasCard==true ?
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                  bottom: 5),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text('کارتخوان', style: AppTextStyle.labelText
+                                                      .copyWith(
+                                                      fontSize: isDesktop ? 12 : 10,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColor.primaryColor
+                                                  ),),
+                                                  SizedBox(width: 3),
+                                                  Checkbox(
+                                                    hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                                                    value: orderCreateController.isCardChecked.value,
+                                                    onChanged: (value) async{
+                                                      orderCreateController.isCardChecked.value = value!;
+                                                      if(value){
+                                                        orderCreateController.priceController.text=((orderCreateController.selectedItem.value!.mesghalPrice)!+(orderCreateController.selectedItem.value?.cardPrice)!.toDouble()).toString().seRagham(separator: ',');
+                                                      }else{
+                                                        orderCreateController.priceController.text=(orderCreateController.selectedItem.value!.mesghalPrice).toString().seRagham(separator: ',');
+                                                      }
+                                                      orderCreateController.updateTotalPrice();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            ) :
+                                                SizedBox.shrink(),
                                             // کاربر
                                             Container(
                                               padding: EdgeInsets.only(
@@ -330,6 +370,8 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                                 .bodyText,
                                                             controller: orderCreateController
                                                                 .searchController,
+                                                            focusNode: orderCreateController
+                                                                .searchFocusNode,
                                                             decoration: InputDecoration(
                                                               isDense: true,
                                                               contentPadding:
@@ -353,10 +395,10 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                       value: orderCreateController
                                                           .selectedAccount.value,
                                                       validator: (value) {
-                                                        if (value == 'انتخاب کنید' ||
-                                                            value == null ||
+                                                        if (value=='انتخاب کنید' ||
+                                                        value == null ||
                                                             value.isEmpty) {
-                                                          return 'کاربر را انتخاب کنید';
+                                                          return 'لطفا کاربر را انتخاب کنید';
                                                         }
                                                         return null;
                                                       },
@@ -366,11 +408,12 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         ...orderCreateController
                                                             .searchedAccounts.map((
                                                             account) =>
-                                                        account.name ?? "")
+                                                        '${account.id}:${account.name ?? ""}')
                                                       ].toList(),
                                                       selectedValue: orderCreateController
-                                                          .selectedAccount.value
-                                                          ?.name,
+                                                          .selectedAccount.value != null
+                                                          ? '${orderCreateController.selectedAccount.value!.id}:${orderCreateController.selectedAccount.value!.name}'
+                                                          : null,
                                                       onChanged: (String? newValue) {
                                                         if (newValue ==
                                                             'انتخاب کنید') {
@@ -378,23 +421,27 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                               .changeSelectedAccount(
                                                               null);
                                                         } else {
-                                                          var selectedAccount = orderCreateController
-                                                              .searchedAccounts
-                                                              .firstWhere((account) =>
-                                                          account.name == newValue);
-                                                          orderCreateController
-                                                              .changeSelectedAccount(
-                                                              selectedAccount);
+                                                          var accountId = int.tryParse(newValue!.split(':')[0]);
+                                                          if (accountId != null) {
+                                                            var selectedAccount = orderCreateController
+                                                                .searchedAccounts
+                                                                .firstWhere((account) =>
+                                                            account.id == accountId);
+                                                            orderCreateController
+                                                                .changeSelectedAccount(
+                                                                selectedAccount);
+                                                          }
                                                         }
                                                       },
-                                                      onMenuStateChange: (isOpen) {
+                                                      /*onMenuStateChange: (isOpen) {
                                                         if (!isOpen) {
                                                           orderCreateController
                                                               .resetAccountSearch();
                                                         } else {
-                                                    
+
                                                         }
-                                                      },
+                                                      },*/
+                                                      onMenuStateChange: orderCreateController.onDropdownMenuStateChange,
                                                       backgroundColor: AppColor
                                                           .textFieldColor,
                                                       borderRadius: 7,
@@ -403,8 +450,8 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                       hideUnderline: true,
                                                     ),
                                                   ),
-                                                  SizedBox(width: 3),
-                                                  GestureDetector(
+                                                  /*SizedBox(width: 3),*/
+                                                  /*GestureDetector(
                                                     onTap: () {
                                                       Get.toNamed('/insertUser',parameters: {'id':0.toString()});
                                                     },
@@ -414,7 +461,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn),
 
                                                       ),
-                                                  ),
+                                                  ),*/
                                                 ],
                                               ),
                                             ),
@@ -447,6 +494,9 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                       style: AppTextStyle.labelText,
                                                       keyboardType: TextInputType
                                                           .number,
+                                                      inputFormatters: [
+                                                        FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                                      ],
                                                       onChanged: (value) {
                                                         // حذف کاماهای قبلی و فرمت جدید
                                                         String cleanedValue = value
@@ -990,7 +1040,8 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                                 10)))),
                                                 onPressed: (){
                                                     if(formKey.currentState!.validate()) {
-                                                      Get.defaultDialog(
+                                                      if(orderCreateController.selectedAccount.value!=null){
+                                                        Get.defaultDialog(
                                                           backgroundColor: AppColor.backGroundColor,
                                                           title: "ایجاد سفارش خرید",
                                                           titleStyle: AppTextStyle.smallTitleText,
@@ -1005,6 +1056,16 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                                   Text('جزئیات خرید ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
                                                                   SizedBox(height: 2,),
                                                                   Divider(height: 1,color: AppColor.dividerColor,),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
                                                                   SizedBox(height: 5,),
                                                                   Row(
                                                                     children: [
@@ -1060,25 +1121,26 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                             ),
                                                           ),
                                                           confirm: ElevatedButton(
-                                                              style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
-                                                                  AppColor.primaryColor)),
-                                                              onPressed: () async {
-                                                                  await orderCreateController.insertOrder();
-                                                              },
-                                                              child: Text('ایجاد', style: AppTextStyle.bodyText,),
+                                                            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
+                                                                AppColor.primaryColor)),
+                                                            onPressed: () async {
+                                                              await orderCreateController.insertOrder();
+                                                            },
+                                                            child: Text('ایجاد', style: AppTextStyle.bodyText,),
                                                           ),
-                                                        cancel: ElevatedButton(
-                                                          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
-                                                              AppColor.accentColor)),
-                                                          onPressed: ()  {
-                                                            Get.back();
-                                                          },
-                                                          child: Text(
-                                                            'لغو',
-                                                            style: AppTextStyle.bodyText,
+                                                          cancel: ElevatedButton(
+                                                            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
+                                                                AppColor.accentColor)),
+                                                            onPressed: ()  {
+                                                              Get.back();
+                                                            },
+                                                            child: Text(
+                                                              'لغو',
+                                                              style: AppTextStyle.bodyText,
+                                                            ),
                                                           ),
-                                                        ),
-                                                      );
+                                                        );
+                                                      }
                                                     }
                                                 },
                                                 child: orderCreateController.isLoading.value
@@ -1111,99 +1173,111 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 onPressed: () {
                                                   if(formKey.currentState!.validate())
                                                   {
-                                                    Get.defaultDialog(
+                                                    if(orderCreateController.selectedAccount.value!=null){
+                                                      Get.defaultDialog(
                                                         backgroundColor: AppColor.backGroundColor,
                                                         title: "ایجاد سفارش فروش",
                                                         titleStyle: AppTextStyle.smallTitleText,
                                                         middleText: "آیا از ایجاد سفارش مطمئن هستید؟",
                                                         middleTextStyle: AppTextStyle.bodyText,
-                                                      content: Card(
-                                                        color: AppColor.backGroundColor,
-                                                        child: Padding(
-                                                          padding: const EdgeInsets.all(8.0),
-                                                          child: Column(
-                                                            children: [
-                                                              Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                              SizedBox(height: 2,),
-                                                              Divider(height: 1,color: AppColor.dividerColor,),
-                                                              SizedBox(height: 5,),
-                                                              Row(
-                                                                children: [
-                                                                  SizedBox(width: 5,),
-                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                  SizedBox(width: 2,),
-                                                                  Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                  Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
-                                                                ],
-                                                              ),
-                                                              SizedBox(height: 5,),
-                                                              Row(
-                                                                children: [
-                                                                  SizedBox(width: 5,),
-                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                  SizedBox(width: 2,),
-                                                                  Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                  Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
-                                                                ],
-                                                              ),
-                                                              SizedBox(height: 5,),
-                                                              Row(
-                                                                children: [
-                                                                  SizedBox(width: 5,),
-                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                  SizedBox(width: 2,),
-                                                                  Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                  Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
-                                                                ],
-                                                              ),
-                                                              SizedBox(height: 5,),
-                                                              Row(
-                                                                children: [
-                                                                  SizedBox(width: 5,),
-                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                  SizedBox(width: 2,),
-                                                                  Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                  Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
-                                                                ],
-                                                              ),
-                                                              SizedBox(height: 5,),
-                                                              Row(
-                                                                children: [
-                                                                  SizedBox(width: 5,),
-                                                                  Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                  SizedBox(width: 2,),
-                                                                  Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                  Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
-                                                                ],
-                                                              ),
-                                                            ],
+                                                        content: Card(
+                                                          color: AppColor.backGroundColor,
+                                                          child: Padding(
+                                                            padding: const EdgeInsets.all(8.0),
+                                                            child: Column(
+                                                              children: [
+                                                                Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                SizedBox(height: 2,),
+                                                                Divider(height: 1,color: AppColor.dividerColor,),
+                                                                SizedBox(height: 5,),
+                                                                Row(
+                                                                  children: [
+                                                                    SizedBox(width: 5,),
+                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                    SizedBox(width: 2,),
+                                                                    Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                    Text(orderCreateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(height: 5,),
+                                                                Row(
+                                                                  children: [
+                                                                    SizedBox(width: 5,),
+                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                    SizedBox(width: 2,),
+                                                                    Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                    Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(height: 5,),
+                                                                Row(
+                                                                  children: [
+                                                                    SizedBox(width: 5,),
+                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                    SizedBox(width: 2,),
+                                                                    Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                    Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(height: 5,),
+                                                                Row(
+                                                                  children: [
+                                                                    SizedBox(width: 5,),
+                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                    SizedBox(width: 2,),
+                                                                    Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                    Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(height: 5,),
+                                                                Row(
+                                                                  children: [
+                                                                    SizedBox(width: 5,),
+                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                    SizedBox(width: 2,),
+                                                                    Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                    Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                  ],
+                                                                ),
+                                                                SizedBox(height: 5,),
+                                                                Row(
+                                                                  children: [
+                                                                    SizedBox(width: 5,),
+                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                    SizedBox(width: 2,),
+                                                                    Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                    Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
+                                                                  ],
+                                                                ),
+                                                              ],
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
                                                         confirm: ElevatedButton(
-                                                            style: ButtonStyle(
-                                                                backgroundColor: WidgetStatePropertyAll(
-                                                                    AppColor.primaryColor)),
-                                                            onPressed: () async {
-                                                                await orderCreateController.insertOrder();
-                                                            },
-                                                            child: Text(
-                                                              'ایجاد',
-                                                              style: AppTextStyle
-                                                                  .bodyText,
-                                                            ),
+                                                          style: ButtonStyle(
+                                                              backgroundColor: WidgetStatePropertyAll(
+                                                                  AppColor.primaryColor)),
+                                                          onPressed: () async {
+                                                            await orderCreateController.insertOrder();
+                                                          },
+                                                          child: Text(
+                                                            'ایجاد',
+                                                            style: AppTextStyle
+                                                                .bodyText,
+                                                          ),
                                                         ),
-                                                      cancel: ElevatedButton(
-                                                        style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
-                                                        onPressed: ()  {
-                                                          Get.back();
-                                                        },
-                                                        child: Text(
-                                                          'لغو',
-                                                          style: AppTextStyle.bodyText,
+                                                        cancel: ElevatedButton(
+                                                          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
+                                                          onPressed: ()  {
+                                                            Get.back();
+                                                          },
+                                                          child: Text(
+                                                            'لغو',
+                                                            style: AppTextStyle.bodyText,
+                                                          ),
                                                         ),
-                                                      ),
-                                                    );
+                                                      );
+                                                    }
                                                   }
                                                 },
                                                 child: orderCreateController
@@ -1250,6 +1324,17 @@ class _OrderCreateViewState extends State<OrderCreateView> {
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }

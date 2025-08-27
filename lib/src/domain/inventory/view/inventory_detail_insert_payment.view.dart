@@ -16,6 +16,7 @@ import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/inventory_detail_insert_payment.controller.dart';
 import '../controller/inventory_detail_insert_receive.controller.dart';
@@ -31,6 +32,7 @@ class InventoryDetailInsertPaymentView extends StatefulWidget {
 class _InventoryDetailInsertPaymentViewState
     extends State<InventoryDetailInsertPaymentView>
     with TickerProviderStateMixin {
+  final formKey = GlobalKey<FormState>();
   InventoryDetailInsertPaymentController inventoryDetailInsertPaymentController = Get
       .find<InventoryDetailInsertPaymentController>();
 
@@ -144,6 +146,7 @@ class _InventoryDetailInsertPaymentViewState
                                             horizontal: 24),
                                         child:
                                         Form(
+                                          key: formKey,
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment
                                                 .start,
@@ -262,7 +265,7 @@ class _InventoryDetailInsertPaymentViewState
                                                 ),
                                               ),
                                               // لیست دریافتی ها
-                                              inventoryDetailInsertPaymentController.selectedWalletAccount.value?.item?.itemUnit?.id == 2 ?
+                                              inventoryDetailInsertPaymentController.selectedWalletAccount.value?.item?.id == 1 ?
                                               ElevatedButton(
                                                 style: ButtonStyle(
                                                     fixedSize: WidgetStatePropertyAll(
@@ -337,6 +340,13 @@ class _InventoryDetailInsertPaymentViewState
                                                     child:
                                                     IntrinsicHeight(
                                                       child: TextFormField(
+                                                        validator: (value) {
+                                                          if (value == null ||
+                                                              value.isEmpty) {
+                                                            return 'لطفا مقدار را وارد کنید';
+                                                          }
+                                                          return null;
+                                                        },
                                                         autovalidateMode: AutovalidateMode
                                                             .onUserInteraction,
                                                         controller: inventoryDetailInsertPaymentController
@@ -630,7 +640,11 @@ class _InventoryDetailInsertPaymentViewState
                                                                   .circular(
                                                                   10)))),
                                                   onPressed: () async {
-                                                   await inventoryDetailInsertPaymentController.uploadImagesDesktop( "image", "InventoryDetail");
+                                                   if(formKey.currentState!.validate()){
+                                                     if(inventoryDetailInsertPaymentController.selectedWalletAccount.value!=null){
+                                                       inventoryDetailInsertPaymentController.uploadImagesDesktop( "image", "InventoryDetail");
+                                                     }
+                                                   }
                                                   },
                                                   child: inventoryDetailInsertPaymentController
                                                       .isLoading.value
@@ -680,6 +694,17 @@ class _InventoryDetailInsertPaymentViewState
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }
@@ -910,6 +935,20 @@ class _InventoryDetailInsertPaymentViewState
                                     Row(
                                       children: [
                                         Text(
+                                            ' وزن ترازو: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${forPayment.weight ??
+                                                0}',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    SizedBox(width: 15,),
+                                    Row(
+                                      children: [
+                                        Text(
                                             ' عیار: ',
                                             style: AppTextStyle
                                                 .labelText),
@@ -940,6 +979,9 @@ class _InventoryDetailInsertPaymentViewState
                                   ],
                                 ),
                                 SizedBox(height: 8,),
+                                Divider(
+                                  height: 1, color: AppColor.dividerColor,),
+                                SizedBox(height: 5,),
                                 // باقیمانده
                                 Row(
                                   mainAxisAlignment: MainAxisAlignment.center,

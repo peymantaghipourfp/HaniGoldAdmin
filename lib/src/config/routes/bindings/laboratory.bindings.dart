@@ -13,7 +13,7 @@ class LaboratoryBindings implements Bindings{
   @override
   void dependencies() {
     Get.lazyPut(()=>LaboratoryController());
-    Get.lazyPut(()=>HomeController());
+    //Get.lazyPut(()=>HomeController());
   }
 
 }

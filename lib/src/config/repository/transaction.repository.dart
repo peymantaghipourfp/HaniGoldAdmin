@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
+import 'package:hanigold_admin/src/domain/transaction/model/all_balances.model.dart';
 
 import '../../domain/laboratory/model/laboratory.model.dart';
 import '../../domain/laboratory/model/list_laboratory.model.dart';
 import '../../domain/users/model/list_transaction.model.dart';
+import '../network/dio_Interceptor.dart';
 
 class TransactionRepository {
 
@@ -12,6 +14,7 @@ class TransactionRepository {
 
   TransactionRepository() {
     transactionDio.options.baseUrl = BaseUrl.baseUrl;
+    transactionDio.interceptors.add(DioInterceptor());
   }
 
   Future<ListTransactionModel> getTransactionList({
@@ -194,5 +197,72 @@ class TransactionRepository {
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<List<AllBalancesModel>> getAllBalancesList(int id,String type)async{
+    try{
+      Map<String,dynamic> option={
+        "id": id,
+        "type":type,
+      };
+      final response=await transactionDio.get('Transaction/getBalances',queryParameters: option);
+      print("url : Transaction/getBalances" );
+      print("request getAllBalancesList : $option" );
+      print("response getAllBalancesList : ${response.data}" );
+      if(response.statusCode==200){
+        List<dynamic> data=response.data;
+        return data.map((balances)=>AllBalancesModel.fromJson(balances)).toList();
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<List<AllBalancesModel>> getAllBalancesByIdList(int id)async{
+    try{
+      Map<String,dynamic> option={
+        "id": id,
+      };
+      final response=await transactionDio.get('Transaction/getBalancesById',queryParameters: option);
+      print("url : Transaction/getBalancesById" );
+      print("request getAllBalancesByIdList : $option" );
+      print("response getAllBalancesByIdList : ${response.data}" );
+      if(response.statusCode==200){
+        List<dynamic> data=response.data;
+        return data.map((balances)=>AllBalancesModel.fromJson(balances)).toList();
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<List<AllBalancesModel>> getAllBalancesDateList(int accountId,String date)async{
+    try{
+      Map<String,dynamic> option={
+        "accountId": accountId,
+        "date":date,
+      };
+      final response=await transactionDio.get('Transaction/getBalancesByDate',queryParameters: option);
+      print("url : Transaction/getBalancesByDate" );
+      print("request getAllBalancesDateList : $option" );
+      print("response getAllBalancesDateList : ${response.data}" );
+      if(response.statusCode==200){
+        List<dynamic> data=response.data;
+        return data.map((balances)=>AllBalancesModel.fromJson(balances)).toList();
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+
 
 }

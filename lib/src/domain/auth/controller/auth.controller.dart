@@ -6,7 +6,9 @@ import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/auth/model/user_login.model.dart';
 
+import '../../../config/const/socket.service.dart';
 import '../../../config/repository/auth.repository.dart';
+import '../../../config/repository/url/web_socket_url.dart';
 import '../view/forget_password.view.dart';
 
 class AuthController extends GetxController{
@@ -34,14 +36,26 @@ class AuthController extends GetxController{
       Get.offNamed('/home');
         box.write('id', fetch.user.id);
         box.write('mobile', mobileController.text);
+        box.write('Authorization', fetch.token);
+        box.write('userName', fetch.user.contact.name);
+        print("userName::${fetch.user.contact.name}");
+      print("writeToken:::Bearer ${fetch.token} ");
+      print("userId:::Bearer ${fetch.user.id} ");
+      //print("userId::: ${fetch.token} ");
 
+      final socketService = SocketService.to;
+      socketService.resetManualDisconnect();
+      await socketService.ensureConnected(clientId: fetch.user.id.toString());
+      socketService.send('{"clientId": "${fetch.user.id}"}');
      }else if(fetch.infos.first[""]=="2022"){
         Get.dialog(
             ForgetPasswordPage());
       }
     }
+
     catch(e){
       Get.snackbar('خطا', 'کاربری یا رمز عبور اشتباه می باشد');
+      print(e);
       //  state.value=PageState.err;
     }finally{
       EasyLoading.dismiss();

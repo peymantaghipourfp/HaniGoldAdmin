@@ -11,6 +11,8 @@ import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
+import '../../withdraw/model/reason_rejection.model.dart';
+
 part 'remittance.model.g.dart';
 
 RemittanceModel remittanceModelFromJson(String str) => RemittanceModel.fromJson(json.decode(str));
@@ -30,7 +32,7 @@ class RemittanceModel {
   @JsonKey(name: "createdBy")
   final UserModel? createdBy;
   @JsonKey(name: "quantity")
-  final int? quantity;
+  final double? quantity;
   @JsonKey(name: "status")
   final int? status;
   @JsonKey(name: "isDeleted")
@@ -51,6 +53,8 @@ class RemittanceModel {
   final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "reasonRejection")
+  final ReasonRejectionModel? reasonRejection;
   @JsonKey(name: "registered")
   final bool? registered;
   @JsonKey(name: "rowNum")
@@ -73,6 +77,7 @@ class RemittanceModel {
     required this.description,
     required this.recId,
     required this.infos,
+    required this.reasonRejection,
     required this.registered,
     required this.rowNum,
   });

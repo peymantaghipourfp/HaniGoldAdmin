@@ -6,13 +6,13 @@ SocketOrderModel socketOrderModelFromJson(String str) => SocketOrderModel.fromJs
 String socketOrderModelToJson(SocketOrderModel data) => json.encode(data.toJson());
 
 class SocketOrderModel {
-  final String channel;
-  final int id;
-  final String accountName;
-  final String itemName;
-  late double quantity;
-  late double price;
-  late double totalPrice;
+  final String? channel;
+  final int? id;
+  final String? accountName;
+  final String? itemName;
+  late double? quantity;
+  late double? price;
+  late double? totalPrice;
 
   SocketOrderModel({
     required this.channel,

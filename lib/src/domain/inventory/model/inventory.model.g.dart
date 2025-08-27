@@ -8,11 +8,15 @@ part of 'inventory.model.dart';
 
 InventoryModel _$InventoryModelFromJson(Map<String, dynamic> json) =>
     InventoryModel(
+      recordId: (json['recordId'] as num?)?.toInt(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
       account: json['account'] == null
           ? null
           : AccountModel.fromJson(json['account'] as Map<String, dynamic>),
+      item: json['item'] == null
+          ? null
+          : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
       type: (json['type'] as num?)?.toInt(),
       isDeleted: json['isDeleted'] as bool?,
       inventoryDetails: (json['inventoryDetails'] as List<dynamic>?)
@@ -20,13 +24,6 @@ InventoryModel _$InventoryModelFromJson(Map<String, dynamic> json) =>
           .toList(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
-      attribute: json['attribute'] as String?,
-      createdOn: json['createdOn'] == null
-          ? null
-          : DateTime.parse(json['createdOn'] as String),
-      modifiedOn: json['modifiedOn'] == null
-          ? null
-          : DateTime.parse(json['modifiedOn'] as String),
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
@@ -37,20 +34,23 @@ InventoryModel _$InventoryModelFromJson(Map<String, dynamic> json) =>
       registered: json['registered'] as bool?,
       confirmByAdmin: json['confirmByAdmin'] as bool?,
       recipient: json['recipient'] as String?,
+      totalQuantity: (json['totalQuantity'] as num?)?.toDouble(),
+      createdBy: json['createdBy'] == null
+          ? null
+          : CreatedByModel.fromJson(json['createdBy'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
     <String, dynamic>{
+      'recordId': instance.recordId,
       'date': instance.date?.toIso8601String(),
       'account': instance.account,
+      'item': instance.item,
       'type': instance.type,
       'isDeleted': instance.isDeleted,
       'inventoryDetails': instance.inventoryDetails,
       'rowNum': instance.rowNum,
       'id': instance.id,
-      'attribute': instance.attribute,
-      'createdOn': instance.createdOn?.toIso8601String(),
-      'modifiedOn': instance.modifiedOn?.toIso8601String(),
       'recId': instance.recId,
       'infos': instance.infos,
       'description': instance.description,
@@ -59,6 +59,8 @@ Map<String, dynamic> _$InventoryModelToJson(InventoryModel instance) =>
       'registered': instance.registered,
       'confirmByAdmin': instance.confirmByAdmin,
       'recipient': instance.recipient,
+      'totalQuantity': instance.totalQuantity,
+      'createdBy': instance.createdBy,
     };
 
 Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(

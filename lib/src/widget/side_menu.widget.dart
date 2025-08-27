@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
 
 import '../config/const/app_color.dart';
 import '../config/const/app_text_style.dart';
+import '../config/const/socket.service.dart';
 
 class SideMenu extends StatelessWidget {
   const SideMenu({super.key});
@@ -58,6 +60,11 @@ class SideMenu extends StatelessWidget {
                   icon: Icons.price_change,
                   route: '/productUpdatePrice',
                 ),
+                _buildSubMenuItem(
+                  title: 'گردش موجودی محصولات',
+                  icon: Icons.assessment,
+                  route: '/productInventory',
+                ),
               ],
             ),
             _buildMenuButton(
@@ -66,9 +73,19 @@ class SideMenu extends StatelessWidget {
               menuKey: 'rialPanel',
               subItems: [
                 _buildSubMenuItem(
+                  title: 'واریزی‌های در انتظار',
+                  icon: Icons.pending_actions,
+                  route: '/depositsPendingList',
+                ),
+                _buildSubMenuItem(
                   title: 'واریزی‌ها',
                   icon: Icons.payments,
                   route: '/depositsList',
+                ),
+                _buildSubMenuItem(
+                  title: 'برداشت های در انتظار',
+                  icon: Icons.pending_actions,
+                  route: '/withdrawsPendingList',
                 ),
                 _buildSubMenuItem(
                   title: 'برداشت ها',
@@ -147,6 +164,11 @@ class SideMenu extends StatelessWidget {
               menuKey: 'remittance',
               subItems: [
                 _buildSubMenuItem(
+                  title: 'حواله های در انتظار',
+                  icon: Icons.pending_actions,
+                  route: '/remittancesPendingList',
+                ),
+                _buildSubMenuItem(
                   title: 'لیست حواله',
                   icon: Icons.list_alt,
                   route: '/remittance',
@@ -183,10 +205,32 @@ class SideMenu extends StatelessWidget {
               ],
             ),
             _buildMenuButton(
+              title: 'انتقال کیف پول',
+              icon: Icons.transform,
+              menuKey: 'transferWallet',
+              subItems: [
+                _buildSubMenuItem(
+                  title: 'لیست انتقال ها',
+                  icon: Icons.list_alt,
+                  route: '/transferWalletList',
+                ),
+                _buildSubMenuItem(
+                  title: 'انتقال پس فردایی به فردایی',
+                  icon: Icons.add_card,
+                  route: '/transferAfterTomorrowChange',
+                ),
+              ],
+            ),
+            _buildMenuButton(
               title: 'تنظیمات',
               icon: Icons.settings,
               menuKey: 'tools',
               subItems: [
+                _buildSubMenuItem(
+                  title: 'ابزارها',
+                  icon: Icons.build,
+                  route: '/setting',
+                ),
                 _buildSubMenuItem(
                   title: 'خروج از سیستم',
                   icon: Icons.logout,
@@ -301,7 +345,17 @@ void _showExitDialog() {
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
           child: const Text('خروج', style: TextStyle(color: Colors.white)),
-          onPressed: () => Get.offAllNamed("/login"),
+          onPressed: () async {
+            // Disconnect socket first
+            final socketService = Get.find<SocketService>();
+            await socketService.disconnect();
+            // Clear stored token and user data
+            final box = GetStorage();
+            box.remove('Authorization');
+            box.remove('id');
+            box.remove('mobile');
+            Get.offAllNamed("/login");
+          },
         ),
       ],
     ),

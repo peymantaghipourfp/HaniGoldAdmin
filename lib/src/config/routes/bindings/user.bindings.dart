@@ -14,6 +14,6 @@ class UserBindings implements Bindings{
     Get.lazyPut(()=>UserInfoDetailTransactionController());
     Get.lazyPut(()=>UserDetailController());
     Get.lazyPut(()=>InsertUserController());
-    Get.lazyPut(()=>HomeController());
+    //Get.lazyPut(()=>HomeController());
   }
 }

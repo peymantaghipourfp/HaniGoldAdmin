@@ -14,6 +14,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../widget/inventory_create_payment_tab.widget.dart';
 import '../widget/inventory_create_receive_tab.widget.dart';
@@ -167,9 +168,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
                         ResponsiveRowColumnItem(
                           rowFlex: 1,
                           child:
-                          inventoryCreateLayoutController.isLoadingBalance.value==false &&  inventoryCreateLayoutController.balanceList.isEmpty ?
-                              SizedBox() :
-                          inventoryCreateLayoutController.isLoadingBalance.value==true &&  inventoryCreateLayoutController.balanceList.isEmpty ?
+                          inventoryCreateLayoutController.isLoadingBalance.value==false ?
                           Center(child: CircularProgressIndicator(),)
                               :
                           BalanceWidget(
@@ -183,6 +182,17 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }

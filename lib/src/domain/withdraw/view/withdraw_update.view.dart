@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_update.controller.dart';
@@ -16,6 +17,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 
 class WithdrawUpdateView extends StatefulWidget {
@@ -209,26 +211,33 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                         right: 15,
                                                         left: 15,
                                                       ),
-                                                      child: TextFormField(
-                                                        style: AppTextStyle
-                                                            .bodyText,
-                                                        controller: withdrawUpdateController
-                                                            .searchController,
-                                                        decoration: InputDecoration(
-                                                          isDense: true,
-                                                          contentPadding:
-                                                          const EdgeInsets
-                                                              .symmetric(
-                                                            horizontal: 10,
-                                                            vertical: 8,
-                                                          ),
-                                                          hintText: 'جستجوی کاربر...',
-                                                          hintStyle: AppTextStyle
-                                                              .labelText,
-                                                          border: OutlineInputBorder(
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(8),
+                                                      child: TextSelectionTheme(
+                                                        data: TextSelectionThemeData(
+                                                          selectionColor: Colors.white.withOpacity(0.4),
+                                                        ),
+                                                        child: TextFormField(
+                                                          style: AppTextStyle
+                                                              .bodyText,
+                                                          controller: withdrawUpdateController
+                                                              .searchController,
+                                                          focusNode: withdrawUpdateController
+                                                              .searchFocusNode,
+                                                          decoration: InputDecoration(
+                                                            isDense: true,
+                                                            contentPadding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                              horizontal: 10,
+                                                              vertical: 8,
+                                                            ),
+                                                            hintText: 'جستجوی کاربر...',
+                                                            hintStyle: AppTextStyle
+                                                                .labelText,
+                                                            border: OutlineInputBorder(
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(8),
+                                                            ),
                                                           ),
                                                         ),
                                                       ),
@@ -238,24 +247,36 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                       .selectedAccount.value
                                                       ?.name,
                                                   showSearchBox: true,
-                                                  items:
-                                                  withdrawUpdateController
+                                                  items:[
+                                                  ...withdrawUpdateController
                                                       .searchedAccounts.map((
                                                       account) =>
-                                                  account.name ?? "").toList(),
+                                                  '${account.id}:${account.name ?? ""}')
+                                                    ].toList(),
                                                   selectedValue: withdrawUpdateController
-                                                      .selectedAccount.value
-                                                      ?.name,
-                                                  onChanged: (
-                                                      String? newValue) {
-                                                    var selectedAccount = withdrawUpdateController
-                                                        .searchedAccounts
-                                                        .firstWhere((account) =>
-                                                    account.name == newValue);
-                                                    withdrawUpdateController
-                                                        .changeSelectedAccount(
-                                                        selectedAccount);
+                                                      .selectedAccount.value != null
+                                                      ? '${withdrawUpdateController.selectedAccount.value!.id}:${withdrawUpdateController.selectedAccount.value!.name}'
+                                                      : null,
+                                                  onChanged: (String? newValue) {
+                                                    if (newValue ==
+                                                        'انتخاب کنید') {
+                                                      withdrawUpdateController
+                                                          .changeSelectedAccount(
+                                                          null);
+                                                    } else {
+                                                      var accountId = int.tryParse(newValue!.split(':')[0]);
+                                                      if (accountId != null) {
+                                                        var selectedAccount = withdrawUpdateController
+                                                            .searchedAccounts
+                                                            .firstWhere((account) =>
+                                                        account.id == accountId);
+                                                        withdrawUpdateController
+                                                            .changeSelectedAccount(
+                                                            selectedAccount);
+                                                      }
+                                                    }
                                                   },
+                                                  onMenuStateChange: withdrawUpdateController.onDropdownMenuStateChange,
                                                   backgroundColor: AppColor
                                                       .textFieldColor,
                                                   borderRadius: 7,
@@ -451,7 +472,7 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                         ));
                                                   }).toList(),
                                                   value: withdrawUpdateController
-                                                      .selectedIndex,
+                                                      .selectedIndex.value,
                                                   onChanged: (newValue) {
                                                     setState(() {
                                                       withdrawUpdateController
@@ -545,18 +566,23 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawUpdateController
-                                                      .ownerNameController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                TextSelectionTheme(
+                                                  data: TextSelectionThemeData(
+                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: withdrawUpdateController
+                                                        .ownerNameController,
+                                                    style: AppTextStyle.bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -579,42 +605,50 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawUpdateController
-                                                      .amountController,
-                                                  style: AppTextStyle.labelText,
-                                                  keyboardType: TextInputType
-                                                      .number,
-                                                  onChanged: (value) {
-                                                    // حذف کاماهای قبلی و فرمت جدید
-                                                    String cleanedValue = value
-                                                        .replaceAll(',', '');
-                                                    if (cleanedValue
-                                                        .isNotEmpty) {
-                                                      withdrawUpdateController
-                                                          .amountController
-                                                          .text =
-                                                          cleanedValue
-                                                              .toPersianDigit()
-                                                              .seRagham();
-                                                      withdrawUpdateController
-                                                          .amountController
-                                                          .selection =
-                                                          TextSelection
-                                                              .collapsed(
-                                                              offset: withdrawUpdateController
-                                                                  .amountController
-                                                                  .text.length);
-                                                    }
-                                                  },
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                TextSelectionTheme(
+                                                  data: TextSelectionThemeData(
+                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: withdrawUpdateController
+                                                        .amountController,
+                                                    style: AppTextStyle.labelText,
+                                                    keyboardType: TextInputType
+                                                        .number,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                                    ],
+                                                    onChanged: (value) {
+                                                      // حذف کاماهای قبلی و فرمت جدید
+                                                      String cleanedValue = value
+                                                          .replaceAll(',', '');
+                                                      if (cleanedValue
+                                                          .isNotEmpty) {
+                                                        withdrawUpdateController
+                                                            .amountController
+                                                            .text =
+                                                            cleanedValue
+                                                                .toPersianDigit()
+                                                                .seRagham();
+                                                        withdrawUpdateController
+                                                            .amountController
+                                                            .selection =
+                                                            TextSelection
+                                                                .collapsed(
+                                                                offset: withdrawUpdateController
+                                                                    .amountController
+                                                                    .text.length);
+                                                      }
+                                                    },
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -637,18 +671,66 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawUpdateController
-                                                      .numberController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                TextSelectionTheme(
+                                                  data: TextSelectionThemeData(
+                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: withdrawUpdateController
+                                                        .numberController,
+                                                    style: AppTextStyle.bodyText,
+                                                    keyboardType: TextInputType
+                                                        .numberWithOptions(
+                                                        decimal: true),
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter
+                                                          .allow(RegExp(
+                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                      TextInputFormatter
+                                                          .withFunction((
+                                                          oldValue, newValue) {
+                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                        String newText = newValue
+                                                            .text
+                                                            .replaceAll(
+                                                            '٠', '0')
+                                                            .replaceAll(
+                                                            '١', '1')
+                                                            .replaceAll(
+                                                            '٢', '2')
+                                                            .replaceAll(
+                                                            '٣', '3')
+                                                            .replaceAll(
+                                                            '٤', '4')
+                                                            .replaceAll(
+                                                            '٥', '5')
+                                                            .replaceAll(
+                                                            '٦', '6')
+                                                            .replaceAll(
+                                                            '٧', '7')
+                                                            .replaceAll(
+                                                            '٨', '8')
+                                                            .replaceAll(
+                                                            '٩', '9');
+
+                                                        return newValue
+                                                            .copyWith(
+                                                            text: newText,
+                                                            selection: TextSelection
+                                                                .collapsed(
+                                                                offset: newText
+                                                                    .length));
+                                                      }),
+                                                    ],
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -671,18 +753,66 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawUpdateController
-                                                      .cardNumberController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                TextSelectionTheme(
+                                                  data: TextSelectionThemeData(
+                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: withdrawUpdateController
+                                                        .cardNumberController,
+                                                    style: AppTextStyle.bodyText,
+                                                    keyboardType: TextInputType
+                                                        .numberWithOptions(
+                                                        decimal: true),
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter
+                                                          .allow(RegExp(
+                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                      TextInputFormatter
+                                                          .withFunction((
+                                                          oldValue, newValue) {
+                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                        String newText = newValue
+                                                            .text
+                                                            .replaceAll(
+                                                            '٠', '0')
+                                                            .replaceAll(
+                                                            '١', '1')
+                                                            .replaceAll(
+                                                            '٢', '2')
+                                                            .replaceAll(
+                                                            '٣', '3')
+                                                            .replaceAll(
+                                                            '٤', '4')
+                                                            .replaceAll(
+                                                            '٥', '5')
+                                                            .replaceAll(
+                                                            '٦', '6')
+                                                            .replaceAll(
+                                                            '٧', '7')
+                                                            .replaceAll(
+                                                            '٨', '8')
+                                                            .replaceAll(
+                                                            '٩', '9');
+
+                                                        return newValue
+                                                            .copyWith(
+                                                            text: newText,
+                                                            selection: TextSelection
+                                                                .collapsed(
+                                                                offset: newText
+                                                                    .length));
+                                                      }),
+                                                    ],
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -705,18 +835,23 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawUpdateController
-                                                      .shebaController,
-                                                  style: AppTextStyle.bodyText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                TextSelectionTheme(
+                                                  data: TextSelectionThemeData(
+                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: withdrawUpdateController
+                                                        .shebaController,
+                                                    style: AppTextStyle.bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -815,19 +950,24 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
                                                 child:
-                                                TextFormField(
-                                                  controller: withdrawUpdateController
-                                                      .descriptionController,
-                                                  maxLines: 3,
-                                                  style: AppTextStyle.labelText,
-                                                  decoration: InputDecoration(
-                                                    border: OutlineInputBorder(
-                                                      borderRadius: BorderRadius
-                                                          .circular(10),
+                                                TextSelectionTheme(
+                                                  data: TextSelectionThemeData(
+                                                    selectionColor: Colors.white.withOpacity(0.4),
+                                                  ),
+                                                  child: TextFormField(
+                                                    controller: withdrawUpdateController
+                                                        .descriptionController,
+                                                    maxLines: 3,
+                                                    style: AppTextStyle.labelText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
                                                     ),
-                                                    filled: true,
-                                                    fillColor: AppColor
-                                                        .textFieldColor,
                                                   ),
                                                 ),
                                               ),
@@ -857,8 +997,14 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
                                                                   .circular(
                                                                   10)))),
                                                   onPressed: () async {
-                                                    await withdrawUpdateController
-                                                        .updateWithdraw();
+                                                    if(withdrawUpdateController.cardNumberController.text.isNotEmpty ||
+                                                        withdrawUpdateController.numberController.text.isNotEmpty ||
+                                                        withdrawUpdateController.shebaController.text.isNotEmpty){
+                                                      await withdrawUpdateController
+                                                          .updateWithdraw();
+                                                    }else{
+                                                      Get.snackbar("فیلدهای ضروری را پر کنید", "شماره کارت-یا شماره حساب-یا شماره شبا");
+                                                    }
                                                   },
                                                   child: withdrawUpdateController
                                                       .isLoading.value
@@ -909,6 +1055,17 @@ class _WithdrawUpdateViewState extends State<WithdrawUpdateView> {
             ),
           ],
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Get.dialog(const ChatDialog());
+          },
+          backgroundColor: AppColor.primaryColor,
+          child: Icon(
+            Icons.chat,
+            color: Colors.white,
+          ),
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
   }

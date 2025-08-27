@@ -6,13 +6,15 @@ import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 
+import '../network/dio_Interceptor.dart';
+
 class ItemRepository{
 
   Dio itemDio=Dio();
 
   ItemRepository(){
     itemDio.options.baseUrl=BaseUrl.baseUrl;
-
+    itemDio.interceptors.add(DioInterceptor());
   }
   Future<List<ItemModel>> getItemList()async{
     try{
@@ -80,6 +82,7 @@ class ItemRepository{
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
+
   Future<Map<String , dynamic>> insertDifferentPriceItem({
     required int itemId,
     required double differentPrice,
@@ -110,11 +113,15 @@ class ItemRepository{
   Future<ItemModel> updateStatusItem({
     required int id,
     required bool status,
+    required bool? sellStatus,
+    required bool? buyStatus,
   }) async {
     try {
       Map<String, dynamic> options = {
         "status": status,
         "id": id,
+        "sellStatus": sellStatus,
+        "buyStatus": buyStatus,
       };
       final response = await itemDio.put('Item/updateStatus', data: options);
       print("request updateStatusItem : $options" );
@@ -150,4 +157,86 @@ class ItemRepository{
       throw ErrorException('خطا در درج اطلاعات:$e');
     }
   }
+
+  Future<Map<String, dynamic>> updateItem({
+    required int itemId,
+    required String itemName,
+    //required int itemGroupId,
+    required String itemGroupName,
+    //required int itemUnitId,
+    required String itemUnitName,
+    required bool? isDecimal,
+    required bool? status,
+    required bool? showMarket,
+    required bool? sellStatus,
+    required bool? buyStatus,
+    required bool? hasWage,
+    required double wage,
+    required bool? hasCard,
+    required double cardPrice,
+    required double initBalance,
+    required double w750,
+    //int? refrenceId,
+
+  })async{
+    try{
+      Map<String, dynamic> itemData =
+      {
+        /*"refrence": {
+          "itemGroup": {
+            "infos": []
+          },
+          "itemUnit": {
+            "infos": []
+          },
+          "name": "",
+          "id": refrenceId,
+          "infos": []
+        },*/
+        "itemGroup": {
+          "name": itemGroupName,
+          //"id": itemGroupId,
+          "infos": []
+        },
+        "itemUnit": {
+          "name": itemUnitName,
+          //"id": itemUnitId,
+          "infos": []
+        },
+        "name": itemName,
+        "isDefault": true,
+        "isDecimal": isDecimal,
+        "status": status,
+        "showMarket": showMarket,
+        "sellStatus": sellStatus,
+        "buyStatus": buyStatus,
+        "isMainCurrency": false,
+        "isCurrency": false,
+        "hasWage": hasWage,
+        "wage": wage,
+        "hasCard": hasCard,
+        "cardPrice": cardPrice,
+        "w750": w750,
+        "initBalance": initBalance,
+        "symbol": "",
+        "foreColor": "",
+        "backColor": "",
+        "icon": "32d97526-459c-4ef0-9be8-646de0e41d09",
+        "id": itemId,
+        "attribute": "sys",
+        "description": "",
+        "recId": "0f6dbcdd-95fb-4608-a7d6-8a95bd9b7e60",
+        "infos": [],
+      };
+      var response=await itemDio.put('Item/update',data: itemData );
+      print('Status Code updateItem: ${response.statusCode}');
+      print('Response Data updateItem: ${response.data}');
+
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    }
+  }
+
 }

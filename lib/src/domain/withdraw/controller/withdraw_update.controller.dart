@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
+import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -32,8 +33,10 @@ enum PageState{loading,err,empty,list}
 class WithdrawUpdateController extends GetxController{
 
   final WithdrawController withdrawController=Get.find<WithdrawController>();
+  final WithdrawPendingController withdrawPendingController=Get.find<WithdrawPendingController>();
 
   final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController amountController=TextEditingController();
   final TextEditingController numberController=TextEditingController();
@@ -64,7 +67,7 @@ class WithdrawUpdateController extends GetxController{
   final Rxn<BankAccountModel> selectedBankAccount = Rxn<BankAccountModel>();
   final Rxn<BankModel> selectedBank = Rxn<BankModel>();
   Rx<int> selectedWalletId = Rx<int>(0);
-  String? selectedIndex ;
+  Rx<String?> selectedIndex = Rx<String?>(null);
   Rx<int> selectedBankId = Rx<int>(0);
   Rx<String> selectedBankName = Rx<String>("");
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
@@ -91,7 +94,7 @@ class WithdrawUpdateController extends GetxController{
   }
 
   changeSelectedBank(String newValue){
-    selectedIndex=newValue;
+    selectedIndex.value=newValue;
     selectedBankId.value=int.parse(newValue);
     for(int i=0 ;i<bankList.length;i++){
       if(selectedBankId.value==bankList[i].id){
@@ -127,7 +130,7 @@ class WithdrawUpdateController extends GetxController{
   @override
   void onInit() async {
     searchController.addListener(onSearchChanged);
-    fetchBankList();
+    await fetchBankList();
     withdrawId.value=int.parse(Get.parameters['id']!);
     await fetchGetOneWithdraw(withdrawId.value);
     if(getOneWithdraw.value!=null){
@@ -140,14 +143,26 @@ class WithdrawUpdateController extends GetxController{
         selectedWalletId.value=existingWithdraw!.wallet!.id!;
       }
     }
-    fetchAccountList();
+    await fetchAccountList();
     super.onInit();
+  }
+
+  void onDropdownMenuStateChange(bool isOpen) {
+    if (isOpen) {
+      // Add a small delay to ensure the dropdown is fully opened
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchFocusNode.requestFocus();
+      });
+    } else {
+      resetAccountSearch();
+    }
   }
 
   @override
   void onClose() {
     debounce?.cancel();
     searchController.removeListener(onSearchChanged);
+    searchFocusNode.dispose();
     //searchController.dispose();
     super.onClose();
   }
@@ -202,7 +217,7 @@ class WithdrawUpdateController extends GetxController{
       var fetchedGetOne = await withdrawGetOneRepository.getOneWithdraw(id);
       if(fetchedGetOne!=null){
         getOneWithdraw.value = fetchedGetOne;
-        selectedAccount.value=getOneWithdraw.value?.wallet?.account;
+        selectedAccount.value=fetchedGetOne.wallet?.account;
         state.value=PageState.list;
         //EasyLoading.dismiss();
       }else{
@@ -310,9 +325,9 @@ class WithdrawUpdateController extends GetxController{
     }
     try{
       isLoading.value = true;
-      //String gregorianDate = convertJalaliToGregorian(dateController.text);
+      String gregorianDate = convertJalaliToGregorian(dateController.text);
       print("walletId updateWithdraw: ${selectedWalletId.value}");
-      Gregorian date=existingWithdraw!.requestDate!.toGregorian();
+      //Gregorian date=existingWithdraw!.requestDate!.toGregorian();
       var response=await withdrawRepository.updateWithdraw(
           withdrawId: withdrawId.value,
           walletId: selectedWalletId.value,
@@ -329,21 +344,24 @@ class WithdrawUpdateController extends GetxController{
           cardNumber: cardNumberController.text,
           sheba: shebaController.text,
           description: descriptionController.text,
-          date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+          //date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+          date: gregorianDate,
           status: statusId.value
       );
 
       if(response!= null){
-        Get.offNamed('/withdrawsList');
+        Get.back();
         Get.snackbar("موفقیت آمیز","ویرایش با موفقیت آنجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('ویرایش با موفقیت آنجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         withdrawController.getWithdrawListPager();
+        withdrawPendingController.getWithdrawListStatusPager();
         balanceList.clear();
         clearList();
         withdrawController.withdrawList.refresh();
+        withdrawPendingController.withdrawListStatus.refresh();
       }
     }catch(e){
       throw ErrorException('خطا در به‌روزرسانی درخواست برداشت: $e');
@@ -366,12 +384,12 @@ class WithdrawUpdateController extends GetxController{
     withdraw.confirmDate==null ?
     dateController.text=withdraw.requestDate?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? ''
     : dateController.text=withdraw.requestDate?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
-    selectedAccount.value = withdraw.wallet?.account !;
-
-    if (withdraw.bank != null) {
+    selectedAccount.value = withdraw.wallet?.account;
+    print("selectedAccount.value:::::::::${selectedAccount.value}");
+    if (withdraw.bank?.id != null) {
       selectedBankId.value = withdraw.bank!.id!;
       selectedBankName.value = withdraw.bank!.name!;
-      selectedIndex = withdraw.bank?.id.toString();
+      selectedIndex.value = withdraw.bank?.id.toString();
     }
 
     /*if (withdraw.bankAccount != null) {
@@ -382,6 +400,7 @@ class WithdrawUpdateController extends GetxController{
         selectedBankAccount.value = bankAccountMatch;
       }
     }*/
+    update();
   }
 
   // لیست بالانس

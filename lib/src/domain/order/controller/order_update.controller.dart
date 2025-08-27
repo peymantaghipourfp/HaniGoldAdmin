@@ -36,6 +36,7 @@ class OrderUpdateController extends GetxController{
   final OrderController orderController=Get.find<OrderController>();
 
   final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   final TextEditingController priceController=TextEditingController();
   final TextEditingController quantityController=TextEditingController();
   final TextEditingController totalPriceController=TextEditingController();
@@ -71,6 +72,7 @@ class OrderUpdateController extends GetxController{
   var maxItemBuy=0.obs;
   var manualPriceChecked = false.obs;
   var notLimitChecked = false.obs;
+  var isCardChecked = false.obs;
   final Rxn<OrderModel> getOneOrder = Rxn<OrderModel>();
   var priceTemp=''.obs;
 
@@ -184,6 +186,7 @@ class OrderUpdateController extends GetxController{
       double quantity=double.tryParse(quantityController.text==""? "0" : quantityController.text.toEnglishDigit()) ?? 0.0;
       double totalPrice= price * quantity;
       totalPriceController.text=totalPrice.toStringAsFixed(0).toPersianDigit().seRagham();
+      priceTemp.value=price.toString();
     }
   }
 
@@ -224,10 +227,23 @@ class OrderUpdateController extends GetxController{
     super.onInit();
   }
 
+  void onDropdownMenuStateChange(bool isOpen) {
+    if (isOpen) {
+      fetchAccountList();
+      // Add a small delay to ensure the dropdown is fully opened
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchFocusNode.requestFocus();
+      });
+    } else {
+      resetAccountSearch();
+    }
+  }
+
   @override
   void onClose() {
     debounce?.cancel();
     searchController.removeListener(onSearchChanged);
+    searchFocusNode.dispose();
     //searchController.dispose();
     //Get.delete<OrderUpdateController>(force: true);
     super.onClose();
@@ -240,7 +256,7 @@ class OrderUpdateController extends GetxController{
       state.value=PageState.loading;
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
-      itemList.removeWhere((e) => e.price==null,);
+      itemList.removeWhere((e) => e.status==false,);
       state.value=PageState.list;
       if (existingOrder != null && existingOrder.item != null) {
         final match = itemList.firstWhereOrNull(
@@ -333,11 +349,12 @@ class OrderUpdateController extends GetxController{
     try {
       isLoading.value = true;
 
-      //String gregorianDate = convertJalaliToGregorian(dateController.text);
-      Gregorian date=existingOrder.date!.toGregorian();
+      String gregorianDate = convertJalaliToGregorian(dateController.text);
+     // Gregorian date=existingOrder.date!.toGregorian();
      var response = await orderRepository.updateOrder(
         orderId: orderId.value,
-        date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+        //date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+       date:gregorianDate,
         accountId: selectedAccount.value?.id ?? 0,
         accountName: selectedAccount.value?.name ?? "",
         type: selectedBuySell.value?.id ?? 0,
@@ -348,11 +365,14 @@ class OrderUpdateController extends GetxController{
         description: descriptionController.text,
         notLimit:notLimitChecked.value,
         manualPrice:manualPriceChecked.value,
+       isCard: isCardChecked.value,
       );
 
      if(response!= null){
        OrderModel orderResponse=OrderModel.fromJson(response);
-       Get.offNamed('/orderList');
+       //Get.toNamed('/orderList');
+       if (Get.isDialogOpen!) Get.back();
+       Get.back();
        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
            titleText: Text(orderResponse.infos!.first['title'],
              textAlign: TextAlign.center,
@@ -387,6 +407,7 @@ class OrderUpdateController extends GetxController{
     isLoadingBalance.value=true;
     priceTemp.value=order.price!.toStringAsFixed(0).seRagham(separator: ',');
     selectedAccount.value=order.account;
+    isCardChecked.value=order.isCard!;
     print("تاریخ ست:::${dateController.text}");
 
   }

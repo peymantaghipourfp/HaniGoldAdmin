@@ -30,6 +30,7 @@ import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/bank_account_req.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/predicate.model.dart';
+import 'deposit_pending.controller.dart';
 
 enum PageState{loading,err,empty,list}
 
@@ -37,6 +38,7 @@ class DepositUpdateController extends GetxController{
 
   final DepositController depositController=Get.find<DepositController>();
   final DepositRequestGetOneController depositRequestGetOneController=Get.find<DepositRequestGetOneController>();
+  final DepositPendingController depositPendingController = Get.find<DepositPendingController>();
 
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController accountController=TextEditingController();
@@ -343,8 +345,8 @@ class DepositUpdateController extends GetxController{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value=true;
-      //String gregorianDate = convertJalaliToGregorian(dateController.text);
-      Gregorian date=getOneDeposit.value!.date!.toGregorian();
+      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      //Gregorian date=getOneDeposit.value!.date!.toGregorian();
       var response=await depositRepository.updateDeposit(
         walletWithdrawId: walletWithdrawId.value,
         depositId: depositId.value,
@@ -360,8 +362,8 @@ class DepositUpdateController extends GetxController{
           // number: numberController.text,
           // cardNumber: cardNumberController.text,
           // sheba: shebaController.text,
-          date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
-          //date: gregorianDate,
+          //date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
+          date: gregorianDate,
           status: statusId.value,
           trackingNumber: trackingNumberController.text,
         recId: getOneDeposit.value?.recId ?? "",
@@ -380,6 +382,7 @@ class DepositUpdateController extends GetxController{
                 style: TextStyle(color: AppColor.textColor)));
         depositRequestGetOneController.fetchGetOneDepositRequest(response.depositRequest?.id ?? 0);
         depositController.getDepositListPager();
+        depositPendingController.getDepositListStatusPager();
         balanceList.clear();
       }
 

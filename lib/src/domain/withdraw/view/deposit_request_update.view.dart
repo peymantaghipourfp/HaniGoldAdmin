@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
@@ -25,6 +26,7 @@ class UpdateDepositRequestWidget extends StatefulWidget {
 }
 class _UpdateDepositRequestWidgetState extends State<UpdateDepositRequestWidget> {
   final withdrawController = Get.find<WithdrawController>();
+  final formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
 
@@ -61,6 +63,7 @@ class _UpdateDepositRequestWidgetState extends State<UpdateDepositRequestWidget>
               Divider(color: Colors.grey),
 
               Form(
+                key: formKey,
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 50),
                   child: Column(
@@ -93,6 +96,7 @@ class _UpdateDepositRequestWidgetState extends State<UpdateDepositRequestWidget>
                               child: TextFormField(
                                 style: AppTextStyle.bodyText,
                                 controller: withdrawController.searchController,
+                                focusNode: withdrawController.searchFocusNode,
                                 decoration: InputDecoration(
                                   isDense: true,
                                   contentPadding:
@@ -120,23 +124,40 @@ class _UpdateDepositRequestWidgetState extends State<UpdateDepositRequestWidget>
                           showSearchBox: true,
                           items: [
                             'انتخاب کنید',
-                            ...withdrawController.searchedAccounts.map((account) => account.name ?? "")
+                            ...withdrawController
+                                .searchedAccounts.map((
+                                account) =>
+                            '${account.id}:${account.name ?? ""}')
                           ].toList(),
-                          selectedValue: withdrawController.selectedAccount.value?.name,
-                          onChanged: (String? newValue){
-                            if (newValue == 'انتخاب کنید') {
-                              withdrawController.changeSelectedAccount(null);
+                          selectedValue: withdrawController
+                              .selectedAccount.value != null
+                              ? '${withdrawController.selectedAccount.value!.id}:${withdrawController.selectedAccount.value!.name}'
+                              : null,
+                          onChanged: (String? newValue) {
+                            if (newValue ==
+                                'انتخاب کنید') {
+                              withdrawController
+                                  .changeSelectedAccount(
+                                  null);
                             } else {
-                              var selectedAccount = withdrawController.searchedAccounts
-                                  .firstWhere((account) => account.name == newValue);
-                              withdrawController.changeSelectedAccount(selectedAccount);
+                              var accountId = int.tryParse(newValue!.split(':')[0]);
+                              if (accountId != null) {
+                                var selectedAccount = withdrawController
+                                    .searchedAccounts
+                                    .firstWhere((account) =>
+                                account.id == accountId);
+                                withdrawController
+                                    .changeSelectedAccount(
+                                    selectedAccount);
+                              }
                             }
                           },
-                          onMenuStateChange: (isOpen) {
+                          /*onMenuStateChange: (isOpen) {
                             if (!isOpen) {
                               withdrawController.resetAccountSearch();
                             }
-                          },
+                          },*/
+                          onMenuStateChange: withdrawController.onDropdownMenuStateChange,
                           backgroundColor: AppColor.textFieldColor,
                           borderRadius: 7,
                           borderColor: AppColor.secondaryColor,
@@ -155,12 +176,22 @@ class _UpdateDepositRequestWidgetState extends State<UpdateDepositRequestWidget>
                       ),
                       SizedBox(height: 12),
                       Container(
-                        height: 50,
+                        //height: 50,
                         padding: EdgeInsets.only(bottom: 5),
                         child: TextFormField(
+                          validator: (value) {
+                            if (value == null ||
+                                value.isEmpty) {
+                              return 'لطفا مبلغ را وارد کنید';
+                            }
+                            return null;
+                          },
                           controller: withdrawController.requestAmountController,
                           style: AppTextStyle.labelText,
                           keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                          ],
                           onChanged: (value) {
                             String cleanedValue = value.replaceAll(',', '');
                             if (cleanedValue.isNotEmpty) {
@@ -213,10 +244,14 @@ class _UpdateDepositRequestWidgetState extends State<UpdateDepositRequestWidget>
                     ),
                     onPressed: () async {
 
-                        await withdrawController.updateDepositRequest(
-                          widget.withdrawId,
-                          widget.depositRequest.id!,
-                        );
+                        if(formKey.currentState!.validate()){
+                          if(withdrawController.selectedAccount.value!=null){
+                            await withdrawController.updateDepositRequest(
+                              widget.withdrawId,
+                              widget.depositRequest,
+                            );
+                          }
+                        }
                     },
                     child: withdrawController.isLoading.value
                         ? CircularProgressIndicator(

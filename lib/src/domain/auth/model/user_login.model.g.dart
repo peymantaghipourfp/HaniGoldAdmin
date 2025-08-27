@@ -13,6 +13,7 @@ UserLoginModel _$UserLoginModelFromJson(Map<String, dynamic> json) =>
       themeName: json['themeName'] as String,
       rowNum: (json['rowNum'] as num).toInt(),
       id: (json['id'] as num).toInt(),
+      token: json['token'] as String?,
       infos: json['infos'] as List<dynamic>,
     );
 
@@ -23,6 +24,7 @@ Map<String, dynamic> _$UserLoginModelToJson(UserLoginModel instance) =>
       'themeName': instance.themeName,
       'rowNum': instance.rowNum,
       'id': instance.id,
+      'token': instance.token,
       'infos': instance.infos,
     };
 

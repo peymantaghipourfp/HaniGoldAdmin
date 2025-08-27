@@ -6,13 +6,13 @@ SocketItemModel socketItemModelFromJson(String str) => SocketItemModel.fromJson(
 String socketItemModelToJson(SocketItemModel data) => json.encode(data.toJson());
 
 class SocketItemModel {
-  final String channel;
-  final int id;
-  final String name;
-  late double price;
-  late double differentPrice;
-  late double mesghalPrice;
-  late double mesghalDifferentPrice;
+  final String? channel;
+  final int? id;
+  final String? name;
+  late double? price;
+  late double? differentPrice;
+  late double? mesghalPrice;
+  late double? mesghalDifferentPrice;
 
   SocketItemModel({
     required this.channel,

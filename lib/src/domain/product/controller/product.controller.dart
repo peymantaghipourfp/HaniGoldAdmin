@@ -8,6 +8,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/socket.service.dart';
 import 'package:hanigold_admin/src/config/repository/web_socket.repository.dart';
+import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:hanigold_admin/src/domain/product/model/socket_item.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
@@ -16,9 +17,13 @@ import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/url/web_socket_url.dart';
 import '../model/item.model.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../../base/base_controller.dart';
 
 enum PageState{loading,err,empty,list}
-class ProductController extends GetxController{
+class ProductController extends BaseController{
+
+  //ProductEditController productEditController = Get.find<ProductEditController>();
 
   final TextEditingController priceController1=TextEditingController();
   final TextEditingController priceController2=TextEditingController();
@@ -42,11 +47,11 @@ class ProductController extends GetxController{
   var isLoading=false.obs;
   bool isLoadingActive=false;
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
-  final Rxn<ItemModel> getOneItem = Rxn<ItemModel>();
+  ItemModel? getOneItem ;
 
 
-  final SocketService socketService = Get.find();
-  StreamSubscription? _socketSubscription;
+  //SocketService socketService = Get.find<SocketService>();
+  StreamSubscription? socketSubscription;
   /*final WebSocketRepository webSocketRepository=WebSocketRepository();
   final RxString _status = 'disconnected'.obs;
   final RxList<String> _messages = <String>[].obs;
@@ -58,8 +63,9 @@ class ProductController extends GetxController{
   String get error => _error.value;*/
 
   @override
-  void onInit() {
+  void onInit(){
     //connect(WebSocketUrl.webSocketUrl);
+    socketSubscription?.cancel();
     _listenToSocket();
     fetchActiveItemList();
     fetchInactiveItemList();
@@ -70,23 +76,50 @@ class ProductController extends GetxController{
   }
 
 
-  void changeSelectedItem(ItemModel? newValue) {
+  /*void changeSelectedItem(ItemModel? newValue) {
     selectedItem.value = newValue;
 
     if (newValue != null && newValue.id != null) {
 
-      fetchGetOneItem(newValue.id!);
+      productEditController.fetchGetOneItem(newValue.id!);
     }
-  }
+  }*/
 
   void _listenToSocket() {
-    _socketSubscription = socketService.messageStream.listen((message) {
+    socketSubscription?.cancel();
+    socketSubscription = socketService.messageStream.listen((message) {
       if (message is String) {
         try {
           final data = json.decode(message);
           if (data['channel'] == 'itemPrice') {
-            fetchActiveItemList();
-            fetchInactiveItemList();
+            final socketItem = SocketItemModel.fromJson(data);
+            /*Get.snackbar('تغییر قیمت', 'قیمت ${socketItem.name} تغییر کرد.',
+              titleText: Text('تغییر قیمت',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(
+                'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+            );*/
+            // Update the specific item in activeItemList
+            final activeIndex = activeItemList.indexWhere((item) => item.id == socketItem.id);
+            if (activeIndex != -1) {
+              activeItemList[activeIndex].price = socketItem.price;
+              activeItemList[activeIndex].differentPrice = socketItem.differentPrice;
+              activeItemList[activeIndex].mesghalPrice = socketItem.mesghalPrice;
+              activeItemList[activeIndex].mesghalDifferentPrice = socketItem.mesghalDifferentPrice;
+              activeItemList.refresh();
+            }
+
+            // Update the specific item in inactiveItemList
+            final inactiveIndex = inactiveItemList.indexWhere((item) => item.id == socketItem.id);
+            if (inactiveIndex != -1) {
+              inactiveItemList[inactiveIndex].price = socketItem.price;
+              inactiveItemList[inactiveIndex].differentPrice = socketItem.differentPrice;
+              inactiveItemList[inactiveIndex].mesghalPrice = socketItem.mesghalPrice;
+              inactiveItemList[inactiveIndex].mesghalDifferentPrice = socketItem.mesghalDifferentPrice;
+              inactiveItemList.refresh();
+            }
           }
         } catch (e) {
           Get.log('Error processing socket message in ProductController: $e');
@@ -122,6 +155,7 @@ class ProductController extends GetxController{
       return activeItemList;
     }
   }
+
   Future<List<ItemModel>> fetchInactiveItemList() async{
     try{
       //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
@@ -146,47 +180,50 @@ class ProductController extends GetxController{
     }
   }
 
-
-  Future<ItemModel?> fetchGetOneItem(int id)async{
-    try {
-      state.value=PageState.loading;
-      var fetchedGetOne = await itemRepository.getOneItem(id);
-
-      if (fetchedGetOne != null) {
-        getOneItem.value = fetchedGetOne;
-      }
-      state.value=PageState.list;
-      state.value=PageState.empty;
-    }
-    catch(e){
-      state.value=PageState.err;
-      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
-    }return null;
-  }
-
-  Future<bool> insertPriceItem(int id, double price, double different,int itemUnitId )async{
+  Future<bool> insertPriceItem(int id, double price, double different,int itemUnitId,{bool showSnackbar = true} )async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await itemRepository.insertPriceItem(
           itemId: id ,
           price: price,
-        differentPrice: different,
-        itemUnitId: itemUnitId
+          differentPrice: different,
+          itemUnitId: itemUnitId
       );
       print(response);
       if (response != null) {
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-            titleText: Text('موفقیت آمیز',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(
-                'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
-                style: TextStyle(color: AppColor.textColor)));
-        activeItemList.clear();
+        if(showSnackbar){
+          Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
+              titleText: Text('موفقیت آمیز',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(
+                  'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColor.textColor)));
+        }
+        //activeItemList.clear();
+        // Update the specific item in activeItemList
+        final activeIndex = activeItemList.indexWhere((item) => item.id == id);
+        if (activeIndex != -1) {
+          /*activeItemList[activeIndex].price = price;
+          activeItemList[activeIndex].differentPrice = different;*/
+          activeItemList[activeIndex].mesghalPrice = price;
+          activeItemList[activeIndex].mesghalDifferentPrice = different;
+          activeItemList.refresh();
+        }
+
+        // Update the specific item in inactiveItemList
+        final inactiveIndex = inactiveItemList.indexWhere((item) => item.id == id);
+        if (inactiveIndex != -1) {
+          /*inactiveItemList[inactiveIndex].price = price;
+          inactiveItemList[inactiveIndex].differentPrice = different;*/
+          inactiveItemList[inactiveIndex].mesghalPrice = price;
+          inactiveItemList[inactiveIndex].mesghalDifferentPrice = different;
+          inactiveItemList.refresh();
+        }
         clearList();
-        fetchActiveItemList();
-        fetchInactiveItemList();
+        //fetchActiveItemList();
+        //fetchInactiveItemList();
       }
       return false;
     }catch(e){
@@ -198,51 +235,54 @@ class ProductController extends GetxController{
     }
   }
 
-  Future<bool> insertDifferentPriceItem(int id, double different, double price,int itemUnitId )async{
-    EasyLoading.show(status: 'لطفا منتظر بمانید');
-    try{
-      isLoading.value = true;
-      var response=await itemRepository.insertDifferentPriceItem(
-        itemId: id ,
-        differentPrice: different,
-        price: price,
-        itemUnitId: itemUnitId
-      );
-      print(response);
-      if (response != null) {
-        Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-            titleText: Text('موفقیت آمیز',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(
-                'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
-                style: TextStyle(color: AppColor.textColor)));
-        activeItemList.clear();
-        clearList();
-        fetchActiveItemList();
-        fetchInactiveItemList();
-      }
-      return false;
-    }catch(e){
-      EasyLoading.dismiss();
-      throw ErrorException('خطا:$e');
-    }finally{
-      EasyLoading.dismiss();
-      isLoading.value=false;
-    }
-  }
-
-  Future<void> updateStatusItem(int id,bool status) async {
-    EasyLoading.show(
-      status: 'لطفا صبر کنید',
+  Future<void> updateStatusItem(int id,bool status,bool sellStatus,bool buyStatus) async {
+    EasyLoading.show(status: 'لطفا صبر کنید',
       dismissOnTap: false,
     );
     try {
       var response = await itemRepository.updateStatusItem(
-        id: id, status: status,
+        id: id,
+        status: status,
+        sellStatus: sellStatus,
+        buyStatus: buyStatus,
       );
-      fetchActiveItemList();
-      fetchInactiveItemList();
+      //fetchActiveItemList();
+      //fetchInactiveItemList();
+      // Update the specific item in activeItemList
+      final activeIndex = activeItemList.indexWhere((item) => item.id == id);
+      final inactiveIndex = inactiveItemList.indexWhere((item) => item.id == id);
+
+      ItemModel? itemToMove;
+
+      if (activeIndex != -1) {
+        // Item is currently in active list
+        itemToMove = activeItemList[activeIndex];
+        itemToMove.status = status;
+        itemToMove.sellStatus = sellStatus;
+        itemToMove.buyStatus = buyStatus;
+
+        if (!status) {
+          // Item is being deactivated, move from active to inactive
+          activeItemList.removeAt(activeIndex);
+          inactiveItemList.add(itemToMove);
+        }
+      } else if (inactiveIndex != -1) {
+        // Item is currently in inactive list
+        itemToMove = inactiveItemList[inactiveIndex];
+        itemToMove.status = status;
+        itemToMove.sellStatus = sellStatus;
+        itemToMove.buyStatus = buyStatus;
+
+        if (status) {
+          // Item is being activated, move from inactive to active
+          inactiveItemList.removeAt(inactiveIndex);
+          activeItemList.add(itemToMove);
+        }
+      }
+
+      // Refresh both lists to update the UI
+      activeItemList.refresh();
+      inactiveItemList.refresh();
       Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
           titleText: Text(response.infos?.first["title"],
             textAlign: TextAlign.center,
@@ -256,7 +296,73 @@ class ProductController extends GetxController{
     }
   }
 
-  Future<bool> updateItemRange(int id,int maxSell,int maxBuy, double salesRange, double buyRange )async{
+  void clearList() {
+    priceController.clear();
+    differentPriceController.clear();
+    selectedItem.value=null;
+
+  }
+
+  @override
+  void onClose() {
+    socketSubscription?.cancel();
+    super.onClose();
+  }
+
+  /*Future<ItemModel?> fetchGetOneItem(int id)async{
+    try {
+      state.value=PageState.loading;
+      var fetchedGetOne = await itemRepository.getOneItem(id);
+
+      if (fetchedGetOne != null) {
+        getOneItem = fetchedGetOne;
+      }
+      state.value=PageState.list;
+      state.value=PageState.empty;
+    }
+    catch(e){
+      state.value=PageState.err;
+      errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
+    }return null;
+  }*/
+
+  /*Future<bool> insertDifferentPriceItem(int id, double different, double price,int itemUnitId,{bool showSnackbar = true} )async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      isLoading.value = true;
+      var response=await itemRepository.insertDifferentPriceItem(
+        itemId: id ,
+        differentPrice: different,
+        price: price,
+        itemUnitId: itemUnitId
+      );
+      print(response);
+      if (response != null) {
+        if(showSnackbar){
+          Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
+              titleText: Text('موفقیت آمیز',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(
+                  'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColor.textColor)));
+        }
+        activeItemList.clear();
+        clearList();
+        fetchActiveItemList();
+        fetchInactiveItemList();
+      }
+      return false;
+    }catch(e){
+      EasyLoading.dismiss();
+      throw ErrorException('خطا:$e');
+    }finally{
+      EasyLoading.dismiss();
+      isLoading.value=false;
+    }
+  }*/
+
+  /*Future<bool> updateItemRange(int id,int maxSell,int maxBuy, double salesRange, double buyRange,{bool showSnackbar = true} )async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
@@ -269,13 +375,15 @@ class ProductController extends GetxController{
       );
       print(response);
       if (response != null) {
-        Get.snackbar("موفقیت آمیز", "آپدیت با موفقیت آنجام شد",
-            titleText: Text('موفقیت آمیز',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColor.textColor),),
-            messageText: Text(
-                'آپدیت با موفقیت آنجام شد', textAlign: TextAlign.center,
-                style: TextStyle(color: AppColor.textColor)));
+        if(showSnackbar){
+          Get.snackbar("موفقیت آمیز", "آپدیت با موفقیت آنجام شد",
+              titleText: Text('موفقیت آمیز',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(
+                  'آپدیت با موفقیت آنجام شد', textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColor.textColor)));
+        }
         activeItemList.clear();
         clearList();
         fetchActiveItemList();
@@ -288,20 +396,7 @@ class ProductController extends GetxController{
       EasyLoading.dismiss();
       isLoading.value=false;
     }
-  }
-
-  void clearList() {
-    priceController.clear();
-    differentPriceController.clear();
-    selectedItem.value=null;
-
-  }
-
-  @override
-  void onClose() {
-    _socketSubscription?.cancel();
-    super.onClose();
-  }
+  }*/
 
   //--------- اتصال به سوکت
   /*Future<void> connect(String url) async {

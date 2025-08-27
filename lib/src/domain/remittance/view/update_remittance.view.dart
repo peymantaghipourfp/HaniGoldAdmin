@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:image/image.dart' as img;
 import '../../../config/const/app_color.dart';
@@ -16,6 +17,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/remittance.controller.dart';
 
@@ -37,7 +39,12 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
-        title: 'ویرایش حواله', onBackTap: () => Get.back(),),
+        title: 'ویرایش حواله',
+          onBackTap: () {
+          Get.back();
+          controller.clearFilter();
+        }
+      ),
       drawer: const AppDrawer(),
       body: Stack(
 
@@ -86,7 +93,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                 shrinkWrap: true,
                                 gridDelegate:
                                 SliverGridDelegateWithFixedCrossAxisCount(
-                                  childAspectRatio:isDesktop? 6: 4.5,
+                                  childAspectRatio:isDesktop? 5: 4.5,
                                   crossAxisCount:isDesktop? 1:1,
                                   crossAxisSpacing: 5,
                                   mainAxisSpacing: 5,
@@ -103,7 +110,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                       IntrinsicHeight(
                                         child: TextFormField(
                                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                                           controller: controller.namePayerController,
+                                           controller: controller.nameRecieptController,
                                           style: AppTextStyle.labelText,
                                           readOnly: true,
 
@@ -151,7 +158,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                       IntrinsicHeight(
                                         child: TextFormField(
                                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                                           controller: controller.mobilePayerController,
+                                           controller: controller.mobileReciptController,
                                           style: AppTextStyle.labelText,
                                           keyboardType: TextInputType.numberWithOptions(decimal: true),
                                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -202,7 +209,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
 
                                           dropdownSearchData: DropdownSearchData<String>(
                                             searchController: controller
-                                                .searchControllerP,
+                                                .searchControllerRecipt,
                                             searchInnerWidgetHeight: 50,
                                             searchInnerWidget: Container(
                                               height: 50,
@@ -213,7 +220,8 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                               child: TextFormField(style: AppTextStyle.bodyText,
                                                 controller: controller
-                                                    .searchControllerP,
+                                                    .searchControllerRecipt,
+                                                focusNode: controller.searchFocusNodeRecipt,
                                                 decoration: InputDecoration(
                                                   isDense: true,
                                                   contentPadding:
@@ -231,7 +239,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                             ),
                                           ),
-                                          value: controller.selectedAccountP.value,
+                                          value: controller.selectedAccountRecipt.value,
                                           /*validator: (value) {
                           if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                             return 'کاربر را انتخاب کنید';
@@ -241,27 +249,36 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                           showSearchBox: true,
                                           items: [
                                             'انتخاب کنید',
-                                            ...controller.searchedAccountsP.map((
-                                                account) => account.name ?? "")
+                                            ...controller.searchedAccountsRecipt.map((
+                                                account) =>
+                                            '${account.id}:${account.name ?? ""}')
                                           ].toList(),
-                                          selectedValue: controller.selectedAccountP
-                                              .value?.name,
+                                          selectedValue:controller.selectedAccountRecipt
+                                              .value !=null ?
+                                          '${controller.selectedAccountRecipt.value?.id}:${controller.selectedAccountRecipt.value?.name}'
+                                              : null,
                                           onChanged: (String? newValue) {
                                             if (newValue == 'انتخاب کنید') {
-                                              controller.changeSelectedAccountP(null);
+                                              controller.changeSelectedAccountRecipt(null);
                                             } else {
-                                              var selectedAccount = controller
-                                                  .searchedAccountsP
-                                                  .firstWhere((account) => account.name == newValue);
-                                              controller.changeSelectedAccountP(
-                                                  selectedAccount);
+                                              var accountId = int.tryParse(newValue!.split(':')[0]);
+                                              if(accountId!=null) {
+                                                var selectedAccount = controller
+                                                    .searchedAccountsRecipt
+                                                    .firstWhere((account) =>
+                                                account.id == accountId);
+                                                controller
+                                                    .changeSelectedAccountRecipt(
+                                                    selectedAccount);
+                                              }
                                             }
                                           },
-                                          onMenuStateChange: (isOpen) {
+                                          /*onMenuStateChange: (isOpen) {
                                             if (!isOpen) {
                                               controller.resetAccountSearchP();
                                             }
-                                          },
+                                          },*/
+                                          onMenuStateChange: controller.onDropdownMenuStateChangeRecipt,
                                           backgroundColor: AppColor.textFieldColor,
                                           borderRadius: 7,
                                           borderColor: AppColor.secondaryColor,
@@ -286,7 +303,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
 
                                           dropdownSearchData: DropdownSearchData<String>(
                                             searchController: controller
-                                                .searchController,
+                                                .searchControllerPayer,
                                             searchInnerWidgetHeight: 50,
                                             searchInnerWidget: Container(
                                               height: 50,
@@ -297,7 +314,8 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                               child: TextFormField(style: AppTextStyle.bodyText,
                                                 controller: controller
-                                                    .searchController,
+                                                    .searchControllerPayer,
+                                                focusNode: controller.searchFocusNodePayer,
                                                 decoration: InputDecoration(
                                                   isDense: true,
                                                   contentPadding:
@@ -315,7 +333,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                             ),
                                           ),
-                                          value: controller.selectedAccount.value,
+                                          value: controller.selectedAccountPayer.value,
                                           /*validator: (value) {
                           if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                             return 'کاربر را انتخاب کنید';
@@ -325,27 +343,40 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                           showSearchBox: true,
                                           items: [
                                             'انتخاب کنید',
-                                            ...controller.searchedAccounts.map((
-                                                account) => account.name ?? "")
+                                            ...controller
+                                                .searchedAccountsPayer.map((
+                                                account) =>
+                                            '${account.id}:${account.name ?? ""}')
                                           ].toList(),
-                                          selectedValue: controller.selectedAccount
-                                              .value?.name,
+                                          selectedValue: controller
+                                              .selectedAccountPayer.value != null
+                                              ? '${controller.selectedAccountPayer.value!.id}:${controller.selectedAccountPayer.value!.name}'
+                                              : null,
                                           onChanged: (String? newValue) {
-                                            if (newValue == 'انتخاب کنید') {
-                                              controller.changeSelectedAccount(null);
+                                            if (newValue ==
+                                                'انتخاب کنید') {
+                                              controller
+                                                  .changeSelectedAccountPayer(
+                                                  null);
                                             } else {
-                                              var selectedAccount = controller
-                                                  .searchedAccounts
-                                                  .firstWhere((account) => account.name == newValue);
-                                              controller.changeSelectedAccount(
-                                                  selectedAccount);
+                                              var accountId = int.tryParse(newValue!.split(':')[0]);
+                                              if (accountId != null) {
+                                                var selectedAccount = controller
+                                                    .searchedAccountsPayer
+                                                    .firstWhere((account) =>
+                                                account.id == accountId);
+                                                controller
+                                                    .changeSelectedAccountPayer(
+                                                    selectedAccount);
+                                              }
                                             }
                                           },
-                                          onMenuStateChange: (isOpen) {
+                                          /*onMenuStateChange: (isOpen) {
                                             if (!isOpen) {
                                               controller.resetAccountSearch();
                                             }
-                                          },
+                                          },*/
+                                          onMenuStateChange: controller.onDropdownMenuStateChangePayer,
                                           backgroundColor: AppColor.textFieldColor,
                                           borderRadius: 7,
                                           borderColor: AppColor.secondaryColor,
@@ -403,9 +434,65 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                             fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                       ),
                                       IntrinsicHeight(
-                                        child: TextFormField(
+                                        child:
+                                        controller.selectedItem.value?.itemUnit?.name == 'ریال' ?
+                                        TextFormField(
                                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                                           controller: controller.quantityPayerController,
+                                          controller: controller.quantityPayerController,
+                                          style: AppTextStyle.labelText,
+                                          textAlign: TextAlign.center,
+                                          keyboardType: TextInputType.number,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                          ],
+                                          onChanged: (value) {
+                                            if (controller.selectedItem.value?.itemUnit?.name == 'ریال') {
+                                              String cleanedValue = value
+                                                  .replaceAll(',', '');
+                                              if (cleanedValue.isNotEmpty) {
+                                                controller.quantityPayerController.text = cleanedValue
+                                                    .toPersianDigit()
+                                                    .seRagham();
+                                                controller.quantityPayerController
+                                                    .selection =
+                                                    TextSelection.collapsed(
+                                                        offset: controller.quantityPayerController
+                                                            .text.length);
+                                              }
+                                            }
+                                          },
+                                          /*inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                            TextInputFormatter.withFunction((oldValue, newValue) {
+                                              // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                              String newText = newValue.text
+                                                  .replaceAll('٠', '0')
+                                                  .replaceAll('١', '1')
+                                                  .replaceAll('٢', '2')
+                                                  .replaceAll('٣', '3')
+                                                  .replaceAll('٤', '4')
+                                                  .replaceAll('٥', '5')
+                                                  .replaceAll('٦', '6')
+                                                  .replaceAll('٧', '7')
+                                                  .replaceAll('٨', '8')
+                                                  .replaceAll('٩', '9');
+
+                                              return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                            }),
+                                          ],*/
+                                          decoration: InputDecoration(
+                                            contentPadding: const EdgeInsets.symmetric(vertical: 17, ),
+                                            isDense: true,
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            filled: true,
+                                            fillColor: AppColor.textFieldColor,
+                                            errorMaxLines: 1,
+                                          ),
+                                        ) :
+                                        TextFormField(
+                                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                                          controller: controller.quantityPayerController,
                                           style: AppTextStyle.labelText,
                                           textAlign: TextAlign.center,
                                           keyboardType: TextInputType.numberWithOptions(decimal: true),
@@ -437,7 +524,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                             fillColor: AppColor.textFieldColor,
                                             errorMaxLines: 1,
                                           ),
-                                        ),
+                                        )
                                       ),
                                     ],
                                   ),
@@ -827,21 +914,21 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          controller.balanceListP.isNotEmpty?  BalanceWidget(
+                          controller.balanceListRecipt.isNotEmpty?  BalanceWidget(
                             title: "بستانکار",
-                            listBalance: controller.balanceListP,
+                            listBalance: controller.balanceListRecipt,
                             size:isDesktop? Get.width * 0.4:Get.width * 0.9,):
                           BalanceWidget(
                             title: "بستانکار",
-                            listBalance: controller.balanceListP,
+                            listBalance: controller.balanceListRecipt,
                             size:isDesktop? Get.width * 0.4:Get.width * 0.9,),
                           SizedBox(height: 10,),
-                          controller.balanceList.isNotEmpty?   BalanceWidget(
+                          controller.balanceListPayer.isNotEmpty?   BalanceWidget(
                             title: "بدهکار",
-                            listBalance: controller.balanceList,
+                            listBalance: controller.balanceListPayer,
                             size:isDesktop? Get.width * 0.4:Get.width * 0.9,):BalanceWidget(
                             title: "بدهکار",
-                            listBalance: controller.balanceList,
+                            listBalance: controller.balanceListPayer,
                             size:isDesktop? Get.width * 0.4:Get.width * 0.9,)
                         ],
                       ),
@@ -858,8 +945,8 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          controller.balanceListP.isNotEmpty?  BalanceWidget(
-                            listBalance: controller.balanceListP,
+                          controller.balanceListRecipt.isNotEmpty?  BalanceWidget(
+                            listBalance: controller.balanceListRecipt,
                             size:isDesktop? Get.width * 0.4:Get.width * 0.9,):Container(
                             width: isDesktop? Get.width * 0.4:Get.width * 0.9,height: 80,
                             //height: controller.isOpenMore.value?300:200,
@@ -874,8 +961,8 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                             ),
                           ),
                           SizedBox(height: 10,),
-                          controller.balanceList.isNotEmpty?   BalanceWidget(
-                            listBalance: controller.balanceList,
+                          controller.balanceListPayer.isNotEmpty?   BalanceWidget(
+                            listBalance: controller.balanceListPayer,
                             size:isDesktop? Get.width * 0.4:Get.width * 0.9,):Container(
                             width: isDesktop? Get.width * 0.4:Get.width * 0.9,height: 80,
                             //height: controller.isOpenMore.value?300:200,
@@ -910,7 +997,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
-                                    'ایجاد حواله',
+                                    'ویرایش حواله',
                                     style: AppTextStyle.labelText.copyWith(fontSize: 15,
                                         fontWeight: FontWeight.bold,color: AppColor.textColor ),
                                   ),
@@ -939,7 +1026,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                       IntrinsicHeight(
                                         child: TextFormField(
                                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                                          controller: controller.namePayerController,
+                                          controller: controller.nameRecieptController,
                                           style: AppTextStyle.labelText,
                                           readOnly: true,
 
@@ -987,7 +1074,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                       IntrinsicHeight(
                                         child: TextFormField(
                                           autovalidateMode: AutovalidateMode.onUserInteraction,
-                                          controller: controller.mobilePayerController,
+                                          controller: controller.mobileReciptController,
                                           style: AppTextStyle.labelText,
                                           keyboardType: TextInputType.numberWithOptions(decimal: true),
                                           inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
@@ -1038,7 +1125,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
 
                                           dropdownSearchData: DropdownSearchData<String>(
                                             searchController: controller
-                                                .searchControllerP,
+                                                .searchControllerRecipt,
                                             searchInnerWidgetHeight: 50,
                                             searchInnerWidget: Container(
                                               height: 50,
@@ -1049,7 +1136,8 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                               child: TextFormField(style: AppTextStyle.bodyText,
                                                 controller: controller
-                                                    .searchControllerP,
+                                                    .searchControllerRecipt,
+                                                focusNode: controller.searchFocusNodeRecipt,
                                                 decoration: InputDecoration(
                                                   isDense: true,
                                                   contentPadding:
@@ -1067,7 +1155,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                             ),
                                           ),
-                                          value: controller.selectedAccountP.value,
+                                          value: controller.selectedAccountRecipt.value,
                                           /*validator: (value) {
                           if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                             return 'کاربر را انتخاب کنید';
@@ -1077,27 +1165,28 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                           showSearchBox: true,
                                           items: [
                                             'انتخاب کنید',
-                                            ...controller.searchedAccountsP.map((
+                                            ...controller.searchedAccountsRecipt.map((
                                                 account) => account.name ?? "")
                                           ].toList(),
-                                          selectedValue: controller.selectedAccountP
+                                          selectedValue: controller.selectedAccountRecipt
                                               .value?.name,
                                           onChanged: (String? newValue) {
                                             if (newValue == 'انتخاب کنید') {
-                                              controller.changeSelectedAccountP(null);
+                                              controller.changeSelectedAccountRecipt(null);
                                             } else {
                                               var selectedAccount = controller
-                                                  .searchedAccountsP
+                                                  .searchedAccountsRecipt
                                                   .firstWhere((account) => account.name == newValue);
-                                              controller.changeSelectedAccountP(
+                                              controller.changeSelectedAccountRecipt(
                                                   selectedAccount);
                                             }
                                           },
-                                          onMenuStateChange: (isOpen) {
+                                          /*onMenuStateChange: (isOpen) {
                                             if (!isOpen) {
                                               controller.resetAccountSearchP();
                                             }
-                                          },
+                                          },*/
+                                          onMenuStateChange: controller.onDropdownMenuStateChangeRecipt,
                                           backgroundColor: AppColor.textFieldColor,
                                           borderRadius: 7,
                                           borderColor: AppColor.secondaryColor,
@@ -1122,7 +1211,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
 
                                           dropdownSearchData: DropdownSearchData<String>(
                                             searchController: controller
-                                                .searchController,
+                                                .searchControllerPayer,
                                             searchInnerWidgetHeight: 50,
                                             searchInnerWidget: Container(
                                               height: 50,
@@ -1133,7 +1222,8 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                               child: TextFormField(style: AppTextStyle.bodyText,
                                                 controller: controller
-                                                    .searchController,
+                                                    .searchControllerPayer,
+                                                focusNode: controller.searchFocusNodePayer,
                                                 decoration: InputDecoration(
                                                   isDense: true,
                                                   contentPadding:
@@ -1151,7 +1241,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                               ),
                                             ),
                                           ),
-                                          value: controller.selectedAccount.value,
+                                          value: controller.selectedAccountPayer.value,
                                           /*validator: (value) {
                           if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
                             return 'کاربر را انتخاب کنید';
@@ -1161,27 +1251,28 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                           showSearchBox: true,
                                           items: [
                                             'انتخاب کنید',
-                                            ...controller.searchedAccounts.map((
+                                            ...controller.searchedAccountsPayer.map((
                                                 account) => account.name ?? "")
                                           ].toList(),
-                                          selectedValue: controller.selectedAccount
+                                          selectedValue: controller.selectedAccountPayer
                                               .value?.name,
                                           onChanged: (String? newValue) {
                                             if (newValue == 'انتخاب کنید') {
-                                              controller.changeSelectedAccount(null);
+                                              controller.changeSelectedAccountPayer(null);
                                             } else {
                                               var selectedAccount = controller
-                                                  .searchedAccounts
+                                                  .searchedAccountsPayer
                                                   .firstWhere((account) => account.name == newValue);
-                                              controller.changeSelectedAccount(
+                                              controller.changeSelectedAccountPayer(
                                                   selectedAccount);
                                             }
                                           },
-                                          onMenuStateChange: (isOpen) {
+                                          /*onMenuStateChange: (isOpen) {
                                             if (!isOpen) {
                                               controller.resetAccountSearch();
                                             }
-                                          },
+                                          },*/
+                                          onMenuStateChange: controller.onDropdownMenuStateChangePayer,
                                           backgroundColor: AppColor.textFieldColor,
                                           borderRadius: 7,
                                           borderColor: AppColor.secondaryColor,
@@ -1239,7 +1330,60 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                             fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                       ),
                                       IntrinsicHeight(
-                                        child: TextFormField(
+                                        child:
+                                        controller.selectedItem.value?.itemUnit?.name == 'ریال' ?
+                                        TextFormField(
+                                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                                          controller: controller.quantityPayerController,
+                                          style: AppTextStyle.labelText,
+                                          textAlign: TextAlign.center,
+                                          keyboardType: TextInputType.number,
+                                          onChanged: (value) {
+                                            if (controller.selectedItem.value?.itemUnit?.name == 'ریال') {
+                                              String cleanedValue = value
+                                                  .replaceAll(',', '');
+                                              if (cleanedValue.isNotEmpty) {
+                                                controller.quantityPayerController.text = cleanedValue
+                                                    .toPersianDigit()
+                                                    .seRagham();
+                                                controller.quantityPayerController
+                                                    .selection =
+                                                    TextSelection.collapsed(
+                                                        offset: controller.quantityPayerController
+                                                            .text.length);
+                                              }
+                                            }
+                                          },
+                                          /*inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                            TextInputFormatter.withFunction((oldValue, newValue) {
+                                              // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                              String newText = newValue.text
+                                                  .replaceAll('٠', '0')
+                                                  .replaceAll('١', '1')
+                                                  .replaceAll('٢', '2')
+                                                  .replaceAll('٣', '3')
+                                                  .replaceAll('٤', '4')
+                                                  .replaceAll('٥', '5')
+                                                  .replaceAll('٦', '6')
+                                                  .replaceAll('٧', '7')
+                                                  .replaceAll('٨', '8')
+                                                  .replaceAll('٩', '9');
+
+                                              return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                            }),
+                                          ],*/
+                                          decoration: InputDecoration(
+                                            contentPadding: const EdgeInsets.symmetric(vertical: 17, ),
+                                            isDense: true,
+                                            border: OutlineInputBorder(
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            filled: true,
+                                            fillColor: AppColor.textFieldColor,
+                                            errorMaxLines: 1,
+                                          ),
+                                        ) :
+                                        TextFormField(
                                           autovalidateMode: AutovalidateMode.onUserInteraction,
                                           controller: controller.quantityPayerController,
                                           style: AppTextStyle.labelText,
@@ -1273,7 +1417,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                             fillColor: AppColor.textFieldColor,
                                             errorMaxLines: 1,
                                           ),
-                                        ),
+                                        )
                                       ),
                                     ],
                                   ),
@@ -1536,6 +1680,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                                       shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(10)))),
                                   onPressed: () async {
+
                                     await controller. uploadImagesDesktopUpdate( "image", "Remittance");
                                   },
                                   child: controller.isLoading.value
@@ -1562,6 +1707,17 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }
 }

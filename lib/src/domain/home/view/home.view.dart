@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
@@ -9,11 +11,17 @@ import 'package:hanigold_admin/src/domain/home/widget/desktop_layout.widget.dart
 import 'package:hanigold_admin/src/widget/custom_appbar.widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../widget/chat_dialog.widget.dart';
+
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Connect to socket when home view is displayed
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.connectToSocket();
+    });
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       backgroundColor: AppColor.backGroundColor,
@@ -234,6 +242,25 @@ class HomeView extends GetView<HomeController> {
                                       },
                                     ),
                                   ),
+                                  Container(
+                                    padding: isDesktop
+                                        ? const EdgeInsets.symmetric(horizontal: 80)
+                                        : const EdgeInsets.symmetric(horizontal: 24),
+                                    child: ListTile(
+                                      horizontalTitleGap: 5,
+                                      minTileHeight: 10,
+                                      title: Text(
+                                        'گردش موجودی محصولات',
+                                        style: AppTextStyle.bodyText,
+                                      ),
+                                      leading: Icon(Icons.circle,
+                                          size: 15,
+                                          color: AppColor.circleColor),
+                                      onTap: () {
+                                        Get.toNamed('/productInventory');
+                                      },
+                                    ),
+                                  ),
                                 ],
                               )
                             : const SizedBox(),
@@ -326,6 +353,25 @@ class HomeView extends GetView<HomeController> {
                                       horizontalTitleGap: 5,
                                       minTileHeight: 10,
                                       title: Text(
+                                        'واریز های در انتظار',
+                                        style: AppTextStyle.bodyText,
+                                      ),
+                                      leading: Icon(Icons.circle,
+                                          size: 15,
+                                          color: AppColor.circleColor),
+                                      onTap: () {
+                                        Get.toNamed('/depositsPendingList');
+                                      },
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: isDesktop
+                                        ? const EdgeInsets.symmetric(horizontal: 80)
+                                        : const EdgeInsets.symmetric(horizontal: 24),
+                                    child: ListTile(
+                                      horizontalTitleGap: 5,
+                                      minTileHeight: 10,
+                                      title: Text(
                                         'لیست درخواست برداشت',
                                         style: AppTextStyle.bodyText,
                                       ),
@@ -334,6 +380,25 @@ class HomeView extends GetView<HomeController> {
                                           color: AppColor.circleColor),
                                       onTap: () {
                                         Get.toNamed('/withdrawsList');
+                                      },
+                                    ),
+                                  ),
+                                  Container(
+                                    padding: isDesktop
+                                        ? const EdgeInsets.symmetric(horizontal: 80)
+                                        : const EdgeInsets.symmetric(horizontal: 24),
+                                    child: ListTile(
+                                      horizontalTitleGap: 5,
+                                      minTileHeight: 10,
+                                      title: Text(
+                                        'برداشت های در انتظار',
+                                        style: AppTextStyle.bodyText,
+                                      ),
+                                      leading: Icon(Icons.circle,
+                                          size: 15,
+                                          color: AppColor.circleColor),
+                                      onTap: () {
+                                        Get.toNamed('/withdrawsPendingList');
                                       },
                                     ),
                                   ),
@@ -801,6 +866,44 @@ class HomeView extends GetView<HomeController> {
                               padding: isDesktop
                                   ? const EdgeInsets.symmetric(horizontal: 80)
                                   : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'حواله های درخواستی',
+                                  style: AppTextStyle.bodyText,
+                                ),
+                                leading: Icon(Icons.pending,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/remittancesRequestList');
+                                },
+                              ),
+                            ),
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'حواله های در انتظار',
+                                  style: AppTextStyle.bodyText,
+                                ),
+                                leading: Icon(Icons.circle,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/remittancesPendingList');
+                                },
+                              ),
+                            ),
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
                               child: AnimatedSize(
                                 duration: Duration(milliseconds: 800),
                                 curve: Curves.easeInOut,
@@ -1017,6 +1120,109 @@ class HomeView extends GetView<HomeController> {
                       ),
                     ),
 
+                    // انتقال کیف پول
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: Row(
+                        children: [
+                          Container(
+                            constraints: isDesktop ? BoxConstraints(maxWidth: 550) : BoxConstraints(maxWidth: 350),
+                            padding: isDesktop
+                                ? const EdgeInsets.symmetric(horizontal: 80)
+                                : const EdgeInsets.only(right: 15),
+                            child: TextButton(
+                              style: ButtonStyle(
+                                elevation: WidgetStateProperty.all(5),
+                                shape: WidgetStateProperty.all(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    side: BorderSide(
+                                        width: 1, color: AppColor.secondaryColor),
+                                  ),
+                                ),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.secondaryColor),
+                              ),
+                              onPressed: () {
+                                controller.toggleSubMenu('transferWallet');
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Center(
+                                      child: Text(
+                                        'انتقال کیف پول',
+                                        style: AppTextStyle.bodyText,
+                                        textAlign: TextAlign.right,
+                                      ),
+                                    ),
+                                  ),
+                                  Icon(color: AppColor.textColor,
+                                      controller.activeSubMenu.value=='transferWallet'?
+                                      Icons.expand_more:
+                                      Icons.expand_less
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    //نمایش زیرمجموعه انتقال کیف پول
+                    ResponsiveRowColumnItem(
+                      rowFlex:1,
+                      child: AnimatedSize(
+                        duration: Duration(milliseconds: 350), // سرعت انیمیشن
+                        curve: Curves.easeInOut, // نوع حرکت انیمیشن
+                        child: controller.isSubMenuOpen('transferWallet')
+                            ? Column(
+                          children: [
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'لیست انتقال ها',
+                                  style: AppTextStyle.bodyText,
+                                ),
+                                leading: Icon(Icons.list_alt,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/transferWalletList');
+                                },
+                              ),
+                            ),
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
+                                  'انتقال پس فردایی به فردایی',
+                                  style: AppTextStyle.bodyText,
+                                ),
+                                leading: Icon(Icons.add_card,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/transferAfterTomorrowChange');
+                                },
+                              ),
+                            ),
+                          ],
+                        )
+                            : const SizedBox(),
+                      ),
+                    ),
+
                     //تنظیمات
                     ResponsiveRowColumnItem(
                       rowFlex:1,
@@ -1085,6 +1291,25 @@ class HomeView extends GetView<HomeController> {
                                 horizontalTitleGap: 5,
                                 minTileHeight: 10,
                                 title: Text(
+                                  'ابزارها',
+                                  style: AppTextStyle.bodyText.copyWith(fontSize: 14),
+                                ),
+                                leading: Icon(Icons.build,
+                                    size: 15,
+                                    color: AppColor.circleColor),
+                                onTap: () {
+                                  Get.toNamed('/setting');
+                                },
+                              ),
+                            ),
+                            Container(
+                              padding: isDesktop
+                                  ? const EdgeInsets.symmetric(horizontal: 80)
+                                  : const EdgeInsets.symmetric(horizontal: 24),
+                              child: ListTile(
+                                horizontalTitleGap: 5,
+                                minTileHeight: 10,
+                                title: Text(
                                   'خروج از برنامه',
                                   style: AppTextStyle.bodyText.copyWith(fontSize: 14),
                                 ),
@@ -1099,9 +1324,18 @@ class HomeView extends GetView<HomeController> {
                                       middleTextStyle: TextStyle(color: AppColor.textColor),
                                       backgroundColor: AppColor.secondaryColor,
                                       textCancel: "خیر",
-                                      onCancel: () => Get.toNamed('/home'),
+                                      onCancel: () => Get.back(),
                                       textConfirm: "بله",
-                                      onConfirm: () =>  FlutterExitApp.exitApp()
+                                      onConfirm: () {
+                                        // Disconnect socket before logout
+                                        controller.disconnectSocket();
+                                        // Clear stored token and user data
+                                        final box = GetStorage();
+                                        box.remove('Authorization');
+                                        box.remove('id');
+                                        box.remove('mobile');
+                                        Get.offAllNamed("/login");
+                                      },
                                   );
                                 },
                               ),
@@ -1137,15 +1371,27 @@ class HomeView extends GetView<HomeController> {
 
         ),
 
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
   Widget userProfile() {
+    final box = GetStorage();
     return Row(
       children: [
         Icon(Icons.account_circle, color: AppColor.textColor, size: 30),
         const SizedBox(width: 10),
         Text(
-          'مدیر سیستم',
+          "${box.read('userName') ?? ''}",
           style: AppTextStyle.bodyText.copyWith(
             fontSize: 16,
             fontWeight: FontWeight.bold,

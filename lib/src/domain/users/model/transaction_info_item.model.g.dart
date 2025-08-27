@@ -23,6 +23,7 @@ TransactionInfoItemModel _$TransactionInfoItemModelFromJson(
           ? null
           : ItemModel.fromJson(json['item'] as Map<String, dynamic>),
       price: (json['price'] as num?)?.toDouble(),
+      mesghalPrice: (json['mesghalPrice'] as num?)?.toDouble(),
       totalPrice: (json['totalPrice'] as num?)?.toDouble(),
       balances: (json['balances'] as List<dynamic>?)
           ?.map((e) => BalanceModel.fromJson(e as Map<String, dynamic>))
@@ -34,7 +35,9 @@ TransactionInfoItemModel _$TransactionInfoItemModelFromJson(
       rowNum: (json['rowNum'] as num?)?.toInt(),
       id: (json['id'] as num?)?.toInt(),
       description: json['description'] as String?,
+      isCard: json['isCard'] as bool?,
       infos: json['infos'] as List<dynamic>?,
+      recordId: (json['recordId'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$TransactionInfoItemModelToJson(
@@ -47,11 +50,14 @@ Map<String, dynamic> _$TransactionInfoItemModelToJson(
       'toWallet': instance.toWallet,
       'item': instance.item,
       'price': instance.price,
+      'mesghalPrice': instance.mesghalPrice,
       'totalPrice': instance.totalPrice,
       'balances': instance.balances,
       'details': instance.details,
       'rowNum': instance.rowNum,
       'id': instance.id,
       'description': instance.description,
+      'isCard': instance.isCard,
       'infos': instance.infos,
+      'recordId': instance.recordId,
     };

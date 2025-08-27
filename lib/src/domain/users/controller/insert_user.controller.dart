@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_list.controller.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
@@ -38,13 +39,15 @@ class InsertUserController extends GetxController{
   final TextEditingController userController=TextEditingController();
   final TextEditingController mobileController=TextEditingController();
   final TextEditingController phoneController=TextEditingController();
-  final TextEditingController passwordController=TextEditingController();
+  //final TextEditingController passwordController=TextEditingController();
   final TextEditingController addressController=TextEditingController();
   final TextEditingController emailController=TextEditingController();
   RxList<StateItemModel> stateList=<StateItemModel>[].obs;
   RxList<CityItemModel> cityList=<CityItemModel>[].obs;
+  RxList<AccountGroupModel> accountGroupList=<AccountGroupModel>[].obs;
   late Rxn<StateItemModel> selectedState=Rxn<StateItemModel>();
   final Rxn<CityItemModel> selectedCity=Rxn<CityItemModel>();
+  final Rxn<AccountGroupModel> selectedAccountGroup=Rxn<AccountGroupModel>();
   AccountModel? accountModel;
   var idUser=0.obs;
   var title="".obs;
@@ -55,6 +58,7 @@ class InsertUserController extends GetxController{
     idUser.value=int.parse(Get.parameters["id"] as String);
     idUser.value!=0? getOneUser(idUser.value):null;
     idUser.value!=0? title.value="ویرایش":title.value="افزودن";
+    getAccountGroup();
     getStateList();
     getCityList();
   }
@@ -70,6 +74,10 @@ class InsertUserController extends GetxController{
 
   void changeSelectedCity(CityItemModel? newValue) {
     selectedCity.value = newValue;
+  }
+
+  void changeSelectedAccountGroup(AccountGroupModel? newValue) {
+    selectedAccountGroup.value = newValue;
   }
 
 
@@ -116,6 +124,24 @@ class InsertUserController extends GetxController{
     } finally {}
   }
 
+  // لیست گروه اکانت ها
+  Future<void> getAccountGroup() async {
+
+    accountGroupList.clear();
+    try {
+      state.value=PageState.loading;
+      var response = await userRepository.getAccountGroup();
+      accountGroupList.addAll(response);
+      if(accountGroupList.isNotEmpty){
+        selectedAccountGroup.value=accountGroupList.first;
+      }
+      state.value=PageState.list;
+      update();
+    }
+    catch (e) {
+      state.value = PageState.err;
+    } finally {}
+  }
 
 
 
@@ -130,20 +156,21 @@ class InsertUserController extends GetxController{
     try {
        state.value=PageState.loading;
        var response = await userRepository.insertUser(
+         accountGroupId: selectedAccountGroup.value?.id ?? 0,
            name: nameController.text,
            mobile: mobileController.text,
            phoneNumber: phoneController.text,
            email: emailController.text,
            user: userController.text,
            hasDeposit:  isChecked.value,
-           password: passwordController.text,
+           //password: passwordController.text,
            state: selectedState.value?.name??"",
            idState: selectedState.value?.id??0,
            city: selectedCity.value?.name??"",
            idCity: selectedCity.value?.id??0,
            address: addressController.text
           );
-       Get.back();
+       Get.toNamed('/userList');
        Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
            titleText: Text(response.infos?.first["title"],
              textAlign: TextAlign.center,
@@ -154,11 +181,12 @@ class InsertUserController extends GetxController{
        phoneController.text="";
        emailController.text="";
        userController.text="";
-       passwordController.text="";
+       //passwordController.text="";
        addressController.text="";
        state.value=PageState.list;
        controller.getUserList();
       update();
+       clearList();
     }
     catch (e) {
       state.value = PageState.err;
@@ -177,20 +205,21 @@ class InsertUserController extends GetxController{
     try {
        state.value=PageState.loading;
        var response = await userRepository.updateUser(
+           accountGroupId: selectedAccountGroup.value?.id ?? 0,
            name: nameController.text,
            mobile: mobileController.text,
            phoneNumber: phoneController.text,
            email: emailController.text,
            user: userController.text,
            hasDeposit:  isChecked.value,
-           password: passwordController.text,
+           //password: passwordController.text,
            state: selectedState.value?.name??"",
            idState: selectedState.value?.id??0,
            city: selectedCity.value?.name??"",
            idCity: selectedCity.value?.id??0,
            address: addressController.text, id: idUser.value
           );
-       Get.back();
+       Get.toNamed('/userList');
        Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
            titleText: Text(response.infos?.first["title"],
              textAlign: TextAlign.center,
@@ -201,7 +230,7 @@ class InsertUserController extends GetxController{
        phoneController.text="";
        emailController.text="";
        userController.text="";
-       passwordController.text="";
+       //passwordController.text="";
        addressController.text="";
        state.value=PageState.list;
        controller.getUserList();
@@ -211,6 +240,7 @@ class InsertUserController extends GetxController{
       state.value = PageState.err;
     } finally {
       EasyLoading.dismiss();
+      clearList();
     }
   }
 
@@ -236,10 +266,11 @@ class InsertUserController extends GetxController{
         }
       }
       userController.text="";
-      passwordController.text="";
+      //passwordController.text="";
       addressController.text=accountModel?.addresses?.first.fullAddress??"";
       selectedState.value=accountModel?.addresses?.first.state;
       selectedCity.value=accountModel?.addresses?.first.city;
+      selectedAccountGroup.value=accountModel?.accountGroup;
 
       //  print(paginated?.totalCount??0);
 
@@ -250,6 +281,17 @@ class InsertUserController extends GetxController{
     } finally {
       EasyLoading.dismiss();
     }
+  }
+
+  void clearList() {
+    nameController.clear();
+    mobileController.clear();
+    phoneController.clear();
+    emailController.clear();
+    addressController.clear();
+    selectedAccountGroup.value=null;
+    selectedCity.value=null;
+    selectedState.value=null;
   }
 
 }

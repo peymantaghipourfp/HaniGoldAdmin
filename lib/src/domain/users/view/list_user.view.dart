@@ -13,6 +13,7 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/user_list.controller.dart';
 
 class UserListView extends GetView<UserListController> {
@@ -1072,6 +1073,17 @@ class UserListView extends GetView<UserListController> {
               ),
             ],
           ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         ));
   }
 
@@ -1197,7 +1209,7 @@ class UserListView extends GetView<UserListController> {
                 DataCell(Center(
                   child: SizedBox(
                     child: Text(
-                      "-",
+                      "${trans.accountGroup?.name}",
                       style: AppTextStyle.bodyText,
                     ),
                   ),
@@ -1223,9 +1235,7 @@ class UserListView extends GetView<UserListController> {
                       onTap: () {
                         print(trans.id.toString());
                         Get.toNamed(
-                            "/"
-                            "",
-                            parameters: {"id": trans.id.toString()});
+                            "/insertUser", parameters: {"id": trans.id.toString()});
                       },
                       child: SvgPicture.asset('assets/svg/edit.svg',
                           height: 20,
@@ -1242,10 +1252,10 @@ class UserListView extends GetView<UserListController> {
                     //       AppColor.textColor,
                     //       BlendMode.srcIn,
                     //     )),
-                    SizedBox(
+                    /*SizedBox(
                       width: 15,
-                    ),
-                    Container(
+                    ),*/
+                    /*Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -1254,11 +1264,11 @@ class UserListView extends GetView<UserListController> {
                         "فاکتور",
                         style: AppTextStyle.bodyText.copyWith(fontSize: 10),
                       ),
-                    ),
-                    SizedBox(
+                    ),*/
+                    /*SizedBox(
                       width: 15,
-                    ),
-                    Container(
+                    ),*/
+                    /*Container(
                       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.all(Radius.circular(5)),
@@ -1267,7 +1277,7 @@ class UserListView extends GetView<UserListController> {
                         "فاکتور جدید",
                         style: AppTextStyle.bodyText.copyWith(fontSize: 10),
                       ),
-                    ),
+                    ),*/
                   ],
                 ))),
                 DataCell(Center(

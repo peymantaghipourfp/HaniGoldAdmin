@@ -67,7 +67,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
   var isLoading=true.obs;
   var isLoadingBalance=true.obs;
 
-  final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
+  RxList<InventoryDetailModel> getOneInventory=<InventoryDetailModel>[].obs;
   var inventoryId=0.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<WalletModel> selectedWalletAccount=Rxn<WalletModel>();
@@ -301,7 +301,7 @@ class InventoryDetailInsertReceiveController extends GetxController{
   Future<void> fetchGetOneInventory(int id)async{
     try {
       stateGetOne.value=PageState.loading;
-      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
+      var fetchedGetOneInventory = await inventoryRepository.getInventoryDetail(id);
       if(fetchedGetOneInventory!=null){
         getOneInventory.value = fetchedGetOneInventory;
         stateGetOne.value=PageState.list;

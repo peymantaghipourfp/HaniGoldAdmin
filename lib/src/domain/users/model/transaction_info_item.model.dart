@@ -34,6 +34,8 @@ class TransactionInfoItemModel {
   final ItemModel? item;
   @JsonKey(name: "price")
   final double? price;
+  @JsonKey(name: "mesghalPrice")
+  final double? mesghalPrice;
   @JsonKey(name: "totalPrice")
   final double? totalPrice;
   @JsonKey(name: "balances")
@@ -46,8 +48,12 @@ class TransactionInfoItemModel {
   final int? id;
   @JsonKey(name: "description")
   final String? description;
+  @JsonKey(name: "isCard")
+  final bool? isCard;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "recordId")
+  final int? recordId;
 
   TransactionInfoItemModel({
     required this.amount,
@@ -57,13 +63,16 @@ class TransactionInfoItemModel {
     required this.toWallet,
     required this.item,
     required this.price,
+    required this.mesghalPrice,
     required this.totalPrice,
     required this.balances,
     required this.details,
     required this.rowNum,
     required this.id,
     required this.description,
+    required this.isCard,
     required this.infos,
+    required this.recordId,
   });
 
   factory TransactionInfoItemModel.fromJson(Map<String, dynamic> json) => _$TransactionInfoItemModelFromJson(json);

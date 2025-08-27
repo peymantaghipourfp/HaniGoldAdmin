@@ -3,6 +3,7 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 
 import '../../domain/deposit/model/list_deposit.model.dart';
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 import 'dart:typed_data';
 
@@ -11,6 +12,7 @@ class DepositRepository{
 
   DepositRepository(){
     depositDio.options.baseUrl=BaseUrl.baseUrl;
+    depositDio.interceptors.add(DioInterceptor());
   }
 
   Future<List<DepositModel>> getDepositList({
@@ -67,16 +69,15 @@ class DepositRepository{
       throw ErrorException('خطا:$e');
     }
   }
-
- Future<ListDepositModel> getDepositListPager({
+  Future<ListDepositModel> getDepositListPager({
     required int startIndex,
     required int toIndex,
     int? accountId,
     required String startDate,
     required String endDate,
-   required String nameDeposit,
-   required String nameRequest,
- })async{
+    required String nameDeposit,
+    required String nameRequest,
+  })async{
     try{
       Map<String, dynamic> options =
       {
@@ -87,33 +88,33 @@ class DepositRepository{
               "outerCondition": 0,
               "filters": [
                 if(accountId != null)
-                {
-                  "fieldName": "Id",
-                  "filterValue": accountId.toString(),
-                  "filterType": 5,
-                  "RefTable": "AccountDeposit"
-                },
+                  {
+                    "fieldName": "Id",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "AccountDeposit"
+                  },
                 if(startDate!="")
-                {
-                  "fieldName": "Date",
-                  "filterValue": "$startDate|$endDate",
-                  "filterType": 25,
-                  "RefTable": "Deposit"
-                },
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Deposit"
+                  },
                 if(nameDeposit!="")
-                {
-                  "fieldName": "Name",
-                  "filterValue": nameDeposit,
-                  "filterType": 0,
-                  "RefTable": "AccountDeposit"
-                },
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameDeposit,
+                    "filterType": 0,
+                    "RefTable": "AccountDeposit"
+                  },
                 if(nameRequest!="")
-                {
-                  "fieldName": "Name",
-                  "filterValue": nameRequest,
-                  "filterType": 0,
-                  "RefTable": "AccountRequest"
-                },
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameRequest,
+                    "filterType": 0,
+                    "RefTable": "AccountRequest"
+                  },
               ],
             }
           ],
@@ -133,6 +134,79 @@ class DepositRepository{
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<ListDepositModel> getDepositListPendingPager({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate,
+    required String nameDeposit,
+    required String nameRequest,
+  })async{
+    try{
+      Map<String, dynamic> options =
+      {
+        "options" : { "deposit" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(accountId != null)
+                  {
+                    "fieldName": "Id",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "AccountDeposit"
+                  },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Deposit"
+                  },
+                if(nameDeposit!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameDeposit,
+                    "filterType": 0,
+                    "RefTable": "AccountDeposit"
+                  },
+                if(nameRequest!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameRequest,
+                    "filterType": 0,
+                    "RefTable": "AccountRequest"
+                  },
+                {
+                  "fieldName": "Status",
+                  "filterValue": "0",
+                  "filterType": 5,
+                  "RefTable": "Deposit"
+                }
+              ],
+            }
+          ],
+          "orderBy": "deposit.Date",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      };
+      final response=await depositDio.post('Deposit/getWrapper',data: options);
+      print("request getDepositListPendingPager : $options" );
+      print("response getDepositListPendingPager : ${response.data}" );
+      return ListDepositModel.fromJson(response.data);
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 
   Future<Uint8List> getDepositExcel({
     required String startDate,
@@ -298,6 +372,9 @@ class DepositRepository{
         "infos": []
       };
       var response=await depositDio.post('Deposit/insert',data: depositData);
+      print('request insertDeposit: $depositData');
+      print('Status Code insertDeposit: ${response.statusCode}');
+      print('Response Data insertDeposit: ${response.data}');
       return DepositModel.fromJson(response.data) ;
     }catch(e){
       throw ErrorException('خطا در درج اطلاعات:$e');
@@ -428,6 +505,9 @@ class DepositRepository{
         "infos": []
       };
       var response=await depositDio.put('Deposit/update',data: depositData);
+      print('request updateDeposit: $depositData');
+      print('Status Code updateDeposit: ${response.statusCode}');
+      print('Response Data updateDeposit: ${response.data}');
       return DepositModel.fromJson(response.data) ;
 
     }catch(e){
@@ -437,8 +517,7 @@ class DepositRepository{
 
   Future<DepositModel> getOneDeposit(int depositId)async{
     try {
-      final response = await depositDio.get(
-          'Deposit/getOne', queryParameters: {'id': depositId});
+      final response = await depositDio.get('Deposit/getOne', queryParameters: {'id': depositId});
       print('Status Code getOneDeposit: ${response.statusCode}');
       print('Response Data getOneDeposit: ${response.data}');
       Map<String, dynamic> data=response.data;

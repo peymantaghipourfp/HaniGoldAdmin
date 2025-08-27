@@ -115,15 +115,45 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                                 children: widget.image.map((e){
                                   return  Stack(
                                     children: [
-                                      Container(
-                                        margin: EdgeInsets.all(10),
-                                        decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: AppColor.textColor),
-                                            image: DecorationImage(image: NetworkImage(e.path,),fit: BoxFit.cover,)
+                                      GestureDetector(
+                                        onTap:(){
+                                          showGeneralDialog(
+                                              context: context,
+                                              barrierDismissible: true,
+                                              barrierLabel: MaterialLocalizations.of(context)
+                                                  .modalBarrierDismissLabel,
+                                              barrierColor: Colors.black45,
+                                              transitionDuration: const Duration(milliseconds: 200),
+                                              pageBuilder: (BuildContext buildContext,
+                                                  Animation animation,
+                                                  Animation secondaryAnimation) {
+                                                return Center(
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: Container(
+                                                      margin: EdgeInsets.all(10),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          border: Border.all(color: AppColor.textColor),
+                                                          image: DecorationImage(image: NetworkImage(e.path,),fit: BoxFit.cover,)
+                                                      ),
+                                                      height: Get.height * 0.8,width: Get.width * 0.4,
+                                                      // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                    ),
+                                                  ),
+                                                );
+                                              });
+                                        },
+                                        child: Container(
+                                          margin: EdgeInsets.all(10),
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: AppColor.textColor),
+                                              image: DecorationImage(image: NetworkImage(e.path,),fit: BoxFit.cover,)
+                                          ),
+                                          height: 60,width: 60,
+                                          // child: Image.network(e!.path,fit: BoxFit.cover,),
                                         ),
-                                        height: 60,width: 60,
-                                        // child: Image.network(e!.path,fit: BoxFit.cover,),
                                       ),
                                       GestureDetector(
                                         child: CircleAvatar(

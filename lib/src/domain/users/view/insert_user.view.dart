@@ -13,6 +13,7 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/insert_user.controller.dart';
 import '../controller/user_list.controller.dart';
 
@@ -25,7 +26,10 @@ class InsertUserView extends GetView<InsertUserController> {
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
         title: ' ${controller.title.value} کاربر جدید ',
-        onBackTap: () => Get.toNamed('/home'),
+        onBackTap: () {
+          Get.back();
+          controller.clearList();
+        }
       ),
       drawer: const AppDrawer(),
       body: Stack(
@@ -76,37 +80,45 @@ class InsertUserView extends GetView<InsertUserController> {
                           crossAxisAlignment:
                           CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'نقش کاربر',
-                              style: AppTextStyle.labelText.copyWith(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.normal,
-                                  color: AppColor.textColor),
-                            ),
                             SizedBox(height: 10,),
-                            IntrinsicHeight(
-                              child: TextFormField(
-                                autovalidateMode: AutovalidateMode
-                                    .onUserInteraction,
-                                controller: controller.userController,
-                                style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                textAlign: TextAlign.start,
-                                keyboardType:TextInputType.text,
-                                decoration: InputDecoration(
-                                  contentPadding:
-                                  const EdgeInsets.symmetric(
-                                      vertical: 11,horizontal: 15
-                                  ),
-                                  isDense: true,
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(6),
-                                  ),
-                                  filled: true,
-                                  fillColor: AppColor.textFieldColor,
-                                  errorMaxLines: 1,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'نقش کاربر',
+                                  style: AppTextStyle.labelText.copyWith(fontSize: 11,
+                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                 ),
-                              ),
+                                Container(
+                                  padding: EdgeInsets.only(bottom: 5),
+                                  child: CustomDropdownWidget(
+                                    validator: (value) {
+                                      if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
+                                        return 'نقش کاربر را انتخاب کنید';
+                                      }
+                                      return null;
+                                    },
+                                    items: [
+                                      'انتخاب کنید',
+                                      ...controller.accountGroupList.map((accountGroup) => accountGroup.name ?? '')
+                                    ].toList(),
+                                    selectedValue: controller.selectedAccountGroup.value?.name,
+                                    onChanged: (String? newValue){
+                                      if (newValue == 'انتخاب کنید') {
+                                        controller.changeSelectedAccountGroup(null);
+                                      } else {
+                                        var selectedAccountGroup= controller.accountGroupList
+                                            .firstWhere((accountGroup) => accountGroup.name == newValue);
+                                        controller.changeSelectedAccountGroup(selectedAccountGroup);
+                                      }
+                                    },
+                                    backgroundColor: AppColor.textFieldColor,
+                                    borderRadius: 7,
+                                    borderColor: AppColor.secondaryColor,
+                                    hideUnderline: true,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -356,7 +368,7 @@ class InsertUserView extends GetView<InsertUserController> {
                           ],
                         ),
                         SizedBox(height: 5,),
-                        Column(
+                        /*Column(
                           crossAxisAlignment:
                           CrossAxisAlignment.start,
                           children: [
@@ -412,8 +424,8 @@ class InsertUserView extends GetView<InsertUserController> {
                               ),
                             ),
                           ],
-                        ),
-                        SizedBox(height: 5,),
+                        ),*/
+                        /*SizedBox(height: 5,),*/
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -580,6 +592,17 @@ class InsertUserView extends GetView<InsertUserController> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }
 }

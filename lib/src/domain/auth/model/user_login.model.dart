@@ -24,6 +24,8 @@ class UserLoginModel {
   final int rowNum;
   @JsonKey(name: "id")
   final int id;
+  @JsonKey(name: "token")
+  String? token;
   @JsonKey(name: "infos")
   final List<dynamic> infos;
 
@@ -33,8 +35,29 @@ class UserLoginModel {
     required this.themeName,
     required this.rowNum,
     required this.id,
+    this.token,
     required this.infos,
   });
+
+  UserLoginModel copyWith({
+    User? user,
+    String? languageCode,
+    String? themeName,
+    int? rowNum,
+    int? id,
+    String? token,
+    List<dynamic>? infos,
+  }) {
+    return UserLoginModel(
+      user: user ?? this.user,
+      languageCode: languageCode ?? this.languageCode,
+      themeName: themeName ?? this.themeName,
+      rowNum: rowNum ?? this.rowNum,
+      id: id ?? this.id,
+      token: token ?? this.token,
+      infos: infos ?? this.infos,
+    );
+  }
 
   factory UserLoginModel.fromJson(Map<String, dynamic> json) => _$UserLoginModelFromJson(json);
 

@@ -349,7 +349,7 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
                             e.itemName??"",
                             style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
                           ), Text(
-                            "${e.transactionCount??0} عدد",
+                            "${e.transactionCount??0} گرم",
                             style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
                           ),
                         ],
@@ -561,10 +561,16 @@ class _TabelInfoWidgetState extends State<TabelInfoWidget> {
                           Text(
                             e.itemName??"",
                             style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
-                          ), Text(
-                            "${e.transactionCount??0} عدد",
-                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
                           ),
+                          e.itemName=='طلای آبشده' ?
+                          Text(
+                            "${e.transactionCount??0} گرم ",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          ):
+                          Text(
+                            "${e.transactionCount??0} عدد ",
+                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 11 : 10,color: AppColor.backGroundColor),
+                          )
                         ],
                       )).toList(),
                     ),

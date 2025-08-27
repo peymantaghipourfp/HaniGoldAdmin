@@ -1,9 +1,9 @@
-import 'package:file_saver/file_saver.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/transaction/widgets/balance_dialog_id.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -13,14 +13,12 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/user_info_detail_transaction.controller.dart';
-import '../controller/user_info_transaction.controller.dart';
 import '../widgets/balance.widget.dart';
 import '../widgets/tabel_info.widget.dart';
-import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 
@@ -32,7 +30,7 @@ class UserInfoTransactionView extends StatefulWidget {
 }
 
 class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
-  var controller=Get.find<UserInfoDetailTransactionController>();
+  final UserInfoDetailTransactionController controller=Get.find<UserInfoDetailTransactionController>();
   final GlobalKey _balanceKey = GlobalKey();
 
   @override
@@ -75,19 +73,25 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                         children: [
                           Row(
                             children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    ' حساب کاربری ${controller.headerInfoUserTransactionModel?.accountName ?? ""}',
-                                    style: AppTextStyle
-                                        .labelText
-                                        .copyWith(
-                                        fontSize:
-                                        isDesktop
-                                            ? 14
-                                            : 13),
-                                  ),
-                                ],
+                              Flexible(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                     children: [
+                                    Flexible(
+                                      child: Text(
+                                        ' حساب کاربری ${controller.headerInfoUserTransactionModel?.accountName ?? ""}',
+                                        style: AppTextStyle
+                                            .labelText
+                                            .copyWith(
+                                            fontSize:
+                                            isDesktop
+                                                ? 14
+                                                : 13),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                               SizedBox(
                                 height: 10,
@@ -235,7 +239,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                           ),
                                         ),
                                         fixedSize: WidgetStatePropertyAll(
-                                            Size(100, 40)),
+                                            Size(100, 30)),
                                         elevation: WidgetStatePropertyAll(
                                             5),
                                         backgroundColor:
@@ -627,10 +631,232 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                       style: AppTextStyle
                                           .labelText,
                                     ),
-                                    //onPressed: () => orderController.getOrderExcel(),
+                                    //onPressed: () => controller.getOrderExcel(),
+                                  ),
+                                  SizedBox(width: 5,),
+                                  // خروجی pdf
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                          EdgeInsets.symmetric(
+                                              horizontal: 15,vertical: 7
+                                          ),
+                                        ),
+                                        elevation: WidgetStatePropertyAll(5),
+                                        fixedSize: WidgetStatePropertyAll(Size(100,30)),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(AppColor.secondary3Color),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(5)))),
+                                    onPressed: () {
+                                      showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          barrierLabel: MaterialLocalizations.of(context)
+                                              .modalBarrierDismissLabel,
+                                          barrierColor: Colors.black45,
+                                          transitionDuration: const Duration(milliseconds: 200),
+                                          pageBuilder: (BuildContext buildContext,
+                                              Animation animation,
+                                              Animation secondaryAnimation) {
+                                            return Center(
+                                              child: Material(
+                                                color: Colors.transparent,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                      color: AppColor.backGroundColor
+                                                  ),
+                                                  width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                  height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                  padding: EdgeInsets.all(20),
+                                                  child: Column(
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            Text(
+                                                              'خروجی pdf',
+                                                              style: AppTextStyle.labelText.copyWith(
+                                                                fontSize: 15,
+                                                                fontWeight: FontWeight.normal,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                        color: AppColor.textColor,height: 0.2,
+                                                      ),
+                                                      Padding(
+                                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                        child: Column(
+                                                          children: [
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'از تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: controller.dateStartController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        controller.startDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        controller.dateStartController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            SizedBox(height: 8),
+                                                            Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'تا تاریخ',
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                ),
+                                                                Container(
+                                                                  //height: 50,
+                                                                  padding: EdgeInsets.only(bottom: 5),
+                                                                  child: IntrinsicHeight(
+                                                                    child: TextFormField(
+                                                                      validator: (value){
+                                                                        if(value==null || value.isEmpty){
+                                                                          return 'لطفا تاریخ را انتخاب کنید';
+                                                                        }
+                                                                        return null;
+                                                                      },
+                                                                      controller: controller.dateEndController,
+                                                                      readOnly: true,
+                                                                      style: AppTextStyle.labelText,
+                                                                      decoration: InputDecoration(
+                                                                        suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                        border: OutlineInputBorder(
+                                                                          borderRadius: BorderRadius.circular(10),
+                                                                        ),
+                                                                        filled: true,
+                                                                        fillColor: AppColor.textFieldColor,
+                                                                        errorMaxLines: 1,
+                                                                      ),
+                                                                      onTap: () async {
+                                                                        Jalali? pickedDate = await showPersianDatePicker(
+                                                                          context: context,
+                                                                          initialDate: Jalali.now(),
+                                                                          firstDate: Jalali(1400,1,1),
+                                                                          lastDate: Jalali(1450,12,29),
+                                                                          initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                          initialDatePickerMode: PersianDatePickerMode.day,
+                                                                          locale: Locale("fa","IR"),
+                                                                        );
+                                                                        // DateTime date=DateTime.now();
+                                                                        Gregorian gregorian= pickedDate!.toGregorian();
+                                                                        controller.endDateFilter.value =
+                                                                        "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                        controller.dateEndController.text =
+                                                                        "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                      },
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+
+                                                          ],
+                                                        ),
+                                                      ),
+                                                      Spacer(),
+                                                      Container(
+                                                        margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                        width: double.infinity,
+                                                        height: 40,
+                                                        child: ElevatedButton(
+                                                          style: ButtonStyle(
+                                                              padding: WidgetStatePropertyAll(
+                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                              // elevation: WidgetStatePropertyAll(5),
+                                                              backgroundColor:
+                                                              WidgetStatePropertyAll(AppColor.appBarColor),
+                                                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                  borderRadius: BorderRadius.circular(5)))),
+                                                          onPressed: () async {
+                                                            controller.exportToPdf(controller.id.value.toString());
+                                                            Get.back();
+                                                          },
+                                                          child: controller.isLoading.value?
+                                                          CircularProgressIndicator(
+                                                            valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                          ) :
+                                                          Text(
+                                                            'ثبت',
+                                                            style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          });
+
+                                    },
+                                    child: Text(
+                                      'خروجی pdf',
+                                      style: AppTextStyle.labelText,
+                                    ),
                                   ),
                                 ],
                               ),
+                              SizedBox(
+                                width: 15,
+                              ),
+
                             ],
                           ),
                           Container(
@@ -1287,7 +1513,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                   ),
                                                 ),
                                                 fixedSize: WidgetStatePropertyAll(
-                                                    Size(100, 40)),
+                                                    Size(100, 30)),
                                                 elevation: WidgetStatePropertyAll(
                                                     5),
                                                 backgroundColor:
@@ -1679,7 +1905,225 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                               style: AppTextStyle
                                                   .labelText,
                                             ),
-                                            //onPressed: () => orderController.getOrderExcel(),
+                                            //onPressed: () => controller.getOrderExcel(),
+                                          ),
+                                          SizedBox(width: 3,),
+                                          // خروجی pdf
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                                padding: WidgetStatePropertyAll(
+                                                  EdgeInsets.symmetric(
+                                                      horizontal: 15,vertical: 7
+                                                  ),
+                                                ),
+                                                elevation: WidgetStatePropertyAll(5),
+                                                fixedSize: WidgetStatePropertyAll(Size(100,30)),
+                                                backgroundColor:
+                                                WidgetStatePropertyAll(AppColor.secondary3Color),
+                                                shape: WidgetStatePropertyAll(
+                                                    RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(5)))),
+                                            onPressed: () {
+                                              showGeneralDialog(
+                                                  context: context,
+                                                  barrierDismissible: true,
+                                                  barrierLabel: MaterialLocalizations.of(context)
+                                                      .modalBarrierDismissLabel,
+                                                  barrierColor: Colors.black45,
+                                                  transitionDuration: const Duration(milliseconds: 200),
+                                                  pageBuilder: (BuildContext buildContext,
+                                                      Animation animation,
+                                                      Animation secondaryAnimation) {
+                                                    return Center(
+                                                      child: Material(
+                                                        color: Colors.transparent,
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                              borderRadius: BorderRadius.circular(8),
+                                                              color: AppColor.backGroundColor
+                                                          ),
+                                                          width:isDesktop?  Get.width * 0.2:Get.height * 0.5,
+                                                          height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                          padding: EdgeInsets.all(20),
+                                                          child: Column(
+                                                            children: [
+                                                              Padding(
+                                                                padding: const EdgeInsets.all(8.0),
+                                                                child: Row(
+                                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                                  children: [
+                                                                    Text(
+                                                                      'خروجی pdf',
+                                                                      style: AppTextStyle.labelText.copyWith(
+                                                                        fontSize: 15,
+                                                                        fontWeight: FontWeight.normal,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Container(
+                                                                color: AppColor.textColor,height: 0.2,
+                                                              ),
+                                                              Padding(
+                                                                padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                child: Column(
+                                                                  children: [
+                                                                    SizedBox(height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'از تاریخ',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                              fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets.only(bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (value){
+                                                                                if(value==null || value.isEmpty){
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: controller.dateStartController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle.labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius.circular(10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor.textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali.now(),
+                                                                                  firstDate: Jalali(1400,1,1),
+                                                                                  lastDate: Jalali(1450,12,29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                  locale: Locale("fa","IR"),
+                                                                                );
+                                                                                Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                controller.startDateFilter.value =
+                                                                                "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                controller.dateStartController.text =
+                                                                                "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                    SizedBox(height: 8),
+                                                                    Column(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      children: [
+                                                                        Text(
+                                                                          'تا تاریخ',
+                                                                          style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                              fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                        ),
+                                                                        Container(
+                                                                          //height: 50,
+                                                                          padding: EdgeInsets.only(bottom: 5),
+                                                                          child: IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              validator: (value){
+                                                                                if(value==null || value.isEmpty){
+                                                                                  return 'لطفا تاریخ را انتخاب کنید';
+                                                                                }
+                                                                                return null;
+                                                                              },
+                                                                              controller: controller.dateEndController,
+                                                                              readOnly: true,
+                                                                              style: AppTextStyle.labelText,
+                                                                              decoration: InputDecoration(
+                                                                                suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius.circular(10),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor.textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                              onTap: () async {
+                                                                                Jalali? pickedDate = await showPersianDatePicker(
+                                                                                  context: context,
+                                                                                  initialDate: Jalali.now(),
+                                                                                  firstDate: Jalali(1400,1,1),
+                                                                                  lastDate: Jalali(1450,12,29),
+                                                                                  initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                  initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                  locale: Locale("fa","IR"),
+                                                                                );
+                                                                                // DateTime date=DateTime.now();
+                                                                                Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                controller.endDateFilter.value =
+                                                                                "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                controller.dateEndController.text =
+                                                                                "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                              },
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              Spacer(),
+                                                              Container(
+                                                                margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                                width: double.infinity,
+                                                                height: 40,
+                                                                child: ElevatedButton(
+                                                                  style: ButtonStyle(
+                                                                      padding: WidgetStatePropertyAll(
+                                                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                      // elevation: WidgetStatePropertyAll(5),
+                                                                      backgroundColor:
+                                                                      WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                          borderRadius: BorderRadius.circular(5)))),
+                                                                  onPressed: () async {
+                                                                    controller.exportToPdf(controller.id.value.toString());
+                                                                    Get.back();
+                                                                  },
+                                                                  child: controller.isLoading.value?
+                                                                  CircularProgressIndicator(
+                                                                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                  ) :
+                                                                  Text(
+                                                                    'ثبت',
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    );
+                                                  });
+
+                                            },
+                                            child: Text(
+                                              'خروجی pdf',
+                                              style: AppTextStyle.labelText,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -2157,15 +2601,508 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                       color:
                       AppColor.appBarColor.withOpacity(0.5),
                           child: SingleChildScrollView(
-                                                scrollDirection: Axis.horizontal,
-                                                controller:
-                                                controller.scrollController,
-                                                physics: ClampingScrollPhysics(),
-                                                child: Row(
+                            scrollDirection: Axis.horizontal,
+                            controller:
+                            controller.scrollController,
+                            physics: ClampingScrollPhysics(),
+                            child: Row(
                           children: [
                             SingleChildScrollView(
-                              child: Column(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
+                                  // فیلتر
+                                  ElevatedButton(
+                                    style: ButtonStyle(
+                                        padding: WidgetStatePropertyAll(
+                                            EdgeInsets.symmetric(
+                                                horizontal: 23,
+                                                vertical: 12)),
+                                        // elevation: WidgetStatePropertyAll(5),
+                                        backgroundColor:
+                                        WidgetStatePropertyAll(
+                                            AppColor.appBarColor
+                                                .withOpacity(
+                                                0.5)),
+                                        shape: WidgetStatePropertyAll(
+                                            RoundedRectangleBorder(
+                                                side: BorderSide(
+                                                    color: AppColor
+                                                        .textColor),
+                                                borderRadius: BorderRadius
+                                                    .circular(
+                                                    5)))),
+                                    onPressed: () async {
+                                      showGeneralDialog(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          barrierLabel: MaterialLocalizations
+                                              .of(context)
+                                              .modalBarrierDismissLabel,
+                                          barrierColor: Colors
+                                              .black45,
+                                          transitionDuration: const Duration(
+                                              milliseconds: 200),
+                                          pageBuilder: (
+                                              BuildContext buildContext,
+                                              Animation animation,
+                                              Animation secondaryAnimation) {
+                                            return Center(
+                                              child: Material(
+                                                color: Colors
+                                                    .transparent,
+                                                child: Container(
+                                                  decoration: BoxDecoration(
+                                                      borderRadius: BorderRadius
+                                                          .circular(
+                                                          8),
+                                                      color: AppColor
+                                                          .backGroundColor
+                                                  ),
+                                                  width: isDesktop
+                                                      ? Get
+                                                      .width * 0.2
+                                                      : Get
+                                                      .height *
+                                                      0.5,
+                                                  height: isDesktop
+                                                      ? Get
+                                                      .height *
+                                                      0.5
+                                                      : Get
+                                                      .height *
+                                                      0.7,
+                                                  padding: EdgeInsets
+                                                      .all(20),
+                                                  child: SingleChildScrollView(
+                                                    child: Column(
+                                                      children: [
+                                                        Padding(
+                                                          padding: const EdgeInsets
+                                                              .all(
+                                                              8.0),
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment
+                                                                .end,
+                                                            children: [
+                                                              Expanded(
+                                                                child: Center(
+                                                                  child: Text(
+                                                                    'فیلتر',
+                                                                    style: AppTextStyle
+                                                                        .labelText
+                                                                        .copyWith(
+                                                                      fontSize: 15,
+                                                                      fontWeight: FontWeight
+                                                                          .normal,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              SizedBox(
+                                                                width: 50,
+                                                                height: 27,
+                                                                child: ElevatedButton(
+                                                                  style: ButtonStyle(
+                                                                      padding: WidgetStatePropertyAll(
+                                                                          EdgeInsets
+                                                                              .symmetric(
+                                                                              horizontal: 2,
+                                                                              vertical: 1)),
+                                                                      // elevation: WidgetStatePropertyAll(5),
+                                                                      backgroundColor:
+                                                                      WidgetStatePropertyAll(
+                                                                          AppColor
+                                                                              .accentColor
+                                                                              .withOpacity(
+                                                                              0.5)),
+                                                                      shape: WidgetStatePropertyAll(
+                                                                          RoundedRectangleBorder(
+                                                                              side: BorderSide(
+                                                                                  color: AppColor
+                                                                                      .textColor),
+                                                                              borderRadius: BorderRadius
+                                                                                  .circular(
+                                                                                  5)))),
+                                                                  onPressed: () async {
+                                                                    controller.clearFilter();
+                                                                    controller.getTransactionInfoListPager(controller.id.value.toString());
+                                                                    Get.back();
+                                                                  },
+                                                                  child: Text(
+                                                                    'حذف فیلتر',
+                                                                    style: AppTextStyle
+                                                                        .labelText
+                                                                        .copyWith(
+                                                                        fontSize: isDesktop
+                                                                            ? 9
+                                                                            : 8),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        Container(
+                                                          color: AppColor
+                                                              .textColor,
+                                                          height: 0.2,
+                                                        ),
+                                                        Padding(
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 10),
+                                                          child: Column(
+                                                            children: [
+                                                              SizedBox(
+                                                                height: 8,),
+                                                              Column(
+                                                                crossAxisAlignment: CrossAxisAlignment
+                                                                    .start,
+                                                                children: [
+                                                                  Text(
+                                                                    'از تاریخ',
+                                                                    style: AppTextStyle
+                                                                        .labelText
+                                                                        .copyWith(
+                                                                        fontSize: 13,
+                                                                        fontWeight: FontWeight
+                                                                            .normal,
+                                                                        color: AppColor
+                                                                            .textColor),
+                                                                  ),
+                                                                  Container(
+                                                                    //height: 50,
+                                                                    padding: EdgeInsets
+                                                                        .only(
+                                                                        bottom: 5),
+                                                                    child: IntrinsicHeight(
+                                                                      child: TextFormField(
+                                                                        validator: (
+                                                                            value) {
+                                                                          if (value ==
+                                                                              null ||
+                                                                              value
+                                                                                  .isEmpty) {
+                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                          }
+                                                                          return null;
+                                                                        },
+                                                                        controller: controller
+                                                                            .dateStartController,
+                                                                        readOnly: true,
+                                                                        style: AppTextStyle
+                                                                            .labelText,
+                                                                        decoration: InputDecoration(
+                                                                          suffixIcon: Icon(
+                                                                              Icons
+                                                                                  .calendar_month,
+                                                                              color: AppColor
+                                                                                  .textColor),
+                                                                          border: OutlineInputBorder(
+                                                                            borderRadius: BorderRadius
+                                                                                .circular(
+                                                                                10),
+                                                                          ),
+                                                                          filled: true,
+                                                                          fillColor: AppColor
+                                                                              .textFieldColor,
+                                                                          errorMaxLines: 1,
+                                                                        ),
+                                                                        onTap: () async {
+                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                            context: context,
+                                                                            initialDate: Jalali
+                                                                                .now(),
+                                                                            firstDate: Jalali(
+                                                                                1400,
+                                                                                1,
+                                                                                1),
+                                                                            lastDate: Jalali(
+                                                                                1450,
+                                                                                12,
+                                                                                29),
+                                                                            initialEntryMode: PersianDatePickerEntryMode
+                                                                                .calendar,
+                                                                            initialDatePickerMode: PersianDatePickerMode
+                                                                                .day,
+                                                                            locale: Locale(
+                                                                                "fa",
+                                                                                "IR"),
+                                                                          );
+                                                                          Gregorian gregorian = pickedDate!
+                                                                              .toGregorian();
+                                                                          controller
+                                                                              .startDateFilter
+                                                                              .value =
+                                                                          "${gregorian
+                                                                              .year}-${gregorian
+                                                                              .month
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}-${gregorian
+                                                                              .day
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}";
+
+                                                                          controller
+                                                                              .dateStartController
+                                                                              .text =
+                                                                          "${pickedDate
+                                                                              .year}/${pickedDate
+                                                                              .month
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}/${pickedDate
+                                                                              .day
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}";
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                              SizedBox(
+                                                                  height: 8),
+                                                              Column(
+                                                                crossAxisAlignment: CrossAxisAlignment
+                                                                    .start,
+                                                                children: [
+                                                                  Text(
+                                                                    'تا تاریخ',
+                                                                    style: AppTextStyle
+                                                                        .labelText
+                                                                        .copyWith(
+                                                                        fontSize: 13,
+                                                                        fontWeight: FontWeight
+                                                                            .normal,
+                                                                        color: AppColor
+                                                                            .textColor),
+                                                                  ),
+                                                                  Container(
+                                                                    //height: 50,
+                                                                    padding: EdgeInsets
+                                                                        .only(
+                                                                        bottom: 5),
+                                                                    child: IntrinsicHeight(
+                                                                      child: TextFormField(
+                                                                        validator: (
+                                                                            value) {
+                                                                          if (value ==
+                                                                              null ||
+                                                                              value
+                                                                                  .isEmpty) {
+                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                          }
+                                                                          return null;
+                                                                        },
+                                                                        controller: controller
+                                                                            .dateEndController,
+                                                                        readOnly: true,
+                                                                        style: AppTextStyle
+                                                                            .labelText,
+                                                                        decoration: InputDecoration(
+                                                                          suffixIcon: Icon(
+                                                                              Icons
+                                                                                  .calendar_month,
+                                                                              color: AppColor
+                                                                                  .textColor),
+                                                                          border: OutlineInputBorder(
+                                                                            borderRadius: BorderRadius
+                                                                                .circular(
+                                                                                10),
+                                                                          ),
+                                                                          filled: true,
+                                                                          fillColor: AppColor
+                                                                              .textFieldColor,
+                                                                          errorMaxLines: 1,
+                                                                        ),
+                                                                        onTap: () async {
+                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                            context: context,
+                                                                            initialDate: Jalali
+                                                                                .now(),
+                                                                            firstDate: Jalali(
+                                                                                1400,
+                                                                                1,
+                                                                                1),
+                                                                            lastDate: Jalali(
+                                                                                1450,
+                                                                                12,
+                                                                                29),
+                                                                            initialEntryMode: PersianDatePickerEntryMode
+                                                                                .calendar,
+                                                                            initialDatePickerMode: PersianDatePickerMode
+                                                                                .day,
+                                                                            locale: Locale(
+                                                                                "fa",
+                                                                                "IR"),
+                                                                          );
+                                                                          // DateTime date=DateTime.now();
+                                                                          Gregorian gregorian = pickedDate!
+                                                                              .toGregorian();
+                                                                          controller
+                                                                              .endDateFilter
+                                                                              .value =
+                                                                          "${gregorian
+                                                                              .year}-${gregorian
+                                                                              .month
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}-${gregorian
+                                                                              .day
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}";
+
+                                                                          controller
+                                                                              .dateEndController
+                                                                              .text =
+                                                                          "${pickedDate
+                                                                              .year}/${pickedDate
+                                                                              .month
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}/${pickedDate
+                                                                              .day
+                                                                              .toString()
+                                                                              .padLeft(
+                                                                              2,
+                                                                              '0')}";
+                                                                        },
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              ),
+
+                                                            ],
+                                                          ),
+                                                        ),
+                                                        //  Spacer(),
+                                                        Container(
+                                                          margin: EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 20,
+                                                              vertical: 10),
+                                                          width: double
+                                                              .infinity,
+                                                          height: 40,
+                                                          child: ElevatedButton(
+                                                            style: ButtonStyle(
+                                                                padding: WidgetStatePropertyAll(
+                                                                    EdgeInsets
+                                                                        .symmetric(
+                                                                        horizontal: 23,
+                                                                        vertical: 19)),
+                                                                // elevation: WidgetStatePropertyAll(5),
+                                                                backgroundColor:
+                                                                WidgetStatePropertyAll(
+                                                                    AppColor
+                                                                        .appBarColor),
+                                                                shape: WidgetStatePropertyAll(
+                                                                    RoundedRectangleBorder(
+                                                                        side: BorderSide(
+                                                                            color: AppColor
+                                                                                .textColor),
+                                                                        borderRadius: BorderRadius
+                                                                            .circular(
+                                                                            5)))),
+                                                            onPressed: () async {
+                                                              controller.getTransactionInfoListPager(controller.id.value.toString());
+                                                              Get.back();
+                                                            },
+                                                            child: controller
+                                                                .isLoading
+                                                                .value
+                                                                ?
+                                                            CircularProgressIndicator(
+                                                              valueColor: AlwaysStoppedAnimation<
+                                                                  Color>(
+                                                                  AppColor
+                                                                      .textColor),
+                                                            )
+                                                                :
+                                                            Text(
+                                                              'فیلتر',
+                                                              style: AppTextStyle
+                                                                  .labelText
+                                                                  .copyWith(
+                                                                  fontSize: isDesktop
+                                                                      ? 12
+                                                                      : 10),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            );
+                                          });
+                                    },
+                                    child: Row(
+                                      children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/filter3.svg',
+                                            height: 17,
+                                            colorFilter:
+                                            ColorFilter
+                                                .mode(
+                                              controller
+                                                  .dateStartController
+                                                  .text !=
+                                                  "" ||
+                                                  controller
+                                                      .dateEndController
+                                                      .text != ""
+                                                  ? AppColor
+                                                  .accentColor
+                                                  : AppColor
+                                                  .textColor,
+                                              BlendMode
+                                                  .srcIn,
+                                            )),
+                                        SizedBox(
+                                          width: 10,
+                                        ),
+                                        Text(
+                                          'فیلتر',
+                                          style: AppTextStyle
+                                              .labelText
+                                              .copyWith(
+                                              fontSize: isDesktop
+                                                  ? 12
+                                                  : 10,
+                                              color:
+                                              controller
+                                                  .dateStartController
+                                                  .text !=
+                                                  "" ||
+                                                  controller
+                                                      .dateEndController
+                                                      .text != ""
+                                                  ? AppColor
+                                                  .accentColor
+                                                  : AppColor
+                                                  .textColor),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 20,
+                                  ),
                                   DataTable(
                                     columns:
                                     buildDataColumns(),
@@ -2178,12 +3115,13 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                     dividerThickness: 0.3,
                                     rows: buildDataRows(
                                         context),
-                                    dataRowMaxHeight: 110,
+                                    dataRowMaxHeight: 120,
                                     //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                     //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                     headingRowHeight: 70,
-                                    columnSpacing: 40,
+                                    columnSpacing: 30,
                                     horizontalMargin: 0,
+
                                   ),
 
                                 ],
@@ -2202,11 +3140,11 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                 :
             ErrPage(
               callback: () {
-                //controller.clearFilter();
+                controller.clearFilter();
                 controller.getTransactionInfoListPager(controller.id.value.toString());
               },
-              title: "خطا در دریافت لیست حواله",
-              des: 'برای دریافت لیست حواله ها مجددا تلاش کنید',
+              title: "خطا در دریافت لیست تراکنش ها",
+              des: 'برای دریافت لیست تراکنش ها مجددا تلاش کنید',
             ),
           ),
           Column(
@@ -2228,6 +3166,17 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }
 
@@ -2235,7 +3184,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
     return [
       DataColumn(
           label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 100),
+              constraints: BoxConstraints(maxWidth: 80),
               child: Text('نوع',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
@@ -2279,27 +3228,39 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
-              child: Text('مانده ریالی',
+              child: Text('عملیات',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 100),
+              child: Text('مانده',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 11))),
+          headingRowAlignment: MainAxisAlignment.center),
+      /*DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 100),
+              child: Text('مانده ریالی',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 11))),
+          headingRowAlignment: MainAxisAlignment.center),*/
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مانده طلایی',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+          headingRowAlignment: MainAxisAlignment.center),*/
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مانده سکه',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+          headingRowAlignment: MainAxisAlignment.center),*/
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مستندات',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
     ];
   }
 
@@ -2307,49 +3268,59 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
     return controller.transactionInfoList
         .map((trans) => DataRow(
       cells: [
-        // تاریخ
-        DataCell(Center(
-          child: RotatedBox(
-            quarterTurns: 1,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 0, vertical: 8),
-              // margin: EdgeInsets.symmetric(vertical: 5),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(0),
-                  color: trans.type == "reciept" ||
-                      trans.type == "receive" ||
-                      trans.type == "buy"
-                      ? AppColor.primaryColor
-                      : AppColor.accentColor),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    trans.type == "issue"
-                        ? ' پرداخت ${trans.item?.name ?? ""}'
-                        : trans.type == "receive"
-                        ? ' دریافت ${trans.item?.name ?? ""}'
-                        : trans.type == "sell"
-                        ? ' فروش ${trans.item?.name ?? ""}'
-                        : trans.type == "buy"
-                        ? ' خرید ${trans.item?.name ?? ""}'
-                        : trans.type == "deposit"
-                        ? ' پرداخت ${trans.item?.name ?? ""}'
-                        : trans.type == "withdraw"
-                        ? ' پرداخت ${trans.item?.name ?? ""}'
-                        : trans.type == "reciept"
-                        ? ' دریافت ${trans.item?.name ?? ""}'
-                        : " پرداخت ${trans.item?.name ?? ""}",
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.textColor,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
+        // نوع
+        DataCell(
+          Center(
+            child: RotatedBox(
+              quarterTurns: 1,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 2, vertical: 8),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(0),
+                    color: trans.type == "reciept" ||
+                        trans.type == "receive" ||
+                        trans.type == "buy"
+                        ? AppColor.primaryColor
+                        : AppColor.accentColor),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        trans.type == "issue"
+                            ? ' حواله ${trans.item?.name ?? ""}'
+                            : trans.type == "receive"
+                            ? ' دریافت ${trans.item?.name ?? ""}'
+                            : trans.type == "payment"
+                            ? ' پرداخت ${trans.item?.name ?? ""}'
+                            : trans.type == "sell"
+                            ? ' فروش ${trans.item?.name ?? ""}'
+                            : trans.type == "buy"
+                            ? ' خرید ${trans.item?.name ?? ""}'
+                            : trans.type == "deposit"
+                            ? ' واریز ${trans.item?.name ?? ""}'
+                            : trans.type == "withdraw"
+                            ? ' برداشت ${trans.item?.name ?? ""}'
+                            : trans.type == "reciept"
+                            ? ' برگشت ${trans.item?.name ?? ""}'
+                            : trans.type == "toTransfer" || trans.type == "fromTransfer"
+                            ? ' ولت ${trans.item?.name ?? ""}'
+                            : "",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.textColor,
+                            fontSize: 9,
+                            fontWeight: FontWeight.bold),
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        )),
+        ),
         DataCell(Center(
           child: Text(
             "${trans.rowNum ?? 0}",
@@ -2362,357 +3333,433 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
             style: AppTextStyle.bodyText
                 .copyWith(color: AppColor.textColor, fontSize: 10),textDirection: TextDirection.ltr,),
         )),
-        DataCell(Center(
-          child: trans.details!.isEmpty
-              ? Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              trans.toWallet?.account?.name != null
-                  ? Row(
+        // شرح
+        DataCell(SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+                horizontal: 5, vertical: 3),
+            child: Center(
+              child: trans.details!.isEmpty
+                  ?
+              Column(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    " از : ",
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.textColor,
-                        fontSize: 10),
-                  ),
-                  Text(
-                    " ${trans.wallet?.account?.name ?? ""} ",
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.accentColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    " به : ",
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.textColor,
-                        fontSize: 10),
-                  ),
-                  Text(
-                    " ${trans.toWallet?.account?.name ?? ""} ",
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.primaryColor,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold),
-                  ),
-                ],
-              )
-                  : SizedBox(),
-              SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    trans.item?.itemUnit?.id == 1
-                        ? " ${trans.amount} "
-                        : trans.item?.itemUnit?.id == 2
-                        ? "${trans.amount} "
-                        : "${trans.amount.toString().seRagham()}  ",
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.textColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10),
-                    textDirection: TextDirection.ltr,
-                  ),
-                  Text(
-                    trans.item?.itemUnit?.id == 1
-                        ? " عدد "
-                        : trans.item?.itemUnit?.id == 2
-                        ? " گرم "
-                        : " ریال ",
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.textColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10),
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    trans.item?.name ?? 'نامشخص',
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.secondary2Color,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 5,
-              ),
-              trans.price != null
-                  ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'به مظنه :  ',
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.iconViewColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10),
-                  ),
-                  Text(
-                      "${trans.price ?? 0}".seRagham() +
-                          "  ریال  ",
-                      style: AppTextStyle.bodyText.copyWith(
-                          color: AppColor.textColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 12)),
-                ],
-              )
-                  : SizedBox(),
-              trans.totalPrice != null
-                  ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    ' قیمت کل :  ',
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.iconViewColor,
-                        fontWeight: FontWeight.normal,
-                        fontSize: 10),
-                  ),
-                  Text(
-                      "${trans.totalPrice ?? 0}"
-                          .seRagham() +
-                          "  ریال  ",
-                      style: AppTextStyle.bodyText.copyWith(
-                          color: AppColor.textColor,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 12)),
-                ],
-              )
-                  : SizedBox(),
-              Container(
-                height: 0.6,
-                color: AppColor.textColor,
-                margin: EdgeInsets.symmetric(
-                    vertical: 5, horizontal: 20),
-              ),
-              trans.description != null
-                  ? Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'توضیحات : ',
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.iconViewColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10),
-                  ),
-                  Text(trans.description ?? 'نامشخص',
-                      style: AppTextStyle.bodyText.copyWith(
-                          color: AppColor.textColor,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 10)),
-                ],
-              )
-                  : SizedBox(),
-              SizedBox(
-                height: 5,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    trans.date?.toPersianDate(showTime: true) ??
-                        'نامشخص',
-                    style: AppTextStyle.bodyText.copyWith(
-                        color: AppColor.iconViewColor,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 10),
-                    textDirection: TextDirection.ltr,
-                  ),
-                ],
-              ),
-            ],
-          )
-              : Column(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: trans.details!
-                .map((e) => Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: 5, vertical: 5),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: AppColor.textColor),
-              child: Column(
-                mainAxisAlignment:
-                MainAxisAlignment.center,
-                crossAxisAlignment:
-                CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.center,
+                  trans.type=="fromTransfer" ?
+                  Column(
                     children: [
                       Row(
                         children: [
-                          Text(
-                            "وزن ترازو : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
+                          SelectableText(
+                            " از ولت ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                color: AppColor.textColor,
+                                fontSize: 12),
                           ),
-                          Text(
-                            "${e.weight ?? 0} گرم ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
+                          SelectableText(
+                            " ${trans.wallet?.account?.name ?? ""} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                color: AppColor.primaryColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
+                    ],
+                  ) :
+                  SizedBox(),
+                  trans.type=="toTransfer" ?
+                  Column(
+                    children: [
                       Row(
                         children: [
-                          Text(
-                            "عیار : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
+                          SelectableText(
+                            " به ولت ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                color: AppColor.textColor,
+                                fontSize: 12),
                           ),
-                          Text(
-                            "${e.carat ?? 0} ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
+                          SelectableText(
+                            " ${trans.wallet?.account?.name ?? ""} ",
+                            style: AppTextStyle.bodyText.copyWith(
+                                color: AppColor.accentColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            "وزن : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.quantity ?? 0} گرم ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
+                    ],
+                  ) :
+                  SizedBox(),
+                  trans.toWallet?.account?.name != null
+                      ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SelectableText(
+                        " از : ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.textColor,
+                            fontSize: 10),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            "ناخالصی : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.impurity ?? 0} گرم ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
+                      trans.type=='reciept'?
+                      SelectableText(
+                        " ${trans.toWallet?.account?.name ?? ""} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.primaryColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
+                      ):
+                      SelectableText(
+                        " ${trans.wallet?.account?.name ?? ""} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.accentColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
+                      ),
+                      SelectableText(
+                        " به : ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.textColor,
+                            fontSize: 10),
+                      ),
+                      trans.type=='reciept'?
+                      SelectableText(
+                        " ${trans.wallet?.account?.name ?? ""} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.accentColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
+                      ):
+                      SelectableText(
+                        " ${trans.toWallet?.account?.name ?? ""} ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.primaryColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  )
+                      : SizedBox(),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SelectableText(
+                        trans.item?.itemUnit?.id == 1
+                            ? " ${trans.amount} "
+                            : trans.item?.itemUnit?.id == 2
+                            ? "${trans.amount} "
+                            : "${trans.amount.toString().seRagham()}  ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.textColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10),
+                        textDirection: TextDirection.ltr,
+                      ),
+                      SelectableText(
+                        trans.item?.itemUnit?.id == 1
+                            ? " عدد "
+                            : trans.item?.itemUnit?.id == 2
+                            ? " گرم "
+                            : trans.item?.itemUnit?.id == 4
+                            ? "دلار"
+                            : trans.item?.itemUnit?.id == 5
+                            ? "یورو"
+                            : " ریال ",
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.textColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10),
+                      ),
+                      SizedBox(
+                        width: 5,
+                      ),
+                      SelectableText(
+                        trans.item?.name ?? 'نامشخص',
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.secondary2Color,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12),
                       ),
                     ],
                   ),
                   SizedBox(
                     height: 5,
                   ),
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.center,
+                  trans.price != null
+                      ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Row(
-                        children: [
-                          Text(
-                            "آزمایشگاه : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.laboratoryName ?? ""} ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
+                      SelectableText(
+                        'به مظنه :  ',
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.iconViewColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10),
                       ),
-                      Row(
-                        children: [
-                          Text(
-                            "شماره آزمایشگاه : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.receiptNumber ?? ""} ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 10,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
+                      SelectableText(
+                          "${trans.mesghalPrice ?? 0}".seRagham() +
+                              "  ریال  ",
+                          style: AppTextStyle.bodyText.copyWith(
+                              color: AppColor.textColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12)),
+                    ],
+                  )
+                      : SizedBox(),
+                  trans.totalPrice != null
+                      ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SelectableText(
+                        ' قیمت کل :  ',
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.iconViewColor,
+                            fontWeight: FontWeight.normal,
+                            fontSize: 10),
+                      ),
+                      SelectableText(
+                          "${trans.totalPrice ?? 0}"
+                              .seRagham() +
+                              "  ریال  ",
+                          style: AppTextStyle.bodyText.copyWith(
+                              color: AppColor.textColor,
+                              fontWeight: FontWeight.normal,
+                              fontSize: 12)),
+                    ],
+                  )
+                      : SizedBox(),
+                  Container(
+                    height: 0.6,
+                    color: AppColor.textColor,
+                    margin: EdgeInsets.symmetric(
+                        vertical: 5, horizontal: 20),
+                  ),
+                  trans.description != null
+                      ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SelectableText(
+                        'توضیحات : ',
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.iconViewColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10),
+                      ),
+                      SelectableText(trans.description ?? 'نامشخص',
+                          style: AppTextStyle.bodyText.copyWith(
+                              color: AppColor.textColor,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10)),
+                    ],
+                  )
+                      : SizedBox(),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SelectableText(
+                        trans.date?.toPersianDate(showTime: true) ??
+                            'نامشخص',
+                        style: AppTextStyle.bodyText.copyWith(
+                            color: AppColor.iconViewColor,
+                            fontWeight: FontWeight.w700,
+                            fontSize: 10),
+                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
                 ],
+              )
+                  :
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: trans.details!
+                    .map((e) => Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 5, vertical: 5),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: AppColor.textColor),
+                    child: Column(
+                      mainAxisAlignment:
+                      MainAxisAlignment.center,
+                      crossAxisAlignment:
+                      CrossAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                SelectableText(
+                                  "وزن ترازو : ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .appBarColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                                SelectableText(
+                                  "${e.weight ?? 0} گرم ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .iconViewColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                SelectableText(
+                                  "عیار : ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .appBarColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                                SelectableText(
+                                  "${e.carat ?? 0} ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .iconViewColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                SelectableText(
+                                  "وزن : ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .appBarColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                                SelectableText(
+                                  "${e.quantity ?? 0} گرم ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .iconViewColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                SelectableText(
+                                  "ناخالصی : ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .appBarColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                                SelectableText(
+                                  "${e.impurity ?? 0} گرم ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .iconViewColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.center,
+                          children: [
+                            Row(
+                              children: [
+                                SelectableText(
+                                  "آزمایشگاه : ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .appBarColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                                SelectableText(
+                                  "${e.laboratoryName ?? ""} ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .iconViewColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                SelectableText(
+                                  "شماره آزمایشگاه : ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .appBarColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                                SelectableText(
+                                  "${e.receiptNumber ?? ""} ",
+                                  style: AppTextStyle.bodyText
+                                      .copyWith(
+                                      color: AppColor
+                                          .iconViewColor,
+                                      fontSize: 10,
+                                      fontWeight:
+                                      FontWeight.bold),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                ))
+                    .toList(),
               ),
-            ))
-                .toList(),
+            ),
           ),
         )),
+        // مقدار
         DataCell(Center(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -2721,11 +3768,11 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                 trans.item?.itemUnit?.id == 1
                     ? "${trans.amount} "
                     : trans.item?.itemUnit?.id == 2
-                    ? "${trans.amount} "
+                    ? "${trans.amount.toString().seRagham()} "
                     : "${trans.amount.toString().seRagham()} ",
                 style: AppTextStyle.bodyText.copyWith(
-                    color: AppColor.buttonColor,
-                    fontSize: 11,
+                    color: trans.amount!>0 ? AppColor.primaryColor :AppColor.accentColor,
+                    fontSize: 12,
                     fontWeight: FontWeight.bold),
                 textDirection: TextDirection.ltr,
               ),
@@ -2734,9 +3781,13 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                     ? " عدد "
                     : trans.item?.itemUnit?.id == 2
                     ? " گرم "
+                    : trans.item?.itemUnit?.id == 4
+                    ? "دلار"
+                    : trans.item?.itemUnit?.id == 5
+                    ? "یورو"
                     : " ریال ",
                 style: AppTextStyle.bodyText.copyWith(
-                    color: AppColor.buttonColor,
+                    color: trans.amount!>0 ? AppColor.primaryColor :AppColor.accentColor,
                     fontSize: 10,
                     fontWeight: FontWeight.bold),
                 textDirection: TextDirection.ltr,
@@ -2744,8 +3795,176 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
             ],
           ),
         )),
-
+        // عملیات
         DataCell(Center(
+          child:
+              //دکمه ادیت جزئیات
+              OutlinedButton(
+                onPressed: () async{
+                  // Handle different transaction types with proper parameters
+                  switch (trans.type) {
+                    case "issue":
+                    case "reciept":
+                    // For remittance operations, use recordId
+                    /*Get.toNamed('/updateRemittance', parameters: {"id": trans.recordId.toString()})
+                        ?.then((_) {
+                      // Refresh data after returning from edit page
+                      controller.getTransactionInfoListPager(controller.id.value.toString());
+                      controller.getBalanceList(controller.id.value);
+                      controller.getHeaderTransaction(controller.id.value);
+                    });*/
+                    Get.snackbar(
+                      'اطلاعات',
+                      'عملیات پرداختی از این طریق امکان‌پذیر نیست',
+                      titleText: Text('اطلاعات', style: TextStyle(color: AppColor.textColor)),
+                      messageText: Text('عملیات پرداختی از این طریق امکان‌پذیر نیست',
+                          style: TextStyle(color: AppColor.textColor)),
+                    );
+                      break;
+                    case "receive":
+                      /*Get.toNamed('/inventoryDetailUpdateReceive', parameters: {
+                        "id": trans.recordId.toString(),
+                        "index": ""
+                      })?.then((_) {
+                        // Refresh data after returning from edit page
+                        controller.getTransactionInfoListPager(controller.id.value.toString());
+                        controller.getBalanceList(controller.id.value);
+                        controller.getHeaderTransaction(controller.id.value);
+                      });*/
+                      Get.snackbar(
+                        'اطلاعات',
+                        'عملیات دریافتی از این طریق امکان‌پذیر نیست',
+                        titleText: Text('اطلاعات', style: TextStyle(color: AppColor.textColor)),
+                        messageText: Text('عملیات دریافتی از این طریق امکان‌پذیر نیست',
+                            style: TextStyle(color: AppColor.textColor)),
+                      );
+                      break;
+                    case "payment":
+                      /*Get.toNamed('/inventoryDetailUpdatePayment', parameters: {
+                        "id": trans.recordId.toString(),
+                        "index": ""
+                      })?.then((_) {
+                        // Refresh data after returning from edit page
+                        controller.getTransactionInfoListPager(controller.id.value.toString());
+                        controller.getBalanceList(controller.id.value);
+                        controller.getHeaderTransaction(controller.id.value);
+                      });*/
+                      Get.snackbar(
+                        'اطلاعات',
+                        'عملیات پرداختی از این طریق امکان‌پذیر نیست',
+                        titleText: Text('اطلاعات', style: TextStyle(color: AppColor.textColor)),
+                        messageText: Text('عملیات پرداختی از این طریق امکان‌پذیر نیست',
+                            style: TextStyle(color: AppColor.textColor)),
+                      );
+                      break;
+                    case "sell":
+                    case "buy":
+                    // For order operations, use recordId
+                    Get.toNamed('/orderUpdate', parameters: {"id": trans.recordId.toString()})
+                        ?.then((_) {
+                      // Refresh data after returning from edit page
+                      controller.getTransactionInfoListPager(controller.id.value.toString());
+                      controller.getBalanceList(controller.id.value);
+                      controller.getHeaderTransaction(controller.id.value);
+                    });
+                      break;
+                    case "deposit":
+                    // For deposit operations, use recordId
+                      Get.toNamed('/depositUpdate', parameters: {"id": trans.recordId.toString()})
+                          ?.then((_) {
+                        // Refresh data after returning from edit page
+                        controller.getTransactionInfoListPager(controller.id.value.toString());
+                        controller.getBalanceList(controller.id.value);
+                        controller.getHeaderTransaction(controller.id.value);
+                      });
+                      break;
+                    case "withdraw":
+                    // For withdraw operations, use recordId
+                      Get.toNamed('/depositUpdate', parameters: {"id": trans.recordId.toString()})
+                          ?.then((_) {
+                        // Refresh data after returning from edit page
+                        controller.getTransactionInfoListPager(controller.id.value.toString());
+                        controller.getBalanceList(controller.id.value);
+                        controller.getHeaderTransaction(controller.id.value);
+                      });
+                      break;
+                    case "toTransfer":
+                    case "fromTransfer":
+                    // For transfer operations, show a message or handle differently
+                      Get.snackbar(
+                        'اطلاعات',
+                        'عملیات انتقال ولت - ویرایش از این طریق امکان‌پذیر نیست',
+                        titleText: Text('اطلاعات', style: TextStyle(color: AppColor.textColor)),
+                        messageText: Text('عملیات انتقال ولت - ویرایش از این طریق امکان‌پذیر نیست',
+                            style: TextStyle(color: AppColor.textColor)),
+                      );
+                      break;
+                    default:
+                    // For unknown types, show error message
+                      Get.snackbar(
+                        'خطا',
+                        'نوع تراکنش نامعتبر است',
+                        titleText: Text('خطا', style: TextStyle(color: AppColor.accentColor)),
+                        messageText: Text('نوع تراکنش نامعتبر است',
+                            style: TextStyle(color: AppColor.accentColor)),
+                      );
+                      break;
+                  }
+                },
+                style: ButtonStyle(
+                  shape: WidgetStatePropertyAll(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+                child: SvgPicture.asset(
+                  'assets/svg/edit.svg', height: 20, width: 20,
+                  colorFilter: ColorFilter.mode(
+                      AppColor.iconViewColor, BlendMode.srcIn),
+                ),
+              ),
+
+        )),
+        // مانده
+        DataCell(
+            Center(
+              child:
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BalanceDialogId(
+                          entityId: trans.id ?? 0,
+                          entityName:'نامشخص',
+                          isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        size: 20,
+                        color: AppColor.buttonColor,
+                      ),
+                      Text(' مانده',
+                        style: AppTextStyle
+                            .labelText
+                            .copyWith(
+                            color: AppColor.buttonColor, fontSize: 11,fontWeight: FontWeight.bold),),
+                    ],
+                  ),
+                ),
+              ),
+            )
+        ),
+
+        /*DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -2809,8 +4028,8 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                       .toList(),
                 ),
               ],
-            ))),
-        DataCell(Center(
+            ))),*/
+        /*DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -2873,8 +4092,8 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                       .toList(),
                 ),
               ],
-            ))),
-        DataCell(Center(
+            ))),*/
+        /*DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -2937,9 +4156,9 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                       .toList(),
                 ),
               ],
-            ))),
+            ))),*/
 
-        DataCell(Center(
+        /*DataCell(Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -2968,7 +4187,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                   width: 20,
                 ),
               ],
-            ))),
+            ))),*/
       ],
     ))
         .toList();

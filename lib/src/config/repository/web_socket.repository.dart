@@ -1,3 +1,4 @@
+/*
 
 
 import 'dart:async';
@@ -16,7 +17,7 @@ class WebSocketRepository{
         Duration pingInterval = const Duration(seconds: 30),
       }) {
     _channel = WebSocketChannel.connect(
-      Uri.parse(WebSocketUrl.webSocketUrl),
+      Uri.parse("wss://172.30.25.225:10000/ws"),
     );
     return _channel!;
   }
@@ -46,4 +47,4 @@ class WebSocketRepository{
     _channel = null;
   }
 
-}
+}*/

@@ -68,7 +68,7 @@ class InventoryUpdateReceiveController extends GetxController{
   var isLoading=true.obs;
   var isLoadingBalance=true.obs;
 
-  final Rxn<InventoryModel> getOneInventory=Rxn<InventoryModel>();
+  final Rxn<InventoryDetailModel> getOneInventory=Rxn<InventoryDetailModel>();
   var inventoryId=0.obs;
   var inventoryDetailId=0.obs;
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
@@ -123,11 +123,11 @@ class InventoryUpdateReceiveController extends GetxController{
      //inventoryDetail=Get.arguments;
      inventoryDetailId.value=int.parse(Get.parameters['id']!);
 
-    if(inventoryDetailId.value!=null) {
+    /*if(inventoryDetailId.value!=null) {
       //inventoryDetail=getOneInventory.value;
       await fetchGetOneInventory(inventoryDetailId.value,Get.parameters['index']!);
 
-    }
+    }*/
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
     quantityController.addListener(updateW750);
@@ -299,22 +299,22 @@ class InventoryUpdateReceiveController extends GetxController{
   }
 
 
-  Future<void> fetchGetOneInventory(int id,String index)async{
+  /*Future<void> fetchGetOneInventory(int id,String index)async{
     try {
       stateGetOne.value=PageState.loading;
-      var fetchedGetOneInventory = await inventoryRepository.getOneInventory(id);
+      var fetchedGetOneInventory = await inventoryRepository.getInventoryDetail(id);
       if(fetchedGetOneInventory!=null){
         getOneInventory.value = fetchedGetOneInventory;
         if(index==""){
-          setInventoryDetail(getOneInventory.value!.inventoryDetails!.first);
-          inventoryDetail=getOneInventory.value!.inventoryDetails!.first;
+          setInventoryDetail(getOneInventory.value!);
+          inventoryDetail=getOneInventory.value!;
           inventoryDetailId.value=inventoryDetail?.id ?? 0;
           accountId.value = inventoryDetail!.wallet!.account!.id!;
           accountName.value = inventoryDetail!.wallet!.account!.name!;
           getWalletAccount(accountId.value);
           getBalanceList(accountId.value);
         }else{
-          inventoryDetail=getOneInventory.value!.inventoryDetails?[int.parse(index)];
+          inventoryDetail=getOneInventory.value!;
           setInventoryDetail(inventoryDetail!);
           inventoryDetailId.value=inventoryDetail?.id ?? 0;
           accountId.value = inventoryDetail!.wallet!.account!.id!;
@@ -333,7 +333,7 @@ class InventoryUpdateReceiveController extends GetxController{
       stateGetOne.value=PageState.err;
       errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
     }
-  }
+  }*/
 
   Future<void> pickImageDesktop( ) async {
     try{
@@ -467,7 +467,7 @@ class InventoryUpdateReceiveController extends GetxController{
             responseData.infos?.first["description"], textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
         );
-        inventoryController.fetchGetOneInventory(responseData.id ?? 0);
+        inventoryController.fetchGetInventoryDetail(responseData.id ?? 0);
         inventoryController.getInventoryListPager();
         Get.back();
         clearList();

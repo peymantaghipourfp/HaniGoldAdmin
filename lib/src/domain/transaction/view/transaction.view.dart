@@ -18,7 +18,9 @@ import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/transaction.controller.dart';
+import '../widgets/balance_dialog_id.widget.dart';
 
 class TransactionView extends StatefulWidget {
   const TransactionView({super.key});
@@ -149,9 +151,13 @@ class _TransactionViewState extends State<TransactionView> {
                                         // خروجی اکسل
                                         ElevatedButton(
                                           style: ButtonStyle(
-                                              padding:isDesktop ? WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23,vertical: 19)) :
-                                              WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 21,vertical: 17)),
-                                              // elevation: WidgetStatePropertyAll(5),
+                                              padding: WidgetStatePropertyAll(
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 15,vertical: 7
+                                                ),
+                                              ),
+                                              elevation: WidgetStatePropertyAll(5),
+                                              fixedSize: WidgetStatePropertyAll(Size(100,30)),
                                               backgroundColor:
                                               WidgetStatePropertyAll(AppColor.secondary3Color),
                                               shape: WidgetStatePropertyAll(RoundedRectangleBorder(
@@ -334,6 +340,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                                 onPressed: () async {
                                                                   controller.exportToExcel();
                                                                   Get.back();
+                                                                  controller.clearFilter();
                                                                 },
                                                                 child: controller.isLoading.value?
                                                                 CircularProgressIndicator(
@@ -360,15 +367,20 @@ class _TransactionViewState extends State<TransactionView> {
                                         ),
                                         SizedBox(width: 5,),
                                         // خروجی pdf
-                                        /*ElevatedButton(
+                                        ElevatedButton(
                                           style: ButtonStyle(
-                                              padding:isDesktop ? WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23,vertical: 19)):
-                                              WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 21,vertical: 17)),
-                                              // elevation: WidgetStatePropertyAll(5),
+                                              padding: WidgetStatePropertyAll(
+                                                EdgeInsets.symmetric(
+                                                    horizontal: 15,vertical: 7
+                                                ),
+                                              ),
+                                              elevation: WidgetStatePropertyAll(5),
+                                              fixedSize: WidgetStatePropertyAll(Size(100,30)),
                                               backgroundColor:
                                               WidgetStatePropertyAll(AppColor.secondary3Color),
-                                              shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(5)))),
+                                              shape: WidgetStatePropertyAll(
+                                                  RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(5)))),
                                           onPressed: () {
                                             showGeneralDialog(
                                                 context: context,
@@ -526,7 +538,6 @@ class _TransactionViewState extends State<TransactionView> {
                                                                       ),
                                                                     ],
                                                                   ),
-
                                                                 ],
                                                               ),
                                                             ),
@@ -545,8 +556,9 @@ class _TransactionViewState extends State<TransactionView> {
                                                                     shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
                                                                         borderRadius: BorderRadius.circular(5)))),
                                                                 onPressed: () async {
-                                                                  // controller.exportToPdf();
+                                                                  controller.exportToPdf();
                                                                   Get.back();
+                                                                  controller.clearFilter();
                                                                 },
                                                                 child: controller.isLoading.value?
                                                                 CircularProgressIndicator(
@@ -570,7 +582,7 @@ class _TransactionViewState extends State<TransactionView> {
                                             'خروجی pdf',
                                             style: AppTextStyle.labelText,
                                           ),
-                                        ),*/
+                                        ),
                                       ],
                                     ),
                                   ],
@@ -955,7 +967,8 @@ class _TransactionViewState extends State<TransactionView> {
                                               outside: BorderSide(color: AppColor.textColor,width: 0.3),
                                               borderRadius: BorderRadius.circular(8)
                                           ),
-                                          dataRowMaxHeight: 100,
+                                          dataRowMinHeight: 100,
+                                          dataRowMaxHeight: double.infinity,
                                           //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                           //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
                                           headingRowHeight: 50,
@@ -1002,6 +1015,17 @@ class _TransactionViewState extends State<TransactionView> {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }
 
@@ -1081,51 +1105,64 @@ class _TransactionViewState extends State<TransactionView> {
               child: Text('مقدار',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
-
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
-              child: Text('مانده ریالی',
+              child: Text('کارتخوان',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
-              child: Text('مانده طلایی',
+              child: Text('مانده',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 100),
+              child: Text('مانده بستانکار',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 11))),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 100),
+              child: Text('تصویر',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 11))),
+          headingRowAlignment: MainAxisAlignment.center),
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مانده سکه',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
 
-      DataColumn(
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مانده ریالی بستانکار',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+          headingRowAlignment: MainAxisAlignment.center),*/
+
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مانده طلایی بستانکار',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+          headingRowAlignment: MainAxisAlignment.center),*/
+
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مانده سکه بستانکار',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
 
-      DataColumn(
+     /* DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('مستندات',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
     ];
   }
 
@@ -1165,6 +1202,8 @@ class _TransactionViewState extends State<TransactionView> {
                         ? ' واریز '
                         : trans.type == "reciept"
                         ? ' دریافت '
+                        : trans.type == "TransferWallet"
+                        ? ' انتقال ولت '
                        :
                       " ${trans.type ?? ""}",
                     style: AppTextStyle.bodyText.copyWith(
@@ -1318,12 +1357,26 @@ class _TransactionViewState extends State<TransactionView> {
                         fontWeight: FontWeight.bold,
                         fontSize: 12),
                   ),
+                  trans.toItem!=null ?
+                  Text(
+                    " به : ",
+                    style: AppTextStyle.bodyText.copyWith(
+                        color: AppColor.textColor,
+                        fontSize: 10),
+                  ) : SizedBox.shrink(),
+                  trans.toItem!=null ?
+                  Text(
+                    trans.toItem?.name ?? 'نامشخص',
+                    style: AppTextStyle.bodyText.copyWith(
+                        color: AppColor.secondary2Color,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12),
+                  ) : SizedBox.shrink(),
                 ],
               ),
               SizedBox(
                 height: 5,
               ),
-
               Row(
                 children: [
                   trans.price != null
@@ -1399,133 +1452,137 @@ class _TransactionViewState extends State<TransactionView> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: trans.details!
-                .map((e) => Container(
+                .map((e) => Padding(
               padding: EdgeInsets.symmetric(
-                  horizontal: 5, vertical: 5),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: AppColor.textColor),
-              child: Column(
-                mainAxisAlignment:
-                MainAxisAlignment.center,
-                crossAxisAlignment:
-                CrossAxisAlignment.center,
-                children: [
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "عیار : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.carat ?? 0} ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "وزن : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.quantity ?? 0} گرم ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          Text(
-                            "ناخالصی : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.impurity ?? 0} گرم ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Row(
-                    mainAxisAlignment:
-                    MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            "نام آزمایشگاه : ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
-                                color: AppColor
-                                    .appBarColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                          Text(
-                            "${e.name ?? ""} ",
-                            style: AppTextStyle.bodyText
-                                .copyWith(
+                  horizontal: 5, vertical: 3),
+                  child: Container(
+                                padding: EdgeInsets.symmetric(
+                    horizontal: 5, vertical: 5),
+                                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: AppColor.textColor),
+                                child: Column(
+                  mainAxisAlignment:
+                  MainAxisAlignment.center,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "عیار : ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  color: AppColor
+                                      .appBarColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                            Text(
+                              "${e.carat ?? 0} ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  color: AppColor
+                                      .iconViewColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "وزن : ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  color: AppColor
+                                      .appBarColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                            Text(
+                              "${e.quantity ?? 0} گرم ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  color: AppColor
+                                      .iconViewColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              "ناخالصی : ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  color: AppColor
+                                      .appBarColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                            Text(
+                              "${e.impurity ?? 0} گرم ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  color: AppColor
+                                      .iconViewColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              "نام آزمایشگاه : ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  color: AppColor
+                                      .appBarColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                            Text(
+                              "${e.name ?? ""} ",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
 
-                                color: AppColor
-                                    .iconViewColor,
-                                fontSize: 11,
-                                fontWeight:
-                                FontWeight.bold),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ))
+                                  color: AppColor
+                                      .iconViewColor,
+                                  fontSize: 11,
+                                  fontWeight:
+                                  FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                                ),
+                              ),
+                ))
                 .toList(),
           ),
         )),
@@ -1560,136 +1617,178 @@ class _TransactionViewState extends State<TransactionView> {
             ],
           ),
         )),
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances == null
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances!
-                      .map((e) => Container(
-                    child: e.unitName == "ریال"
-                        ? Row(
-                      children: [
-                        Text(
-                          " ${e.itemName} ",
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 9,
-                              color: e.balance! > 0
-                                  ? AppColor
-                                  .primaryColor
-                                  : AppColor
-                                  .accentColor,
-                              fontWeight:
-                              FontWeight.bold),
-                        ),
-                        Text(
-                          e.balance
-                              .toString()
-                              .seRagham(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 10,
-                              color: e.balance! > 0
-                                  ? AppColor
-                                  .primaryColor
-                                  : AppColor
-                                  .accentColor,
-                              fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color: e.balance! >
-                                    0
-                                    ? AppColor
-                                    .primaryColor
-                                    : AppColor
-                                    .accentColor,
-                                fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : SizedBox(),
-                  ))
-                      .toList(),
+        // کارتخوان
+        DataCell(
+            Center(
+              child:
+              trans.isCard==true ?
+              SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                  colorFilter: ColorFilter.mode(
+                    AppColor.primaryColor,
+                    BlendMode.srcIn,
+                  )) :
+              SvgPicture.asset('assets/svg/close-circle1.svg',
+                  colorFilter: ColorFilter.mode(
+                    AppColor.accentColor,
+                    BlendMode.srcIn,
+                  )),
+            )),
+        // مانده
+        DataCell(
+            trans.toId!=0 && trans.fromId!=0 ?
+            Center(
+              child:
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BalanceDialogId(
+                          entityId:trans.fromId!=0 ? trans.fromId ?? 0 : trans.id ?? 0,
+                          entityName:'نامشخص',
+                          isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        size: 20,
+                        color: AppColor.accentColor,
+                      ),
+                      Text(' مانده بدهکار',
+                        style: AppTextStyle
+                            .labelText
+                            .copyWith(
+                            color: AppColor.accentColor, fontSize: 11,fontWeight: FontWeight.bold),),
+
+                    ],
+                  ),
                 ),
-              ],
-            ))),
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances == null
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances!
-                      .map((e) => Container(
-                    child: e.unitName == "گرم"
-                        ? Row(
-                      children: [
-                        Text(" ${e.itemName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color: e.balance! >
-                                    0
-                                    ? AppColor
-                                    .primaryColor
-                                    : AppColor
-                                    .accentColor,
-                                fontWeight:
-                                FontWeight
-                                    .bold)),
-                        Text(
-                          e.balance.toString(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 10,
-                              color: e.balance! > 0
-                                  ? AppColor
-                                  .primaryColor
-                                  : AppColor
-                                  .accentColor,
-                              fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color: e.balance! >
-                                    0
-                                    ? AppColor
-                                    .primaryColor
-                                    : AppColor
-                                    .accentColor,
-                                fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : SizedBox(),
-                  ))
-                      .toList(),
+              ),
+            ) :
+            Center(
+              child:
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BalanceDialogId(
+                          entityId:trans.fromId!=0 ? trans.fromId ?? 0 : trans.id ?? 0,
+                          entityName:'نامشخص',
+                          isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        size: 20,
+                        color: AppColor.dividerColor,
+                      ),
+                      Text(' مانده',
+                        style: AppTextStyle
+                            .labelText
+                            .copyWith(
+                            color: AppColor.dividerColor, fontSize: 11,fontWeight: FontWeight.bold),),
+                    ],
+                  ),
                 ),
-              ],
-            ))),
+              ),
+            )
+        ),
+        // مانده بستانکار
+        DataCell(
+            trans.toId!=0 && trans.fromId!=0 ?
+            Center(
+              child:
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GestureDetector(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return BalanceDialogId(
+                          entityId: trans.toId ?? 0,
+                          entityName:'نامشخص',
+                          isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                        );
+                      },
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.account_balance_wallet,
+                        size: 20,
+                        color: AppColor.primaryColor,
+                      ),
+                      Text(' مانده بستانکار',
+                        style: AppTextStyle
+                            .labelText
+                            .copyWith(
+                            color: AppColor.primaryColor, fontSize: 11,fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                ),
+              ),
+            ) :
+                SizedBox.shrink(),
+        ) ,
+        // تصویر
         DataCell(Center(
+          child:
+          GestureDetector(
+            onTap: () async{
+              await controller.getImage(
+                  trans.recId ?? "",trans.type == "payment" || trans.type == "receive" ? "Inventory" : trans.type == "issue" || trans.type == "reciept" ? "Remittance" :
+              trans.type == "deposit" ? "Deposit" : "",
+              );
+              _showImageGallery(context);
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColor.iconViewColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: AppColor.iconViewColor.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    'assets/svg/picture.svg',
+                    height: 16,
+                    colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    "تصاویر",
+                    style: AppTextStyle.labelText.copyWith(
+                      color: AppColor.iconViewColor,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        )),
+
+        /*DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1752,8 +1851,8 @@ class _TransactionViewState extends State<TransactionView> {
                       .toList(),
                 ),
               ],
-            ))),
-        DataCell(Center(
+            ))),*/
+        /*DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1817,8 +1916,8 @@ class _TransactionViewState extends State<TransactionView> {
                       .toList(),
                 ),
               ],
-            ))),
-        DataCell(Center(
+            ))),*/
+        /*DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1881,8 +1980,8 @@ class _TransactionViewState extends State<TransactionView> {
                       .toList(),
                 ),
               ],
-            ))),
-        DataCell(Center(
+            ))),*/
+        /*DataCell(Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -1945,8 +2044,8 @@ class _TransactionViewState extends State<TransactionView> {
                       .toList(),
                 ),
               ],
-            ))),
-        DataCell(Center(
+            ))),*/
+        /*DataCell(Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -2669,9 +2768,178 @@ class _TransactionViewState extends State<TransactionView> {
                   width: 20,
                 ),
               ],
-            ))),
+            ))),*/
       ],
     ))
         .toList();
+  }
+
+  void _showImageGallery(BuildContext context) {
+    Future.delayed(const Duration(milliseconds: 200), () {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: AppColor.backGroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.photo_library,
+                        color: AppColor.primaryColor,
+                        size: 24,
+                      ),
+                      SizedBox(width: 12),
+                      Text(
+                        'گالری تصاویر',
+                        style: AppTextStyle.smallTitleText.copyWith(
+                          color: AppColor.primaryColor,
+                        ),
+                      ),
+                      Spacer(),
+                      IconButton(
+                        onPressed: () => Get.back(),
+                        icon: Icon(Icons.close, color: AppColor.textColor),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+
+                  // Image viewer
+                  SizedBox(
+                    width: 500,
+                    height: 500,
+                    child: Stack(
+                      children: [
+                        PageView.builder(
+                          controller: controller.pageController,
+                          itemCount: controller.imageList.length,
+                          onPageChanged: (index) =>
+                          controller.currentImagePage.value = index,
+                          itemBuilder: (context, index) {
+                            final attachment = controller.imageList[index];
+                            return Column(
+                              children: [
+                                if (kIsWeb)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 50),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        IconButton(
+                                          icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                          onPressed: () => controller.downloadImage(attachment),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                Expanded(
+                                  child: Image.network(
+                                    "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(child: CircularProgressIndicator());
+                                    },
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Icon(Icons.error, color: Colors.red),
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+
+                        // Navigation arrows
+                        Obx(() => Positioned(
+                          left: 10,
+                          top: 0,
+                          bottom: 0,
+                          child: Visibility(
+                            visible: controller.currentImagePage.value > 0,
+                            child: IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(Colors.black54),
+                                shape: WidgetStateProperty.all(CircleBorder()),
+                                padding: WidgetStateProperty.all(EdgeInsets.all(8)),
+                              ),
+                              icon: Icon(Icons.chevron_left, color: Colors.white, size: 40),
+                              onPressed: () {
+                                controller.pageController.previousPage(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                            ),
+                          ),
+                        )),
+
+                        Obx(() => Positioned(
+                          right: 10,
+                          top: 0,
+                          bottom: 0,
+                          child: Visibility(
+                            visible: controller.currentImagePage.value <
+                                (controller.imageList.length - 1),
+                            child: IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStateProperty.all(Colors.black54),
+                                shape: WidgetStateProperty.all(CircleBorder()),
+                                padding: WidgetStateProperty.all(EdgeInsets.all(8)),
+                              ),
+                              icon: Icon(Icons.chevron_right, color: Colors.white, size: 40),
+                              onPressed: () {
+                                controller.pageController.nextPage(
+                                  duration: Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
+                            ),
+                          ),
+                        )),
+                      ],
+                    ),
+                  ),
+
+                  // Page indicators
+                  SizedBox(height: 16),
+                  Obx(() => Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(
+                      controller.imageList.length,
+                          (index) => Container(
+                        width: 8,
+                        height: 8,
+                        margin: EdgeInsets.symmetric(horizontal: 4),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: controller.currentImagePage.value == index
+                              ? AppColor.primaryColor
+                              : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  )),
+
+                  SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text("بستن", style: AppTextStyle.bodyText),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    });
   }
 }

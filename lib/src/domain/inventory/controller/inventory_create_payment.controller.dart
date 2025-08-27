@@ -22,6 +22,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
@@ -50,7 +51,9 @@ class InventoryCreatePaymentController extends GetxController{
   final InventoryCreateLayoutController inventoryCreateLayoutController = Get.find<InventoryCreateLayoutController>();
 
   final TextEditingController searchController = TextEditingController();
+  final FocusNode searchFocusNode = FocusNode();
   final TextEditingController searchLaboratoryController=TextEditingController();
+  final FocusNode searchLaboratoryFocusNode = FocusNode();
   final TextEditingController quantityController=TextEditingController();
   final TextEditingController impurityController=TextEditingController();
   final TextEditingController weight750Controller=TextEditingController();
@@ -67,6 +70,7 @@ class InventoryCreatePaymentController extends GetxController{
   final LaboratoryRepository laboratoryRepository=LaboratoryRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<WalletModel> walletAccountList=<WalletModel>[].obs;
@@ -111,24 +115,98 @@ class InventoryCreatePaymentController extends GetxController{
   final RxInt countdownSeconds = 180.obs;
   final RxBool isTimerActive = false.obs;
   var verificationChecked = false.obs;
+  var itemCountTemp=''.obs;
+  var calculatedWeight = 0.0.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
+    if (tempDetails.isNotEmpty) {
+      Get.snackbar(
+        "هشدار",
+        "امکان تغییر کاربر وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+        titleText: Text(
+          "هشدار",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "امکان تغییر کاربر وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+      return;
+    }
     selectedAccount.value = newValue;
     selectedWalletAccount.value = null;
     getWalletAccount(selectedAccount.value?.id ?? 0);
-   // getBalanceList(newValue?.id ?? 0);
+    // getBalanceList(newValue?.id ?? 0);
     isLoadingBalance.value=false;
+
+  }
+  void updateW750(){
+    if (selectedWalletAccount.value?.item?.itemUnit?.id == 2) {
+      int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
+      double quantity = double.tryParse(quantityController.text=="" ? "0" : quantityController.text.toEnglishDigit()) ?? 0;
+      double w750 = (carat * quantity)/750;
+      weight750Controller.text = w750.toStringAsFixed(2).toEnglishDigit();
+    } else {
+      weight750Controller.clear();
+    }
   }
 
   void changeSelectedWalletAccount(WalletModel? newValue) {
+    // Check if there are items in tempDetails and prevent changing wallet account
+    if (tempDetails.isNotEmpty) {
+      Get.snackbar(
+        "هشدار",
+        "امکان تغییر حساب wallet وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+        titleText: Text(
+          "هشدار",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "امکان تغییر حساب wallet وجود ندارد. ابتدا آیتم‌های موقت را پاک کنید.",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+      return;
+    }
     selectedWalletAccount.value = newValue;
+    if (newValue?.item?.itemUnit?.id == 2) {
+      if(newValue?.item?.id==10 ||
+          newValue?.item?.id==12 ||
+          newValue?.item?.id==15 ||
+          newValue?.item?.id==16){
+        caratController.text = '900';
+        updateW750();
+      }else if(newValue?.item?.id==13){
+        caratController.text = '750';
+        updateW750();
+      }else{
+        caratController.text = '';
+        updateW750();
+      }
+    }
     selectedLaboratoryId.value = 0;
     searchLaboratoryController.clear();
     getForPaymentListPager();
 
+    viewCountItem();
     print(selectedWalletAccount.value?.item?.id);
     print(selectedWalletAccount.value?.item?.name);
   }
+
+
+  void viewCountItem(){
+    if(selectedWalletAccount.value?.item?.id==10 || selectedWalletAccount.value?.item?.id==13 || selectedWalletAccount.value?.item?.id==15 || selectedWalletAccount.value?.item?.id==16){
+      double? w750=selectedWalletAccount.value?.item?.w750;
+      double quantity=double.tryParse(quantityController.text==""? "0" :quantityController.text.toEnglishDigit()) ?? 0;
+      itemCountTemp.value=(quantity/w750!).round().toString();
+    }
+  }
+
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
     selectedLaboratory.value=newValue;
   }
@@ -141,7 +219,24 @@ class InventoryCreatePaymentController extends GetxController{
   void updateTempDetailQuantity(int index, double newQuantity) {
     if (index >= 0 && index < tempDetails.length) {
       final oldDetail = tempDetails[index];
-      final newDetail = oldDetail.copyWith(quantity: newQuantity);
+
+      // Calculate weight using formula: (weight * carat) / 750 for طلای آبشده (Molten Gold)
+      // This calculation converts the original weight to the actual weight based on carat purity
+      // and will be sent in the weight field during submission
+      //double calculatedWeight = 0.0;
+      if (oldDetail.item?.id == 1) { // Item id 1 is "طلای آبشده" (Molten Gold)
+        //final weight = oldDetail.weight ?? 0.0;
+        final carat = oldDetail.carat ?? 0;
+        if (newQuantity > 0 && carat > 0) {
+          calculatedWeight.value = (newQuantity * carat) / 750;
+          print('طلای آبشده22222 - Calculated weight: ($newQuantity * $carat) / 750 = $calculatedWeight');
+        }
+      }
+
+      final newDetail = oldDetail.copyWith(
+        quantity: newQuantity,
+        weight: calculatedWeight.value,
+      );
       tempDetails[index] = newDetail;
     }
   }
@@ -149,14 +244,14 @@ class InventoryCreatePaymentController extends GetxController{
     if (index >= 0 && index < tempDetails.length) {
       final oldDetail = tempDetails[index];
       List<XFile> list = tempDetails[index].listXfile!=null?tempDetails[index].listXfile!:[];
-       if(listXfile.isNotEmpty){
-         list .addAll(listXfile);
-       }
+      if(listXfile.isNotEmpty){
+        list.addAll(listXfile);
+      }
       final newDetail = oldDetail.copyWith(recId: recId,listXfile: list);
       tempDetails[index] = newDetail;
       print("reccccccc::${recId}");
       print("reccccciddd::${tempDetails[index].recId}");
-     update();
+      update();
     }
   }
 
@@ -164,6 +259,8 @@ class InventoryCreatePaymentController extends GetxController{
   @override
   void onInit() {
     searchController.addListener(onSearchChanged);
+    quantityController.addListener(updateW750);
+    caratController.addListener(updateW750);
     fetchAccountList();
     fetchWalletAccountList();
     getForPaymentListPager();
@@ -173,14 +270,63 @@ class InventoryCreatePaymentController extends GetxController{
     "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     super.onInit();
   }
+  void onDropdownMenuStateChange(bool isOpen) {
+    if (isOpen) {
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchFocusNode.requestFocus();
+      });
+    } else {
+      resetAccountSearch();
+    }
+  }
   @override
   void onClose() {
     _timer?.cancel();
     debounce?.cancel();
     searchController.dispose();
+    searchFocusNode.dispose();
     searchLaboratoryController.dispose();
+    searchLaboratoryFocusNode.dispose();
     super.onClose();
   }
+
+  // لیست عکس ها
+  Future<List<String>> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    //imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      /*imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();*/
+      print('تعداد image:${fetch.guidIds.length}');
+      return fetch.guidIds;
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+      return [];
+    }finally{
+    }
+  }
+
+  /*Future<void> deleteImage(String fileName,) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    print('تعداد image:');
+    try{
+      var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
+      if(fetch){
+        getImage(remittanceModel?.recId??"", "Remittance");
+      }
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }*/
 
   // لیست کاربران
   Future<void> fetchAccountList() async{
@@ -309,7 +455,7 @@ class InventoryCreatePaymentController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getForPaymentListPager();
   }
@@ -347,13 +493,13 @@ class InventoryCreatePaymentController extends GetxController{
       var response = await inventoryRepository.getForPaymentlistPager(
         startIndex: currentPage.value,
         toIndex: itemsPerPage.value,
-          itemId:selectedWalletAccount.value?.item?.id ?? 0,
-          laboratoryId: selectedLaboratoryId.value == 0
-              ? null :selectedLaboratoryId.value
+        itemId:selectedWalletAccount.value?.item?.id ?? 0,
+        /*laboratoryId: selectedLaboratoryId.value == 0
+              ? null :selectedLaboratoryId.value*/
       );
       forPaymentList.clear();
       //isLoading.value=false;
-      forPaymentList.addAll(response.inventories??[]);
+      forPaymentList.addAll(response.inventories?.where((pList)=>pList.itemUnit?.id==2).toList() ?? []);
       paginated.value=response.paginated;
       //state.value=PageState.list;
       update();
@@ -368,34 +514,36 @@ class InventoryCreatePaymentController extends GetxController{
     try{
       for(int i=0; i < tempDetails.length; i++){
         recordId.value=uuid.v4();
-        if (tempDetails[i].listXfile==null){
-          return;
+        if (tempDetails[i].listXfile==null || tempDetails[i].listXfile!.isEmpty){
+          continue;
         }
-        else{
-          isUploadingDesktop.value = true;
-          uploadStatusesDesktop.assignAll(List.filled(tempDetails[i].listXfile!.length, false));
-            for (int j = 0; j < tempDetails[i].listXfile!.length; j++) {
-              final file = tempDetails[i].listXfile![j];
-              try{
-                final bytes = await file.readAsBytes();
-                String success = await uploadRepositoryDesktop.uploadImageDesktop(
-                  imageBytes: bytes,
-                  fileName: file.name,
-                  recordId: tempDetails[i].recId ?? '',
-                  type: type,
-                  entityType: entityType,
-                );
-                uploadStatusesDesktop[i] = success.isNotEmpty;
-              }catch(e){
-                EasyLoading.dismiss();
-                Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
-              }
-            }
-            if (uploadStatusesDesktop.every((status) => status)) {
-              EasyLoading.dismiss();
-              Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
-            }
+        if (tempDetails[i].recId == null || tempDetails[i].recId!.isEmpty) {
+          tempDetails[i] = tempDetails[i].copyWith(recId: uuid.v4());
         }
+        isUploadingDesktop.value = true;
+        uploadStatusesDesktop.assignAll(List.filled(tempDetails[i].listXfile!.length, false));
+        for (int j = 0; j < tempDetails[i].listXfile!.length; j++) {
+          final file = tempDetails[i].listXfile![j];
+          try{
+            final bytes = await file.readAsBytes();
+            String success = await uploadRepositoryDesktop.uploadImageDesktop(
+              imageBytes: bytes,
+              fileName: file.name,
+              recordId: tempDetails[i].recId!,
+              type: type,
+              entityType: entityType,
+            );
+            uploadStatusesDesktop[i] = success.isNotEmpty;
+          }catch(e){
+            EasyLoading.dismiss();
+            Get.snackbar("خطا", "خطا در آپلود تصویر ${j + 1}");
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          EasyLoading.dismiss();
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+        }
+
       }
     }finally{
       submitFinalInventory();
@@ -415,11 +563,24 @@ class InventoryCreatePaymentController extends GetxController{
           quantityController.text.isEmpty) {
         throw ErrorException('لطفا فیلدهای ضروری را پر کنید');
       }
+      print(calculatedWeight.value);
+      if(selectedWalletAccount.value!.item?.id==1){
+        calculatedWeight.value=(double.tryParse(quantityController.text.toEnglishDigit())! * double.parse(caratController.text.toEnglishDigit())) / 750;
+      }
+
+      print("weight750Controller.text::::${weight750Controller.text}");
+      print("caratController.text::::${caratController.text}");
 
       final newDetail = InventoryDetailModel(
         wallet: selectedWalletAccount.value!,
         item: selectedWalletAccount.value!.item!,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
+        weight: selectedWalletAccount.value?.item?.id==10 ||
+            selectedWalletAccount.value?.item?.id==12 ||
+            selectedWalletAccount.value?.item?.id==15 ||
+            selectedWalletAccount.value?.item?.id==16 ? double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0
+            : selectedWalletAccount.value!.item?.id==1 && calculatedWeight.value!=0 ? calculatedWeight.value :
+        double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         type: 1,
         impurity: double.tryParse(impurityController.text.toEnglishDigit()) ?? 0.0,
         weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
@@ -429,6 +590,9 @@ class InventoryCreatePaymentController extends GetxController{
         stateMode : 1,
         inputItemId: selectedWalletAccount.value!.item?.itemUnit?.id==2 ? selectedInputItem.value?.id : null,
         description: descriptionController.text,
+        listXfile: selectedInputItem.value?.listXfile ?? [],
+        recId: selectedInputItem.value?.recId,
+        //fetchedImageUrls: fetchedImageUrls,
       );
 
       tempDetails.add(newDetail);
@@ -436,6 +600,7 @@ class InventoryCreatePaymentController extends GetxController{
           !selectedForPaymentId.contains(selectedInputItem.value!.id)) {
         selectedForPaymentId.add(selectedInputItem.value!.id!);
       }
+      selectedInputItem.value = null;
       // ریست کردن فیلدها
       /*quantityController.clear();
       receiptNumberController.clear();
@@ -453,6 +618,7 @@ class InventoryCreatePaymentController extends GetxController{
 
   // تایمر
   void startTimer() {
+    print("Starting timer");
     isTimerActive.value = true;
     countdownSeconds.value = 180;
     _timer?.cancel();
@@ -467,15 +633,67 @@ class InventoryCreatePaymentController extends GetxController{
   }
 
   void stopTimer() {
+    print("Stopping timer");
     _timer?.cancel();
     isTimerActive.value = false;
     countdownSeconds.value = 180;
   }
 
+  void resetTimer() {
+    print("Resetting timer");
+    stopTimer();
+    isTimerActive.value = false;
+    countdownSeconds.value = 180;
+  }
+
+  void resendVerificationCode() {
+    print("Resending verification code");
+    if (selectedAccount.value?.id != null && selectedAccount.value!.id! > 0) {
+      // Reset verification state
+      isVerification.value = false;
+      isCodeVerified.value = false;
+      verificationCodeController.clear();
+
+      // Send new code
+      sendVerificationCode(selectedAccount.value!.id!);
+    } else {
+      Get.snackbar(
+        "خطا",
+        "لطفا ابتدا کاربر را انتخاب کنید",
+        titleText: Text(
+          "خطا",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "لطفا ابتدا کاربر را انتخاب کنید",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+    }
+  }
 //ارسال کد
   Future<void> sendVerificationCode(int accountId) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
+      if (accountId <= 0) {
+        Get.snackbar(
+          "خطا",
+          "لطفا ابتدا کاربر را انتخاب کنید",
+          titleText: Text(
+            "خطا",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+          messageText: Text(
+            "لطفا ابتدا کاربر را انتخاب کنید",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+        );
+        return;
+      }
       isVerification.value=false;
       isCodeVerified.value=false;
       var response=await inventoryRepository.sendVerificationCode(accountId);
@@ -500,14 +718,14 @@ class InventoryCreatePaymentController extends GetxController{
       } else {
         Get.snackbar(
           "خطا",
-          "خطا در ارسال کد",
+          "اجازه دهید زمان 3 دقیقه تمام شود \n خطا در ارسال کد",
           titleText: Text(
             "خطا",
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),
           ),
           messageText: Text(
-            "خطا در ارسال کد",
+            "اجازه دهید زمان 3 دقیقه تمام شود \n خطا در ارسال کد",
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),
           ),
@@ -641,7 +859,19 @@ class InventoryCreatePaymentController extends GetxController{
                     ],
                   ),
                   pw.SizedBox(height: 10),
-                  buildBalanceWidget(inventoryCreateLayoutController.balanceList),
+                  pw.Row(mainAxisAlignment: pw.MainAxisAlignment.start,
+                      children: [
+                        pw.Container(
+                          width: 250,
+                          child: buildBalanceWidget(inventoryCreateLayoutController.balanceList),
+                        ),
+                        /*pw.SizedBox(width: 3),
+                      pw.Container(
+                        width: 250,
+                        child: buildBalanceWidgetBefore(inventoryCreateLayoutController.balanceList,inventoryDetails),
+                      ),*/
+                      ]
+                  ),
                   pw.SizedBox(height: 20),
                   buildInvoiceFooter(inventoryDetails),
                 ];
@@ -710,8 +940,8 @@ class InventoryCreatePaymentController extends GetxController{
             );
           }
         }
-          Get.offNamed('/inventoryList');
-          clearList();
+        Get.offNamed('/inventoryList');
+        clearList();
       }
     }catch(e){
       EasyLoading.dismiss();
@@ -728,21 +958,10 @@ class InventoryCreatePaymentController extends GetxController{
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        /*pw.Row(
-          children: [
-            pw.Image(
-              pw.MemoryImage(logoBytes),
-              width: 100,
-              height: 50,
-            ),
-            pw.SizedBox(width: 20),
-            pw.Text('فاکتور رسمی', style: pw.TextStyle(fontSize: 24)),
-          ],
-        ),*/
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.center,
-          children:[
-            pw.Text('فاکتور مشتری ${responseData.account?.name ?? '-'}', style: pw.TextStyle(fontSize: 15)),
-          ]
+            children:[
+              pw.Text('فاکتور مشتری ${responseData.account?.name ?? '-'}', style: pw.TextStyle(fontSize: 15)),
+            ]
         ),
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -794,8 +1013,11 @@ class InventoryCreatePaymentController extends GetxController{
   pw.TableRow buildInvoiceDataRow(InventoryDetailModel detail, int index) {
     return pw.TableRow(
       children: [
-        buildDataCell(detail.itemUnit?.id==2 ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
-        buildDataCell(detail.item?.name ?? ''),
+        buildDataCell(detail.item?.id==1  ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  :
+        detail.itemUnit?.id==2 && detail.item?.id!=1 && detail.item?.id!=10 && detail.item?.id!=13 && detail.item?.id!=15 && detail.item?.id!=16 ? " گرم ${detail.quantity}, عیار: ${detail.carat}" :
+        detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
+        " عدد ${itemCountTemp.value.toString()}" ?? '' : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(" (پرداخت) ${detail.item?.name}" ?? ''),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
     );
@@ -849,58 +1071,117 @@ class InventoryCreatePaymentController extends GetxController{
   }
 
   pw.Widget buildBalanceWidget(List<BalanceItemModel> balanceList) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text('مانده فعلی', style: pw.TextStyle(fontSize: 12,)),
-        pw.SizedBox(height: 5),
-        pw.Table(
-          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
-          columnWidths: {
-            0: pw.FlexColumnWidth(1),
-            1: pw.FlexColumnWidth(2),
-            2: pw.FlexColumnWidth(3),
-          },
-          children: [
-            pw.TableRow(
-              decoration: pw.BoxDecoration(color: PdfColors.grey300),
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(4),
-                  child: pw.Text('مقدار', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(4),
-                  child: pw.Text('واحد', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(4),
-                  child: pw.Text('نام محصول', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
-                ),
-              ],
-            ),
-            ...balanceList.map((e) => pw.TableRow(
-              children: [
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(4),
-                  child: pw.Text((e.item?.itemUnit?.name=='ریال' ? e.balance.toString().seRagham(separator: ',') : e.balance ?? 0.0).toString(), style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(4),
-                  child: pw.Text(e.item?.itemUnit?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
-                ),
-                pw.Padding(
-                  padding: const pw.EdgeInsets.all(4),
-                  child: pw.Text(e.item?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
-                ),
-              ],
-            )).toList(),
-          ],
-        ),
-      ],
-    );
+    return
+      pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text('مانده فعلی', style: pw.TextStyle(fontSize: 12,)),
+          pw.SizedBox(height: 5),
+          pw.Table(
+            border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
+            columnWidths: {
+              0: pw.FlexColumnWidth(2.5),
+              1: pw.FlexColumnWidth(1),
+              2: pw.FlexColumnWidth(2),
+            },
+            children: [
+              pw.TableRow(
+                decoration: pw.BoxDecoration(color: PdfColors.grey300),
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text('مقدار', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text('واحد', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text('نام محصول', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                ],
+              ),
+              ...balanceList.map((e) => pw.TableRow(
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text((e.item?.itemUnit?.name=='ریال' ? e.balance.toString().seRagham(separator: ',') : e.balance ?? 0.0).toString(), style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text(e.item?.itemUnit?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text(e.item?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                ],
+              )).toList(),
+            ],
+          ),
+        ],
+      );
   }
 
+  pw.Widget buildBalanceWidgetBefore(List<BalanceItemModel> balanceList, List<InventoryDetailModel> details) {
+    return
+      pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.Text('مانده قبلی', style: pw.TextStyle(fontSize: 12,)),
+          pw.SizedBox(height: 5),
+          pw.Table(
+            border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
+            columnWidths: {
+              0: pw.FlexColumnWidth(2.5),
+              1: pw.FlexColumnWidth(1),
+              2: pw.FlexColumnWidth(2),
+            },
+            children: [
+              pw.TableRow(
+                decoration: pw.BoxDecoration(color: PdfColors.grey300),
+                children: [
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text('مقدار', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text('واحد', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(4),
+                    child: pw.Text('نام محصول', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                  ),
+                ],
+              ),
+              ...balanceList.map((e){
+                final detail = details.firstWhere(
+                      (d) => d.item?.id == e.item?.id,
+                );
+                return pw.TableRow(
+                  children: [
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text((e.item?.itemUnit?.name=='ریال' ? e.balance.toString().seRagham(separator: ',') : e.balance ?? 0.0).toString(), style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(e.item?.itemUnit?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                    ),
+                    pw.Padding(
+                      padding: const pw.EdgeInsets.all(4),
+                      child: pw.Text(e.item?.name ?? '', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                    ),
+                  ],
+                );
+              }).toList(),
+            ],
+          ),
+        ],
+      );
+  }
 
   // لیست بالانس
   /*Future<void> getBalanceList(int id) async{
@@ -936,8 +1217,10 @@ class InventoryCreatePaymentController extends GetxController{
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    selectedInputItem.value = null;
     factorBalanceChecked.value=false;
     factorChecked.value=false;
+    clearVerificationState();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
@@ -954,18 +1237,22 @@ class InventoryCreatePaymentController extends GetxController{
     selectedWalletAccount.value=null;
     selectedAccount.value = null;
     selectedLaboratory.value=null;
+    selectedInputItem.value = null;
     factorBalanceChecked.value=false;
     factorChecked.value=false;
+    clearVerificationState();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
   }
+
   void clearItemFields() {
     quantityController.clear();
     impurityController.clear();
     weight750Controller.clear();
     caratController.clear();
     receiptNumberController.clear();
+    clearVerificationState();
     //recipientNameController.clear();
     selectedLaboratory.value = null;
   }
@@ -978,5 +1265,11 @@ class InventoryCreatePaymentController extends GetxController{
     searchedLaboratories.assignAll(laboratoryList);
   }
 
+  void clearVerificationState() {
+    isVerification.value = false;
+    isCodeVerified.value = false;
+    verificationCodeController.clear();
+    resetTimer();
+  }
 
 }

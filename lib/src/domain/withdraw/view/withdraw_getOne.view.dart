@@ -16,6 +16,7 @@ import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import 'deposit_request_create.view.dart';
 
 
@@ -168,7 +169,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                     .status ==
                                                                     1
                                                                     ? 'تایید شده'
-                                                                    : 'نامشخص',
+                                                                    : 'در انتظار',
                                                                 style: AppTextStyle
                                                                     .labelText,
                                                                 textAlign: TextAlign
@@ -421,6 +422,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                             .value?.depositRequests?[index];
                                                                                         return Column(
                                                                                           children: [
+
                                                                                             Padding(
                                                                                               padding: const EdgeInsets.only(
                                                                                                   top: 5,
@@ -532,7 +534,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                                                     ?.status ==
                                                                                                                     1
                                                                                                                     ? 'تایید شده'
-                                                                                                                    : 'نامشخص',
+                                                                                                                    : 'در انتظار',
                                                                                                                 style: AppTextStyle
                                                                                                                     .labelText,
                                                                                                                 textAlign: TextAlign
@@ -1251,7 +1253,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                           .status ==
                                                           1
                                                           ? 'تایید شده'
-                                                          : 'نامشخص',
+                                                          : 'در انتظار',
                                                       style: AppTextStyle
                                                           .labelText,
                                                       textAlign: TextAlign
@@ -1642,7 +1644,7 @@ class WithdrawGetOneView extends StatelessWidget {
                                                                                         ?.status ==
                                                                                         1
                                                                                         ? 'تایید شده'
-                                                                                        : 'نامشخص',
+                                                                                        : 'در انتظار',
                                                                                     style: AppTextStyle
                                                                                         .labelText,
                                                                                     textAlign: TextAlign
@@ -2005,6 +2007,17 @@ class WithdrawGetOneView extends StatelessWidget {
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
 }

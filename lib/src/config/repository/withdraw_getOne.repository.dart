@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 
 class WithdrawGetOneRepository{
@@ -11,6 +12,7 @@ class WithdrawGetOneRepository{
 
   WithdrawGetOneRepository(){
     withdrawGetOneDio.options.baseUrl=BaseUrl.baseUrl;
+    withdrawGetOneDio.interceptors.add(DioInterceptor());
   }
 
 Future<WithdrawModel> getOneWithdraw(int withdrawId)async{

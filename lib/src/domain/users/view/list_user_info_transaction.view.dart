@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -12,6 +13,7 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/user_info_transaction.controller.dart';
 
 class ListUserInfoTransactionView extends GetView<UserInfoTransactionController> {
@@ -61,7 +63,11 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                         //   // });
                         // },
                         onEditingComplete: () async {
-                        controller.getListTransactionInfoPager();
+                          if (controller.searchController.text.isNotEmpty) {
+                            await controller.getListTransactionInfoPager();
+                          }else {
+                            controller.clearSearch();
+                          }
                       },
 
                         decoration: InputDecoration(
@@ -82,7 +88,52 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                 color: AppColor.textColor,
                                 size: 30,
                               )),
+                            suffixIcon: IconButton(
+                              onPressed: controller.clearSearch,
+                              icon: Icon(Icons.close, color: AppColor.textColor),
+                            )
                         ),
+                      ),
+                    ),
+                    // خروجی اکسل
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30),
+                      child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          ElevatedButton(
+                            style: ButtonStyle(
+                                padding: WidgetStatePropertyAll(
+                                  EdgeInsets
+                                      .symmetric(
+                                      horizontal: 15,
+                                      vertical: 7
+                                  ),
+                                ),
+                                fixedSize: WidgetStatePropertyAll(
+                                    Size(100, 30)),
+                                elevation: WidgetStatePropertyAll(
+                                    5),
+                                backgroundColor:
+                                WidgetStatePropertyAll(
+                                    AppColor
+                                        .secondary3Color),
+                                shape: WidgetStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius
+                                            .circular(
+                                            5)))),
+                            onPressed: () {
+                              controller.getListUserInfoTransactionExcel();
+                              Get.back();
+                            },
+                            child: Text(
+                              'خروجی اکسل',
+                              style: AppTextStyle
+                                  .labelText,
+                            ),
+                            //onPressed: () => orderController.getOrderExcel(),
+                          ),
+                        ],
                       ),
                     ),
                     Container(
@@ -105,9 +156,12 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   DataTable(
                                     columns:
                                     buildDataColumns(),
-                                    sortColumnIndex: controller.sortIndex.value,
-                                    sortAscending:
-                                    controller.sort.value,
+                                    sortColumnIndex: controller
+                                        .sortColumnIndex
+                                        .value,
+                                    sortAscending: controller
+                                        .sortAscending
+                                        .value,
                                     border: TableBorder.symmetric(inside: BorderSide(color: AppColor.textColor,width: 0.3),
                                       outside: BorderSide(color: AppColor.textColor,width: 0.3),
                                       borderRadius: BorderRadius.circular(8),
@@ -118,11 +172,430 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     dataRowMaxHeight: 80,
                                     //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
                                     //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                    headingRowHeight: 40,
-                                    columnSpacing: 20,
+                                    headingRowHeight: 60,
+                                    columnSpacing: 30,
                                     horizontalMargin: 5,
                                   ),
+                                  // Footer Section
+                                  Obx(() => controller.listTransactionInfoFooter.isNotEmpty
+                                      ? Container(
+                                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color:AppColor.appBarColor.withOpacity(0.5),),
+                                        child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                            margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                            //decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color:AppColor.appBarColor.withOpacity(0.5),),
+                                            child: SingleChildScrollView(
+                                            scrollDirection: Axis.horizontal,
+                                            child: Row(
+                                              children: [
+                                                // ریال بستانکار
+                                                _buildFooterItem(
+                                                  title: "ریال بستانکار",
+                                                  positiveValue: controller.listTransactionInfoFooter
+                                                      .where((item) => item.unitName == "ریال")
+                                                      .fold(0.0, (sum, item) => sum! + (item.totalPositiveBalance ?? 0)),
+                                                  color: AppColor.primaryColor,
+                                                  unit: "ریال",
+                                                ),
+                                                SizedBox(width: 20),
+                                                // ریال بدهکار
+                                                _buildFooterItem(
+                                                  title: "ریال بدهکار",
+                                                  negativeValue: controller.listTransactionInfoFooter
+                                                      .where((item) => item.unitName == "ریال")
+                                                      .fold(0.0, (sum, item) => sum! + (item.totalNegativeBalance ?? 0)),
+                                                  color: AppColor.accentColor,
+                                                  unit: "ریال",
+                                                ),
+                                                SizedBox(width: 20),
+                                                // طلا بستانکار
+                                                Row(
+                                                  children: [
+                                                    _buildFooterItem(
+                                                      title: "طلا بستانکار",
+                                                      positiveValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "گرم")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalPositiveBalance ?? 0)),
+                                                      color: AppColor.primaryColor,
+                                                      unit: "گرم",
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: (){
+                                                        Get.defaultDialog(
+                                                          confirm: Column(
+                                                            children: controller.listTransactionInfoFooter.map((e)=>e.unitName=="گرم" && e.totalPositiveBalance! > 0 ? Row(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  e.itemName??"",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ), Text(
+                                                                  "${e.totalPositiveBalance??0} گرم ",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ),
+                                                              ],
+                                                            ):SizedBox()).toList(),
+                                                          ),
+                                                          middleText: "لیست مانده طلای بستانکار",
+                                                          middleTextStyle: context
+                                                              .textTheme.bodyMedium!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 13),
+                                                          title: "جزییات",
+                                                          titleStyle: context
+                                                              .textTheme.titleSmall!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 14),
+                                                          backgroundColor: AppColor.textColor,
+                                                          radius: 7,
+                                                          contentPadding: EdgeInsets.symmetric(
+                                                              horizontal: 20, vertical: 20),
 
+
+                                                        );
+                                                      },
+                                                      child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                                                          colorFilter: ColorFilter.mode(
+                                                            AppColor.textColor,
+                                                            BlendMode.srcIn,
+                                                          )),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(width: 20),
+                                                // طلا بدهکار
+                                                Row(
+                                                  children: [
+                                                    _buildFooterItem(
+                                                      title: "طلا بدهکار",
+                                                      negativeValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "گرم")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalNegativeBalance ?? 0)),
+                                                      color: AppColor.accentColor,
+                                                      unit: "گرم",
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: (){
+                                                        Get.defaultDialog(
+                                                          confirm: Column(
+                                                            children: controller.listTransactionInfoFooter.map((e)=>e.unitName=="گرم" && e.totalNegativeBalance! < 0 ? Row(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  e.itemName??"",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ), Text(
+                                                                  "${e.totalNegativeBalance??0} گرم ",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ),
+                                                              ],
+                                                            ):SizedBox()).toList(),
+                                                          ),
+                                                          middleText: "لیست مانده طلای بدهکار",
+                                                          middleTextStyle: context
+                                                              .textTheme.bodyMedium!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 13),
+                                                          title: "جزییات",
+                                                          titleStyle: context
+                                                              .textTheme.titleSmall!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 14),
+                                                          backgroundColor: AppColor.textColor,
+                                                          radius: 7,
+                                                          contentPadding: EdgeInsets.symmetric(
+                                                              horizontal: 20, vertical: 20),
+
+
+                                                        );
+                                                      },
+                                                      child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                                                          colorFilter: ColorFilter.mode(
+                                                            AppColor.textColor,
+                                                            BlendMode.srcIn,
+                                                          )),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(width: 20),
+                                                // سکه بستانکار
+                                                Row(
+                                                  children: [
+                                                    _buildFooterItem(
+                                                      title: "سکه بستانکار",
+                                                      positiveValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "عدد")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalPositiveBalance ?? 0)),
+                                                      color: AppColor.primaryColor,
+                                                      unit: "عدد",
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: (){
+                                                        Get.defaultDialog(
+                                                          confirm: Column(
+                                                            children: controller.listTransactionInfoFooter.map((e)=>e.unitName=="عدد" && e.totalPositiveBalance! > 0 ? Row(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  e.itemName??"",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ), Text(
+                                                                  "${e.totalPositiveBalance??0} عدد ",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ),
+                                                              ],
+                                                            ):SizedBox()).toList(),
+                                                          ),
+                                                          middleText: "لیست مانده سکه بستانکار",
+                                                          middleTextStyle: context
+                                                              .textTheme.bodyMedium!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 13),
+                                                          title: "جزییات",
+                                                          titleStyle: context
+                                                              .textTheme.titleSmall!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 14),
+                                                          backgroundColor: AppColor.textColor,
+                                                          radius: 7,
+                                                          contentPadding: EdgeInsets.symmetric(
+                                                              horizontal: 20, vertical: 20),
+
+
+                                                        );
+                                                      },
+                                                      child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                                                          colorFilter: ColorFilter.mode(
+                                                            AppColor.textColor,
+                                                            BlendMode.srcIn,
+                                                          )),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(width: 20),
+                                                // سکه بدهکار
+                                                Row(
+                                                  children: [
+                                                    _buildFooterItem(
+                                                      title: "سکه بدهکار",
+                                                      negativeValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "عدد")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalNegativeBalance ?? 0)),
+                                                      color: AppColor.accentColor,
+                                                      unit: "عدد",
+                                                    ),
+                                                    GestureDetector(
+                                                      onTap: (){
+                                                        Get.defaultDialog(
+                                                          confirm: Column(
+                                                            children: controller.listTransactionInfoFooter.map((e)=>e.unitName=="عدد" && e.totalNegativeBalance! < 0 ? Row(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: [
+                                                                Text(
+                                                                  e.itemName??"",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ), Text(
+                                                                  "${e.totalNegativeBalance??0} عدد ",
+                                                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                                                ),
+                                                              ],
+                                                            ):SizedBox()).toList(),
+                                                          ),
+                                                          middleText: "لیست مانده سکه بدهکار",
+                                                          middleTextStyle: context
+                                                              .textTheme.bodyMedium!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 13),
+                                                          title: "جزییات",
+                                                          titleStyle: context
+                                                              .textTheme.titleSmall!
+                                                              .copyWith(
+                                                              color: AppColor.backGroundColor,
+                                                              fontSize: 14),
+                                                          backgroundColor: AppColor.textColor,
+                                                          radius: 7,
+                                                          contentPadding: EdgeInsets.symmetric(
+                                                              horizontal: 20, vertical: 20),
+
+
+                                                        );
+                                                      },
+                                                      child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                                                          colorFilter: ColorFilter.mode(
+                                                            AppColor.textColor,
+                                                            BlendMode.srcIn,
+                                                          )),
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(width: 20),
+                                                // ارز بستانکار
+                                                Column(
+                                                  children: [
+                                                    _buildFooterItem(
+                                                      title: "ارز بستانکار",
+                                                      positiveValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "دلار")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalPositiveBalance ?? 0)),
+                                                      color: AppColor.primaryColor,
+                                                      unit: "دلار",
+                                                    ),
+                                                    _buildFooterItem(
+                                                      title: "",
+                                                      positiveValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "یورو")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalPositiveBalance ?? 0)),
+                                                      color: AppColor.primaryColor,
+                                                      unit: "یورو",
+                                                    ),
+                                                  ],
+                                                ),
+                                                SizedBox(width: 20),
+                                                // ارز بدهکار
+                                                Column(
+                                                  children: [
+                                                    _buildFooterItem(
+                                                      title: "ارز بدهکار",
+                                                      negativeValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "دلار")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalNegativeBalance ?? 0)),
+                                                      color: AppColor.accentColor,
+                                                      unit: "دلار",
+                                                    ),
+                                                    SizedBox(height: 2,),
+                                                    _buildFooterItem(
+                                                      title: "",
+                                                      positiveValue: controller.listTransactionInfoFooter
+                                                          .where((item) => item.unitName == "یورو")
+                                                          .fold(0.0, (sum, item) => sum! + (item.totalNegativeBalance ?? 0)),
+                                                      color: AppColor.primaryColor,
+                                                      unit: "یورو",
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                                                                ),
+                                                                              ),
+                                            Container(
+                                              margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color: AppColor.backGroundColor1.withOpacity(0.5),),
+                                              child: Row(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                                    //decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color: AppColor.appBarColor.withOpacity(0.5),),
+                                                    child:  Row(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+                                                        children: [
+                                                          // ریال خالص
+                                                          _buildNetFooterItem(
+                                                            title: "ریال خالص",
+                                                            netValue: controller.listTransactionInfoFooter
+                                                                .where((item) => item.unitName == "ریال")
+                                                                .fold(0.0, (sum, item) => sum + ((item.totalPositiveBalance ?? 0) + (item.totalNegativeBalance ?? 0))),
+                                                            unit: "ریال",
+                                                          ),
+                                                          SizedBox(width: 50),
+                                                          // طلا خالص
+                                                          _buildNetFooterItem(
+                                                            title: "طلا خالص",
+                                                            netValue: controller.listTransactionInfoFooter
+                                                                .where((item) => item.unitName == "گرم")
+                                                                .fold(0.0, (sum, item) => sum + ((item.totalPositiveBalance ?? 0) + (item.totalNegativeBalance ?? 0))),
+                                                            unit: "گرم",
+                                                          ),
+                                                          SizedBox(width: 50),
+                                                          // Individual Coin Types
+                                                          Container(
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: controller.listTransactionInfoFooter
+                                                                  .where((item) => item.unitName == "عدد")
+                                                                  .map((item) {
+                                                                final netValue = (item.totalPositiveBalance ?? 0) + (item.totalNegativeBalance ?? 0);
+                                                                if (netValue == 0.0) return SizedBox();
+                                                                return Padding(
+                                                                  padding: EdgeInsets.only(bottom: 8),
+                                                                  child: _buildNetFooterItem(
+                                                                    title: item.itemName ?? "سکه",
+                                                                    netValue: netValue,
+                                                                    unit: "عدد",
+                                                                  ),
+                                                                );
+                                                              }).toList(),
+                                                            ),
+                                                          ),
+                                                          SizedBox(width: 50),
+                                                          // Individual Currency Types
+                                                          Container(
+                                                            child: Column(
+                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                              children: controller.listTransactionInfoFooter
+                                                                  .where((item) => item.itemGroupName == "ارز")
+                                                                  .map((item) {
+                                                                final netValue = (item.totalPositiveBalance ?? 0) + (item.totalNegativeBalance ?? 0);
+                                                                if (netValue == 0.0) return SizedBox();
+                                                                return Padding(
+                                                                  padding: EdgeInsets.only(bottom: 8),
+                                                                  child: _buildNetFooterItem(
+                                                                    title: "" ?? "ارز",
+                                                                    netValue: netValue,
+                                                                    unit: item.unitName,
+                                                                  ),
+                                                                );
+                                                              }).toList(),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+
+                                                  ),
+                                                  Container(
+                                                    width: Get.width*0.2,
+                                                    margin: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+                                                    //decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color: AppColor.appBarColor.withOpacity(0.5),),
+                                                    child:  Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                      children: [
+                                                        Text(
+                                                          "مجموع کل:",
+                                                          style: AppTextStyle.labelText.copyWith(
+                                                            fontSize: 14,
+                                                            fontWeight: FontWeight.bold,
+                                                          ),
+                                                        ),
+                                                        SizedBox(height: 10),
+                                                        _buildNetFooterItem(
+                                                          title: "مجموع کل",
+                                                          netValue: controller.listTransactionInfoFooter.fold(0.0, (sum, item) =>
+                                                          sum + ((item.totalPositiveBalance ?? 0) + (item.totalNegativeBalance ?? 0))
+                                                          ),
+                                                          unit: "ریال",
+                                                        ),
+                                                      ],
+                                                    ),
+
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                      : SizedBox()),
                                 ],
                               ),
                             ),
@@ -137,7 +610,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                 : Center(
               child: ErrPage(
                 callback: () {
-                  controller.clearFilter();
+                  controller.clearSearch();
                   controller.getListTransactionInfoPager();
                 },
                 title: "خطا در لیست کاربران",
@@ -148,6 +621,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
+              // Pagination
               controller.paginated.value!=null?   Container(
                   height: 70,
                   margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
@@ -161,6 +635,17 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
           ),
         ],
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }
   List<DataColumn> buildDataColumns() {
@@ -170,19 +655,16 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
               constraints: BoxConstraints(maxWidth: 80),
               child: Text('ردیف',
                   style: AppTextStyle.labelText)),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center,
+      ),
       DataColumn(
-          onSort: (columnIndex, ascending) {
-            print(columnIndex);
-            controller.setSort(columnIndex,ascending);
-
-            controller.onSortColum(columnIndex, ascending);
-          },
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100),
               child: Text('نام',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center,
+      ),
+
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 120),
@@ -195,7 +677,11 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold)),
                 ],
               )),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 110),
@@ -208,7 +694,11 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold)),
                 ],
               )),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
 
       DataColumn(
           label: ConstrainedBox(
@@ -447,17 +937,19 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
             ))),
 
         DataCell(Center(
-            child: Row(
+            child:
+            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0)>0 ?
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 trans.balances.isEmpty
                     ? SizedBox()
-                    : trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" &&item.balance! > 0 ? sum + item.balance!:sum + 0) == 0?
-                SizedBox(width: 120,):
+                    : trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم"  ? sum + item.balance!:sum + 0) == 0?
+                SizedBox(width: 150,):
                 Row(
                   children: [
                     SizedBox(
-                      width: 130,
+                      width: 150,
                           child: Row(
                                             children: [
                           Text(" طلای آبشده ",
@@ -471,13 +963,12 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   FontWeight
                                       .bold)),
                           Text(
-                            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" &&item.balance! >0 ? sum + item.balance!:sum + 0).toStringAsFixed(3),
+                            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0).toStringAsFixed(3),
                             style: AppTextStyle.bodyText
                                 .copyWith(
                                 fontSize: 11,
                                 color:  AppColor
-                                    .primaryColor
-                                ,
+                                    .primaryColor,
                                 fontWeight:
                                 FontWeight.bold),
                             textDirection:
@@ -501,7 +992,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                       onTap: (){
                         Get.defaultDialog(
                           confirm: Column(
-                            children: trans.balances.map((e)=>e.unitName=="گرم" && e.balance! > 0 ? Row(
+                            children: trans.balances.map((e)=>e.unitName=="گرم" ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
@@ -545,19 +1036,24 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
 
 
               ],
-            ))),
+            ):
+                SizedBox.shrink(),
+        ),
+        ),
         DataCell(Center(
-            child: Column(
+            child:
+            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0)<0 ?
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 trans.balances.isEmpty
                     ? SizedBox()
-                    : trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" &&item.balance! <0 ? sum + item.balance!:sum + 0) == 0?
-                SizedBox(width: 120,):
+                    : trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0) == 0?
+                SizedBox(width: 150,):
                 Row(
                   children: [
                     SizedBox(
-                      width: 130,
+                      width: 150,
                       child: Row(
                         children: [
                           Text(" طلای آبشده ",
@@ -571,7 +1067,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   FontWeight
                                       .bold)),
                           Text(
-                            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" &&item.balance! <0 ? sum + item.balance!:sum + 0).toStringAsFixed(3),
+                            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0).toStringAsFixed(3),
                             style: AppTextStyle.bodyText
                                 .copyWith(
                                 fontSize: 11,
@@ -601,14 +1097,14 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                       onTap: (){
                         Get.defaultDialog(
                           confirm: Column(
-                            children: trans.balances.map((e)=>e.unitName=="گرم" && e.balance! < 0? Row(
+                            children: trans.balances.map((e)=>e.unitName=="گرم" ? Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   e.itemName??"",
                                   style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
                                 ), Text(
-                                  "${e.balance??0} عدد",
+                                  "${e.balance??0} گرم",
                                   style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
                                 ),
                               ],
@@ -644,7 +1140,10 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                 ),
 
               ],
-            ))),
+            ):
+                SizedBox.shrink(),
+        ),
+        ),
 
         DataCell(Center(
             child: Column(
@@ -900,7 +1399,8 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                              BlendMode
                                  .srcIn,
                            )),
-                       Text(" ${trans.currencyValue} ".seRagham(),
+                       SizedBox(width: 5,),
+                       Text(trans.currencyValue.toStringAsFixed(0).seRagham(),
                            style: AppTextStyle
                                .bodyText
                                .copyWith(
@@ -1009,6 +1509,149 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
       ],
     ))
         .toList();
+  }
+
+  Widget _buildFooterItem({
+    required String title,
+    double? positiveValue,
+    double? negativeValue,
+    required Color color,
+    String? unit,
+  }) {
+    final value = positiveValue ?? negativeValue ?? 0.0;
+
+    // Don't display if value is zero
+    if (value == 0.0) {
+      return SizedBox();
+    }
+
+    String formattedValue;
+    if (unit == "ریال") {
+      // For Rial, use seRagham formatting
+      formattedValue = value.toStringAsFixed(3).seRagham();
+    } else if(unit == "گرم") {
+      // For other units, use 3 decimal places
+      formattedValue = value.toStringAsFixed(3);
+    }else{
+      formattedValue = value.toString();
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: color, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: AppTextStyle.labelText.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 3),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                formattedValue,
+                style: AppTextStyle.bodyText.copyWith(
+                  fontSize: 14,
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+                textDirection: TextDirection.ltr,
+              ),
+              if (unit != null) ...[
+                SizedBox(width: 4),
+                Text(
+                  unit,
+                  style: AppTextStyle.bodyText.copyWith(
+                    fontSize: 12,
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNetFooterItem({
+    required String title,
+    required double netValue,
+    String? unit,
+  }) {
+    // Don't display if net value is zero
+    if (netValue == 0.0) {
+      return SizedBox();
+    }
+
+    // Determine color based on net value
+    final color = netValue > 0 ? AppColor.primaryColor : AppColor.accentColor;
+
+    String formattedValue;
+    if (unit == "ریال") {
+      // For Rial, use seRagham formatting
+      formattedValue = netValue.toStringAsFixed(3).seRagham();
+    } else if(unit == "گرم") {
+      // For other units, use 3 decimal places
+      formattedValue = netValue.toStringAsFixed(3);
+    }else{
+      formattedValue = netValue.toString();
+    }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: color, width: 1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            title,
+            style: AppTextStyle.labelText.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(width: 3),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                formattedValue,
+                style: AppTextStyle.bodyText.copyWith(
+                  fontSize: 14,
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                ),
+                textDirection: TextDirection.ltr,
+              ),
+              if (unit != null) ...[
+                SizedBox(width: 4),
+                Text(
+                  unit,
+                  style: AppTextStyle.bodyText.copyWith(
+                    fontSize: 12,
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
 }

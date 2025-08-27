@@ -16,6 +16,8 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
+import '../../home/widget/chat_dialog.widget.dart';
+import '../../transaction/widgets/balance_dialog.widget.dart';
 import '../controller/remittance.controller.dart';
 
 class RemittanceView extends StatefulWidget {
@@ -86,12 +88,12 @@ class _RemittanceViewState extends State<RemittanceView> {
                                     alignment: Alignment.center,
                                     height: 80,
                                     child: TextFormField(
-                                      controller: controller.searchController,
+                                      controller: controller.searchControllerRecipt,
                                       style: AppTextStyle.labelText,
                                       textInputAction: TextInputAction.search,
                                       onFieldSubmitted: (value) async {
                                         if (value.isNotEmpty) {
-                                          await controller.searchAccounts(value);
+                                          await controller.searchAccountsRecipt(value);
                                           showSearchResults(context);
                                         } else {
                                           controller.clearSearch();
@@ -107,9 +109,9 @@ class _RemittanceViewState extends State<RemittanceView> {
                                         hintStyle: AppTextStyle.labelText,
                                         prefixIcon: IconButton(
                                             onPressed: ()async{
-                                              if (controller.searchController.text.isNotEmpty) {
-                                                await controller.searchAccounts(
-                                                    controller.searchController.text
+                                              if (controller.searchControllerRecipt.text.isNotEmpty) {
+                                                await controller.searchAccountsRecipt(
+                                                    controller.searchControllerRecipt.text
                                                 );
                                                 showSearchResults(context);
                                               }else {
@@ -139,6 +141,29 @@ class _RemittanceViewState extends State<RemittanceView> {
                                             children: [
                                               Row(
                                                 children: [
+                                                  ElevatedButton(
+                                                    style: ButtonStyle(
+                                                        padding: isDesktop ?
+                                                        WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 12,vertical: 17)):
+                                                        WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 10,vertical: 14)),
+                                                        elevation: WidgetStatePropertyAll(5),
+                                                        backgroundColor:
+                                                        WidgetStatePropertyAll(AppColor.purpleColor),
+                                                        shape: WidgetStatePropertyAll(
+                                                            RoundedRectangleBorder(
+                                                                borderRadius: BorderRadius.circular(5)))),
+                                                    onPressed: () {
+                                                      Get.toNamed('/remittancesPendingList');
+                                                    },
+                                                    child: Text(
+                                                      'حواله های در انتظار',
+                                                      style: AppTextStyle.labelText.copyWith(
+                                                        fontSize:isDesktop ? 12 : 10,
+                                                        fontWeight: FontWeight.normal,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 5,),
                                                   // ایجاد حواله
                                                   ElevatedButton(
                                                     style: ButtonStyle(
@@ -151,6 +176,9 @@ class _RemittanceViewState extends State<RemittanceView> {
                                                         shape: WidgetStatePropertyAll(RoundedRectangleBorder(
                                                             borderRadius: BorderRadius.circular(5)))),
                                                     onPressed: () async {
+                                                      controller.clearList();
+                                                      controller.balanceListRecipt.clear();
+                                                      controller.balanceListPayer.clear();
                                                       Get.toNamed("/insertRemittance",);
                                                     },
                                                     child: Row(
@@ -1070,6 +1098,17 @@ class _RemittanceViewState extends State<RemittanceView> {
               ),
             ],
           ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Get.dialog(const ChatDialog());
+        },
+        backgroundColor: AppColor.primaryColor,
+        child: Icon(
+          Icons.chat,
+          color: Colors.white,
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
         ));
   }
 
@@ -1082,9 +1121,9 @@ class _RemittanceViewState extends State<RemittanceView> {
           width: double.maxFinite,
           child: ListView.builder(
             shrinkWrap: true,
-            itemCount: controller.searchedAccounts.length,
+            itemCount: controller.searchedAccountsRecipt.length,
             itemBuilder: (context, index) {
-              final account = controller.searchedAccounts[index];
+              final account = controller.searchedAccountsRecipt[index];
               return ListTile(
                 title: Text(account.name ?? '',style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
                 onTap: () => controller.selectAccount(account),
@@ -1173,21 +1212,27 @@ class _RemittanceViewState extends State<RemittanceView> {
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
-              child: Text('مانده ریالی',
+              child: Text('مانده',
                   style: AppTextStyle.labelText.copyWith(fontSize: 12))),
           headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+      /*DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 80),
+              child: Text('مانده ریالی',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 12))),
+          headingRowAlignment: MainAxisAlignment.center),*/
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
               child: Text('مانده طلایی',
                   style: AppTextStyle.labelText.copyWith(fontSize: 12))),
-          headingRowAlignment: MainAxisAlignment.center),
-      DataColumn(
+          headingRowAlignment: MainAxisAlignment.center),*/
+      /*DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
               child: Text('مانده سکه',
                   style: AppTextStyle.labelText.copyWith(fontSize: 12))),
-          headingRowAlignment: MainAxisAlignment.center),
+          headingRowAlignment: MainAxisAlignment.center),*/
       DataColumn(
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 80),
@@ -1269,7 +1314,7 @@ class _RemittanceViewState extends State<RemittanceView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text("${remittance.walletReciept?.account?.name ?? 'نامشخص'} ",
+                Text("${remittance.walletPayer?.account?.name ?? 'نامشخص'} ",
                     style: AppTextStyle.bodyText
                         .copyWith(color: AppColor.accentColor, fontSize: 11)),
                 SvgPicture.asset('assets/svg/refresh.svg',
@@ -1278,7 +1323,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                       AppColor.textColor,
                       BlendMode.srcIn,
                     )),
-                Text(" ${remittance.walletPayer?.account?.name ?? 'نامشخص'}",
+                Text(" ${remittance.walletReciept?.account?.name ?? 'نامشخص'}",
                     style: AppTextStyle.bodyText
                         .copyWith(color: AppColor.primaryColor, fontSize: 11)),
               ],
@@ -1309,33 +1354,170 @@ class _RemittanceViewState extends State<RemittanceView> {
               remittance.item?.itemUnit?.id == 1
                   ? "${remittance.quantity} عدد "
                   : remittance.item?.itemUnit?.id == 2
-                      ? "${remittance.quantity} گرم "
+                      ? "${remittance.quantity.toString().seRagham()} گرم "
                       : "${remittance.quantity.toString().seRagham()} ریال ",
               style: AppTextStyle.bodyText.copyWith(fontSize: 12),
             ),
           )),
           // وضعیت
-          DataCell(Center(
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
-              decoration: BoxDecoration(
-                  color: remittance.status == 1
-                      ? AppColor.secondary2Color
-                      : remittance.status == 1
-                          ? AppColor.accentColor
-                          : AppColor.textFieldColor,
-                  borderRadius: BorderRadius.circular(5)),
-              child: Text(
-                remittance.status == 1
-                    ? "تایید شده"
-                    : remittance.status == 0
-                        ? "تایید نشده"
-                        : "نامشخص",
-                style: AppTextStyle.bodyText
-                    .copyWith(color: AppColor.textColor, fontSize: 10),
+          DataCell(
+            Center(
+              child: Column(
+                children: [
+                  SizedBox(height: 5,),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 5, vertical: 5),
+                    decoration: BoxDecoration(
+                        color: remittance.status == 0
+                            ? AppColor.textFieldColor
+                            : remittance.status == 1
+                            ? AppColor.secondary2Color
+                            : AppColor.accentColor,
+                        borderRadius: BorderRadius.circular(5)),
+                    child: Text(
+                      remittance.status == 0 ? 'در انتظار'
+                          : remittance.status == 1
+                          ? 'تایید شده'
+                          : 'تایید نشده',
+                      style: AppTextStyle.bodyText
+                          .copyWith(color: AppColor.textColor, fontSize: 10),
+                    ),
+                  ),
+                  SizedBox(height: 6,),
+                  Container(
+                    padding: const EdgeInsets
+                        .symmetric(
+                        horizontal: 0,
+                        vertical: 0),
+                    child: PopupMenuButton<
+                        int>(
+                      splashRadius: 10,
+                      tooltip: 'تعیین وضعیت',
+                      onSelected: (value) async {
+                        if(value==2){
+                          await controller.showReasonRejectionDialog("Remittance");
+                          if (controller.selectedReasonRejection.value == null) {
+                            return; // اگر کاربر دلیل را انتخاب نکرد، عملیات لغو شود
+                          }
+                          await controller.updateStatusRemittance(
+                            remittance.id!,
+                            value,
+                            controller.selectedReasonRejection.value!.id!,
+                          );
+                        }else {
+                          await controller.updateStatusRemittance(
+                              remittance.id!,
+                              value, 0);
+                        }
+                        controller.getRemittanceListPager();
+                      },
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius
+                            .all(
+                            Radius.circular(
+                                10.0)),
+                      ),
+                      color: AppColor
+                          .backGroundColor,
+                      constraints: BoxConstraints(
+                        minWidth: 60,
+                        maxWidth: 60,
+                      ),
+                      position: PopupMenuPosition
+                          .under,
+                      offset: const Offset(
+                          0, 0),
+                      itemBuilder: (
+                          context) =>
+                      [
+                        PopupMenuItem<int>(height: 18,
+                          labelTextStyle: WidgetStateProperty
+                              .all(
+                              AppTextStyle
+                                  .madiumbodyText
+                          ),
+                          value: 1,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .center,
+                            children: [
+                              controller.isLoading.value
+                                  ?
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                              ) :
+                              Text('تایید',
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    color: AppColor
+                                        .primaryColor,
+                                    fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const PopupMenuDivider(),
+                        PopupMenuItem<int>(height: 18,
+                          value: 2,
+                          labelTextStyle: WidgetStateProperty
+                              .all(
+                              AppTextStyle
+                                  .madiumbodyText
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment
+                                .center,
+                            children: [
+                              controller.isLoading.value
+                                  ?
+                              CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                              ) :
+                              Text('رد',
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    color: AppColor
+                                        .accentColor,
+                                    fontSize: 12),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      child: Text(
+                        'تعیین وضعیت',
+                        style: AppTextStyle
+                            .bodyText
+                            .copyWith(
+                            decoration: TextDecoration
+                                .underline,
+                            decorationColor: AppColor
+                                .textColor
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 6,),
+                  remittance.status==2 ?
+                  Wrap(
+                    children: [
+                      Text('به دلیل ',
+                        style: AppTextStyle
+                            .labelText,),
+                      Text("`${remittance.reasonRejection?.name}`",
+                        style: AppTextStyle
+                            .bodyText,),
+                      Text('رد شد.',
+                        style: AppTextStyle
+                            .labelText,), 
+                    ],
+                  ) : Text(""),
+                ],
               ),
             ),
-          )),
+          ),
           // شرح
           DataCell(Center(
             child: Column(
@@ -1351,7 +1533,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                           .copyWith(color: AppColor.textColor, fontSize: 10),
                     ),
                     Text(
-                      "${remittance.walletReciept?.account?.name??"نامشخص"} ",
+                      "${remittance.walletPayer?.account?.name??"نامشخص"} ",
                       style: AppTextStyle.bodyText
                           .copyWith(color: AppColor.accentColor, fontSize: 10),
                     ),
@@ -1361,7 +1543,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                           .copyWith(color: AppColor.textColor, fontSize: 10),
                     ),
                     Text(
-                      "${remittance.walletPayer?.account?.name??"نامشخص"} ",
+                      "${remittance.walletReciept?.account?.name??"نامشخص"} ",
                       style: AppTextStyle.bodyText
                           .copyWith(color: AppColor.primaryColor, fontSize: 10),
                     ),
@@ -1377,7 +1559,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                       remittance.item?.itemUnit?.id == 1
                           ? "${remittance.quantity} عدد "
                           : remittance.item?.itemUnit?.id == 2
-                              ? "${remittance.quantity} گرم "
+                              ? "${remittance.quantity.toString().seRagham()} گرم "
                               : "${remittance.quantity.toString().seRagham()} ریال ",
                       style: AppTextStyle.bodyText.copyWith(
                           color: AppColor.textColor,
@@ -1440,8 +1622,80 @@ class _RemittanceViewState extends State<RemittanceView> {
               ],
             ),
           )),
+          // مانده
+          DataCell(
+              Center(
+                child:
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BalanceDialog(
+                                entityId: remittance.id ?? 0,
+                                entityType:"issue",
+                                entityName: remittance.walletPayer?.account?.name ?? 'نامشخص',
+                                isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                              );
+                            },
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet,
+                              size: 20,
+                              color: AppColor.accentColor,
+                            ),
+                            Text(' مانده بدهکار',
+                              style: AppTextStyle
+                                  .labelText
+                                  .copyWith(
+                                  color: AppColor.accentColor, fontSize: 11,fontWeight: FontWeight.bold),),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 3,),
+                      GestureDetector(
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return BalanceDialog(
+                                entityId: remittance.id ?? 0,
+                                entityType:"reciept",
+                                entityName: remittance.walletReciept?.account?.name ?? 'نامشخص',
+                                isDesktop: ResponsiveBreakpoints.of(context).largerThan(TABLET),
+                              );
+                            },
+                          );
+                        },
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet,
+                              size: 20,
+                              color: AppColor.primaryColor,
+                            ),
+                            Text(' مانده بستانکار',
+                              style: AppTextStyle
+                                  .labelText
+                                  .copyWith(
+                                  color: AppColor.primaryColor, fontSize: 11,fontWeight: FontWeight.bold),),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+          ),
           // مانده ریالی
-          DataCell(Center(
+          /*DataCell(Center(
               child: SizedBox(
                 child: SingleChildScrollView(
                   child: Padding(
@@ -1519,9 +1773,9 @@ class _RemittanceViewState extends State<RemittanceView> {
                               ),
                   ),
                 ),
-              ))),
+              ))),*/
           // مانده طلایی
-          DataCell(Center(
+          /*DataCell(Center(
               child: SizedBox(
                 child: SingleChildScrollView(
                   clipBehavior: Clip.hardEdge,
@@ -1600,9 +1854,9 @@ class _RemittanceViewState extends State<RemittanceView> {
                               ),
                   ),
                 ),
-              ))),
+              ))),*/
           // مانده سکه
-          DataCell(Center(
+          /*DataCell(Center(
               child: SizedBox(
                 child: Scrollbar(
                   child: SingleChildScrollView(
@@ -1682,7 +1936,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                     ),
                   ),
                 ),
-              ))),
+              ))),*/
           // عملیات
           DataCell(
               Center(
@@ -1930,7 +2184,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                     )),
            ),
               SizedBox(
-                width: 10,
+                width: 20,
               ),
               GestureDetector(
                 onTap: (){
@@ -1943,7 +2197,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                     )),
               ),
               SizedBox(
-                width: 10,
+                width: 20,
               ),
               GestureDetector(
                 onTap: () {

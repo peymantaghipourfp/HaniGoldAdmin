@@ -65,6 +65,10 @@ class OrderModel {
   AccountParent? accountParent;
   @JsonKey(name: "extraAmount")
   final double? extraAmount;
+  @JsonKey(name: "isCard")
+  final bool? isCard;
+  @JsonKey(name: "byAdmin")
+  final bool? byAdmin;
 
   OrderModel({
     required this.date,
@@ -92,6 +96,8 @@ class OrderModel {
     required this.manualPrice,
     required this.accountParent,
     required this.extraAmount,
+    required this.isCard,
+    required this.byAdmin,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) => _$OrderModelFromJson(json);

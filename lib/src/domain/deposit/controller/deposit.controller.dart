@@ -1,5 +1,7 @@
 
 
+import 'dart:async';
+import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:typed_data';
@@ -14,6 +16,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/upload.repository.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
+import 'package:hanigold_admin/src/domain/deposit/model/socket_deposit.model.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -34,10 +37,11 @@ import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../../base/base_controller.dart';
 
 enum PageState{loading,err,empty,list}
 
-class DepositController extends GetxController{
+class DepositController extends BaseController{
   RxInt currentPage = 1.obs;
   RxInt itemsPerPage = 10.obs;
   RxBool hasMore = true.obs;
@@ -77,12 +81,14 @@ class DepositController extends GetxController{
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
 
+  StreamSubscription? socketSubscription;
+
   void setError(String message){
     state.value=PageState.err;
     errorMessage.value=message;
   }
   void isChangePage(int index){
-    currentPage.value=index*10-10;
+    currentPage.value=(index*10-10)+1;
     itemsPerPage.value=index*10;
     getDepositListPager();
   }
@@ -113,14 +119,36 @@ class DepositController extends GetxController{
 
   @override
   void onInit() {
+    socketSubscription?.cancel();
+    _listenToSocket();
     getDepositListPager();
     setupScrollListener();
     super.onInit();
   }
 
   @override void onClose() {
+    socketSubscription?.cancel();
     scrollController.dispose();
     super.onClose();
+  }
+  void _listenToSocket() {
+    socketSubscription?.cancel();
+    socketSubscription = socketService.messageStream.listen((message) {
+      if (message is String) {
+        try {
+          final data = json.decode(message);
+          if (data['channel'] == 'deposit') {
+            final socketDeposit = SocketDepositModel.fromJson(data);
+
+            getDepositListPager();
+          }
+        } catch (e) {
+          Get.log('Error processing socket message in DepositController: $e');
+        }
+      }
+    }, onError: (error) {
+      Get.log('Socket stream error in DepositController: $error');
+    });
   }
   void setupScrollListener() {
     scrollController.addListener(() {
@@ -280,7 +308,7 @@ class DepositController extends GetxController{
         nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
       );
       isLoading.value=false;
-      depositList.addAll(response.deposit??[]);
+      depositList.assignAll(response.deposit??[]);
       paginated.value=response.paginated;
       state.value=PageState.list;
 
@@ -619,7 +647,7 @@ class DepositController extends GetxController{
   String getStatusText(int status) {
     switch (status) {
       case 0:
-        return 'نامشخص';
+        return 'در انتظار';
       case 1:
         return 'تایید شده';
       case 2:

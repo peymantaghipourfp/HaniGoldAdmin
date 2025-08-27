@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
 
+import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 
 class BankRepository{
@@ -11,14 +12,14 @@ class BankRepository{
 
   BankRepository(){
     bankDio.options.baseUrl=BaseUrl.baseUrl;
-
+    bankDio.interceptors.add(DioInterceptor());
   }
   Future<List<BankModel>> getBankList()async{
     try{
       Map<String , dynamic> options={
         "options" : { "bank" :{
           "orderBy": "Bank.Name",
-          "orderByType": "asc",
+          "orderByType": "desc",
           "StartIndex": 1,
           "ToIndex": 10000
         }}

@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 
 import '../../domain/laboratory/model/laboratory.model.dart';
 import '../../domain/laboratory/model/list_laboratory.model.dart';
+import '../network/dio_Interceptor.dart';
 
 class LaboratoryRepository {
 
@@ -11,6 +12,7 @@ class LaboratoryRepository {
 
   LaboratoryRepository() {
     laboratoryDio.options.baseUrl = BaseUrl.baseUrl;
+    laboratoryDio.interceptors.add(DioInterceptor());
   }
 
   Future<List<LaboratoryModel>> getLaboratoryList() async {

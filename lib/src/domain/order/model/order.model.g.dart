@@ -44,6 +44,8 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
           : AccountParent.fromJson(
               json['accountParent'] as Map<String, dynamic>),
       extraAmount: (json['extraAmount'] as num?)?.toDouble(),
+      isCard: json['isCard'] as bool?,
+      byAdmin: json['byAdmin'] as bool?,
     );
 
 Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
@@ -73,6 +75,8 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'manualPrice': instance.manualPrice,
       'accountParent': instance.accountParent,
       'extraAmount': instance.extraAmount,
+      'isCard': instance.isCard,
+      'byAdmin': instance.byAdmin,
     };
 
 Balance _$BalanceFromJson(Map<String, dynamic> json) => Balance(
