@@ -14,18 +14,28 @@ String itemModelToJson(List<ItemModel> data) => json.encode(List<dynamic>.from(d
 
 @JsonSerializable()
 class ItemModel {
+  @JsonKey(name: "itemPriceDate")
+  late DateTime? itemPriceDate;
   @JsonKey(name: "itemGroup")
   final ItemGroupModel? itemGroup;
   @JsonKey(name: "itemUnit")
   final ItemUnitModel? itemUnit;
   @JsonKey(name: "price")
   late double? price;
+  @JsonKey(name: "basePrice")
+  late double? basePrice;
   @JsonKey(name: "mesghalPrice")
   late double? mesghalPrice;
+  @JsonKey(name: "baseMesghalPrice")
+  late double? baseMesghalPrice;
   @JsonKey(name: "differentPrice")
   late double? differentPrice;
+  @JsonKey(name: "baseDifferentPrice")
+  late double? baseDifferentPrice;
   @JsonKey(name: "mesghalDifferentPrice")
   late double? mesghalDifferentPrice;
+  @JsonKey(name: "baseMesghalDifferentPrice")
+  late double? baseMesghalDifferentPrice;
   @JsonKey(name: "name")
   final String? name;
   @JsonKey(name: "isDefault")
@@ -82,12 +92,17 @@ class ItemModel {
   final Refrence? refrence;
 
   ItemModel({
+    required this.itemPriceDate,
     required this.itemGroup,
     required this.itemUnit,
     required this.price,
+    required this.basePrice,
     required this.mesghalPrice,
+    required this.baseMesghalPrice,
     required this.differentPrice,
+    required this.baseDifferentPrice,
     required this.mesghalDifferentPrice,
+    required this.baseMesghalDifferentPrice,
     required this.name,
     required this.isDefault,
     required this.isDecimal,

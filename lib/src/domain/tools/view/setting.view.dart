@@ -38,7 +38,7 @@ class SettingView extends StatelessWidget {
               width: isMobile ? Get.width * 0.95 : Get.width * 0.55,
               padding: EdgeInsets.all(isMobile ? 12.0 : 24.0),
               decoration: BoxDecoration(
-                color: AppColor.secondaryColor.withOpacity(0.8),
+                color: AppColor.secondaryColor.withAlpha(200),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: SingleChildScrollView(

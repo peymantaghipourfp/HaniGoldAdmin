@@ -79,26 +79,19 @@
 //   Map<String, dynamic> toJson() => _$AccountModelToJson(this);
 // }
 //
+import 'package:hanigold_admin/src/domain/account/model/account_level.model.dart';
+import 'package:hanigold_admin/src/domain/accountSalesGroup/model/account_sales_group.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/parent_account.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
-
 import '../../users/model/account_sub_group.model.dart';
 import '../../users/model/city_item.model.dart';
 import '../../users/model/state_item.model.dart';
 import 'account_group.model.dart';
-
 part 'account.model.g.dart';
-
-
-
-
 // To parse this JSON data, do
 //
 //     final accountModel = accountModelFromJson(jsonString);
-
-
 
 AccountModel accountModelFromJson(String str) => AccountModel.fromJson(json.decode(str));
 
@@ -108,8 +101,6 @@ String accountModelToJson(AccountModel data) => json.encode(data.toJson());
 class AccountModel {
   @JsonKey(name: "type")
   final int? type;
-  @JsonKey(name: "accountLevel")
-  final int? accountLevel;
   @JsonKey(name: "childrenCount")
   final int? childrenCount;
   @JsonKey(name: "subGroupCount")
@@ -124,6 +115,8 @@ class AccountModel {
   final String? lastName;
   @JsonKey(name: "name")
   final String? name;
+  @JsonKey(name: "nationalCode")
+  final String? nationalCode;
   @JsonKey(name: "status")
   final int? status;
   @JsonKey(name: "hasDeposit")
@@ -138,6 +131,12 @@ class AccountModel {
   final List<ContactElement>? contacts;
   @JsonKey(name: "accountSubGroups")
   final List<AccountSubGroupModel>? accountSubGroups;
+  @JsonKey(name: "accountSubGroup")
+  final AccountSubGroupModel? accountSubGroup;
+  @JsonKey(name: "accountSalesGroup")
+  final AccountSalesGroupModel? accountSalesGroup;
+  @JsonKey(name: "accountLevel")
+  final AccountLevelModel? accountLevel;
   @JsonKey(name: "addresses")
   final List<Address>? addresses;
   @JsonKey(name: "contactInfos")
@@ -150,14 +149,19 @@ class AccountModel {
   final int? id;
   @JsonKey(name: "attribute")
   final String? attribute;
+  @JsonKey(name: "userIds")
+  final List<dynamic>? userIds;
   @JsonKey(name: "recId")
   final String? recId;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
+  @JsonKey(name: "isNegative")
+  final bool? isNegative;
+  @JsonKey(name: "telegramMobile")
+  final String? telegramMobile;
 
   AccountModel({
     required this.type,
-    required this.accountLevel,
     required this.childrenCount,
     required this.subGroupCount,
     required this.contactInfo,
@@ -165,6 +169,7 @@ class AccountModel {
     required this.firstName,
     required this.lastName,
     required this.name,
+    required this.nationalCode,
     required this.status,
     required this.hasDeposit,
     required this.startDate,
@@ -172,14 +177,20 @@ class AccountModel {
     required this.accountGroup,
     required this.contacts,
     required this.accountSubGroups,
+    required this.accountSubGroup,
+    required this.accountSalesGroup,
+    required this.accountLevel,
     required this.addresses,
     required this.contactInfos,
     required this.childs,
     required this.rowNum,
     required this.id,
     required this.attribute,
+    required this.userIds,
     required this.recId,
     required this.infos,
+    required this.isNegative,
+    required this.telegramMobile,
   });
 
   factory AccountModel.fromJson(Map<String, dynamic> json) => _$AccountModelFromJson(json);

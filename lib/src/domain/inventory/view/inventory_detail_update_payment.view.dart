@@ -7,6 +7,7 @@ import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_update_receive.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/pager_widget1.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -35,9 +36,38 @@ class _InventoryDetailUpdatePaymentViewState
     extends State<InventoryDetailUpdatePaymentView>
     with TickerProviderStateMixin {
   final formKey = GlobalKey<FormState>();
+  final ScrollController _forPaymentScrollController = ScrollController();
   InventoryDetailUpdatePaymentController inventoryDetailUpdatePaymentController = Get
       .find<InventoryDetailUpdatePaymentController>();
 
+  void _scrollToMatchingItem() {
+    // Find the index of the matching item
+    final visibleList = inventoryDetailUpdatePaymentController.forPaymentList;
+    final matchingIndex = visibleList
+        .indexWhere((item) => item.id == inventoryDetailUpdatePaymentController.inputItemId.value);
+
+    if (matchingIndex != -1 && _forPaymentScrollController.hasClients) {
+      // Calculate the scroll position (assuming each item is roughly 120 pixels tall)
+      final scrollPosition = matchingIndex * 120.0;
+      _forPaymentScrollController.animateTo(
+        scrollPosition,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+
+      // Also automatically select the matching item
+      final matchingItem = visibleList[matchingIndex];
+      if (matchingItem.id != null) {
+        inventoryDetailUpdatePaymentController.selectedForPaymentId.add(matchingItem.id!);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _forPaymentScrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +75,7 @@ class _InventoryDetailUpdatePaymentViewState
     final isMobile = ResponsiveBreakpoints
         .of(context)
         .isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
     return Obx(() {
       return Scaffold(
         appBar:
@@ -56,13 +87,13 @@ class _InventoryDetailUpdatePaymentViewState
             SafeArea(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: ResponsiveRowColumn(
                     layout: isDesktop
                         ? ResponsiveRowColumnType.ROW
                         : ResponsiveRowColumnType.COLUMN,
-                    columnSpacing: 30,
-                    rowSpacing: 20,
+                    columnSpacing: 16,
+                    rowSpacing: 16,
                     rowCrossAxisAlignment: CrossAxisAlignment.start,
                     rowMainAxisAlignment: MainAxisAlignment.start,
                     columnCrossAxisAlignment: CrossAxisAlignment.start,
@@ -85,7 +116,9 @@ class _InventoryDetailUpdatePaymentViewState
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 20),
+                              horizontal: isMobile ? 2 : isTablet ? 16 : 40,
+                              vertical: isMobile ? 12 : isTablet ? 20 : 30
+                          ),
                           /*decoration: BoxDecoration(
                             color: AppColor.backGroundColor1,
                             borderRadius: BorderRadius.circular(16),
@@ -98,11 +131,12 @@ class _InventoryDetailUpdatePaymentViewState
                             ],
                           ),*/
                           child: SizedBox(
-                            width: Get.width * 0.9,
-                            height: Get.height,
+                            width: double.infinity,
+                            height: isDesktop ? Get.height : null,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 ResponsiveRowColumnItem(
                                   child: Row(
@@ -121,22 +155,24 @@ class _InventoryDetailUpdatePaymentViewState
                                   ),
                                 ),
                                 ResponsiveRowColumnItem(
-                                  child: isDesktop ? SizedBox(width: 480,
+                                  child: isDesktop
+                                      ? SizedBox(
+                                    width: 480,
                                     child: Divider(
                                       height: 1,
                                       color: AppColor.appBarColor,
                                     ),
-                                  ) : SizedBox(width: 420,
-                                    child: Divider(
-                                      height: 1,
-                                      color: AppColor.appBarColor,
-                                    ),
+                                  )
+                                      : Divider(
+                                    height: 1,
+                                    color: AppColor.appBarColor,
                                   ),
                                 ),
+
                                 ResponsiveRowColumnItem(
-                                    rowFlex: 1,
+                                    rowFlex: isDesktop ? 1 : null,
                                     child: SingleChildScrollView(
-                                      physics: BouncingScrollPhysics(),
+                                      physics: isDesktop ? BouncingScrollPhysics() : NeverScrollableScrollPhysics(),
                                       child: Container(
                                         constraints: isDesktop ? BoxConstraints(
                                             maxWidth: 500) : BoxConstraints(
@@ -170,100 +206,34 @@ class _InventoryDetailUpdatePaymentViewState
                                               Container(
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
-                                                child: DropdownButton2(
-                                                  isExpanded: true,
-                                                  hint: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          "انتخاب کنید",
-                                                          style: AppTextStyle
-                                                              .labelText
-                                                              .copyWith(
-                                                            fontSize: 14,
-                                                            color: AppColor
-                                                                .textColor,
-                                                          ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
+                                                child: Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 5),
+                                                  child:
+                                                  Obx(() => TextFormField(
+                                                    readOnly: true,
+                                                    controller: TextEditingController(
+                                                      text: inventoryDetailUpdatePaymentController.selectedWalletAccount.value != null
+                                                          ? "${inventoryDetailUpdatePaymentController.selectedWalletAccount.value!.item?.name ?? ''} - ${inventoryDetailUpdatePaymentController.selectedWalletAccount.value!.account?.name ?? ''}"
+                                                          : 'انتخاب کنید',
+                                                    ),
+                                                    style: AppTextStyle
+                                                        .bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
                                                       ),
-                                                    ],
-                                                  ),
-                                                  items:
-                                                  inventoryDetailUpdatePaymentController
-                                                      .walletAccountList.map((
-                                                      wallet) {
-                                                    return DropdownMenuItem(
-                                                        value: wallet,
-                                                        child: Row(
-                                                          children: [
-                                                            Text("${wallet.item
-                                                                ?.name}" ?? "",
-                                                              style: AppTextStyle
-                                                                  .bodyText,),
-                                                          ],
-                                                        ));
-                                                  }).toList(),
-                                                  value: inventoryDetailUpdatePaymentController
-                                                      .selectedWalletAccount
-                                                      .value,
-                                                  onChanged: (newValue) {
-                                                    if (newValue != null) {
-                                                      inventoryDetailUpdatePaymentController
-                                                          .changeSelectedWalletAccount(
-                                                          newValue);
-                                                    }
-                                                  },
-                                                  buttonStyleData: ButtonStyleData(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 5),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius
-                                                          .circular(7),
-                                                      color: AppColor
+                                                      filled: true,
+                                                      fillColor: AppColor
                                                           .textFieldColor,
-                                                      border: Border.all(
-                                                          color: AppColor
-                                                              .backGroundColor,
-                                                          width: 1),
+                                                      suffixIcon: Icon(
+                                                        Icons.arrow_drop_down,
+                                                        color: AppColor.textColor,
+                                                      ),
                                                     ),
-                                                    elevation: 0,
-                                                  ),
-                                                  iconStyleData: IconStyleData(
-                                                    icon: const Icon(Icons
-                                                        .keyboard_arrow_down),
-                                                    iconSize: 23,
-                                                    iconEnabledColor: AppColor
-                                                        .textColor,
-                                                    iconDisabledColor: Colors
-                                                        .grey,
-                                                  ),
-                                                  dropdownStyleData: DropdownStyleData(
-                                                    maxHeight: 200,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius
-                                                          .circular(7),
-                                                      color: AppColor
-                                                          .textFieldColor,
-                                                    ),
-                                                    offset: const Offset(0, 0),
-                                                    scrollbarTheme: ScrollbarThemeData(
-                                                      radius: const Radius
-                                                          .circular(7),
-                                                      thickness: WidgetStateProperty
-                                                          .all(6),
-                                                      thumbVisibility: WidgetStateProperty
-                                                          .all(true),
-                                                    ),
-                                                  ),
-                                                  menuItemStyleData: const MenuItemStyleData(
-                                                    height: 40,
-                                                    padding: EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
-                                                  ),
+                                                  )),
                                                 ),
                                               ),
                                               // لیست دریافتی ها
@@ -299,6 +269,10 @@ class _InventoryDetailUpdatePaymentViewState
                                                 onPressed: () async {
                                                   await inventoryDetailUpdatePaymentController.getForPaymentListPager();
                                                   showForPaymentModal();
+                                                  // Scroll to matching item after a short delay to ensure the list is rendered
+                                                  Future.delayed(Duration(milliseconds: 300), () {
+                                                    _scrollToMatchingItem();
+                                                  });
                                                   print(
                                                       'idIttttem ${inventoryDetailUpdatePaymentController
                                                           .selectedWalletAccount
@@ -323,8 +297,215 @@ class _InventoryDetailUpdatePaymentViewState
                                                 ),
                                               )
                                                   : SizedBox.shrink(),
-                                              // مقدار
+                                              inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==1 ?
+                                              // آزمایشگاه
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'آزمایشگاه',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
+                                                    ),
+                                                  ),
+                                                  // آزمایشگاه
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    CustomDropdownWidget(
 
+                                                      dropdownSearchData: DropdownSearchData<
+                                                          String>(
+                                                        searchController: inventoryDetailUpdatePaymentController
+                                                            .searchLaboratoryController,
+                                                        searchInnerWidgetHeight: 50,
+                                                        searchInnerWidget: Container(
+                                                          height: 50,
+                                                          padding: const EdgeInsets
+                                                              .only(
+                                                            top: 8,
+                                                            right: 15,
+                                                            left: 15,
+                                                          ),
+                                                          child: TextFormField(
+                                                            style: AppTextStyle
+                                                                .bodyText,
+                                                            controller: inventoryDetailUpdatePaymentController
+                                                                .searchLaboratoryController,
+                                                            decoration: InputDecoration(
+                                                              isDense: true,
+                                                              contentPadding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                horizontal: 10,
+                                                                vertical: 8,
+                                                              ),
+                                                              hintText: 'جستجوی آزمایشگاه...',
+                                                              hintStyle: AppTextStyle
+                                                                  .labelText,
+                                                              border: OutlineInputBorder(
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(8),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      value: inventoryDetailUpdatePaymentController
+                                                          .selectedLaboratory.value,
+                                                      /*validator: (value) {
+                                                                                        if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
+                                                                                          return 'کاربر را انتخاب کنید';
+                                                                                        }
+                                                                                        return null;
+                                                                                      },*/
+                                                      showSearchBox: true,
+                                                      items: [
+                                                        'انتخاب کنید',
+                                                        ...inventoryDetailUpdatePaymentController
+                                                            .searchedLaboratories
+                                                            .map((laboratory) =>
+                                                        laboratory.name ?? "")
+                                                      ].toList(),
+                                                      selectedValue: inventoryDetailUpdatePaymentController
+                                                          .selectedLaboratory.value
+                                                          ?.name,
+                                                      onChanged: (
+                                                          String? newValue) {
+                                                        if (newValue ==
+                                                            'انتخاب کنید') {
+                                                          inventoryDetailUpdatePaymentController
+                                                              .changeSelectedLaboratory(
+                                                              null);
+                                                        } else {
+                                                          var selectedLaboratory = inventoryDetailUpdatePaymentController
+                                                              .searchedLaboratories
+                                                              .firstWhere((
+                                                              laboratory) =>
+                                                          laboratory.name ==
+                                                              newValue);
+                                                          inventoryDetailUpdatePaymentController
+                                                              .changeSelectedLaboratory(
+                                                              selectedLaboratory);
+                                                        }
+                                                      },
+                                                      onMenuStateChange: (isOpen) {
+                                                        if (!isOpen) {
+                                                          inventoryDetailUpdatePaymentController
+                                                              .resetLaboratorySearch();
+                                                        }
+                                                      },
+                                                      backgroundColor: AppColor
+                                                          .textFieldColor,
+                                                      borderRadius: 7,
+                                                      borderColor: AppColor
+                                                          .secondaryColor,
+                                                      hideUnderline: true,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
+                                              inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==1 ?
+                                              // شماره قبض
+                                              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  // شماره قبض
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'شماره قبض',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
+                                                    ),
+                                                  ),
+                                                  // شماره قبض
+                                                  Container(
+                                                    //height: 40,
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    TextFormField(
+                                                      validator: (value) {
+                                                        if (value == null ||
+                                                            value.isEmpty) {
+                                                          return 'لطفا شماره قبض را وارد کنید';
+                                                        }
+                                                        return null;
+                                                      },
+                                                      controller: inventoryDetailUpdatePaymentController
+                                                          .receiptNumberController,
+                                                      style: AppTextStyle.labelText,
+                                                      keyboardType: TextInputType
+                                                          .numberWithOptions(
+                                                          decimal: true),
+                                                      inputFormatters: [
+                                                        FilteringTextInputFormatter
+                                                            .allow(RegExp(
+                                                            r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                        TextInputFormatter
+                                                            .withFunction((
+                                                            oldValue, newValue) {
+                                                          // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                          String newText = newValue
+                                                              .text
+                                                              .replaceAll(
+                                                              '٠', '0')
+                                                              .replaceAll(
+                                                              '١', '1')
+                                                              .replaceAll(
+                                                              '٢', '2')
+                                                              .replaceAll(
+                                                              '٣', '3')
+                                                              .replaceAll(
+                                                              '٤', '4')
+                                                              .replaceAll(
+                                                              '٥', '5')
+                                                              .replaceAll(
+                                                              '٦', '6')
+                                                              .replaceAll(
+                                                              '٧', '7')
+                                                              .replaceAll(
+                                                              '٨', '8')
+                                                              .replaceAll(
+                                                              '٩', '9');
+
+                                                          return newValue
+                                                              .copyWith(
+                                                              text: newText,
+                                                              selection: TextSelection
+                                                                  .collapsed(
+                                                                  offset: newText
+                                                                      .length));
+                                                        }),
+                                                      ],
+                                                      decoration: InputDecoration(
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius
+                                                              .circular(10),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor
+                                                            .textFieldColor,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
+                                              // مقدار
                                               Column(
                                                 crossAxisAlignment: CrossAxisAlignment
                                                     .start,
@@ -420,6 +601,234 @@ class _InventoryDetailUpdatePaymentViewState
                                                   ),
                                                 ],
                                               ),
+                                              // تعداد
+                                              SizedBox(height: 3),
+                                              inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id == 10 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id == 13 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id == 15 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id == 16
+                                                  ?
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    ' تعداد: ',
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                  Text(inventoryDetailUpdatePaymentController.itemCountTemp.value,
+                                                    style: AppTextStyle.bodyText
+                                                        .copyWith(color: AppColor
+                                                        .primaryColor.withOpacity(0.8)),)
+                                                ],
+                                              ) :
+                                              SizedBox(),
+                                              inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==1 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==12 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==15 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==16 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==14 ?
+                                              // عیار
+                                              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'عیار',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
+                                                    ),
+                                                  ),
+                                                  // عیار
+                                                  Container(
+                                                    //height: 50,
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    IntrinsicHeight(
+                                                      child: TextFormField(
+                                                        onChanged: (value) {
+                                                          inventoryDetailUpdatePaymentController.updateW750();
+                                                        },
+                                                        /*readOnly: inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
+                                                            inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==12 ||
+                                                            inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==15 ||
+                                                            inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==16 ? true :false ,*/
+                                                        validator: (value) {
+                                                          if (value == null ||
+                                                              value.isEmpty) {
+                                                            return 'لطفا عیار را وارد کنید';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        autovalidateMode: AutovalidateMode
+                                                            .onUserInteraction,
+                                                        controller: inventoryDetailUpdatePaymentController
+                                                            .caratController,
+                                                        style: AppTextStyle
+                                                            .labelText,
+                                                        keyboardType: TextInputType
+                                                            .numberWithOptions(
+                                                            decimal: true),
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter
+                                                              .allow(RegExp(
+                                                              r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                          TextInputFormatter
+                                                              .withFunction((
+                                                              oldValue, newValue) {
+                                                            // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                            String newText = newValue
+                                                                .text
+                                                                .replaceAll(
+                                                                '٠', '0')
+                                                                .replaceAll(
+                                                                '١', '1')
+                                                                .replaceAll(
+                                                                '٢', '2')
+                                                                .replaceAll(
+                                                                '٣', '3')
+                                                                .replaceAll(
+                                                                '٤', '4')
+                                                                .replaceAll(
+                                                                '٥', '5')
+                                                                .replaceAll(
+                                                                '٦', '6')
+                                                                .replaceAll(
+                                                                '٧', '7')
+                                                                .replaceAll(
+                                                                '٨', '8')
+                                                                .replaceAll(
+                                                                '٩', '9');
+
+                                                            return newValue
+                                                                .copyWith(
+                                                                text: newText,
+                                                                selection: TextSelection
+                                                                    .collapsed(
+                                                                    offset: newText
+                                                                        .length));
+                                                          }),
+                                                        ],
+                                                        decoration: InputDecoration(
+                                                          isDense: true,
+                                                          border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius
+                                                                .circular(10),
+                                                          ),
+                                                          filled: true,
+                                                          fillColor: AppColor
+                                                              .textFieldColor,
+                                                          errorMaxLines: 1,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
+                                              inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==1 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==12 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==15 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==16 ||
+                                                  inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==14 ?
+                                              // وزن 750
+                                              Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Container(
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 3, top: 5),
+                                                    child: Text(
+                                                      'وزن 750',
+                                                      style: AppTextStyle.labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10),
+                                                    ),
+                                                  ),
+                                                  // وزن 750
+                                                  Container(
+                                                    //height: 50,
+                                                    padding: EdgeInsets.only(
+                                                        bottom: 5),
+                                                    child:
+                                                    IntrinsicHeight(
+                                                      child: TextFormField(
+                                                        readOnly: inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
+                                                            inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==12 ||
+                                                            inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==15 ||
+                                                            inventoryDetailUpdatePaymentController.selectedWalletAccount.value?.item?.id==16 ? true :false ,
+                                                        autovalidateMode: AutovalidateMode
+                                                            .onUserInteraction,
+                                                        controller: inventoryDetailUpdatePaymentController
+                                                            .weight750Controller,
+                                                        style: AppTextStyle
+                                                            .labelText,
+                                                        keyboardType: TextInputType
+                                                            .numberWithOptions(
+                                                            decimal: true),
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter
+                                                              .allow(RegExp(
+                                                              r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                          TextInputFormatter
+                                                              .withFunction((
+                                                              oldValue, newValue) {
+                                                            // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                            String newText = newValue
+                                                                .text
+                                                                .replaceAll(
+                                                                '٠', '0')
+                                                                .replaceAll(
+                                                                '١', '1')
+                                                                .replaceAll(
+                                                                '٢', '2')
+                                                                .replaceAll(
+                                                                '٣', '3')
+                                                                .replaceAll(
+                                                                '٤', '4')
+                                                                .replaceAll(
+                                                                '٥', '5')
+                                                                .replaceAll(
+                                                                '٦', '6')
+                                                                .replaceAll(
+                                                                '٧', '7')
+                                                                .replaceAll(
+                                                                '٨', '8')
+                                                                .replaceAll(
+                                                                '٩', '9');
+
+                                                            return newValue
+                                                                .copyWith(
+                                                                text: newText,
+                                                                selection: TextSelection
+                                                                    .collapsed(
+                                                                    offset: newText
+                                                                        .length));
+                                                          }),
+                                                        ],
+                                                        decoration: InputDecoration(
+                                                          isDense: true,
+                                                          border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius
+                                                                .circular(10),
+                                                          ),
+                                                          filled: true,
+                                                          fillColor: AppColor
+                                                              .textFieldColor,
+                                                          errorMaxLines: 1,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ):
+                                              SizedBox.shrink(),
                                               // تاریخ
                                               Container(
                                                 padding: EdgeInsets.only(
@@ -763,7 +1172,7 @@ class _InventoryDetailUpdatePaymentViewState
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: isMobile ? SizedBox.shrink() : FloatingActionButton(
           onPressed: () {
             Get.dialog(const ChatDialog());
           },
@@ -784,48 +1193,50 @@ class _InventoryDetailUpdatePaymentViewState
         child: Dialog(
           backgroundColor: AppColor.backGroundColor,
           insetPadding: EdgeInsets.all(20),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: 600,
-              maxHeight: Get.height * 0.8,
-            ),
-            child: Column(
-              children: [
-                buildForPaymentDetail(),
-                Obx(() {
-                  return Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        inventoryDetailUpdatePaymentController.paginated.value != null
-                            ? Container(
-                            height: 70,
-                            margin: EdgeInsets.symmetric(
-                                horizontal: 70, vertical: 10),
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            color: AppColor.appBarColor.withOpacity(0.5),
-                            alignment: Alignment.bottomCenter,
-                            child: PagerWidget(
-                              countPage: inventoryDetailUpdatePaymentController
-                                  .paginated.value?.totalCount ?? 0,
-                              callBack: (int index) {
-                                inventoryDetailUpdatePaymentController.isChangePage(
-                                    index);
-                              },))
-                            : SizedBox(),
-                      ],
-                    ),
-                  );
-                }),
-                /*TextButton(
-                  onPressed: () =>
-                      Get.back(),
-                  child: Text("بستن", style: AppTextStyle.bodyText,),
-                ),*/
-                //SizedBox(height: 15,),
-              ],
-            ),
-          ),
+          child: Builder(builder: (context) {
+            final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isMobile ? Get.width * 0.95 : 600,
+                maxHeight: isMobile ? Get.height * 0.9 : Get.height * 0.8,
+              ),
+              child: Column(
+                children: [
+                  buildForPaymentDetail(),
+                  Obx(() {
+                    final isMobileLocal = ResponsiveBreakpoints.of(context).isMobile;
+                    return Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          inventoryDetailUpdatePaymentController.paginated.value != null
+                              ? Container(
+                              height: isMobileLocal ? 56 : 70,
+                              margin: EdgeInsets.symmetric(
+                                  horizontal: isMobileLocal ? 8 : 70, vertical: isMobileLocal ? 2 : 10),
+                              padding: EdgeInsets.symmetric(horizontal: isMobileLocal ? 8 : 20,),
+                              color: AppColor.appBarColor.withOpacity(0.5),
+                              alignment: Alignment.bottomCenter,
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: PagerWidget1(
+                                  countPage: inventoryDetailUpdatePaymentController
+                                      .paginated.value?.totalCount ?? 0,
+                                  callBack: (int index) {
+                                    inventoryDetailUpdatePaymentController.isChangePage(
+                                        index);
+                                  },
+                                ),
+                              ))
+                              : SizedBox(),
+                        ],
+                      ),
+                    );
+                  }),
+                ],
+              ),
+            );
+          }),
         ),
       ),
     );
@@ -842,8 +1253,8 @@ class _InventoryDetailUpdatePaymentViewState
         ) :
         // لیست ForPayment مربوط به هر ولت
         SizedBox(
-          height: Get.height * 0.65, // تعیین ارتفاع ثابت
-          width: Get.width * 0.5,
+          height: ResponsiveBreakpoints.of(context).isMobile ? Get.height * 0.8 : Get.height * 0.65, // تعیین ارتفاع ثابت
+          width: ResponsiveBreakpoints.of(context).isMobile ? Get.width * 0.95 : Get.width * 0.5,
           child: SingleChildScrollView(
             child: Column(
               children: [
@@ -859,6 +1270,39 @@ class _InventoryDetailUpdatePaymentViewState
                     ],
                   ),
                 ),
+                // Show which item is being edited
+                if (inventoryDetailUpdatePaymentController.inputItemId.value > 0)
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColor.primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: AppColor.primaryColor.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.edit,
+                          color: AppColor.primaryColor,
+                          size: 20,
+                        ),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'در حال ویرایش آیتم با شناسه: ${inventoryDetailUpdatePaymentController.inputItemId.value}',
+                            style: AppTextStyle.labelText.copyWith(
+                                color: AppColor.primaryColor,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 SizedBox(height: 12,),
                 Row(
                   children: [
@@ -926,9 +1370,10 @@ class _InventoryDetailUpdatePaymentViewState
                 inventoryDetailUpdatePaymentController.forPaymentList.isNotEmpty ?
                 ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxHeight: Get.height * 0.65,
+                    maxHeight:ResponsiveBreakpoints.of(context).isMobile ? Get.height * 0.6 : Get.height * 0.65,
                   ),
                   child: ListView.builder(
+                    controller: _forPaymentScrollController,
                     shrinkWrap: true,
                     itemCount: inventoryDetailUpdatePaymentController
                         .forPaymentList.length,
@@ -947,10 +1392,23 @@ class _InventoryDetailUpdatePaymentViewState
                         },
                         contentPadding: EdgeInsets.zero,
                         title: Card(
-                          color: inventoryDetailUpdatePaymentController
+                          color: (forPayment.id != null &&
+                              forPayment.id == inventoryDetailUpdatePaymentController.inputItemId.value)
+                              ? AppColor.primaryColor.withOpacity(0.1)
+                              : inventoryDetailUpdatePaymentController
                               .selectedForPaymentId.contains(forPayment.id)
                               ? AppColor.textFieldColor
                               : AppColor.secondaryColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            side: BorderSide(
+                              color: (forPayment.id != null &&
+                                  forPayment.id == inventoryDetailUpdatePaymentController.inputItemId.value)
+                                  ? AppColor.primaryColor
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
                           child: Padding(
                             padding: const EdgeInsets
                                 .only(
@@ -961,16 +1419,50 @@ class _InventoryDetailUpdatePaymentViewState
                             child: Column(
                               children: [
                                 // آزمایشگاه
-                                Row(
+                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                        ' آزمایشگاه: ',
-                                        style: AppTextStyle
-                                            .labelText),
-                                    Text(
-                                        forPayment.laboratory?.name ?? '',
-                                        style: AppTextStyle
-                                            .bodyText),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' آزمایشگاه: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            forPayment.laboratory?.name ?? '',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    if (forPayment.id != null &&
+                                        forPayment.id == inventoryDetailUpdatePaymentController.inputItemId.value)
+                                      Container(
+                                        margin: EdgeInsets.only(right: 8),
+                                        padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: AppColor.primaryColor,
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        child: Text(
+                                          'در حال ویرایش',
+                                          style: AppTextStyle.labelText.copyWith(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' شناسه دریافتی: ',
+                                            style: AppTextStyle
+                                                .labelText.copyWith(color: AppColor.dividerColor,fontSize: 12)),
+                                        Text(
+                                            forPayment.id.toString() ?? '',
+                                            style: AppTextStyle
+                                                .bodyText.copyWith(color: AppColor.dividerColor,fontSize: 13)),
+                                      ],
+                                    ),
                                   ],
                                 ),
                                 SizedBox(height: 5,),

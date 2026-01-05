@@ -36,5 +36,41 @@ class BankRepository{
     }
   }
 
+  Future<List<BankModel>> searchBankList(String name,)async{
+    try{
+      Map<String , dynamic> options={
+        "options" : { "bank" :{
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "Name",
+                  "filterValue": name,
+                  "filterType": 0,
+                  "RefTable": "Bank"
+                },
+              ]
+            }
+          ],
+          "orderBy": "Bank.Name",
+          "orderByType": "desc",
+          "StartIndex": 1,
+          "ToIndex": 10000
+        }}
+      };
+      final response=await bankDio.post('Bank/get',data: options);
+      print("request searchBankList : $options" );
+      print("response searchBankList : ${response.data}" );
+      List<dynamic> data=response.data;
+      return data.map((bank)=>BankModel.fromJson(bank)).toList();
+
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 
 }

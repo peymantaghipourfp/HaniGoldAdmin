@@ -39,7 +39,7 @@ class CustomAppbar1 extends StatelessWidget implements PreferredSizeWidget {
       ],
       title: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Image.asset('assets/images/logo.png', width: 120,height: 40,),
+          //Image.asset('assets/images/logo.png', width: 120,height: 40,),
           Expanded(
             child: Center(
               child: Text(title,style: AppTextStyle.smallTitleText,),

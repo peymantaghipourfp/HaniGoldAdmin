@@ -33,18 +33,24 @@ import 'package:uuid/uuid.dart';
 import 'package:path/path.dart' as path;
 
 import '../../../config/network/error/network.error.dart';
+import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/url/base_url.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
+import '../../product/model/item.model.dart';
+import '../../users/model/balance_item.model.dart';
 import '../../users/model/paginated.model.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 
+import '../service/invoice_generation.service.dart';
+
 enum PageState{loading,err,empty,list}
 class InventoryController extends BaseController{
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
 
   ScrollController scrollController = ScrollController();
@@ -55,12 +61,17 @@ class InventoryController extends BaseController{
   final InventoryRepository inventoryRepository=InventoryRepository();
   final AccountRepository accountRepository=AccountRepository();
   final RemittanceRepository remittanceRepository=RemittanceRepository();
+  final ItemRepository itemRepository=ItemRepository();
   final TextEditingController nameFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
   final TextEditingController searchController=TextEditingController();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
+  final TextEditingController receiptNumberController=TextEditingController();
+  final TextEditingController quantityFilterController=TextEditingController();
 
+  final Rxn<ItemModel> selectedItemFilter=Rxn<ItemModel>();
+  final List<ItemModel> itemList=<ItemModel>[].obs;
   var inventoryList=<InventoryModel>[].obs;
   var errorMessage=''.obs;
   var isLoading=true.obs;
@@ -83,6 +94,8 @@ class InventoryController extends BaseController{
   RxInt currentImagePage = 0.obs;
   RxBool showArrows = false.obs;
   RxList<String> imageList = <String>[].obs;
+  // نگهداری تعداد عکس‌ها برای هر InventoryDetail
+  RxMap<String, int> imageCounts = <String, int>{}.obs;
 
   RxList<InventoryDetailModel> getInventoryDetail=<InventoryDetailModel>[].obs;
 
@@ -90,6 +103,7 @@ class InventoryController extends BaseController{
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
+  var typeFilter=''.obs;
   var recordId="".obs;
   var uuid = Uuid();
 
@@ -113,6 +127,17 @@ class InventoryController extends BaseController{
   }
   bool isItemExpanded(int index) {
     return expandedIndex.value==index;
+  }
+
+  void changeSelectedItemFilter(ItemModel? newValue) {
+    selectedItemFilter.value = newValue;
+    update();
+  }
+
+  // Change selected type filter
+  void changeSelectedType(String newValue) {
+    typeFilter.value = newValue;
+    update();
   }
 
   void onSort(int columnIndex, bool ascending) {
@@ -139,6 +164,7 @@ class InventoryController extends BaseController{
     _listenToSocket();
     getInventoryListPager();
     setupScrollListener();
+    fetchItemList();
     super.onInit();
   }
   @override void onClose() {
@@ -184,16 +210,20 @@ class InventoryController extends BaseController{
       try {
         final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
         final toIndex = nextPage * itemsPerPage.value;
-        var fetchedInventoryList = await inventoryRepository.getInventoryList(
+        var fetchedInventoryList = await inventoryRepository.getInventoryListPager(
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
           startDate: startDateFilter.value, endDate: endDateFilter.value,
+          name:nameFilterController.text, receiptNumber: receiptNumberController.text,
         );
-        if (fetchedInventoryList.isNotEmpty) {
-          inventoryList.addAll(fetchedInventoryList);
+        if (fetchedInventoryList.inventories!.isNotEmpty) {
+          inventoryList.addAll(fetchedInventoryList.inventories ?? []);
           currentPage.value = nextPage;
-          hasMore.value = fetchedInventoryList.length == itemsPerPage.value;
+          hasMore.value = fetchedInventoryList.inventories!.length >= itemsPerPage.value;
+          paginated.value = fetchedInventoryList.paginated;
+          inventoryList.refresh();
+          update();
         } else {
           hasMore.value = false;
         }
@@ -231,6 +261,7 @@ class InventoryController extends BaseController{
   void clearSearch() {
     paginated.value=null;
     currentPage.value = 1;
+    itemsPerPage.value=25;
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
@@ -289,6 +320,10 @@ class InventoryController extends BaseController{
         name:nameFilterController.text,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
         startDate: startDateFilter.value, endDate: endDateFilter.value,
+        receiptNumber: receiptNumberController.text,
+        quantity: quantityFilterController.text.isNotEmpty ? quantityFilterController.text.replaceAll(',', '').replaceAll('٬', '') : null,
+        item: selectedItemFilter.value?.id,
+        typeFilter: typeFilter.value,
       );
       isLoading.value=false;
       inventoryList.assignAll(response.inventories??[]);
@@ -310,6 +345,13 @@ class InventoryController extends BaseController{
       var fetchedGetInventoryDetail = await inventoryRepository.getInventoryDetail(id);
       if(fetchedGetInventoryDetail!=null){
         getInventoryDetail.value = fetchedGetInventoryDetail;
+
+        // دریافت تعداد عکس‌ها برای هر آیتم
+        for (var detail in fetchedGetInventoryDetail) {
+          if (detail.recId != null) {
+            await _getImageCountForDetail(detail.recId!);
+          }
+        }
 
         stateGetOne.value=PageState.list;
 
@@ -349,38 +391,24 @@ class InventoryController extends BaseController{
     return null;
   }
 
-  Future<List<dynamic>?> updateDeleteInventoryReceive(
-      String date,
+  Future<List<dynamic>?> deleteInventoryDetail(
       int id,
-      int inventoryDetailId,
-      int stateMode,
-      int type,
-      int accountId,
-      int walletId,
-      int itemId,
-      double quantity,
       )async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
       var response=await inventoryRepository.deleteInventoryDetail(
-          date:date,
           id: id,
-          inventoryDetailId: inventoryDetailId,
-          stateMode: stateMode,
-          type:0,
-          accountId: accountId,
-          walletId: walletId,
-          itemId: itemId,
-          quantity: quantity
       );
       if(response.isNotEmpty){
+        if (Get.isDialogOpen!) Get.back();
         Get.back();
         Get.snackbar("موفقیت آمیز","حذف با موفقیت انجام شد",
             titleText: Text('موفقیت آمیز',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('حذف با موفقیت انجام شد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        if (Get.isDialogOpen!) Get.back();
         Get.back();
         getInventoryListPager();
       }
@@ -393,7 +421,26 @@ class InventoryController extends BaseController{
     }
     return null;
   }
-  Future<List<dynamic>?> updateDeleteInventoryPayment(
+
+  // لیست محصولات
+  Future<void> fetchItemList() async{
+    try{
+      // state.value=PageState.loading;
+      var fetchedItemList=await itemRepository.getItemList();
+      itemList.assignAll(fetchedItemList);
+      //  state.value=PageState.list;
+      if(itemList.isEmpty){
+        //   state.value=PageState.empty;
+      }
+    }
+    catch(e){
+      // state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+
+    }
+  }
+  /*Future<List<dynamic>?> updateDeleteInventoryPayment(
       String date,
       int id,
       int inventoryDetailId,
@@ -408,7 +455,6 @@ class InventoryController extends BaseController{
     try{
       isLoading.value = true;
       var response=await inventoryRepository.deleteInventoryDetail(
-          date: date,
           id: id,
           inventoryDetailId: inventoryDetailId,
           stateMode: stateMode,
@@ -436,7 +482,7 @@ class InventoryController extends BaseController{
       isLoading.value = false;
     }
     return null;
-  }
+  }*/
 
   Future<void> pickImage(String recordId, String type, String entityType,{required int inventoryId}) async {
     final source = await showDialog<ImageSource>(
@@ -594,8 +640,8 @@ class InventoryController extends BaseController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getInventoryListPager();
   }
 
@@ -606,14 +652,34 @@ class InventoryController extends BaseController{
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
+      // ذخیره تعداد عکس‌ها برای این fileName
+      imageCounts[fileName] = fetch.guidIds.length;
       print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
+      print("imageList.length:::::${imageList.length}");
     }
     catch(e){
       //  state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+      // در صورت خطا، تعداد را صفر قرار می‌دهیم
+      imageCounts[fileName] = 0;
     }finally{
+    }
+  }
+
+  // دریافت تعداد عکس‌ها برای یک fileName خاص
+  int getImageCount(String fileName) {
+    return imageCounts[fileName] ?? 0;
+  }
+
+  // دریافت تعداد عکس‌ها برای یک detail بدون تغییر imageList
+  Future<void> _getImageCountForDetail(String fileName) async {
+    try {
+      var fetch = await remittanceRepository.getImage(fileName: fileName, type: "InventoryDetail");
+      imageCounts[fileName] = fetch.guidIds.length;
+    } catch (e) {
+      imageCounts[fileName] = 0;
     }
   }
 
@@ -728,7 +794,7 @@ class InventoryController extends BaseController{
           await FileSaver.instance.saveFile(
             name: 'inventories',
             bytes: uint8List,
-            ext: 'xlsx',
+            fileExtension: 'xlsx',
             mimeType: MimeType.microsoftExcel,
           );
         }
@@ -1032,7 +1098,7 @@ class InventoryController extends BaseController{
         await FileSaver.instance.saveFile(
           name: "row_screenshot_${inventory.id}",
           bytes: uint8List,
-          ext: 'png',
+          fileExtension: 'png',
           mimeType: MimeType.png,
         );
       }
@@ -1056,23 +1122,62 @@ class InventoryController extends BaseController{
       anchor.remove();
     }else{
       try {
-        final status = await Permission.storage.request();
-        if (!status.isGranted) return;
+        // Request appropriate permissions for different Android versions
+        Map<Permission, PermissionStatus> statuses = await [
+          Permission.storage,
+        ].request();
+
+        // Check if any storage permission is granted
+        bool hasPermission = statuses[Permission.storage]?.isGranted == true ||
+            statuses[Permission.photos]?.isGranted == true;
+
+        if (!hasPermission) {
+          Get.snackbar(
+            'خطای دسترسی',
+            'برای ذخیره تصاویر، مجوز ذخیره‌سازی لازم است',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return;
+        }
 
         final dio = Dio();
         final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
-        final downloadsDir = await getDownloadsDirectory();
-        if (downloadsDir == null) {
-          throw Exception('Could not access downloads directory');
+        // Download the file as bytes first
+        final response = await dio.get(
+          url,
+          options: Options(responseType: ResponseType.bytes),
+        );
+
+        if (response.statusCode != 200) {
+          throw Exception('خطا در دریافت فایل از سرور');
         }
+        final bytes = response.data as List<int>;
+        final uint8List = Uint8List.fromList(bytes);
+
+        // Determine file extension more reliably
         String fileExtension = path.extension(guidId);
-        if(fileExtension.isEmpty) fileExtension = '.png';
+        if (fileExtension.isEmpty) {
+          // Try to detect from content type or default to common image extensions
+          final contentType = response.headers.value('content-type');
+          if (contentType?.contains('jpeg') == true || contentType?.contains('jpg') == true) {
+            fileExtension = '.jpg';
+          } else if (contentType?.contains('png') == true) {
+            fileExtension = '.png';
+          } else if (contentType?.contains('gif') == true) {
+            fileExtension = '.gif';
+          } else {
+            fileExtension = '.png'; // Default fallback
+          }
+        }
         final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
-        final savePath = path.join(downloadsDir.path, fileName);
-        /*final dir = await getApplicationDocumentsDirectory();
-        final path = '${dir.path}/images_$guidId.png';*/
-        await dio.download(url, savePath);
-        print(savePath);
+        // Use FileSaver for more reliable file saving across platforms
+        await FileSaver.instance.saveFile(
+          name: fileName,
+          bytes: uint8List,
+          fileExtension: fileExtension.replaceFirst('.', ''),
+          mimeType: _getMimeType(fileExtension),
+        );
+
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',
@@ -1088,13 +1193,104 @@ class InventoryController extends BaseController{
     }
   }
 
+  // Helper method to get MIME type based on file extension
+  MimeType _getMimeType(String extension) {
+    switch (extension.toLowerCase()) {
+      case '.jpg':
+      case '.jpeg':
+        return MimeType.jpeg;
+      case '.png':
+        return MimeType.png;
+      case '.gif':
+        return MimeType.gif;
+      case '.bmp':
+        return MimeType.bmp;
+      default:
+        return MimeType.png; // Default fallback
+    }
+  }
 
   void clearFilter() {
     nameFilterController.clear();
-    mobileFilterController.clear();
+    receiptNumberController.clear();
     dateStartController.clear();
     dateEndController.clear();
     startDateFilter.value="";
     endDateFilter.value="";
+    quantityFilterController.clear();
+    selectedItemFilter.value = null;
+    typeFilter.value = '';
+  }
+
+  /// Generate invoice for inventory (both payment and receive types)
+  Future<void> generateInvoice(InventoryModel inventory) async {
+    try {
+      EasyLoading.show(status: 'در حال تولید فاکتور...');
+
+      final invoiceService = InvoiceGenerationService();
+      final userInfoTransactionRepository = UserInfoTransactionRepository();
+
+      // Fetch inventory details if not already loaded
+      InventoryModel inventoryWithDetails = inventory;
+      if (inventory.inventoryDetails == null || inventory.inventoryDetails!.isEmpty) {
+        if (inventory.id != null) {
+          final inventoryDetails = await inventoryRepository.getInventoryDetail(inventory.id!);
+          if (inventoryDetails != null && inventoryDetails.isNotEmpty) {
+            inventoryWithDetails = inventory.copyWith(inventoryDetails: inventoryDetails);
+          } else {
+            throw Exception('اطلاعات فاکتور یافت نشد');
+          }
+        } else {
+          throw Exception('شناسه فاکتور موجود نیست');
+        }
+      }
+
+      // Get balance list for the account
+      List<BalanceItemModel> balanceList = [];
+      if (inventory.account?.id != null) {
+        balanceList = await userInfoTransactionRepository.getBalanceList(inventory.account!.id!);
+        balanceList.removeWhere((r) => r.balance == 0);
+      }
+
+      // Generate invoice with balance information
+      await invoiceService.generateInvoice(
+        inventory: inventoryWithDetails,
+        includeBalance: true,
+        balanceList: balanceList,
+      );
+
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "موفقیت",
+        "فاکتور با موفقیت تولید شد",
+        titleText: Text(
+          "موفقیت",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "فاکتور با موفقیت تولید شد",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "خطا",
+        "خطا در تولید فاکتور: ${e.toString()}",
+        titleText: Text(
+          "خطا",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "خطا در تولید فاکتور: ${e.toString()}",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+      print("خطا در تولید فاکتور: ${e.toString()}");
+    }
   }
 }

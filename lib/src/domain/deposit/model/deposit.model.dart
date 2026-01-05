@@ -27,7 +27,9 @@ class DepositModel {
   @JsonKey(name: "reasonRejection")
   final ReasonRejectionModel? reasonRejection;
   @JsonKey(name: "amount")
-  final int? amount;
+  final double? amount;
+  @JsonKey(name: "extraAmount")
+  final double? extraAmount;
   @JsonKey(name: "status")
   final int? status;
   @JsonKey(name: "isDeleted")
@@ -50,6 +52,14 @@ class DepositModel {
   final DateTime? date;
   @JsonKey(name: "trackingNumber")
   final String? trackingNumber;
+  @JsonKey(name: "description")
+  final String? description;
+  @JsonKey(name: "ownerName")
+  final String? ownerName;
+  @JsonKey(name: "isSendTelegram")
+  final bool? isSendTelegram;
+  @JsonKey(name: "isSendWhatsapp")
+  final bool? isSendWhatsapp;
 
   DepositModel({
     required this.depositRequest,
@@ -58,6 +68,7 @@ class DepositModel {
     required this.bankAccount,
     required this.reasonRejection,
     required this.amount,
+    required this.extraAmount,
     required this.status,
     required this.isDeleted,
     required this.registered,
@@ -69,6 +80,10 @@ class DepositModel {
     required this.infos,
     required this.date,
     required this.trackingNumber,
+    required this.description,
+    required this.ownerName,
+    required this.isSendTelegram,
+    required this.isSendWhatsapp,
   });
 
   factory DepositModel.fromJson(Map<String, dynamic> json) => _$DepositModelFromJson(json);

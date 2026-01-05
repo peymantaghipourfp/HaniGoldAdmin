@@ -39,7 +39,7 @@ enum PageState{loading,err,empty,list}
 class DepositPendingController extends BaseController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
 
@@ -52,13 +52,15 @@ class DepositPendingController extends BaseController{
   final TextEditingController dateEndController=TextEditingController();
   final TextEditingController nameDepositFilterController=TextEditingController();
   final TextEditingController nameRequestFilterController=TextEditingController();
+  final TextEditingController amountFilterController=TextEditingController();
+  final TextEditingController trackingNumberFilterController=TextEditingController();
 
   RxList<DepositModel> depositList = RxList([]);
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   var errorMessage=''.obs;
-  var isLoading=true.obs;
+  var isLoading=false.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   var startDateFilter=''.obs;
@@ -80,8 +82,8 @@ class DepositPendingController extends BaseController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getDepositListStatusPager();
   }
 
@@ -156,6 +158,7 @@ class DepositPendingController extends BaseController{
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
           startDate: startDateFilter.value, endDate: endDateFilter.value,
         );
         if (fetchedDepositList.isNotEmpty) {
@@ -220,7 +223,9 @@ class DepositPendingController extends BaseController{
   }
 
   void clearSearch() {
+    paginated.value=null;
     currentPage.value = 1;
+    itemsPerPage.value=25;
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
@@ -231,7 +236,7 @@ class DepositPendingController extends BaseController{
   Future<void> getDepositListStatusPager() async {
     print("### getDepositListStatusPager ###");
     depositList.clear();
-    isLoading.value=true;
+    //isLoading.value=true;
     try {
       state.value=PageState.loading;
       var response = await depositRepository.getDepositListPendingPager(
@@ -242,19 +247,27 @@ class DepositPendingController extends BaseController{
         toIndex: itemsPerPage.value,
         startDate: startDateFilter.value,
         endDate: endDateFilter.value,
+        amount: amountFilterController.text.replaceAll(',', ''),
+        trackingNumber: trackingNumberFilterController.text,
       );
-      isLoading.value=false;
+      //isLoading.value=false;
+      state.value=PageState.list;
       // فیلتر کردن فقط واریزهای در انتظار (status == 0)
       var pendingDeposits = response.deposit ?? [];
       depositList.assignAll(pendingDeposits);
       paginated.value=response.paginated;
-      state.value=PageState.list;
-
+      if(depositList.isEmpty){
+        //isLoading.value=false;
+        state.value=PageState.empty;
+      }
       update();
     }
     catch (e) {
+      //isLoading.value=false;
       state.value = PageState.err;
-    } finally {}
+    } finally {
+      //isLoading.value=false;
+    }
   }
 
   // مدل آپشن ReasonRejection
@@ -434,7 +447,7 @@ class DepositPendingController extends BaseController{
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -470,6 +483,8 @@ class DepositPendingController extends BaseController{
   void clearFilter() {
     nameDepositFilterController.clear();
     nameRequestFilterController.clear();
+    amountFilterController.clear();
+    trackingNumberFilterController.clear();
     dateStartController.clear();
     dateEndController.clear();
     startDateFilter.value="";
@@ -557,7 +572,7 @@ class DepositPendingController extends BaseController{
         await FileSaver.instance.saveFile(
           name: "deposit_screenshot_${deposit.id}",
           bytes: uint8List,
-          ext: 'png',
+          fileExtension: 'png',
           mimeType: MimeType.png,
         );
       }

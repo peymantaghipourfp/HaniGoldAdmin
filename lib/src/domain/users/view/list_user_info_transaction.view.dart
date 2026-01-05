@@ -15,6 +15,7 @@ import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/user_info_transaction.controller.dart';
+import '../widgets/filter_dialog_report_setting.widget.dart';
 
 class ListUserInfoTransactionView extends GetView<UserInfoTransactionController> {
   const ListUserInfoTransactionView({super.key});
@@ -41,9 +42,11 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
               height: Get.height,
               width: Get.width,
               child: SingleChildScrollView(
+                controller:isDesktop ? null : controller.scrollControllerMobile,
                 child: Column(
                   children: [
                     //فیلد جستجو
+                    isDesktop ? SizedBox.shrink() :
                     Container(
                       margin: EdgeInsets.symmetric(
                           horizontal: 15, vertical: 10),
@@ -95,12 +98,325 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                         ),
                       ),
                     ),
-                    // خروجی اکسل
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                      child: Row(mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          ElevatedButton(
+                    isDesktop ?
+                    Container(
+                      margin: EdgeInsets.only(left: 30,right: 30, top: 5,bottom: 30),
+                      padding: EdgeInsets.only(left: 20,right: 20, top: 5, bottom: 40),
+                      color: AppColor.backGroundColor1.withAlpha(150),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        controller:
+                        controller.scrollController,
+                        physics: ClampingScrollPhysics(),
+                        child: Row(
+                          children: [
+                            SingleChildScrollView(
+                              child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.symmetric( vertical: 5),
+                                    child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          width: 400,
+                                          child: TextFormField(
+                                            // onChanged: (value){
+                                            //   Future.delayed(const Duration(milliseconds: 3000), () {
+                                            //     controller.getListTransactionInfo();
+                                            //   });
+                                            // },
+                                            controller: controller.searchController,
+                                            style: AppTextStyle.labelText,
+                                            textInputAction: TextInputAction.search,
+                                            // onFieldSubmitted: (value) async {
+                                            //   // Future.delayed(const Duration(milliseconds: 700), () {
+                                            //      controller.getListTransactionInfo();
+                                            //   // });
+                                            // },
+                                            onEditingComplete: () async {
+                                              if (controller.searchController.text.isNotEmpty) {
+                                                await controller.getListTransactionInfoPager();
+                                              }else {
+                                                controller.clearSearch();
+                                              }
+                                            },
+
+                                            decoration: InputDecoration(
+                                                border: OutlineInputBorder(
+                                                  borderRadius: BorderRadius.circular(10),
+                                                ),
+                                                filled: true,
+                                                fillColor: AppColor.textFieldColor,
+                                                hintText: "جستجو ... ",
+                                                hintStyle: AppTextStyle.labelText,
+
+                                                prefixIcon: IconButton(
+                                                    onPressed: () async {
+                                                      controller.getListTransactionInfoPager();
+                                                    },
+                                                    icon: Icon(
+                                                      Icons.search,
+                                                      color: AppColor.textColor,
+                                                      size: 30,
+                                                    )),
+                                                suffixIcon: IconButton(
+                                                  onPressed: controller.clearSearch,
+                                                  icon: Icon(Icons.close, color: AppColor.textColor),
+                                                )
+                                            ),
+                                          ),
+                                        ),
+                                        SizedBox(width: 10),
+                                        Row(
+                                          children: [
+                                            // خروجی اکسل
+                                            OutlinedButton.icon(
+                                              onPressed: () async {
+                                                controller.clearFilter();
+                                                showGeneralDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    barrierLabel:
+                                                    MaterialLocalizations
+                                                        .of(context)
+                                                        .modalBarrierDismissLabel,
+                                                    barrierColor:
+                                                    Colors.black45,
+                                                    transitionDuration:
+                                                    const Duration(
+                                                        milliseconds:
+                                                        200),
+                                                    pageBuilder: (BuildContext
+                                                    buildContext,
+                                                        Animation animation,
+                                                        Animation
+                                                        secondaryAnimation) {
+                                                      return Center(
+                                                        child: Material(
+                                                          color: Colors
+                                                              .transparent,
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                    8),
+                                                                color: AppColor
+                                                                    .backGroundColor),
+                                                            width: isDesktop
+                                                                ? Get.width *
+                                                                0.2
+                                                                : Get.width *
+                                                                0.5,
+                                                            height: isDesktop
+                                                                ? Get.height *
+                                                                0.5
+                                                                : Get.height *
+                                                                0.7,
+                                                            padding:
+                                                            EdgeInsets
+                                                                .all(20),
+                                                            child: Column(
+                                                              children: [
+                                                                Padding(
+                                                                  padding:
+                                                                  const EdgeInsets
+                                                                      .all(
+                                                                      8.0),
+                                                                  child: Row(
+                                                                    mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .end,
+                                                                    children: [
+                                                                      Expanded(
+                                                                        child:
+                                                                        Center(
+                                                                          child:
+                                                                          Text(
+                                                                            'خروجی اکسل',
+                                                                            style: AppTextStyle.labelText.copyWith(
+                                                                              fontSize: 15,
+                                                                              fontWeight: FontWeight.normal,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Container(
+                                                                  color: AppColor
+                                                                      .textColor,
+                                                                  height: 0.2,
+                                                                ),
+                                                                Padding(
+                                                                  padding: const EdgeInsets
+                                                                      .symmetric(
+                                                                      horizontal:
+                                                                      10),
+                                                                  child:
+                                                                  Column(
+                                                                    children: [
+                                                                      SizedBox(
+                                                                        height:
+                                                                        8,
+                                                                      ),
+                                                                      Column(
+                                                                        crossAxisAlignment:
+                                                                        CrossAxisAlignment.start,
+                                                                        children: [
+                                                                          Text(
+                                                                            'نام حساب',
+                                                                            style: AppTextStyle.labelText.copyWith(fontSize: 11, fontWeight: FontWeight.normal, color: AppColor.textColor),
+                                                                          ),
+                                                                          SizedBox(
+                                                                            height: 10,
+                                                                          ),
+                                                                          IntrinsicHeight(
+                                                                            child: TextFormField(
+                                                                              autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                                              controller: controller.nameFilterController,
+                                                                              style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                              textAlign: TextAlign.start,
+                                                                              keyboardType: TextInputType.text,
+                                                                              decoration: InputDecoration(
+                                                                                contentPadding: const EdgeInsets.symmetric(vertical: 11, horizontal: 15),
+                                                                                isDense: true,
+                                                                                border: OutlineInputBorder(
+                                                                                  borderRadius: BorderRadius.circular(6),
+                                                                                ),
+                                                                                filled: true,
+                                                                                fillColor: AppColor.textFieldColor,
+                                                                                errorMaxLines: 1,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      SizedBox(
+                                                                        height:
+                                                                        8,
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                Spacer(),
+                                                                Container(
+                                                                  margin: EdgeInsets.symmetric(
+                                                                      horizontal:
+                                                                      20,
+                                                                      vertical:
+                                                                      10),
+                                                                  width: double
+                                                                      .infinity,
+                                                                  height: 40,
+                                                                  child:
+                                                                  ElevatedButton(
+                                                                    style: ButtonStyle(
+                                                                        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                        // elevation: WidgetStatePropertyAll(5),
+                                                                        backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                        shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
+                                                                    onPressed:
+                                                                        () async {
+                                                                      controller.getListUserInfoTransactionExcel();
+                                                                      Get.back();
+                                                                    },
+                                                                    child: controller
+                                                                        .isLoading
+                                                                        .value
+                                                                        ? CircularProgressIndicator(
+                                                                      valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                    )
+                                                                        : Text(
+                                                                      'خروجی اکسل',
+                                                                      style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
+                                              },
+                                              label: Text(
+                                                'خروجی اکسل',
+                                                style: AppTextStyle
+                                                    .labelText.copyWith(color: AppColor.primaryColor,fontSize: 12),
+                                              ),
+                                              icon: SvgPicture.asset(
+                                                'assets/svg/excel.svg',
+                                                height: 24,
+                                              ),
+                                            ),
+                                            SizedBox(width: 10),
+                                            // Filter Button
+                                            OutlinedButton.icon(
+                                              onPressed: () async {
+                                                //controller.fetchAccountList();
+                                                showGeneralDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    barrierLabel:
+                                                    MaterialLocalizations
+                                                        .of(context)
+                                                        .modalBarrierDismissLabel,
+                                                    barrierColor:
+                                                    Colors.black45,
+                                                    transitionDuration:
+                                                    const Duration(
+                                                        milliseconds:
+                                                        200),
+                                                    pageBuilder: (BuildContext
+                                                    buildContext,
+                                                        Animation animation,
+                                                        Animation
+                                                        secondaryAnimation) {
+                                                      return Center(
+                                                        child: Material(
+                                                          color: Colors
+                                                              .transparent,
+                                                          child: Container(
+                                                            decoration: BoxDecoration(
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(
+                                                                    8),
+                                                                color: AppColor
+                                                                    .backGroundColor),
+                                                            width: isDesktop
+                                                                ? Get.width *
+                                                                0.5
+                                                                : Get.width *
+                                                                0.8,
+                                                            height: isDesktop
+                                                                ? Get.height *
+                                                                0.8
+                                                                : Get.height *
+                                                                0.9,
+                                                            padding:
+                                                            EdgeInsets.only(left: 20,right: 20,top: 20,bottom: 3),
+                                                            child: FilterDialog(controller: controller),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    });
+                                              },
+                                                icon: SvgPicture.asset(
+                                                    'assets/svg/filter3.svg',
+                                                    height: 22,
+                                                    colorFilter:
+                                                    ColorFilter.mode(AppColor.textColor, BlendMode.srcIn,
+                                                    )),
+                                                label: Text(
+                                                  'فیلتر',
+                                                  style: AppTextStyle
+                                                      .labelText,
+                                                ),
+                                            ),
+                                            /*ElevatedButton(
                             style: ButtonStyle(
                                 padding: WidgetStatePropertyAll(
                                   EdgeInsets
@@ -132,27 +448,12 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   .labelText,
                             ),
                             //onPressed: () => orderController.getOrderExcel(),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 70),
-                      color:
-                      AppColor.appBarColor.withOpacity(0.5),
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        controller:
-                        controller.scrollController,
-                        physics: ClampingScrollPhysics(),
-                        child: Row(
-                          children: [
-                            SingleChildScrollView(
-                              child: Column(
-                                children: [
+                          ),*/
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                   DataTable(
                                     columns:
                                     buildDataColumns(),
@@ -169,10 +470,10 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     dividerThickness: 0.3,
                                     rows: buildDataRows(
                                         context),
-                                    dataRowMaxHeight: 80,
+                                    dataRowMaxHeight: double.infinity,
                                     //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                    headingRowHeight: 60,
+                                    headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
+                                    headingRowHeight: 35,
                                     columnSpacing: 30,
                                     horizontalMargin: 5,
                                   ),
@@ -181,7 +482,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                       ? Container(
                                     margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                     padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color:AppColor.appBarColor.withOpacity(0.5),),
+                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color:AppColor.appBarColor.withAlpha(130),),
                                         child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Container(
@@ -491,7 +792,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                             Container(
                                               margin: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                                               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
-                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color: AppColor.backGroundColor1.withOpacity(0.5),),
+                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8),color: AppColor.backGroundColor1.withAlpha(130),),
                                               child: Row(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
                                                   Container(
@@ -602,7 +903,8 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                           ],
                         ),
                       ),
-                    ),
+                    ):
+                    _buildMobileTransactionList(context),
                   ],
                 ),
               ),
@@ -618,6 +920,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
               ),
             ),
           ),
+          isDesktop ?
           Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -626,16 +929,16 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   height: 70,
                   margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  color: AppColor.appBarColor.withOpacity(0.5),
+                  //color: AppColor.appBarColor.withAlpha(130),
                   alignment: Alignment.bottomCenter,
                   child:PagerWidget(countPage: controller.paginated.value?.totalCount??0, callBack: (int index) {
                     controller.isChangePage(index);
                   },)):SizedBox(),
             ],
-          ),
+          ): SizedBox.shrink(),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton:isDesktop ? FloatingActionButton(
         onPressed: () {
           Get.dialog(const ChatDialog());
         },
@@ -644,7 +947,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
           Icons.chat,
           color: Colors.white,
         ),
-      ),
+      ) : SizedBox.shrink(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }
@@ -666,9 +969,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
       ),
 
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 120),
-              child: Row(
+          label:  Row(
                 children: [
                   Text('مانده ریالی',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -676,16 +977,14 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بستانکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
+              ),
           headingRowAlignment: MainAxisAlignment.center,
         onSort: (columnIndex, ascending){
           controller.onSort(columnIndex, ascending);
         },
       ),
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label:  Row(
                 children: [
                   Text('مانده ریالی',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -693,7 +992,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بدهکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
+              ),
           headingRowAlignment: MainAxisAlignment.center,
         onSort: (columnIndex, ascending){
           controller.onSort(columnIndex, ascending);
@@ -701,9 +1000,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
       ),
 
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label: Row(
                 children: [
                   Text('مانده طلا',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -711,12 +1008,15 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بستانکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
-          headingRowAlignment: MainAxisAlignment.center),
+              ),
+
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label: Row(
                 children: [
                   Text('مانده طلا',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -724,13 +1024,16 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بدهکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
-          headingRowAlignment: MainAxisAlignment.center),
+              ),
+
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
 
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label: Row(
                 children: [
                   Text('مانده سکه',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -738,12 +1041,15 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بستانکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
-          headingRowAlignment: MainAxisAlignment.center),
+              ),
+
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label: Row(
                 children: [
                   Text('مانده سکه',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -751,13 +1057,16 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بدهکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
-          headingRowAlignment: MainAxisAlignment.center),
+              ),
+
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
 
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label: Row(
                 children: [
                   Text('مانده ارز',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -765,13 +1074,12 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بستانکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
+              ),
+
           headingRowAlignment: MainAxisAlignment.center),
 
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label: Row(
                 children: [
                   Text('مانده ارز',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -779,180 +1087,1006 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                   Text('(بدهکار)',
                       style: AppTextStyle.labelText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold)),
                 ],
-              )),
+              ),
+
           headingRowAlignment: MainAxisAlignment.center),
 
       DataColumn(
-          label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 110),
-              child: Row(
+          label: Row(
                 children: [
-                  Text('تراز کل',
+                  Text('تراز کل بس',
                       style: AppTextStyle.labelText.copyWith(fontSize: 11)),
                 ],
-              )),
-          headingRowAlignment: MainAxisAlignment.center),
-
-
+              ),
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
+      DataColumn(
+          label: Row(
+            children: [
+              Text('تراز کل بد',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+            ],
+          ),
+          headingRowAlignment: MainAxisAlignment.center,
+        onSort: (columnIndex, ascending){
+          controller.onSort(columnIndex, ascending);
+        },
+      ),
     ];
   }
 
   List<DataRow> buildDataRows(BuildContext context) {
-    return controller.listTransactionInfo
-        .map((trans) => DataRow(
-      cells: [
-        DataCell(
-            Center(
-          child: Text(
-            "${trans.rowNum}",
-            style: AppTextStyle.bodyText,
-          ),
-        )),
-        DataCell(Center(
-          child: GestureDetector(
-            onTap: (){
-              Get.toNamed("/userInfoTransaction",parameters: {"accountId":trans.accountId.toString()});
-              // /controller.getInfo(trans.accountId);
-            },
-            child: Text(
+    return controller.listTransactionInfo.asMap().entries.map((entry) {
+      final index = entry.key;
+      final trans = entry.value;
+      final rowColor = index.isEven
+          ? AppColor.backGroundColor
+          : AppColor.secondaryColor.withAlpha(100);
+      return DataRow(
+        color: WidgetStateProperty.all(rowColor),
+        cells: [
+          // ردیف
+          DataCell(
+              Center(
+                child: Text(
+                  "${trans.rowNum}",
+                  style: AppTextStyle.bodyText,
+                ),
+              )),
+          // نام
+          DataCell(Center(
+            child: GestureDetector(
+              onTap: (){
+                Get.toNamed("/userInfoTransaction",parameters: {"accountId":trans.accountId.toString()});
+                // /controller.getInfo(trans.accountId);
+              },
+              child: Text(
                 "${trans.accountName} ",
                 style: AppTextStyle.bodyText
                     .copyWith(color: AppColor.textColor, fontSize: 11,decoration: TextDecoration.underline,decorationColor: AppColor.textColor,decorationThickness: 3),),
-          ),
-        )),
-
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances.isEmpty
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances
-                      .map((e) => Container(
-                    child: e.unitName == "ریال" && e.balance! >0
-                        ? Row(
-                      children: [
-                        Text(" ${e.itemName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color:  AppColor
-                                    .primaryColor,
-                                fontWeight:
-                                FontWeight
-                                    .bold)),
-                        Text(
-                          e.balance.toString().seRagham(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 10,
-                              color:  AppColor
-                                  .primaryColor,
-                              fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color:  AppColor
-                                    .primaryColor,
-                                fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : Row(
-                      children: [
-                        SizedBox(width: 120,),
-                      ],
-                    ),
-                  ))
-                      .toList(),
-                ),
-              ],
-            ))),
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances .isEmpty
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances
-                      .map((e) => Container(
-                    child: e.unitName == "ریال" && e.balance! <0
-                        ? Row(
-                      children: [
-                        Text(" ${e.itemName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color:  AppColor
-                                    .accentColor,
-                                fontWeight:
-                                FontWeight
-                                    .bold)),
-                        Text(
-                          e.balance.toString().seRagham(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 10,
-                              color:  AppColor
-                                  .accentColor,
-                              fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color:  AppColor
-                                    .accentColor,
-                                fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : Row(
-                      children: [
-                        SizedBox(width: 120,),
-                      ],
-                    ),
-                  ))
-                      .toList(),
-                ),
-              ],
-            ))),
-
-        DataCell(Center(
+            ),
+          )),
+          // مانده ریالی بستانکار
+          DataCell(Center(
             child:
-            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0)>0 ?
+            (trans.cashBalanceBes ?? 0)>0 ?
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                trans.balances.isEmpty
+                trans.cashBalanceBes==0
                     ? SizedBox()
-                    : trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم"  ? sum + item.balance!:sum + 0) == 0?
-                SizedBox(width: 150,):
-                Row(
+                    :
+                Column(mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    SizedBox(
-                      width: 150,
+                    Row(
+                      children: [
+                        SizedBox(
+                          //width: 150,
                           child: Row(
-                                            children: [
-                          Text(" طلای آبشده ",
+                            children: [
+                              Text(" مانده وجه نقد ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .primaryColor,
+                                      fontWeight:
+                                      FontWeight
+                                          .bold)),
+                              Text(
+                                trans.cashBalanceBes!.toStringAsFixed(0).seRagham(),
+                                style: AppTextStyle.bodyText
+                                    .copyWith(
+                                    fontSize: 12,
+                                    color:  AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight.bold),
+                                textDirection:
+                                TextDirection.ltr,
+                              ),
+                              Text(" ریال ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .primaryColor,
+                                      fontWeight:
+                                      FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: (){
+                            Get.defaultDialog(
+                              confirm: Column(
+                                children: trans.balances!.map((e)=>e.unitName=="ریال" ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      e.itemName??"",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                    ), Text(
+                                      "${e.balance?.toStringAsFixed(0).seRagham() ?? 0} ریال ",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ):SizedBox()).toList(),
+                              ),
+                              middleText: "لیست مانده ریال بستانکار",
+                              middleTextStyle: context
+                                  .textTheme.bodyMedium!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 13),
+                              title: "جزییات",
+                              titleStyle: context
+                                  .textTheme.titleSmall!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 14),
+                              backgroundColor: AppColor.textColor,
+                              radius: 7,
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 20),
+
+
+                            );
+                          },
+                          child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                              colorFilter: ColorFilter.mode(
+                                AppColor.textColor,
+                                BlendMode.srcIn,
+                              )),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5,),
+                    (trans.afterCashBalance ?? 0) > 0 ?
+                    Divider(height: 0.5,color: AppColor.dividerColor,) : SizedBox.shrink(),
+                    SizedBox(height: 5,),
+                    (trans.afterCashBalance ?? 0) > 0 ?
+                    Column(
+                      children: trans.balances!.map((e)=>e.unitName=="ریال" ?
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          (e.balance ?? 0) > 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "${e.balance?.toStringAsFixed(0).seRagham() ?? 0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                                textDirection: TextDirection.ltr,
+                              ),
+                              Text(" ریال ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                                ,textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ): (e.balance ?? 0) < 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.accentColor , fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "-${e.balance?.abs().toStringAsFixed(0).seRagham() ?? 0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                textDirection: TextDirection.ltr,
+                              ),
+                              Text(" ریال ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 10,
+                                      color:  AppColor
+                                          .accentColor,
+                                      fontWeight:
+                                      FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ) : SizedBox.shrink(),
+                        ],
+                      ):SizedBox()).toList(),
+                    ):
+                    SizedBox.shrink(),
+                  ],
+                ),
+
+
+              ],
+            ):
+            SizedBox.shrink(),
+          ),
+          ),
+          // مانده ریالی بدهکار
+          DataCell(Center(
+            child:
+            (trans.cashBalanceBed ?? 0)<0 ?
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                trans.cashBalanceBed==0
+                    ? SizedBox()
+                    :
+                Column(mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(
+                          //width: 150,
+                          child: Row(
+                            children: [
+                              Text(" مانده وجه نقد ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .accentColor,
+                                      fontWeight:
+                                      FontWeight
+                                          .bold)),
+                              Text(
+                                "-${trans.cashBalanceBed?.abs().toStringAsFixed(0).seRagham() ?? ""}",
+                                style: AppTextStyle.bodyText
+                                    .copyWith(
+                                    fontSize: 12,
+                                    color:  AppColor
+                                        .accentColor
+                                    ,
+                                    fontWeight:
+                                    FontWeight.bold),
+                                textDirection:
+                                TextDirection.ltr,
+                              ),
+                              Text(" ریال ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .accentColor,
+                                      fontWeight:
+                                      FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: (){
+                            Get.defaultDialog(
+                              confirm: Column(
+                                children: trans.balances!.map((e)=>e.unitName=="ریال" ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      e.itemName??"",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                    ), Text(
+                                      "-${e.balance?.abs().toStringAsFixed(0).seRagham() ?? 0} ریال ",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor,),
+                                      textDirection: TextDirection.ltr,
+                                    ),
+                                  ],
+                                ):SizedBox()).toList(),
+                              ),
+                              middleText: "لیست مانده ریال بدهکار",
+                              middleTextStyle: context
+                                  .textTheme.bodyMedium!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 13),
+                              title: "جزییات",
+                              titleStyle: context
+                                  .textTheme.titleSmall!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 14),
+                              backgroundColor: AppColor.textColor,
+                              radius: 7,
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 20),
+
+
+                            );
+                          },
+                          child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                              colorFilter: ColorFilter.mode(
+                                AppColor.textColor,
+                                BlendMode.srcIn,
+                              )),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5,),
+                    (trans.afterCashBalance ?? 0) < 0 ?
+                    Divider(height: 0.5,color: AppColor.dividerColor,) : SizedBox.shrink(),
+                    SizedBox(height: 5,),
+                    (trans.afterCashBalance ?? 0) < 0 ?
+                    Column(
+                      children: trans.balances!.map((e)=>e.unitName=="ریال" ?
+                      Row(
+                        children: [
+                          (e.balance ?? 0) < 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.accentColor , fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "-${e.balance?.abs().toStringAsFixed(0).seRagham() ?? 0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                                textDirection: TextDirection.ltr,
+                              ),
+                              Text(" ریال ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 10,
+                                      color:  AppColor
+                                          .accentColor,
+                                      fontWeight:
+                                      FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ) : (e.balance ?? 0) > 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "${e.balance?.toStringAsFixed(0).seRagham() ?? 0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                                textDirection: TextDirection.ltr,
+                              ),
+                              Text(" ریال ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                                ,textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ): SizedBox.shrink(),
+                        ],
+                      ):SizedBox()).toList(),
+                    ):SizedBox.shrink(),
+                  ],
+                ),
+
+              ],
+            ):
+            SizedBox.shrink(),
+          ),
+          ),
+          // مانده طلا بستانکار
+          DataCell(Center(
+            child:
+            (trans.goldBalanceBes ?? 0)>0 ?
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                trans.goldBalanceBes==0
+                    ? SizedBox()
+                    :
+                Column(mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(
+                          //width: 150,
+                          child: Row(
+                            children: [
+                              Text(" مانده آبشده ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .primaryColor,
+                                      fontWeight:
+                                      FontWeight
+                                          .bold)),
+                              Text(
+                                trans.goldBalanceBes!.toStringAsFixed(3),
+                                style: AppTextStyle.bodyText
+                                    .copyWith(
+                                    fontSize: 11,
+                                    color:  AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight.bold),
+                                textDirection:
+                                TextDirection.ltr,
+                              ),
+                              Text(" گرم ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .primaryColor,
+                                      fontWeight:
+                                      FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: (){
+                            Get.defaultDialog(
+                              confirm: Column(
+                                children: trans.balances!.map((e)=>e.unitName=="گرم" ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      e.itemName??"",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                    ), Text(
+                                      "${e.balance??0} گرم ",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                    ),
+                                  ],
+                                ):SizedBox()).toList(),
+                              ),
+                              middleText: "لیست مانده طلای بستانکار",
+                              middleTextStyle: context
+                                  .textTheme.bodyMedium!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 13),
+                              title: "جزییات",
+                              titleStyle: context
+                                  .textTheme.titleSmall!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 14),
+                              backgroundColor: AppColor.textColor,
+                              radius: 7,
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 20),
+
+
+                            );
+                          },
+                          child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                              colorFilter: ColorFilter.mode(
+                                AppColor.textColor,
+                                BlendMode.srcIn,
+                              )),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5,),
+                    (trans.afterGoldBalance ?? 0) > 0 ?
+                    Divider(height: 0.5,color: AppColor.dividerColor,) : SizedBox.shrink(),
+                    SizedBox(height: 5,),
+                    (trans.afterGoldBalance ?? 0) > 0 ?
+                    Column(
+                      children: trans.balances!.map((e)=>e.unitName=="گرم" ?
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          (e.balance ?? 0) > 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "${e.balance??0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(" گرم ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 10,
+                                      color:  AppColor
+                                          .primaryColor,
+                                      fontWeight: FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ): (e.balance ?? 0) < 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "-${e.balance?.abs() ?? 0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.accentColor,fontWeight: FontWeight.bold),textDirection: TextDirection.ltr,
+                              ),
+                              Text(" گرم ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 10,
+                                    color:  AppColor
+                                        .accentColor,
+                                    fontWeight: FontWeight.bold)
+                                ,textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ) : SizedBox.shrink(),
+                        ],
+                      ):SizedBox()).toList(),
+                    ):
+                    SizedBox.shrink(),
+                  ],
+                ),
+
+
+              ],
+            ):
+            SizedBox.shrink(),
+          ),
+          ),
+          // مانده طلا بدهکار
+          DataCell(Center(
+            child:
+            (trans.goldBalanceBed ?? 0)<0 ?
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                trans.goldBalanceBed==0
+                    ? SizedBox()
+                    :
+                Column(mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(
+                          //width: 150,
+                          child: Row(
+                            children: [
+                              Text(" مانده آبشده ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .accentColor,
+                                      fontWeight:
+                                      FontWeight
+                                          .bold)),
+                              Text(
+                                "-${trans.goldBalanceBed?.abs().toStringAsFixed(3) ?? ""}",
+                                style: AppTextStyle.bodyText
+                                    .copyWith(
+                                    fontSize: 11,
+                                    color:  AppColor
+                                        .accentColor
+                                    ,
+                                    fontWeight:
+                                    FontWeight.bold),
+                                textDirection:
+                                TextDirection.ltr,
+                              ),
+                              Text(" گرم ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 9,
+                                      color:  AppColor
+                                          .accentColor,
+                                      fontWeight:
+                                      FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: (){
+                            Get.defaultDialog(
+                              confirm: Column(
+                                children: trans.balances!.map((e)=>e.unitName=="گرم" ? Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      e.itemName??"",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                    ), Text(
+                                      "${e.balance??0} گرم",
+                                      style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
+                                    ),
+                                  ],
+                                ):SizedBox()).toList(),
+                              ),
+                              middleText: "لیست مانده طلای بدهکار",
+                              middleTextStyle: context
+                                  .textTheme.bodyMedium!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 13),
+                              title: "جزییات",
+                              titleStyle: context
+                                  .textTheme.titleSmall!
+                                  .copyWith(
+                                  color: AppColor.backGroundColor,
+                                  fontSize: 14),
+                              backgroundColor: AppColor.textColor,
+                              radius: 7,
+                              contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 20, vertical: 20),
+
+
+                            );
+                          },
+                          child: SvgPicture.asset('assets/svg/list.svg',height: 16,
+                              colorFilter: ColorFilter.mode(
+                                AppColor.textColor,
+                                BlendMode.srcIn,
+                              )),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 5,),
+                    (trans.afterGoldBalance ?? 0) < 0 ?
+                    Divider(height: 0.5,color: AppColor.dividerColor,) : SizedBox.shrink(),
+                    SizedBox(height: 5,),
+                    (trans.afterGoldBalance ?? 0) < 0 ?
+                    Column(
+                      children: trans.balances!.map((e)=>e.unitName=="گرم" ?
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          (e.balance ?? 0) > 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "${e.balance??0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(" گرم ",
+                                  style: AppTextStyle
+                                      .bodyText
+                                      .copyWith(
+                                      fontSize: 10,
+                                      color:  AppColor
+                                          .primaryColor,
+                                      fontWeight: FontWeight.bold)
+                                //  textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ): (e.balance ?? 0) < 0 ?
+                          Row(
+                            children: [
+                              Text(
+                                e.itemName??"",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  10,color: AppColor.accentColor,fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                "-${e.balance?.abs() ?? 0}",
+                                style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.accentColor,fontWeight: FontWeight.bold),textDirection: TextDirection.ltr,
+                              ),
+                              Text(" گرم ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 10,
+                                    color:  AppColor
+                                        .accentColor,
+                                    fontWeight: FontWeight.bold)
+                                ,textDirection: TextDirection.ltr,
+                              ),
+                            ],
+                          ) : SizedBox.shrink(),
+                        ],
+                      ):SizedBox()).toList(),
+                    ):
+                    SizedBox.shrink(),
+                  ],
+                ),
+
+              ],
+            ):
+            SizedBox.shrink(),
+          ),
+          ),
+          // مانده سکه بستانکار
+          DataCell(Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  trans.coinBalanceBes==0
+                      ? SizedBox()
+                      : Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(" تمام سکه ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color: AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight
+                                        .bold)),
+                            Text(
+                              trans.coinBalanceBes.toString(),
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  fontSize: 11,
+                                  color:  AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight.bold),
+                              textDirection:
+                              TextDirection.ltr,
+                            ),
+                            Text(" عدد ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(" نیم سکه ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color: AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight
+                                        .bold)),
+                            Text(
+                              trans.halfCoinBalanceBes.toString(),
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  fontSize: 11,
+                                  color:  AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight.bold),
+                              textDirection:
+                              TextDirection.ltr,
+                            ),
+                            Text(" عدد ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(" ربع سکه ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color: AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight
+                                        .bold)),
+                            Text(
+                              trans.quarterCoinBalanceBes.toString(),
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  fontSize: 11,
+                                  color:  AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight.bold),
+                              textDirection:
+                              TextDirection.ltr,
+                            ),
+                            Text(" عدد ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .primaryColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        )
+                      ]
+                  ),
+                ],
+              ))),
+          // مانده سکه بدهکار
+          DataCell(Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  trans.coinBalanceBed==0
+                      ? SizedBox()
+                      : Column(
+                      children: [
+                        Row(
+                          children: [
+                            Text(" تمام سکه ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color: AppColor
+                                        .accentColor,
+                                    fontWeight:
+                                    FontWeight
+                                        .bold)),
+                            Text(
+                              "-${trans.coinBalanceBed?.abs().toString()}",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  fontSize: 11,
+                                  color:  AppColor
+                                      .accentColor,
+                                  fontWeight:
+                                  FontWeight.bold),
+                              textDirection:
+                              TextDirection.ltr,
+                            ),
+                            Text(" عدد ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .accentColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(" نیم سکه ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color: AppColor
+                                        .accentColor,
+                                    fontWeight:
+                                    FontWeight
+                                        .bold)),
+                            Text(
+                              "-${trans.halfCoinBalanceBed?.abs().toString()}",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  fontSize: 11,
+                                  color:  AppColor
+                                      .accentColor,
+                                  fontWeight:
+                                  FontWeight.bold),
+                              textDirection:
+                              TextDirection.ltr,
+                            ),
+                            Text(" عدد ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .accentColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Text(" ربع سکه ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color: AppColor
+                                        .accentColor,
+                                    fontWeight:
+                                    FontWeight
+                                        .bold)),
+                            Text(
+                              "-${trans.quarterCoinBalanceBed?.abs().toString()}",
+                              style: AppTextStyle.bodyText
+                                  .copyWith(
+                                  fontSize: 11,
+                                  color:  AppColor
+                                      .accentColor,
+                                  fontWeight:
+                                  FontWeight.bold),
+                              textDirection:
+                              TextDirection.ltr,
+                            ),
+                            Text(" عدد ",
+                                style: AppTextStyle
+                                    .bodyText
+                                    .copyWith(
+                                    fontSize: 9,
+                                    color:  AppColor
+                                        .accentColor,
+                                    fontWeight:
+                                    FontWeight.bold)
+                              //  textDirection: TextDirection.ltr,
+                            ),
+                          ],
+                        )
+                      ]
+                  ),
+                ],
+              ))),
+          // مانده ارز بستانکار
+          DataCell(Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  trans.balances!.isEmpty
+                      ? SizedBox()
+                      : Column(
+                    children: trans.balances
+                    !.map((e) => Container(
+                      child: e.unitName == "دلار" && e.balance! > 0
+                          ? Row(
+                        children: [
+                          Text(" ${e.itemName} ",
                               style: AppTextStyle
                                   .bodyText
                                   .copyWith(
@@ -963,18 +2097,19 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   FontWeight
                                       .bold)),
                           Text(
-                            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0).toStringAsFixed(3),
+                            e.balance.toString(),
                             style: AppTextStyle.bodyText
                                 .copyWith(
-                                fontSize: 11,
+                                fontSize: 10,
                                 color:  AppColor
-                                    .primaryColor,
+                                    .primaryColor
+                                ,
                                 fontWeight:
                                 FontWeight.bold),
                             textDirection:
                             TextDirection.ltr,
                           ),
-                          Text(" گرم ",
+                          Text(" ${e.unitName} ",
                               style: AppTextStyle
                                   .bodyText
                                   .copyWith(
@@ -985,78 +2120,32 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   FontWeight.bold)
                             //  textDirection: TextDirection.ltr,
                           ),
-                                            ],
-                                          ),
-                        ),
-                    GestureDetector(
-                      onTap: (){
-                        Get.defaultDialog(
-                          confirm: Column(
-                            children: trans.balances.map((e)=>e.unitName=="گرم" ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  e.itemName??"",
-                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
-                                ), Text(
-                                  "${e.balance??0} گرم ",
-                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
-                                ),
-                              ],
-                            ):SizedBox()).toList(),
-                          ),
-                          middleText: "لیست مانده طلای بستانکار",
-                          middleTextStyle: context
-                              .textTheme.bodyMedium!
-                              .copyWith(
-                              color: AppColor.backGroundColor,
-                              fontSize: 13),
-                          title: "جزییات",
-                          titleStyle: context
-                              .textTheme.titleSmall!
-                              .copyWith(
-                              color: AppColor.backGroundColor,
-                              fontSize: 14),
-                          backgroundColor: AppColor.textColor,
-                          radius: 7,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
-
-
-                        );
-                      },
-                      child: SvgPicture.asset('assets/svg/list.svg',height: 16,
-                          colorFilter: ColorFilter.mode(
-                            AppColor.textColor,
-                            BlendMode.srcIn,
-                          )),
-                    ),
-                  ],
-                ),
-
-
-              ],
-            ):
-                SizedBox.shrink(),
-        ),
-        ),
-        DataCell(Center(
-            child:
-            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0)<0 ?
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances.isEmpty
-                    ? SizedBox()
-                    : trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0) == 0?
-                SizedBox(width: 150,):
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 150,
-                      child: Row(
+                        ],
+                      )
+                          : Row(
                         children: [
-                          Text(" طلای آبشده ",
+                          SizedBox(width: 120,),
+                        ],
+                      ),
+                    ))
+                        .toList(),
+                  ),
+                ],
+              ))),
+          // مانده ارز بدهکار
+          DataCell(Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  trans.balances!.isEmpty
+                      ? SizedBox()
+                      : Column(
+                    children: trans.balances
+                    !.map((e) => Container(
+                      child: e.unitName == "دلار" && e.balance! < 0
+                          ? Row(
+                        children: [
+                          Text(" ${e.itemName} ",
                               style: AppTextStyle
                                   .bodyText
                                   .copyWith(
@@ -1067,10 +2156,10 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   FontWeight
                                       .bold)),
                           Text(
-                            trans.balances.fold(0.0, (sum, item) => item.unitName=="گرم" ? sum + item.balance!:sum + 0).toStringAsFixed(3),
+                            e.balance.toString(),
                             style: AppTextStyle.bodyText
                                 .copyWith(
-                                fontSize: 11,
+                                fontSize: 10,
                                 color:  AppColor
                                     .accentColor
                                 ,
@@ -1079,7 +2168,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                             textDirection:
                             TextDirection.ltr,
                           ),
-                          Text(" گرم ",
+                          Text(" ${e.unitName} ",
                               style: AppTextStyle
                                   .bodyText
                                   .copyWith(
@@ -1091,424 +2180,321 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                             //  textDirection: TextDirection.ltr,
                           ),
                         ],
+                      )
+                          : Row(
+                        children: [
+                          SizedBox(width: 120,),
+                        ],
                       ),
-                    ),
-                    GestureDetector(
-                      onTap: (){
-                        Get.defaultDialog(
-                          confirm: Column(
-                            children: trans.balances.map((e)=>e.unitName=="گرم" ? Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  e.itemName??"",
-                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
-                                ), Text(
-                                  "${e.balance??0} گرم",
-                                  style: AppTextStyle.labelText.copyWith(fontSize:  12,color: AppColor.backGroundColor),
-                                ),
-                              ],
-                            ):SizedBox()).toList(),
-                          ),
-                          middleText: "لیست مانده طلای بدهکار",
-                          middleTextStyle: context
-                              .textTheme.bodyMedium!
-                              .copyWith(
-                              color: AppColor.backGroundColor,
-                              fontSize: 13),
-                          title: "جزییات",
-                          titleStyle: context
-                              .textTheme.titleSmall!
-                              .copyWith(
-                              color: AppColor.backGroundColor,
-                              fontSize: 14),
-                          backgroundColor: AppColor.textColor,
-                          radius: 7,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
-
-
-                        );
-                      },
-                      child: SvgPicture.asset('assets/svg/list.svg',height: 16,
-                          colorFilter: ColorFilter.mode(
-                            AppColor.textColor,
-                            BlendMode.srcIn,
-                          )),
-                    ),
-                  ],
-                ),
-
-              ],
-            ):
-                SizedBox.shrink(),
-        ),
-        ),
-
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances.isEmpty
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances
-                      .map((e) => Container(
-                    child: e.unitName == "عدد" && e.balance! >0
-                        ? Row(
-                      children: [
-                        Text(" ${e.itemName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color: AppColor
+                    ))
+                        .toList(),
+                  ),
+                ],
+              ))),
+          // تراز کل بستانکار
+          DataCell(Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  (trans.currencyValueBes ?? 0) > 0 ?
+                  Column(
+                    children: [
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                              'assets/svg/scales.svg',
+                              height: 15,
+                              colorFilter:
+                              ColorFilter
+                                  .mode(
+                                AppColor
                                     .primaryColor,
-                                fontWeight:
-                                FontWeight
-                                    .bold)),
-                        Text(
-                          e.balance.toString(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 11,
-                              color:  AppColor
-                                  .primaryColor,
-                              fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
+                                BlendMode
+                                    .srcIn,
+                              )),
+                          SizedBox(width: 5,),
+                          Text(trans.currencyValueBes?.toStringAsFixed(0).seRagham() ?? "",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 10,
+                                  color:AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+
+                          Text(" ریال ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 8,
+                                  color:AppColor.primaryColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+
+                          SizedBox(width: 5,)
+                        ],
+                      ),
+                      Container(
+                        margin: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+                        height: 0.5,color: AppColor.textColor,
+                      ),
+                      Row(
+                        children: [
+                          Text(" معادل آبشده : ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                          (trans.goldValue ?? 0) <0 ?
+                          Text("-${trans.goldValue?.abs().toStringAsFixed(3) ?? ""} ",
                             style: AppTextStyle
                                 .bodyText
                                 .copyWith(
                                 fontSize: 9,
-                                color:  AppColor
-                                    .primaryColor,
-                                fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : Row(
-                      children: [
-                        SizedBox(width: 120,),
-                      ],
-                    ),
-                  ))
-                      .toList(),
-                ),
-              ],
-            ))),
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances.isEmpty
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances
-                      .map((e) => Container(
-                    child: e.unitName == "عدد" && e.balance! < 0
-                        ? Row(
-                      children: [
-                        Text(" ${e.itemName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color:  AppColor
+                                color:AppColor
                                     .accentColor,
                                 fontWeight:
                                 FontWeight
-                                    .bold)),
-                        Text(
-                          e.balance.toString(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
+                                    .bold),textDirection:
+                            TextDirection.ltr,):
+                          Text(" ${trans.goldValue?.toStringAsFixed(3) ?? ""} ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+
+                          Text(" گرم ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 8,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                        ],
+                      ),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text(" معادل سکه : ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                          (trans.coinValue ?? 0) <0 ?
+                          Text("-${trans.coinValue?.abs().toStringAsFixed(3) ?? ""} ",
+                            style: AppTextStyle
+                                .bodyText
+                                .copyWith(
+                                fontSize: 9,
+                                color:AppColor
+                                    .accentColor,
+                                fontWeight:
+                                FontWeight
+                                    .bold),textDirection:
+                            TextDirection.ltr,):
+                          Text(" ${trans.coinValue?.toStringAsFixed(3) ?? ""} ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                          Text(" عدد ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 8,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                        ],
+                      ),
+                      SizedBox(height: 5,),
+                    ],
+                  ):SizedBox.shrink(),
+                ],
+              ))),
+          // تراز کل بدهکار
+          DataCell(Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  (trans.currencyValueBed ?? 0) < 0 ?
+                  Column(
+                    children: [
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          SvgPicture.asset(
+                              'assets/svg/scales.svg',
+                              height: 15,
+                              colorFilter:
+                              ColorFilter
+                                  .mode(AppColor
+                                  .accentColor,
+                                BlendMode
+                                    .srcIn,
+                              )),
+                          SizedBox(width: 5,),
+                          Text("-${trans.currencyValueBed?.abs().toStringAsFixed(0).seRagham() ?? ""}",
+                            style: AppTextStyle
+                                .bodyText
+                                .copyWith(
                               fontSize: 10,
-                              color: AppColor
+                              color:AppColor
                                   .accentColor,
                               fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color: AppColor
-                                    .accentColor,
-                                fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : Row(
-                      children: [
-                        SizedBox(width: 120,),
-                      ],
-                    ),
-                  ))
-                      .toList(),
-                ),
-              ],
-            ))),
+                              FontWeight
+                                  .bold,),textDirection:
+                            TextDirection.ltr,),
+                          Text(" ریال ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 8,
+                                  color:AppColor
+                                      .accentColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
 
-
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances.isEmpty
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances
-                      .map((e) => Container(
-                    child: e.unitName == "دلار" && e.balance! > 0
-                        ? Row(
-                      children: [
-                        Text(" ${e.itemName} ",
+                          SizedBox(width: 5,)
+                        ],
+                      ),
+                      Container(
+                        margin: EdgeInsets.symmetric(vertical: 5,horizontal: 10),
+                        height: 0.5,color: AppColor.textColor,
+                      ),
+                      Row(
+                        children: [
+                          Text(" معادل آبشده : ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                          (trans.goldValue ?? 0) <0 ?
+                          Text("-${trans.goldValue?.abs().toStringAsFixed(3) ?? ""} ",
                             style: AppTextStyle
                                 .bodyText
                                 .copyWith(
                                 fontSize: 9,
-                                color:  AppColor
-                                    .primaryColor,
-                                fontWeight:
-                                FontWeight
-                                    .bold)),
-                        Text(
-                          e.balance.toString(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 10,
-                              color:  AppColor
-                                  .primaryColor
-                                 ,
-                              fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color:  AppColor
-                                    .primaryColor,
-                                fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : Row(
-                      children: [
-                        SizedBox(width: 120,),
-                      ],
-                    ),
-                  ))
-                      .toList(),
-                ),
-              ],
-            ))),
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                trans.balances.isEmpty
-                    ? SizedBox()
-                    : Column(
-                  children: trans.balances
-                      .map((e) => Container(
-                    child: e.unitName == "دلار" && e.balance! < 0
-                        ? Row(
-                      children: [
-                        Text(" ${e.itemName} ",
-                            style: AppTextStyle
-                                .bodyText
-                                .copyWith(
-                                fontSize: 9,
-                                color:  AppColor
+                                color:AppColor
                                     .accentColor,
                                 fontWeight:
                                 FontWeight
-                                    .bold)),
-                        Text(
-                          e.balance.toString(),
-                          style: AppTextStyle.bodyText
-                              .copyWith(
-                              fontSize: 10,
-                              color:  AppColor
-                                  .accentColor
-                              ,
-                              fontWeight:
-                              FontWeight.bold),
-                          textDirection:
-                          TextDirection.ltr,
-                        ),
-                        Text(" ${e.unitName} ",
+                                    .bold),textDirection:
+                            TextDirection.ltr,):
+                          Text(" ${trans.goldValue?.toStringAsFixed(3) ?? ""} ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+
+                          Text(" گرم ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 8,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                        ],
+                      ),
+                      SizedBox(height: 5,),
+                      Row(
+                        children: [
+                          Text(" معادل سکه : ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                          (trans.coinValue ?? 0) <0 ?
+                          Text("-${trans.coinValue?.abs().toStringAsFixed(3) ?? ""} ",
                             style: AppTextStyle
                                 .bodyText
                                 .copyWith(
                                 fontSize: 9,
-                                color:  AppColor
+                                color:AppColor
                                     .accentColor,
                                 fontWeight:
-                                FontWeight.bold)
-                          //  textDirection: TextDirection.ltr,
-                        ),
-                      ],
-                    )
-                        : Row(
-                          children: [
-                            SizedBox(width: 120,),
-                          ],
-                        ),
-                  ))
-                      .toList(),
-                ),
-              ],
-            ))),
-
-        DataCell(Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                 Column(
-                 children: [
-                   Row(
-
-                     children: [
-                       SvgPicture.asset(
-                           'assets/svg/scales.svg',
-                           height: 15,
-                           colorFilter:
-                           ColorFilter
-                               .mode(
-                             trans.currencyValue>0?  AppColor
-                                 .primaryColor:AppColor
-                                 .accentColor,
-                             BlendMode
-                                 .srcIn,
-                           )),
-                       SizedBox(width: 5,),
-                       Text(trans.currencyValue.toStringAsFixed(0).seRagham(),
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 10,
-                               color:trans.currencyValue>0?  AppColor
-                                   .primaryColor:AppColor
-                                   .accentColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-
-                       Text(" ریال ",
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 8,
-                               color:trans.currencyValue>0?  AppColor
-                                   .primaryColor:AppColor
-                                   .accentColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-
-                       SizedBox(width: 5,)
-                     ],
-                   ),
-                   Container(
-                     margin: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
-                     height: 0.5,color: AppColor.textColor,
-                   ),
-                   Row(
-                     children: [
-                       Text(" معادل آبشده : ",
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 9,
-                               color:AppColor
-                                   .textColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-                       Text(" ${trans.goldValue.toStringAsFixed(3)} ",
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 9,
-                               color:AppColor
-                                   .textColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-
-                       Text(" گرم ",
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 8,
-                               color:AppColor
-                                   .textColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-                     ],
-                   ),
-                   SizedBox(height: 5,),
-                   Row(
-                     children: [
-                       Text(" معادل سکه : ",
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 9,
-                               color:AppColor
-                                   .textColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-                       Text(" ${trans.coinValue.toStringAsFixed(3)} ",
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 9,
-                               color:AppColor
-                                   .textColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-
-                       Text(" عدد ",
-                           style: AppTextStyle
-                               .bodyText
-                               .copyWith(
-                               fontSize: 8,
-                               color:AppColor
-                                   .textColor,
-                               fontWeight:
-                               FontWeight
-                                   .bold)),
-                     ],
-                   ),
-                 ],
-                ),
-              ],
-            ))),
-      ],
-    ))
-        .toList();
+                                FontWeight
+                                    .bold),textDirection:
+                            TextDirection.ltr,):
+                          Text(" ${trans.coinValue?.toStringAsFixed(3) ?? ""} ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 9,
+                                  color:AppColor
+                                      .primaryColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                          Text(" عدد ",
+                              style: AppTextStyle
+                                  .bodyText
+                                  .copyWith(
+                                  fontSize: 8,
+                                  color:AppColor
+                                      .textColor,
+                                  fontWeight:
+                                  FontWeight
+                                      .bold)),
+                        ],
+                      ),
+                      SizedBox(height: 5,),
+                    ],
+                  ):SizedBox.shrink(),
+                ],
+              ))),
+        ],
+      );
+    }
+    ).toList();
   }
 
   Widget _buildFooterItem({
@@ -1599,12 +2585,12 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
     String formattedValue;
     if (unit == "ریال") {
       // For Rial, use seRagham formatting
-      formattedValue = netValue.toStringAsFixed(3).seRagham();
+      formattedValue = netValue.toStringAsFixed(0).seRagham();
     } else if(unit == "گرم") {
       // For other units, use 3 decimal places
       formattedValue = netValue.toStringAsFixed(3);
     }else{
-      formattedValue = netValue.toString();
+      formattedValue = netValue.toStringAsFixed(3);
     }
 
     return Container(
@@ -1649,6 +2635,502 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
               ],
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileTransactionList(BuildContext context){
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                //margin: const EdgeInsets.symmetric(horizontal: 5,vertical: 5),
+                padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 5),
+                child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    // خروجی اکسل
+                    GestureDetector(
+                      onTap: () async {
+                        controller.clearFilter();
+                        showGeneralDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            barrierLabel:
+                            MaterialLocalizations
+                                .of(context)
+                                .modalBarrierDismissLabel,
+                            barrierColor:
+                            Colors.black45,
+                            transitionDuration:
+                            const Duration(
+                                milliseconds:
+                                200),
+                            pageBuilder: (BuildContext
+                            buildContext,
+                                Animation animation,
+                                Animation
+                                secondaryAnimation) {
+                              return Center(
+                                child: Material(
+                                  color: Colors
+                                      .transparent,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                        BorderRadius
+                                            .circular(
+                                            8),
+                                        color: AppColor
+                                            .backGroundColor),
+                                    width: Get.width * 0.65,
+                                    height: Get.height * 0.5,
+                                    padding:
+                                    EdgeInsets
+                                        .all(20),
+                                    child: Column(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                          const EdgeInsets
+                                              .all(
+                                              8.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment
+                                                .end,
+                                            children: [
+                                              Expanded(
+                                                child:
+                                                Center(
+                                                  child:
+                                                  Text(
+                                                    'خروجی اکسل',
+                                                    style: AppTextStyle.labelText.copyWith(
+                                                      fontSize: 15,
+                                                      fontWeight: FontWeight.normal,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Container(
+                                          color: AppColor
+                                              .textColor,
+                                          height: 0.2,
+                                        ),
+                                        Padding(
+                                          padding: const EdgeInsets
+                                              .symmetric(
+                                              horizontal:
+                                              10),
+                                          child:
+                                          Column(
+                                            children: [
+                                              SizedBox(
+                                                height:
+                                                8,
+                                              ),
+                                              Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'نام حساب',
+                                                    style: AppTextStyle.labelText.copyWith(fontSize: 11, fontWeight: FontWeight.normal, color: AppColor.textColor),
+                                                  ),
+                                                  SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                  IntrinsicHeight(
+                                                    child: TextFormField(
+                                                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                      controller: controller.nameFilterController,
+                                                      style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                      textAlign: TextAlign.start,
+                                                      keyboardType: TextInputType.text,
+                                                      decoration: InputDecoration(
+                                                        contentPadding: const EdgeInsets.symmetric(vertical: 11, horizontal: 15),
+                                                        isDense: true,
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(6),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor.textFieldColor,
+                                                        errorMaxLines: 1,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              SizedBox(
+                                                height:
+                                                8,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Spacer(),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                              horizontal:
+                                              20,
+                                              vertical:
+                                              10),
+                                          width: double
+                                              .infinity,
+                                          height: 40,
+                                          child:
+                                          ElevatedButton(
+                                            style: ButtonStyle(
+                                                padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                // elevation: WidgetStatePropertyAll(5),
+                                                backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
+                                                shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
+                                            onPressed:
+                                                () async {
+                                              controller.getListUserInfoTransactionExcel();
+                                              Get.back();
+                                            },
+                                            child: controller
+                                                .isLoading
+                                                .value
+                                                ? CircularProgressIndicator(
+                                              valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                            )
+                                                : Text(
+                                              'خروجی اکسل',
+                                              style: AppTextStyle.labelText.copyWith(fontSize: 10),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            });
+                      },
+                      child: SvgPicture.asset(
+                        'assets/svg/excel.svg',
+                        height: 30,
+                      ),
+                    ),
+                    SizedBox(width: 8,),
+                    // فیلتر
+                    GestureDetector(
+                      onTap: () async {
+                        //controller.fetchAccountList();
+                        showGeneralDialog(
+                            context: context,
+                            barrierDismissible: true,
+                            barrierLabel:
+                            MaterialLocalizations
+                                .of(context)
+                                .modalBarrierDismissLabel,
+                            barrierColor:
+                            Colors.black45,
+                            transitionDuration:
+                            const Duration(
+                                milliseconds:
+                                200),
+                            pageBuilder: (BuildContext
+                            buildContext,
+                                Animation animation,
+                                Animation
+                                secondaryAnimation) {
+                              return Center(
+                                child: Material(
+                                  color: Colors
+                                      .transparent,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        borderRadius:
+                                        BorderRadius
+                                            .circular(
+                                            8),
+                                        color: AppColor
+                                            .backGroundColor),
+                                    width:Get.width * 0.9,
+                                    height:Get.height * 0.9,
+                                    padding:
+                                    EdgeInsets.only(left: 20,right: 20,top: 20,bottom: 3),
+                                    child: FilterDialog(controller: controller),
+                                  ),
+                                ),
+                              );
+                            });
+                      },
+                      child: SvgPicture.asset(
+                          'assets/svg/filter3.svg',
+                          height: 26,
+                          colorFilter:
+                          ColorFilter.mode(
+                             AppColor.textColor,
+                            BlendMode.srcIn,
+                          )
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(child: _buildMobileSortHeader()),
+            ],
+          ),
+          SizedBox(height: 10),
+          ListView.builder(
+            itemCount: controller.listTransactionInfo.length,
+            shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
+            itemBuilder: (ctx, index){
+              final trans = controller.listTransactionInfo[index];
+              return Container(
+                margin: EdgeInsets.only(bottom: 12),
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColor.appBarColor.withAlpha(200),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColor.textColor.withAlpha(75)),
+                ),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: GestureDetector(
+                            onTap: (){
+                              Get.toNamed("/userInfoTransaction",parameters: {"accountId":trans.accountId.toString()});
+                            },
+                            child: Text(
+                              trans.accountName ?? "",
+                              style: AppTextStyle.labelText.copyWith(fontSize: 13, fontWeight: FontWeight.bold, color: AppColor.textColor),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ),
+                        Text("${trans.rowNum}", style: AppTextStyle.labelText.copyWith(fontSize: 10, color: AppColor.textColor.withAlpha(200))),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Divider(height: 0.5,color: AppColor.dividerColor),
+                    SizedBox(height: 8),
+                    // Rial balances
+                    if((trans.cashBalanceBes ?? 0) > 0)
+                      _mobileLine("مانده وجه نقد (بس)",
+                          "${trans.cashBalanceBes!.toStringAsFixed(0).seRagham()}", AppColor.primaryColor,"ریال"),
+                    if((trans.cashBalanceBed ?? 0) < 0)
+                      _mobileLine("مانده وجه نقد (بد)",
+                          "-${trans.cashBalanceBed!.abs().toStringAsFixed(0).seRagham()}", AppColor.accentColor,"ریال"),
+                    // Gold balances
+                    if((trans.goldBalanceBes ?? 0) > 0)
+                      _mobileLine("مانده آبشده (بس)",
+                          "${trans.goldBalanceBes!.toStringAsFixed(3)}", AppColor.primaryColor,"گرم"),
+                    if((trans.goldBalanceBed ?? 0) < 0)
+                      _mobileLine("مانده آبشده (بد)",
+                          "-${trans.goldBalanceBed!.abs().toStringAsFixed(3)}", AppColor.accentColor,"گرم"),
+                    // Coin balances
+                    if((trans.coinBalanceBes ?? 0) != 0 || (trans.halfCoinBalanceBes ?? 0) != 0 || (trans.quarterCoinBalanceBes ?? 0) != 0)
+                      _mobileLine("سکه بستانکار",
+                          "تمام ${trans.coinBalanceBes} / نیم ${trans.halfCoinBalanceBes} / ربع ${trans.quarterCoinBalanceBes}", AppColor.primaryColor,"عدد"),
+                    if((trans.coinBalanceBed ?? 0) != 0 || (trans.halfCoinBalanceBed ?? 0) != 0 || (trans.quarterCoinBalanceBed ?? 0) != 0)
+                      _mobileLine("سکه بدهکار",
+                          "-تمام ${(trans.coinBalanceBed??0).abs()}- / نیم ${(trans.halfCoinBalanceBed??0).abs()}- / ربع ${(trans.quarterCoinBalanceBed??0).abs()}", AppColor.accentColor,"عدد"),
+                    // Currency sample (USD)
+                    if((trans.balances??[]).any((e)=> e.unitName=="دلار" && (e.balance??0)>0))
+                      _mobileLine("ارز بستانکار",
+                          "${(trans.balances??[]).where((e)=>e.unitName=="دلار").fold<double>(0, (p, e)=> p + (e.balance??0))}", AppColor.primaryColor,"دلار"),
+                    if((trans.balances??[]).any((e)=> e.unitName=="دلار" && (e.balance??0)<0))
+                      _mobileLine("ارز بدهکار",
+                          "-${(trans.balances??[]).where((e)=>e.unitName=="دلار").fold<double>(0, (p, e)=> p + (e.balance??0).abs())}", AppColor.accentColor,"دلار"),
+                    SizedBox(height: 8),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: AppColor.backGroundColor.withAlpha(60),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: AppColor.textColor.withAlpha(50)),
+                      ),
+                      child: Column(
+                        children: [
+                          if((trans.currencyValueBes ?? 0) > 0)
+                            _mobileLineWithIcon("تراز کل بس",
+                                "${trans.currencyValueBes!.toStringAsFixed(0).seRagham()}",
+                                'assets/svg/scales.svg', AppColor.primaryColor,"ریال"),
+                          if((trans.currencyValueBed ?? 0) < 0)
+                            _mobileLineWithIcon("تراز کل بد",
+                                "-${trans.currencyValueBed!.abs().toStringAsFixed(0).seRagham()}",
+                                'assets/svg/scales.svg', AppColor.accentColor,"ریال"),
+                          if((trans.goldValue ?? 0) != 0)
+                            _mobileLine("معادل آبشده",
+                                (trans.goldValue ?? 0) < 0 ? "-${trans.goldValue!.abs().toStringAsFixed(3)}" : "${trans.goldValue!.toStringAsFixed(3)}",
+                                (trans.goldValue ?? 0) < 0 ? AppColor.accentColor : AppColor.primaryColor,"گرم"),
+                          if((trans.coinValue ?? 0) != 0)
+                            _mobileLine("معادل سکه",
+                                (trans.coinValue ?? 0) < 0 ? "-${trans.coinValue!.abs().toStringAsFixed(3)}" : "${trans.coinValue!.toStringAsFixed(3)}",
+                                (trans.coinValue ?? 0) < 0 ? AppColor.accentColor : AppColor.primaryColor,"عدد"),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMobileSortHeader() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12,),
+      decoration: BoxDecoration(
+        color: AppColor.appBarColor.withAlpha(80),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColor.textColor.withAlpha(80)),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.sort,
+            color: AppColor.textColor,
+            size: 18,
+          ),
+          SizedBox(width: 8),
+          Text(
+            'مرتب‌سازی:',
+            style: AppTextStyle.labelText.copyWith(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColor.textColor,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<int>(
+                value: controller.sortColumnIndex.value,
+                isExpanded: true,
+                style: AppTextStyle.labelText.copyWith(
+                  fontSize: 11,
+                  color: AppColor.textColor,
+                ),
+                dropdownColor: AppColor.appBarColor,
+                icon: Icon(
+                  Icons.arrow_drop_down,
+                  color: AppColor.textColor,
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 2,
+                    child: Text('ریال بستانکار'),
+                  ),
+                  DropdownMenuItem(
+                    value: 3,
+                    child: Text('ریال بدهکار'),
+                  ),
+                  DropdownMenuItem(
+                    value: 4,
+                    child: Text('طلا بستانکار'),
+                  ),
+                  DropdownMenuItem(
+                    value: 5,
+                    child: Text('طلا بدهکار'),
+                  ),
+                  DropdownMenuItem(
+                    value: 6,
+                    child: Text('سکه بستانکار'),
+                  ),
+                  DropdownMenuItem(
+                    value: 7,
+                    child: Text('سکه بدهکار'),
+                  ),
+                  DropdownMenuItem(
+                    value: 10,
+                    child: Text('تراز کل بستانکار'),
+                  ),
+                  DropdownMenuItem(
+                    value: 11,
+                    child: Text('تراز کل بدهکار'),
+                  ),
+                ],
+                onChanged: (int? newValue) {
+                  if (newValue != null) {
+                    controller.onSort(newValue, !controller.sortAscending.value);
+                  }
+                },
+              ),
+            ),
+          ),
+          SizedBox(width: 8),
+          // Sort direction toggle button
+          GestureDetector(
+            onTap: () {
+              if (controller.sortColumnIndex.value != null) {
+                controller.onSort(controller.sortColumnIndex.value!, !controller.sortAscending.value);
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: controller.sortColumnIndex.value != null
+                    ? AppColor.primaryColor.withAlpha(30)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: controller.sortColumnIndex.value != null
+                      ? AppColor.primaryColor
+                      : AppColor.textColor.withAlpha(30),
+                  width: 1,
+                ),
+              ),
+              child: Icon(
+                controller.sortAscending.value ? Icons.arrow_upward : Icons.arrow_downward,
+                size: 16,
+                color: controller.sortColumnIndex.value != null
+                    ? AppColor.primaryColor
+                    : AppColor.textColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobileLine(String label, String value, Color color , String itemName){
+    return Padding(
+      padding: EdgeInsets.only(bottom: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(child: Text(label, style: AppTextStyle.labelText.copyWith(fontSize: 11, color: AppColor.textColor))),
+          SizedBox(width: 8),
+          Text(value, style: AppTextStyle.labelText.copyWith(fontSize: 12, color: color, fontWeight: FontWeight.bold), textDirection: TextDirection.ltr),
+          SizedBox(width: 4),
+          Text(itemName, style: AppTextStyle.labelText.copyWith(fontSize: 10, color: AppColor.textColor, fontWeight: FontWeight.bold),),
+        ],
+      ),
+    );
+  }
+
+  Widget _mobileLineWithIcon(String label, String value, String asset, Color color,String itemName){
+    return Padding(
+      padding: EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          SvgPicture.asset(asset, height: 14, colorFilter: ColorFilter.mode(color, BlendMode.srcIn)),
+          SizedBox(width: 6),
+          Expanded(child: Text(label, style: AppTextStyle.labelText.copyWith(fontSize: 11, color: AppColor.textColor))),
+          SizedBox(width: 8),
+          Text(value, style: AppTextStyle.labelText.copyWith(fontSize: 12, color: color, fontWeight: FontWeight.bold), textDirection: TextDirection.ltr),
+          SizedBox(width: 4),
+          Text(itemName, style: AppTextStyle.labelText.copyWith(fontSize: 10, color: AppColor.textColor, fontWeight: FontWeight.bold),),
         ],
       ),
     );

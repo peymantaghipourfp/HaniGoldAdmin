@@ -34,7 +34,7 @@ class RemittanceModel {
   @JsonKey(name: "quantity")
   final double? quantity;
   @JsonKey(name: "status")
-  final int? status;
+  late int? status;
   @JsonKey(name: "isDeleted")
   final bool? isDeleted;
   @JsonKey(name: "attachments")
@@ -54,9 +54,9 @@ class RemittanceModel {
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
   @JsonKey(name: "reasonRejection")
-  final ReasonRejectionModel? reasonRejection;
+  late ReasonRejectionModel? reasonRejection;
   @JsonKey(name: "registered")
-  final bool? registered;
+  late bool? registered;
   @JsonKey(name: "rowNum")
   final int? rowNum;
 

@@ -38,7 +38,7 @@ enum PageState{loading,err,empty,list}
 class TransferWalletController extends GetxController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
 
@@ -73,8 +73,8 @@ class TransferWalletController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getTransferWalletListPager();
   }
 
@@ -198,9 +198,9 @@ class TransferWalletController extends GetxController{
     getTransferWalletListPager();
   }
 
-  // لیست حواله‌های درخواستی با صفحه بندی
+  // لیست حواله‌های انتقال ولت با صفحه بندی
   Future<void> getTransferWalletListPager() async {
-    print("### getRemittanceListStatusPager ###");
+    print("### getTransferWalletListPager ###");
     transferWalletList.clear();
     try {
       state.value=PageState.loading;

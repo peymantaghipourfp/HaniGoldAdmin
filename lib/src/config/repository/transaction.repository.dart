@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/transaction/model/all_balances.model.dart';
+import 'package:hanigold_admin/src/domain/transaction/model/all_balances_new.model.dart';
 
 import '../../domain/laboratory/model/laboratory.model.dart';
 import '../../domain/laboratory/model/list_laboratory.model.dart';
@@ -211,6 +212,27 @@ class TransactionRepository {
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((balances)=>AllBalancesModel.fromJson(balances)).toList();
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<AllBalancesNewModel> getAllBalancesNewList(int id,String type)async{
+    try{
+      Map<String,dynamic> option={
+        "id": id,
+        "type":type,
+      };
+      final response=await transactionDio.get('Transaction/getBalancesTotal',queryParameters: option);
+      print("url : Transaction/getBalancesTotal" );
+      print("request getAllBalancesNewList : $option" );
+      print("response getAllBalancesNewList : ${response.data}" );
+      if(response.statusCode==200){
+        return AllBalancesNewModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }

@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hanigold_admin/src/widget/background_image.widget.dart';
@@ -14,9 +17,14 @@ import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
+import '../../../widget/custom_dropdown1.widget.dart';
 import '../../account/model/account.model.dart';
+import '../../account/widget/account_level_get_one_item.widget.dart';
+import '../../accountSalesGroup/widget/account_sales_group_get_one_item.widget.dart';
 import '../../home/widget/chat_dialog.widget.dart';
+import '../../product/model/item.model.dart';
 import '../../users/widgets/balance.widget.dart';
+import '../../users/widgets/user_create_dialog.widget.dart';
 
 class OrderCreateView extends StatefulWidget {
   OrderCreateView({super.key});
@@ -31,13 +39,80 @@ class _OrderCreateViewState extends State<OrderCreateView> {
   OrderCreateController orderCreateController =
   Get.find<OrderCreateController>();
 
-@override
+  // For quantity validation
+  bool _isValidatingQuantity = false;
+  Timer? _limitCheckDebounce;
+  bool _isDialogShowing = false;
+
+  /*@override
   void initState() {
-  var now = Jalali.now();
-  DateTime date=DateTime.now();
-  orderCreateController.dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    var now = Jalali.now();
+    DateTime date=DateTime.now();
+    orderCreateController.dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     super.initState();
+  }*/
+
+  bool _isPriceDifferent() {
+    if (orderCreateController.socketPrice.value.isEmpty || orderCreateController.currentPrice.value.isEmpty) {
+      return false;
+    }
+
+    String socketPriceClean = orderCreateController.socketPrice.value.replaceAll(',', '').toEnglishDigit();
+    String textFieldPriceClean = orderCreateController.currentPrice.value.replaceAll(',', '').toEnglishDigit();
+
+    // برای آیتم‌های گرم، باید قیمت را به مثقال تبدیل کنیم
+    if (orderCreateController.selectedItem.value?.itemUnit?.name == 'گرم') {
+      double textFieldPriceInMesghal = double.tryParse(textFieldPriceClean) ?? 0;
+      double socketPriceInMesghal = double.tryParse(socketPriceClean) ?? 0;
+      return textFieldPriceInMesghal != socketPriceInMesghal;
+    } else {
+      // برای آیتم‌های غیر گرم، مقایسه مستقیم
+      return socketPriceClean != textFieldPriceClean;
+    }
   }
+
+  Color _getSocketPriceDisplayColor() {
+    return _isPriceDifferent() ? Colors.red.withAlpha(25) : Colors.green.withAlpha(25);
+  }
+
+  Color _getSocketPriceBorderColor() {
+    return _isPriceDifferent() ? Colors.red : Colors.green;
+  }
+
+  IconData _getSocketPriceIcon() {
+    return _isPriceDifferent() ? Icons.warning : Icons.check_circle;
+  }
+
+  String _getSocketPriceValue() {
+    return orderCreateController.socketPrice.value;
+  }
+
+  String _cleanNumber(String input) {
+    return input.replaceAll(',', '').toEnglishDigit();
+  }
+
+  double? _priceDiffRatio() {
+    final socketText = orderCreateController.socketPrice.value;
+    if (socketText.isEmpty) return null;
+    final inputText = orderCreateController.priceController.text;
+    final socket = double.tryParse(_cleanNumber(socketText)) ?? 0;
+    final input = double.tryParse(_cleanNumber(inputText)) ?? 0;
+    if (socket <= 0) return null;
+    return ((input - socket).abs()) / socket;
+  }
+
+  bool _isPriceOverOnePercent() {
+    final diffRatio = _priceDiffRatio();
+    if (diffRatio == null) return false;
+    return diffRatio > 0.1;
+  }
+
+  @override
+  void dispose() {
+    _limitCheckDebounce?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
@@ -45,23 +120,23 @@ class _OrderCreateViewState extends State<OrderCreateView> {
     return Obx(() {
       return Scaffold(
         appBar:CustomAppbar1(
-          title: 'ایجاد سفارش جدید', onBackTap: () {
-            Get.toNamed('/home');
-            orderCreateController.clearList(); }),
+            title: 'ایجاد سفارش جدید', onBackTap: () {
+          Get.toNamed('/home');
+          orderCreateController.clearList(); }),
         drawer: const AppDrawer(),
         body: Stack(
           children: [
             BackgroundImage(),
             SafeArea(
               child: SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal:isDesktop ? 40 : 20, vertical: 20),
                   child: ResponsiveRowColumn(
                     layout: isDesktop
                         ? ResponsiveRowColumnType.ROW
                         : ResponsiveRowColumnType.COLUMN,
-                    columnSpacing: 30,
-
+                    columnSpacing:isDesktop ? 30 : 10,
                     rowSpacing: 20,
                     rowCrossAxisAlignment: CrossAxisAlignment.start,
                     rowMainAxisAlignment: MainAxisAlignment.start,
@@ -70,20 +145,107 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                       if(isMobile)
                         ResponsiveRowColumnItem(
                           rowFlex: 1,
-                          child:
+                          /*child:
                           orderCreateController.isLoadingBalance.value==false ?
                           Center(child: CircularProgressIndicator(),)
                               :
                           BalanceWidget(title: orderCreateController.selectedAccount.value?.name,
                             listBalance: orderCreateController.balanceList,
-                            size: 400,),
+                            size: 400,),*/
+                          child: Column(
+                            children: [
+                              orderCreateController.isLoadingBalance.value==false ?
+                              Center(child: CircularProgressIndicator(),)
+                                  :
+                              BalanceWidget(title: orderCreateController.selectedAccount.value?.name,
+                                listBalance: orderCreateController.balanceList,
+                                size: 400,),
+                              // Error display widget for mobile
+                              Obx(() => orderCreateController.hasError.value
+                                  ? Container(
+                                margin: EdgeInsets.only(top: 16),
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  border: Border.all(color: Colors.red.shade300),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      color: Colors.red.shade600,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            orderCreateController.errorTitle.value,
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              color: Colors.red.shade700,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            orderCreateController.errorMessage.value,
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              color: Colors.red.shade600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => orderCreateController.clearError(),
+                                      child: Icon(
+                                        Icons.close,
+                                        color: Colors.red.shade600,
+                                        size: 18,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                                  : SizedBox.shrink()),
+                              const SizedBox(height: 8),
+                              Obx(() {
+                                return AccountSalesGroupGetOneItemWidget(
+                                  data: orderCreateController.selectedAccountSalesGroupItem.value,
+                                  width: 400,
+                                  title: orderCreateController
+                                      .selectedAccount.value?.accountSalesGroup?.name,
+                                  isLoading: orderCreateController.isLoadingAccountSalesGroupItem.value,
+                                  selectedItemId: orderCreateController.selectedItem.value?.id,
+                                  selectedBuySellId: orderCreateController.selectedBuySell.value?.id,
+                                  onPriceSelected: (mesghlPrice) {
+                                    orderCreateController.setPriceFromSalesGroup(mesghlPrice);
+                                  },
+                                );
+                              }),
+                              const SizedBox(height: 8),
+                              Obx(() {
+                                return AccountLevelGetOneItemWidget(
+                                  data: orderCreateController.selectedAccountLevelItem.value,
+                                  width: 400,
+                                  title: orderCreateController
+                                      .selectedAccount.value?.accountLevel?.name,
+                                  isLoading: orderCreateController.isLoadingAccountLevelItem.value,
+                                );
+                              }),
+                            ],
+                          ),
                         ),
                       ResponsiveRowColumnItem(
                         rowFlex: 2,
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
                           padding: EdgeInsets.symmetric(
-                              horizontal:isDesktop ?40 : 2, vertical: isDesktop ? 20 : 5),
+                              horizontal:isDesktop ? 40 : 2, vertical: isDesktop ? 20 : 5),
                           /*decoration: BoxDecoration(
                             color: AppColor.backGroundColor1.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(16),
@@ -96,11 +258,12 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                             ],
                           ),*/
                           child: SizedBox(
-                            width: Get.width * 0.9,
-                            height: Get.height,
+                            /*width: Get.width * 0.9,
+                            height: Get.height,*/
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 ResponsiveRowColumnItem(
                                   child: Row(
@@ -164,17 +327,13 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                 ),
                                 ResponsiveRowColumnItem(
                                   rowFlex: 1,
-                                  child: SingleChildScrollView(
-                                    physics: BouncingScrollPhysics(),
-                                    child: Container(
+                                  child:  Container(
                                       constraints: isDesktop ? BoxConstraints(
                                           maxWidth: 500) : BoxConstraints(
                                           maxWidth: 400),
                                       padding: isDesktop
-                                          ? const EdgeInsets.symmetric(
-                                          horizontal: 40)
-                                          : const EdgeInsets.symmetric(
-                                          horizontal: 24),
+                                          ? const EdgeInsets.symmetric(horizontal: 40)
+                                          : const EdgeInsets.symmetric(horizontal: 24,vertical: 5),
                                       child:
                                       Form(
                                         key: formKey,
@@ -244,91 +403,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 hideUnderline: true,
                                               ),
                                             ),
-                                            // محصول
-                                            Container(
-                                              padding: EdgeInsets.only(
-                                                  bottom: 3, top: 5),
-                                              child: Text(
-                                                'محصول',
-                                                style: AppTextStyle.labelText
-                                                    .copyWith(
-                                                    fontSize: isDesktop
-                                                        ? 12
-                                                        : 10),
-                                              ),
-                                            ),
-                                            // محصول
-                                            Container(
-                                              padding: EdgeInsets.only(
-                                                  bottom: 5),
-                                              child: CustomDropdownWidget(
-                                                validator: (value) {
-                                                  if (value == 'انتخاب کنید' ||
-                                                      value == null ||
-                                                      value.isEmpty) {
-                                                    return 'محصول را انتخاب کنید';
-                                                  }
-                                                  return null;
-                                                },
-                                                items: [
-                                                  'انتخاب کنید',
-                                                  ...orderCreateController.itemList.map((item) => item.name ?? '')
-                                                ].toList(),
-                                                selectedValue: orderCreateController
-                                                    .selectedItem.value?.name,
-                                                onChanged: (String? newValue) {
-                                                  if (newValue == 'انتخاب کنید') {
-                                                    orderCreateController.changeSelectedItem(null);
-                                                  } else {
-                                                    var selectedItem = orderCreateController
-                                                        .itemList
-                                                        .firstWhere((item) =>
-                                                    item.name == newValue);
-                                                    orderCreateController
-                                                        .changeSelectedItem(
-                                                        selectedItem);
-                                                  }
-                                                },
-                                                backgroundColor: AppColor
-                                                    .textFieldColor,
-                                                borderRadius: 7,
-                                                borderColor: AppColor
-                                                    .secondaryColor,
-                                                hideUnderline: true,
-                                              ),
-                                            ),
-                                            // کارتخوان
-                                            orderCreateController.selectedBuySell.value?.id==0 && orderCreateController.selectedItem.value?.hasCard==true ?
-                                            Container(
-                                              padding: EdgeInsets.only(
-                                                  bottom: 5),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text('کارتخوان', style: AppTextStyle.labelText
-                                                      .copyWith(
-                                                      fontSize: isDesktop ? 12 : 10,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: AppColor.primaryColor
-                                                  ),),
-                                                  SizedBox(width: 3),
-                                                  Checkbox(
-                                                    hoverColor: AppColor.textFieldColor.withOpacity(0.8),
-                                                    value: orderCreateController.isCardChecked.value,
-                                                    onChanged: (value) async{
-                                                      orderCreateController.isCardChecked.value = value!;
-                                                      if(value){
-                                                        orderCreateController.priceController.text=((orderCreateController.selectedItem.value!.mesghalPrice)!+(orderCreateController.selectedItem.value?.cardPrice)!.toDouble()).toString().seRagham(separator: ',');
-                                                      }else{
-                                                        orderCreateController.priceController.text=(orderCreateController.selectedItem.value!.mesghalPrice).toString().seRagham(separator: ',');
-                                                      }
-                                                      orderCreateController.updateTotalPrice();
-                                                    },
-                                                  ),
-                                                ],
-                                              ),
-                                            ) :
-                                                SizedBox.shrink(),
                                             // کاربر
                                             Container(
                                               padding: EdgeInsets.only(
@@ -343,128 +417,201 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                               ),
                                             ),
                                             // کاربر
-                                            Container(
-                                              padding: EdgeInsets.only(bottom: 5),
-                                              child:
-                                              Row(crossAxisAlignment: CrossAxisAlignment.start,
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Flexible(
-                                                    fit: FlexFit.loose,
-                                                    child: CustomDropdownWidget(
-                                                      dropdownSearchData: DropdownSearchData<
-                                                          String>(
-                                                        searchController: orderCreateController
-                                                            .searchController,
-                                                        searchInnerWidgetHeight: 50,
-                                                        searchInnerWidget: Container(
-                                                          height: 50,
-                                                          padding: const EdgeInsets
-                                                              .only(
-                                                            top: 8,
-                                                            right: 15,
-                                                            left: 15,
-                                                          ),
-                                                          child: TextFormField(
-                                                            style: AppTextStyle
-                                                                .bodyText,
-                                                            controller: orderCreateController
-                                                                .searchController,
-                                                            focusNode: orderCreateController
-                                                                .searchFocusNode,
-                                                            decoration: InputDecoration(
-                                                              isDense: true,
-                                                              contentPadding:
-                                                              const EdgeInsets
-                                                                  .symmetric(
-                                                                horizontal: 10,
-                                                                vertical: 8,
-                                                              ),
-                                                              hintText: 'جستجوی کاربر...',
-                                                              hintStyle: AppTextStyle
-                                                                  .labelText,
-                                                              border: OutlineInputBorder(
-                                                                borderRadius:
-                                                                BorderRadius.circular(
-                                                                    8),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                      value: orderCreateController
-                                                          .selectedAccount.value,
-                                                      validator: (value) {
-                                                        if (value=='انتخاب کنید' ||
-                                                        value == null ||
-                                                            value.isEmpty) {
-                                                          return 'لطفا کاربر را انتخاب کنید';
-                                                        }
-                                                        return null;
+                                            orderCreateController.accountList.isEmpty ?
+                                            Center(
+                                              child: CircularProgressIndicator(
+                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                    AppColor.textColor),
+                                              ),
+                                            ) :
+                                            Row(crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Expanded(
+                                                  child: Container(
+                                                    child: CustomDropdown<AccountModel>(
+                                                      items: orderCreateController.accountList,
+                                                      selectedItem: orderCreateController.selectedAccount.value,
+                                                      enableSearch: true,
+                                                      errorText: orderCreateController.dropdownError.value,
+                                                      itemLabel: (account) =>
+                                                      account.name ??
+                                                          "",
+                                                      /*itemIcon: (bank) =>
+                                                         bank.icon ??
+                                                             "",*/
+                                                      onChanged: (account) async {
+                                                        setState(() {
+                                                          orderCreateController.selectedAccount.value = account;
+                                                          orderCreateController.dropdownError.value = "";
+                                                        });
+                                                        await orderCreateController.changeSelectedAccount(
+                                                            account);
+                                                        debugPrint(
+                                                          "کاربر انتخاب شد: ${account?.name}",
+                                                        );
                                                       },
-                                                      showSearchBox: true,
-                                                      items: [
-                                                        'انتخاب کنید',
-                                                        ...orderCreateController
-                                                            .searchedAccounts.map((
-                                                            account) =>
-                                                        '${account.id}:${account.name ?? ""}')
-                                                      ].toList(),
-                                                      selectedValue: orderCreateController
-                                                          .selectedAccount.value != null
-                                                          ? '${orderCreateController.selectedAccount.value!.id}:${orderCreateController.selectedAccount.value!.name}'
-                                                          : null,
-                                                      onChanged: (String? newValue) {
-                                                        if (newValue ==
-                                                            'انتخاب کنید') {
-                                                          orderCreateController
-                                                              .changeSelectedAccount(
-                                                              null);
-                                                        } else {
-                                                          var accountId = int.tryParse(newValue!.split(':')[0]);
-                                                          if (accountId != null) {
-                                                            var selectedAccount = orderCreateController
-                                                                .searchedAccounts
-                                                                .firstWhere((account) =>
-                                                            account.id == accountId);
-                                                            orderCreateController
-                                                                .changeSelectedAccount(
-                                                                selectedAccount);
-                                                          }
-                                                        }
-                                                      },
-                                                      /*onMenuStateChange: (isOpen) {
-                                                        if (!isOpen) {
-                                                          orderCreateController
-                                                              .resetAccountSearch();
-                                                        } else {
+                                                      isIcon: false,
 
-                                                        }
-                                                      },*/
-                                                      onMenuStateChange: orderCreateController.onDropdownMenuStateChange,
-                                                      backgroundColor: AppColor
-                                                          .textFieldColor,
-                                                      borderRadius: 7,
-                                                      borderColor: AppColor
-                                                          .secondaryColor,
-                                                      hideUnderline: true,
                                                     ),
                                                   ),
-                                                  /*SizedBox(width: 3),*/
-                                                  /*GestureDetector(
-                                                    onTap: () {
-                                                      Get.toNamed('/insertUser',parameters: {'id':0.toString()});
-                                                    },
-                                                      child: SvgPicture.asset('assets/svg/add.svg',
-                                                        width: 35,
-                                                        height: 35,
-                                                        colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn),
-
+                                                ),
+                                                SizedBox(width: 5),
+                                                Tooltip(
+                                                  message: "ایجاد کاربری جدید",
+                                                  child: Padding(
+                                                    padding: const EdgeInsets.only(top: 4),
+                                                    child: GestureDetector(
+                                                      onTap: () async {
+                                                        await Get.dialog(const UserCreateDialogWidget());
+                                                        await orderCreateController.fetchAccountList();
+                                                      },
+                                                      child: SvgPicture.asset(
+                                                        'assets/svg/add-plus.svg',
+                                                        height: 30,
                                                       ),
-                                                  ),*/
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            // محصول
+                                            Row(
+                                              children: [
+                                                Container(
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'محصول',
+                                                    style: AppTextStyle.labelText
+                                                        .copyWith(
+                                                        fontSize: isDesktop
+                                                            ? 12
+                                                            : 10),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 8,),
+                                                // Most-used products (itemId 1 and 2)
+                                                Obx(() {
+                                                  final hasAccountSelected = orderCreateController.selectedAccount.value != null;
+                                                  final mostUsedProducts = _getMostUsedProducts();
+                                                  return hasAccountSelected &&
+                                                      !orderCreateController.isLoadingItems.value &&
+                                                      mostUsedProducts.isNotEmpty
+                                                      ? Column(
+                                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                                    children: [
+                                                      Container(
+                                                        padding: EdgeInsets.only(bottom: isDesktop ? 2 : 5),
+                                                        child: Row(
+                                                          children: mostUsedProducts.asMap().entries.map((entry) {
+                                                            final index = entry.key;
+                                                            final item = entry.value;
+                                                            final isSelected = orderCreateController.selectedItem.value?.id == item.id;
+                                                            return Container(
+                                                              margin: EdgeInsets.only(
+                                                                left: 2,
+                                                              ),
+                                                              child: _buildMostUsedProductCard(item, isSelected, isDesktop),
+                                                            );
+                                                          }).toList(),
+                                                        ),
+                                                      ),
+                                                      SizedBox(height: 5),
+                                                    ],
+                                                  )
+                                                      : SizedBox.shrink();
+                                                }),
+                                              ],
+                                            ),
+                                            // محصول
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                  bottom: 5),
+                                              child: Obx(() {
+                                                final hasAccountSelected = orderCreateController.selectedAccount.value != null;
+                                                if(orderCreateController.isLoadingItems.value){
+                                                  return Center(
+                                                    child: CircularProgressIndicator(
+                                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                                          AppColor.textColor),
+                                                    ),
+                                                  );
+                                                }
+                                                return CustomDropdownWidget(
+                                                  validator: (value) {
+                                                    if(!hasAccountSelected){
+                                                      return 'ابتدا کاربر را انتخاب کنید';
+                                                    }
+                                                    if (value == 'انتخاب کنید' ||
+                                                        value == null ||
+                                                        value.isEmpty) {
+                                                      return 'محصول را انتخاب کنید';
+                                                    }
+                                                    return null;
+                                                  },
+                                                  items: hasAccountSelected
+                                                      ? [
+                                                    'انتخاب کنید',
+                                                    ...orderCreateController.itemList.map((item) => item.name ?? '')
+                                                  ].toList()
+                                                      : ['ابتدا کاربر را انتخاب کنید'],
+                                                  selectedValue: hasAccountSelected
+                                                      ? orderCreateController.selectedItem.value?.name
+                                                      : 'ابتدا کاربر را انتخاب کنید',
+                                                  onChanged: hasAccountSelected ? (String? newValue) {
+                                                    if (newValue == 'انتخاب کنید') {
+                                                      orderCreateController.changeSelectedItem(null);
+                                                    } else {
+                                                      var selectedItem = orderCreateController
+                                                          .itemList
+                                                          .firstWhere((item) =>
+                                                      item.name == newValue);
+                                                      orderCreateController
+                                                          .changeSelectedItem(
+                                                          selectedItem);
+                                                    }
+                                                  } : null,
+                                                  backgroundColor: AppColor
+                                                      .textFieldColor,
+                                                  borderRadius: 7,
+                                                  borderColor: AppColor
+                                                      .secondaryColor,
+                                                  hideUnderline: true,
+                                                );
+                                              }),
+                                            ),
+                                            // کارتخوان
+                                            orderCreateController.selectedBuySell.value?.id==0 && orderCreateController.selectedItem.value?.hasCard==true ?
+                                            Container(
+                                              padding: EdgeInsets.only(
+                                                  bottom: 5),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Text('کارتخوان', style: AppTextStyle.labelText
+                                                      .copyWith(
+                                                      fontSize: isDesktop ? 12 : 10,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: AppColor.primaryColor
+                                                  ),),
+                                                  SizedBox(width: 3),
+                                                  Checkbox(
+                                                    hoverColor: AppColor.textFieldColor.withAlpha(200),
+                                                    value: orderCreateController.isCardChecked.value,
+                                                    onChanged: (value) async{
+                                                      orderCreateController.isCardChecked.value = value!;
+                                                      if(value){
+                                                        orderCreateController.priceController.text=((orderCreateController.selectedItem.value!.mesghalPrice)!+(orderCreateController.selectedItem.value?.cardPrice)!.toDouble()).toString().seRagham(separator: ',');
+                                                      }else{
+                                                        orderCreateController.priceController.text=(orderCreateController.selectedItem.value!.mesghalPrice).toString().seRagham(separator: ',');
+                                                      }
+                                                      orderCreateController.updateTotalPrice();
+                                                    },
+                                                  ),
                                                 ],
                                               ),
-                                            ),
+                                            ) :
+                                            SizedBox.shrink(),
                                             // قیمت
                                             Container(
                                               padding: EdgeInsets.only(
@@ -480,7 +627,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                             ),
                                             // قیمت
                                             Container(
-                                              height: 50,
+                                              height: 70,
                                               padding: EdgeInsets.only(
                                                   bottom: 5),
                                               child:
@@ -488,45 +635,76 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 mainAxisSize: MainAxisSize.min,
                                                 children: [
                                                   Flexible(fit: FlexFit.loose,
-                                                    child: TextFormField(
-                                                      readOnly: !orderCreateController.manualPriceChecked.value,
-                                                      controller: orderCreateController.priceController,
-                                                      style: AppTextStyle.labelText,
-                                                      keyboardType: TextInputType
-                                                          .number,
-                                                      inputFormatters: [
-                                                        FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
-                                                      ],
-                                                      onChanged: (value) {
-                                                        // حذف کاماهای قبلی و فرمت جدید
-                                                        String cleanedValue = value
-                                                            .replaceAll(',', '');
-                                                        if (cleanedValue.isNotEmpty) {
-                                                          orderCreateController.priceController.text = cleanedValue
-                                                                  .toPersianDigit()
-                                                                  .seRagham();
-                                                          orderCreateController
-                                                              .priceController
-                                                              .selection =
-                                                              TextSelection.collapsed(
-                                                                  offset: orderCreateController
-                                                                      .priceController
-                                                                      .text.length);
-                                                        }
-                                                        orderCreateController.updateTotalPrice();
-                                                      },
-                                                      decoration: InputDecoration(
-                                                        border: OutlineInputBorder(
-                                                          borderRadius: BorderRadius
-                                                              .circular(10),
+                                                    child: IntrinsicHeight(
+                                                      child: TextFormField(
+                                                        validator: (value) {
+                                                          if (value == null ||
+                                                              value.isEmpty) {
+                                                            return 'لطفا قیمت سفارش را وارد کنید';
+                                                          }
+                                                          return null;
+                                                        },
+                                                        //readOnly: !orderCreateController.manualPriceChecked.value,
+                                                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                        controller: orderCreateController.priceController,
+                                                        style: AppTextStyle.labelText,
+                                                        keyboardType: TextInputType
+                                                            .number,
+                                                        inputFormatters: [
+                                                          FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                                        ],
+                                                        onChanged: (value) {
+                                                          // حذف کاماهای قبلی و فرمت جدید
+                                                          String cleanedValue = value
+                                                              .replaceAll(',', '');
+                                                          if (cleanedValue.isNotEmpty) {
+                                                            orderCreateController.priceController.text = cleanedValue
+                                                                .toPersianDigit()
+                                                                .seRagham();
+                                                            orderCreateController
+                                                                .priceController
+                                                                .selection =
+                                                                TextSelection.collapsed(
+                                                                    offset: orderCreateController
+                                                                        .priceController
+                                                                        .text.length);
+                                                          }
+                                                          orderCreateController.updateTotalPrice();
+                                                        },
+                                                        decoration: InputDecoration(
+                                                          border: OutlineInputBorder(
+                                                            borderRadius: BorderRadius
+                                                                .circular(10),
+                                                          ),
+                                                          filled: true,
+                                                          fillColor: AppColor
+                                                              .textFieldColor,
                                                         ),
-                                                        filled: true,
-                                                        fillColor: AppColor
-                                                            .textFieldColor,
                                                       ),
                                                     ),
                                                   ),
-                                                  SizedBox(width: 3),
+                                                  //SizedBox(width: 8),
+                                                  /*ElevatedButton(
+                                                    onPressed: () async {
+                                                      // دریافت قیمت از socket
+                                                      await orderCreateController.fetchPriceFromSocket();
+                                                    },
+                                                    style: ButtonStyle(
+                                                      backgroundColor: WidgetStatePropertyAll(AppColor.primaryColor),
+                                                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 12, vertical: 8)),
+                                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(8),
+                                                      )),
+                                                    ),
+                                                    child: Text(
+                                                      'دریافت قیمت',
+                                                      style: AppTextStyle.labelText.copyWith(
+                                                        color: Colors.white,
+                                                        fontSize: 10,
+                                                      ),
+                                                    ),
+                                                  ),*/
+                                                  /*SizedBox(width: 3),
                                                   Checkbox(
                                                     hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                     value: orderCreateController.manualPriceChecked.value,
@@ -536,10 +714,87 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         orderCreateController.changeSelectedItem(orderCreateController.selectedItem.value);
                                                       }
                                                       },
-                                                  ),
+                                                  ),*/
                                                 ],
                                               ),
                                             ),
+                                            // نمایش قیمت سوکت
+                                           // SizedBox(height: 8),
+                                            Obx(() {
+                                              // مشاهده هر دو متغیر برای به‌روزرسانی
+                                              orderCreateController.socketPrice.value;
+                                              orderCreateController.currentPrice.value;
+                                              return orderCreateController.socketPrice
+                                                  .value.isNotEmpty ?
+                                              Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 12,
+                                                    vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: _getSocketPriceDisplayColor(),
+                                                  border: Border.all(
+                                                    color: _getSocketPriceBorderColor(),
+                                                    width: 1,
+                                                  ),
+                                                  borderRadius: BorderRadius
+                                                      .circular(8),
+                                                ),
+                                                child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Icon(
+                                                          _getSocketPriceIcon(),
+                                                          color: _getSocketPriceBorderColor(),
+                                                          size: 16,
+                                                        ),
+                                                        SizedBox(width: 8),
+                                                        Text(
+                                                          'قیمت آیتم: ',
+                                                          style: AppTextStyle
+                                                              .labelText.copyWith(
+                                                            color: AppColor
+                                                                .textColor
+                                                                .withAlpha(175),
+                                                            fontSize: 12,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          _getSocketPriceValue(),
+                                                          style: AppTextStyle
+                                                              .labelText.copyWith(
+                                                            color: _getSocketPriceBorderColor(),
+                                                            fontSize: 12,
+                                                            fontWeight: FontWeight
+                                                                .bold,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    Tooltip(
+                                                      message: "افزودن قیمت",
+                                                      child: GestureDetector(
+                                                        onTap: () async {
+                                                          await orderCreateController.fetchPriceFromSocket();
+                                                        },
+                                                        child: Transform.rotate(
+                                                          angle: math.pi / 2,
+                                                          child: SvgPicture.asset(
+                                                            'assets/svg/add-price.svg',
+                                                            height: 28,
+                                                            colorFilter: ColorFilter.mode(
+                                                              AppColor.primaryColor,
+                                                              BlendMode.srcIn,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ) :
+                                              SizedBox();
+                                            }),
                                             // قیمت به گرم
                                             SizedBox(height: 3),
                                             orderCreateController.selectedItem.value?.itemUnit?.name == 'گرم' ?
@@ -548,14 +803,14 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 Text(
                                                   ' قیمت به گرم: ',
                                                   style: AppTextStyle
-                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                      .labelText.copyWith(color: AppColor.textColor.withAlpha(130)),),
                                                 Text(orderCreateController.priceTemp.value.seRagham(separator: ','),
                                                   style: AppTextStyle.bodyText
                                                       .copyWith(color: AppColor
-                                                      .primaryColor.withOpacity(0.5)),)
+                                                      .primaryColor.withAlpha(130)),)
                                               ],
                                             ) :
-                                                SizedBox(),
+                                            SizedBox(),
                                             // گرم/عدد
                                             Container(
                                               padding: EdgeInsets.only(
@@ -593,18 +848,35 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                             return null;
                                                           },
                                                           onChanged: (value) {
-                                                            if(orderCreateController.notLimitChecked.value==false){
-                                                              setState(() {
-                                                                double item = double.tryParse(value == ""
-                                                                    ? "0"
-                                                                    : value.replaceAll(" ", "").toEnglishDigit()) ?? 0;
-                                                                if (item >= orderCreateController.maxItemSell.value) {
-                                                                  orderCreateController.quantityController.text =
-                                                                      orderCreateController.maxItemSell.value.toString();
-                                                                  print(item);
-                                                                }
+                                                            if (_isValidatingQuantity) return;
 
-                                                              });
+                                                            // Cancel previous debounce timer if active
+                                                            _limitCheckDebounce?.cancel();
+                                                            // Check limit if value is not empty
+                                                            if (value.isNotEmpty) {
+                                                              final enteredValue = double.tryParse(value.toEnglishDigit());
+                                                              if (enteredValue != null) {
+                                                                final limit = _getCurrentLimit();
+                                                                if (limit != null && enteredValue > limit) {
+                                                                  // Debounce: wait for user to stop typing before showing dialog
+                                                                  _limitCheckDebounce = Timer(const Duration(milliseconds: 500), () async {
+                                                                    if (!_isDialogShowing) {
+                                                                      _isDialogShowing = true;
+                                                                      final shouldContinue = await _showLimitExceededDialog();
+                                                                      _isDialogShowing = false;
+
+                                                                      if (!shouldContinue) {
+                                                                        // Cancel: clear the field as per requirement
+                                                                        _isValidatingQuantity = true;
+                                                                        orderCreateController.quantityController.clear();
+                                                                        _isValidatingQuantity = false;
+                                                                        // Update total price with cleared value
+                                                                        orderCreateController.updateTotalPrice();
+                                                                      }
+                                                                    }
+                                                                  });
+                                                                }
+                                                              }
                                                             }
                                                             orderCreateController.updateTotalPrice();
                                                           },
@@ -670,14 +942,14 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         ),
                                                       ),
                                                     ),
-                                                    SizedBox(width: 3),
+                                                    /*SizedBox(width: 3),
                                                     Checkbox(
                                                       hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                       value: orderCreateController.notLimitChecked.value,
                                                       onChanged: (value) async{
                                                         orderCreateController.notLimitChecked.value = value!;
                                                       },
-                                                    ),
+                                                    ),*/
                                                   ],
                                                 ),
                                               ),
@@ -702,16 +974,35 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                             return null;
                                                           },
                                                           onChanged: (value) {
-                                                            if(orderCreateController.notLimitChecked.value==false){
-                                                              setState(() {
-                                                                double item = double.tryParse(value == ""
-                                                                        ? "0"
-                                                                        : value.replaceAll(" ", "").toEnglishDigit()) ?? 0;
-                                                                if (item >= orderCreateController.maxItemBuy.value) {
-                                                                  orderCreateController.quantityController.text = orderCreateController.maxItemBuy.value.toString();
-                                                                  print(item);
+                                                            if (_isValidatingQuantity) return;
+
+                                                            // Cancel previous debounce timer if active
+                                                            _limitCheckDebounce?.cancel();
+                                                            // Check limit if value is not empty
+                                                            if (value.isNotEmpty) {
+                                                              final enteredValue = double.tryParse(value.toEnglishDigit());
+                                                              if (enteredValue != null) {
+                                                                final limit = _getCurrentLimit();
+                                                                if (limit != null && enteredValue > limit) {
+                                                                  // Debounce: wait for user to stop typing before showing dialog
+                                                                  _limitCheckDebounce = Timer(const Duration(milliseconds: 500), () async {
+                                                                    if (!_isDialogShowing) {
+                                                                      _isDialogShowing = true;
+                                                                      final shouldContinue = await _showLimitExceededDialog();
+                                                                      _isDialogShowing = false;
+
+                                                                      if (!shouldContinue) {
+                                                                        // Cancel: clear the field as per requirement
+                                                                        _isValidatingQuantity = true;
+                                                                        orderCreateController.quantityController.clear();
+                                                                        _isValidatingQuantity = false;
+                                                                        // Update total price with cleared value
+                                                                        orderCreateController.updateTotalPrice();
+                                                                      }
+                                                                    }
+                                                                  });
                                                                 }
-                                                              });
+                                                              }
                                                             }
                                                             orderCreateController.updateTotalPrice();
                                                           },
@@ -777,44 +1068,55 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         ),
                                                       ),
                                                     ),
-                                                    SizedBox(width: 3),
+                                                    /*SizedBox(width: 3),
                                                     Checkbox(
                                                       hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                       value: orderCreateController.notLimitChecked.value,
                                                       onChanged: (value) async{
                                                         orderCreateController.notLimitChecked.value = value!;
                                                       },
-                                                    ),
+                                                    ),*/
                                                   ],
                                                 ),
                                               ),
                                             ),
                                             SizedBox(height: 3),
                                             orderCreateController.selectedItem.value?.id==10 ||
-                                            orderCreateController.selectedItem.value?.id==14 ||
-                                            orderCreateController.selectedItem.value?.id==15 ||
-                                            orderCreateController.selectedItem.value?.id==16 ||
-                                            orderCreateController.selectedItem.value?.id==37 ||
-                                            orderCreateController.selectedItem.value?.id==38 ||
-                                            orderCreateController.selectedItem.value?.id==39  ?
+                                                orderCreateController.selectedItem.value?.id==14 ||
+                                                orderCreateController.selectedItem.value?.id==15 ||
+                                                orderCreateController.selectedItem.value?.id==16 ||
+                                                orderCreateController.selectedItem.value?.id==37 ||
+                                                orderCreateController.selectedItem.value?.id==38 ||
+                                                orderCreateController.selectedItem.value?.id==39  ?
                                             Row(
                                               children: [
                                                 Text(
                                                   ' وزن: ',
                                                   style: AppTextStyle
-                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                      .labelText.copyWith(color: AppColor.textColor.withAlpha(130)),),
                                                 Text("${orderCreateController.selectedItem.value?.w750} گرم ",
                                                   style: AppTextStyle.bodyText
                                                       .copyWith(color: AppColor
-                                                      .primaryColor.withOpacity(0.5)),)
+                                                      .primaryColor.withAlpha(130)),)
                                               ],
                                             ) :
                                             SizedBox(),
-                                            orderCreateController
+                                            /*orderCreateController
                                                 .selectedBuySell.value?.name ==
                                                 'فروش به کاربر' ?
                                             Row(
                                               children: [
+                                                Checkbox(
+                                                  hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                                                  value: orderCreateController.notLimitChecked.value,
+                                                  onChanged: (value) async{
+                                                    orderCreateController.notLimitChecked.value = value!;
+                                                    if(value==false){
+                                                      orderCreateController.quantityController.text = orderCreateController.maxItemSell.value.toString();
+                                                    }
+                                                    orderCreateController.updateTotalPrice();
+                                                  },
+                                                ),
                                                 Text(
                                                   ' حداکثر مقدار فروش برای این محصول: ',
                                                   style: AppTextStyle
@@ -829,6 +1131,17 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                 :
                                             Row(
                                               children: [
+                                                Checkbox(
+                                                  hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                                                  value: orderCreateController.notLimitChecked.value,
+                                                  onChanged: (value) async{
+                                                    orderCreateController.notLimitChecked.value = value!;
+                                                    if(value==false){
+                                                      orderCreateController.quantityController.text = orderCreateController.maxItemBuy.value.toString();
+                                                    }
+                                                    orderCreateController.updateTotalPrice();
+                                                  },
+                                                ),
                                                 Text(
                                                   ' حداکثر مقدار خرید برای این محصول: ',
                                                   style: AppTextStyle
@@ -839,7 +1152,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                       .copyWith(color: AppColor
                                                       .primaryColor),)
                                               ],
-                                            ),
+                                            ),*/
                                             SizedBox(height: 5,),
                                             // مبلغ کل
                                             Container(
@@ -887,6 +1200,12 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                   }
                                                   orderCreateController
                                                       .updateQuantity();
+                                                },
+                                                onTap: () {
+                                                  orderCreateController.totalPriceController.selection = TextSelection(
+                                                    baseOffset: 0,
+                                                    extentOffset: orderCreateController.totalPriceController.text.length,
+                                                  );
                                                 },
                                                 decoration: InputDecoration(
                                                   border: OutlineInputBorder(
@@ -999,8 +1318,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                             ),
                                             // توضیحات
                                             Container(
-                                              padding: EdgeInsets.only(
-                                                  bottom: 5),
+                                              padding: EdgeInsets.only(bottom: 5),
                                               child:
                                               TextFormField(
                                                 controller: orderCreateController
@@ -1019,7 +1337,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                               ),
                                             ),
                                             // دکمه ایجاد سفارش
-                                            SizedBox(height: 20,),
+                                            SizedBox(height:isDesktop ? 20 : 10,),
                                             orderCreateController.selectedBuySell.value?.name == 'خرید از کاربر' ?
                                             SizedBox(width: double.infinity,
                                               height: 40,
@@ -1039,8 +1357,129 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                                 .circular(
                                                                 10)))),
                                                 onPressed: (){
-                                                    if(formKey.currentState!.validate()) {
-                                                      if(orderCreateController.selectedAccount.value!=null){
+                                                  if(formKey.currentState!.validate()) {
+                                                    if(orderCreateController.selectedAccount.value!=null){
+                                                      if (_isPriceOverOnePercent()) {
+                                                        Get.defaultDialog(
+                                                          backgroundColor: AppColor.backGroundColor,
+                                                          title: "اخطار قیمت",
+                                                          titleStyle: AppTextStyle.smallTitleText,
+                                                          middleText: "قیمت در محدوده غیر مجاز است. آیا مایل به ادامه دادن هستید؟",
+                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                          confirm: ElevatedButton(
+                                                            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.primaryColor)),
+                                                            onPressed: () {
+                                                              Get.back();
+                                                              Get.defaultDialog(
+                                                                backgroundColor: AppColor.backGroundColor,
+                                                                title: "ایجاد سفارش خرید",
+                                                                titleStyle: AppTextStyle.smallTitleText,
+                                                                middleText: "آیا از ایجاد سفارش مطمئن هستید؟",
+                                                                middleTextStyle: AppTextStyle.bodyText,
+                                                                content: Card(
+                                                                  color: AppColor.backGroundColor,
+                                                                  child: Padding(
+                                                                    padding: const EdgeInsets.all(8.0),
+                                                                    child: Column(
+                                                                      children: [
+                                                                        Text('جزئیات خرید ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                        SizedBox(height: 2,),
+                                                                        Divider(height: 1,color: AppColor.dividerColor,),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('قیمت خرید: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                confirm: ElevatedButton(
+                                                                  style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
+                                                                      AppColor.primaryColor)),
+                                                                  onPressed: () async {
+                                                                    await orderCreateController.insertOrder();
+                                                                  },
+                                                                  child: Text('ایجاد', style: AppTextStyle.bodyText,),
+                                                                ),
+                                                                cancel: ElevatedButton(
+                                                                  style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(
+                                                                      AppColor.accentColor)),
+                                                                  onPressed: ()  {
+                                                                    Get.back();
+                                                                  },
+                                                                  child: Text(
+                                                                    'لغو',
+                                                                    style: AppTextStyle.bodyText,
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            },
+                                                            child: Text('ادامه', style: AppTextStyle.bodyText,),
+                                                          ),
+                                                          cancel: ElevatedButton(
+                                                            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
+                                                            onPressed: () { Get.back(); },
+                                                            child: Text('لغو', style: AppTextStyle.bodyText,),
+                                                          ),
+                                                        );
+                                                      }
+                                                      else {
                                                         Get.defaultDialog(
                                                           backgroundColor: AppColor.backGroundColor,
                                                           title: "ایجاد سفارش خرید",
@@ -1142,6 +1581,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         );
                                                       }
                                                     }
+                                                  }
                                                 },
                                                 child: orderCreateController.isLoading.value
                                                     ?
@@ -1174,109 +1614,235 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                   if(formKey.currentState!.validate())
                                                   {
                                                     if(orderCreateController.selectedAccount.value!=null){
-                                                      Get.defaultDialog(
-                                                        backgroundColor: AppColor.backGroundColor,
-                                                        title: "ایجاد سفارش فروش",
-                                                        titleStyle: AppTextStyle.smallTitleText,
-                                                        middleText: "آیا از ایجاد سفارش مطمئن هستید؟",
-                                                        middleTextStyle: AppTextStyle.bodyText,
-                                                        content: Card(
-                                                          color: AppColor.backGroundColor,
-                                                          child: Padding(
-                                                            padding: const EdgeInsets.all(8.0),
-                                                            child: Column(
-                                                              children: [
-                                                                Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                SizedBox(height: 2,),
-                                                                Divider(height: 1,color: AppColor.dividerColor,),
-                                                                SizedBox(height: 5,),
-                                                                Row(
-                                                                  children: [
-                                                                    SizedBox(width: 5,),
-                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                    SizedBox(width: 2,),
-                                                                    Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                    Text(orderCreateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
-                                                                  ],
+                                                      if (_isPriceOverOnePercent()) {
+                                                        Get.defaultDialog(
+                                                          backgroundColor: AppColor.backGroundColor,
+                                                          title: "اخطار قیمت",
+                                                          titleStyle: AppTextStyle.smallTitleText,
+                                                          middleText: "قیمت در محدوده غیر مجاز است. آیا مایل به ادامه دادن هستید؟",
+                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                          confirm: ElevatedButton(
+                                                            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.primaryColor)),
+                                                            onPressed: () {
+                                                              Get.back();
+                                                              Get.defaultDialog(
+                                                                backgroundColor: AppColor.backGroundColor,
+                                                                title: "ایجاد سفارش فروش",
+                                                                titleStyle: AppTextStyle.smallTitleText,
+                                                                middleText: "آیا از ایجاد سفارش مطمئن هستید؟",
+                                                                middleTextStyle: AppTextStyle.bodyText,
+                                                                content: Card(
+                                                                  color: AppColor.backGroundColor,
+                                                                  child: Padding(
+                                                                    padding: const EdgeInsets.all(8.0),
+                                                                    child: Column(
+                                                                      children: [
+                                                                        Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                        SizedBox(height: 2,),
+                                                                        Divider(height: 1,color: AppColor.dividerColor,),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                          ],
+                                                                        ),
+                                                                        SizedBox(height: 5,),
+                                                                        Row(
+                                                                          children: [
+                                                                            SizedBox(width: 5,),
+                                                                            Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                            SizedBox(width: 2,),
+                                                                            Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                            Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
+                                                                          ],
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
                                                                 ),
-                                                                SizedBox(height: 5,),
-                                                                Row(
-                                                                  children: [
-                                                                    SizedBox(width: 5,),
-                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                    SizedBox(width: 2,),
-                                                                    Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                    Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
-                                                                  ],
+                                                                confirm: ElevatedButton(
+                                                                  style: ButtonStyle(
+                                                                      backgroundColor: WidgetStatePropertyAll(
+                                                                          AppColor.primaryColor)),
+                                                                  onPressed: () async {
+                                                                    await orderCreateController.insertOrder();
+                                                                  },
+                                                                  child: Text(
+                                                                    'ایجاد',
+                                                                    style: AppTextStyle
+                                                                        .bodyText,
+                                                                  ),
                                                                 ),
-                                                                SizedBox(height: 5,),
-                                                                Row(
-                                                                  children: [
-                                                                    SizedBox(width: 5,),
-                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                    SizedBox(width: 2,),
-                                                                    Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                    Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
-                                                                  ],
+                                                                cancel: ElevatedButton(
+                                                                  style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
+                                                                  onPressed: ()  {
+                                                                    Get.back();
+                                                                  },
+                                                                  child: Text(
+                                                                    'لغو',
+                                                                    style: AppTextStyle.bodyText,
+                                                                  ),
                                                                 ),
-                                                                SizedBox(height: 5,),
-                                                                Row(
-                                                                  children: [
-                                                                    SizedBox(width: 5,),
-                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                    SizedBox(width: 2,),
-                                                                    Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                    Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(height: 5,),
-                                                                Row(
-                                                                  children: [
-                                                                    SizedBox(width: 5,),
-                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                    SizedBox(width: 2,),
-                                                                    Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                    Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
-                                                                  ],
-                                                                ),
-                                                                SizedBox(height: 5,),
-                                                                Row(
-                                                                  children: [
-                                                                    SizedBox(width: 5,),
-                                                                    Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
-                                                                    SizedBox(width: 2,),
-                                                                    Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                    Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
-                                                                  ],
-                                                                ),
-                                                              ],
+                                                              );
+                                                            },
+                                                            child: Text('ادامه', style: AppTextStyle.bodyText,),
+                                                          ),
+                                                          cancel: ElevatedButton(
+                                                            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
+                                                            onPressed: () { Get.back(); },
+                                                            child: Text('لغو', style: AppTextStyle.bodyText,),
+                                                          ),
+                                                        );
+                                                      }
+                                                      else {
+                                                        Get.defaultDialog(
+                                                          backgroundColor: AppColor.backGroundColor,
+                                                          title: "ایجاد سفارش فروش",
+                                                          titleStyle: AppTextStyle.smallTitleText,
+                                                          middleText: "آیا از ایجاد سفارش مطمئن هستید؟",
+                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                          content: Card(
+                                                            color: AppColor.backGroundColor,
+                                                            child: Padding(
+                                                              padding: const EdgeInsets.all(8.0),
+                                                              child: Column(
+                                                                children: [
+                                                                  Text('جزئیات فروش ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                  SizedBox(height: 2,),
+                                                                  Divider(height: 1,color: AppColor.dividerColor,),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('نام کاربر: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.selectedAccount.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('محصول: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.selectedItem.value?.name ??'', style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('قیمت فروش: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.priceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('مبلغ کل: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.totalPriceController.text.seRagham(separator: ','), style: AppTextStyle.bodyText,),
+                                                                    ],
+                                                                  ),
+                                                                  SizedBox(height: 5,),
+                                                                  Row(
+                                                                    children: [
+                                                                      SizedBox(width: 5,),
+                                                                      Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
+                                                                      SizedBox(width: 2,),
+                                                                      Text('تاریخ: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
+                                                                      Text(orderCreateController.dateController.text, style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
                                                             ),
                                                           ),
-                                                        ),
-                                                        confirm: ElevatedButton(
-                                                          style: ButtonStyle(
-                                                              backgroundColor: WidgetStatePropertyAll(
-                                                                  AppColor.primaryColor)),
-                                                          onPressed: () async {
-                                                            await orderCreateController.insertOrder();
-                                                          },
-                                                          child: Text(
-                                                            'ایجاد',
-                                                            style: AppTextStyle
-                                                                .bodyText,
+                                                          confirm: ElevatedButton(
+                                                            style: ButtonStyle(
+                                                                backgroundColor: WidgetStatePropertyAll(
+                                                                    AppColor.primaryColor)),
+                                                            onPressed: () async {
+                                                              await orderCreateController.insertOrder();
+                                                            },
+                                                            child: Text(
+                                                              'ایجاد',
+                                                              style: AppTextStyle
+                                                                  .bodyText,
+                                                            ),
                                                           ),
-                                                        ),
-                                                        cancel: ElevatedButton(
-                                                          style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
-                                                          onPressed: ()  {
-                                                            Get.back();
-                                                          },
-                                                          child: Text(
-                                                            'لغو',
-                                                            style: AppTextStyle.bodyText,
+                                                          cancel: ElevatedButton(
+                                                            style: ButtonStyle(backgroundColor: WidgetStatePropertyAll(AppColor.accentColor)),
+                                                            onPressed: ()  {
+                                                              Get.back();
+                                                            },
+                                                            child: Text(
+                                                              'لغو',
+                                                              style: AppTextStyle.bodyText,
+                                                            ),
                                                           ),
-                                                        ),
-                                                      );
+                                                        );
+                                                      }
                                                     }
                                                   }
                                                 },
@@ -1299,7 +1865,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                       ),
 
                                     ),
-                                  ),
                                 ),
                               ],
                             ),
@@ -1310,12 +1875,95 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                         ResponsiveRowColumnItem(
                           rowFlex: 1,
                           child:
+                          Column(
+                            children: [
                               orderCreateController.isLoadingBalance.value==false ?
-                                  Center(child: CircularProgressIndicator(),)
+                              Center(child: CircularProgressIndicator(),)
                                   :
-                          BalanceWidget(title: orderCreateController.selectedAccount.value?.name,
-                            listBalance: orderCreateController.balanceList,
-                            size: 400,),
+                              BalanceWidget(title: orderCreateController.selectedAccount.value?.name,
+                                listBalance: orderCreateController.balanceList,
+                                size: 400,),
+                              // Error display widget
+                              Obx(() => orderCreateController.hasError.value
+                                  ? Container(
+                                margin: EdgeInsets.only(top: 16),
+                                padding: EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Colors.red.shade50,
+                                  border: Border.all(color: Colors.red.shade300),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.error_outline,
+                                      color: Colors.red.shade600,
+                                      size: 20,
+                                    ),
+                                    SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            orderCreateController.errorTitle.value,
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              color: Colors.red.shade700,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            orderCreateController.errorMessage.value,
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              color: Colors.red.shade600,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => orderCreateController.clearError(),
+                                      child: Icon(
+                                        Icons.close,
+                                        color: Colors.red.shade600,
+                                        size: 22,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                                  : SizedBox.shrink()),
+                              const SizedBox(height: 8),
+                              Obx(() {
+                                return AccountSalesGroupGetOneItemWidget(
+                                  data: orderCreateController.selectedAccountSalesGroupItem.value,
+                                  width: 400,
+                                  title: orderCreateController
+                                      .selectedAccount.value?.accountSalesGroup?.name,
+                                  isLoading:
+                                  orderCreateController.isLoadingAccountSalesGroupItem.value,
+                                  selectedItemId: orderCreateController.selectedItem.value?.id,
+                                  selectedBuySellId: orderCreateController.selectedBuySell.value?.id,
+                                  onPriceSelected: (mesghlPrice) {
+                                    orderCreateController.setPriceFromSalesGroup(mesghlPrice);
+                                  },
+                                );
+                              }),
+                              SizedBox(height: 8),
+                              Obx(() {
+                                return AccountLevelGetOneItemWidget(
+                                  data: orderCreateController.selectedAccountLevelItem.value,
+                                  width: 400,
+                                  title: orderCreateController
+                                      .selectedAccount.value?.accountLevel?.name,
+                                  isLoading:
+                                  orderCreateController.isLoadingAccountLevelItem.value,
+                                );
+                              }),
+                            ],
+                          ),
                         ),
                     ],
                   ),
@@ -1324,7 +1972,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: isDesktop ? FloatingActionButton(
           onPressed: () {
             Get.dialog(const ChatDialog());
           },
@@ -1333,7 +1981,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
             Icons.chat,
             color: Colors.white,
           ),
-        ),
+        ) : SizedBox.shrink(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });
@@ -1350,6 +1998,124 @@ class _OrderCreateViewState extends State<OrderCreateView> {
       return formatted;
     }
   }
+
+  /// Get most-used products (items with id == 1 and id == 2)
+  List<ItemModel> _getMostUsedProducts() {
+    return orderCreateController.itemList
+        .where((item) => item.id == 1 || item.id == 2 || item.id == 3)
+        .toList();
+  }
+
+  /// Build a clickable card for most-used products
+  Widget _buildMostUsedProductCard(ItemModel item, bool isSelected, bool isDesktop) {
+    return GestureDetector(
+      onTap: () {
+        orderCreateController.changeSelectedItem(item);
+      },
+      child: Obx(() {
+        final buySellId = orderCreateController.selectedBuySell.value?.id;
+        return Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: 4,
+            vertical: 5,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? (buySellId == 0
+                ? AppColor.accentColor.withAlpha(30)
+                : AppColor.primaryColor.withAlpha(30))
+                : AppColor.secondary200Color,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected
+                  ? (buySellId == 0
+                  ? AppColor.accentColor.withAlpha(200)
+                  : AppColor.primaryColor.withAlpha(200))
+                  : AppColor.secondary200Color,
+              width: isSelected ? 2 : 1,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              item.name ?? '',
+              style: AppTextStyle.labelText.copyWith(
+                fontSize: isDesktop ? 10 : 9,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.bold,
+                color: isSelected
+                    ? (buySellId == 0
+                    ? AppColor.accentColor
+                    : AppColor.primaryColor)
+                    : AppColor.dividerColor,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  /// Get the current limit (maxSell for sell, maxBuy for buy)
+  double? _getCurrentLimit() {
+    final accountLevelItem = orderCreateController.selectedAccountLevelItem.value;
+    if (accountLevelItem == null ||
+        accountLevelItem.accountLevelItems == null ||
+        accountLevelItem.accountLevelItems!.isEmpty) {
+      return null;
+    }
+
+    final item = accountLevelItem.accountLevelItems!.first;
+    final buySellId = orderCreateController.selectedBuySell.value?.id;
+
+    // id == 0 means sell, id == 1 means buy
+    if (buySellId == 0) {
+      // Sell order - check maxSell
+      return item.maxSell;
+    } else if (buySellId == 1) {
+      // Buy order - check maxBuy
+      return item.maxBuy;
+    }
+
+    return null;
+  }
+
+  /// Show dialog when entered amount exceeds the allowed limit
+  Future<bool> _showLimitExceededDialog() async {
+    bool? result = false;
+
+    await Get.defaultDialog(
+      backgroundColor: AppColor.backGroundColor,
+      title: "هشدار",
+      titleStyle: AppTextStyle.smallTitleText,
+      middleText: "مقدار وارد شده از حد مجاز سطح بیشتر است",
+      middleTextStyle: AppTextStyle.bodyText,
+      confirm: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(AppColor.primaryColor),
+        ),
+        onPressed: () {
+          result = true;
+          Get.back();
+        },
+        child: Text('ادامه', style: AppTextStyle.bodyText),
+      ),
+      cancel: ElevatedButton(
+        style: ButtonStyle(
+          backgroundColor: WidgetStatePropertyAll(AppColor.accentColor),
+        ),
+        onPressed: () {
+          result = false;
+          Get.back();
+        },
+        child: Text('لغو', style: AppTextStyle.bodyText),
+      ),
+    );
+
+    return result ?? false;
+  }
+
 }
 
 

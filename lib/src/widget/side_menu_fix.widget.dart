@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/config/const/socket.service.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
+import 'package:hanigold_admin/src/widget/version.widget.dart';
 import 'package:universal_html/html.dart' as html;
 
 import '../config/const/app_color.dart';
@@ -63,280 +65,398 @@ class SideMenuFix extends StatelessWidget {
       child: SingleChildScrollView(
         child: Obx(() =>
             Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 20),
-            // Socket status indicator
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              child: Row(
-                children: [
-                  const SocketStatusIndicator(),
-                  const SizedBox(width: 8),
-                  Text(
-                    'وضعیت اتصال',
-                    style: AppTextStyle.bodyText.copyWith(
-                      fontSize: 12,
-                      color: AppColor.textColor.withOpacity(0.7),
-                    ),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                //const SizedBox(height: 20),
+                // Socket status indicator
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 4),
+                  child: Row(
+                    children: [
+                      const SocketStatusIndicator(),
+                      const SizedBox(width: 8),
+                      Text(
+                        'وضعیت اتصال',
+                        style: AppTextStyle.bodyText.copyWith(
+                          fontSize: 12,
+                          color: AppColor.textColor.withOpacity(0.7),
+                        ),
+                      ),
+                      const Spacer(),
+                      // Test button for debugging
+                      if (kDebugMode)
+                        IconButton(
+                          icon: const Icon(Icons.wifi_find, size: 16),
+                          onPressed: () {
+                            final socketService = Get.find<SocketService>();
+                            socketService.testConnection();
+                            Get.snackbar(
+                              'تست اتصال',
+                              'در حال تست اتصال سوکت...',
+                              snackPosition: SnackPosition.BOTTOM,
+                              backgroundColor: AppColor.primaryColor
+                                  .withOpacity(0.9),
+                              colorText: Colors.white,
+                              duration: const Duration(seconds: 2),
+                            );
+                          },
+                          tooltip: 'تست اتصال سوکت',
+                        ),
+                    ],
                   ),
-                  const Spacer(),
-                  // Test button for debugging
-                  if (kDebugMode)
-                    IconButton(
-                      icon: const Icon(Icons.wifi_find, size: 16),
-                      onPressed: () {
-                        final socketService = Get.find<SocketService>();
-                        socketService.testConnection();
-                        Get.snackbar(
-                          'تست اتصال',
-                          'در حال تست اتصال سوکت...',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: AppColor.primaryColor.withOpacity(0.9),
-                          colorText: Colors.white,
-                          duration: const Duration(seconds: 2),
-                        );
-                      },
-                      tooltip: 'تست اتصال سوکت',
+                ),
+                //const SizedBox(height: 8),
+                _buildMenuButton(
+                  title: 'سفارشات',
+                  icon: Icons.shopping_cart,
+                  iconColor: Color(0xff3B82F6),
+                  menuKey: 'orders',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست سفارشات',
+                      icon: Icons.list_alt,
+                      route: '/orderList',
                     ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            _buildMenuButton(
-              title: 'سفارشات',
-              icon: Icons.shopping_cart,
-              menuKey: 'orders',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'لیست سفارشات',
-                  icon: Icons.list_alt,
-                  route: '/orderList',
+                    _buildSubMenuItem(
+                      title: 'ایجاد سفارش جدید',
+                      icon: Icons.add_shopping_cart,
+                      route: '/orderCreate',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'گزارش لیست کارکرد',
+                      icon: Icons.list_alt,
+                      route: '/orderByAccountReportList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'سفارش های ویرایش شده',
+                      icon: Icons.list_alt,
+                      route: '/orderEditedReportList',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'ایجاد سفارش جدید',
-                  icon: Icons.add_shopping_cart,
-                  route: '/orderCreate',
+                _buildMenuButton(
+                  title: 'گزارشات تحلیلی',
+                  icon: Icons.analytics,
+                  iconColor: Color(0xff8B5CF6),
+                  menuKey: 'reports',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'گزارش حجمی سفارشات',
+                      icon: Icons.assessment,
+                      route: '/statisticsReportList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'نمودار تغییر قیمت و حجم',
+                      icon: Icons.candlestick_chart,
+                      route: '/candlePriceChart',
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'محصولات',
-              icon: Icons.inventory,
-              menuKey: 'products',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'بروزرسانی قیمت',
-                  icon: Icons.price_change,
-                  route: '/productUpdatePrice',
+                _buildMenuButton(
+                  title: 'محصولات',
+                  icon: Icons.inventory,
+                  iconColor: Color(0xff06B6D4),
+                  menuKey: 'products',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'بروزرسانی قیمت',
+                      icon: Icons.price_change,
+                      route: '/productUpdatePrice',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'گردش موجودی محصولات',
+                      icon: Icons.assessment,
+                      route: '/productInventory',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'موجودی محصولات',
+                      icon: Icons.assessment,
+                      route: '/productInventoryQuantity',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'گردش موجودی محصولات',
-                  icon: Icons.assessment,
-                  route: '/productInventory',
+                _buildMenuButton(
+                  title: 'پنل ریالی',
+                  icon: Icons.account_balance_wallet,
+                  iconColor: Color(0xff22C55E),
+                  menuKey: 'rialPanel',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'واریزی‌های در انتظار',
+                      icon: Icons.pending_actions,
+                      route: '/depositsPendingList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'واریزی‌ها',
+                      icon: Icons.payments,
+                      route: '/depositsList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'برداشت های در انتظار',
+                      icon: Icons.pending_actions,
+                      route: '/withdrawsPendingList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'برداشت ها',
+                      icon: Icons.money_off,
+                      route: '/withdrawsList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'ایجاد برداشت',
+                      icon: Icons.add_card,
+                      route: '/withdrawCreate',
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'پنل ریالی',
-              icon: Icons.account_balance_wallet,
-              menuKey: 'rialPanel',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'واریزی‌های در انتظار',
-                  icon: Icons.pending_actions,
-                  route: '/depositsPendingList',
-                ),
-                _buildSubMenuItem(
-                  title: 'واریزی‌ها',
-                  icon: Icons.payments,
-                  route: '/depositsList',
-                ),
-                _buildSubMenuItem(
-                  title: 'برداشت های در انتظار',
-                  icon: Icons.pending_actions,
-                  route: '/withdrawsPendingList',
-                ),
-                _buildSubMenuItem(
-                  title: 'برداشت ها',
-                  icon: Icons.money_off,
-                  route: '/withdrawsList',
-                ),
-                _buildSubMenuItem(
-                  title: 'ایجاد برداشت',
-                  icon: Icons.add_card,
-                  route: '/withdrawCreate',
-                ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'تراز معاملاتی',
-              icon: Icons.balance,
-              menuKey: 'balance',
-              subItems: [
-                _buildSubMenuItem(
+                _buildMenuButton(
                   title: 'تراز معاملاتی',
-                  icon: Icons.scale,
-                  route: '/tradingBalance',
+                  icon: Icons.balance,
+                  iconColor: Color(0xffF59E0B),
+                  menuKey: 'balance',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'تراز معاملاتی',
+                      icon: Icons.scale,
+                      route: '/tradingBalance',
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'کاربران',
-              icon: Icons.people_rounded,
-              menuKey: 'users',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'مانده کاربران',
-                  icon: Icons.perm_contact_cal_outlined,
-                  route: '/listUserInfoTransaction',
+                _buildMenuButton(
+                  title: 'کاربران',
+                  icon: Icons.people_rounded,
+                  iconColor: Color(0xff60A5FA),
+                  menuKey: 'users',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'مانده کاربران',
+                      icon: Icons.perm_contact_cal_outlined,
+                      route: '/listUserInfoTransaction',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'مانده کاربران طلایی',
+                      icon: Icons.perm_contact_cal_outlined,
+                      route: '/listUserInfoGoldTransaction',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'مانده کاربران (تاریخ)',
+                      icon: Icons.perm_contact_cal_outlined,
+                      route: '/userInfoDateTransaction',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'پیگیری مطالبات',
+                      icon: Icons.perm_contact_cal_outlined,
+                      route: '/transactionsWalletReceivables',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'لیست اکانت ها',
+                      icon: Icons.list_alt,
+                      route: '/userList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'لیست کاربران',
+                      icon: Icons.perm_identity_sharp,
+                      route: '/personList',
+                    ),
+                    _buildSubMenuItem(
+                        title: 'افزودن اکانت جدید',
+                        icon: Icons.person_add_alt,
+                        onTap: () {
+                          Get.toNamed(
+                              "/insertUser", parameters: {"id": 0.toString()});
+                        }),
+                    _buildSubMenuItem(
+                      title: 'لیست سطوح کاربر',
+                      icon: Icons.perm_identity_sharp,
+                      route: '/accountLevelList',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'لیست اکانت ها',
-                  icon: Icons.list_alt,
-                  route: '/userList',
+                _buildMenuButton(
+                  title: 'اعتبارات',
+                  icon: Icons.verified_user,
+                  iconColor: Color(0xff10B981),
+                  menuKey: 'credits',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست اعتبارات کمکی',
+                      icon: Icons.list_alt,
+                      route: '/creditHelperList',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'لیست کاربران',
-                  icon: Icons.perm_identity_sharp,
-                  route: '/personList',
+                _buildMenuButton(
+                  title: 'گروه بندی',
+                  icon: Icons.groups_rounded,
+                  iconColor: Color(0xff6366F1),
+                  menuKey: 'group',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست گروه های قیمت گذاری',
+                      icon: Icons.view_list_outlined,
+                      route: '/accountSalesGroupList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'ایجاد گروه قیمت گذاری',
+                      icon: Icons.group_add_rounded,
+                      route: '/insertAccountSalesGroup',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                    title: 'افزودن اکانت جدید',
-                    icon: Icons.person_add_alt,
-                    onTap: () {
-                      Get.toNamed("/insertUser", parameters: {"id": 0.toString()});
-                    }),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'دریافت و پرداخت',
-              icon: Icons.inventory,
-              menuKey: 'inventory',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'لیست دریافت و پرداخت',
-                  icon: Icons.list_alt,
-                  route: '/inventoryList',
+                /*_buildMenuButton(
+                  title: 'مدیریت دسترسی ها',
+                  icon: Icons.security,
+                  menuKey: 'roles',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'افزودن نقش جدید',
+                      icon: Icons.scale,
+                      route: '/roleCreation',
+                    ),
+                  ],
+                ),*/
+                _buildMenuButton(
+                  title: 'دریافت و پرداخت',
+                  icon: Icons.swap_horiz,
+                  iconColor: Color(0xff4ADE80),
+                  menuKey: 'inventory',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست دریافت و پرداخت',
+                      icon: Icons.list_alt,
+                      route: '/inventoryList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'دریافت و پرداخت جدید',
+                      icon: Icons.add_card,
+                      route: '/inventoryCreate',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'دریافت و پرداخت جدید',
-                  icon: Icons.add_card,
-                  route: '/inventoryCreate',
+                _buildMenuButton(
+                  title: 'حواله',
+                  icon: Icons.send,
+                  iconColor: Color(0xff14B8A6),
+                  menuKey: 'remittance',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'حواله های درخواستی',
+                      icon: Icons.pending,
+                      route: '/remittancesRequestList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'حواله های در انتظار',
+                      icon: Icons.pending_actions,
+                      route: '/remittancesPendingList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'لیست حواله',
+                      icon: Icons.list_alt,
+                      route: '/remittance',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'ایجاد حواله',
+                      icon: Icons.add_card,
+                      route: '/insertRemittance',
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'حواله',
-              icon: Icons.inventory,
-              menuKey: 'remittance',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'حواله های درخواستی',
-                  icon: Icons.pending,
-                  route: '/remittancesRequestList',
+                _buildMenuButton(
+                  title: 'آزمایشگاه',
+                  icon: Icons.biotech_sharp,
+                  iconColor: Color(0xffEC4899),
+                  menuKey: 'laboratory',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست آزمایشگاه',
+                      icon: Icons.badge_outlined,
+                      route: '/laboratory',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'حواله های در انتظار',
-                  icon: Icons.pending_actions,
-                  route: '/remittancesPendingList',
+                _buildMenuButton(
+                  title: 'تراکنش ها',
+                  icon: Icons.replay_circle_filled_outlined,
+                  iconColor: Color(0xff2563EB),
+                  menuKey: 'transaction',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست تراکنش های کاربران',
+                      icon: Icons.refresh,
+                      route: '/transactionList',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'لیست حواله',
-                  icon: Icons.list_alt,
-                  route: '/remittance',
+                _buildMenuButton(
+                  title: 'انتقال کیف پول',
+                  icon: Icons.transform,
+                  iconColor: Color(0xff2DD4BF),
+                  menuKey: 'transferWallet',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست انتقال ها',
+                      icon: Icons.list_alt,
+                      route: '/transferWalletList',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'انتقال پس فردایی به فردایی',
+                      icon: Icons.add_card,
+                      route: '/transferAfterTomorrowChange',
+                    ),
+                  ],
                 ),
-                _buildSubMenuItem(
-                  title: 'ایجاد حواله',
-                  icon: Icons.add_card,
-                  route: '/insertRemittance',
-                ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'آزمایشگاه',
-              icon: Icons.biotech_sharp,
-              menuKey: 'laboratory',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'لیست آزمایشگاه',
-                  icon: Icons.badge_outlined,
-                  route: '/laboratory',
-                ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'تراکنش ها',
-              icon: Icons.replay_circle_filled_outlined,
-              menuKey: 'transaction',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'لیست تراکنش های کاربران',
-                  icon: Icons.refresh,
-                  route: '/transactionList',
-                ),
-              ],
-            ),
-            _buildMenuButton(
-              title: 'انتقال کیف پول',
-              icon: Icons.transform,
-              menuKey: 'transferWallet',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'لیست انتقال ها',
-                  icon: Icons.list_alt,
-                  route: '/transferWalletList',
-                ),
-                _buildSubMenuItem(
-                  title: 'انتقال پس فردایی به فردایی',
-                  icon: Icons.add_card,
-                  route: '/transferAfterTomorrowChange',
-                ),
-              ],
-            ),
 
-            _buildMenuButton(
-              title: 'اعلان ها و اطلاعیه ها',
-              icon: Icons.notifications,
-              menuKey: 'notification',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'لیست اعلان ها و اطلاعیه ها',
-                  icon: Icons.list_alt,
-                  route: '/notificationList',
-                ),
-                /*_buildSubMenuItem(
+                _buildMenuButton(
+                  title: 'اعلان ها و اطلاعیه ها',
+                  icon: Icons.notifications,
+                  iconColor: Color(0xffFB923C),
+                  menuKey: 'notification',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'لیست اعلان ها و اطلاعیه ها',
+                      icon: Icons.list_alt,
+                      route: '/notificationList',
+                    ),
+                    /*_buildSubMenuItem(
                   title: 'انتقال پس فردایی به فردایی',
                   icon: Icons.add_card,
                   route: '/transferAfterTomorrowChange',
                 ),*/
+                  ],
+                ),
+                _buildMenuButton(
+                  title: 'تنظیمات',
+                  icon: Icons.settings,
+                  iconColor: Color(0xff9CA3AF),
+                  menuKey: 'tools',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'ابزارها',
+                      icon: Icons.build,
+                      route: '/setting',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'تنظیمات تلگرام',
+                      icon: Icons.telegram,
+                      route: '/settingTelegram',
+                    ),
+                    _buildSubMenuItem(
+                      title: 'خروج از سیستم',
+                      icon: Icons.logout,
+                      onTap: _showExitDialog,
+                    ),
+                    _buildSubMenuItem(
+                      title: 'تغییر رمز عبور',
+                      icon: Icons.change_circle_outlined,
+                      onTap: _showChangePassword,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                const VersionWidget(),
+                const SizedBox(height: 16),
               ],
-            ),
-            _buildMenuButton(
-              title: 'تنظیمات',
-              icon: Icons.settings,
-              menuKey: 'tools',
-              subItems: [
-                _buildSubMenuItem(
-                  title: 'ابزارها',
-                  icon: Icons.build,
-                  route: '/setting',
-                ),
-                _buildSubMenuItem(
-                  title: 'خروج از سیستم',
-                  icon: Icons.logout,
-                  onTap: _showExitDialog,
-                ),
-                _buildSubMenuItem(
-                  title: 'تغییر رمز عبور',
-                  icon: Icons.change_circle_outlined,
-                  onTap: _showChangePassword,
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
-          ],
-        )),
+            )),
       ),
     );
   }
@@ -345,22 +465,23 @@ class SideMenuFix extends StatelessWidget {
 Widget _buildMenuButton({
   required String title,
   required IconData icon,
+  required Color iconColor,
   required String menuKey,
   required List<Widget> subItems,
 }) {
   final HomeController homeController = Get.find<HomeController>();
   return Container(
-    margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
+    margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(12),
       color: homeController.isSubMenuOpen(menuKey)
-          ? AppColor.primaryColor.withOpacity(0.15)
+          ? AppColor.buttonColor.withAlpha(80)
           : Colors.transparent,
     ),
     child: Column(
       children: [
         ListTile(
-          leading: Icon(icon, color: AppColor.textColor, size: 22),
+          leading: Icon(icon, color: iconColor, size: 22),
           title: Text(
             title,
             style: AppTextStyle.bodyText.copyWith(
@@ -382,7 +503,8 @@ Widget _buildMenuButton({
             borderRadius: BorderRadius.circular(12),
           ),
           hoverColor: AppColor.primaryColor.withOpacity(0.1),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16, vertical: 4),
         ),
         AnimatedContainer(
           duration: const Duration(milliseconds: 300),
@@ -393,7 +515,8 @@ Widget _buildMenuButton({
             opacity: homeController.isSubMenuOpen(menuKey) ? 1.0 : 0.0,
             child: homeController.isSubMenuOpen(menuKey)
                 ? Padding(
-              padding: const EdgeInsets.only(right: 20.0, left: 8.0, bottom: 8.0),
+              padding: const EdgeInsets.only(
+                  right: 20.0, left: 8.0, bottom: 8.0),
               child: Column(
                 children: subItems,
               ),
@@ -414,7 +537,7 @@ Widget _buildSubMenuItem({
 }) {
   final showNewTabIcon = route != null && kIsWeb;
   return Container(
-    margin: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
+    margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
     decoration: BoxDecoration(
       borderRadius: BorderRadius.circular(8),
       color: Colors.transparent,
@@ -428,7 +551,7 @@ Widget _buildSubMenuItem({
           leading: Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
-              color: AppColor.primaryColor.withOpacity(0.1),
+              color: AppColor.primaryColor.withAlpha(25),
               borderRadius: BorderRadius.circular(6),
             ),
             child: Icon(icon, size: 16, color: AppColor.primaryColor),
@@ -440,7 +563,7 @@ Widget _buildSubMenuItem({
                   title,
                   style: AppTextStyle.bodyText.copyWith(
                     fontSize: 12,
-                    color: AppColor.textColor.withOpacity(0.9),
+                    color: AppColor.textColor.withAlpha(225),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -458,7 +581,8 @@ Widget _buildSubMenuItem({
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+          contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16, vertical: 2),
           dense: true,
           visualDensity: VisualDensity.compact,
         ),
@@ -544,99 +668,134 @@ void _showChangePassword() {
             style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor)),
         content: SizedBox(
           height: Get.height * 0.5,
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              TextFormField(
-                style: AppTextStyle.bodyText.copyWith(
-                  fontSize: 13,
-                ),
-                textDirection: TextDirection.rtl,
-                controller: controller.passwordOldController,
-                autofillHints: const [AutofillHints.password],
-                obscureText: true,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 16,
+          child: Obx(() {
+            return Column(
+              children: [
+                const SizedBox(height: 24),
+                TextFormField(
+                  style: AppTextStyle.bodyText.copyWith(
+                    fontSize: 13,
                   ),
-                  labelText: 'رمز عبور قبلی',
-                  labelStyle: TextStyle(color: AppColor.textColor),
-                  prefixIcon: const Icon(Icons.lock_outline_rounded),
-                  prefixIconColor: AppColor.textColor,
-                  border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  textDirection: TextDirection.rtl,
+                  controller: controller.passwordOldController,
+                  autofillHints: const [AutofillHints.password],
+                  obscureText: controller.showPasswordOld.value,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 16,
+                    ),
+                    labelText: 'رمز عبور قبلی',
+                    labelStyle: TextStyle(color: AppColor.textColor),
+                    prefixIcon: const Icon(Icons.lock_outline_rounded),
+                    prefixIconColor: AppColor.textColor,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.showPasswordOld.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColor.textColor,
+                      ),
+                      onPressed: () {
+                        controller.showPasswordOld.value = !controller.showPasswordOld.value;
+                      },
+                    ),
+                    border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'لطفا رمز عبور را وارد کنید';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'لطفا رمز عبور را وارد کنید';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-              // وارد کردن پسورد
-              TextFormField(
-                style: AppTextStyle.bodyText.copyWith(
-                  fontSize: 13,
-                ),
-                textDirection: TextDirection.rtl,
-                controller: controller.passwordController,
-                autofillHints: const [AutofillHints.password],
-                obscureText: true,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 16,
+                // وارد کردن پسورد
+                TextFormField(
+                  style: AppTextStyle.bodyText.copyWith(
+                    fontSize: 13,
                   ),
-                  labelText: 'رمز عبور جدید',
-                  labelStyle: TextStyle(color: AppColor.textColor),
-                  prefixIcon: const Icon(Icons.lock_outline_rounded),
-                  prefixIconColor: AppColor.textColor,
-                  border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'لطفا رمز عبور را وارد کنید';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 24),
-              TextFormField(
-                style: AppTextStyle.bodyText.copyWith(
-                  fontSize: 13,
-                ),
-                textDirection: TextDirection.rtl,
-                controller: controller.retypePasswordController,
-                autofillHints: const [AutofillHints.password],
-                obscureText: true,
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 16,
-                    horizontal: 16,
+                  textDirection: TextDirection.rtl,
+                  controller: controller.passwordController,
+                  autofillHints: const [AutofillHints.password],
+                  obscureText: controller.showPasswordNew.value,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 16,
+                    ),
+                    labelText: 'رمز عبور جدید',
+                    labelStyle: TextStyle(color: AppColor.textColor),
+                    prefixIcon: const Icon(Icons.lock_outline_rounded),
+                    prefixIconColor: AppColor.textColor,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.showPasswordNew.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColor.textColor,
+                      ),
+                      onPressed: () {
+                        controller.showPasswordNew.value = !controller.showPasswordNew.value;
+                      },
+                    ),
+                    border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
                   ),
-                  labelText: 'تکرار رمز عبور جدید',
-                  labelStyle: TextStyle(color: AppColor.textColor),
-                  prefixIcon: const Icon(Icons.lock_outline_rounded),
-                  prefixIconColor: AppColor.textColor,
-                  border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'لطفا رمز عبور را وارد کنید';
+                    }
+                    return null;
+                  },
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'لطفا رمز عبور را وارد کنید';
-                  }
-                  return null;
-                },
-              ),
-            ],
-          ),
+                const SizedBox(height: 24),
+                TextFormField(
+                  style: AppTextStyle.bodyText.copyWith(
+                    fontSize: 13,
+                  ),
+                  textDirection: TextDirection.rtl,
+                  controller: controller.retypePasswordController,
+                  autofillHints: const [AutofillHints.password],
+                  obscureText: controller.showPasswordNew.value,
+                  decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 16,
+                    ),
+                    labelText: 'تکرار رمز عبور جدید',
+                    labelStyle: TextStyle(color: AppColor.textColor),
+                    prefixIcon: const Icon(Icons.lock_outline_rounded),
+                    prefixIconColor: AppColor.textColor,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.showPasswordNew.value
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: AppColor.textColor,
+                      ),
+                      onPressed: () {
+                        controller.showPasswordNew.value = !controller.showPasswordNew.value;
+                      },
+                    ),
+                    border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'لطفا رمز عبور را وارد کنید';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            );
+          }),
         ),
         actions: [
           TextButton(
@@ -653,7 +812,8 @@ void _showChangePassword() {
               shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
             ),
-            child: const Text('تغییر رمز', style: TextStyle(color: Colors.white)),
+            child: const Text(
+                'تغییر رمز', style: TextStyle(color: Colors.white)),
             onPressed: () {
               if (formKey.currentState!.validate()) {
                 controller.changePassword();

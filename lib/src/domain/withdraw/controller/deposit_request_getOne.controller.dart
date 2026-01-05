@@ -32,6 +32,7 @@ class DepositRequestGetOneController extends GetxController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var isLoading=true.obs;
   var isLoadingRegister=true.obs;
+  var isLoadingSendTelegram=true.obs;
   var errorMessage=''.obs;
   RxList<String> imageList = <String>[].obs;
   final PageController pageController = PageController();
@@ -111,6 +112,41 @@ class DepositRequestGetOneController extends GetxController{
     } finally {
       EasyLoading.dismiss();
       isLoading.value = false;
+    }
+
+    return null;
+  }
+
+  Future<List<dynamic>?> sendTelegramDeposit(int depositId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingSendTelegram.value = true;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await depositRepository.sendTelegramDeposit(
+        depositId: depositId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar(response.first["title"],response.first["description"],
+            titleText: Text(response.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        depositController.getDepositListPager();
+        fetchGetOneDepositRequest(id.value);
+
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","ارسال به تلگرام ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("ارسال به تلگرام ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در ارسال: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingSendTelegram.value = false;
     }
 
     return null;

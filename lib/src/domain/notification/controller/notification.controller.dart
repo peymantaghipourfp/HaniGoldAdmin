@@ -37,7 +37,7 @@ class NotificationController extends GetxController {
 
   // Pagination
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
 
@@ -182,8 +182,8 @@ class NotificationController extends GetxController {
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getNotificationListPager();
     update();
   }
@@ -192,6 +192,9 @@ class NotificationController extends GetxController {
   Future<void> getNotificationListPager() async {
     print("### getNotificationListPager ###");
     isLoading.value = true;
+    notificationList.clear();
+    announcementList.clear();
+    headerList.clear();
     try {
       state.value = PageState.loading;
 
@@ -279,7 +282,7 @@ class NotificationController extends GetxController {
   void clearSearch() {
     paginated.value=null;
     currentPage.value = 1;
-    itemsPerPage.value=10;
+    itemsPerPage.value=25;
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
@@ -299,7 +302,7 @@ class NotificationController extends GetxController {
     searchedAccounts.clear();
     paginated.value=null;
     currentPage.value = 1;
-    itemsPerPage.value=10;
+    itemsPerPage.value=25;
     // Clear both lists to ensure clean state
     notificationList.clear();
     announcementList.clear();

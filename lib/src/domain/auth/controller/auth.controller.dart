@@ -5,30 +5,94 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/auth/model/user_login.model.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/socket.service.dart';
 import '../../../config/repository/auth.repository.dart';
 import '../../../config/repository/url/web_socket_url.dart';
 import '../view/forget_password.view.dart';
+import '../service/credentials_storage.dart';
 
 class AuthController extends GetxController{
-  final AuthRepository authRepository=AuthRepository();
-  final TextEditingController mobileController=TextEditingController();
-  final TextEditingController passwordController=TextEditingController();
-  final Rxn<UserLoginModel> accountModel=Rxn<UserLoginModel>();
-  final box = GetStorage();
+  AuthController({
+    AuthRepository? authRepository,
+    CredentialsStorage? credentialsStorage,
+    GetStorage? storage,
+  })  : authRepository = authRepository ?? AuthRepository(),
+        _credentialsStorage = credentialsStorage ?? SecureCredentialsStorage(),
+        box = storage ?? GetStorage();
+  final AuthRepository authRepository;
+  final CredentialsStorage _credentialsStorage;
+  final GetStorage box;
+  final TextEditingController mobileController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final Rxn<UserLoginModel> accountModel = Rxn<UserLoginModel>();
+  final RxBool rememberMe = false.obs;
   RxString code = "0".obs;
   RxBool isForget = false.obs;
   @override
   void onInit() {
-    // TODO: implement onInit
+    loadRememberedCredentials();
     super.onInit();
-
   }
+
+  Future<void> loadRememberedCredentials() async {
+    final shouldRemember = box.read('rememberMe') ?? false;
+    rememberMe.value = shouldRemember;
+    if (!shouldRemember) {
+      return;
+    }
+
+    try {
+      final stored = await _credentialsStorage.readCredentials();
+      if (stored == null) {
+        rememberMe.value = false;
+        await box.write('rememberMe', false);
+        return;
+      }
+
+      mobileController.text = stored.mobile;
+      passwordController.text = stored.password;
+    } catch (e) {
+      rememberMe.value = false;
+      await box.write('rememberMe', false);
+      debugPrint('AuthController: Failed to load remembered credentials: $e');
+    }
+  }
+
+  Future<void> updateRememberMe(bool value) async {
+    rememberMe.value = value;
+    await box.write('rememberMe', value);
+    if (!value) {
+      await _credentialsStorage.clearCredentials();
+    }
+  }
+
+  Future<void> _persistRememberedCredentials() async {
+    try {
+      if (rememberMe.value) {
+        await _credentialsStorage.saveCredentials(
+          mobileController.text,
+          passwordController.text,
+        );
+        await box.write('rememberMe', true);
+      } else {
+        await _credentialsStorage.clearCredentials();
+        await box.write('rememberMe', false);
+      }
+    } catch (e) {
+      debugPrint('AuthController: Failed to persist credentials: $e');
+    }
+  }
+
   Future<void> login() async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
-      var fetch=await authRepository.login(mobileController.text,passwordController.text);
+      final normalizedMobile = mobileController.text.toEnglishDigit();
+      final normalizedPassword = passwordController.text.toEnglishDigit();
+      mobileController.text = normalizedMobile;
+      passwordController.text = normalizedPassword;
+      var fetch=await authRepository.login(normalizedMobile, normalizedPassword);
       if(fetch.infos.isNotEmpty){
         Get.snackbar(fetch.infos.first["title"].toString(), fetch.infos.first["description"].toString());
       }
@@ -36,8 +100,10 @@ class AuthController extends GetxController{
       Get.offNamed('/home');
         box.write('id', fetch.user.id);
         box.write('mobile', mobileController.text);
+        box.write('password', passwordController.text);
         box.write('Authorization', fetch.token);
         box.write('userName', fetch.user.contact.name);
+      await _persistRememberedCredentials();
         print("userName::${fetch.user.contact.name}");
       print("writeToken:::Bearer ${fetch.token} ");
       print("userId:::Bearer ${fetch.user.id} ");
@@ -66,7 +132,7 @@ class AuthController extends GetxController{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isForget.value=false;
-      var fetch=await authRepository.forgetPasswordMobile(mobileController.text);
+      var fetch=await authRepository.forgetPasswordMobile(mobileController.text.toEnglishDigit());
       isForget.value=true;
        // if(fetch.infos.isNotEmpty){
        //   Get.snackbar(fetch.infos.first["title"].toString(), fetch.infos.first["description"].toString());
@@ -86,7 +152,7 @@ class AuthController extends GetxController{
   Future<Map<String , dynamic>?> forgetPasswordVerify(BuildContext context) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
-      var fetch=await authRepository.forgetPasswordVerify(mobileController.text,code.value);
+      var fetch=await authRepository.forgetPasswordVerify(mobileController.text.toEnglishDigit(),code.value.toEnglishDigit());
       if(fetch["infos"].isNotEmpty){
         Get.snackbar(fetch["infos"][0]["title"], fetch["infos"][0]["description"]);
       }

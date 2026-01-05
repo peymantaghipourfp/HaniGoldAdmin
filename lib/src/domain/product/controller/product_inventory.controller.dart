@@ -18,15 +18,22 @@ class ProductInventoryController extends GetxController{
   var productInventoryList=<ProductInventoryModel>[].obs;
   var isLoading=true.obs;
   RxBool isOpenMore = false.obs;
+  RxBool hasMore = true.obs;
+  ScrollController scrollControllerMobile = ScrollController();
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageStateDe> stateDe=Rx<PageStateDe>(PageStateDe.list);
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
+  final TextEditingController userFilterController=TextEditingController();
+  final TextEditingController amountFilterController=TextEditingController();
   var id = 0.obs;
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
+  var userFilter=''.obs;
+  var amountFilter=''.obs;
+  var typeFilter=''.obs;
   RxList<ProductInventoryDetailModel> productInventoryDetailList = <ProductInventoryDetailModel>[].obs;
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   RxInt selectedItemId = 0.obs;
@@ -37,9 +44,59 @@ class ProductInventoryController extends GetxController{
 
   @override
   void onInit() {
+    setupScrollListener();
     // Remove the automatic loading of details since we'll load them on demand
     getProductInventoryList();
     super.onInit();
+  }
+  @override void onClose() {
+    scrollControllerMobile.dispose();
+    super.onClose();
+  }
+
+  void setupScrollListener() {
+    scrollControllerMobile.addListener(() {
+      if (scrollControllerMobile.position.pixels >=
+          scrollControllerMobile.position.maxScrollExtent - 200 &&
+          hasMore.value &&
+          !isLoading.value) {
+        loadMore(selectedItemId.value.toString());
+      }
+    });
+  }
+  Future<void> loadMore(String itemId) async {
+    if (!scrollControllerMobile.hasClients || hasMore.value && !isLoading.value) {
+      isLoading.value = true;
+      final nextPage = currentPage.value + 1;
+      try {
+        final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
+        final toIndex = nextPage * itemsPerPage.value;
+        var fetchedProductInventoryDetailList = await productInventoryRepository.getProductInventoryDetailListPager(
+          startIndex: startIndex,
+          toIndex: toIndex,
+          startDate: startDateFilter.value,
+          endDate: endDateFilter.value,
+          typeFilter: typeFilter.value,
+          userFilter: userFilter.value,
+          amountFilter: amountFilter.value, itemId: itemId,
+        );
+        if (fetchedProductInventoryDetailList.inventories!.isNotEmpty ) {
+          productInventoryDetailList.addAll(fetchedProductInventoryDetailList.inventories ?? []);
+          currentPage.value = nextPage;
+          hasMore.value = fetchedProductInventoryDetailList.inventories!.length >= itemsPerPage.value;
+          paginated.value = fetchedProductInventoryDetailList.paginated;
+          productInventoryDetailList.refresh();
+          update();
+        } else {
+          hasMore.value = false;
+        }
+      } catch (e) {
+        hasMore.value = false; // توقف بارگذاری بیشتر در صورت خطا
+        "خطا در دریافت اطلاعات بیشتر: ${e.toString()}";
+      } finally {
+        isLoading.value = false;
+      }
+    }
   }
 
 
@@ -62,8 +119,8 @@ class ProductInventoryController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     if (selectedItemId.value > 0) {
       getProductInventoryDetailListPager(selectedItemId.value.toString());
     }
@@ -78,8 +135,9 @@ class ProductInventoryController extends GetxController{
       // Expand and load details for the clicked item (replaces previous selection)
       isDetailsExpanded.value = true;
       selectedItemId.value = itemId;
+      paginated.value=null;
       currentPage.value = 1;
-      itemsPerPage.value = 10;
+      itemsPerPage.value = 25;
       getProductInventoryDetailListPager(itemId.toString());
     }
     update();
@@ -104,6 +162,9 @@ class ProductInventoryController extends GetxController{
         itemId: itemId,
         startDate: startDateFilter.value,
         endDate: endDateFilter.value,
+        typeFilter: typeFilter.value,
+        userFilter: userFilter.value,
+        amountFilter: amountFilter.value,
       );
 
       // Store the details for this item
@@ -128,6 +189,43 @@ class ProductInventoryController extends GetxController{
     dateStartController.clear();
     dateEndController.clear();
     update();
+  }
+  // Clear all filters
+  void clearFilter() {
+    currentPage.value=1;
+    itemsPerPage.value=25;
+    startDateFilter.value = '';
+    endDateFilter.value = '';
+    userFilter.value = '';
+    amountFilter.value = '';
+    typeFilter.value = '';
+    dateStartController.clear();
+    dateEndController.clear();
+    userFilterController.clear();
+    amountFilterController.clear();
+    hasMore.value = true;
+    update();
+  }
+
+  // Change selected type filter
+  void changeSelectedType(String newValue) {
+    typeFilter.value = newValue;
+    update();
+  }
+
+  // Check if there are active filters
+  bool hasActiveFilters() {
+    return dateStartController.text.isNotEmpty ||
+        startDateFilter.value.isNotEmpty ||
+        dateEndController.text.isNotEmpty ||
+        endDateFilter.value.isNotEmpty ||
+        userFilterController.text.isNotEmpty ||
+        userFilter.value.isNotEmpty ||
+        amountFilterController.text.isNotEmpty ||
+        amountFilter.value.isNotEmpty ||
+        (typeFilter.value != null &&
+            typeFilter.value != 'انتخاب کنید' &&
+            typeFilter.value.isNotEmpty);
   }
 
 }

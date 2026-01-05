@@ -19,6 +19,8 @@ class DepositRepository{
     required int startIndex,
     required int toIndex,
     int? accountId,
+    required String nameDeposit,
+    required String nameRequest,
     required String startDate,
     required String endDate})async{
     try{
@@ -49,7 +51,21 @@ class DepositRepository{
                     "filterValue": "$startDate|$endDate",
                     "filterType": 25,
                     "RefTable": "Deposit"
-                  }
+                  },
+                if(nameDeposit!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameDeposit,
+                    "filterType": 0,
+                    "RefTable": "AccountDeposit"
+                  },
+                if(nameRequest!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": nameRequest,
+                    "filterType": 0,
+                    "RefTable": "AccountRequest"
+                  },
               ]
             }
           ],
@@ -77,6 +93,9 @@ class DepositRepository{
     required String endDate,
     required String nameDeposit,
     required String nameRequest,
+    required String amount,
+    required String trackingNumber,
+    required bool extraAmount,
   })async{
     try{
       Map<String, dynamic> options =
@@ -114,6 +133,27 @@ class DepositRepository{
                     "filterValue": nameRequest,
                     "filterType": 0,
                     "RefTable": "AccountRequest"
+                  },
+                if(amount!="")
+                  {
+                    "fieldName": "Amount",
+                    "filterValue": amount,
+                    "filterType": 0,
+                    "RefTable": "Deposit"
+                  },
+                if(trackingNumber!="")
+                  {
+                    "fieldName": "TrackingNumber",
+                    "filterValue": trackingNumber,
+                    "filterType": 0,
+                    "RefTable": "Deposit"
+                  },
+                if(extraAmount)
+                  {
+                    "fieldName": "ExtraAmount",
+                    "filterValue": "0",
+                    "filterType": 8,
+                    "RefTable": "Deposit"
                   },
               ],
             }
@@ -143,6 +183,8 @@ class DepositRepository{
     required String endDate,
     required String nameDeposit,
     required String nameRequest,
+    required String amount,
+    required String trackingNumber,
   })async{
     try{
       Map<String, dynamic> options =
@@ -180,6 +222,20 @@ class DepositRepository{
                     "filterValue": nameRequest,
                     "filterType": 0,
                     "RefTable": "AccountRequest"
+                  },
+                if(amount!="")
+                  {
+                    "fieldName": "Amount",
+                    "filterValue": amount,
+                    "filterType": 0,
+                    "RefTable": "Deposit"
+                  },
+                if(trackingNumber!="")
+                  {
+                    "fieldName": "TrackingNumber",
+                    "filterValue": trackingNumber,
+                    "filterType": 0,
+                    "RefTable": "Deposit"
                   },
                 {
                   "fieldName": "Status",
@@ -255,6 +311,7 @@ class DepositRepository{
     required int? depositRequestId,
     //required int? bankAccountId,
     required double? amount,
+    required double? extraAmount,
     required int accountId,
     //required String accountName,
     // required int bankId,
@@ -268,6 +325,7 @@ class DepositRepository{
     required int walletWithdrawId,
     required String trackingNumber,
     required String recId,
+    String? description,
   })async{
     try{
       Map<String , dynamic> depositData={
@@ -362,6 +420,7 @@ class DepositRepository{
           "infos": []
         },
         "amount": amount,
+        "extraAmount": extraAmount,
         "trackingNumber":trackingNumber,
         "date": date,
         "status": status,
@@ -369,6 +428,7 @@ class DepositRepository{
         "id": 1,
         "attribute": "cus",
         "recId": recId,
+        "description": description,
         "infos": []
       };
       var response=await depositDio.post('Deposit/insert',data: depositData);
@@ -387,6 +447,7 @@ class DepositRepository{
     required int? depositRequestId,
     //required int? bankAccountId,
     required double? amount,
+    required double? extraAmount,
     required int accountId,
     required String accountName,
     // required int bankId,
@@ -400,6 +461,7 @@ class DepositRepository{
     required int walletWithdrawId,
     required String trackingNumber,
     required String recId,
+    String? description,
 
   })async{
     try{
@@ -495,6 +557,7 @@ class DepositRepository{
           "infos": []
         },
         "amount": amount,
+        "extraAmount": extraAmount,
         "trackingNumber":trackingNumber,
         "date": date,
         "status": status,
@@ -502,6 +565,7 @@ class DepositRepository{
         "id": depositId,
         "attribute": "cus",
         "recId": recId,
+        "description": description,
         "infos": []
       };
       var response=await depositDio.put('Deposit/update',data: depositData);
@@ -683,6 +747,19 @@ class DepositRepository{
     }
     catch(e){
       throw ErrorException('خطا در ریجیستر:$e');
+    }
+  }
+
+  Future<List< dynamic>> sendTelegramDeposit({
+    required int depositId,
+      })async{
+    try {
+      final response = await depositDio.post('Deposit/sendTelegram', queryParameters: {'depositId': depositId});
+      print('Status Code sendTelegramDeposit: ${response.statusCode}');
+      print('Response Data sendTelegramDeposit: ${response.data}');
+      return response.data;
+    }catch(e){
+      throw ErrorException('خطا:$e');
     }
   }
 }

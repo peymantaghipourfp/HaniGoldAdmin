@@ -74,33 +74,50 @@ Widget _buildStatsGrid() {
 }
 
 Widget _buildStatCard(String title, String value, IconData icon) {
-  return Card(
-    elevation: 5,
-    shape: RoundedRectangleBorder(
+  return Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [AppColor.secondary100Color, AppColor.secondaryColor],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
       borderRadius: BorderRadius.circular(15),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withAlpha(50),
+          blurRadius: 5,
+          offset: const Offset(0, 3),
+        ),
+      ],
     ),
-    color: AppColor.secondaryColor,
-    child: Padding(
-      padding: const EdgeInsets.all(15.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 25, color: AppColor.primaryColor),
-          Spacer(),
-          Text(
-            value,
-            style: AppTextStyle.bodyText.copyWith(
-              fontSize: 18,
-              color: AppColor.textColor,
+    child: Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      color: Colors.transparent,
+      child: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 25, color: AppColor.primaryColor),
+            Spacer(),
+            Text(
+              value,
+              style: AppTextStyle.bodyText.copyWith(
+                fontSize: 18,
+                color: AppColor.textColor,
+              ),
             ),
-          ),
-          Text(
-            title,
-            style: AppTextStyle.bodyText.copyWith(
-              color: AppColor.textColor.withOpacity(0.8),
+            Text(
+              title,
+              style: AppTextStyle.bodyText.copyWith(
+                color: AppColor.textColor.withAlpha(205),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     ),
   );

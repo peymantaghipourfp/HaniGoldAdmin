@@ -7,6 +7,9 @@ part of 'item.model.dart';
 // **************************************************************************
 
 ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
+      itemPriceDate: json['itemPriceDate'] == null
+          ? null
+          : DateTime.parse(json['itemPriceDate'] as String),
       itemGroup: json['itemGroup'] == null
           ? null
           : ItemGroupModel.fromJson(json['itemGroup'] as Map<String, dynamic>),
@@ -14,10 +17,15 @@ ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
           ? null
           : ItemUnitModel.fromJson(json['itemUnit'] as Map<String, dynamic>),
       price: (json['price'] as num?)?.toDouble(),
+      basePrice: (json['basePrice'] as num?)?.toDouble(),
       mesghalPrice: (json['mesghalPrice'] as num?)?.toDouble(),
+      baseMesghalPrice: (json['baseMesghalPrice'] as num?)?.toDouble(),
       differentPrice: (json['differentPrice'] as num?)?.toDouble(),
+      baseDifferentPrice: (json['baseDifferentPrice'] as num?)?.toDouble(),
       mesghalDifferentPrice:
           (json['mesghalDifferentPrice'] as num?)?.toDouble(),
+      baseMesghalDifferentPrice:
+          (json['baseMesghalDifferentPrice'] as num?)?.toDouble(),
       name: json['name'] as String?,
       isDefault: json['isDefault'] as bool?,
       isDecimal: json['isDecimal'] as bool?,
@@ -50,12 +58,17 @@ ItemModel _$ItemModelFromJson(Map<String, dynamic> json) => ItemModel(
     );
 
 Map<String, dynamic> _$ItemModelToJson(ItemModel instance) => <String, dynamic>{
+      'itemPriceDate': instance.itemPriceDate?.toIso8601String(),
       'itemGroup': instance.itemGroup,
       'itemUnit': instance.itemUnit,
       'price': instance.price,
+      'basePrice': instance.basePrice,
       'mesghalPrice': instance.mesghalPrice,
+      'baseMesghalPrice': instance.baseMesghalPrice,
       'differentPrice': instance.differentPrice,
+      'baseDifferentPrice': instance.baseDifferentPrice,
       'mesghalDifferentPrice': instance.mesghalDifferentPrice,
+      'baseMesghalDifferentPrice': instance.baseMesghalDifferentPrice,
       'name': instance.name,
       'isDefault': instance.isDefault,
       'isDecimal': instance.isDecimal,

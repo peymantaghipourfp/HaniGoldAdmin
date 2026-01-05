@@ -90,6 +90,9 @@ class RemittanceRepository{
     int? accountId,
     required String namePayer,
     required String nameReciept,
+    String? quantity,
+    String? descriptionFilter,
+    int? item,
   })async{
     try{
       Map<String , dynamic> options=
@@ -128,8 +131,61 @@ class RemittanceRepository{
                     "filterType": 0,
                     "RefTable": "AccountReciept"
                   },
+                if (quantity != null && quantity.isNotEmpty)
+                  {
+                    "fieldName": "Quantity",
+                    "filterValue": quantity,
+                    "filterType": 0,
+                    "RefTable": "Remittance"
+                  },
+                if (item != null)
+                  {
+                    "fieldName": "Id",
+                    "filterValue": "$item",
+                    "filterType": 5,
+                    "RefTable": "Item"
+                  }
               ],
-            }
+            },
+            // Description filter
+            if(descriptionFilter != null && descriptionFilter.isNotEmpty)
+              {
+                "innerCondition": 1,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "Name",
+                    "filterValue": descriptionFilter,
+                    "filterType": 0,
+                    "RefTable": "AccountPayer"
+                  },
+                  {
+                    "fieldName": "Name",
+                    "filterValue": descriptionFilter,
+                    "filterType": 0,
+                    "RefTable": "AccountReciept"
+                  },
+                  {
+                    "fieldName": "Quantity",
+                    "filterValue": descriptionFilter,
+                    "filterType": 0,
+                    "RefTable": "Remittance"
+                  },
+                  {
+                    "fieldName": "Description",
+                    "filterValue": descriptionFilter,
+                    "filterType": 0,
+                    "RefTable": "Remittance"
+                  },
+                  {
+                    "fieldName": "Name",
+                    "filterValue": descriptionFilter,
+                    "filterType": 0,
+                    "RefTable": "Item"
+                  },
+
+                ]
+              },
           ],
           "orderBy": "Remittance.Date",
           "orderByType": "desc",
@@ -139,7 +195,7 @@ class RemittanceRepository{
         }
       };
       final response=await remittanceDio.post('Remittance/getWrapper',data: options);
-      print("url getRemittanceListPager : Remittance/get" );
+      print("url getRemittanceListPager : Remittance/getWrapper" );
       print("request getRemittanceListPager : $options" );
       print("response getRemittanceListPager : ${response.data}" );
       if(response.statusCode==200){
@@ -216,7 +272,7 @@ class RemittanceRepository{
         }
       };
       final response=await remittanceDio.post('Remittance/getWrapper',data: options);
-      print("url getRemittanceListPendingPager : Remittance/get" );
+      print("url getRemittanceListPendingPager : Remittance/getWrapper" );
       print("request getRemittanceListPendingPager : $options" );
       print("response getRemittanceListPendingPager : ${response.data}" );
       if(response.statusCode==200){
@@ -281,6 +337,7 @@ class RemittanceRepository{
     required String accountNameReciept,
     required String recId,
     required int itemId,
+    required int itemUnitId,
     required double quantity,
     required String? description,
   })async{
@@ -350,7 +407,7 @@ class RemittanceRepository{
             },
             "itemUnit": {
               "name": null,
-              "id": null,
+              "id": itemUnitId,
               "infos": []
             },
             "name": "طلای آبشده",
@@ -400,7 +457,7 @@ class RemittanceRepository{
     required int walletRecieptId,
   })async{
     try{
-      Map<String, dynamic> orderData =
+      Map<String, dynamic> remittanceData =
         {
           "date": date,
           "walletPayer": {
@@ -484,9 +541,9 @@ class RemittanceRepository{
           "infos": []
 
       };
-      print(orderData);
+      print(remittanceData);
 
-      var response=await remittanceDio.put('Remittance/update',data: orderData);
+      var response=await remittanceDio.put('Remittance/update',data: remittanceData);
       print('Status Code updateRemittance: ${response.statusCode}');
       print('Response Data updateRemittance: ${response.data}');
       /*if(response.statusCode==200){

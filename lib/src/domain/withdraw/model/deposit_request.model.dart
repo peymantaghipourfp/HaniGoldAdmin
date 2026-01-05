@@ -52,6 +52,10 @@ class DepositRequestModel {
   final List<dynamic>? infos;
   @JsonKey(name: "depositCount")
   final int? depositCount;
+  @JsonKey(name: "isSendTelegram")
+  final bool? isSendTelegram;
+  @JsonKey(name: "isSendWhatsapp")
+  final bool? isSendWhatsapp;
 
   DepositRequestModel({
     required this.withdrawRequest,
@@ -73,6 +77,8 @@ class DepositRequestModel {
     required this.recId,
     required this.infos,
     required this.depositCount,
+    required this.isSendTelegram,
+    required this.isSendWhatsapp,
   });
 
   factory DepositRequestModel.fromJson(Map<String, dynamic> json) => _$DepositRequestModelFromJson(json);

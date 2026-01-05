@@ -43,9 +43,10 @@ enum PageState{loading,err,empty,list}
 
 class DepositController extends BaseController{
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
+  ScrollController scrollControllerMobile = ScrollController();
   final TextEditingController searchController=TextEditingController();
 
   final AccountRepository accountRepository=AccountRepository();
@@ -57,11 +58,15 @@ class DepositController extends BaseController{
   final TextEditingController dateEndController=TextEditingController();
   final TextEditingController nameDepositFilterController=TextEditingController();
   final TextEditingController nameRequestFilterController=TextEditingController();
+  final TextEditingController amountFilterController=TextEditingController();
+  final TextEditingController trackingNumberFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
+  final RxBool showOnlyExtraDeposits = false.obs;
   RxList<DepositModel> depositList = RxList([]);
   var errorMessage=''.obs;
   var isLoading=true.obs;
   var isLoadingRegister=true.obs;
+  var isLoadingSendTelegram=true.obs;
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   final List<ReasonRejectionModel> reasonRejectionList=<ReasonRejectionModel>[].obs;
@@ -83,13 +88,15 @@ class DepositController extends BaseController{
 
   StreamSubscription? socketSubscription;
 
+  //RxBool isRefreshing = false.obs;
+
   void setError(String message){
     state.value=PageState.err;
     errorMessage.value=message;
   }
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getDepositListPager();
   }
 
@@ -128,7 +135,7 @@ class DepositController extends BaseController{
 
   @override void onClose() {
     socketSubscription?.cancel();
-    scrollController.dispose();
+    scrollControllerMobile.dispose();
     super.onClose();
   }
   void _listenToSocket() {
@@ -150,10 +157,36 @@ class DepositController extends BaseController{
       Get.log('Socket stream error in DepositController: $error');
     });
   }
+
+  /*Future<void> refreshDepositListSilently() async {
+    isRefreshing.value = true;
+    try {
+      var response = await depositRepository.getDepositListPager(
+        startIndex: currentPage.value,
+        toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
+        accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
+        amount: amountFilterController.text.replaceAll(',', ''),
+        trackingNumber: trackingNumberFilterController.text,
+        extraAmount:showOnlyExtraDeposits.value,
+      );
+
+      // Update list without clearing first (prevents flicker)
+      depositList.assignAll(response.deposit??[]);
+      paginated.value=response.paginated;
+      state.value=PageState.list;
+
+    } catch (e) {
+      print('Error in silent order refresh: $e');
+    } finally {
+      isRefreshing.value = false;
+    }
+  }*/
+
   void setupScrollListener() {
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 200 &&
+    scrollControllerMobile.addListener(() {
+      if (scrollControllerMobile.position.pixels >=
+          scrollControllerMobile.position.maxScrollExtent - 200 &&
           hasMore.value &&
           !isLoading.value) {
         loadMore();
@@ -161,23 +194,29 @@ class DepositController extends BaseController{
     });
   }
   Future<void> loadMore() async {
-    if (!scrollController.hasClients || hasMore.value && !isLoading.value) {
+    if (!scrollControllerMobile.hasClients || hasMore.value && !isLoading.value) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
         final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
         final toIndex = nextPage * itemsPerPage.value;
-        var fetchedDepositList = await depositRepository.getDepositList(
+        var fetchedDepositList = await depositRepository.getDepositListPager(
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
           startDate: startDateFilter.value, endDate: endDateFilter.value,
+          amount: amountFilterController.text.replaceAll(',', ''),
+          trackingNumber: trackingNumberFilterController.text,
+          extraAmount:showOnlyExtraDeposits.value,
         );
-        if (fetchedDepositList.isNotEmpty) {
-          depositList.addAll(fetchedDepositList);
+        if (fetchedDepositList.deposit!.isNotEmpty) {
+          depositList.addAll(fetchedDepositList.deposit ?? []);
           currentPage.value = nextPage;
-          hasMore.value = fetchedDepositList.length == itemsPerPage.value;
-
+          hasMore.value = fetchedDepositList.deposit!.length >= itemsPerPage.value;
+          paginated.value = fetchedDepositList.paginated;
+          depositList.refresh();
+          update();
         } else {
           hasMore.value = false;
         }
@@ -288,7 +327,9 @@ class DepositController extends BaseController{
   }
 
   void clearSearch() {
+    paginated.value=null;
     currentPage.value = 1;
+    itemsPerPage.value=25;
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
@@ -306,6 +347,9 @@ class DepositController extends BaseController{
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
         nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
+        amount: amountFilterController.text.replaceAll(',', ''),
+        trackingNumber: trackingNumberFilterController.text,
+        extraAmount:showOnlyExtraDeposits.value,
       );
       isLoading.value=false;
       depositList.assignAll(response.deposit??[]);
@@ -528,6 +572,39 @@ class DepositController extends BaseController{
     return null;
   }
 
+  Future<List<dynamic>?> sendTelegramDeposit(int depositId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingSendTelegram.value = true;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await depositRepository.sendTelegramDeposit(
+        depositId: depositId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar(response.first["title"],response.first["description"],
+            titleText: Text(response.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        getDepositListPager();
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","ارسال به تلگرام ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("ارسال به تلگرام ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در ارسال: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingSendTelegram.value = false;
+    }
+
+    return null;
+  }
+
   //فایل اکسل
   Future<void> getDepositExcel() async{
     try{
@@ -551,7 +628,7 @@ class DepositController extends BaseController{
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -667,6 +744,7 @@ class DepositController extends BaseController{
         startIndex: 1,
         toIndex: 100000,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+        nameDeposit: nameDepositFilterController.text ,nameRequest: nameRequestFilterController.text,
         startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
 
@@ -821,11 +899,13 @@ class DepositController extends BaseController{
   void clearFilter() {
     nameDepositFilterController.clear();
     nameRequestFilterController.clear();
-    mobileFilterController.clear();
+    amountFilterController.clear();
+    trackingNumberFilterController.clear();
     dateStartController.clear();
     dateEndController.clear();
     startDateFilter.value="";
     endDateFilter.value="";
+    showOnlyExtraDeposits.value = false;
   }
 
   // خروجی pdf

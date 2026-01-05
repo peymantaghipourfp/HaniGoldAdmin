@@ -52,11 +52,15 @@ InventoryDetailModel _$InventoryDetailModelFromJson(
           ? null
           : DateTime.parse(json['modifiedOn'] as String),
       recId: json['recId'] as String?,
+      recIdParent: json['recIdParent'] as String?,
       infos: json['infos'] as List<dynamic>?,
       description: json['description'] as String?,
       inputItemId: (json['inputItemId'] as num?)?.toInt(),
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
+      createdBy: json['createdBy'] == null
+          ? null
+          : CreatedByModel.fromJson(json['createdBy'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$InventoryDetailModelToJson(
@@ -90,10 +94,12 @@ Map<String, dynamic> _$InventoryDetailModelToJson(
       'createdOn': instance.createdOn?.toIso8601String(),
       'modifiedOn': instance.modifiedOn?.toIso8601String(),
       'recId': instance.recId,
+      'recIdParent': instance.recIdParent,
       'infos': instance.infos,
       'description': instance.description,
       'inputItemId': instance.inputItemId,
       'date': instance.date?.toIso8601String(),
+      'createdBy': instance.createdBy,
     };
 
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(

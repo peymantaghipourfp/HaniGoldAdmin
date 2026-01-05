@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_exit_app/flutter_exit_app.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:hanigold_admin/src/domain/auth/controller/auth.controller.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
+import '../../../widget/version.widget.dart';
 import 'forget_password.view.dart';
 
 
@@ -126,7 +128,6 @@ class _LoginViewState extends State<LoginView> {
                                 style: AppTextStyle.largeBodyTextBold.copyWith(fontSize: 18)
                             ),
                             const SizedBox(height: 32),
-
                             // وارد کردن شماره موبایل
                             TextFormField(
                               style: AppTextStyle.bodyText.copyWith(
@@ -154,6 +155,10 @@ class _LoginViewState extends State<LoginView> {
                                 ),
                               ),
                               keyboardType: TextInputType.phone,
+                              inputFormatters: [
+                                //FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                                FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                              ],
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return 'لطفا شماره موبایل را وارد کنید';
@@ -204,6 +209,24 @@ class _LoginViewState extends State<LoginView> {
                                 return null;
                               },
                             ),
+
+                            const SizedBox(height: 16),
+
+                            Obx(() => CheckboxListTile(
+                              contentPadding: EdgeInsets.zero,
+                              dense: true,
+                              controlAffinity: ListTileControlAffinity.leading,
+                              value: controller.rememberMe.value,
+                              onChanged: (value) {
+                                controller.updateRememberMe(value ?? false);
+                              },
+                              title: Text(
+                                'مرا به خاطر بسپار',
+                                style: AppTextStyle.bodyText.copyWith(
+                                  fontSize: isDesktop ? 14 : 12,
+                                ),
+                              ),
+                            )),
 
                             const SizedBox(height: 16),
 
@@ -261,6 +284,7 @@ class _LoginViewState extends State<LoginView> {
           ),
         ),
       ),
+      bottomNavigationBar: const VersionWidget(),
     );
   }
 }

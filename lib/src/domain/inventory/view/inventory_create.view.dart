@@ -16,6 +16,8 @@ import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
+import '../widget/total_balance_gold_value.widget.dart';
+import '../controller/inventory_create_payment.controller.dart';
 import '../widget/inventory_create_payment_tab.widget.dart';
 import '../widget/inventory_create_receive_tab.widget.dart';
 
@@ -29,12 +31,28 @@ class InventoryCreateView extends StatefulWidget {
 class _InventoryCreateViewState extends State<InventoryCreateView>
     with TickerProviderStateMixin {
   InventoryCreateLayoutController inventoryCreateLayoutController = Get.find<InventoryCreateLayoutController>();
+  final InventoryCreateReceiveController _receiveController = Get.find<InventoryCreateReceiveController>();
+  final InventoryCreatePaymentController _paymentController = Get.find<InventoryCreatePaymentController>();
+  int _currentTabIndex = 0;
 
+  void _handleTabChange(int newIndex) {
+    if (newIndex == _currentTabIndex) return;
+    // Clear the previous tab's transient state
+    if (_currentTabIndex == 0) {
+      _receiveController.resetFieldsForTab(_currentTabIndex);
+    } else {
+      _paymentController.resetFieldsForTab(_currentTabIndex);
+    }
+    setState(() {
+      _currentTabIndex = newIndex;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
     return Obx(() {
       return Scaffold(
         appBar:
@@ -45,9 +63,147 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
           children: [
             BackgroundImage(),
             SafeArea(
-              child: SingleChildScrollView(
+              child: isMobile
+                  ? SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 12
+                  ),
+                  child: ResponsiveRowColumn(
+                    layout: ResponsiveRowColumnType.COLUMN,
+                    columnSpacing: 16,
+                    rowSpacing: 16,
+                    rowCrossAxisAlignment: CrossAxisAlignment.start,
+                    rowMainAxisAlignment: MainAxisAlignment.start,
+                    columnCrossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      ResponsiveRowColumnItem(
+                        rowFlex: 1,
+                        child:
+                        inventoryCreateLayoutController.tooltipTotalBalanceModel.value == null ?
+                        // Empty state when no user is selected
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: AppColor.secondaryColor,
+                          ),
+                          child: Column(
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    ' تراز کاربر ',
+                                    style: AppTextStyle.labelText.copyWith(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Divider(height: 10.0, color: Colors.white, thickness: 0.5),
+                            ],
+                          ),
+                        )
+                            :
+                        inventoryCreateLayoutController.isLoadingTooltipBalance.value ?
+                        Center(child: CircularProgressIndicator(),)
+                            :
+                        TotalBalanceGoldValue(
+                            totalBalanceGoldValue: inventoryCreateLayoutController.tooltipTotalBalanceModel.value!,
+                            size: double.infinity),
+                      ),
+                      ResponsiveRowColumnItem(
+                        rowFlex: 2,
+                        child: Container(
+                          constraints: BoxConstraints(
+                            maxWidth: double.infinity,
+                            minHeight: 400,
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 16),
+                          child: SizedBox(
+                            height: Get.height * 0.7, // Provide bounded height
+                            child: DefaultTabController(
+                                length: 2,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      constraints: BoxConstraints(
+                                          maxWidth: double.infinity
+                                      ),
+                                      child: TabBar(
+                                        onTap: (value) {
+                                          _handleTabChange(value);
+                                          inventoryCreateLayoutController.getTooltipTotalBalance(0);
+                                        },
+
+                                        labelStyle: AppTextStyle.bodyText.copyWith(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                        labelColor: AppColor.textColor,
+                                        dividerColor: AppColor
+                                            .backGroundColor,
+                                        overlayColor: WidgetStatePropertyAll(
+                                            AppColor.backGroundColor1),
+                                        unselectedLabelColor: AppColor
+                                            .textColor.withAlpha(
+                                            120),
+                                        indicatorColor: AppColor
+                                            .primaryColor,
+                                        tabs: [
+                                          Tab(text: "دریافت"),
+                                          Tab(text: "پرداخت"),
+                                        ],
+                                      ),
+                                    ),
+                                    Expanded(
+                                      child: Container(
+                                        constraints: BoxConstraints(
+                                            maxWidth: double.infinity
+                                        ),
+                                        child: TabBarView(
+
+                                            children: [
+                                              // TabBar 1 دریافت
+                                              InventoryCreateReceiveTabWidget(callBack: (int id) {
+                                                setState(() {
+                                                  inventoryCreateLayoutController.getTooltipTotalBalance(id);
+                                                });
+                                              },),
+
+                                              // TabBar 2 پرداخت
+                                              InventoryCreatePaymentTabWidget(callBack: (int id) {
+                                                setState(() {
+                                                  inventoryCreateLayoutController.getTooltipTotalBalance(id);
+                                                });
+                                              },),
+                                            ]
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                )
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+                  : SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: isTablet ? 20 : 40,
+                      vertical: 20
+                  ),
                   child: ResponsiveRowColumn(
                     layout: isDesktop
                         ? ResponsiveRowColumnType.ROW
@@ -58,34 +214,16 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
                     rowMainAxisAlignment: MainAxisAlignment.start,
                     columnCrossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if(isMobile)
-                        ResponsiveRowColumnItem(
-                          rowFlex: 1,
-                          child:
-                          inventoryCreateLayoutController.isLoadingBalance.value==false &&  inventoryCreateLayoutController.balanceList.isEmpty ?
-                          Center(child: CircularProgressIndicator(),)
-                              :
-                          BalanceWidget(
-                            listBalance: inventoryCreateLayoutController.balanceList,
-                            size: 400,),
-                        ),
                       ResponsiveRowColumnItem(
                         rowFlex: 2,
                         child: Container(
-                          constraints: BoxConstraints(maxWidth: 700),
+                          constraints: BoxConstraints(
+                            maxWidth: isDesktop ? 700 : double.infinity,
+                            minHeight: 500,
+                          ),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 20),
-                          /*decoration: BoxDecoration(
-                            color: AppColor.backGroundColor1,
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 12,
-                                offset: Offset(0, 4),
-                              ),
-                            ],
-                          ),*/
+                              horizontal: isTablet ? 20 : 40,
+                              vertical: 20),
                           child: SizedBox(
                             width: Get.width * 0.9,
                             height: Get.height,
@@ -106,12 +244,13 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
                                             ),
                                             child: TabBar(
                                               onTap: (value) {
-
+                                                _handleTabChange(value);
+                                                inventoryCreateLayoutController.getTooltipTotalBalance(0);
                                               },
-                                              labelStyle: AppTextStyle.bodyText
-                                                  .copyWith(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.bold),
+                                              labelStyle: AppTextStyle.bodyText.copyWith(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                               labelColor: AppColor.textColor,
                                               dividerColor: AppColor
                                                   .backGroundColor,
@@ -141,14 +280,14 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
                                                     // TabBar 1 دریافت
                                                     InventoryCreateReceiveTabWidget(callBack: (int id) {
                                                       setState(() {
-                                                        inventoryCreateLayoutController.getBalanceList(id);
+                                                        inventoryCreateLayoutController.getTooltipTotalBalance(id);
                                                       });
                                                     },),
 
                                                     // TabBar 2 پرداخت
                                                     InventoryCreatePaymentTabWidget(callBack: (int id) {
                                                       setState(() {
-                                                        inventoryCreateLayoutController.getBalanceList(id);
+                                                        inventoryCreateLayoutController.getTooltipTotalBalance(id);
                                                       });
                                                     },),
                                                   ]
@@ -168,11 +307,39 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
                         ResponsiveRowColumnItem(
                           rowFlex: 1,
                           child:
-                          inventoryCreateLayoutController.isLoadingBalance.value==false ?
+                          inventoryCreateLayoutController.tooltipTotalBalanceModel.value == null ?
+                          // Empty state when no user is selected
+                          Container(
+                            width: 400,
+                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: AppColor.secondaryColor,
+                            ),
+                            child: Column(
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      ' تراز کاربر ',
+                                      style: AppTextStyle.labelText.copyWith(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Divider(height: 10.0, color: Colors.white, thickness: 0.5),
+                              ],
+                            ),
+                          )
+                              :
+                          inventoryCreateLayoutController.isLoadingTooltipBalance.value ?
                           Center(child: CircularProgressIndicator(),)
                               :
-                          BalanceWidget(
-                            listBalance: inventoryCreateLayoutController.balanceList,
+                          TotalBalanceGoldValue(
+                            totalBalanceGoldValue: inventoryCreateLayoutController.tooltipTotalBalanceModel.value!,
                             size: 400,),
                         ),
                     ],
@@ -182,7 +349,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton:isMobile ? SizedBox.shrink() : FloatingActionButton(
           onPressed: () {
             Get.dialog(const ChatDialog());
           },

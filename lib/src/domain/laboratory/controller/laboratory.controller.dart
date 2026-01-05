@@ -26,7 +26,7 @@ class LaboratoryController extends GetxController{
   Rx<PageStateLob> state=Rx<PageStateLob>(PageStateLob.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   var isChecked=false.obs;
   var isLoading=false.obs;
   LaboratoryRepository laboratoryRepository=LaboratoryRepository();
@@ -72,12 +72,20 @@ class LaboratoryController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     fetchLaboratoryList();
   }
 
+  // Clear form controllers (for create dialog)
+  void clearFormControllers() {
+    nameController.clear();
+    phoneController.clear();
+    addressController.clear();
+  }
+
   void clearSearch() {
+    paginated=null;
     currentPage.value = 1;
     nameController.clear();
     fetchLaboratoryList();
@@ -108,7 +116,7 @@ class LaboratoryController extends GetxController{
   Future<void> insertLaboratory()async{
 
     try{
-      isLoading.value=false;
+      isLoading.value=true;
       //state.value=PageStateLob.loading;
       var response=await laboratoryRepository.insertLaboratory(name: nameController.text,
           phone: phoneController.text,
@@ -120,7 +128,6 @@ class LaboratoryController extends GetxController{
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-      isLoading.value=true;
       nameController.text="";
       phoneController.text="";
       addressController.text="";
@@ -132,13 +139,15 @@ class LaboratoryController extends GetxController{
     }
     catch(e){
      // state.value=PageStateLob.err;
+    }finally{
+      isLoading.value=false;
     }
   }
   // اآپدیت آزمایشگاه ها
   Future<void> updateLaboratory(int id,BuildContext context)async{
 
     try{
-      isLoading.value=false;
+      isLoading.value=true;
       //state.value=PageStateLob.loading;
       var response=await laboratoryRepository.updateLaboratory(name: nameController.text,
           phone: phoneController.text,
@@ -149,7 +158,6 @@ class LaboratoryController extends GetxController{
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-      isLoading.value=true;
       nameController.text="";
       phoneController.text="";
       addressController.text="";
@@ -162,6 +170,8 @@ class LaboratoryController extends GetxController{
     }
     catch(e){
      // state.value=PageStateLob.err;
+    }finally{
+      isLoading.value=false;
     }
   }
 

@@ -13,6 +13,7 @@ import 'package:hanigold_admin/src/domain/product/widget/price_different.widget.
 import 'package:hanigold_admin/src/domain/product/widget/price_sell.widget.dart';
 import 'package:hanigold_admin/src/domain/product/widget/sale_range.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
@@ -41,6 +42,7 @@ class _ProductEditViewState extends State<ProductEditView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).isDesktop;
     return Scaffold(
       appBar: CustomAppbar1(
         title: 'ویرایش محصول',
@@ -144,7 +146,7 @@ class _ProductEditViewState extends State<ProductEditView> {
                       _buildMaxSellEditorRow('سقف فروش', item),
                       _buildSalesRangeEditorRow('محدوده فروش', item),
                       //_buildSellPriceEditorRow('قیمت فروش ریال', item),
-                      _buildDifferentPriceEditorRow('تفاوت قیمت خرید و فروش', item),
+                      _buildDifferentPriceEditorRow('تفاوت قیمت', item),
                       _buildToggle('وضعیت خرید',(val) => productEditController.buyStateSwitch.value = val,),
                       _buildMaxBuyEditorRow('سقف خرید', item),
                       _buildBuyRangeEditorRow('محدوده خرید', item),
@@ -192,7 +194,7 @@ class _ProductEditViewState extends State<ProductEditView> {
           ),
         );
       }),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isDesktop ? FloatingActionButton(
         onPressed: () {
           Get.dialog(const ChatDialog());
         },
@@ -201,7 +203,7 @@ class _ProductEditViewState extends State<ProductEditView> {
           Icons.chat,
           color: Colors.white,
         ),
-      ),
+      ) : SizedBox.shrink(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
@@ -271,13 +273,7 @@ class _ProductEditViewState extends State<ProductEditView> {
   }*/
 
   Widget _buildDifferentPriceEditorRow(String label, ItemModel item) {
-    String differentPrice = item
-        .mesghalDifferentPrice
-        .toString()
-        .replaceAll(
-        RegExp(
-            r'[^0-9]'),
-        '');
+    String? differentPrice = item.mesghalDifferentPrice?.toStringAsFixed(0).replaceAll(RegExp(r'[^0-9]'), '') ?? "0";
     List<
         String> parts = [
     ];
@@ -315,7 +311,7 @@ class _ProductEditViewState extends State<ProductEditView> {
         .length >= 3
         ? parts[2]
         : '0';
-    if (label == 'تفاوت قیمت خرید و فروش') {
+    if (label == 'تفاوت قیمت') {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -48,6 +48,7 @@ class InventoryUpdateReceiveController extends GetxController{
   final TextEditingController dateController=TextEditingController();
   final TextEditingController descriptionController=TextEditingController();
   final TextEditingController typeController=TextEditingController();
+  final TextEditingController walletAccountController=TextEditingController();
 
   final AccountRepository accountRepository=AccountRepository();
   final WalletRepository walletRepository=WalletRepository();
@@ -90,24 +91,33 @@ class InventoryUpdateReceiveController extends GetxController{
   RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploadingDesktop = false.obs;
   RxList<String> imageList = <String>[].obs;
+  var itemCountTemp=''.obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
     selectedWalletAccount.value = null;
     getWalletAccount(selectedAccount.value?.id ?? 0);
   }
+  void viewCountItem(){
+    if(selectedWalletAccount.value?.item?.id==10 || selectedWalletAccount.value?.item?.id==13 || selectedWalletAccount.value?.item?.id==15 || selectedWalletAccount.value?.item?.id==16){
+      double? w750=selectedWalletAccount.value?.item?.w750;
+      double quantity=double.tryParse(quantityController.text==""? "0" :quantityController.text.toEnglishDigit()) ?? 0;
+      itemCountTemp.value=(quantity/w750!).round().toString();
+    }
+  }
 
   void updateW750(){
-      int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
-      double quantity = double.tryParse(quantityController.text=="" ? "0"  :  quantityController.text.toEnglishDigit()) ?? 0;
-      double w750 = (carat * quantity)/750;
-      weight750Controller.text = w750.toStringAsFixed(2).toPersianDigit();
-
+    int carat = int.parse(caratController.text=="" ? "0" : caratController.text.toEnglishDigit());
+    double quantity = double.tryParse(quantityController.text=="" ? "0"  :  quantityController.text.toEnglishDigit()) ?? 0;
+    double w750 = (carat * quantity)/750;
+    weight750Controller.text = w750.toStringAsFixed(2).toPersianDigit();
+    viewCountItem();
   }
 
   void changeSelectedWalletAccount(WalletModel? newValue) {
     selectedWalletAccount.value = newValue;
-      updateW750();
+    updateW750();
+    viewCountItem();
 
     print(selectedWalletAccount.value?.item?.id);
     print(selectedWalletAccount.value?.item?.name);
@@ -120,14 +130,28 @@ class InventoryUpdateReceiveController extends GetxController{
 
   @override
   void onInit() async{
-     //inventoryDetail=Get.arguments;
-     inventoryDetailId.value=int.parse(Get.parameters['id']!);
+    //inventoryDetail=Get.arguments;
+    inventoryDetailId.value=int.parse(Get.parameters['id']!);
 
-    /*if(inventoryDetailId.value!=null) {
+    // Initialize walletAccountReqModel with default values
+    walletAccountReqModel = WalletAccountReqModel(
+        wallet: OptionsModel(
+            orderBy: "wallet.Id",
+            orderByType: "asc",
+            startIndex: 1,
+            toIndex: 10000,
+            predicate: [PredicateModel(
+                innerCondition: 0,
+                outerCondition: 0,
+                filters: []
+            )]
+        )
+    );
+
+    if(inventoryDetailId.value != 0) {
       //inventoryDetail=getOneInventory.value;
-      await fetchGetOneInventory(inventoryDetailId.value,Get.parameters['index']!);
-
-    }*/
+      await fetchGetOneInventoryDetail(inventoryDetailId.value, Get.parameters['index'] ?? "");
+    }
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
     quantityController.addListener(updateW750);
@@ -232,11 +256,13 @@ class InventoryUpdateReceiveController extends GetxController{
   Future<void> fetchWalletAccountList()async{
     try{
       state.value=PageState.loading;
-      var fetchedWalletAccountList=await walletRepository.getWalletList(walletAccountReqModel!);
-      walletAccountList.assignAll(fetchedWalletAccountList);
-      for(int i=0;i<walletAccountList.length;i++){
-        if(walletAccountList[i].id==inventoryDetail?.wallet?.id){
-          selectedWalletAccount.value=walletAccountList[i];
+      if(walletAccountReqModel != null) {
+        var fetchedWalletAccountList=await walletRepository.getWalletList(walletAccountReqModel!);
+        walletAccountList.assignAll(fetchedWalletAccountList);
+        for(int i=0;i<walletAccountList.length;i++){
+          if(walletAccountList[i].id==inventoryDetail?.wallet?.id){
+            selectedWalletAccount.value=walletAccountList[i];
+          }
         }
       }
       state.value=PageState.list;
@@ -299,32 +325,43 @@ class InventoryUpdateReceiveController extends GetxController{
   }
 
 
-  /*Future<void> fetchGetOneInventory(int id,String index)async{
+  Future<void> fetchGetOneInventoryDetail(int id,String index)async{
     try {
       stateGetOne.value=PageState.loading;
       var fetchedGetOneInventory = await inventoryRepository.getInventoryDetail(id);
-      if(fetchedGetOneInventory!=null){
-        getOneInventory.value = fetchedGetOneInventory;
-        if(index==""){
-          setInventoryDetail(getOneInventory.value!);
-          inventoryDetail=getOneInventory.value!;
-          inventoryDetailId.value=inventoryDetail?.id ?? 0;
-          accountId.value = inventoryDetail!.wallet!.account!.id!;
-          accountName.value = inventoryDetail!.wallet!.account!.name!;
-          getWalletAccount(accountId.value);
-          getBalanceList(accountId.value);
-        }else{
-          inventoryDetail=getOneInventory.value!;
-          setInventoryDetail(inventoryDetail!);
-          inventoryDetailId.value=inventoryDetail?.id ?? 0;
-          accountId.value = inventoryDetail!.wallet!.account!.id!;
-          accountName.value = inventoryDetail!.wallet!.account!.name!;
-          getWalletAccount(accountId.value);
-          getBalanceList(accountId.value);
+      if(fetchedGetOneInventory.isNotEmpty){
+        // Find the specific inventory detail by ID
+        InventoryDetailModel? foundDetail;
+        if(index.isNotEmpty) {
+          int indexInt = int.tryParse(index) ?? 0;
+          if(indexInt < fetchedGetOneInventory.length) {
+            foundDetail = fetchedGetOneInventory[indexInt];
+          }
+        } else {
+          // If no index provided, find by inventoryDetailId
+          foundDetail = fetchedGetOneInventory.firstWhere(
+                (detail) => detail.id == inventoryDetailId.value,
+            orElse: () => fetchedGetOneInventory.first,
+          );
         }
-        print(accountId.value);
-        print("wallet::::${inventoryDetail?.wallet?.item?.name}");
-        stateGetOne.value=PageState.list;
+
+        if(foundDetail != null) {
+          getOneInventory.value = foundDetail;
+          inventoryDetail = foundDetail;
+          setInventoryDetail(inventoryDetail!);
+          inventoryDetailId.value = inventoryDetail?.id ?? 0;
+          inventoryId.value = inventoryDetail?.inventoryId ?? 0;
+          accountId.value = inventoryDetail!.wallet!.account!.id!;
+          accountName.value = inventoryDetail!.wallet!.account!.name!;
+          getWalletAccount(accountId.value);
+          getBalanceList(accountId.value);
+
+          print(accountId.value);
+          print("wallet::::${inventoryDetail?.wallet?.item?.name}");
+          stateGetOne.value=PageState.list;
+        } else {
+          stateGetOne.value=PageState.empty;
+        }
       }else{
         stateGetOne.value=PageState.empty;
       }
@@ -333,7 +370,7 @@ class InventoryUpdateReceiveController extends GetxController{
       stateGetOne.value=PageState.err;
       errorMessage.value=" خطایی به وجود آمده است ${e.toString()}";
     }
-  }*/
+  }
 
   Future<void> pickImageDesktop( ) async {
     try{
@@ -434,7 +471,7 @@ class InventoryUpdateReceiveController extends GetxController{
       print(accountId.value);
       print(accountName.value);
       var response=await inventoryRepository.updateDetailInventoryReceive(
-        id: inventoryId.value,
+        inventoryId: inventoryId.value,
         inventoryDetailId: inventoryDetailId.value,
         date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
         accountId: accountId.value,
@@ -444,19 +481,28 @@ class InventoryUpdateReceiveController extends GetxController{
         walletId: selectedWalletAccount.value?.id ?? 0,
         itemId: selectedWalletAccount.value!.item?.id ?? 0,
         itemName: selectedWalletAccount.value?.item?.name ?? '',
+        itemUnitId: selectedWalletAccount.value?.item?.itemUnit?.id ?? 0,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         impurity: double.tryParse(impurityController.text.toEnglishDigit()) ?? 0.0,
-        weight750: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
+        weight750:selectedWalletAccount.value!.item?.id==1 ||
+            selectedWalletAccount.value!.item?.id==10 ||
+            selectedWalletAccount.value!.item?.id==12 ||
+            selectedWalletAccount.value!.item?.id==15 ||
+            selectedWalletAccount.value!.item?.id==16 ||
+            selectedWalletAccount.value!.item?.id==14 ? double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0 : double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0 ,
         carat: int.tryParse(caratController.text.toEnglishDigit()) ?? 0,
         receiptNumber: receiptNumberController.text,
         stateMode : 2,
         laboratoryName: selectedLaboratory.value?.name ?? '',
         laboratoryId: selectedLaboratory.value?.id ?? 0,
         recId: inventoryDetail?.recId ?? '',
+        recIdParent: inventoryDetail?.recIdParent ?? '',
+        weight: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
 
       );
       print(response);
       if (response != null) {
+        if (Get.isDialogOpen!) Get.back();
         Get.back();
         InventoryModel responseData=InventoryModel.fromJson(response);
         Get.snackbar(responseData.infos?.first['title'], responseData.infos?.first["description"],
@@ -469,6 +515,7 @@ class InventoryUpdateReceiveController extends GetxController{
         );
         inventoryController.fetchGetInventoryDetail(responseData.id ?? 0);
         inventoryController.getInventoryListPager();
+        if (Get.isDialogOpen!) Get.back();
         Get.back();
         clearList();
       }
@@ -484,7 +531,7 @@ class InventoryUpdateReceiveController extends GetxController{
 
   void setInventoryDetail(InventoryDetailModel inventoryDetail){
     inventoryId.value=inventoryDetail.inventoryId ?? 0;
-    quantityController.text=inventoryDetail.quantity.toString() ?? '';
+    quantityController.text=inventoryDetail.weight.toString() ?? '';
     impurityController.text=inventoryDetail.impurity.toString() ?? '';
     weight750Controller.text=inventoryDetail.weight750.toString() ?? '';
     caratController.text=inventoryDetail.carat.toString() ?? '';
@@ -492,6 +539,15 @@ class InventoryUpdateReceiveController extends GetxController{
     selectedLaboratory.value=inventoryDetail.laboratory;
     descriptionController.text=inventoryDetail.description ?? "";
     dateController.text = inventoryDetail.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
+
+    // Set the selected account and wallet
+    if(inventoryDetail.wallet?.account != null) {
+      selectedAccount.value = inventoryDetail.wallet!.account!;
+    }
+    if(inventoryDetail.wallet != null) {
+      selectedWalletAccount.value = inventoryDetail.wallet!;
+    }
+
     getImage(inventoryDetail.recId ?? '', "InventoryDetail");
   }
 

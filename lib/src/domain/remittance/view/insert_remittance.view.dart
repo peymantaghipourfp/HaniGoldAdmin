@@ -16,6 +16,8 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../../widget/custom_dropdown1.widget.dart';
+import '../../account/model/account.model.dart';
 import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/remittance.controller.dart';
@@ -31,7 +33,13 @@ class InsertRemittanceView extends StatefulWidget {
 class _InsertRemittanceViewState extends State<InsertRemittanceView> {
 
   var controller=Get.find<RemittanceController>();
-
+  /*@override
+  void initState() {
+    var now = Jalali.now();
+    DateTime date=DateTime.now();
+    controller.dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
+    super.initState();
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +64,6 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     // SizedBox(height: 10,),
-
                     Container(
                       width: Get.width * 0.4 ,
                       padding: EdgeInsets.symmetric(horizontal: 30,vertical: 15),
@@ -86,7 +93,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                 primary: true,
                                 shrinkWrap: true,
                                 gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
+                                SliverGridDelegateWithFixedCrossAxisCount(mainAxisExtent: 90,
                                   childAspectRatio:isDesktop? 5: 4.5,
                                   crossAxisCount:isDesktop? 1:1,
                                   crossAxisSpacing: 5,
@@ -187,6 +194,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       ),
                                     ],
                                   ),
+                                  // بستانکار(دریافت)
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -195,92 +203,46 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                         style: AppTextStyle.labelText.copyWith(fontSize: 13,
                                             fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                       ),
+                                      //بستانکار(دریافت) کاربر
+                                      controller.accountListRecipt.isEmpty ?
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                              AppColor.textColor),
+                                        ),
+                                      ) :
                                       Container(
                                         padding: EdgeInsets.only(
                                             bottom: 5),
-                                        child:
-                                        CustomDropdownWidget(
+                                        child: CustomDropdown<AccountModel>(
+                                          items: controller.accountListRecipt,
+                                          selectedItem: controller.selectedAccountRecipt.value,
+                                          enableSearch: true,
+                                          errorText: controller.dropdownError.value,
+                                          itemLabel: (account) =>
+                                          account.name ??
+                                              "",
+                                          /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                                          onChanged: (account) {
+                                            setState(() {
+                                              controller.selectedAccountRecipt.value = account;
+                                              controller.dropdownError.value = "";
 
-                                          dropdownSearchData: DropdownSearchData<String>(
-                                            searchController: controller
-                                                .searchControllerRecipt,
-                                            searchInnerWidgetHeight: 50,
-                                            searchInnerWidget: Container(
-                                              height: 50,
-                                              padding: const EdgeInsets.only(
-                                                top: 8,
-                                                right: 15,
-                                                left: 15,
-                                              ),
-                                              child: TextFormField(style: AppTextStyle.bodyText,
-                                                controller: controller
-                                                    .searchControllerRecipt,
-                                                focusNode: controller.searchFocusNodeRecipt,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 8,
-                                                  ),
-                                                  hintText: 'جستجوی کاربر...',
-                                                  hintStyle: AppTextStyle.labelText,
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                    BorderRadius.circular(8),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          value: controller.selectedAccountRecipt.value,
-                                          validator: (value) {
-                          if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                            return 'بستانکار را انتخاب کنید';
-                          }
-                          return null;
-                        },
-                                          showSearchBox: true,
-                                          items: [
-                                            'انتخاب کنید',
-                                            ...controller.searchedAccountsRecipt.map((
-                                                account) =>
-                                            '${account.id}:${account.name ?? ""}')
-                                          ].toList(),
-                                          selectedValue:controller.selectedAccountRecipt
-                                              .value !=null ?
-                                          '${controller.selectedAccountRecipt.value?.id}:${controller.selectedAccountRecipt.value?.name}'
-                                              : null,
-                                          onChanged: (String? newValue) {
-                                            if (newValue == 'انتخاب کنید') {
-                                              controller.changeSelectedAccountRecipt(null);
-                                            } else {
-                                              var accountId = int.tryParse(newValue!.split(':')[0]);
-                                              if(accountId!=null) {
-                                                var selectedAccount = controller
-                                                    .searchedAccountsRecipt
-                                                    .firstWhere((account) =>
-                                                account.id == accountId);
-                                                controller
-                                                    .changeSelectedAccountRecipt(
-                                                    selectedAccount);
-                                              }
-                                            }
+                                              controller.changeSelectedAccountRecipt(
+                                                  account);
+                                            });
+                                            debugPrint(
+                                              "بستانکار انتخاب شد: ${account?.name}",
+                                            );
                                           },
-                                          /*onMenuStateChange: (isOpen) {
-                                            if (!isOpen) {
-                                              controller.resetAccountSearchP();
-                                            }
-                                          },*/
-                                          onMenuStateChange: controller.onDropdownMenuStateChangeRecipt,
-                                          backgroundColor: AppColor.textFieldColor,
-                                          borderRadius: 7,
-                                          borderColor: AppColor.secondaryColor,
-                                          hideUnderline: true,
+                                          isIcon: false,
                                         ),
                                       ),
                                     ],
                                   ),
+                                  // بدهکار(پرداخت)
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -289,92 +251,41 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                         style: AppTextStyle.labelText.copyWith(fontSize: 13,
                                             fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                       ),
+                                      // کاربر بدهکار(پرداخت)
+                                      controller.accountListPayer.isEmpty ?
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                              AppColor.textColor),
+                                        ),
+                                      ) :
                                       Container(
                                         padding: EdgeInsets.only(
                                             bottom: 5),
-                                        child:
-                                        CustomDropdownWidget(
+                                        child: CustomDropdown<AccountModel>(
+                                          items: controller.accountListPayer,
+                                          selectedItem: controller.selectedAccountPayer.value,
+                                          enableSearch: true,
+                                          errorText: controller.dropdownError.value,
+                                          itemLabel: (account) =>
+                                          account.name ??
+                                              "",
+                                          /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                                          onChanged: (account) {
+                                            setState(() {
+                                              controller.selectedAccountPayer.value = account;
+                                              controller.dropdownError.value = "";
 
-                                          dropdownSearchData: DropdownSearchData<String>(
-                                            searchController: controller
-                                                .searchControllerPayer,
-                                            searchInnerWidgetHeight: 50,
-                                            searchInnerWidget: Container(
-                                              height: 50,
-                                              padding: const EdgeInsets.only(
-                                                top: 8,
-                                                right: 15,
-                                                left: 15,
-                                              ),
-                                              child: TextFormField(style: AppTextStyle.bodyText,
-                                                controller: controller
-                                                    .searchControllerPayer,
-                                                focusNode: controller.searchFocusNodePayer,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 8,
-                                                  ),
-                                                  hintText: 'جستجوی کاربر...',
-                                                  hintStyle: AppTextStyle.labelText,
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                    BorderRadius.circular(8),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          value: controller.selectedAccountPayer.value,
-                                          validator: (value) {
-                          if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                            return 'بدهکار را انتخاب کنید';
-                          }
-                          return null;
-                        },
-                                          showSearchBox: true,
-                                          items: [
-                                            'انتخاب کنید',
-                                            ...controller
-                                                .searchedAccountsPayer.map((
-                                                account) =>
-                                            '${account.id}:${account.name ?? ""}')
-                                          ].toList(),
-                                          selectedValue: controller
-                                              .selectedAccountPayer.value != null
-                                              ? '${controller.selectedAccountPayer.value!.id}:${controller.selectedAccountPayer.value!.name}'
-                                              : null,
-                                          onChanged: (String? newValue) {
-                                            if (newValue ==
-                                                'انتخاب کنید') {
-                                              controller
-                                                  .changeSelectedAccountPayer(
-                                                  null);
-                                            } else {
-                                              var accountId = int.tryParse(newValue!.split(':')[0]);
-                                              if (accountId != null) {
-                                                var selectedAccount = controller
-                                                    .searchedAccountsPayer
-                                                    .firstWhere((account) =>
-                                                account.id == accountId);
-                                                controller
-                                                    .changeSelectedAccountPayer(
-                                                    selectedAccount);
-                                              }
-                                            }
+                                              controller.changeSelectedAccountPayer(
+                                                  account);
+                                            });
+                                            debugPrint(
+                                              "بستانکار انتخاب شد: ${account?.name}",
+                                            );
                                           },
-                                          /*onMenuStateChange: (isOpen) {
-                                            if (!isOpen) {
-                                              controller.resetAccountSearch();
-                                            }
-                                          },*/
-                                          onMenuStateChange: controller.onDropdownMenuStateChangePayer,
-                                          backgroundColor: AppColor.textFieldColor,
-                                          borderRadius: 7,
-                                          borderColor: AppColor.secondaryColor,
-                                          hideUnderline: true,
+                                          isIcon: false,
                                         ),
                                       ),
                                     ],
@@ -483,6 +394,12 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                             fillColor: AppColor.textFieldColor,
                                             errorMaxLines: 1,
                                           ),
+                                          onFieldSubmitted: (value) {
+
+                                            if (controller.selectedItem.value != null && value.isNotEmpty) {
+                                              controller.tempBalanceView(value);
+                                            }
+                                          },
                                         )
                                               :
                                           TextFormField(
@@ -519,6 +436,12 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                               fillColor: AppColor.textFieldColor,
                                               errorMaxLines: 1,
                                             ),
+                                            onFieldSubmitted: (value) {
+
+                                              if (controller.selectedItem.value != null && value.isNotEmpty) {
+                                                controller.tempBalanceView(value);
+                                              }
+                                            },
                                           )
                                       ),
                                     ],
@@ -623,7 +546,6 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       ),
                                     ],
                                   ),
-
 
                                 ],
                               ),
@@ -798,7 +720,126 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                             size:isDesktop? Get.width * 0.4:Get.width * 0.9,):BalanceWidget(
                             title: "بدهکار",
                             listBalance: controller.balanceListPayer,
-                            size:isDesktop? Get.width * 0.4:Get.width * 0.9,)
+                            size:isDesktop? Get.width * 0.4:Get.width * 0.9,),
+                          SizedBox(height: 10,),
+                          if(controller.selectedItem.value?.id != null)
+                            Column(mainAxisAlignment: MainAxisAlignment.start,crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.primaryColor.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColor.primaryColor.withAlpha(75),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(width: 8),
+                                      Text(
+                                        ' تغییر تراز بستانکار: ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                      ),
+                                      (controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id] ?? 0) < 0 ?
+                                      Text(
+                                        '-${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      ):
+                                      Text(
+                                        ' ${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      Text(
+                                        ' ${controller.selectedItem.value?.name} ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 5,),
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.accentColor.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColor.accentColor.withAlpha(75),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(width: 8),
+                                      Text(
+                                        ' تغییر تراز بدهکار: ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                      ),
+                                      (controller.tempBalanceChangesPayer[controller.selectedItem.value?.id] ?? 0) < 0 ?
+                                      Text(
+                                        '-${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      ):
+                                      Text(
+                                        ' ${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      )
+                                      ,
+                                      Text(
+                                        ' ${controller.selectedItem.value?.name} ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                        textDirection: TextDirection.rtl,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ),
@@ -845,13 +886,131 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                 color: AppColor.secondaryColor
                             ),
                           ),
+                          if(controller.selectedItem.value?.id != null)
+                            Column(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.primaryColor.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColor.primaryColor.withAlpha(75),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(width: 8),
+                                      Text(
+                                        ' تغییر تراز بستانکار: ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                      ),
+                                      (controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id] ?? 0) < 0 ?
+                                      Text(
+                                        '-${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      ):
+                                      Text(
+                                        ' ${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesRecipt[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      ),
+                                      Text(
+                                        ' ${controller.selectedItem.value?.name} ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 4,),
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                  padding: EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.accentColor.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(
+                                      color: AppColor.accentColor.withAlpha(75),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(width: 8),
+                                      Text(
+                                        ' تغییر تراز بدهکار: ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                      ),
+                                      (controller.tempBalanceChangesPayer[controller.selectedItem.value?.id] ?? 0) < 0 ?
+                                      Text(
+                                        '-${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      ):
+                                      Text(
+                                        ' ${controller.selectedItem.value?.id==6 || controller.selectedItem.value?.itemUnit?.id==1 ? controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toStringAsFixed(0).seRagham():
+                                        controller.tempBalanceChangesPayer[controller.selectedItem.value?.id]?.abs().toString().seRagham()
+                                        } ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.primaryColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15
+                                        ),
+                                        textDirection: TextDirection.ltr,
+                                      )
+                                      ,
+                                      Text(
+                                        ' ${controller.selectedItem.value?.name} ',
+                                        style: AppTextStyle.labelText.copyWith(
+                                            color: AppColor.accentColor,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12
+                                        ),
+                                        textDirection: TextDirection.rtl,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ),
                     Container(
                       width: Get.width * 0.9 ,
                       padding: EdgeInsets.symmetric(horizontal: 30,vertical: 15),
-                      margin: EdgeInsets.symmetric(horizontal: 10,vertical: 30),
+                      margin: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
                       decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: AppColor.secondaryColor
@@ -860,7 +1019,6 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Column(
-
                             children: [
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -873,11 +1031,11 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                 ],
                               ),
                               SizedBox(height: 20,),
-                              GridView(
+                              GridView(physics: ScrollPhysics(parent: BouncingScrollPhysics()),
                                 primary: true,
                                 shrinkWrap: true,
                                 gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
+                                SliverGridDelegateWithFixedCrossAxisCount(mainAxisExtent: 90,
                                   childAspectRatio:isDesktop? 6: 4,
                                   crossAxisCount:isDesktop? 1:1,
                                   crossAxisSpacing: 5,
@@ -978,6 +1136,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                       ),
                                     ],
                                   ),
+                                  // بستانکار(دریافت)
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -986,89 +1145,47 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                         style: AppTextStyle.labelText.copyWith(fontSize: 13,
                                             fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                       ),
+
+                                      //بستانکار(دریافت) کاربر
+                                      controller.accountListRecipt.isEmpty ?
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                              AppColor.textColor),
+                                        ),
+                                      ) :
                                       Container(
                                         padding: EdgeInsets.only(
                                             bottom: 5),
-                                        child:
-                                        CustomDropdownWidget(
-                                          dropdownSearchData: DropdownSearchData<String>(
-                                            searchController: controller
-                                                .searchControllerRecipt,
-                                            searchInnerWidgetHeight: 50,
-                                            searchInnerWidget: Container(
-                                              height: 50,
-                                              padding: const EdgeInsets.only(
-                                                top: 8,
-                                                right: 15,
-                                                left: 15,
-                                              ),
-                                              child: TextFormField(style: AppTextStyle.bodyText,
-                                                controller: controller
-                                                    .searchControllerRecipt,
-                                                focusNode: controller.searchFocusNodeRecipt,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 8,
-                                                  ),
-                                                  hintText: 'جستجوی کاربر...',
-                                                  hintStyle: AppTextStyle.labelText,
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                    BorderRadius.circular(8),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          value: controller.selectedAccountRecipt.value,
-                                          /*validator: (value) {
-                          if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                            return 'کاربر را انتخاب کنید';
-                          }
-                          return null;
-                        },*/
-                                          showSearchBox: true,
-                                          validator: (value) {
-                                            if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                                              return 'بستانکار را انتخاب کنید';
-                                            }
-                                            return null;
-                                          },
-                                          items: [
-                                            'انتخاب کنید',
-                                            ...controller.searchedAccountsRecipt.map((
-                                                account) => account.name ?? "")
-                                          ].toList(),
-                                          selectedValue: controller.selectedAccountRecipt
-                                              .value?.name,
-                                          onChanged: (String? newValue) {
-                                            if (newValue == 'انتخاب کنید') {
-                                              controller.changeSelectedAccountRecipt(null);
-                                            } else {
-                                              var selectedAccount = controller
-                                                  .searchedAccountsRecipt
-                                                  .firstWhere((account) => account.name == newValue);
+                                        child: CustomDropdown<AccountModel>(
+                                          items: controller.accountListRecipt,
+                                          selectedItem: controller.selectedAccountRecipt.value,
+                                          enableSearch: true,
+                                          errorText: controller.dropdownError.value,
+                                          itemLabel: (account) =>
+                                          account.name ??
+                                              "",
+                                          /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                                          onChanged: (account) {
+                                            setState(() {
+                                              controller.selectedAccountRecipt.value = account;
+                                              controller.dropdownError.value = "";
+
                                               controller.changeSelectedAccountRecipt(
-                                                  selectedAccount);
-                                            }
+                                                  account);
+                                            });
+                                            debugPrint(
+                                              "بستانکار انتخاب شد: ${account?.name}",
+                                            );
                                           },
-                                          /*onMenuStateChange: (isOpen) {
-                                            if (!isOpen) {
-                                              controller.resetAccountSearchP();
-                                            }
-                                          },*/
-                                          onMenuStateChange: controller.onDropdownMenuStateChangeRecipt,
-                                          backgroundColor: AppColor.textFieldColor,
-                                          borderRadius: 7,
-                                          borderColor: AppColor.secondaryColor,
-                                          hideUnderline: true,
+                                          isIcon: false,
                                         ),
                                       ),
                                     ],
                                   ),
+                                  // بدهکار(پرداخت)
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -1077,85 +1194,41 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                         style: AppTextStyle.labelText.copyWith(fontSize: 13,
                                             fontWeight: FontWeight.normal,color: AppColor.textColor ),
                                       ),
+                                      // کاربر بدهکار(پرداخت)
+                                      controller.accountListPayer.isEmpty ?
+                                      Center(
+                                        child: CircularProgressIndicator(
+                                          valueColor: AlwaysStoppedAnimation<Color>(
+                                              AppColor.textColor),
+                                        ),
+                                      ) :
                                       Container(
                                         padding: EdgeInsets.only(
                                             bottom: 5),
-                                        child:
-                                        CustomDropdownWidget(
-                                          dropdownSearchData: DropdownSearchData<String>(
-                                            searchController: controller
-                                                .searchControllerPayer,
-                                            searchInnerWidgetHeight: 50,
-                                            searchInnerWidget: Container(
-                                              height: 50,
-                                              padding: const EdgeInsets.only(
-                                                top: 8,
-                                                right: 15,
-                                                left: 15,
-                                              ),
-                                              child: TextFormField(style: AppTextStyle.bodyText,
-                                                controller: controller
-                                                    .searchControllerPayer,
-                                                focusNode: controller.searchFocusNodePayer,
-                                                decoration: InputDecoration(
-                                                  isDense: true,
-                                                  contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 10,
-                                                    vertical: 8,
-                                                  ),
-                                                  hintText: 'جستجوی کاربر...',
-                                                  hintStyle: AppTextStyle.labelText,
-                                                  border: OutlineInputBorder(
-                                                    borderRadius:
-                                                    BorderRadius.circular(8),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          value: controller.selectedAccountPayer.value,
-                                          /*validator: (value) {
-                          if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                            return 'کاربر را انتخاب کنید';
-                          }
-                          return null;
-                        },*/
-                                          showSearchBox: true,
-                                          validator: (value) {
-                                            if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                                              return 'بدهکار را انتخاب کنید';
-                                            }
-                                            return null;
-                                          },
-                                          items: [
-                                            'انتخاب کنید',
-                                            ...controller.searchedAccountsPayer.map((
-                                                account) => account.name ?? "")
-                                          ].toList(),
-                                          selectedValue: controller.selectedAccountPayer
-                                              .value?.name,
-                                          onChanged: (String? newValue) {
-                                            if (newValue == 'انتخاب کنید') {
-                                              controller.changeSelectedAccountPayer(null);
-                                            } else {
-                                              var selectedAccount = controller
-                                                  .searchedAccountsPayer
-                                                  .firstWhere((account) => account.name == newValue);
+                                        child: CustomDropdown<AccountModel>(
+                                          items: controller.accountListPayer,
+                                          selectedItem: controller.selectedAccountPayer.value,
+                                          enableSearch: true,
+                                          errorText: controller.dropdownError.value,
+                                          itemLabel: (account) =>
+                                          account.name ??
+                                              "",
+                                          /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                                          onChanged: (account) {
+                                            setState(() {
+                                              controller.selectedAccountPayer.value = account;
+                                              controller.dropdownError.value = "";
+
                                               controller.changeSelectedAccountPayer(
-                                                  selectedAccount);
-                                            }
+                                                  account);
+                                            });
+                                            debugPrint(
+                                              "بستانکار انتخاب شد: ${account?.name}",
+                                            );
                                           },
-                                          /*onMenuStateChange: (isOpen) {
-                                            if (!isOpen) {
-                                              controller.resetAccountSearch();
-                                            }
-                                          },*/
-                                          onMenuStateChange: controller.onDropdownMenuStateChangePayer,
-                                          backgroundColor: AppColor.textFieldColor,
-                                          borderRadius: 7,
-                                          borderColor: AppColor.secondaryColor,
-                                          hideUnderline: true,
+                                          isIcon: false,
                                         ),
                                       ),
                                     ],
@@ -1261,6 +1334,12 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                             fillColor: AppColor.textFieldColor,
                                             errorMaxLines: 1,
                                           ),
+                                          onFieldSubmitted: (value) {
+
+                                            if (controller.selectedItem.value != null && value.isNotEmpty) {
+                                              controller.tempBalanceView(value);
+                                            }
+                                          },
                                         )
                                             :
                                         TextFormField(
@@ -1297,6 +1376,12 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                             fillColor: AppColor.textFieldColor,
                                             errorMaxLines: 1,
                                           ),
+                                          onFieldSubmitted: (value) {
+
+                                            if (controller.selectedItem.value != null && value.isNotEmpty) {
+                                              controller.tempBalanceView(value);
+                                            }
+                                          },
                                         )
                                       ),
                                     ],
@@ -1573,7 +1658,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isDesktop ? FloatingActionButton(
         onPressed: () {
           Get.dialog(const ChatDialog());
         },
@@ -1582,7 +1667,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
           Icons.chat,
           color: Colors.white,
         ),
-      ),
+      ) : SizedBox.shrink(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     ));
   }

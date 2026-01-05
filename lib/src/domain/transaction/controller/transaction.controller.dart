@@ -45,7 +45,7 @@ class TransactionController extends GetxController{
   Rx<PageStateTrans> state=Rx<PageStateTrans>(PageStateTrans.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   var isChecked=false.obs;
   var isLoading=false.obs;
   var startDateFilter=''.obs;
@@ -128,8 +128,8 @@ class TransactionController extends GetxController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     fetchTransactionList();
   }
 
@@ -157,7 +157,9 @@ class TransactionController extends GetxController{
   }
 
   void clearSearch() {
+    paginated=null;
     currentPage.value = 1;
+    itemsPerPage.value=25;
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
@@ -341,7 +343,7 @@ class TransactionController extends GetxController{
           await FileSaver.instance.saveFile(
             name: 'inventories',
             bytes: uint8List,
-            ext: 'xlsx',
+            fileExtension: 'xlsx',
             mimeType: MimeType.microsoftExcel,
           );
         }
@@ -454,7 +456,7 @@ class TransactionController extends GetxController{
         await FileSaver.instance.saveFile(
           name: "row_screenshot_${transaction.id}",
           bytes: uint8List,
-          ext: 'png',
+          fileExtension: 'png',
           mimeType: MimeType.png,
         );
       }

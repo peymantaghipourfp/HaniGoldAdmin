@@ -29,6 +29,7 @@ class TransferAfterTomorrowChangeController extends GetxController {
     isLoading.value = true;
     try {
       String gregorianDate = convertJalaliToGregorian(dateController.text);
+      if (Get.isDialogOpen!) Get.back();
       final TransferWalletModel response = await _transferWalletRepository.changeTransferAfterTomorrow(gregorianDate);
 
       String title = 'موفق';
@@ -54,6 +55,13 @@ class TransferAfterTomorrowChangeController extends GetxController {
     } catch (e) {
       EasyLoading.dismiss();
       isLoading.value = false;
+      /*Get.snackbar(
+        "خطا در انتقال",
+        "انتقال انجام نشد",
+        titleText: Text("خطا در انتقال", textAlign: TextAlign.center, style: TextStyle(color: AppColor.textColor)),
+        messageText:
+        Text("انتقال انجام نشد", textAlign: TextAlign.center, style: TextStyle(color: AppColor.textColor)),
+      );*/
       throw ErrorException('خطا در انتقال: $e');
     } finally {
       EasyLoading.dismiss();

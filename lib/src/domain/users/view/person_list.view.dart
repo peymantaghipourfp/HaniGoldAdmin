@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/controller/person_list.controller.dart';
+import 'package:hanigold_admin/src/widget/pager_widget1.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -23,263 +24,436 @@ class PersonListView extends GetView<PersonListController> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    return Obx(()=>Scaffold(
-      appBar: CustomAppbar1(
-        title: 'لیست کاربران',
-        onBackTap: () => Get.toNamed("/home"),
-      ),
-      drawer: const AppDrawer(),
-      body:Stack(
-        children: [
-          BackgroundImageTotal(),
-          SafeArea(
-            child: controller.state.value == PageStateUser.loading
-                ? Center(
-              child: SizedBox(
-                  height: Get.height ,
-                  width: Get.width,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                          height: 50,width: 50,
-                          child: Padding(
-                            padding: const EdgeInsets.all(5),
-                            child: CircularProgressIndicator(),
-                          )),
-                    ],
-                  )),
-            )
-                : controller.state.value == PageStateUser.list
-                ? SizedBox(
-              height: Get.height *0.85,
-              width: Get.width,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    //فیلد جستجو
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      color: AppColor.appBarColor.withOpacity(0.5),
-                      alignment: Alignment.center,
-
-                      height: 80,
-                      child: TextFormField(
-                        onChanged: (value){
-                          // Future.delayed(const Duration(milliseconds: 5000), () {
-                          //   controller.getUserAccountList();
-                          // });
-                        },
-                        controller: controller.nameFilterController,
-                        style: AppTextStyle.labelText,
-                        textInputAction: TextInputAction.search,
-                        onFieldSubmitted: (value) async {
-                          // Future.delayed(const Duration(milliseconds: 700), () {
-                       //   controller.getUserAccountList();
-                          // });
-                        },
-                        onEditingComplete: () async {
-                          controller.getUserAccountList();
-                        },
-
-                        decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(7),
-                          ),
-                          filled: true,
-                          fillColor: AppColor.textFieldColor,
-                          hintText: "جستجو ... ",
-                          hintStyle: AppTextStyle.labelText,
-
-                          prefixIcon: IconButton(
-                              onPressed: () async {
-                                controller.getUserAccountList();
-                              },
-                              icon: Icon(
-                                Icons.search,
-                                color: AppColor.textColor,
-                                size: 30,
-                              )),
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 50,vertical: 20),
-                      color: AppColor.appBarColor.withOpacity(0.5),
+    return Obx(() =>
+        Scaffold(
+          appBar: CustomAppbar1(
+            title: 'لیست کاربران',
+            onBackTap: () => Get.toNamed("/home"),
+          ),
+          drawer: const AppDrawer(),
+          body: Stack(
+            children: [
+              BackgroundImageTotal(),
+              SafeArea(
+                child: controller.state.value == PageStateUser.loading
+                    ? Center(
+                  child: SizedBox(
+                      height: Get.height,
+                      width: Get.width,
                       child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                SizedBox(width: 30,),
-                                // Row(
-                                //   children: [
-                                //     ElevatedButton(
-                                //       style: ButtonStyle(
-                                //           padding: WidgetStatePropertyAll(
-                                //               EdgeInsets.symmetric(horizontal: 12,vertical: 17)),
-                                //           elevation: WidgetStatePropertyAll(5),
-                                //           backgroundColor:
-                                //           WidgetStatePropertyAll(AppColor.secondary3Color),
-                                //           shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                //               borderRadius: BorderRadius.circular(5)))),
-                                //       onPressed: () async {
-                                //         Get.toNamed("/insertUser",parameters: {"id":0.toString()});
-                                //       },
-                                //       child: Row(
-                                //         children: [
-                                //           Icon(Icons.add,color: AppColor.textColor,size: 18,),
-                                //           SizedBox(width: 5,),
-                                //           Text(
-                                //             'تبدیل کاربر',
-                                //             style: AppTextStyle.labelText,
-                                //           ),
-                                //         ],
-                                //       ),
-                                //     ),
-                                //     SizedBox(width: 20,),
-                                //   ],
-                                // ),
-                                ElevatedButton(
-                                  style: ButtonStyle(
-                                      padding: WidgetStatePropertyAll(
-                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
-                                      // elevation: WidgetStatePropertyAll(5),
-                                      backgroundColor:
-                                      WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
-                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
-                                          borderRadius: BorderRadius.circular(5)))),
-                                  onPressed: () async {
-                                    showGeneralDialog(
-                                        context: context,
-                                        barrierDismissible: true,
-                                        barrierLabel: MaterialLocalizations.of(context)
-                                            .modalBarrierDismissLabel,
-                                        barrierColor: Colors.black45,
-                                        transitionDuration: const Duration(milliseconds: 200),
-                                        pageBuilder: (BuildContext buildContext,
-                                            Animation animation,
-                                            Animation secondaryAnimation) {
-                                          return Center(
-                                            child: FitterUserListWidget(),
-                                          );
-                                        });
-                                  },
-                                  child: Row(
-                                    children: [
-                                      SvgPicture.asset(
-                                          'assets/svg/filter3.svg',
-                                          height: 17,
-                                          colorFilter:
-                                          ColorFilter
-                                              .mode(
-                                            controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" || controller.nameAccController.text!="" || controller.nameUserController.text!="" ||controller.status.value!=0 ?AppColor.accentColor:  AppColor
-                                                .textColor,
-                                            BlendMode
-                                                .srcIn,
-                                          )),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text(
-                                        'فیلتر',
-                                        style: AppTextStyle
-                                            .labelText
-                                            .copyWith(
-                                            fontSize: isDesktop
-                                                ? 12
-                                                : 10,color:  controller.nameFilterController.text!="" ||  controller.mobileFilterController.text!="" || controller.nameAccController.text!="" || controller.nameUserController.text!="" ||controller.status.value!=0 ?AppColor.accentColor: AppColor.textColor),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-
-                            ),
-                          ),
-                          SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            controller: controller.scrollController,
-                            physics: ClampingScrollPhysics(),
-                            child: Row(
-                              children: [
-                                SingleChildScrollView(
-                                  child: Column(
-                                    children: [
-                                      DataTable(
-                                        columns:
-                                        buildDataColumns(),
-                                        border: TableBorder.symmetric(
-                                            inside: BorderSide(color: AppColor.textColor, width: 0.3),
-                                            outside: BorderSide(color: AppColor.textColor, width: 0.3),
-                                            borderRadius: BorderRadius.circular(8)),
-                                        dividerThickness: 0.3,
-                                        rows: buildDataRows(context),
-                                        dataRowMaxHeight: 50,
-                                        //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                        //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                        headingRowHeight: 40,
-                                        columnSpacing: 90,
-                                        horizontalMargin: 30,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          SizedBox(
+                              height: 50, width: 50,
+                              child: Padding(
+                                padding: const EdgeInsets.all(5),
+                                child: CircularProgressIndicator(),
+                              )),
                         ],
-                      ),
-                    ),
+                      )),
+                )
+                    : controller.state.value == PageStateUser.list
+                    ? SizedBox(
+                  height: Get.height * 0.85,
+                  width: Get.width,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        //فیلد جستجو
+                        isDesktop ? SizedBox.shrink() :
+                        Container(
+                          margin: EdgeInsets.symmetric(
+                              horizontal: 50, vertical: 10),
+                          padding: EdgeInsets.symmetric(horizontal: 20),
+                          color: AppColor.appBarColor.withAlpha(130),
+                          alignment: Alignment.center,
 
-                  ],
+                          height: 80,
+                          child: TextFormField(
+                            onChanged: (value) {
+                              // Future.delayed(const Duration(milliseconds: 5000), () {
+                              //   controller.getUserAccountList();
+                              // });
+                            },
+                            controller: controller.nameFilterController,
+                            style: AppTextStyle.labelText,
+                            textInputAction: TextInputAction.search,
+                            onFieldSubmitted: (value) async {
+                              // Future.delayed(const Duration(milliseconds: 700), () {
+                              //   controller.getUserAccountList();
+                              // });
+                            },
+                            onEditingComplete: () async {
+                              controller.getUserAccountList();
+                            },
+
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(7),
+                              ),
+                              filled: true,
+                              fillColor: AppColor.textFieldColor,
+                              hintText: "جستجو ... ",
+                              hintStyle: AppTextStyle.labelText,
+
+                              prefixIcon: IconButton(
+                                  onPressed: () async {
+                                    controller.getUserAccountList();
+                                  },
+                                  icon: Icon(
+                                    Icons.search,
+                                    color: AppColor.textColor,
+                                    size: 30,
+                                  )),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.symmetric(horizontal: 5,vertical:5 ),
+                          padding: EdgeInsets.symmetric(horizontal: 5,vertical:5),
+                          decoration: BoxDecoration(
+                            color: AppColor.backGroundColor1,
+                            borderRadius: BorderRadius.circular(10),
+                            //border: Border.all(color: const Color(0xFF64748B)),
+                          ),
+                          child: Column(
+                            children: [
+                              isDesktop ? SizedBox.shrink() :
+                              Padding(
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment
+                                      .spaceBetween,
+                                  children: [
+                                    SizedBox(width: 30,),
+                                    // Row(
+                                    //   children: [
+                                    //     ElevatedButton(
+                                    //       style: ButtonStyle(
+                                    //           padding: WidgetStatePropertyAll(
+                                    //               EdgeInsets.symmetric(horizontal: 12,vertical: 17)),
+                                    //           elevation: WidgetStatePropertyAll(5),
+                                    //           backgroundColor:
+                                    //           WidgetStatePropertyAll(AppColor.secondary3Color),
+                                    //           shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                                    //               borderRadius: BorderRadius.circular(5)))),
+                                    //       onPressed: () async {
+                                    //         Get.toNamed("/insertUser",parameters: {"id":0.toString()});
+                                    //       },
+                                    //       child: Row(
+                                    //         children: [
+                                    //           Icon(Icons.add,color: AppColor.textColor,size: 18,),
+                                    //           SizedBox(width: 5,),
+                                    //           Text(
+                                    //             'تبدیل کاربر',
+                                    //             style: AppTextStyle.labelText,
+                                    //           ),
+                                    //         ],
+                                    //       ),
+                                    //     ),
+                                    //     SizedBox(width: 20,),
+                                    //   ],
+                                    // ),
+                                    ElevatedButton(
+                                      style: ButtonStyle(
+                                          padding: WidgetStatePropertyAll(
+                                              EdgeInsets.symmetric(
+                                                  horizontal: 23,
+                                                  vertical: 19)),
+                                          // elevation: WidgetStatePropertyAll(5),
+                                          backgroundColor:
+                                          WidgetStatePropertyAll(
+                                              AppColor.appBarColor.withAlpha(130)),
+                                          shape: WidgetStatePropertyAll(
+                                              RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                      color: AppColor
+                                                          .textColor),
+                                                  borderRadius: BorderRadius
+                                                      .circular(5)))),
+                                      onPressed: () async {
+                                        showGeneralDialog(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            barrierLabel: MaterialLocalizations
+                                                .of(context)
+                                                .modalBarrierDismissLabel,
+                                            barrierColor: Colors.black45,
+                                            transitionDuration: const Duration(
+                                                milliseconds: 200),
+                                            pageBuilder: (
+                                                BuildContext buildContext,
+                                                Animation animation,
+                                                Animation secondaryAnimation) {
+                                              return Center(
+                                                child: FitterUserListWidget(),
+                                              );
+                                            });
+                                      },
+                                      child: Row(
+                                        children: [
+                                          SvgPicture.asset(
+                                              'assets/svg/filter3.svg',
+                                              height: 17,
+                                              colorFilter:
+                                              ColorFilter
+                                                  .mode(
+                                                controller.nameFilterController
+                                                    .text != "" || controller
+                                                    .mobileFilterController
+                                                    .text != "" ||
+                                                    controller.nameAccController
+                                                        .text != "" ||
+                                                    controller
+                                                        .nameUserController
+                                                        .text != "" ||
+                                                    controller.status.value != 0
+                                                    ? AppColor.accentColor
+                                                    : AppColor
+                                                    .textColor,
+                                                BlendMode
+                                                    .srcIn,
+                                              )),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text(
+                                            'فیلتر',
+                                            style: AppTextStyle
+                                                .labelText
+                                                .copyWith(
+                                                fontSize: isDesktop
+                                                    ? 12
+                                                    : 10,
+                                                color: controller
+                                                    .nameFilterController
+                                                    .text != "" || controller
+                                                    .mobileFilterController
+                                                    .text != "" ||
+                                                    controller.nameAccController
+                                                        .text != "" ||
+                                                    controller
+                                                        .nameUserController
+                                                        .text != "" ||
+                                                    controller.status.value != 0
+                                                    ? AppColor.accentColor
+                                                    : AppColor.textColor),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+
+                                ),
+                              ),
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                controller: controller.scrollController,
+                                physics: ClampingScrollPhysics(),
+                                child: Row(
+                                  children: [
+                                    SingleChildScrollView(
+                                      child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          isDesktop ?
+                                          Container(
+                                            padding: EdgeInsets.symmetric( vertical: 5),
+                                            child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 400,
+                                                  child: TextFormField(
+                                                    onChanged: (value) {
+                                                      // Future.delayed(const Duration(milliseconds: 5000), () {
+                                                      //   controller.getUserAccountList();
+                                                      // });
+                                                    },
+                                                    controller: controller.nameFilterController,
+                                                    style: AppTextStyle.labelText,
+                                                    textInputAction: TextInputAction.search,
+                                                    onFieldSubmitted: (value) async {
+                                                      // Future.delayed(const Duration(milliseconds: 700), () {
+                                                      //   controller.getUserAccountList();
+                                                      // });
+                                                    },
+                                                    onEditingComplete: () async {
+                                                      controller.getUserAccountList();
+                                                    },
+
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius.circular(7),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor.textFieldColor,
+                                                      hintText: "جستجو ... ",
+                                                      hintStyle: AppTextStyle.labelText,
+
+                                                      prefixIcon: IconButton(
+                                                          onPressed: () async {
+                                                            controller.getUserAccountList();
+                                                          },
+                                                          icon: Icon(
+                                                            Icons.search,
+                                                            color: AppColor.textColor,
+                                                            size: 30,
+                                                          )),
+                                                    ),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 10,),
+                                                Row(
+                                                  children: [
+                                                    OutlinedButton.icon(
+                                                        onPressed: () async {
+                                                          showGeneralDialog(
+                                                              context: context,
+                                                              barrierDismissible: true,
+                                                              barrierLabel: MaterialLocalizations
+                                                                  .of(context)
+                                                                  .modalBarrierDismissLabel,
+                                                              barrierColor: Colors.black45,
+                                                              transitionDuration: const Duration(
+                                                                  milliseconds: 200),
+                                                              pageBuilder: (
+                                                                  BuildContext buildContext,
+                                                                  Animation animation,
+                                                                  Animation secondaryAnimation) {
+                                                                return Center(
+                                                                  child: FitterUserListWidget(),
+                                                                );
+                                                              });
+                                                        },
+                                                        icon: SvgPicture.asset(
+                                                            'assets/svg/filter3.svg',
+                                                            height: 17,
+                                                            colorFilter:
+                                                            ColorFilter
+                                                                .mode(
+                                                              controller.nameFilterController
+                                                                  .text != "" || controller
+                                                                  .mobileFilterController
+                                                                  .text != "" ||
+                                                                  controller.nameAccController
+                                                                      .text != "" ||
+                                                                  controller
+                                                                      .nameUserController
+                                                                      .text != "" ||
+                                                                  controller.status.value != 0
+                                                                  ? AppColor.accentColor
+                                                                  : AppColor
+                                                                  .textColor,
+                                                              BlendMode
+                                                                  .srcIn,
+                                                            )),
+                                                        label: Text(
+                                                          'فیلتر',
+                                                          style: AppTextStyle
+                                                              .labelText
+                                                              .copyWith(
+                                                              fontSize: isDesktop
+                                                                  ? 12
+                                                                  : 10,
+                                                              color: controller
+                                                                  .nameFilterController
+                                                                  .text != "" || controller
+                                                                  .mobileFilterController
+                                                                  .text != "" ||
+                                                                  controller.nameAccController
+                                                                      .text != "" ||
+                                                                  controller
+                                                                      .nameUserController
+                                                                      .text != "" ||
+                                                                  controller.status.value != 0
+                                                                  ? AppColor.accentColor
+                                                                  : AppColor.textColor),
+                                                        ),
+                                                    ),
+                                                ],
+                                                ),
+                                              ],
+                                            ),
+                                          ) : SizedBox.shrink(),
+                                          DataTable(
+                                            columns:
+                                            buildDataColumns(),
+                                            border: TableBorder.symmetric(
+                                                inside: BorderSide(
+                                                    color: AppColor.textColor,
+                                                    width: 0.3),
+                                                outside: BorderSide(
+                                                    color: AppColor.textColor,
+                                                    width: 0.3),
+                                                borderRadius: BorderRadius
+                                                    .circular(8)),
+                                            dividerThickness: 0.3,
+                                            rows: buildDataRows(context),
+                                            dataRowMaxHeight: 50,
+                                            //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
+                                            headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
+                                            headingRowHeight: 35,
+                                            columnSpacing: 90,
+                                            horizontalMargin: 30,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                      ],
+                    ),
+                  ),
+                )
+                    : Center(
+                  child: ErrPage(
+                    callback: () {
+                      controller.clearFilter();
+                      controller.getUserAccountList();
+                    },
+                    title: "خطا در لیست کاربران",
+                    des: 'برای دریافت لیست کاربران مجددا تلاش کنید',
+                  ),
                 ),
               ),
-            )
-                : Center(
-              child: ErrPage(
-                callback: () {
-                  controller.clearFilter();
-                  controller.getUserAccountList();
-                },
-                title: "خطا در لیست کاربران",
-                des: 'برای دریافت لیست کاربران مجددا تلاش کنید',
+              Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  controller.paginated != null ? Container(
+                      height: 70,
+                      margin: EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 10),
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      //color: AppColor.appBarColor.withAlpha(130),
+                      alignment: Alignment.bottomCenter,
+                      child: PagerWidget1(
+                        countPage: controller.paginated!.totalCount ?? 0,
+                        callBack: (int index) {
+                          controller.isChangePage(index);
+                        },)) : SizedBox(),
+                ],
               ),
-            ),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              controller.paginated!=null?   Container(
-                  height: 70,
-                  margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
-                  padding: EdgeInsets.symmetric(horizontal: 20),
-                  color: AppColor.appBarColor.withOpacity(0.5),
-                  alignment: Alignment.bottomCenter,
-                  child:PagerWidget(countPage: controller.paginated!.totalCount??0, callBack: (int index) {
-                    controller.isChangePage(index);
-                  },)):SizedBox(),
             ],
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-    ));
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {
+              Get.dialog(const ChatDialog());
+            },
+            backgroundColor: AppColor.primaryColor,
+            child: Icon(
+              Icons.chat,
+              color: Colors.white,
+            ),
+          ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        ));
   }
+
   List<DataColumn> buildDataColumns() {
     return [
       DataColumn(
@@ -291,8 +465,7 @@ class PersonListView extends GetView<PersonListController> {
       DataColumn(
           onSort: (columnIndex, ascending) {
             print(columnIndex);
-            controller.setSort(columnIndex,ascending);
-
+            controller.setSort(columnIndex, ascending);
           },
           label: Text('نام',
               style: AppTextStyle.labelText.copyWith(fontSize: 11)),
@@ -358,355 +531,590 @@ class PersonListView extends GetView<PersonListController> {
 
   List<DataRow> buildDataRows(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    return controller.userList
-        .map((trans) => DataRow(
-      cells: [
-        DataCell(
-            Center(
+    return controller.userList.asMap().entries.map((entry) {
+      final index = entry.key;
+      final trans = entry.value;
+      final rowColor = index.isEven
+          ? AppColor.backGroundColor
+          : AppColor.secondaryColor.withAlpha(100);
+      return DataRow(
+        color: WidgetStateProperty.all(rowColor),
+        cells: [
+          DataCell(
+              Center(
+                child: Text(
+                  "${trans.rowNum}",
+                  style: AppTextStyle.bodyText,
+                ),
+              )),
+          DataCell(Center(
+            child: GestureDetector(
+              onTap: () {
+                //  Get.toNamed("/userInfoTransaction",parameters: {"accountId":trans.accountId.toString()});
+                // /controller.getInfo(trans.accountId);
+              },
               child: Text(
-                "${trans.rowNum}",
-                style: AppTextStyle.bodyText,
-              ),
-            )),
-        DataCell(Center(
-          child: GestureDetector(
-            onTap: (){
-              //  Get.toNamed("/userInfoTransaction",parameters: {"accountId":trans.accountId.toString()});
-              // /controller.getInfo(trans.accountId);
-            },
-            child: Text(
-              trans.contact?.name??"",
-              style: AppTextStyle.bodyText
-                  .copyWith(color: AppColor.textColor, fontSize: 12,),),
-          ),
-        )),
+                trans.contact?.name ?? "",
+                style: AppTextStyle.bodyText
+                    .copyWith(color: AppColor.textColor, fontSize: 12,),),
+            ),
+          )),
 
-        DataCell(
-            Center(
-              child: SizedBox(
-                child: Text(
-                  trans.mobileNumber??"",
-                  style: AppTextStyle.bodyText,
-                ),
-              ),
-            )),
-        DataCell(Center(
-            child: Container(
-          //    alignment: Alignment.center,
-              width: 50,
-              padding: EdgeInsets.symmetric(horizontal: 6,vertical: 5),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  color:trans.status==1?AppColor.primaryColor: AppColor.accentColor
-              ),
-              child:Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    trans.status==1?   "فعال":"غیرفعال",
-                    style: AppTextStyle.bodyText.copyWith(fontSize: 9),
+          DataCell(
+              Center(
+                child: SizedBox(
+                  child: Text(
+                    trans.mobileNumber ?? "",
+                    style: AppTextStyle.bodyText,
                   ),
-                ],
-              ) ,
-
-            ))),
-
-        DataCell(
-            Center(
-              child: SizedBox(
-                child: Text(
-                  trans.userName??"",
-                  style: AppTextStyle.bodyText,
                 ),
-              ),
-            )),
-        DataCell(Center(
-          child:Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                trans.email??"-",
-                style: AppTextStyle.bodyText,textDirection: TextDirection.ltr,
-              ),
-            ],
-          ) ,)),
+              )),
+          DataCell(Center(
+              child: Container(
+                //    alignment: Alignment.center,
+                width: 50,
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(5)),
+                    color: trans.status == 1
+                        ? AppColor.primaryColor
+                        : AppColor.accentColor
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      trans.status == 1 ? "فعال" : "غیرفعال",
+                      style: AppTextStyle.bodyText.copyWith(fontSize: 9),
+                    ),
+                  ],
+                ),
 
-        DataCell(Center(
+              ))),
+
+          DataCell(
+              Center(
+                child: SizedBox(
+                  child: Text(
+                    trans.userName ?? "",
+                    style: AppTextStyle.bodyText,
+                  ),
+                ),
+              )),
+          DataCell(Center(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GestureDetector(
-                  onTap: (){
-                    controller.emailUpdateEndController.text=trans.email??"";
-                    controller.userNameUpdateEndController.text=trans.userName??"";
-                    controller.mobileUpdateEndController.text=trans.mobileNumber??"";
-                    showGeneralDialog(
-                        context: context,
-                        barrierDismissible: true,
-                        barrierLabel: MaterialLocalizations.of(context)
-                            .modalBarrierDismissLabel,
-                        barrierColor: Colors.black45,
-                        transitionDuration: const Duration(milliseconds: 200),
-                        pageBuilder: (BuildContext buildContext,
-                            Animation animation,
-                            Animation secondaryAnimation) {
-                          return Center(
-                            child: Material(
-                              color: Colors.transparent,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
-                                    color: AppColor.appBarColor
-                                ),
-                                width:isDesktop?  Get.width * 0.3:Get.height * 0.5,
-                                height:isDesktop?  Get.height * 0.65:Get.height * 0.7,
-                                padding: EdgeInsets.all(20),
-                                child: Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'ویرایش کاربر',
-                                            style: AppTextStyle.labelText.copyWith(
-                                              fontSize: 15,
-                                              fontWeight: FontWeight.normal,
+                Text(
+                  trans.email ?? "-",
+                  style: AppTextStyle.bodyText,
+                  textDirection: TextDirection.ltr,
+                ),
+              ],
+            ),)),
+          DataCell(Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    child: SvgPicture.asset('assets/svg/password-change.svg',
+                        height: 18,
+                        colorFilter: ColorFilter.mode(
+                          AppColor.dividerColor,
+                          BlendMode.srcIn,
+                        )),
+                    onTap: () {
+                      _showChangePassword(trans.id ?? 0);
+                    },
+                  ),
+                  SizedBox(width: 15,),
+                  GestureDetector(
+                    onTap: () {
+                      controller.emailUpdateEndController.text =
+                          trans.email ?? "";
+                      controller.userNameUpdateEndController.text =
+                          trans.userName ?? "";
+                      controller.mobileUpdateEndController.text =
+                          trans.mobileNumber ?? "";
+                      showGeneralDialog(
+                          context: context,
+                          barrierDismissible: true,
+                          barrierLabel: MaterialLocalizations
+                              .of(context)
+                              .modalBarrierDismissLabel,
+                          barrierColor: Colors.black45,
+                          transitionDuration: const Duration(
+                              milliseconds: 200),
+                          pageBuilder: (BuildContext buildContext,
+                              Animation animation,
+                              Animation secondaryAnimation) {
+                            return Center(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: AppColor.appBarColor
+                                  ),
+                                  width: isDesktop ? Get.width * 0.3 : Get
+                                      .height * 0.5,
+                                  height: isDesktop ? Get.height * 0.65 : Get
+                                      .height * 0.7,
+                                  padding: EdgeInsets.all(20),
+                                  child: Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment
+                                              .start,
+                                          children: [
+                                            Text(
+                                              'ویرایش کاربر',
+                                              style: AppTextStyle.labelText
+                                                  .copyWith(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.normal,
+                                              ),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 30),
-                                      child: Column(
-                                        children: [
-                                          SizedBox(height: 8,),
-                                          Column(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'نام کاربری',
-                                                style: AppTextStyle.labelText.copyWith(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.normal,
-                                                    color: AppColor.textColor),
-                                              ),
-                                              SizedBox(height: 10,),
-                                              IntrinsicHeight(
-                                                child: TextFormField(
-                                                  autovalidateMode: AutovalidateMode
-                                                      .onUserInteraction,
-                                                  controller: controller.userNameUpdateEndController,
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                                  textAlign: TextAlign.start,
-                                                  keyboardType:TextInputType.text,
-                                                  decoration: InputDecoration(
-                                                    contentPadding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 11,horizontal: 15
-                                                    ),
-                                                    isDense: true,
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                      BorderRadius.circular(6),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                    errorMaxLines: 1,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 8,),
-                                          Column(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'تلفن تماس',
-                                                style: AppTextStyle.labelText.copyWith(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.normal,
-                                                    color: AppColor.textColor),
-                                              ),
-                                              SizedBox(height: 10,),
-                                              IntrinsicHeight(
-                                                child: TextFormField(
-                                                  autovalidateMode: AutovalidateMode
-                                                      .onUserInteraction,
-                                                  controller: controller.mobileUpdateEndController,
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                                  textAlign: TextAlign.center,
-                                                  keyboardType:TextInputType.phone,
-                                                  inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
-                                                    TextInputFormatter.withFunction((oldValue, newValue) {
-                                                      // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
-                                                      String newText = newValue.text
-                                                          .replaceAll('٠', '0')
-                                                          .replaceAll('١', '1')
-                                                          .replaceAll('٢', '2')
-                                                          .replaceAll('٣', '3')
-                                                          .replaceAll('٤', '4')
-                                                          .replaceAll('٥', '5')
-                                                          .replaceAll('٦', '6')
-                                                          .replaceAll('٧', '7')
-                                                          .replaceAll('٨', '8')
-                                                          .replaceAll('٩', '9');
-
-                                                      return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
-                                                    }),
-                                                  ],
-                                                  decoration: InputDecoration(
-                                                    contentPadding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 11,horizontal: 15
-
-                                                    ),
-                                                    isDense: true,
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                      BorderRadius.circular(6),
-                                                    ),
-
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                    errorMaxLines: 1,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          SizedBox(height: 8),
-                                          Column(
-                                            crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                'ایمیل',
-                                                style: AppTextStyle.labelText.copyWith(
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.normal,
-                                                    color: AppColor.textColor),
-                                              ),
-                                              SizedBox(height: 10,),
-                                              IntrinsicHeight(
-                                                child: TextFormField(
-                                                  maxLines: 3,
-                                                  autovalidateMode: AutovalidateMode
-                                                      .onUserInteraction,
-                                                  controller: controller.emailUpdateEndController,
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: 15),
-                                                  textAlign: TextAlign.start,
-                                                  keyboardType:TextInputType.text,
-                                                  decoration: InputDecoration(
-                                                    contentPadding:
-                                                    const EdgeInsets.symmetric(
-                                                        vertical: 14,horizontal: 15
-                                                    ),
-                                                    isDense: true,
-                                                    border: OutlineInputBorder(
-                                                      borderRadius:
-                                                      BorderRadius.circular(6),
-                                                    ),
-                                                    filled: true,
-                                                    fillColor: AppColor.textFieldColor,
-                                                    errorMaxLines: 1,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(height: 10),
-                                    Spacer(),
-                                    Obx(()=>Container(
-                                      margin: EdgeInsets.symmetric(horizontal: 40,vertical: 10),
-
-                                      width: double.infinity,
-                                      height: 40,
-                                      child: ElevatedButton(
-                                        style: ButtonStyle(
-                                            padding: WidgetStatePropertyAll(
-                                                EdgeInsets.symmetric(horizontal: 7)),
-                                            elevation: WidgetStatePropertyAll(5),
-                                            backgroundColor:
-                                            WidgetStatePropertyAll(AppColor.buttonColor),
-                                            shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(10)))),
-                                        onPressed: () async {
-                                         controller.updateUserAccount(trans.id??0);
-                                        },
-                                        child: controller.isLoading.value?
-                                        CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
-                                        ) :
-                                        Text(
-                                          'ویرایش کاربر',
-                                          style: AppTextStyle.labelText.copyWith(fontSize:  12 ),
+                                          ],
                                         ),
                                       ),
-                                    ),)
-                                  ],
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 30),
+                                        child: Column(
+                                          children: [
+                                            SizedBox(height: 8,),
+                                            Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'نام کاربری',
+                                                  style: AppTextStyle
+                                                      .labelText.copyWith(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight
+                                                          .normal,
+                                                      color: AppColor
+                                                          .textColor),
+                                                ),
+                                                SizedBox(height: 10,),
+                                                IntrinsicHeight(
+                                                  child: TextFormField(
+                                                    autovalidateMode: AutovalidateMode
+                                                        .onUserInteraction,
+                                                    controller: controller
+                                                        .userNameUpdateEndController,
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(
+                                                        fontSize: 15),
+                                                    textAlign: TextAlign
+                                                        .start,
+                                                    keyboardType: TextInputType
+                                                        .text,
+                                                    decoration: InputDecoration(
+                                                      contentPadding:
+                                                      const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 11,
+                                                          horizontal: 15
+                                                      ),
+                                                      isDense: true,
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
+                                                      errorMaxLines: 1,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 8,),
+                                            Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'تلفن تماس',
+                                                  style: AppTextStyle
+                                                      .labelText.copyWith(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight
+                                                          .normal,
+                                                      color: AppColor
+                                                          .textColor),
+                                                ),
+                                                SizedBox(height: 10,),
+                                                IntrinsicHeight(
+                                                  child: TextFormField(
+                                                    autovalidateMode: AutovalidateMode
+                                                        .onUserInteraction,
+                                                    controller: controller
+                                                        .mobileUpdateEndController,
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(
+                                                        fontSize: 15),
+                                                    textAlign: TextAlign
+                                                        .center,
+                                                    keyboardType: TextInputType
+                                                        .phone,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter
+                                                          .allow(RegExp(
+                                                          r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                      TextInputFormatter
+                                                          .withFunction((
+                                                          oldValue,
+                                                          newValue) {
+                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                        String newText = newValue
+                                                            .text
+                                                            .replaceAll(
+                                                            '٠', '0')
+                                                            .replaceAll(
+                                                            '١', '1')
+                                                            .replaceAll(
+                                                            '٢', '2')
+                                                            .replaceAll(
+                                                            '٣', '3')
+                                                            .replaceAll(
+                                                            '٤', '4')
+                                                            .replaceAll(
+                                                            '٥', '5')
+                                                            .replaceAll(
+                                                            '٦', '6')
+                                                            .replaceAll(
+                                                            '٧', '7')
+                                                            .replaceAll(
+                                                            '٨', '8')
+                                                            .replaceAll(
+                                                            '٩', '9');
+
+                                                        return newValue
+                                                            .copyWith(
+                                                            text: newText,
+                                                            selection: TextSelection
+                                                                .collapsed(
+                                                                offset: newText
+                                                                    .length));
+                                                      }),
+                                                    ],
+                                                    decoration: InputDecoration(
+                                                      contentPadding:
+                                                      const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 11,
+                                                          horizontal: 15
+
+                                                      ),
+                                                      isDense: true,
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                      ),
+
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
+                                                      errorMaxLines: 1,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 8),
+                                            Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'ایمیل',
+                                                  style: AppTextStyle
+                                                      .labelText.copyWith(
+                                                      fontSize: 11,
+                                                      fontWeight: FontWeight
+                                                          .normal,
+                                                      color: AppColor
+                                                          .textColor),
+                                                ),
+                                                SizedBox(height: 10,),
+                                                IntrinsicHeight(
+                                                  child: TextFormField(
+                                                    maxLines: 3,
+                                                    autovalidateMode: AutovalidateMode
+                                                        .onUserInteraction,
+                                                    controller: controller
+                                                        .emailUpdateEndController,
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(
+                                                        fontSize: 15),
+                                                    textAlign: TextAlign
+                                                        .start,
+                                                    keyboardType: TextInputType
+                                                        .text,
+                                                    decoration: InputDecoration(
+                                                      contentPadding:
+                                                      const EdgeInsets
+                                                          .symmetric(
+                                                          vertical: 14,
+                                                          horizontal: 15
+                                                      ),
+                                                      isDense: true,
+                                                      border: OutlineInputBorder(
+                                                        borderRadius:
+                                                        BorderRadius.circular(
+                                                            6),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
+                                                      errorMaxLines: 1,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+
+                                          ],
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Spacer(),
+                                      Obx(() =>
+                                          Container(
+                                            margin: EdgeInsets.symmetric(
+                                                horizontal: 40, vertical: 10),
+
+                                            width: double.infinity,
+                                            height: 40,
+                                            child: ElevatedButton(
+                                              style: ButtonStyle(
+                                                  padding: WidgetStatePropertyAll(
+                                                      EdgeInsets.symmetric(
+                                                          horizontal: 7)),
+                                                  elevation: WidgetStatePropertyAll(
+                                                      5),
+                                                  backgroundColor:
+                                                  WidgetStatePropertyAll(
+                                                      AppColor.buttonColor),
+                                                  shape: WidgetStatePropertyAll(
+                                                      RoundedRectangleBorder(
+                                                          borderRadius: BorderRadius
+                                                              .circular(
+                                                              10)))),
+                                              onPressed: () async {
+                                                controller.updateUserAccount(
+                                                    trans.id ?? 0);
+                                              },
+                                              child: controller.isLoading
+                                                  .value ?
+                                              CircularProgressIndicator(
+                                                valueColor: AlwaysStoppedAnimation<
+                                                    Color>(
+                                                    AppColor.textColor),
+                                              ) :
+                                              Text(
+                                                'ویرایش کاربر',
+                                                style: AppTextStyle.labelText
+                                                    .copyWith(fontSize: 12),
+                                              ),
+                                            ),
+                                          ),)
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        });
-                  },
-                  child: SvgPicture.asset('assets/svg/edit.svg',height: 20,
-                      colorFilter: ColorFilter.mode(
-                        AppColor.textColor,
-                        BlendMode.srcIn,
-                      )),
-                ),
-              ],
-            ))),
-        DataCell(Center(
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 20,
-                ),
-                GestureDetector(
-                  onTap: (){
-                    controller.updateUserStatusAccount(trans.id??0,-1);
-                  },
-                  child: SvgPicture.asset('assets/svg/close-circle1.svg',
-                      colorFilter: ColorFilter.mode(
-                        AppColor.accentColor,
-                        BlendMode.srcIn,
-                      )),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                GestureDetector(
-                  onTap: (){
-                    controller.updateUserStatusAccount(trans.id??0,1);
-                  },
-                  child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
-                      colorFilter: ColorFilter.mode(
-                        AppColor.primaryColor,
-                        BlendMode.srcIn,
-                      )),
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-              ],
-            ))),
+                            );
+                          });
+                    },
+                    child: SvgPicture.asset('assets/svg/edit.svg', height: 20,
+                        colorFilter: ColorFilter.mode(
+                          AppColor.textColor,
+                          BlendMode.srcIn,
+                        )),
+                  ),
+                ],
+              ))),
+          DataCell(Center(
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      controller.updateUserStatusAccount(trans.id ?? 0, -1);
+                    },
+                    child: SvgPicture.asset('assets/svg/close-circle1.svg',
+                        colorFilter: ColorFilter.mode(
+                          AppColor.accentColor,
+                          BlendMode.srcIn,
+                        )),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      controller.updateUserStatusAccount(trans.id ?? 0, 1);
+                    },
+                    child: SvgPicture.asset(
+                        'assets/svg/check-mark-circle.svg',
+                        colorFilter: ColorFilter.mode(
+                          AppColor.primaryColor,
+                          BlendMode.srcIn,
+                        )),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                ],
+              ))),
 
 
+        ],
+      );
+    }).toList();
+  }
 
-      ],
-    ))
-        .toList();
+  void _showChangePassword(int id) {
+    final formKey = GlobalKey<FormState>();
+    Get.dialog(
+      Form(
+        key: formKey,
+        child: AlertDialog(
+          backgroundColor: AppColor.secondaryColor,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20)),
+          title: Text('تغییر رمز عبور',
+              style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor)),
+          content: SizedBox(
+            height: Get.height * 0.3,
+            child: Obx(() {
+              return Column(
+                children: [
+                  const SizedBox(height: 24),
+                  // وارد کردن پسورد
+                  TextFormField(
+                    style: AppTextStyle.bodyText.copyWith(
+                      fontSize: 13,
+                    ),
+                    textDirection: TextDirection.rtl,
+                    controller: controller.passwordController,
+                    autofillHints: const [AutofillHints.password],
+                    obscureText: controller.showPasswordNew.value,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      ),
+                      labelText: 'رمز عبور جدید',
+                      labelStyle: TextStyle(color: AppColor.textColor),
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      prefixIconColor: AppColor.textColor,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.showPasswordNew.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColor.textColor,
+                        ),
+                        onPressed: () {
+                          controller.showPasswordNew.value = !controller.showPasswordNew.value;
+                        },
+                      ),
+                      border:
+                      OutlineInputBorder(borderRadius: BorderRadius.circular(
+                          12)),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'لطفا رمز عبور را وارد کنید';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+                  TextFormField(
+                    style: AppTextStyle.bodyText.copyWith(
+                      fontSize: 13,
+                    ),
+                    textDirection: TextDirection.rtl,
+                    controller: controller.retypePasswordController,
+                    autofillHints: const [AutofillHints.password],
+                    obscureText: controller.showPasswordNew.value,
+                    decoration: InputDecoration(
+                      contentPadding: const EdgeInsets.symmetric(
+                        vertical: 16,
+                        horizontal: 16,
+                      ),
+                      labelText: 'تکرار رمز عبور جدید',
+                      labelStyle: TextStyle(color: AppColor.textColor),
+                      prefixIcon: const Icon(Icons.lock_outline_rounded),
+                      prefixIconColor: AppColor.textColor,
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          controller.showPasswordNew.value
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: AppColor.textColor,
+                        ),
+                        onPressed: () {
+                          controller.showPasswordNew.value = !controller.showPasswordNew.value;
+                        },
+                      ),
+                      border:
+                      OutlineInputBorder(borderRadius: BorderRadius.circular(
+                          12)),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'لطفا رمز عبور را وارد کنید';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              );
+            }),
+          ),
+          actions: [
+            TextButton(
+              child:
+              Text('انصراف', style: TextStyle(color: AppColor.primaryColor)),
+              onPressed: () {
+                Get.back();
+                controller.clearChangePasswordForm();
+              },
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.primaryColor,
+                shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+              child: const Text(
+                  'تغییر رمز', style: TextStyle(color: Colors.white)),
+              onPressed: () {
+                if (formKey.currentState!.validate()) {
+                  controller.changePasswordByAdmin(id);
+                  controller.clearChangePasswordForm();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

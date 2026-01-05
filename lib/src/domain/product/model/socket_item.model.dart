@@ -13,6 +13,11 @@ class SocketItemModel {
   late double? differentPrice;
   late double? mesghalPrice;
   late double? mesghalDifferentPrice;
+  late double? salesRange;
+  late double? buyRange;
+  final DateTime? date;
+  final int? groupId;
+  final String? groupName;
 
   SocketItemModel({
     required this.channel,
@@ -22,25 +27,40 @@ class SocketItemModel {
     required this.differentPrice,
     required this.mesghalPrice,
     required this.mesghalDifferentPrice,
+    required this.salesRange,
+    required this.buyRange,
+    required this.date,
+    required this.groupId,
+    required this.groupName,
   });
 
   factory SocketItemModel.fromJson(Map<String, dynamic> json) => SocketItemModel(
     channel: json["channel"],
     id: json["id"],
-    name: json["Name"],
+    name: json["name"],
     price: json["price"]?.toDouble(),
     differentPrice: json["differentPrice"]?.toDouble(),
     mesghalPrice: json["mesghalPrice"]?.toDouble(),
-    mesghalDifferentPrice: json["mesghalDifferentPrice"].toDouble(),
+    mesghalDifferentPrice: json["mesghalDifferentPrice"]?.toDouble(),
+    salesRange: json["salesRange"]?.toDouble(),
+    buyRange: json["buyRange"]?.toDouble(),
+    date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
+    groupId: json["groupId"],
+    groupName: json["groupName"],
   );
 
   Map<String, dynamic> toJson() => {
     "channel": channel,
     "id": id,
-    "Name": name,
+    "name": name,
     "price": price,
     "differentPrice": differentPrice,
     "mesghalPrice": mesghalPrice,
     "mesghalDifferentPrice": mesghalDifferentPrice,
+    "salesRange": salesRange,
+    "buyRange": buyRange,
+    'date': date?.toIso8601String(),
+    "groupId": groupId,
+    "groupName": groupName,
   };
 }

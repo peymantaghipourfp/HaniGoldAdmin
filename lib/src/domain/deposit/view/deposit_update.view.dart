@@ -27,6 +27,7 @@ class DepositUpdateView extends StatefulWidget {
 
 class _DepositUpdateViewState extends State<DepositUpdateView> {
 
+  final GlobalKey _balanceKey = GlobalKey();
   final DepositUpdateController depositUpdateController = Get.find<DepositUpdateController>();
 
   @override
@@ -71,6 +72,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                               Center(child: CircularProgressIndicator(),)
                                   :
                               BalanceWidget(
+                                title: "${depositUpdateController.accountController.text} ${Jalali.now().year}/${Jalali.now().month.toString().padLeft(2, '0')}/${Jalali.now().day.toString().padLeft(2, '0')}",
                                 listBalance: depositUpdateController
                                     .balanceList,
                                 size: 400,),
@@ -816,7 +818,70 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                                     ),
                                                   ),
                                                 ),
-
+                                                // اضافه واریزی
+                                                Container(
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'اضافه واریزی (ریال)',
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(
+                                                        fontSize: isDesktop
+                                                            ? 12
+                                                            : 10),
+                                                  ),
+                                                ),
+                                                // اضافه واریزی
+                                                Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 5),
+                                                  child:
+                                                  TextFormField(
+                                                    controller: depositUpdateController
+                                                        .extraAmountController,
+                                                    style: AppTextStyle
+                                                        .labelText,
+                                                    keyboardType: TextInputType
+                                                        .number,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                                    ],
+                                                    onChanged: (value) {
+                                                      // حذف کاماهای قبلی و فرمت جدید
+                                                      String cleanedValue = value
+                                                          .replaceAll(',', '');
+                                                      if (cleanedValue
+                                                          .isNotEmpty) {
+                                                        depositUpdateController
+                                                            .extraAmountController
+                                                            .text =
+                                                            cleanedValue
+                                                                .toPersianDigit()
+                                                                .seRagham();
+                                                        depositUpdateController
+                                                            .extraAmountController
+                                                            .selection =
+                                                            TextSelection
+                                                                .collapsed(
+                                                                offset: depositUpdateController
+                                                                    .extraAmountController
+                                                                    .text
+                                                                    .length);
+                                                      }
+                                                    },
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
+                                                    ),
+                                                  ),
+                                                ),
+                                                // نمایش و بارگذاری تصویر
                                                 SizedBox(
                                                   width: Get.width * 0.7,
                                                   height: 100,
@@ -1022,10 +1087,30 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
                                   false ?
                               Center(child: CircularProgressIndicator(),)
                                   :
-                              BalanceWidget(
-                                listBalance: depositUpdateController
-                                    .balanceList,
-                                size: 400,),
+                              Row(mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  IconButton(
+                                    icon: SvgPicture.asset(
+                                      'assets/svg/camera.svg',
+                                      height: 24,
+                                      colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),
+                                    ),
+                                    tooltip: 'گرفتن اسکرین شات',
+                                    onPressed: () => depositUpdateController.captureBalanceScreenshot(context, _balanceKey),
+                                  ),
+                                  RepaintBoundary(
+                                    key: _balanceKey,
+                                    child: BalanceWidget(
+                                      title: "${depositUpdateController.accountController.text.length > 35
+                                          ? '${depositUpdateController.accountController.text.substring(0, 35)}...'
+                                          : depositUpdateController.accountController.text}${Jalali.now().year}/${Jalali.now().month.toString().padLeft(2, '0')}/${Jalali.now().day.toString().padLeft(2, '0')}",
+                                      listBalance: depositUpdateController
+                                          .balanceList,
+                                      size: 400,),
+                                  ),
+                                ],
+                              ),
                             ),
                         ],
                       )
@@ -1034,7 +1119,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: isDesktop ? FloatingActionButton(
           onPressed: () {
             Get.dialog(const ChatDialog());
           },
@@ -1043,7 +1128,7 @@ class _DepositUpdateViewState extends State<DepositUpdateView> {
             Icons.chat,
             color: Colors.white,
           ),
-        ),
+        ) : SizedBox.shrink(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });

@@ -43,6 +43,7 @@ class _InventoryDetailUpdateReceiveViewState
     final isMobile = ResponsiveBreakpoints
         .of(context)
         .isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
     return Obx(() {
       return Scaffold(
         appBar:
@@ -54,13 +55,13 @@ class _InventoryDetailUpdateReceiveViewState
             SafeArea(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                   child: ResponsiveRowColumn(
                     layout: isDesktop
                         ? ResponsiveRowColumnType.ROW
                         : ResponsiveRowColumnType.COLUMN,
-                    columnSpacing: 30,
-                    rowSpacing: 20,
+                    columnSpacing: 16,
+                    rowSpacing: 16,
                     rowCrossAxisAlignment: CrossAxisAlignment.start,
                     rowMainAxisAlignment: MainAxisAlignment.start,
                     columnCrossAxisAlignment: CrossAxisAlignment.start,
@@ -83,7 +84,9 @@ class _InventoryDetailUpdateReceiveViewState
                         child: Container(
                           constraints: BoxConstraints(maxWidth: 700),
                           padding: EdgeInsets.symmetric(
-                              horizontal: 40, vertical: 20),
+                              horizontal: isMobile ? 2 : isTablet ? 16 : 40,
+                              vertical: isMobile ? 12 : isTablet ? 20 : 30
+                          ),
                           /*decoration: BoxDecoration(
                             color: AppColor.backGroundColor1,
                             borderRadius: BorderRadius.circular(16),
@@ -96,11 +99,12 @@ class _InventoryDetailUpdateReceiveViewState
                             ],
                           ),*/
                           child: SizedBox(
-                            width: Get.width * 0.9,
-                            height: Get.height,
+                            width: double.infinity,
+                            height: isDesktop ? Get.height : null,
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 ResponsiveRowColumnItem(
                                   child: Row(
@@ -119,22 +123,23 @@ class _InventoryDetailUpdateReceiveViewState
                                   ),
                                 ),
                                 ResponsiveRowColumnItem(
-                                  child: isDesktop ? SizedBox(width: 480,
+                                  child: isDesktop
+                                      ? SizedBox(
+                                    width: 480,
                                     child: Divider(
                                       height: 1,
                                       color: AppColor.appBarColor,
                                     ),
-                                  ) : SizedBox(width: 420,
-                                    child: Divider(
-                                      height: 1,
-                                      color: AppColor.appBarColor,
-                                    ),
+                                  )
+                                      : Divider(
+                                    height: 1,
+                                    color: AppColor.appBarColor,
                                   ),
                                 ),
                                 ResponsiveRowColumnItem(
-                                    rowFlex: 1,
+                                    rowFlex: isDesktop ? 1 : null,
                                     child: SingleChildScrollView(
-                                      physics: BouncingScrollPhysics(),
+                                      physics: isDesktop ? BouncingScrollPhysics() : NeverScrollableScrollPhysics(),
                                       child: Container(
                                         constraints: isDesktop ? BoxConstraints(
                                             maxWidth: 500) : BoxConstraints(
@@ -168,100 +173,34 @@ class _InventoryDetailUpdateReceiveViewState
                                               Container(
                                                 padding: EdgeInsets.only(
                                                     bottom: 5),
-                                                child: DropdownButton2(
-                                                  isExpanded: true,
-                                                  hint: Row(
-                                                    children: [
-                                                      Expanded(
-                                                        child: Text(
-                                                          "انتخاب کنید",
-                                                          style: AppTextStyle
-                                                              .labelText
-                                                              .copyWith(
-                                                            fontSize: 14,
-                                                            color: AppColor
-                                                                .textColor,
-                                                          ),
-                                                          overflow: TextOverflow
-                                                              .ellipsis,
-                                                        ),
+                                                child: Container(
+                                                  height: 50,
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 5),
+                                                  child:
+                                                  Obx(() => TextFormField(
+                                                    readOnly: true,
+                                                    controller: TextEditingController(
+                                                      text: inventoryUpdateReceiveController.selectedWalletAccount.value != null
+                                                          ? "${inventoryUpdateReceiveController.selectedWalletAccount.value!.item?.name ?? ''} - ${inventoryUpdateReceiveController.selectedWalletAccount.value!.account?.name ?? ''}"
+                                                          : 'انتخاب کنید',
+                                                    ),
+                                                    style: AppTextStyle
+                                                        .bodyText,
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
                                                       ),
-                                                    ],
-                                                  ),
-                                                  items:
-                                                  inventoryUpdateReceiveController
-                                                      .walletAccountList.map((
-                                                      wallet) {
-                                                    return DropdownMenuItem(
-                                                        value: wallet,
-                                                        child: Row(
-                                                          children: [
-                                                            Text("${wallet.item
-                                                                ?.name}" ?? "",
-                                                              style: AppTextStyle
-                                                                  .bodyText,),
-                                                          ],
-                                                        ));
-                                                  }).toList(),
-                                                  value: inventoryUpdateReceiveController
-                                                      .selectedWalletAccount
-                                                      .value,
-                                                  onChanged: (newValue) {
-                                                    if (newValue != null) {
-                                                      inventoryUpdateReceiveController
-                                                          .changeSelectedWalletAccount(
-                                                          newValue);
-                                                    }
-                                                  },
-                                                  buttonStyleData: ButtonStyleData(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 5),
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius
-                                                          .circular(7),
-                                                      color: AppColor
+                                                      filled: true,
+                                                      fillColor: AppColor
                                                           .textFieldColor,
-                                                      border: Border.all(
-                                                          color: AppColor
-                                                              .backGroundColor,
-                                                          width: 1),
+                                                      suffixIcon: Icon(
+                                                        Icons.arrow_drop_down,
+                                                        color: AppColor.textColor,
+                                                      ),
                                                     ),
-                                                    elevation: 0,
-                                                  ),
-                                                  iconStyleData: IconStyleData(
-                                                    icon: const Icon(Icons
-                                                        .keyboard_arrow_down),
-                                                    iconSize: 23,
-                                                    iconEnabledColor: AppColor
-                                                        .textColor,
-                                                    iconDisabledColor: Colors
-                                                        .grey,
-                                                  ),
-                                                  dropdownStyleData: DropdownStyleData(
-                                                    maxHeight: 200,
-                                                    decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius
-                                                          .circular(7),
-                                                      color: AppColor
-                                                          .textFieldColor,
-                                                    ),
-                                                    offset: const Offset(0, 0),
-                                                    scrollbarTheme: ScrollbarThemeData(
-                                                      radius: const Radius
-                                                          .circular(7),
-                                                      thickness: WidgetStateProperty
-                                                          .all(6),
-                                                      thumbVisibility: WidgetStateProperty
-                                                          .all(true),
-                                                    ),
-                                                  ),
-                                                  menuItemStyleData: const MenuItemStyleData(
-                                                    height: 40,
-                                                    padding: EdgeInsets
-                                                        .symmetric(
-                                                        horizontal: 10),
-                                                  ),
+                                                  )),
                                                 ),
                                               ),
                                               inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==1 ?
@@ -380,7 +319,7 @@ class _InventoryDetailUpdateReceiveViewState
                                                   ),
                                                 ],
                                               ):
-                                                  SizedBox.shrink(),
+                                              SizedBox.shrink(),
 
                                               inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==1 ?
                                               // شماره قبض
@@ -564,8 +503,33 @@ class _InventoryDetailUpdateReceiveViewState
                                                   ),
                                                 ),
                                               ),
+                                              // تعداد
+                                              SizedBox(height: 3),
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id == 10 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id == 13 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id == 15 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id == 16
+                                                  ?
+                                              Row(
+                                                children: [
+                                                  Text(
+                                                    ' تعداد: ',
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                  Text(inventoryUpdateReceiveController.itemCountTemp.value,
+                                                    style: AppTextStyle.bodyText
+                                                        .copyWith(color: AppColor
+                                                        .primaryColor.withOpacity(0.8)),)
+                                                ],
+                                              ) :
+                                              SizedBox(),
 
-                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==1 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==10 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==12 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==15 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==16 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==14 ?
                                               // عیار
                                               Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -589,6 +553,13 @@ class _InventoryDetailUpdateReceiveViewState
                                                     child:
                                                     IntrinsicHeight(
                                                       child: TextFormField(
+                                                        onChanged: (value) {
+                                                          inventoryUpdateReceiveController.updateW750();
+                                                        },
+                                                        /*readOnly: inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==10 ||
+                                                            inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==12 ||
+                                                            inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==15 ||
+                                                            inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==16 ? true :false ,*/
                                                         validator: (value) {
                                                           if (value == null ||
                                                               value.isEmpty) {
@@ -663,7 +634,12 @@ class _InventoryDetailUpdateReceiveViewState
                                               ):
                                               SizedBox.shrink(),
 
-                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==1 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==10 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==12 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==15 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==16 ||
+                                                  inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==14 ?
                                               // وزن 750
                                               Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -687,6 +663,10 @@ class _InventoryDetailUpdateReceiveViewState
                                                     child:
                                                     IntrinsicHeight(
                                                       child: TextFormField(
+                                                        readOnly: inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==10 ||
+                                                            inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==12 ||
+                                                            inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==15 ||
+                                                            inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==16 ? true :false ,
                                                         autovalidateMode: AutovalidateMode
                                                             .onUserInteraction,
                                                         controller: inventoryUpdateReceiveController
@@ -754,7 +734,7 @@ class _InventoryDetailUpdateReceiveViewState
                                               ):
                                               SizedBox.shrink(),
 
-                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.itemUnit?.id==2 ?
+                                              inventoryUpdateReceiveController.selectedWalletAccount.value?.item?.id==1 ?
                                               // ناخالصی
                                               Column(crossAxisAlignment: CrossAxisAlignment.start,
                                                 children: [
@@ -1186,7 +1166,7 @@ class _InventoryDetailUpdateReceiveViewState
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: isMobile ? SizedBox.shrink() : FloatingActionButton(
           onPressed: () {
             Get.dialog(const ChatDialog());
           },

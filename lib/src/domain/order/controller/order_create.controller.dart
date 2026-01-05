@@ -19,8 +19,11 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/audio.service.dart';
 import '../../../config/const/socket.service.dart';
+import '../../../config/repository/account_sales_group.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
+import '../../account/model/account_level_get_one_item.model.dart';
+import '../../accountSalesGroup/model/account_sales_group_get_one_item.model.dart';
 import '../../product/model/socket_item.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../model/order.model.dart';
@@ -35,7 +38,6 @@ class OrderTypeModel{
   final String? name;
   OrderTypeModel({this.id, this.name});
 }
-
 
 class OrderCreateController extends BaseController{
 
@@ -52,6 +54,7 @@ class OrderCreateController extends BaseController{
   final List<OrderTypeModel> orderTypeList=<OrderTypeModel>[].obs;
   final ItemRepository itemRepository=ItemRepository();
   final AccountRepository accountRepository=AccountRepository();
+  final AccountSalesGroupRepository accountSalesGroupRepository=AccountSalesGroupRepository();
   final OrderRepository orderRepository=OrderRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   final List<ItemModel> itemList=<ItemModel>[].obs;
@@ -61,6 +64,7 @@ class OrderCreateController extends BaseController{
   var errorMessage=''.obs;
   var isLoading=true.obs;
   var isLoadingBalance=true.obs;
+  var isLoadingItems=false.obs;
 
   var maxItemSell=0.obs;
   var maxItemBuy=0.obs;
@@ -74,13 +78,31 @@ class OrderCreateController extends BaseController{
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
   Timer? debounce;
   var priceTemp=''.obs;
+  var socketPrice=''.obs;
+  var currentPrice=''.obs;
+  final Rxn<AccountLevelGetOneItemModel> selectedAccountLevelItem = Rxn<AccountLevelGetOneItemModel>();
+  var isLoadingAccountLevelItem = false.obs;
+  final Rxn<AccountSalesGroupGetOneItemModel> selectedAccountSalesGroupItem = Rxn<AccountSalesGroupGetOneItemModel>();
+  var isLoadingAccountSalesGroupItem = false.obs;
+  // Error handling
+  var hasError = false.obs;
+  var errorTitle = ''.obs;
+  var dropdownError="".obs;
 
   //SocketService socketService = Get.find<SocketService>();
   StreamSubscription? socketSubscription;
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
       selectedBuySell.value = newValue;
-      if(selectedItem.value!=null){
+      // قیمت فیلد همیشه خالی باشد
+      priceController.clear();
+      currentPrice.value = '';
+      if (selectedItem.value != null) {
+        _updateSocketPriceFromCurrent();
+      } else {
+        socketPrice.value = '';
+      }
+      /*if(selectedItem.value!=null){
         if(selectedItem.value?.itemUnit?.name=='گرم'){
           if(selectedBuySell.value?.id==0){
             priceController.text=(selectedItem.value!.mesghalPrice).toString().seRagham(separator: ',');
@@ -98,14 +120,25 @@ class OrderCreateController extends BaseController{
             priceTemp.value=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
           }
         }
-      }
+      }*/
   }
 
   void changeSelectedItem(ItemModel? newValue) {
     clearListChangeItem();
     selectedItem.value = newValue;
-
-    if(newValue?.itemUnit?.name=='گرم'){
+// قیمت فیلد همیشه خالی باشد
+    priceController.clear();
+    currentPrice.value = '';
+    if (newValue != null) {
+      _updateSocketPriceFromCurrent();
+      _fetchAccountLevelForCurrentSelection();
+      _fetchAccountSalesGroupForCurrentSelection();
+    } else {
+      socketPrice.value = '';
+      selectedAccountLevelItem.value = null;
+      selectedAccountSalesGroupItem.value = null;
+    }
+    /*if(newValue?.itemUnit?.name=='گرم'){
       if(selectedBuySell.value?.id==0) {
         priceController.text=selectedItem.value!.mesghalPrice.toString().seRagham(separator: ',');
         priceTemp.value=newValue!.price.toString().seRagham(separator: ',');
@@ -121,12 +154,12 @@ class OrderCreateController extends BaseController{
         priceController.text=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
         priceTemp.value=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
       }
-    }
+    }*/
 
-    maxItemSell.value=newValue!.maxSell!;
-    maxItemBuy.value=newValue.maxBuy!;
-    print(maxItemSell.value);
-    print(maxItemBuy.value);
+    //maxItemSell.value=newValue!.maxSell!;
+    //maxItemBuy.value=newValue.maxBuy!;
+    //print(maxItemSell.value);
+    //print(maxItemBuy.value);
     print(priceTemp.value);
   }
 
@@ -146,8 +179,9 @@ class OrderCreateController extends BaseController{
                 'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
             );*/
-            print("sssssss:::${socketItem.mesghalPrice}");
+            print("socketItem.mesghalPrice:::${socketItem.mesghalPrice}");
             changePriceItem(socketItem);
+            _fetchAccountSalesGroupForCurrentSelection();
           }
         } catch (e) {
           Get.log('Error processing socket message in OrderCreateController: $e');
@@ -161,27 +195,47 @@ class OrderCreateController extends BaseController{
   void changePriceItem(SocketItemModel socketItem){
     for(int i=0 ; i<itemList.length ; i++){
       if(itemList[i].id==socketItem.id){
-        itemList[i].mesghalPrice=socketItem.mesghalPrice;
-      }
-    }
-    if(selectedItem.value!=null){
-      if(selectedItem.value?.id==socketItem.id){
-        selectedItem.value?.mesghalPrice=socketItem.mesghalPrice;
-        if(selectedBuySell.value?.id==0){
-          priceController.text=socketItem.mesghalPrice.toString().seRagham(separator: ',');
-        }else if(selectedBuySell.value?.id==1){
-          priceController.text=((socketItem.mesghalPrice?.toDouble() ?? 0)-(socketItem.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',');
-        }
+        itemList[i].baseMesghalPrice=socketItem.mesghalPrice;
+        itemList[i].basePrice=socketItem.price;
+        itemList[i].baseMesghalDifferentPrice = socketItem.mesghalDifferentPrice;
+        itemList[i].baseDifferentPrice = socketItem.differentPrice;
 
+        if(selectedItem.value?.id == socketItem.id) {
+          _updateSocketPriceFromCurrent();
+        }
       }
     }
+    /*if(selectedItem.value!=null){
+      if(selectedItem.value?.id==socketItem.id && manualPriceChecked.value==false){
+        selectedItem.value?.mesghalPrice=socketItem.mesghalPrice;
+        if(selectedBuySell.value?.id==0 && manualPriceChecked.value==false){
+          priceController.text=socketItem.mesghalPrice.toString().seRagham(separator: ',');
+          priceTemp.value=socketItem.price.toString().seRagham(separator: ',');
+
+        }else if(selectedBuySell.value?.id==1 && manualPriceChecked.value==false){
+          priceController.text=((socketItem.mesghalPrice?.toDouble() ?? 0)-(socketItem.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',');
+          priceTemp.value=(((socketItem.price!)-(socketItem.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
+
+        }
+      }
+    }*/
     update();
   }
 
-  void changeSelectedAccount(AccountModel? newValue) {
+  Future<void> changeSelectedAccount(AccountModel? newValue) async {
     selectedAccount.value = newValue;
+    selectedItem.value = null;
+    selectedAccountLevelItem.value = null;
+    itemList.clear();
+    isLoadingItems.value = true;
     getBalanceList(newValue?.id ?? 0);
     isLoadingBalance.value=false;
+    // Load items filtered by selected account
+    if(newValue?.id != null){
+      await fetchItemList(accountId: newValue!.id);
+      await _fetchAccountLevelForCurrentSelection();
+      await _fetchAccountSalesGroupForCurrentSelection();
+    }
   }
 
 
@@ -199,6 +253,38 @@ class OrderCreateController extends BaseController{
       double totalPrice= price * quantity;
       totalPriceController.text=totalPrice.toStringAsFixed(0).toPersianDigit().seRagham();
       priceTemp.value=price.toString();
+    }
+    // به‌روزرسانی قیمت فعلی برای مقایسه
+    currentPrice.value = priceController.text;
+
+    _updateSocketPriceFromCurrent();
+  }
+
+  void _updateSocketPriceFromCurrent() {
+    if (selectedItem.value != null) {
+      // جستجو در لیست محصولات برای یافتن قیمت فعلی سوکت
+      for (var item in itemList) {
+        if (item.id == selectedItem.value?.id) {
+          if (selectedItem.value?.itemUnit?.name == 'گرم') {
+            if (selectedBuySell.value?.id == 0) {
+              socketPrice.value = item.baseMesghalPrice.toString().seRagham(separator: ',');
+            } else if (selectedBuySell.value?.id == 1) {
+              socketPrice.value = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+            } else {
+              socketPrice.value = item.baseMesghalPrice.toString().seRagham(separator: ',');
+            }
+          } else {
+            if (selectedBuySell.value?.id == 0) {
+              socketPrice.value = item.basePrice.toString().seRagham(separator: ',');
+            } else if (selectedBuySell.value?.id == 1) {
+              socketPrice.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+            } else {
+              socketPrice.value = item.basePrice.toString().seRagham(separator: ',');
+            }
+          }
+          break;
+        }
+      }
     }
   }
   
@@ -219,19 +305,18 @@ class OrderCreateController extends BaseController{
 
   @override
   void onInit() {
+    socketSubscription?.cancel();
+    _listenToSocket();
+    fetchAccountList();
     orderTypeList.addAll([
       OrderTypeModel(id:null, name: 'انتخاب کنید'),
       OrderTypeModel(id:0,name: 'فروش به کاربر'),
       OrderTypeModel(id:1,name: 'خرید از کاربر'),
     ]);
     searchController.addListener(onSearchChanged);
-    fetchItemList();
-    fetchAccountList();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
-    socketSubscription?.cancel();
-    _listenToSocket();
     super.onInit();
   }
 
@@ -256,23 +341,32 @@ class OrderCreateController extends BaseController{
   }
 
   // لیست محصولات
-  Future<void> fetchItemList() async{
+  Future<void> fetchItemList({int? accountId}) async{
+    isLoadingItems.value=true;
+    if(accountId==null){
+      // Without account we don't fetch items
+      itemList.clear();
+      isLoadingItems.value=false;
+      return;
+    }
     try{
       state.value=PageState.loading;
-      var fetchedItemList=await itemRepository.getItemList();
+      var fetchedItemList=await itemRepository.getItemList(accountId: accountId.toString());
       itemList.assignAll(fetchedItemList);
       itemList.removeWhere((e) => e.status==false,);
       state.value=PageState.list;
       if(itemList.isEmpty){
         state.value=PageState.empty;
       }
-      print("itemList${itemList.length}");
+      print("itemList$itemList");
     }
     catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+      showError('خطا در بارگذاری محصولات', 'خطایی هنگام بارگذاری محصولات به وجود آمده است: ');
     }finally{
       isLoading.value=false;
+      isLoadingItems.value=false;
     }
   }
 
@@ -308,6 +402,7 @@ class OrderCreateController extends BaseController{
     catch(e){
       state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+      showError('خطا در بارگذاری کاربران', 'خطایی هنگام بارگذاری کاربران به وجود آمده است: ');
     }finally{
       isLoading.value=false;
     }
@@ -342,6 +437,7 @@ class OrderCreateController extends BaseController{
       EasyLoading.show(status: 'لطفا صبر کنید...');
       isLoading.value = true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
+      if (Get.isDialogOpen!) Get.back();
       var response = await orderRepository.insertOrder(
         date: gregorianDate,
         accountId: selectedAccount.value?.id ?? 0,
@@ -352,16 +448,14 @@ class OrderCreateController extends BaseController{
         price: double.parse(priceTemp.value.replaceAll(',', '').toEnglishDigit()),
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         description: descriptionController.text,
-        notLimit:notLimitChecked.value,
-        manualPrice:manualPriceChecked.value,
+        notLimit:true,
+        manualPrice:true,
         isCard: isCardChecked.value,
       );
       print(response);
       if (response != null) {
         OrderModel orderResponse=OrderModel.fromJson(response);
-        //Get.toNamed('/orderList');
-        if (Get.isDialogOpen!) Get.back();
-        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
+        /*Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
             titleText: Text(orderResponse.infos!.first['title'],
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
@@ -371,11 +465,57 @@ class OrderCreateController extends BaseController{
         orderController.getOrderListPager();
         orderController.fetchTotalBalanceList();
         balanceList.clear();
-        clearList();
+        clearList();*/
+        // Check if there are any errors in the response
+        if (orderResponse.infos != null && orderResponse.infos!.isNotEmpty) {
+          var firstInfo = orderResponse.infos!.first;
+          String title = firstInfo['title'] ?? 'خطا';
+          String description = firstInfo['description'] ?? 'خطای نامشخص';
+          Get.snackbar(title, description,
+              titleText: Text(title,
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),),
+              messageText: Text(
+                  description , textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColor.textColor)));
+          // Check if this is an error (you might need to adjust this condition based on your API response structure)
+          if (title.toLowerCase().contains('خطا') || title.toLowerCase().contains('error') ||
+              description.toLowerCase().contains('خطا') || description.toLowerCase().contains('error')) {
+            showError(title, description);
+          } else {
+            // Success message - show snackbar and clear form
+            Get.snackbar(title, description,
+                titleText: Text(title,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppColor.textColor),),
+                messageText: Text(
+                    description , textAlign: TextAlign.center,
+                    style: TextStyle(color: AppColor.textColor)));
+            /*orderController.getOrderListPager();
+            orderController.fetchTotalBalanceList();*/
+            // Use silent refresh to update list without UI flicker
+            orderController.refreshOrderListSilently();
+            orderController.refreshTotalBalanceSilently();
+            balanceList.clear();
+            clearList();
+            clearError(); // Clear any previous errors
+          }
+        } else {
+          // No info in response, assume success
+          /*orderController.getOrderListPager();
+          orderController.fetchTotalBalanceList();*/
+          // Use silent refresh to update list without UI flicker
+          orderController.refreshOrderListSilently();
+          orderController.refreshTotalBalanceSilently();
+          balanceList.clear();
+          clearList();
+          clearError();
+        }
       }
     }
     catch(e){
-      throw ErrorException('خطا:$e');
+      showError('خطا در ایجاد سفارش', 'خطا: ');
+      print('خطا:$e');
     }finally{
       EasyLoading.dismiss();
       isLoading.value=false;
@@ -406,8 +546,53 @@ class OrderCreateController extends BaseController{
     }
   }
 
+  Future<void> _fetchAccountLevelForCurrentSelection() async {
+    final accountId = selectedAccount.value?.id;
+    final itemId = selectedItem.value?.id;
+    if (accountId == null || itemId == null) {
+      selectedAccountLevelItem.value = null;
+      return;
+    }
+    try {
+      isLoadingAccountLevelItem.value = true;
+      final result = await accountRepository.accountLevelGetOneItem(
+        accountId: accountId,
+        itemId: itemId,
+      );
+      selectedAccountLevelItem.value = result;
+    } catch (_) {
+      selectedAccountLevelItem.value = null;
+    } finally {
+      isLoadingAccountLevelItem.value = false;
+    }
+  }
+
+  Future<void> _fetchAccountSalesGroupForCurrentSelection() async {
+    final accountId = selectedAccount.value?.id;
+    final itemId = selectedItem.value?.id;
+    if (accountId == null || itemId == null) {
+      selectedAccountSalesGroupItem.value = null;
+      return;
+    }
+    try {
+      isLoadingAccountSalesGroupItem.value = true;
+      final result = await accountSalesGroupRepository.accountSalesGroupGetOneItem(
+        accountId: accountId,
+        itemId: itemId,
+      );
+      selectedAccountSalesGroupItem.value = result;
+    } catch (_) {
+      selectedAccountSalesGroupItem.value = null;
+    } finally {
+      isLoadingAccountSalesGroupItem.value = false;
+    }
+  }
+
    void clearList() {
     //dateController.clear();
+     var now = Jalali.now();
+     DateTime date=DateTime.now();
+     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     priceController.clear();
     quantityController.clear();
     descriptionController.clear();
@@ -415,9 +600,15 @@ class OrderCreateController extends BaseController{
     selectedBuySell.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
-    manualPriceChecked.value=false;
-    notLimitChecked.value=false;
+    selectedAccountLevelItem.value = null;
+     selectedAccountSalesGroupItem.value = null;
+    itemList.clear();
+    socketPrice.value="";
+    currentPrice.value="";
+    //manualPriceChecked.value=false;
+    //notLimitChecked.value=false;
     isCardChecked.value=false;
+    clearError();
   }
   void clearListChangeItem() {
     priceController.clear();
@@ -425,12 +616,70 @@ class OrderCreateController extends BaseController{
     descriptionController.clear();
     totalPriceController.clear();
     selectedItem.value=null;
-    manualPriceChecked.value=false;
-    notLimitChecked.value=false;
+    //manualPriceChecked.value=false;
+    //notLimitChecked.value=false;
     isCardChecked.value=false;
+    selectedAccountLevelItem.value = null;
+    selectedAccountSalesGroupItem.value = null;
   }
+
   void resetAccountSearch() {
     searchController.clear();
     searchedAccounts.assignAll(accountList);
   }
+  // Error handling methods
+  void showError(String title, String message) {
+    hasError.value = true;
+    errorTitle.value = title;
+    errorMessage.value = message;
+  }
+
+  void clearError() {
+    hasError.value = false;
+    errorTitle.value = '';
+    errorMessage.value = '';
+  }
+
+  // Set price from sales group
+  void setPriceFromSalesGroup(double mesghalPrice) {
+    priceController.text = mesghalPrice.toStringAsFixed(0).toPersianDigit().seRagham(separator: ',');
+    currentPrice.value = priceController.text;
+    updateTotalPrice();
+  }
+
+  // دریافت قیمت از socket
+  Future<void> fetchPriceFromSocket() async {
+    if (selectedItem.value != null) {
+      // جستجو در لیست محصولات برای یافتن قیمت به‌روز
+      for (var item in itemList) {
+        if (item.id == selectedItem.value?.id) {
+          if (selectedItem.value?.itemUnit?.name == 'گرم') {
+            if (selectedBuySell.value?.id == 0) {
+              socketPrice.value = item.baseMesghalPrice.toString().seRagham(separator: ',');
+              priceController.text = item.baseMesghalPrice.toString().seRagham(separator: ',');
+              priceTemp.value = item.basePrice.toString().seRagham(separator: ',');
+            } else if (selectedBuySell.value?.id == 1) {
+              socketPrice.value = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              priceController.text = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              priceTemp.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+            }
+          } else {
+            if (selectedBuySell.value?.id == 0) {
+              socketPrice.value = item.basePrice.toString().seRagham(separator: ',');
+              priceController.text = item.basePrice.toString().seRagham(separator: ',');
+              priceTemp.value = item.basePrice.toString().seRagham(separator: ',');
+            } else if (selectedBuySell.value?.id == 1) {
+              socketPrice.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              priceController.text = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              priceTemp.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+            }
+          }
+          updateTotalPrice();
+          break;
+        }
+      }
+    }
+  }
+
+
 }

@@ -2,7 +2,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-
+import 'dart:html' as html;
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -52,6 +52,9 @@ class ProductController extends BaseController{
 
   //SocketService socketService = Get.find<SocketService>();
   StreamSubscription? socketSubscription;
+  RxBool isRefreshing = false.obs;
+  RxInt refreshCounter = 0.obs;
+  html.BroadcastChannel? _statusChangeChannel;
   /*final WebSocketRepository webSocketRepository=WebSocketRepository();
   final RxString _status = 'disconnected'.obs;
   final RxList<String> _messages = <String>[].obs;
@@ -67,12 +70,60 @@ class ProductController extends BaseController{
     //connect(WebSocketUrl.webSocketUrl);
     socketSubscription?.cancel();
     _listenToSocket();
+    _setupSocketReconnectionHandler();
+    _setupBroadcastChannel();
     fetchActiveItemList();
     fetchInactiveItemList();
     /*if(getOneItem.value!=null) {
       itemController.text = getOneItem.value!.name!;
     }*/
     super.onInit();
+  }
+
+  // Setup BroadcastChannel for cross-tab status change notifications
+  void _setupBroadcastChannel() {
+    try {
+      _statusChangeChannel = html.BroadcastChannel('product_status_changes');
+      _statusChangeChannel!.onMessage.listen((event) {
+        try {
+          final data = json.decode(event.data);
+          if (data['type'] == 'statusChanged') {
+            print('ProductController: Received status change notification from another tab');
+            // Refresh lists to sync with server
+            refreshItemListsSilently();
+          }
+        } catch (e) {
+          Get.log('Error handling broadcast message: $e');
+        }
+      });
+    } catch (e) {
+      // BroadcastChannel might not be available in all environments
+      Get.log('BroadcastChannel not available: $e');
+    }
+  }
+
+  // Notify other tabs about status changes
+  void _notifyOtherTabsOfStatusChange() {
+    try {
+      if (_statusChangeChannel != null) {
+        _statusChangeChannel!.postMessage(json.encode({
+          'type': 'statusChanged',
+          'timestamp': DateTime.now().toIso8601String(),
+        }));
+        print('ProductController: Sent status change notification to other tabs');
+      }
+    } catch (e) {
+      Get.log('Error sending broadcast message: $e');
+    }
+  }
+
+  void _setupSocketReconnectionHandler() {
+    ever(isSocketConnected, (bool connected) {
+      if (connected) {
+        print('ProductController: Socket reconnected, re-subscribing...');
+        _listenToSocket();
+      }
+    });
   }
 
 
@@ -88,11 +139,18 @@ class ProductController extends BaseController{
   void _listenToSocket() {
     socketSubscription?.cancel();
     socketSubscription = socketService.messageStream.listen((message) {
-      if (message is String) {
         try {
-          final data = json.decode(message);
-          if (data['channel'] == 'itemPrice') {
+          Map<String, dynamic>? data;
+          if (message is String) {
+            data = json.decode(message);
+            print("dataSocketItem::::::${data}");
+          } else if (message is Map) {
+            data = Map<String, dynamic>.from(message);
+            print("dataSocketItem2222::::::${data}");
+          }
+          if (data != null && data['channel'] == 'itemPrice') {
             final socketItem = SocketItemModel.fromJson(data);
+            print("socketItemData111111111::::::${socketItem.price}");
             /*Get.snackbar('تغییر قیمت', 'قیمت ${socketItem.name} تغییر کرد.',
               titleText: Text('تغییر قیمت',
                 textAlign: TextAlign.center,
@@ -101,6 +159,10 @@ class ProductController extends BaseController{
                 'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
             );*/
+            /*print(data);
+            fetchActiveItemList();
+            fetchInactiveItemList();*/
+            print('Socket: Item price update received - ID: ${socketItem.id}, Name: ${socketItem.name}');
             // Update the specific item in activeItemList
             final activeIndex = activeItemList.indexWhere((item) => item.id == socketItem.id);
             if (activeIndex != -1) {
@@ -110,7 +172,6 @@ class ProductController extends BaseController{
               activeItemList[activeIndex].mesghalDifferentPrice = socketItem.mesghalDifferentPrice;
               activeItemList.refresh();
             }
-
             // Update the specific item in inactiveItemList
             final inactiveIndex = inactiveItemList.indexWhere((item) => item.id == socketItem.id);
             if (inactiveIndex != -1) {
@@ -120,22 +181,59 @@ class ProductController extends BaseController{
               inactiveItemList[inactiveIndex].mesghalDifferentPrice = socketItem.mesghalDifferentPrice;
               inactiveItemList.refresh();
             }
+            // Show price change notification
+            /*Get.snackbar(
+              'تغییر قیمت',
+              'قیمت ${socketItem.Name ?? 'محصول'} تغییر کرد.',
+              titleText: Text(
+                'تغییر قیمت',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),
+              ),
+              messageText: Text(
+                'قیمت ${socketItem.Name ?? 'محصول'} تغییر کرد.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColor.textColor),
+              ),
+              snackPosition: SnackPosition.TOP,
+              duration: Duration(seconds: 3),
+            );*/
+            refreshItemListsSilently();
+          }
+          else if (data != null && (data['channel'] == 'item' || data['channel'] == 'itemStatus')) {
+            print('Socket: Item status update received');
+            // Perform full refresh to sync status changes across tabs
+            refreshItemListsSilently();
           }
         } catch (e) {
           Get.log('Error processing socket message in ProductController: $e');
         }
-      }
     }, onError: (error) {
       Get.log('Socket stream error in ProductController: $error');
+      Future.delayed(Duration(seconds: 2), () {
+        if (socketService.isConnected) {
+          _listenToSocket();
+        }
+      });
     });
   }
 
+  @override
+  void onClose() {
+    socketSubscription?.cancel();
+    _statusChangeChannel?.close();
+    super.onClose();
+  }
 
   // لیست محصولات
-  Future<List<ItemModel>> fetchActiveItemList() async{
+  Future<List<ItemModel>> fetchActiveItemList({bool showLoading = true}) async{
     try{
       //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-      state.value=PageState.loading;
+      if (showLoading) {
+        if (activeItemList.isEmpty) {
+          state.value=PageState.loading;
+        }
+      }
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
       activeItemList.assignAll(
@@ -146,6 +244,7 @@ class ProductController extends BaseController{
       if(itemList.isEmpty){
         state.value=PageState.empty;
       }
+      refreshCounter.value++;
     }
     catch(e){
       state.value=PageState.err;
@@ -156,10 +255,14 @@ class ProductController extends BaseController{
     }
   }
 
-  Future<List<ItemModel>> fetchInactiveItemList() async{
+  Future<List<ItemModel>> fetchInactiveItemList({bool showLoading = true}) async{
     try{
       //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-      state.value=PageState.loading;
+      if (showLoading) {
+        if (inactiveItemList.isEmpty) {
+          state.value=PageState.loading;
+        }
+      }
       var fetchedItemList=await itemRepository.getItemList();
       itemList.assignAll(fetchedItemList);
       inactiveItemList.assignAll(
@@ -180,7 +283,79 @@ class ProductController extends BaseController{
     }
   }
 
-  Future<bool> insertPriceItem(int id, double price, double different,int itemUnitId,{bool showSnackbar = true} )async{
+  // Silent refresh for socket updates - no loading state change
+  Future<void> refreshActiveItemListSilently() async {
+    isRefreshing.value = true;
+    try {
+      var fetchedItemList = await itemRepository.getItemList();
+
+      // Update list without clearing first (prevents flicker)
+      itemList.assignAll(fetchedItemList);
+      activeItemList.assignAll(
+        fetchedItemList.where((item) => item.status == true).toList(),
+      );
+      state.value = PageState.list;
+
+      // Increment refresh counter to invalidate cached data
+      refreshCounter.value++;
+
+    } catch (e) {
+      print('Error in silent active item refresh: $e');
+    } finally {
+      isRefreshing.value = false;
+    }
+  }
+
+  // Silent refresh for inactive items - no loading state change
+  Future<void> refreshInactiveItemListSilently() async {
+    isRefreshing.value = true;
+    try {
+      var fetchedItemList = await itemRepository.getItemList();
+
+      // Update list without clearing first (prevents flicker)
+      itemList.assignAll(fetchedItemList);
+      inactiveItemList.assignAll(
+        fetchedItemList.where((item) => item.status == false).toList(),
+      );
+      state.value = PageState.list;
+
+      // Increment refresh counter to invalidate cached data
+      refreshCounter.value++;
+
+    } catch (e) {
+      print('Error in silent inactive item refresh: $e');
+    } finally {
+      isRefreshing.value = false;
+    }
+  }
+
+  // Combined silent refresh for both lists - optimized single API call
+  Future<void> refreshItemListsSilently() async {
+    isRefreshing.value = true;
+    try {
+      var fetchedItemList = await itemRepository.getItemList();
+
+      // Update list without clearing first (prevents flicker)
+      itemList.assignAll(fetchedItemList);
+      activeItemList.assignAll(
+        fetchedItemList.where((item) => item.status == true).toList(),
+      );
+      inactiveItemList.assignAll(
+        fetchedItemList.where((item) => item.status == false).toList(),
+      );
+      state.value = PageState.list;
+
+      // Increment refresh counter to invalidate cached data
+      refreshCounter.value++;
+
+    } catch (e) {
+      print('Error in silent item lists refresh: $e');
+    } finally {
+      isRefreshing.value = false;
+    }
+  }
+
+  Future<Map<String, dynamic>?> insertPriceItem(int id, double price, double different,int itemUnitId,{bool showSnackbar = true} )async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoading.value = true;
@@ -192,40 +367,70 @@ class ProductController extends BaseController{
       );
       print(response);
       if (response != null) {
-        if(showSnackbar){
-          Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
-              titleText: Text('موفقیت آمیز',
-                textAlign: TextAlign.center,
-                style: TextStyle(color: AppColor.textColor),),
-              messageText: Text(
-                  'درج با موفقیت آنجام شد', textAlign: TextAlign.center,
-                  style: TextStyle(color: AppColor.textColor)));
-        }
-        //activeItemList.clear();
-        // Update the specific item in activeItemList
-        final activeIndex = activeItemList.indexWhere((item) => item.id == id);
-        if (activeIndex != -1) {
-          /*activeItemList[activeIndex].price = price;
-          activeItemList[activeIndex].differentPrice = different;*/
-          activeItemList[activeIndex].mesghalPrice = price;
-          activeItemList[activeIndex].mesghalDifferentPrice = different;
-          activeItemList.refresh();
+        Map<String, dynamic>? firstInfo;
+        final infos = response['infos'];
+        if (infos is List && infos.isNotEmpty) {
+          final rawInfo = infos.first;
+          if (rawInfo is Map<String, dynamic>) {
+            firstInfo = rawInfo;
+          }
         }
 
-        // Update the specific item in inactiveItemList
-        final inactiveIndex = inactiveItemList.indexWhere((item) => item.id == id);
-        if (inactiveIndex != -1) {
-          /*inactiveItemList[inactiveIndex].price = price;
+        final dynamic code = firstInfo != null ? firstInfo['code'] : null;
+        final String title = (firstInfo != null && firstInfo['title'] != null)
+            ? firstInfo['title'].toString()
+            : 'موفقیت آمیز';
+        final String description = (firstInfo != null && firstInfo['description'] != null)
+            ? firstInfo['description'].toString()
+            : 'درج با موفقیت انجام شد';
+
+        // Only show snackbar for non-3006 codes here.
+        // For code 3006 (validation error), UI widgets handle error display and value rollback.
+        if (code != 3006 && showSnackbar) {
+          Get.snackbar(
+            title,
+            description,
+            titleText: Text(
+              title,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),
+            ),
+            messageText: Text(
+              description,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),
+            ),
+          );
+        }
+        //activeItemList.clear();
+        if (code != 3006) {
+          // Update the specific item in activeItemList
+          final activeIndex = activeItemList.indexWhere((item) =>
+          item.id == id);
+          if (activeIndex != -1) {
+            /*activeItemList[activeIndex].price = price;
+          activeItemList[activeIndex].differentPrice = different;*/
+            activeItemList[activeIndex].mesghalPrice = price;
+            activeItemList[activeIndex].mesghalDifferentPrice = different;
+            activeItemList.refresh();
+          }
+
+          // Update the specific item in inactiveItemList
+          final inactiveIndex = inactiveItemList.indexWhere((item) =>
+          item.id == id);
+          if (inactiveIndex != -1) {
+            /*inactiveItemList[inactiveIndex].price = price;
           inactiveItemList[inactiveIndex].differentPrice = different;*/
-          inactiveItemList[inactiveIndex].mesghalPrice = price;
-          inactiveItemList[inactiveIndex].mesghalDifferentPrice = different;
-          inactiveItemList.refresh();
+            inactiveItemList[inactiveIndex].mesghalPrice = price;
+            inactiveItemList[inactiveIndex].mesghalDifferentPrice = different;
+            inactiveItemList.refresh();
+          }
         }
         clearList();
         //fetchActiveItemList();
         //fetchInactiveItemList();
       }
-      return false;
+      return response;
     }catch(e){
       EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
@@ -289,6 +494,10 @@ class ProductController extends BaseController{
             style: TextStyle(color: AppColor.textColor),),
           messageText: Text(response.infos?.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
 
+      // Refresh lists silently to ensure data is in sync with server for current tab
+      refreshItemListsSilently();
+      // Notify other tabs via BroadcastChannel to trigger their refresh
+      _notifyOtherTabsOfStatusChange();
       update();
     } catch (e) {
     } finally {
@@ -301,12 +510,6 @@ class ProductController extends BaseController{
     differentPriceController.clear();
     selectedItem.value=null;
 
-  }
-
-  @override
-  void onClose() {
-    socketSubscription?.cancel();
-    super.onClose();
   }
 
   /*Future<ItemModel?> fetchGetOneItem(int id)async{

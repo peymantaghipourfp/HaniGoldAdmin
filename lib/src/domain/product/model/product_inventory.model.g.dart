@@ -19,6 +19,8 @@ ProductInventoryModel _$ProductInventoryModelFromJson(
       quantity: (json['quantity'] as num?)?.toDouble(),
       quantityIn: (json['quantityIn'] as num?)?.toDouble(),
       quantityOut: (json['quantityOut'] as num?)?.toDouble(),
+      quantity750: (json['quantity750'] as num?)?.toDouble(),
+      quantityCount: (json['quantityCount'] as num?)?.toDouble(),
       rowNum: (json['rowNum'] as num?)?.toInt(),
     );
 
@@ -31,5 +33,7 @@ Map<String, dynamic> _$ProductInventoryModelToJson(
       'quantity': instance.quantity,
       'quantityIn': instance.quantityIn,
       'quantityOut': instance.quantityOut,
+      'quantity750': instance.quantity750,
+      'quantityCount': instance.quantityCount,
       'rowNum': instance.rowNum,
     };

@@ -5,6 +5,11 @@ plugins {
     id "dev.flutter.flutter-gradle-plugin"
 }
 
+repositories {
+    google()
+    mavenCentral()
+}
+
 android {
     namespace = "org.admin.hanigold.hanigold_admin"
     compileSdk = flutter.compileSdkVersion
@@ -41,4 +46,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation 'androidx.core:core:1.9.0'
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -19,6 +20,9 @@ class CustomDropdownWidget extends StatefulWidget {
   final String? Function(String?)? validator;
   final Function(bool)? onMenuStateChange;
   final bool enabledChange;
+  final List<dynamic>? dataList;
+  final String? Function(dynamic)? getItemIcon;
+
 
   const CustomDropdownWidget({
     super.key,
@@ -36,6 +40,8 @@ class CustomDropdownWidget extends StatefulWidget {
     this.validator,
     this.onMenuStateChange,
     this.enabledChange = true,
+    this.dataList,
+    this.getItemIcon,
   });
 
   @override
@@ -178,12 +184,79 @@ class _CustomDropdownWidgetState extends State<CustomDropdownWidget> {
         } else {
           displayText = item;
         }
-        return DropdownMenuItem(
+        /*return DropdownMenuItem(
           value: item,
           child: Text(
             displayText,
             style: AppTextStyle.bodyText,
-          ),
+          ),*/
+        // Check if we have dataList and getItemIcon function for custom rendering
+        Widget itemWidget;
+        if (widget.dataList != null && widget.getItemIcon != null) {
+          // Find the corresponding data item
+          var dataItem;
+          try {
+            dataItem = widget.dataList!.firstWhere(
+                  (data) => '${data.id}:${data.name}' == item,
+            );
+          } catch (e) {
+            dataItem = null;
+          }
+
+          if (dataItem != null) {
+            String? iconPath = widget.getItemIcon!(dataItem);
+            itemWidget = Row(
+              children: [
+                if (iconPath != null)
+                  iconPath.contains('http')
+                      ? Image.network(
+                    iconPath,
+                    width: 22,
+                    height: 22,
+                    errorBuilder: (context, error, stackTrace) {
+                      return SvgPicture.asset(
+                        'assets/svg/bank.svg',
+                        width: 22,
+                        height: 22,
+                      );
+                    },
+                  )
+                      : SvgPicture.asset(
+                    iconPath,
+                    width: 22,
+                    height: 22,
+                  )
+                else
+                  SvgPicture.asset(
+                    'assets/svg/bank.svg',
+                    width: 22,
+                    height: 22,
+                  ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    displayText,
+                    style: AppTextStyle.bodyText,
+                  ),
+                ),
+              ],
+            );
+          } else {
+            itemWidget = Text(
+              displayText,
+              style: AppTextStyle.bodyText,
+            );
+          }
+        } else {
+          itemWidget = Text(
+            displayText,
+            style: AppTextStyle.bodyText,
+          );
+        }
+
+        return DropdownMenuItem(
+          value: item,
+          child: itemWidget,
         );
       }).toList(),
       value: (widget.selectedValue != null && widget.items!.contains(widget.selectedValue)) ? widget.selectedValue : null,

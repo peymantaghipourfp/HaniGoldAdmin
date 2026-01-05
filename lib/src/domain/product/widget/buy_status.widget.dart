@@ -3,6 +3,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
+import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -79,6 +80,7 @@ class BuyStatusWidgetState extends State<BuyStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,

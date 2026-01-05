@@ -4,6 +4,8 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
+import 'package:hanigold_admin/src/domain/order/model/info.model.dart';
+import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
@@ -203,7 +205,7 @@ class UserRepository {
         "options": {
           "city": {
             "orderBy": "City.name",
-            "orderByType": "DESC",
+            "orderByType": "asc",
             "StartIndex": startIndex,
             "ToIndex": toIndex
           }
@@ -228,7 +230,7 @@ class UserRepository {
         "options": {
           "state": {
             "orderBy": "State.Name",
-            "orderByType": "DESC",
+            "orderByType": "asc",
             "StartIndex": startIndex,
             "ToIndex": toIndex
           }
@@ -267,11 +269,14 @@ class UserRepository {
 
   Future<AccountModel> insertUser({
     required int accountGroupId,
+    required int accountSalesGroupId,
+    required int accountLevelId,
     required String name,
+    required String nationalCode,
     required String mobile,
     required String phoneNumber,
     required String email,
-    required String user,
+    //required String user,
     required bool hasDeposit,
     //required String password,
     required String state,
@@ -286,9 +291,18 @@ class UserRepository {
         "code": null,
         "hasDeposit": hasDeposit,
         "name": name,
+        "nationalCode": nationalCode,
         "parent": {"infos": []},
         "accountGroup": {
           "id": accountGroupId,
+          "infos": []
+        },
+        "accountSalesGroup": {
+          "id": accountSalesGroupId,
+          "infos": []
+        },
+        "accountLevel": {
+          "id": accountLevelId,
           "infos": []
         },
         "addresses": [
@@ -375,12 +389,15 @@ class UserRepository {
 
   Future<AccountModel> updateUser({
     required int accountGroupId,
+    required int accountSalesGroupId,
+    required int accountLevelId,
     required String name,
+    required String nationalCode,
     required int id,
     required String mobile,
     required String phoneNumber,
     required String email,
-    required String user,
+    //required String user,
     required bool hasDeposit,
     //required String password,
     required String state,
@@ -388,21 +405,39 @@ class UserRepository {
     required String city,
     required int idCity,
     required String address,
+    required int status,
+    required int type,
+    required String code,
+    required int accountId,
+    required int contactId,
+    required int contactInfoId0,
+    required int contactInfoId1,
+    required int contactInfoId2,
+    //required int addressId,
   }) async {
     try {
       Map<String, dynamic> options = {
-        "type": 1,
-        "code": "1",
+        "type": type,
+        "code": code,
         "hasDeposit": hasDeposit,
         "name": name,
+        "nationalCode": nationalCode,
         "parent": {"infos": []},
         "accountGroup": {
           "id": accountGroupId,
           "infos": []
         },
+        "accountSalesGroup": {
+          "id": accountSalesGroupId,
+          "infos": []
+        },
+        "accountLevel": {
+          "id": accountLevelId,
+          "infos": []
+        },
         "addresses": [
           {
-            "StateMode": 1,
+            "StateMode": 0,
             "isMain": true,
             "name": "آدرس",
             "account": {"infos": []},
@@ -415,60 +450,64 @@ class UserRepository {
             "city": {"name": city, "id": idCity, "infos": []},
             "fullAddress": address,
             "rowNum": 1,
-            "id": null,
+            //"id": addressId,
             "attribute": "cus",
             "infos": []
           }
         ],
         "contactInfos": [
           {
-            "account": {"id": 1, "infos": []},
+            "account": {"id": accountId, "infos": []},
             "contact": {
               "account": {"infos": []},
-              "infos": []
+              "infos": [],
+              "id":contactId
             },
-            "StateMode": 1,
+            "StateMode": 2,
             "type": 0,
             "name": name,
             "value": mobile,
             "rowNum": 1,
-            "id": null,
+            "id": contactInfoId0,
             "attribute": "cus",
             "infos": []
           },
           {
-            "account": {"id": 1, "infos": []},
+            "account": {"id": accountId, "infos": []},
             "contact": {
               "account": {"infos": []},
-              "infos": []
+              "infos": [],
+              "id":contactId
             },
-            "StateMode": 1,
+            "StateMode": 2,
             "type": 1,
             "name": name,
             "value": phoneNumber,
             "rowNum": 1,
-            "id": null,
+            "id": contactInfoId1,
             "attribute": "cus",
             "infos": []
           },
           {
-            "account": {"id": 1, "infos": []},
+            "account": {"id": accountId, "infos": []},
             "contact": {
               "account": {"infos": []},
-              "infos": []
+              "infos": [],
+              "id":contactId
             },
-            "StateMode": 1,
+            "StateMode": 2,
             "type": 2,
             "name": name,
             "value": email,
             "rowNum": 1,
-            "id": null,
+            "id": contactInfoId2,
             "attribute": "cus",
             "infos": []
           },
         ],
         "rowNum": 1,
         "id": id,
+        "status":status,
         "attribute": "cus",
         "infos": []
       };
@@ -585,6 +624,46 @@ class UserRepository {
       print('Status Code getOneAccount: ${response.statusCode}');
       print("response getOneAccount : ${response.data}" );
       return AccountModel.fromJson(response.data);
+    } catch (e) {
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<Map<String , dynamic>> changePasswordByAdmin(String password,int id)async{
+    try{
+      Map<String , dynamic> options={
+        "password" : password,
+        "RetypePassword" : password,
+        "user": {
+          "id" : id
+        }
+      };
+      final response = await userDio.post('Login/changePasswordByAdmin', data: options);
+      print("request changePasswordByAdmin : $options");
+      print("response changePasswordByAdmin : ${response.data}");
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<List<dynamic>> insertMobileTelegram({
+    required int id,
+    required String mobile,
+    required String name,
+  }) async {
+    try {
+      Map<String, dynamic> options = {
+        "TelegarmMobile": mobile,
+        "AccountId": id,
+        "TelegramFirstName": name
+      };
+      final response = await userDio.post('Account/setTelegramInfo', data: options);
+      print('Status Code insertMobileTelegram: ${response.statusCode}');
+      print("request insertMobileTelegram : $options" );
+      print("response insertMobileTelegram : ${response.data}" );
+      return response.data;
     } catch (e) {
       throw ErrorException('خطا:$e');
     }

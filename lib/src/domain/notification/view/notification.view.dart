@@ -63,7 +63,7 @@ class _NotificationViewState extends State<NotificationView> {
                       _buildDateFilterSection(context, isDesktop),
 
                       // Tab Bar
-                      _buildTabBar(),
+                      //_buildTabBar(),
 
                       // Content Section
                       _buildContentSection(context, isDesktop),
@@ -78,7 +78,7 @@ class _NotificationViewState extends State<NotificationView> {
                                   margin: EdgeInsets.symmetric(
                                       horizontal: 50, vertical: 10),
                                   padding: EdgeInsets.symmetric(horizontal: 20),
-                                  color: AppColor.appBarColor.withOpacity(0.5),
+                                  //color: AppColor.appBarColor.withOpacity(0.5),
                                   alignment: Alignment.bottomCenter,
                                   child: PagerWidget(
                                     countPage: notificationController.paginated.value
@@ -111,14 +111,14 @@ class _NotificationViewState extends State<NotificationView> {
 
   Widget _buildFilterSection(BuildContext context, bool isDesktop) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           if (isDesktop) {
             return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 5),
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              color: AppColor.appBarColor.withOpacity(0.5),
+              color: AppColor.backGroundColor1.withAlpha(130),
               alignment: Alignment.center,
               height: 70,
               child: Row(
@@ -424,16 +424,16 @@ class _NotificationViewState extends State<NotificationView> {
 
   Widget _buildDateFilterSection(BuildContext context, bool isDesktop) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(4.0),
       child:
       LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           if (isDesktop) {
             return
               Container(
-              margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 5),
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              color: AppColor.appBarColor.withOpacity(0.5),
+              color: AppColor.backGroundColor1.withAlpha(150),
               alignment: Alignment.center,
               height: 70,
               child: Row(
@@ -609,134 +609,130 @@ class _NotificationViewState extends State<NotificationView> {
   }
 
   Widget _buildTabBar() {
-    return Column(
-      children: [
-        Container(
-          margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 10),
-          decoration: BoxDecoration(
-            color: AppColor.appBarColor.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Obx(() => ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                      notificationController.selectedTabIndex.value == 0
-                          ? AppColor.buttonColor
-                          : Colors.transparent,
-                    ),
-                    elevation: WidgetStatePropertyAll(0),
-                    shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+    return
+        Row(
+          children: [
+            Container(
+              margin: const EdgeInsets.symmetric( vertical: 5),
+              decoration: BoxDecoration(
+                color: AppColor.secondary200Color.withAlpha(150),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Obx(() => ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(
+                        notificationController.selectedTabIndex.value == 0
+                            ? AppColor.buttonColor
+                            : Colors.transparent,
+                      ),
+                      elevation: WidgetStatePropertyAll(0),
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                  ),
-                  onPressed: () => notificationController.switchTab(0),
-                  child: Text(
-                    'اعلان‌ها',
-                    style: AppTextStyle.labelText.copyWith(
-                      color: notificationController.selectedTabIndex.value == 0
-                          ? AppColor.textColor
-                          : AppColor.textColor.withOpacity(0.7),
-                    ),
-                  ),
-                )),
-              ),
-              Expanded(
-                child: Obx(() => ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                      notificationController.selectedTabIndex.value == 1
-                          ? AppColor.buttonColor
-                          : Colors.transparent,
-                    ),
-                    elevation: WidgetStatePropertyAll(0),
-                    shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                    onPressed: () => notificationController.switchTab(0),
+                    child: Text(
+                      'اعلان‌ها',
+                      style: AppTextStyle.labelText.copyWith(
+                        color: notificationController.selectedTabIndex.value == 0
+                            ? AppColor.textColor
+                            : AppColor.textColor.withOpacity(0.7),
                       ),
                     ),
-                  ),
-                  onPressed: () => notificationController.switchTab(1),
-                  child: Text(
-                    'اطلاعیه‌ها',
-                    style: AppTextStyle.labelText.copyWith(
-                      color: notificationController.selectedTabIndex.value == 1
-                          ? AppColor.textColor
-                          : AppColor.textColor.withOpacity(0.7),
-                    ),
-                  ),
-                )),
-              ),
-              Expanded(
-                child: Obx(() => ElevatedButton(
-                  style: ButtonStyle(
-                    backgroundColor: WidgetStatePropertyAll(
-                      notificationController.selectedTabIndex.value == 2
-                          ? AppColor.buttonColor
-                          : Colors.transparent,
-                    ),
-                    elevation: WidgetStatePropertyAll(0),
-                    shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
+                  )),
+                  Obx(() => ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(
+                        notificationController.selectedTabIndex.value == 1
+                            ? AppColor.buttonColor
+                            : Colors.transparent,
+                      ),
+                      elevation: WidgetStatePropertyAll(0),
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
-                  ),
-                  onPressed: () => notificationController.switchTab(2),
-                  child: Text(
-                    'هدر ها',
-                    style: AppTextStyle.labelText.copyWith(
-                      color: notificationController.selectedTabIndex.value == 2
-                          ? AppColor.textColor
-                          : AppColor.textColor.withOpacity(0.7),
+                    onPressed: () => notificationController.switchTab(1),
+                    child: Text(
+                      'اطلاعیه‌ها',
+                      style: AppTextStyle.labelText.copyWith(
+                        color: notificationController.selectedTabIndex.value == 1
+                            ? AppColor.textColor
+                            : AppColor.textColor.withOpacity(0.7),
+                      ),
                     ),
-                  ),
-                )),
+                  )),
+                  Obx(() => ElevatedButton(
+                    style: ButtonStyle(
+                      backgroundColor: WidgetStatePropertyAll(
+                        notificationController.selectedTabIndex.value == 2
+                            ? AppColor.buttonColor
+                            : Colors.transparent,
+                      ),
+                      elevation: WidgetStatePropertyAll(0),
+                      shape: WidgetStatePropertyAll(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                    ),
+                    onPressed: () => notificationController.switchTab(2),
+                    child: Text(
+                      'هدر ها',
+                      style: AppTextStyle.labelText.copyWith(
+                        color: notificationController.selectedTabIndex.value == 2
+                            ? AppColor.textColor
+                            : AppColor.textColor.withOpacity(0.7),
+                      ),
+                    ),
+                  )),
+                ],
               ),
-            ],
-          ),
-        ),
-        // Insert buttons for type 1 and 2
-        Obx(() => notificationController.selectedTabIndex.value == 1 ||
-            notificationController.selectedTabIndex.value == 2
-            ? Container(
-          margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 5),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  Get.toNamed('/insertNotification', parameters: {
-                    'notificationType': notificationController.selectedTabIndex.value.toString(),
-                  });
-                },
+            ),
+            // Insert buttons for type 1 and 2
+            Obx(() => notificationController.selectedTabIndex.value == 1 ||
+                notificationController.selectedTabIndex.value == 2
+                ? Container(
+              margin: const EdgeInsets.symmetric(horizontal: 50, vertical: 5),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Get.toNamed('/insertNotification', parameters: {
+                        'notificationType': notificationController.selectedTabIndex.value.toString(),
+                      });
+                    },
 
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.primaryColor,
-                  foregroundColor: AppColor.textColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.primaryColor,
+                      foregroundColor: AppColor.textColor,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(
+                      notificationController.selectedTabIndex.value == 1
+                          ? 'افزودن اطلاعیه'
+                          : 'افزودن هدر',
+                      style: AppTextStyle.labelText,
+                    ),
                   ),
-                ),
-                icon: const Icon(Icons.add, size: 18),
-                label: Text(
-                  notificationController.selectedTabIndex.value == 1
-                      ? 'افزودن اطلاعیه'
-                      : 'افزودن هدر',
-                  style: AppTextStyle.labelText,
-                ),
+                ],
               ),
-            ],
-          ),
-        )
-            : const SizedBox.shrink()),
-      ],
-    );
+            )
+                : const SizedBox.shrink()),
+          ],
+        );
+
   }
 
   Widget _buildContentSection(BuildContext context, bool isDesktop) {
@@ -782,7 +778,7 @@ class _NotificationViewState extends State<NotificationView> {
                  notificationController.announcementList
                 : notificationController.headerList;
 
-            if (currentList.isEmpty) {
+            /*if (currentList.isEmpty) {
               return EmptyPage(
                 title: notificationController.selectedTabIndex.value == 0
                     ? 'اعلانی وجود ندارد'
@@ -793,11 +789,11 @@ class _NotificationViewState extends State<NotificationView> {
                   notificationController.getNotificationListPager();
                 },
               );
-            }
+            }*/
 
             return Container(
               decoration: BoxDecoration(
-                color: AppColor.backGroundColor.withOpacity(0.8),
+                color: AppColor.backGroundColor1.withAlpha(200),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: SingleChildScrollView(
@@ -806,8 +802,9 @@ class _NotificationViewState extends State<NotificationView> {
                 child: Row(
                   children: [
                     SingleChildScrollView(
-                      child: Column(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          _buildTabBar(),
                           DataTable(
                             sortColumnIndex: notificationController.sortColumnIndex.value,
                             sortAscending: notificationController.sortAscending.value,
@@ -826,9 +823,10 @@ class _NotificationViewState extends State<NotificationView> {
                               ),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            headingRowHeight: 60,
-                            columnSpacing: 90,
-                            horizontalMargin: 20,
+                            headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
+                            headingRowHeight: 35,
+                            columnSpacing: 70,
+                            horizontalMargin: 5,
                           ),
                           // Loading indicator for pagination
                           if (notificationController.hasMore.value)
@@ -942,8 +940,14 @@ class _NotificationViewState extends State<NotificationView> {
   }
 
   List<DataRow> _buildDataRows(BuildContext context, List<NotificationModel> currentList) {
-    return currentList.map((notification) {
+    return currentList.asMap().entries.map((entry) {
+      final index = entry.key;
+      final notification = entry.value;
+      final rowColor = index.isEven
+          ? AppColor.backGroundColor
+          : AppColor.secondaryColor.withAlpha(100);
       return DataRow(
+        color: WidgetStateProperty.all(rowColor),
         cells: [
           // ردیف
           DataCell(

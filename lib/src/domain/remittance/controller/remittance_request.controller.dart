@@ -32,6 +32,8 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/user_info_transaction.repository.dart';
+import '../../order/model/tooltip_total_balance.model.dart';
 import '../../users/model/paginated.model.dart';
 import 'package:universal_html/html.dart' as html;
 
@@ -40,13 +42,14 @@ enum PageState{loading,err,empty,list}
 class RemittanceRequestController extends BaseController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
-
+  ScrollController scrollControllerMobile = ScrollController();
   final AccountRepository accountRepository=AccountRepository();
   final RemittanceRequestRepository remittanceRequestRepository=RemittanceRequestRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
+  final UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
   final TextEditingController searchController=TextEditingController();
   final TextEditingController dateStartController=TextEditingController();
@@ -80,8 +83,8 @@ class RemittanceRequestController extends BaseController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getRemittanceRequestListPager();
   }
 
@@ -122,6 +125,7 @@ class RemittanceRequestController extends BaseController{
   @override void onClose() {
     socketSubscription?.cancel();
     scrollController.dispose();
+    scrollControllerMobile.dispose();
     remittanceRequestList.clear();
     super.onClose();
   }
@@ -147,9 +151,9 @@ class RemittanceRequestController extends BaseController{
   }
 
   void setupScrollListener() {
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 200 &&
+    scrollControllerMobile.addListener(() {
+      if (scrollControllerMobile.position.pixels >=
+          scrollControllerMobile.position.maxScrollExtent - 200 &&
           hasMore.value &&
           !isLoading.value) {
         loadMore();
@@ -158,7 +162,7 @@ class RemittanceRequestController extends BaseController{
   }
 
   Future<void> loadMore() async {
-    if (!scrollController.hasClients || hasMore.value && !isLoading.value) {
+    if (!scrollControllerMobile.hasClients || hasMore.value && !isLoading.value) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
@@ -233,6 +237,7 @@ class RemittanceRequestController extends BaseController{
   }
 
   void clearSearch() {
+    paginated=null;
     currentPage.value = 1;
     selectedAccountId.value = 0;
     searchController.clear();
@@ -425,6 +430,17 @@ class RemittanceRequestController extends BaseController{
     dateEndController.clear();
     startDateFilter.value="";
     endDateFilter.value="";
+  }
+
+  // Method to fetch user tooltip total balance data
+  Future<TooltipTotalBalanceModel?> getTooltipTotalBalance(int userId) async {
+    try {
+      final tooltipTotalBalance = await userInfoTransactionRepository.getTooltipTotalBalance(userId);
+      return tooltipTotalBalance;
+    } catch (e) {
+      print('Error fetching tooltip total balance: $e');
+      return null;
+    }
   }
 
 }

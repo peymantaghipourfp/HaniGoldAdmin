@@ -9,11 +9,14 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/transaction_info_footer.model.dart';
+import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
+import '../../account/model/account.model.dart';
 import '../model/balance_item.model.dart';
 import '../model/header_info_user_transaction.model.dart';
 import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
+import '../model/report_setting.model.dart';
 import '../model/transaction_info_item.model.dart';
 import 'dart:ui' as ui;
 import 'dart:typed_data';
@@ -28,12 +31,14 @@ class UserInfoTransactionController extends GetxController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final AccountRepository accountRepository=AccountRepository();
   ScrollController scrollController = ScrollController();
+  ScrollController scrollControllerMobile = ScrollController();
   final TextEditingController searchController=TextEditingController();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
@@ -52,44 +57,98 @@ class UserInfoTransactionController extends GetxController{
   var mobilePayer="".obs;
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
-  // Fields for server-side sorting
-  String _orderBy = "ABS(AccountValues.CurrencyValue)";
-  String _orderByType = "DESC";
+  RxString currentOrderBy = "AccountValues.CurrencyValueBes".obs;
+  RxString currentOrderByType = "DESC".obs;
   var id = 0.obs; // or `false`...
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
+  final List<AccountModel> accountList=<AccountModel>[].obs;
+  final Rxn<ReportSettingModel> getOneReportSetting = Rxn<ReportSettingModel>();
+  List<int>? filteredAccountIds;
+  int? accountFilterType;
 
 
   void onSort(int columnIndex, bool ascending) {
     sortColumnIndex.value = columnIndex;
     sortAscending.value = ascending;
 
-    /*if (columnIndex == 3) {
+    /*if (columnIndex == 2) {
       listTransactionInfo.sort((a, b) {
-        final aName = a.listTransactionInfo?.name ?? '';
-        final bName = b.listTransactionInfo?.name ?? '';
-        return ascending ? aName.compareTo(bName) : bName.compareTo(aName);
+        final aCurrency = a.currencyValue;
+        final bCurrency = b.currencyValue;
+        return ascending ? aCurrency.compareTo(bCurrency) : bCurrency.compareTo(aCurrency);
+      });
+    }else if(columnIndex == 3){
+      listTransactionInfo.sort((a, b) {
+        final aCurrency = a.currencyValue;
+        final bCurrency = b.currencyValue;
+        return ascending ? aCurrency.compareTo(bCurrency) : bCurrency.compareTo(aCurrency);
       });
     }*/
+
+    // Map column indices to orderBy fields
+    String orderByField;
+    switch (columnIndex) {
+      case 2: // Rial balance (credit)
+        orderByField = "AccountValues.CashBalanceBes";
+        break;
+      case 3: // Rial balance (debit)
+        orderByField = "AccountValues.CashBalanceBed";
+        break;
+      case 4: // Gold balance (credit)
+        orderByField = "AccountValues.GoldBalanceBes";
+        break;
+      case 5: // Gold balance (debit)
+        orderByField = "AccountValues.GoldBalanceBed";
+        break;
+      case 6: // Coin balance (credit)
+        orderByField = "AccountValues.CoinBalanceBes";
+        break;
+      case 7: // Coin balance (debit)
+        orderByField = "AccountValues.CoinBalanceBed";
+        break;
+      case 10: // Currency balance (debit)
+        orderByField = "AccountValues.CurrencyValueBes";
+        break;
+      case 11: // Currency balance (debit)
+        orderByField = "AccountValues.CurrencyValueBed";
+        break;
+      default:
+        orderByField = "AccountValues.CurrencyValueBes";
+    }
+
+    currentOrderBy.value = orderByField;
+    currentOrderByType.value = ascending ? "ASC" : "DESC";
+
+    // Refresh data with new sorting
+    getListTransactionInfoPager();
   }
 
 
   void isChangePage(int index) {
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value = index * 10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value = index * 25;
     getListTransactionInfoPager();
   }
 
   void clearFilter() {
     nameFilterController.clear();
     mobileFilterController.clear();
+    filteredAccountIds = null;
+    accountFilterType = null;
   }
   void clearSearch(){
+    paginated.value=null;
     currentPage.value = 1;
+    itemsPerPage.value=25;
     searchController.clear();
     // Reset sorting to default
     sortAscending.value = false;
     sortColumnIndex.value = null;
+    currentOrderBy.value = "AccountValues.CurrencyValueBes";
+    currentOrderByType.value = "DESC";
+    filteredAccountIds = null;
+    accountFilterType = null;
     getListTransactionInfoPager();
   }
   @override
@@ -98,6 +157,52 @@ class UserInfoTransactionController extends GetxController{
     // Initialize default sorting
     sortAscending.value = false;
     getListTransactionInfoPager();
+    setupScrollListener();
+  }
+  @override void onClose() {
+    scrollControllerMobile.dispose();
+    super.onClose();
+  }
+
+  void setupScrollListener() {
+    scrollControllerMobile.addListener(() {
+      if (scrollControllerMobile.position.pixels >=
+          scrollControllerMobile.position.maxScrollExtent - 200 &&
+          hasMore.value &&
+          !isLoading.value) {
+        loadMore();
+      }
+    });
+  }
+  Future<void> loadMore() async {
+    if (!scrollControllerMobile.hasClients || hasMore.value && !isLoading.value) {
+      isLoading.value = true;
+      final nextPage = currentPage.value + 1;
+      try {
+        final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
+        final toIndex = nextPage * itemsPerPage.value;
+        var fetchedListTransactionInfo = await userInfoTransactionRepository.getListTransactionInfoListPager(
+          startIndex: startIndex,
+          toIndex: toIndex,
+          name: searchController.text,
+          accountIds: filteredAccountIds,
+          filterType: accountFilterType,
+        );
+        if (fetchedListTransactionInfo.transactionWallets!.isNotEmpty ) {
+          listTransactionInfo.addAll(fetchedListTransactionInfo.transactionWallets ?? []);
+          currentPage.value = nextPage;
+          hasMore.value = fetchedListTransactionInfo.transactionWallets?.length == itemsPerPage.value;
+
+        } else {
+          hasMore.value = false;
+        }
+      } catch (e) {
+        hasMore.value = false; // توقف بارگذاری بیشتر در صورت خطا
+        "خطا در دریافت اطلاعات بیشتر: ${e.toString()}";
+      } finally {
+        isLoading.value = false;
+      }
+    }
   }
 
   // void goToPage(int page) {
@@ -161,6 +266,10 @@ class UserInfoTransactionController extends GetxController{
         startIndex: currentPage.value,
         toIndex: itemsPerPage.value,
         name: searchController.text,
+        accountIds: filteredAccountIds,
+        filterType: accountFilterType,
+        orderBy: currentOrderBy.value,
+        orderByType: currentOrderByType.value,
       );
       state.value=PageState.list;
       listTransactionInfo.assignAll(response.transactionWallets??[]);
@@ -184,7 +293,11 @@ class UserInfoTransactionController extends GetxController{
       EasyLoading.show(status: 'در حال دریافت فایل اکسل...');
       isLoading.value = true;
 
-      Uint8List excelBytes = await userInfoTransactionRepository.getListUserInfoTransactionExcel();
+      Uint8List excelBytes = await userInfoTransactionRepository.getListUserInfoTransactionExcel(
+        name:nameFilterController.text,
+        accountIds: filteredAccountIds,
+        filterType: accountFilterType,
+      );
 
       String fileName = 'userTransaction_${DateTime.now().toIso8601String()}.xlsx';
 
@@ -199,7 +312,7 @@ class UserInfoTransactionController extends GetxController{
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -226,6 +339,8 @@ class UserInfoTransactionController extends GetxController{
         startIndex: 1,
         toIndex: 100000,
         name: searchController.text,
+        accountIds: filteredAccountIds,
+        filterType: accountFilterType,
       );
       listTransactionInfoFooter.assignAll(response);
       print("Footer list updated with ${listTransactionInfoFooter.length} items");
@@ -235,6 +350,96 @@ class UserInfoTransactionController extends GetxController{
       print("Error loading footer data: $e");
     }finally{
       print("getTransactionInfoFooter : completed");
+    }
+  }
+
+  // Infinite scroll loader for mobile: increases page size by 25 and reloads
+  Future<int> loadMoreOnMobile() async {
+    if (isLoading.value) return 0;
+    if (!(hasMore.value)) return 0;
+
+    final int before = listTransactionInfo.length;
+    itemsPerPage.value = itemsPerPage.value + 25;
+    await getListTransactionInfoPager();
+    final int after = listTransactionInfo.length;
+
+    final int delta = after - before;
+    if (delta <= 0) {
+      hasMore.value = false;
+    }
+    return delta;
+  }
+
+  // لیست کاربران
+  Future<void> fetchAccountList() async{
+    try{
+      state.value=PageState.loading;
+      var fetchedAccountList=await accountRepository.getAccountList("");
+      accountList.assignAll(fetchedAccountList);
+      state.value=PageState.list;
+      if(accountList.isEmpty){
+        state.value=PageState.empty;
+      }
+      print('تعداد :${accountList.length}');
+    }
+    catch(e){
+      state.value=PageState.err;
+      " خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      isLoading.value=false;
+    }
+  }
+
+  // getOne reportSetting
+  Future<ReportSettingModel?> fetchGetOneReportSetting(String name)async{
+    try {
+      state.value=PageState.loading;
+      //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+      var fetchedGetOneReportSetting = await userInfoTransactionRepository.getOneReportSetting(name);
+      if(fetchedGetOneReportSetting!=null){
+        getOneReportSetting.value = fetchedGetOneReportSetting;
+        state.value=PageState.list;
+        //EasyLoading.dismiss();
+      }else{
+        state.value=PageState.empty;
+      }
+    }
+    catch(e){
+      state.value=PageState.err;
+      " خطایی به وجود آمده است ${e.toString()}";
+    }
+    return null;
+  }
+
+
+
+  // Update report setting
+  Future<void> updateReportSetting(ReportSettingModel reportSetting) async {
+    try {
+      EasyLoading.show(status: 'در حال به‌روزرسانی تنظیمات گزارش...');
+      isLoading.value = true;
+
+      await userInfoTransactionRepository.updateReportSetting(reportSetting);
+
+      EasyLoading.showSuccess('تنظیمات گزارش با موفقیت به‌روزرسانی شد');
+      Get.snackbar(
+        'موفق',
+        'تنظیمات گزارش با موفقیت به‌روزرسانی شد',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar(
+        'خطا',
+        'خطا در به‌روزرسانی تنظیمات گزارش',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      print("Error updating report setting: $e");
+    } finally {
+      EasyLoading.dismiss();
+      isLoading.value = false;
     }
   }
 

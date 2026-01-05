@@ -44,6 +44,28 @@ class BalanceItemModel {
     required this.infos,
   });
 
+  BalanceItemModel copyWith({
+    int? id,
+    double? balance,
+    ItemModel? item,
+    int? type,
+    String? address,
+    AccountModel? account,
+    bool? isMainCurrency,
+    List<dynamic>? infos,
+  }) {
+    return BalanceItemModel(
+      id: id ?? this.id,
+      balance: balance ?? this.balance,
+      item: item ?? this.item,
+      type:type ?? this.type,
+      address:address ?? this.address,
+      account:account ?? this.account,
+      isMainCurrency:isMainCurrency ?? this.isMainCurrency,
+      infos: infos ?? this.infos,
+    );
+  }
+
   factory BalanceItemModel.fromJson(Map<String, dynamic> json) => _$BalanceItemModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$BalanceItemModelToJson(this);

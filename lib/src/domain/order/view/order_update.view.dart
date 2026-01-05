@@ -13,6 +13,8 @@ import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
+import '../../../widget/custom_dropdown1.widget.dart';
+import '../../account/model/account.model.dart';
 import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/order_update.controller.dart';
@@ -28,6 +30,11 @@ class OrderUpdateView extends StatefulWidget {
 class _OrderUpdateViewState extends State<OrderUpdateView> {
   OrderUpdateController orderUpdateController =
   Get.find<OrderUpdateController>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,8 +53,9 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
             BackgroundImage(),
             SafeArea(
               child: SingleChildScrollView(
+                physics: BouncingScrollPhysics(),
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                  padding: EdgeInsets.symmetric(horizontal:isDesktop ? 40 : 20, vertical: 20),
                   child: ResponsiveRowColumn(
                     layout: isDesktop
                         ? ResponsiveRowColumnType.ROW
@@ -62,7 +70,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                         ResponsiveRowColumnItem(
                           rowFlex: 1,
                           child:
-                          orderUpdateController.isLoadingBalance.value == false
+                          orderUpdateController.isLoadingBalance.value == true
                               ?
                           Center(child: CircularProgressIndicator(),)
                               :
@@ -89,11 +97,12 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                             ],
                           ),*/
                           child: SizedBox(
-                            width: Get.width * 0.9,
-                            height: Get.height,
+                            /*width: Get.width * 0.9,
+                            height: Get.height,*/
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
                                 ResponsiveRowColumnItem(
                                   child: Row(
@@ -111,7 +120,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                       Expanded(
                                         child: GestureDetector(
                                             onTap: () {
-                                              Get.toNamed('/orderList');
+                                              Get.offNamed('/orderList');
                                             },
                                             child: Padding(
                                               padding: EdgeInsets.only(
@@ -157,9 +166,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                 ),
                                 ResponsiveRowColumnItem(
                                   rowFlex: 1,
-                                  child: SingleChildScrollView(
-                                    physics: BouncingScrollPhysics(),
-                                    child: Container(
+                                  child: Container(
                                       constraints: isDesktop ? BoxConstraints(
                                           maxWidth: 500) : BoxConstraints(
                                           maxWidth: 400),
@@ -273,7 +280,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                   ),),
                                                   SizedBox(width: 3),
                                                   Checkbox(
-                                                    hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                                                    hoverColor: AppColor.textFieldColor.withAlpha(200),
                                                     value: orderUpdateController.isCardChecked.value,
                                                     onChanged: (value) async{
                                                       orderUpdateController.isCardChecked.value = value!;
@@ -303,7 +310,43 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                               ),
                                             ),
                                             // کاربر
+                                            orderUpdateController.accountList.isEmpty ?
+                                            Center(
+                                              child: CircularProgressIndicator(
+                                                valueColor: AlwaysStoppedAnimation<Color>(
+                                                    AppColor.textColor),
+                                              ),
+                                            ) :
                                             Container(
+                                              padding: EdgeInsets.only(
+                                                  bottom: 5),
+                                              child: CustomDropdown<AccountModel>(
+                                                items: orderUpdateController.accountList,
+                                                selectedItem: orderUpdateController.selectedAccount.value,
+                                                enableSearch: true,
+                                                errorText: orderUpdateController.dropdownError.value,
+                                                itemLabel: (account) =>
+                                                account.name ??
+                                                    "",
+                                                /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                                                onChanged: (account) {
+                                                  setState(() {
+                                                    orderUpdateController.selectedAccount.value = account;
+                                                    orderUpdateController.dropdownError.value = "";
+
+                                                    orderUpdateController.changeSelectedAccount(
+                                                        account);
+                                                  });
+                                                  debugPrint(
+                                                    "کاربر انتخاب شد: ${account?.name}",
+                                                  );
+                                                },
+                                                isIcon: false,
+                                              ),
+                                            ),
+                                            /*Container(
                                               padding: EdgeInsets.only(
                                                   bottom: 5),
                                               child: Row(crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,14 +427,14 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                           }
                                                         }
                                                       },
-                                                      /*onMenuStateChange: (isOpen) {
+                                                      *//*onMenuStateChange: (isOpen) {
                                                         if (isOpen) {
                                                           orderUpdateController.fetchAccountList();
                                                         }
                                                         if (!isOpen) {
                                                           orderUpdateController.resetAccountSearch();
                                                         }
-                                                      },*/
+                                                      },*//*
                                                       onMenuStateChange: orderUpdateController.onDropdownMenuStateChange,
                                                       backgroundColor: AppColor
                                                           .textFieldColor,
@@ -401,8 +444,8 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                       hideUnderline: true,
                                                     ),
                                                   ),
-                                                  /*SizedBox(width: 3),*/
-                                                  /*GestureDetector(
+                                                  *//*SizedBox(width: 3),*//*
+                                                  *//*GestureDetector(
                                                     onTap: () {
                                                       Get.toNamed('/insertUser',parameters: {'id':0.toString()});
                                                     },
@@ -412,10 +455,10 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                       colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn),
 
                                                     ),
-                                                  ),*/
+                                                  ),*//*
                                                 ],
                                               ),
-                                            ),
+                                            ),*/
                                             // قیمت
                                             Container(
                                               padding: EdgeInsets.only(
@@ -482,7 +525,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                   ),
                                                   SizedBox(width: 3),
                                                   Checkbox(
-                                                    hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                                                    hoverColor: AppColor.textFieldColor.withAlpha(200),
                                                     value: orderUpdateController.manualPriceChecked.value,
                                                     onChanged: (value) async{
                                                       orderUpdateController.manualPriceChecked.value = value!;
@@ -502,11 +545,11 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                 Text(
                                                   ' قیمت به گرم: ',
                                                   style: AppTextStyle
-                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                      .labelText.copyWith(color: AppColor.textColor.withAlpha(130)),),
                                                 Text(orderUpdateController.priceTemp.value.seRagham(separator: ','),
                                                   style: AppTextStyle.bodyText
                                                       .copyWith(color: AppColor
-                                                      .primaryColor.withOpacity(0.5)),),
+                                                      .primaryColor.withAlpha(130)),),
 
                                               ],
                                             ) :
@@ -548,7 +591,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                             return null;
                                                           },
                                                           onChanged: (value) {
-                                                            if(orderUpdateController.notLimitChecked.value==false){
+                                                            /*if(orderUpdateController.notLimitChecked.value==false){
                                                               setState(() {
                                                                 double item = double
                                                                     .tryParse(
@@ -561,7 +604,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                                   print(item);
                                                                 }
                                                               });
-                                                            }
+                                                            }*/
                                                             orderUpdateController
                                                                 .updateTotalPrice();
                                                           },
@@ -627,14 +670,14 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                         ),
                                                       ),
                                                     ),
-                                                    SizedBox(width: 3),
+                                                    /*SizedBox(width: 3),
                                                     Checkbox(
                                                       hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                       value: orderUpdateController.notLimitChecked.value,
                                                       onChanged: (value) async{
                                                         orderUpdateController.notLimitChecked.value = value!;
                                                       },
-                                                    ),
+                                                    ),*/
                                                   ],
                                                 ),
                                               ),
@@ -659,7 +702,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                             return null;
                                                           },
                                                           onChanged: (value) {
-                                                            if(orderUpdateController.notLimitChecked.value==false){
+                                                            /*if(orderUpdateController.notLimitChecked.value==false){
                                                               setState(() {
                                                                 double item = double
                                                                     .tryParse(
@@ -671,7 +714,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                                   print(item);
                                                                 }
                                                               });
-                                                            }
+                                                            }*/
                                                             orderUpdateController
                                                                 .updateTotalPrice();
                                                           },
@@ -737,14 +780,14 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                         ),
                                                       ),
                                                     ),
-                                                    SizedBox(width: 3),
+                                                    /*SizedBox(width: 3),
                                                     Checkbox(
                                                       hoverColor: AppColor.textFieldColor.withOpacity(0.8),
                                                       value: orderUpdateController.notLimitChecked.value,
                                                       onChanged: (value) async{
                                                         orderUpdateController.notLimitChecked.value = value!;
                                                       },
-                                                    ),
+                                                    ),*/
                                                   ],
                                                 ),
                                               ),
@@ -762,15 +805,15 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                 Text(
                                                   ' وزن: ',
                                                   style: AppTextStyle
-                                                      .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                                                      .labelText.copyWith(color: AppColor.textColor.withAlpha(130)),),
                                                 Text("${orderUpdateController.selectedItem.value?.w750} گرم ",
                                                   style: AppTextStyle.bodyText
                                                       .copyWith(color: AppColor
-                                                      .primaryColor.withOpacity(0.5)),)
+                                                      .primaryColor.withAlpha(130)),)
                                               ],
                                             ) :
                                             SizedBox(),
-                                            orderUpdateController
+                                            /*orderUpdateController
                                                 .selectedBuySell.value?.name ==
                                                 'فروش به کاربر' ?
                                             Row(
@@ -799,7 +842,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                       .copyWith(color: AppColor
                                                       .primaryColor),)
                                               ],
-                                            ),
+                                            ),*/
                                             SizedBox(height: 5,),
                                             /*Container(
                                               height: 50,
@@ -930,6 +973,40 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                       .textFieldColor,
                                                 ),
                                                 onTap: () async {
+                                                  // انتخاب تاریخ
+                                                  Jalali? pickedDate = await showPersianDatePicker(
+                                                    context: context,
+                                                    initialDate: Jalali.now(),
+                                                    firstDate: Jalali(1400, 1, 1),
+                                                    lastDate: Jalali(1450, 12, 29),
+                                                    initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                    initialDatePickerMode: PersianDatePickerMode.day,
+                                                    locale: const Locale("fa", "IR"),
+                                                  );
+
+                                                  if (pickedDate != null) {
+                                                    // انتخاب زمان
+                                                    TimeOfDay? pickedTime = await showTimePicker(
+                                                      context: context,
+                                                      initialTime: TimeOfDay.now(),
+                                                      builder: (context, child) {
+                                                        return Directionality(
+                                                          textDirection: TextDirection.rtl,
+                                                          child: child!,
+                                                        );
+                                                      },
+                                                    );
+                                                    if (pickedTime != null) {
+                                                      final formattedDate =
+                                                          "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+                                                      final formattedTime =
+                                                          "${pickedTime.hour.toString().padLeft(2, '0')}:${pickedTime.minute.toString().padLeft(2, '0')}";
+
+                                                      orderUpdateController.dateController.text = "$formattedDate $formattedTime";
+                                                    }
+                                                  }
+                                                },
+                                                /*onTap: () async {
                                                   Jalali? pickedDate = await showPersianDatePicker(
                                                     context: context,
                                                     initialDate: Jalali.now(),
@@ -962,7 +1039,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                         .toString().padLeft(
                                                         2, '0')}";
                                                   }
-                                                },
+                                                },*/
                                               ),
                                             ),
                                             // توضیحات
@@ -1296,7 +1373,6 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                       ),
 
                                     ),
-                                  ),
                                 ),
                               ],
                             ),
@@ -1307,7 +1383,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                         ResponsiveRowColumnItem(
                           rowFlex: 1,
                           child:
-                          orderUpdateController.isLoadingBalance.value == false
+                          orderUpdateController.isLoadingBalance.value == true
                               ?
                           Center(child: CircularProgressIndicator(),)
                               :
@@ -1322,7 +1398,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: isDesktop ? FloatingActionButton(
           onPressed: () {
             Get.dialog(const ChatDialog());
           },
@@ -1331,7 +1407,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
             Icons.chat,
             color: Colors.white,
           ),
-        ),
+        ) : SizedBox.shrink(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });

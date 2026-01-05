@@ -21,6 +21,7 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
       ownerName: json['ownerName'] as String?,
       requestAmount: (json['requestAmount'] as num?)?.toDouble(),
       amount: (json['amount'] as num?)?.toDouble(),
+      extraAmount: (json['extraAmount'] as num?)?.toDouble(),
       dividedAmount: (json['dividedAmount'] as num?)?.toDouble(),
       notConfirmedAmount: (json['notConfirmedAmount'] as num?)?.toDouble(),
       undividedAmount: (json['undividedAmount'] as num?)?.toDouble(),
@@ -62,6 +63,8 @@ WithdrawModel _$WithdrawModelFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
       refrenceId: (json['refrenceId'] as num?)?.toInt(),
       recId: json['recId'] as String?,
+      isReferencedByAnother: json['isReferencedByAnother'] as bool?,
+      allDepositSent: json['allDepositSent'] as bool?,
     );
 
 Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
@@ -72,6 +75,7 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'ownerName': instance.ownerName,
       'requestAmount': instance.requestAmount,
       'amount': instance.amount,
+      'extraAmount': instance.extraAmount,
       'dividedAmount': instance.dividedAmount,
       'notConfirmedAmount': instance.notConfirmedAmount,
       'undividedAmount': instance.undividedAmount,
@@ -102,4 +106,6 @@ Map<String, dynamic> _$WithdrawModelToJson(WithdrawModel instance) =>
       'description': instance.description,
       'refrenceId': instance.refrenceId,
       'recId': instance.recId,
+      'isReferencedByAnother': instance.isReferencedByAnother,
+      'allDepositSent': instance.allDepositSent,
     };

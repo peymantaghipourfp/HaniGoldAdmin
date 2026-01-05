@@ -80,6 +80,50 @@ class InventoryModel {
   factory InventoryModel.fromJson(Map<String, dynamic> json) => _$InventoryModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$InventoryModelToJson(this);
+
+  InventoryModel copyWith({
+    int? recordId,
+    DateTime? date,
+    AccountModel? account,
+    ItemModel? item,
+    int? type,
+    bool? isDeleted,
+    List<InventoryDetailModel>? inventoryDetails,
+    int? rowNum,
+    int? id,
+    String? recId,
+    List<dynamic>? infos,
+    String? description,
+    int? inventoryDetailsCount,
+    List<Balance>? balances,
+    bool? registered,
+    bool? confirmByAdmin,
+    String? recipient,
+    double? totalQuantity,
+    CreatedByModel? createdBy,
+  }) {
+    return InventoryModel(
+      recordId: recordId ?? this.recordId,
+      date: date ?? this.date,
+      account: account ?? this.account,
+      item: item ?? this.item,
+      type: type ?? this.type,
+      isDeleted: isDeleted ?? this.isDeleted,
+      inventoryDetails: inventoryDetails ?? this.inventoryDetails,
+      rowNum: rowNum ?? this.rowNum,
+      id: id ?? this.id,
+      recId: recId ?? this.recId,
+      infos: infos ?? this.infos,
+      description: description ?? this.description,
+      inventoryDetailsCount: inventoryDetailsCount ?? this.inventoryDetailsCount,
+      balances: balances ?? this.balances,
+      registered: registered ?? this.registered,
+      confirmByAdmin: confirmByAdmin ?? this.confirmByAdmin,
+      recipient: recipient ?? this.recipient,
+      totalQuantity: totalQuantity ?? this.totalQuantity,
+      createdBy: createdBy ?? this.createdBy,
+    );
+  }
 }
 
 @JsonSerializable()

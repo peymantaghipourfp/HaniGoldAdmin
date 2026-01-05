@@ -61,7 +61,7 @@ class RemittanceController extends BaseController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;
@@ -70,6 +70,7 @@ class RemittanceController extends BaseController{
   final ItemRepository itemRepository=ItemRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
   ScrollController scrollController = ScrollController();
+  ScrollController scrollControllerMobile = ScrollController();
   final TextEditingController searchControllerRecipt=TextEditingController();
   final FocusNode searchFocusNodeRecipt = FocusNode();
   final TextEditingController searchControllerPayer=TextEditingController();
@@ -82,6 +83,8 @@ class RemittanceController extends BaseController{
   final TextEditingController mobileReciptController=TextEditingController();
   final TextEditingController quantityPayerController=TextEditingController();
   final TextEditingController descController=TextEditingController();
+  final TextEditingController quantityFilterController=TextEditingController();
+  final TextEditingController descriptionFilterController=TextEditingController();
   RxList<String> getList = RxList([]);
   RxList<RemittanceModel> remittanceList = RxList([]);
   RxList<RemittanceModel> remittanceListStatus = RxList([]);
@@ -94,7 +97,7 @@ class RemittanceController extends BaseController{
   final PageController pageController = PageController();
   final List<ItemModel> itemList=<ItemModel>[].obs;
   final List<AccountModel> accountListPayer=<AccountModel>[].obs;
-  PaginatedModel? paginated;
+  final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   var errorMessage=''.obs;
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
@@ -111,6 +114,7 @@ class RemittanceController extends BaseController{
   RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploadingDesktop = false.obs;
   final Rxn<ItemModel> selectedItem=Rxn<ItemModel>();
+  final Rxn<ItemModel> selectedItemFilter=Rxn<ItemModel>();
   BalanceModel? balanceModel;
   RxList<BalanceItemModel> balanceListRecipt = <BalanceItemModel>[].obs;
   RxList<BalanceItemModel> balanceListPayer = <BalanceItemModel>[].obs;
@@ -125,8 +129,79 @@ class RemittanceController extends BaseController{
   var recordId="".obs;
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
+  var dropdownError="".obs;
+
+  RxMap<int, double> tempBalanceChangesPayer = <int, double>{}.obs;
+  RxMap<int, double> tempBalanceChangesRecipt = <int, double>{}.obs;
+  RxBool showTempBalance = false.obs;
+
+  final RxList<AccountModel> allAccounts = <AccountModel>[].obs;
+  final RxBool isAccountsLoaded = false.obs;
+  final RxBool isAccountsLoading = false.obs;
 
   StreamSubscription? socketSubscription;
+
+  void tempBalanceView(String value) {
+    if (value.isEmpty || selectedItem.value?.id == null) {
+      // Reset temporary changes if value is empty
+      tempBalanceChangesPayer.clear();
+      tempBalanceChangesRecipt.clear();
+      showTempBalance.value = false;
+      return;
+    }
+
+    try {
+      double enteredQuantity = double.parse(value.replaceAll(',', '').toEnglishDigit());
+      int selectedItemId = selectedItem.value!.id!;
+
+      double? currentPayerBalance = balanceListPayer
+          .firstWhereOrNull((item) => item.item?.id == selectedItemId)
+          ?.balance;
+      double? currentReciptBalance = balanceListRecipt
+          .firstWhereOrNull((item) => item.item?.id == selectedItemId)
+          ?.balance;
+      if (currentPayerBalance != null) {
+        tempBalanceChangesPayer[selectedItemId] = currentPayerBalance - enteredQuantity;
+      }
+      else{
+        tempBalanceChangesPayer[selectedItemId]=-enteredQuantity;
+      }
+      if (currentReciptBalance != null) {
+        tempBalanceChangesRecipt[selectedItemId] = currentReciptBalance + enteredQuantity;
+      }
+      else{
+        tempBalanceChangesRecipt[selectedItemId]=enteredQuantity;
+      }
+      showTempBalance.value = true;
+
+      tempBalanceChangesPayer.refresh();
+      tempBalanceChangesRecipt.refresh();
+      update();
+      print("tempBalanceChangesPayer::::$tempBalanceChangesPayer");
+      print("tempBalanceChangesRecipt::::$tempBalanceChangesRecipt");
+
+    } catch (e) {
+      print('Error in tempBalanceView: $e');
+      tempBalanceChangesPayer.clear();
+      tempBalanceChangesRecipt.clear();
+      showTempBalance.value = false;
+    }
+  }
+
+  /*double getDisplayBalance(BalanceItemModel balanceItem, bool isPayer) {
+    int itemId = balanceItem.item?.id ?? 0;
+
+    if (showTempBalance.value &&
+        ((isPayer && tempBalanceChangesPayer.containsKey(itemId)) ||
+            (!isPayer && tempBalanceChangesRecipt.containsKey(itemId)))) {
+
+      return isPayer
+          ? tempBalanceChangesPayer[itemId]!
+          : tempBalanceChangesRecipt[itemId]!;
+    }
+
+    return balanceItem.balance ?? 0;
+  }*/
 
   getAccountRecipt(String index){
     indexAccountPayerGet=index;
@@ -156,9 +231,15 @@ class RemittanceController extends BaseController{
         quantityPayerController.text = text.seRagham();
       }
     }
+    tempBalanceChangesPayer.clear();
+    tempBalanceChangesRecipt.clear();
+    showTempBalance.value = false;
   }
 
-
+  void changeSelectedItemFilter(ItemModel? newValue) {
+    selectedItemFilter.value = newValue;
+    update();
+  }
 
   void changeSelectedAccountRecipt(AccountModel? newValue)async {
     selectedAccountRecipt.value = newValue;
@@ -166,8 +247,14 @@ class RemittanceController extends BaseController{
     balanceListRecipt.clear();
     balanceListRecipt.assignAll((await getBalanceList(selectedAccountRecipt.value?.id??0))!);
     balanceListRecipt.refresh();
-    //searchedAccountsRecipt.clear();
+
+    //resetAccountSearchRecipt();
+    fetchAccountListRecipt('');
+    tempBalanceChangesPayer.clear();
+    tempBalanceChangesRecipt.clear();
+    showTempBalance.value = false;
     update();
+
     // selectedWalletAccount.value = null;
     // getWalletAccount(selectedAccount.value?.id ?? 0);
   }
@@ -177,19 +264,23 @@ class RemittanceController extends BaseController{
     namePayerController.text=newValue?.name??"";
     balanceListPayer.assignAll((await getBalanceList(selectedAccountPayer.value?.id??0))!);
     balanceListPayer.refresh();
-    //searchedAccountsPayer.clear();
+    //resetAccountSearchPayer();
+    fetchAccountListPayer('');
+    tempBalanceChangesPayer.clear();
+    tempBalanceChangesRecipt.clear();
+    showTempBalance.value = false;
     update();
     // selectedWalletAccount.value = null;
     // getWalletAccount(selectedAccount.value?.id ?? 0);
   }
   void resetAccountSearchRecipt() {
-
+    searchedAccountsRecipt.clear();
     searchControllerRecipt.clear();
     searchedAccountsRecipt.assignAll(accountListRecipt);
 
   }
   void resetAccountSearchPayer() {
-
+    searchedAccountsPayer.clear();
     searchControllerPayer.clear();
     searchedAccountsPayer.assignAll(accountListPayer);
   }
@@ -226,6 +317,7 @@ class RemittanceController extends BaseController{
   void onDropdownMenuStateChangeRecipt(bool isOpen) {
     if (isOpen) {
       Future.delayed(const Duration(milliseconds: 100), () {
+
         searchFocusNodeRecipt.requestFocus();
       });
     } else {
@@ -236,6 +328,7 @@ class RemittanceController extends BaseController{
   void onDropdownMenuStateChangePayer(bool isOpen) {
     if (isOpen) {
       Future.delayed(const Duration(milliseconds: 100), () {
+
         searchFocusNodePayer.requestFocus();
       });
     } else {
@@ -246,15 +339,21 @@ class RemittanceController extends BaseController{
   @override
   void onClose() {
     socketSubscription?.cancel();
+    debounceRecipt?.cancel();
+    debouncePayer?.cancel();
     searchFocusNodeRecipt.dispose();
     searchFocusNodePayer.dispose();
+    scrollControllerMobile.dispose();
     super.onClose();
   }
 
   @override
   void onInit() {
+    fetchAccountListRecipt("");
+    fetchAccountListPayer("");
     socketSubscription?.cancel();
     _listenToSocket();
+    setupScrollListener();
     searchControllerRecipt.addListener(onSearchChangedRecipt);
     searchControllerPayer.addListener(onSearchChangedPayer);
     /*// Check if we're in update mode by looking for the 'id' parameter
@@ -267,7 +366,7 @@ class RemittanceController extends BaseController{
       fetchAccountListP("");
       // Then fetch the remittance data
       getOneRemittance(int.parse(updateId));
-    } else {*/
+      } else {*/
       getRemittanceListPager();
       var now = Jalali.now();
       DateTime date = DateTime.now();
@@ -279,12 +378,67 @@ class RemittanceController extends BaseController{
           2, '0')}";
       fetchItemList();
       //fetchAccountListRecipt("");
-      fetchAccountListPayer("");
       balanceListRecipt.clear();
       balanceListPayer.clear();
       //clearList();
     //}
     super.onInit();
+  }
+
+  void setupScrollListener() {
+    scrollControllerMobile.addListener(() {
+      if (scrollControllerMobile.position.pixels >=
+          scrollControllerMobile.position.maxScrollExtent - 200 &&
+          hasMore.value &&
+          !isLoading.value) {
+        loadMore();
+      }
+    });
+  }
+
+  Future<void> loadMore() async {
+    // بررسی شرایط برای بارگذاری بیشتر
+    if (scrollControllerMobile.hasClients &&
+        hasMore.value &&
+        !isLoading.value ) {
+
+      isLoading.value = true;
+      final nextPage = currentPage.value + 1;
+
+      try {
+        final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
+        final toIndex = nextPage * itemsPerPage.value;
+
+        var fetchedListRemittance = await remittanceRepository.getRemittanceListPager(
+          startIndex: startIndex,
+          toIndex: toIndex, startDate: startDateFilter.value, endDate: endDateFilter.value,
+          accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
+          namePayer: namePayerController.text ,nameReciept: nameRecieptController.text,
+          quantity: quantityFilterController.text.isNotEmpty ? quantityFilterController.text.replaceAll(',', '').replaceAll('٬', '') : null,
+          descriptionFilter: descriptionFilterController.text.isNotEmpty ? descriptionFilterController.text : null,
+          item: selectedItemFilter.value?.id,
+        );
+
+        if (fetchedListRemittance.remittances!.isNotEmpty) {
+          remittanceList.addAll(fetchedListRemittance.remittances ?? []);
+          currentPage.value = nextPage;
+
+          hasMore.value = fetchedListRemittance.remittances!.length >= itemsPerPage.value;
+
+          paginated.value = fetchedListRemittance.paginated;
+
+          remittanceList.refresh();
+          update();
+        } else {
+          hasMore.value = false;
+        }
+      } catch (e) {
+        hasMore.value = false;
+        print("خطا در بارگذاری بیشتر: ${e.toString()}");
+      } finally {
+        isLoading.value = false;
+      }
+    }
   }
 
   void _listenToSocket() {
@@ -295,8 +449,7 @@ class RemittanceController extends BaseController{
           final data = json.decode(message);
           if (data['channel'] == 'remittance') {
             final socketRemittance = SocketRemittanceModel.fromJson(data);
-
-            getRemittanceListPager();
+            //getRemittanceListPager();
           }
         } catch (e) {
           Get.log('Error processing socket message in RemittanceController: $e');
@@ -307,25 +460,25 @@ class RemittanceController extends BaseController{
     });
   }
 
-  Timer? debounce;
+  Timer? debounceRecipt;
   void onSearchChangedRecipt(){
-    if (debounce?.isActive ?? false) debounce!.cancel();
-    debounce=Timer(const Duration(milliseconds: 500), () async {
+    if (debounceRecipt?.isActive ?? false) debounceRecipt!.cancel();
+    debounceRecipt=Timer(const Duration(milliseconds: 500), () async {
       final query = searchControllerRecipt.text.trim();
       if (query.isEmpty) {
         searchedAccountsRecipt.assignAll(accountListRecipt);
         state.value = PageState.list;
         return;
       }
-      await fetchAccountListPayer(query);
+      await fetchAccountListRecipt(query);
 
     });
   }
-Timer? debounceP;
+  Timer? debouncePayer;
 
   void onSearchChangedPayer(){
-    if (debounce?.isActive ?? false) debounce!.cancel();
-    debounce=Timer(const Duration(milliseconds: 500), () async {
+    if (debouncePayer?.isActive ?? false) debouncePayer!.cancel();
+    debouncePayer=Timer(const Duration(milliseconds: 500), () async {
       final query = searchControllerPayer.text.trim();
       if (query.isEmpty) {
         searchedAccountsPayer.assignAll(accountListPayer);
@@ -357,8 +510,8 @@ Timer? debounceP;
     }
   }
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getRemittanceListPager();
   }
 
@@ -377,7 +530,6 @@ Timer? debounceP;
     }
 
   }
-
 
 
   Future<void> uploadImagesDesktop( String type, String entityType,) async {
@@ -413,6 +565,7 @@ Timer? debounceP;
         if (uploadStatusesDesktop.every((status) => status)) {
           Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
           insertRemittance(recordId.value);
+          remittanceList.clear();
         }
       } finally {
         isUploadingDesktop.value = false;
@@ -463,8 +616,6 @@ Timer? debounceP;
     }
 
   }
-
-
 
 
   // لیست بالانس
@@ -605,31 +756,26 @@ Timer? debounceP;
 
 
   Future<void> fetchAccountListPayer(String name) async{
-
     try{
-      /*searchedAccountsRecipt.clear();
-      searchedAccountsPayer.clear();*/
-     // state.value=PageState.loading;
-      var fetchedAccountList=await accountRepository.searchAccountListNew(name,"");
+      var fetchedAccountList=await accountRepository.getAccountList("");
       accountListPayer.assignAll(fetchedAccountList);
       searchedAccountsPayer.assignAll(fetchedAccountList);
-      //  state.value=PageState.list;
-      if(accountListPayer.isEmpty){
-        //   state.value=PageState.empty;
-      }
-      print('تعداد :${accountListPayer.length}');
-      accountListRecipt.assignAll(fetchedAccountList);
-      searchedAccountsRecipt.assignAll(fetchedAccountList);
-      //  state.value=PageState.list;
-      if(accountListRecipt.isEmpty){
-        //   state.value=PageState.empty;
-      }
-      print('تعداد :${accountListRecipt.length}');
+      print('تعداد Payer:${accountListPayer.length}');
     }
     catch(e){
-     // state.value=PageState.err;
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
-    }finally{
+    }
+  }
+
+  Future<void> fetchAccountListRecipt(String name) async{
+    try{
+      var fetchedAccountList=await accountRepository.getAccountList("");
+      accountListRecipt.assignAll(fetchedAccountList);
+      searchedAccountsRecipt.assignAll(fetchedAccountList);
+      print('تعداد Recipt:${accountListRecipt.length}');
+    }
+    catch(e){
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }
   }
 
@@ -641,6 +787,7 @@ Timer? debounceP;
       RemittanceModel response = await remittanceRepository.insertRemittance(
         date: gregorianDate,
         itemId: selectedItem.value?.id ?? 0,
+        itemUnitId: selectedItem.value?.itemUnit?.id ?? 0,
         quantity: double.parse(quantityPayerController.text.replaceAll(',', '').toEnglishDigit()),
         description: descController.text,
         accountIdPayer: selectedAccountPayer.value?.id??0,
@@ -659,7 +806,7 @@ Timer? debounceP;
       descController.text="";
       dateController.text="";
       quantityPayerController.text="";
-     // getRemittanceListPager();
+      remittanceList.clear();
       clearFilter();
        clearSearch();
       clearList();
@@ -734,10 +881,13 @@ Timer? debounceP;
   }
 
   void clearSearch() {
+    paginated.value=null;
     currentPage.value = 1;
     selectedAccountId.value = 0;
-    /*searchControllerRecipt.clear();
-    searchedAccountsRecipt.clear();*/
+    searchControllerPayer.clear();
+    searchControllerRecipt.clear();
+    searchedAccountsRecipt.clear();
+    searchedAccountsPayer.clear();
     getRemittanceListPager();
   }
   // لیست حواله ها با صفحه بندی
@@ -752,10 +902,13 @@ Timer? debounceP;
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
         accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
         namePayer: namePayerController.text ,nameReciept: nameRecieptController.text,
+        quantity: quantityFilterController.text.isNotEmpty ? quantityFilterController.text.replaceAll(',', '').replaceAll('٬', '') : null,
+        descriptionFilter: descriptionFilterController.text.isNotEmpty ? descriptionFilterController.text : null,
+        item: selectedItemFilter.value?.id,
 
       );
-      remittanceList.addAll(response.remittances??[]);
-      paginated=response.paginated;
+      remittanceList.assignAll(response.remittances??[]);
+      paginated.value=response.paginated;
       state.value=PageState.list;
       isOpenMore.value = true;
 
@@ -781,7 +934,7 @@ Timer? debounceP;
 
       );
       remittanceList.addAll(response.remittances??[]);
-      paginated=response.paginated;
+      paginated.value=response.paginated;
       state.value=PageState.list;
       isOpenMore.value = true;
 
@@ -797,6 +950,14 @@ Timer? debounceP;
     //EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoadingRegister.value = true;
+      final int rIndex = remittanceList.indexWhere((r) => (r.id ?? 0) == remittanceId);
+      bool? previousRegistered;
+      if (rIndex != -1) {
+        previousRegistered = remittanceList[rIndex].registered;
+        remittanceList[rIndex].registered = registered;
+        remittanceList.refresh();
+        update();
+      }
       var response = await remittanceRepository.updateRegistered(
         remittanceId: remittanceId,
         registered: registered,
@@ -808,11 +969,25 @@ Timer? debounceP;
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.infos!.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        getRemittanceListPager();
-        clearFilter();
+        /*getRemittanceListPager();
+        clearFilter();*/
+      } else {
+        // Revert if backend did not confirm
+        if (rIndex != -1) {
+          remittanceList[rIndex].registered = previousRegistered;
+          remittanceList.refresh();
+          update();
+        }
       }
 
     } catch (e) {
+      // Revert optimistic update on error
+      final int rIndex = remittanceList.indexWhere((r) => (r.id ?? 0) == remittanceId);
+      if (rIndex != -1) {
+        remittanceList[rIndex].registered = !(registered);
+        remittanceList.refresh();
+        update();
+      }
       throw ErrorException('خطا در ریجیستر: $e');
     } finally {
       isLoadingRegister.value = false;
@@ -938,9 +1113,37 @@ Timer? debounceP;
   }
 
   Future<RemittanceModel?> updateStatusRemittance(int remittanceId,int status,int reasonRejectionId) async {
-    EasyLoading.show(status: 'لطفا منتظر بمانید');
+   // EasyLoading.show(status: 'لطفا منتظر بمانید');
+    int? previousStatus;
+    ReasonRejectionModel? previousReason;
     try {
       isLoading.value = true;
+      // Optimistic update: apply change locally first
+      final int rIndex = remittanceList.indexWhere((r) => (r.id ?? 0) == remittanceId);
+      previousReason = rIndex != -1 ? remittanceList[rIndex].reasonRejection : null;
+      if (rIndex != -1) {
+        previousStatus = remittanceList[rIndex].status;
+        remittanceList[rIndex].status = status;
+        // Update reason rejection locally if rejected, else clear
+        if (status == 2) {
+          // Try to find selected reason by id or use the currently selectedReasonRejection
+          final selected = selectedReasonRejection.value;
+          if (selected != null && (selected.id == reasonRejectionId)) {
+            remittanceList[rIndex].reasonRejection = selected;
+          } else {
+            final found = reasonRejectionList.firstWhereOrNull((r) => (r.id ?? 0) == reasonRejectionId);
+            if (found != null) {
+              remittanceList[rIndex].reasonRejection = found;
+            } else {
+              remittanceList[rIndex].reasonRejection = ReasonRejectionModel(id: reasonRejectionId, name: '', type: '', rowNum: null, attribute: '', infos: []);
+            }
+          }
+        } else {
+          remittanceList[rIndex].reasonRejection = null;
+        }
+        remittanceList.refresh();
+        update();
+      }
       var response = await remittanceRepository.updateStatusRemittance(
         status: status,
         remittanceId: remittanceId,
@@ -952,14 +1155,28 @@ Timer? debounceP;
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('وضعیت حواله با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        //fetchDepositList();
+        //getRemittanceListPager();
+      }else {
+        // Revert if backend did not confirm
+        if (rIndex != -1) {
+          remittanceList[rIndex].status = previousStatus;
+          remittanceList.refresh();
+          update();
+        }
       }
 
     } catch (e) {
-      EasyLoading.dismiss();
+      // Revert optimistic update on error
+      final int rIndex = remittanceList.indexWhere((r) => (r.id ?? 0) == remittanceId);
+      if (rIndex != -1) {
+        remittanceList[rIndex].status = remittanceList[rIndex].status; // no-op safeguard
+        remittanceList.refresh();
+        update();
+      }
+      //EasyLoading.dismiss();
       throw ErrorException('خطا در تغییر وضعیت: $e');
     } finally {
-      EasyLoading.dismiss();
+
       isLoading.value = false;
     }
 
@@ -990,7 +1207,7 @@ Timer? debounceP;
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -1081,7 +1298,7 @@ Timer? debounceP;
           await FileSaver.instance.saveFile(
             name: 'remittances',
             bytes: uint8List,
-            ext: 'xlsx',
+            fileExtension: 'xlsx',
             mimeType: MimeType.microsoftExcel,
           );
         }
@@ -1316,10 +1533,16 @@ Timer? debounceP;
     dateEndController.clear();
     startDateFilter.value="";
     endDateFilter.value="";
+    quantityFilterController.clear();
+    descriptionFilterController.clear();
+    selectedItemFilter.value = null;
   }
 
   void clearList() {
     //dateController.clear();
+    var now = Jalali.now();
+    DateTime date=DateTime.now();
+    dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";
     quantityPayerController.clear();
     mobileReciptController.clear();
     descController.clear();
@@ -1330,7 +1553,7 @@ Timer? debounceP;
     selectedAccountPayer.value=null;
   }
 
-  Future<void> captureRowScreenshot(RemittanceModel remittance, GlobalKey dataTableKey, Map<int, GlobalKey> rowKeys) async {
+  /*Future<void> captureRowScreenshot(RemittanceModel remittance, GlobalKey dataTableKey, Map<int, GlobalKey> rowKeys) async {
     final rowKey = rowKeys[remittance.id!];
     if (rowKey == null || rowKey.currentContext == null) {
       Get.snackbar('خطا', 'ردیفی برای ثبت پیدا نشد. کلید آماده نیست.');
@@ -1421,7 +1644,7 @@ Timer? debounceP;
     } catch (e) {
       Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
     }
-  }
+  }*/
 
   void downloadImage(String guidId) async {
     if (kIsWeb){
@@ -1464,6 +1687,117 @@ Timer? debounceP;
           snackPosition: SnackPosition.BOTTOM,
         );
       }
+    }
+  }
+  // Capture a specific row of the DataTable without relying on row-specific GlobalKeys
+  Future<void> captureTableScreenshot(RemittanceModel remittance, GlobalKey dataTableKey) async {
+    try {
+      if (dataTableKey.currentContext == null) {
+        Get.snackbar('خطا', 'جدولی برای ثبت پیدا نشد.');
+        return;
+      }
+
+      // Find row index
+      final rowIndex = remittanceList.indexWhere((r) => r.id == remittance.id);
+      if (rowIndex == -1) {
+        Get.snackbar('خطا', 'ردیف مورد نظر پیدا نشد.');
+        return;
+      }
+
+      // Match DataTable config
+      const double headerHeight = 40.0; // headingRowHeight
+      const double rowHeight = 80.0; // dataRowMaxHeight
+
+      final RenderRepaintBoundary boundary = dataTableKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+
+      final RenderBox tableBox = dataTableKey.currentContext!.findRenderObject() as RenderBox;
+      final tableSize = tableBox.size;
+
+      final Rect cropRect = Rect.fromLTWH(
+        0,
+        headerHeight + (rowIndex * rowHeight),
+        tableSize.width,
+        rowHeight,
+      );
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final paint = Paint();
+      canvas.drawImageRect(
+        image,
+        cropRect,
+        Rect.fromLTWH(0, 0, cropRect.width, cropRect.height),
+        paint,
+      );
+
+      final picture = recorder.endRecording();
+      final croppedImage = await picture.toImage(cropRect.width.toInt(), cropRect.height.toInt());
+      final byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        Get.snackbar('خطا', 'دریافت داده‌های تصویر ناموفق بود.');
+        return;
+      }
+      final uint8List = byteData.buffer.asUint8List();
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'image/png');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'remittance_row_${remittance.id}.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: "remittance_row_${remittance.id}",
+          bytes: uint8List,
+          fileExtension: 'png',
+          mimeType: MimeType.png,
+        );
+      }
+
+      Get.snackbar('موفقیت', 'تصویر ردیف با موفقیت ذخیره شد.');
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در ثبت تصویر: $e');
+    }
+  }
+
+  // Capture the entire DataTable
+  Future<void> captureEntireTable(GlobalKey dataTableKey) async {
+    try {
+      if (dataTableKey.currentContext == null) {
+        Get.snackbar('خطا', 'جدولی برای ثبت پیدا نشد.');
+        return;
+      }
+
+      final RenderRepaintBoundary boundary = dataTableKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        Get.snackbar('خطا', 'دریافت داده‌های تصویر ناموفق بود.');
+        return;
+      }
+      final uint8List = byteData.buffer.asUint8List();
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'image/png');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'remittance_table_${DateTime.now().millisecondsSinceEpoch}.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: "remittance_table_${DateTime.now().millisecondsSinceEpoch}",
+          bytes: uint8List,
+          fileExtension: 'png',
+          mimeType: MimeType.png,
+        );
+      }
+
+      Get.snackbar('موفقیت', 'تصویر جدول با موفقیت ذخیره شد.');
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در ثبت تصویر جدول: $e');
     }
   }
 }

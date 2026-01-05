@@ -16,6 +16,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
@@ -56,7 +57,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
         children: [
           Positioned.fill(
             child: Container(
-              padding: EdgeInsets.all(30),
+              padding: EdgeInsets.all(isDesktop ? 30 : 25),
               decoration: BoxDecoration(
                 image: DecorationImage(
                   image: AssetImage('assets/images/bgHaniGold.png'),
@@ -68,15 +69,16 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           ),
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 45, horizontal: 20),
+              padding: EdgeInsets.symmetric(vertical: 45, horizontal: isDesktop ? 20 : 10),
               child: SizedBox(
                 width: Get.width,
                 height: Get.height,
                 child: Card(
-                  color: AppColor.secondaryColor.withOpacity(0.8),
-                  elevation: 5,
+                  color: AppColor.backGroundColor1.withAlpha(150),
+                  //color: AppColor.secondaryColor.withAlpha(150),
+                  elevation: 10,
                   child: Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: EdgeInsets.all(isDesktop ? 20 : 5),
                     child:
                     DefaultTabController(
                       length: 2,
@@ -92,8 +94,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                   fontSize: 13, fontWeight: FontWeight.bold),
                               labelColor: AppColor.textColor,
                               dividerColor: AppColor.backGroundColor,
-                              overlayColor: WidgetStatePropertyAll(
-                                  AppColor.backGroundColor1),
+                              overlayColor: WidgetStatePropertyAll(AppColor.backGroundColor1),
                               unselectedLabelColor: AppColor.textColor
                                   .withAlpha(
                                   120),
@@ -108,18 +109,18 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                           Obx(() {
                             if (productController.state.value == PageState.loading) {
                               //EasyLoading.show(status: 'لطفا منتظر بمانید...');
-                            return Center(
-                            child: CircularProgressIndicator());
+                              return Center(
+                                  child: CircularProgressIndicator());
                             } else
                             if (productController.state.value == PageState.empty) {
                               //EasyLoading.dismiss();
-                            return EmptyPage(
-                            title: 'درخواستی وجود ندارد',
-                            callback: () {
-                            productController
-                                .fetchActiveItemList();
-                            },
-                            );
+                              return EmptyPage(
+                                title: 'درخواستی وجود ندارد',
+                                callback: () {
+                                  productController
+                                      .fetchActiveItemList();
+                                },
+                              );
                             } else
                             if (productController.state.value == PageState.list) {
                               EasyLoading.dismiss();
@@ -129,6 +130,41 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                     physics: NeverScrollableScrollPhysics(),
                                     children: [
                                       // Tabbar1 فعال
+                                      if (isDesktop)
+                                        SingleChildScrollView(
+                                          scrollDirection: Axis.horizontal,
+                                          controller: productController.scrollController,
+                                          physics: ClampingScrollPhysics(),
+                                          child: Row(crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              SingleChildScrollView(
+                                                child: Column(
+                                                  children: [
+                                                     DataTable(
+                                                        border: TableBorder.symmetric(
+                                                            inside: BorderSide(color: AppColor.textColor, width: 0.3),
+                                                            outside: BorderSide(color: AppColor.textColor, width: 0.3),
+                                                            borderRadius: BorderRadius.circular(8)),
+                                                        dividerThickness: 0.3,
+                                                        columns: buildDataColumnsActive(),
+                                                        rows: buildDataRowsActive(context),
+                                                       headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
+                                                        dataRowMaxHeight: 60,
+                                                        headingRowHeight: 40,
+                                                        columnSpacing: 60,
+                                                        horizontalMargin: 40,
+                                                      ),
+
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      else
+                                        buildMobileActiveList(context),
+                                      //Tabbar2 غیر فعال
+                                      if (isDesktop)
                                         SingleChildScrollView(
                                           scrollDirection: Axis.horizontal,
                                           controller: productController.scrollController,
@@ -139,64 +175,32 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                 child: Column(
                                                   children: [
                                                     DataTable(
-                                                        border: TableBorder.symmetric(
-                                                            inside: BorderSide(color: AppColor.textColor, width: 0.3),
-                                                            outside: BorderSide(color: AppColor.textColor, width: 0.3),
-                                                            borderRadius: BorderRadius.circular(8)),
-                                                        dividerThickness: 0.3,
-                                                        columns: buildDataColumnsActive(),
-
-                                                        rows: buildDataRowsActive(context),
-                                                    dataRowMaxHeight: 65,
-                                                    //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                    headingRowHeight: 40,
-                                                    columnSpacing: 100,
-                                                    horizontalMargin: 50,
-                                                        ),
+                                                      border: TableBorder.symmetric(
+                                                          inside: BorderSide(color: AppColor.textColor, width: 0.3),
+                                                          outside: BorderSide(color: AppColor.textColor, width: 0.3),
+                                                          borderRadius: BorderRadius.circular(8)),
+                                                      dividerThickness: 0.3,
+                                                      columns: buildDataColumnsInactive(),
+                                                      rows: buildDataRowsInactive(context),
+                                                      headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
+                                                      dataRowMaxHeight: 60,
+                                                      headingRowHeight: 40,
+                                                      columnSpacing: 60,
+                                                      horizontalMargin: 40,
+                                                    ),
                                                   ],
                                                 ),
                                               ),
                                             ],
                                           ),
-                                        ),
-                                      //Tabbar2 غیر فعال
-                                      SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        controller: productController.scrollController,
-                                        physics: ClampingScrollPhysics(),
-                                        child: Row(crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            SingleChildScrollView(
-                                              child: Column(
-                                                children: [
-                                                  DataTable(
-                                                    border: TableBorder.symmetric(
-                                                        inside: BorderSide(color: AppColor.textColor, width: 0.3),
-                                                        outside: BorderSide(color: AppColor.textColor, width: 0.3),
-                                                        borderRadius: BorderRadius.circular(8)),
-                                                    dividerThickness: 0.3,
-                                                    columns: buildDataColumnsInactive(),
-
-                                                    rows: buildDataRowsInactive(context),
-                                                    dataRowMaxHeight: 65,
-                                                    //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                                    //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                                    headingRowHeight: 40,
-                                                    columnSpacing: 100,
-                                                    horizontalMargin: 50,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                        )
+                                      else
+                                        buildMobileInactiveList(context),
                                     ],
                                   ),
                                 );
 
-                                /*Expanded(
+                              /*Expanded(
                                       child: Container(
                                           constraints: BoxConstraints(maxWidth: 400),
                                           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -567,7 +571,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isDesktop ? FloatingActionButton(
         onPressed: () {
           Get.dialog(const ChatDialog());
         },
@@ -576,7 +580,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           Icons.chat,
           color: Colors.white,
         ),
-      ),
+      ) : SizedBox.shrink(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }
@@ -587,7 +591,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           label: ConstrainedBox(
               constraints: BoxConstraints(maxWidth: 100,),
               child: Text('عنوان',
-                  style: AppTextStyle.labelText.copyWith(fontSize: 11))),
+                  style: AppTextStyle.bodyText)),
           headingRowAlignment: MainAxisAlignment.center
       ),
       DataColumn(
@@ -596,7 +600,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           constraints: BoxConstraints(maxWidth: 150,),
           child: Text('قیمت خرید',
             style: AppTextStyle
-                .smallTitleText,),
+                .bodyText,),
         ),
       ),
       DataColumn(
@@ -605,10 +609,16 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           constraints: BoxConstraints(maxWidth: 150,),
           child: Text('قیمت فروش',
             style: AppTextStyle
-                .smallTitleText,),
+                .bodyText,),
         ),
       ),
-
+      DataColumn(
+          label: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 100,),
+              child: Text('تاریخ آخرین تغییر',
+                  style: AppTextStyle.bodyText)),
+          headingRowAlignment: MainAxisAlignment.center
+      ),
       /*DataColumn(
         headingRowAlignment: MainAxisAlignment.center,
         label: ConstrainedBox(
@@ -663,20 +673,20 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           constraints: BoxConstraints(maxWidth: 60,),
           child: Text('وضعیت',
             style: AppTextStyle
-                .smallTitleText,),
+                .bodyText,),
         ),
       ),
       DataColumn(
           label: Text('ویرایش',
-              style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+              style: AppTextStyle.bodyText),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: Text('وضعیت خرید',
-              style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+              style: AppTextStyle.bodyText),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: Text('وضعیت فروش',
-              style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+              style: AppTextStyle.bodyText),
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           label: Column(
@@ -693,95 +703,108 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
     ];
   }
   List<DataRow> buildDataRowsActive(BuildContext context) {
-    return productController.activeItemList
-        .map((activeList) => DataRow(
-      cells: [
-        DataCell(
-          Row(
-            children: [
-              activeList.icon!=null ?
-              Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${activeList.icon}',
-                width: 30,
-                height: 30,) :
-              SvgPicture.asset(
-                'assets/svg/gold.svg',
-                width: 25,
-                height: 25,),
-              SizedBox(width: 5,),
-              Text(
-                textAlign: TextAlign
-                    .center,
-                "${activeList.name}",
-                style: AppTextStyle.bodyText,
-              ),
-            ],
+    return productController.activeItemList.asMap().entries.map((entry) {
+      final index = entry.key;
+      final activeList = entry.value;
+      final rowColor = index.isEven
+          ? AppColor.backGroundColor
+          : AppColor.secondaryColor.withAlpha(100);
+      return DataRow(
+        color: WidgetStateProperty.all(rowColor),
+        cells: [
+          DataCell(
+            Row(
+              children: [
+                activeList.icon!=null ?
+                Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${activeList.icon}',
+                  width: 30,
+                  height: 30,) :
+                SvgPicture.asset(
+                  'assets/svg/gold.svg',
+                  width: 25,
+                  height: 25,),
+                SizedBox(width: 5,),
+                Text(
+                  textAlign: TextAlign
+                      .center,
+                  "${activeList.name}",
+                  style: AppTextStyle.bodyText,
+                ),
+              ],
+            ),
           ),
-        ),
-        DataCell(
-          Text(
-            textAlign: TextAlign.center,
-            (((activeList.mesghalPrice?.toDouble() ?? 0)-(activeList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
-            style: AppTextStyle.bodyText,
+          DataCell(
+            Text(
+              textAlign: TextAlign.center,
+              (((activeList.mesghalPrice?.toDouble() ?? 0)-(activeList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+              style: AppTextStyle.bodyText,
+            ),
           ),
-        ),
-        // price
-        DataCell(
-              () {
-            String price = activeList.mesghalPrice.toString().replaceAll(RegExp(r'[^0-9]'), '');
-            List<String> parts = [];
-            String remaining = price;
-            int count = 0;
-            while (remaining
-                .isNotEmpty &&
-                count < 3) {
-              int end = remaining
-                  .length;
-              int start = end -
-                  3;
-              if (start < 0)
-                start = 0;
-              String part = remaining
-                  .substring(
-                  start, end);
-              parts.add(part);
-              remaining =
-                  remaining
-                      .substring(
-                      0,
-                      start);
-              count++;
-            }
-            String price1 = parts
-                .isNotEmpty
-                ? parts[0]
-                : '0';
-            String price2 = parts
-                .length >= 2
-                ? parts[1]
-                : '0';
-            String price3 = parts
-                .length >= 3
-                ? parts[2]
-                : '0';
-            String price4 = remaining;
-            return PriceSellWidget(
-              price1: price1,
-              price2: price2,
-              price3: price3,
-              price4: price4,
-              mesghalDifferent: activeList
-                  .mesghalDifferentPrice ??
-                  0,
-              id: activeList
-                  .id!,
-              itemUnitId: activeList.itemUnit?.id ?? 0,
-              refrence:activeList.refrence,
+          // price
+          DataCell(
+                () {
+              String price = activeList.mesghalPrice.toString().replaceAll(RegExp(r'[^0-9]'), '');
+              List<String> parts = [];
+              String remaining = price;
+              int count = 0;
+              while (remaining
+                  .isNotEmpty &&
+                  count < 3) {
+                int end = remaining
+                    .length;
+                int start = end -
+                    3;
+                if (start < 0)
+                  start = 0;
+                String part = remaining
+                    .substring(
+                    start, end);
+                parts.add(part);
+                remaining =
+                    remaining
+                        .substring(
+                        0,
+                        start);
+                count++;
+              }
+              String price1 = parts
+                  .isNotEmpty
+                  ? parts[0]
+                  : '0';
+              String price2 = parts
+                  .length >= 2
+                  ? parts[1]
+                  : '0';
+              String price3 = parts
+                  .length >= 3
+                  ? parts[2]
+                  : '0';
+              String price4 = remaining;
+              return PriceSellWidget(
+                price1: price1,
+                price2: price2,
+                price3: price3,
+                price4: price4,
+                mesghalDifferent: activeList
+                    .mesghalDifferentPrice ??
+                    0,
+                id: activeList
+                    .id!,
+                itemUnitId: activeList.itemUnit?.id ?? 0,
+                refrence:activeList.refrence,
 
-            );
-          }(),
-        ),
-        //different
-        /*DataCell(
+              );
+            }(),
+          ),
+          DataCell(
+            Row(
+              children: [
+                Text(activeList.itemPriceDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? "", style: AppTextStyle.bodyText.copyWith(color: AppColor.dividerColor, fontWeight: FontWeight.bold,fontSize: 12)),
+              ],
+            ),
+          ),
+          //different
+          /*DataCell(
               () {
             String differentPrice = activeList
                 .mesghalDifferentPrice
@@ -839,8 +862,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // max sell
-        /*DataCell(
+          // max sell
+          /*DataCell(
               () {
             String maxSell = activeList
                 .maxSell
@@ -855,8 +878,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // max buy
-        /*DataCell(
+          // max buy
+          /*DataCell(
               () {
             String maxBuy = activeList
                 .maxBuy
@@ -871,8 +894,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // sale range
-        /*DataCell(
+          // sale range
+          /*DataCell(
               () {
             String salesRange = activeList
                 .salesRange
@@ -887,8 +910,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // buy range
-        /*DataCell(
+          // buy range
+          /*DataCell(
               () {
             String buyRange = activeList
                 .buyRange
@@ -903,104 +926,105 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // status
-        DataCell(
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius
-                  .circular(
-                  5),
-            ),
-            color: activeList
-                .status ==
-                true
-                ? AppColor
-                .primaryColor
-                : AppColor
-                .accentColor,
-            margin: EdgeInsets
-                .symmetric(
-                vertical: 0,
-                horizontal: 5),
-            child: Padding(
-              padding: const EdgeInsets
-                  .all(6),
-              child: Text(
-                  activeList
-                      .status ==
-                      true
-                      ? 'فعال'
-                      : 'غیر فعال',
-                  style: AppTextStyle
-                      .labelText,
-                  textAlign: TextAlign
-                      .center),
-            ),
-          ),
-        ),
-        // edit
-        DataCell(
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                Get.toNamed('/productEdit', parameters: {"id": activeList.id.toString()});
-                print('activeListId:::::::::${activeList.id}');
-              },
-              child: Icon(
-                Icons.edit,
-                color: AppColor.iconViewColor,
+          // status
+          DataCell(
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius
+                    .circular(
+                    5),
+              ),
+              color: activeList
+                  .status ==
+                  true
+                  ? AppColor
+                  .primaryColor
+                  : AppColor
+                  .accentColor,
+              margin: EdgeInsets
+                  .symmetric(
+                  vertical: 0,
+                  horizontal: 5),
+              child: Padding(
+                padding: const EdgeInsets
+                    .all(6),
+                child: Text(
+                    activeList
+                        .status ==
+                        true
+                        ? 'فعال'
+                        : 'غیر فعال',
+                    style: AppTextStyle
+                        .labelText,
+                    textAlign: TextAlign
+                        .center),
               ),
             ),
           ),
-        ),
-        // وضعیت خرید
-        DataCell(
-          BuyStatusWidget(item: activeList),
-        ),
-        // وضعیت فروش
-        DataCell(
-          SellStatusWidget(item: activeList),
-        ),
-        // change status
-        DataCell(
+          // edit
+          DataCell(
             Center(
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 20,
+              child: GestureDetector(
+                onTap: () {
+                  Get.toNamed('/productEdit', parameters: {"id": activeList.id.toString()});
+                  print('activeListId:::::::::${activeList.id}');
+                },
+                child: Icon(
+                  Icons.edit,
+                  color: AppColor.iconViewColor,
                 ),
-                GestureDetector(
-                  onTap: (){
-                    productController.updateStatusItem(activeList.id??0,false,false,false);
-                  },
-                  child: SvgPicture.asset('assets/svg/close-circle1.svg',
-                      colorFilter: ColorFilter.mode(
-                        AppColor.accentColor,
-                        BlendMode.srcIn,
-                      )),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                GestureDetector(
-                  onTap: (){
-                    productController.updateStatusItem(activeList.id??0,true,true,true);
-                  },
-                  child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
-                      colorFilter: ColorFilter.mode(
-                        AppColor.primaryColor,
-                        BlendMode.srcIn,
-                      )),
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-              ],
-            ))
-        ),
-      ],
-    ))
-        .toList();
+              ),
+            ),
+          ),
+          // وضعیت خرید
+          DataCell(
+            BuyStatusWidget(item: activeList),
+          ),
+          // وضعیت فروش
+          DataCell(
+            SellStatusWidget(item: activeList),
+          ),
+          // change status
+          DataCell(
+              Center(
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 20,
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          productController.updateStatusItem(activeList.id??0,false,false,false);
+                        },
+                        child: SvgPicture.asset('assets/svg/close-circle1.svg',
+                            colorFilter: ColorFilter.mode(
+                              AppColor.accentColor,
+                              BlendMode.srcIn,
+                            )),
+                      ),
+                      SizedBox(
+                        width: 10,
+                      ),
+                      GestureDetector(
+                        onTap: (){
+                          productController.updateStatusItem(activeList.id??0,true,true,true);
+                        },
+                        child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                            colorFilter: ColorFilter.mode(
+                              AppColor.primaryColor,
+                              BlendMode.srcIn,
+                            )),
+                      ),
+                      SizedBox(
+                        width: 20,
+                      ),
+                    ],
+                  ))
+          ),
+        ],
+      );
+    }
+    ).toList();
   }
 
   List<DataColumn> buildDataColumnsInactive() {
@@ -1107,99 +1131,105 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
     ];
   }
   List<DataRow> buildDataRowsInactive(BuildContext context) {
-    return productController.inactiveItemList
-        .map((inActiveList) => DataRow(
-      cells: [
-        DataCell(
-          Row(
-            children: [
-              inActiveList.icon!=null ?
-              Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${inActiveList.icon}',
-                width: 30,
-                height: 30,) :
-              SvgPicture.asset(
-                'assets/svg/gold.svg',
-                width: 25,
-                height: 25,),
-              SizedBox(width: 5,),
-              Text(
-                textAlign: TextAlign
-                    .center,
-                "${inActiveList.name}",
-                style: AppTextStyle.bodyText,
-              ),
-            ],
+    return productController.inactiveItemList.asMap().entries.map((entry) {
+      final index = entry.key;
+      final inActiveList = entry.value;
+      final rowColor = index.isEven
+          ? AppColor.backGroundColor
+          : AppColor.secondaryColor.withAlpha(100);
+      return DataRow(
+        color: WidgetStateProperty.all(rowColor),
+        cells: [
+          DataCell(
+            Row(
+              children: [
+                inActiveList.icon!=null ?
+                Image.network('${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${inActiveList.icon}',
+                  width: 30,
+                  height: 30,) :
+                SvgPicture.asset(
+                  'assets/svg/gold.svg',
+                  width: 25,
+                  height: 25,),
+                SizedBox(width: 5,),
+                Text(
+                  textAlign: TextAlign
+                      .center,
+                  "${inActiveList.name}",
+                  style: AppTextStyle.bodyText,
+                ),
+              ],
+            ),
           ),
-        ),
-        DataCell(
-          Text(
-            textAlign: TextAlign.center,
-            (((inActiveList.mesghalPrice?.toDouble() ?? 0)-(inActiveList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
-            style: AppTextStyle.bodyText,
+          DataCell(
+            Text(
+              textAlign: TextAlign.center,
+              (((inActiveList.mesghalPrice?.toDouble() ?? 0)-(inActiveList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+              style: AppTextStyle.bodyText,
+            ),
           ),
-        ),
-        // price
-        DataCell(
-              () {
-            String price = inActiveList
-                .mesghalPrice.toString()
-                .replaceAll(
-                RegExp(
-                    r'[^0-9]'),
-                '');
-            List<String> parts = [
-            ];
-            String remaining = price;
-            int count = 0;
-            while (remaining
-                .isNotEmpty &&
-                count < 3) {
-              int end = remaining
-                  .length;
-              int start = end - 3;
-              if (start < 0)
-                start =
-                0;
-              String part = remaining
-                  .substring(
-                  start, end);
-              parts.add(part);
-              remaining =
-                  remaining
-                      .substring(
-                      0, start);
-              count++;
-            }
-            String price1 = parts
-                .isNotEmpty
-                ? parts[0]
-                : '0';
-            String price2 = parts
-                .length >= 2
-                ? parts[1]
-                : '0';
-            String price3 = parts
-                .length >= 3
-                ? parts[2]
-                : '0';
-            String price4 = remaining;
-            return PriceSellWidget(
-              price1: price1,
-              price2: price2,
-              price3: price3,
-              price4: price4,
-              mesghalDifferent: inActiveList
-                  .mesghalDifferentPrice ??
-                  0,
-              id: inActiveList
-                  .id!,
-              itemUnitId: inActiveList.itemUnit?.id ?? 0,
-              refrence:inActiveList.refrence,
-            );
-          }(),
-        ),
-        //different
-        /*DataCell(
+          // price
+          DataCell(
+                () {
+              String price = inActiveList
+                  .mesghalPrice.toString()
+                  .replaceAll(
+                  RegExp(
+                      r'[^0-9]'),
+                  '');
+              List<String> parts = [
+              ];
+              String remaining = price;
+              int count = 0;
+              while (remaining
+                  .isNotEmpty &&
+                  count < 3) {
+                int end = remaining
+                    .length;
+                int start = end - 3;
+                if (start < 0)
+                  start =
+                  0;
+                String part = remaining
+                    .substring(
+                    start, end);
+                parts.add(part);
+                remaining =
+                    remaining
+                        .substring(
+                        0, start);
+                count++;
+              }
+              String price1 = parts
+                  .isNotEmpty
+                  ? parts[0]
+                  : '0';
+              String price2 = parts
+                  .length >= 2
+                  ? parts[1]
+                  : '0';
+              String price3 = parts
+                  .length >= 3
+                  ? parts[2]
+                  : '0';
+              String price4 = remaining;
+              return PriceSellWidget(
+                price1: price1,
+                price2: price2,
+                price3: price3,
+                price4: price4,
+                mesghalDifferent: inActiveList
+                    .mesghalDifferentPrice ??
+                    0,
+                id: inActiveList
+                    .id!,
+                itemUnitId: inActiveList.itemUnit?.id ?? 0,
+                refrence:inActiveList.refrence,
+              );
+            }(),
+          ),
+          //different
+          /*DataCell(
               () {
             String differentPrice = inActiveList
                 .mesghalDifferentPrice
@@ -1254,8 +1284,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // max sell
-        /*DataCell(
+          // max sell
+          /*DataCell(
               () {
             String maxSell = inActiveList
                 .maxSell
@@ -1270,8 +1300,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // max buy
-        /*DataCell(
+          // max buy
+          /*DataCell(
               () {
             String maxBuy = inActiveList
                 .maxBuy
@@ -1286,8 +1316,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // sale range
-        /*DataCell(
+          // sale range
+          /*DataCell(
               () {
             String salesRange = inActiveList
                 .salesRange
@@ -1302,8 +1332,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // buy range
-        /*DataCell(
+          // buy range
+          /*DataCell(
               () {
             String buyRange = inActiveList
                 .buyRange
@@ -1318,93 +1348,419 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
             );
           }(),
         ),*/
-        // status
-        DataCell(
-          Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius
-                  .circular(5),
-            ),
-            color: inActiveList
-                .status == true
-                ? AppColor
-                .primaryColor
-                : AppColor
-                .accentColor,
-            margin: EdgeInsets
-                .symmetric(
-                vertical: 0,
-                horizontal: 5),
-            child: Padding(
-              padding: const EdgeInsets
-                  .all(6),
-              child: Text(
-                  inActiveList
-                      .status ==
-                      true
-                      ? 'فعال'
-                      : 'غیر فعال',
-                  style: AppTextStyle
-                      .labelText,
-                  textAlign: TextAlign
-                      .center),
-            ),
-          ),
-        ),
-        // edit
-        DataCell(
-          Center(
-            child: GestureDetector(
-              onTap: () {
-                Get.toNamed('/productEdit', parameters: {"id": inActiveList.id.toString()});
-              },
-              child: Icon(
-                Icons.edit,
-                color: AppColor.iconViewColor,
+          // status
+          DataCell(
+            Card(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius
+                    .circular(5),
+              ),
+              color: inActiveList
+                  .status == true
+                  ? AppColor
+                  .primaryColor
+                  : AppColor
+                  .accentColor,
+              margin: EdgeInsets
+                  .symmetric(
+                  vertical: 0,
+                  horizontal: 5),
+              child: Padding(
+                padding: const EdgeInsets
+                    .all(6),
+                child: Text(
+                    inActiveList
+                        .status ==
+                        true
+                        ? 'فعال'
+                        : 'غیر فعال',
+                    style: AppTextStyle
+                        .labelText,
+                    textAlign: TextAlign
+                        .center),
               ),
             ),
           ),
-        ),
-        // change status
-        DataCell(Center(
-            child: Row(
-              children: [
-                SizedBox(
-                  width: 20,
+          // edit
+          DataCell(
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  Get.toNamed('/productEdit', parameters: {"id": inActiveList.id.toString()});
+                },
+                child: Icon(
+                  Icons.edit,
+                  color: AppColor.iconViewColor,
                 ),
-                GestureDetector(
-                  onTap: (){
-                    productController.updateStatusItem(inActiveList.id??0,false,false,false);
-                  },
-                  child: SvgPicture.asset('assets/svg/close-circle1.svg',
-                      colorFilter: ColorFilter.mode(
-                        AppColor.accentColor,
-                        BlendMode.srcIn,
-                      )),
-                ),
-                SizedBox(
-                  width: 10,
-                ),
-                GestureDetector(
-                  onTap: (){
-                    productController.updateStatusItem(inActiveList.id??0,true,true,true);
-                  },
-                  child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
-                      colorFilter: ColorFilter.mode(
-                        AppColor.primaryColor,
-                        BlendMode.srcIn,
-                      )),
-                ),
-                SizedBox(
-                  width: 20,
-                ),
-              ],
-            ))),
-      ],
-    ))
-        .toList();
+              ),
+            ),
+          ),
+          // change status
+          DataCell(Center(
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 20,
+                  ),
+                  GestureDetector(
+                    onTap: (){
+                      productController.updateStatusItem(inActiveList.id??0,false,false,false);
+                    },
+                    child: SvgPicture.asset('assets/svg/close-circle1.svg',
+                        colorFilter: ColorFilter.mode(
+                          AppColor.accentColor,
+                          BlendMode.srcIn,
+                        )),
+                  ),
+                  SizedBox(
+                    width: 10,
+                  ),
+                  GestureDetector(
+                    onTap: (){
+                      productController.updateStatusItem(inActiveList.id??0,true,true,true);
+                    },
+                    child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                        colorFilter: ColorFilter.mode(
+                          AppColor.primaryColor,
+                          BlendMode.srcIn,
+                        )),
+                  ),
+                  SizedBox(
+                    width: 20,
+                  ),
+                ],
+              ))),
+        ],
+      );
+    }
+    ).toList();
   }
 
+  // موبایل تب فعال
+  Widget buildMobileActiveList(BuildContext context) {
+    return ListView.separated(
+      padding: EdgeInsets.symmetric(vertical: 16),
+      physics: BouncingScrollPhysics(),
+      itemCount: productController.activeItemList.length,
+      separatorBuilder: (_, __) => SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final item = productController.activeItemList[index];
+        final buyPrice = (((item.mesghalPrice?.toDouble() ?? 0) - (item.mesghalDifferentPrice?.toDouble() ?? 0))
+            .toStringAsFixed(0)
+            .seRagham(separator: ','));
+
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColor.secondary100Color, AppColor.secondaryColor],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(50),
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Card(
+            elevation: 0,
+            color: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: Container(
+              padding: EdgeInsets.all(5),
+              margin: EdgeInsets.only(left: 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      item.icon != null
+                          ? Image.network(
+                        '${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${item.icon}',
+                        width: 30,
+                        height: 30,
+                      )
+                          : SvgPicture.asset('assets/svg/gold.svg', width: 25, height: 25),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item.name ?? '',
+                          style: AppTextStyle.bodyText.copyWith(fontSize: 13,fontWeight: FontWeight.bold),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: item.status == true ? AppColor.primaryColor : AppColor.accentColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          item.status == true ? 'فعال' : 'غیر فعال',
+                          style: AppTextStyle.labelText,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Text('قیمت خرید', style: AppTextStyle.bodyText),
+                          SizedBox(width: 10,),
+                          Text(buyPrice, style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor, fontWeight: FontWeight.bold,fontSize: 12)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          Text('زمان تغییر: ', style: AppTextStyle.bodyText),
+                          SizedBox(width: 3,),
+                          Text(item.itemPriceDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? "", style: AppTextStyle.bodyText.copyWith(color: AppColor.dividerColor, fontWeight: FontWeight.bold,fontSize: 12)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('وضعیت خرید', style: AppTextStyle.bodyText.copyWith(fontSize: 10)),
+                      Expanded(child: BuyStatusWidget(item: item)),
+                      Text('وضعیت فروش', style: AppTextStyle.bodyText.copyWith(fontSize: 10)),
+                      Expanded(child: SellStatusWidget(item: item)),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  // قیمت فروش (قابل ویرایش با PriceSellWidget)
+                  Row(mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      PriceSellWidget(
+                        price1: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item1,
+                        price2: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item2,
+                        price3: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item3,
+                        price4: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item4,
+                        mesghalDifferent: item.mesghalDifferentPrice ?? 0,
+                        id: item.id!,
+                        itemUnitId: item.itemUnit?.id ?? 0,
+                        refrence: item.refrence,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 15),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          Get.toNamed('/productEdit', parameters: {"id": item.id.toString()});
+                        },
+                        icon: Icon(Icons.edit, color: AppColor.iconViewColor),
+                        label: Text('ویرایش', style: AppTextStyle.labelText),
+                      ),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              productController.updateStatusItem(item.id ?? 0, false, false, false);
+                            },
+                            child: SvgPicture.asset('assets/svg/close-circle1.svg',width: 30,height: 30,
+                                colorFilter: ColorFilter.mode(AppColor.accentColor, BlendMode.srcIn)),
+                          ),
+                          SizedBox(width: 14),
+                          GestureDetector(
+                            onTap: () {
+                              productController.updateStatusItem(item.id ?? 0, true, true, true);
+                            },
+                            child: SvgPicture.asset('assets/svg/check-mark-circle.svg',width: 30,height: 30,
+                                colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn)),
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // موبایل تب غیرفعال
+  Widget buildMobileInactiveList(BuildContext context) {
+    return ListView.separated(
+      padding: EdgeInsets.only(top: 16, bottom: 16),
+      physics: BouncingScrollPhysics(),
+      itemCount: productController.inactiveItemList.length,
+      separatorBuilder: (_, __) => SizedBox(height: 12),
+      itemBuilder: (context, index) {
+        final item = productController.inactiveItemList[index];
+        final buyPrice = (((item.mesghalPrice?.toDouble() ?? 0) - (item.mesghalDifferentPrice?.toDouble() ?? 0))
+            .toString()
+            .seRagham(separator: ','));
+
+        return Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColor.secondary100Color, AppColor.secondaryColor],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(50),
+                blurRadius: 5,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Card(
+            elevation: 0,
+            color: Colors.transparent,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            child: Padding(
+              padding: EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      item.icon != null
+                          ? Image.network(
+                        '${BaseUrl.baseUrl}Attachment/downloadResource?fileName=${item.icon}',
+                        width: 30,
+                        height: 30,
+                      )
+                          : SvgPicture.asset('assets/svg/gold.svg', width: 25, height: 25),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          item.name ?? '',
+                          style: AppTextStyle.bodyText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: item.status == true ? AppColor.primaryColor : AppColor.accentColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          item.status == true ? 'فعال' : 'غیر فعال',
+                          style: AppTextStyle.labelText,
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text('قیمت خرید', style: AppTextStyle.smallTitleText),
+                      SizedBox(width: 50,),
+                      Text(buyPrice, style: AppTextStyle.bodyText),
+                    ],
+                  ),
+
+                  SizedBox(height: 10),
+                  // قیمت فروش (قابل ویرایش با PriceSellWidget)
+                  Row(mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      PriceSellWidget(
+                        price1: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item1,
+                        price2: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item2,
+                        price3: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item3,
+                        price4: _splitPrice(item.mesghalPrice?.toStringAsFixed(0)).item4,
+                        mesghalDifferent: item.mesghalDifferentPrice ?? 0,
+                        id: item.id!,
+                        itemUnitId: item.itemUnit?.id ?? 0,
+                        refrence: item.refrence,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton.icon(
+                        onPressed: () {
+                          Get.toNamed('/productEdit', parameters: {"id": item.id.toString()});
+                        },
+                        icon: Icon(Icons.edit, color: AppColor.iconViewColor),
+                        label: Text('ویرایش', style: AppTextStyle.labelText),
+                      ),
+                      Row(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              productController.updateStatusItem(item.id ?? 0, false, false, false);
+                            },
+                            child: SvgPicture.asset('assets/svg/close-circle1.svg',
+                                colorFilter: ColorFilter.mode(AppColor.accentColor, BlendMode.srcIn)),
+                          ),
+                          SizedBox(width: 14),
+                          GestureDetector(
+                            onTap: () {
+                              productController.updateStatusItem(item.id ?? 0, true, true, true);
+                            },
+                            child: SvgPicture.asset('assets/svg/check-mark-circle.svg',
+                                colorFilter: ColorFilter.mode(AppColor.primaryColor, BlendMode.srcIn)),
+                          ),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // Helper to split price into 4 segments expected by PriceSellWidget
+  _PriceParts _splitPrice(dynamic value) {
+    final raw = (value?.toString() ?? '0').replaceAll(RegExp(r'[^0-9]'), '');
+    List<String> parts = [];
+    String remaining = raw;
+    int count = 0;
+    while (remaining.isNotEmpty && count < 3) {
+      int end = remaining.length;
+      int start = end - 3;
+      if (start < 0) start = 0;
+      String part = remaining.substring(start, end);
+      parts.add(part);
+      remaining = remaining.substring(0, start);
+      count++;
+    }
+    String price1 = parts.isNotEmpty ? parts[0] : '0';
+    String price2 = parts.length >= 2 ? parts[1] : '0';
+    String price3 = parts.length >= 3 ? parts[2] : '0';
+    String price4 = remaining;
+    return _PriceParts(price1, price2, price3, price4);
+  }
 }
+
+class _PriceParts {
+  final String item1;
+  final String item2;
+  final String item3;
+  final String item4;
+  _PriceParts(this.item1, this.item2, this.item3, this.item4);
+}
+
 
 

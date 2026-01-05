@@ -23,6 +23,10 @@ class ProductInventoryModel {
   final double? quantityIn;
   @JsonKey(name: "quantityOut")
   final double? quantityOut;
+  @JsonKey(name: "quantity750")
+  final double? quantity750;
+  @JsonKey(name: "quantityCount")
+  final double? quantityCount;
   @JsonKey(name: "rowNum")
   final int? rowNum;
 
@@ -33,6 +37,8 @@ class ProductInventoryModel {
     required this.quantity,
     required this.quantityIn,
     required this.quantityOut,
+    required this.quantity750,
+    required this.quantityCount,
     required this.rowNum,
   });
 

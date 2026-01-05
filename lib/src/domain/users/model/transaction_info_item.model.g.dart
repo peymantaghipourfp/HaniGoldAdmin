@@ -38,6 +38,8 @@ TransactionInfoItemModel _$TransactionInfoItemModelFromJson(
       isCard: json['isCard'] as bool?,
       infos: json['infos'] as List<dynamic>?,
       recordId: (json['recordId'] as num?)?.toInt(),
+      recId: json['recId'] as String?,
+      checked: json['checked'] as bool?,
     );
 
 Map<String, dynamic> _$TransactionInfoItemModelToJson(
@@ -60,4 +62,6 @@ Map<String, dynamic> _$TransactionInfoItemModelToJson(
       'isCard': instance.isCard,
       'infos': instance.infos,
       'recordId': instance.recordId,
+      'recId': instance.recId,
+      'checked': instance.checked,
     };

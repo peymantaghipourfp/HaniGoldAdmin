@@ -54,6 +54,10 @@ class TransactionInfoItemModel {
   final List<dynamic>? infos;
   @JsonKey(name: "recordId")
   final int? recordId;
+  @JsonKey(name: "recId")
+  final String? recId;
+  @JsonKey(name: "checked")
+  late bool? checked;
 
   TransactionInfoItemModel({
     required this.amount,
@@ -73,6 +77,8 @@ class TransactionInfoItemModel {
     required this.isCard,
     required this.infos,
     required this.recordId,
+    required this.recId,
+    required this.checked,
   });
 
   factory TransactionInfoItemModel.fromJson(Map<String, dynamic> json) => _$TransactionInfoItemModelFromJson(json);

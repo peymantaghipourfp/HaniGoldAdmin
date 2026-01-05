@@ -328,9 +328,15 @@ class BalanceDialogId extends StatelessWidget {
                   Row(
                     children: [
                       Text(textDirection: TextDirection.ltr,
-                        balance.unitName == 'ریال' || balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند'
-                            ? (balance.balance?.toInt().toString().seRagham(separator: ',') ?? '0')
-                            : (balance.balance?.toString() ?? '0'),
+                        balance.unitName == 'ریال' && (balance.balance ?? 0) < 0 ?
+                        "-${(balance.balance?.toInt().abs().toStringAsFixed(0).seRagham(separator: ',') ?? '0')}" :
+                        balance.unitName == 'ریال' && (balance.balance ?? 0) > 0 ?
+                        (balance.balance?.toStringAsFixed(0).seRagham() ?? '0'):
+                        ( balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند') && (balance.balance ?? 0) < 0
+                            ? "-${(balance.balance?.toInt().abs().toString().seRagham(separator: ',') ?? '0')}"
+                            : ( balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند') && (balance.balance ?? 0) > 0 ?
+                        (balance.balance?.toString().seRagham() ?? '0'):
+                        (balance.balance?.toString() ?? '0'),
                         style: AppTextStyle.bodyText.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,

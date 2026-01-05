@@ -74,6 +74,8 @@ class InventoryDetailModel {
   final DateTime? modifiedOn;
   @JsonKey(name: "recId")
   late  String? recId;
+  @JsonKey(name: "recIdParent")
+  late  String? recIdParent;
   @JsonKey(name: "infos")
   final List<dynamic>? infos;
   @JsonKey(name: "description")
@@ -82,8 +84,8 @@ class InventoryDetailModel {
   final int? inputItemId;
   @JsonKey(name: "date")
   final DateTime? date;
-  /*@JsonKey(name: "createdBy")
-  final CreatedByModel? createdBy;*/
+  @JsonKey(name: "createdBy")
+  final CreatedByModel? createdBy;
   @JsonKey(ignore: true)
    late List<XFile>? listXfile;
 
@@ -116,11 +118,12 @@ class InventoryDetailModel {
     this.createdOn,
     this.modifiedOn,
     this.recId,
+    this.recIdParent,
     this.infos,
     this.description,
     this.inputItemId,
     this.date,
-    //required this.createdBy,
+    this.createdBy,
     this.listXfile,
   });
 
@@ -157,6 +160,7 @@ class InventoryDetailModel {
     String? description,
     int? inputItemId,
     DateTime? date,
+    CreatedByModel? createdBy,
     List<XFile>? listXfile,
   }) {
     return InventoryDetailModel(
@@ -192,6 +196,7 @@ class InventoryDetailModel {
       description: description ?? this.description,
       inputItemId: inputItemId ?? this.inputItemId,
       date: date ?? this.date,
+      createdBy:createdBy ?? this.createdBy,
       listXfile: listXfile ?? this.listXfile,
     );
   }

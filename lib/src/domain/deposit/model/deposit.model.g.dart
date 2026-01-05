@@ -26,7 +26,8 @@ DepositModel _$DepositModelFromJson(Map<String, dynamic> json) => DepositModel(
           ? null
           : ReasonRejectionModel.fromJson(
               json['reasonRejection'] as Map<String, dynamic>),
-      amount: (json['amount'] as num?)?.toInt(),
+      amount: (json['amount'] as num?)?.toDouble(),
+      extraAmount: (json['extraAmount'] as num?)?.toDouble(),
       status: (json['status'] as num?)?.toInt(),
       isDeleted: json['isDeleted'] as bool?,
       registered: json['registered'] as bool?,
@@ -43,6 +44,10 @@ DepositModel _$DepositModelFromJson(Map<String, dynamic> json) => DepositModel(
       date:
           json['date'] == null ? null : DateTime.parse(json['date'] as String),
       trackingNumber: json['trackingNumber'] as String?,
+      description: json['description'] as String?,
+      ownerName: json['ownerName'] as String?,
+      isSendTelegram: json['isSendTelegram'] as bool?,
+      isSendWhatsapp: json['isSendWhatsapp'] as bool?,
     );
 
 Map<String, dynamic> _$DepositModelToJson(DepositModel instance) =>
@@ -53,6 +58,7 @@ Map<String, dynamic> _$DepositModelToJson(DepositModel instance) =>
       'bankAccount': instance.bankAccount,
       'reasonRejection': instance.reasonRejection,
       'amount': instance.amount,
+      'extraAmount': instance.extraAmount,
       'status': instance.status,
       'isDeleted': instance.isDeleted,
       'registered': instance.registered,
@@ -64,6 +70,10 @@ Map<String, dynamic> _$DepositModelToJson(DepositModel instance) =>
       'infos': instance.infos,
       'date': instance.date?.toIso8601String(),
       'trackingNumber': instance.trackingNumber,
+      'description': instance.description,
+      'ownerName': instance.ownerName,
+      'isSendTelegram': instance.isSendTelegram,
+      'isSendWhatsapp': instance.isSendWhatsapp,
     };
 
 Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(

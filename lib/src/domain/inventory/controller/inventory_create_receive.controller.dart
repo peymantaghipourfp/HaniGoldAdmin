@@ -97,6 +97,7 @@ class InventoryCreateReceiveController extends GetxController{
   var factorBalanceChecked = false.obs;
   var factorChecked = false.obs;
   var itemCountTemp=''.obs;
+  var dropdownError="".obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     if (tempDetails.isNotEmpty) {
@@ -213,13 +214,13 @@ class InventoryCreateReceiveController extends GetxController{
 
   @override
   void onInit() {
+    fetchAccountList();
+    fetchWalletAccountList();
+    fetchLaboratoryList();
     searchController.addListener(onSearchChanged);
     searchLaboratoryController.addListener(onSearchLaboratoryChanged);
     quantityController.addListener(updateW750);
     caratController.addListener(updateW750);
-    fetchAccountList();
-    fetchWalletAccountList();
-    fetchLaboratoryList();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text =
@@ -455,6 +456,7 @@ class InventoryCreateReceiveController extends GetxController{
       final newDetail = InventoryDetailModel(
         wallet: selectedWalletAccount.value!,
         item: selectedWalletAccount.value!.item!,
+        itemUnit: selectedWalletAccount.value!.item!.itemUnit,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         weight: double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0,
         type: 0,
@@ -479,14 +481,14 @@ class InventoryCreateReceiveController extends GetxController{
       receiptNumberController.clear();
       descriptionController.clear();
       impurityController.clear();
+      selectedLaboratory.value=null;
       if(selectedWalletAccount.value!.item?.id!=10 ||
           selectedWalletAccount.value!.item?.id!=12 ||
           selectedWalletAccount.value!.item?.id!=15 ||
           selectedWalletAccount.value!.item?.id!=16 ){
         weight750Controller.clear();
-        caratController.clear();
+        //caratController.clear();
       }
-      selectedLaboratory.value=null;
 
       Get.snackbar("موفق", "آیتم به لیست موقت اضافه شد");
 
@@ -561,9 +563,15 @@ class InventoryCreateReceiveController extends GetxController{
                       pw.Container(
                         width: 250,
                         child: buildBalanceWidget(inventoryCreateLayoutController.balanceList),
-                      )
+                      ),
                     ]
                   ),
+                    pw.Container(
+                      width: 250,
+                      child: buildBalanceGoldWidget(inventoryCreateLayoutController.balanceList),
+                    ),
+
+
                   pw.SizedBox(height: 20),
                   buildInvoiceFooter(inventoryDetails),
                 ];
@@ -706,10 +714,11 @@ class InventoryCreateReceiveController extends GetxController{
   pw.TableRow buildInvoiceDataRow(InventoryDetailModel detail, int index) {
     return pw.TableRow(
       children: [
-        buildDataCell(detail.item?.id==1  ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  :
-    detail.itemUnit?.id==2 && detail.item?.id!=1 && detail.item?.id!=10 && detail.item?.id!=13 && detail.item?.id!=15 && detail.item?.id!=16 ? " گرم ${detail.quantity}, عیار: ${detail.carat}" :
-    detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
-        " عدد ${itemCountTemp.value.toString()}" ?? '' : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(detail.item?.id==1  ? " گرم ${detail.weight}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.quantity}, عیار: ${detail.carat}"  :
+    detail.item?.id==10 || detail.item?.id==12 || detail.item?.id==13 || detail.item?.id==14 || detail.item?.id==15 || detail.item?.id==16 ? " گرم ${detail.weight}, عیار: ${detail.carat}, وزن ترازو: ${detail.quantity} "
+    /*detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
+        " عدد ${itemCountTemp.value.toString()}" ?? '' */
+        : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
         buildDataCell(" (دریافت) ${detail.item?.name}" ?? ''),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
@@ -816,6 +825,62 @@ class InventoryCreateReceiveController extends GetxController{
     );
   }
 
+  pw.Widget buildBalanceGoldWidget(List<BalanceItemModel> balanceList) {
+    final totalGram = balanceList
+        .where((balance) => balance.item?.itemUnit?.name == "گرم")
+        .fold(0.0, (sum, balance) => sum + (balance.balance ?? 0));
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('مانده طلایی', style: pw.TextStyle(fontSize: 12,)),
+        pw.SizedBox(height: 5),
+        pw.Table(
+          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
+          columnWidths: {
+            0: pw.FlexColumnWidth(2.5),
+            1: pw.FlexColumnWidth(1),
+            2: pw.FlexColumnWidth(2),
+          },
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.grey300),
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مقدار', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('واحد', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+               /* pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مانده طلایی', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),*/
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text((totalGram.toStringAsFixed(2).seRagham(separator: ',')).toString() , style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('گرم', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                /*pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مانده طلایی', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),*/
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   // لیست بالانس
   /*Future<void> getBalanceList(int id) async{
     print("getBalanceList : $id");
@@ -870,6 +935,8 @@ class InventoryCreateReceiveController extends GetxController{
     selectedImagesDesktop.clear();
     factorBalanceChecked.value=false;
     factorChecked.value=false;
+    balanceList.clear();
+    tempDetails.clear();
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text = "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";

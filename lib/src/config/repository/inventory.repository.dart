@@ -17,7 +17,7 @@ class InventoryRepository {
   Dio inventoryDio=Dio();
   InventoryRepository(){
     inventoryDio.options.baseUrl=BaseUrl.baseUrl;
-    inventoryDio.options.connectTimeout=Duration(seconds: 10);
+    inventoryDio.options.connectTimeout=Duration(seconds: 20);
     inventoryDio.interceptors.add(DioInterceptor());
   }
 
@@ -82,6 +82,10 @@ class InventoryRepository {
     required String startDate,
     required String endDate,
    required String name,
+   required String receiptNumber,
+   String? quantity,
+   int? item,
+   String? typeFilter,
  })async{
     try{
       Map<String , dynamic> options=
@@ -113,6 +117,34 @@ class InventoryRepository {
                   "filterType": 0,
                   "RefTable": "Inventory"
                 },
+                if(receiptNumber!="")
+                  {
+                    "fieldName": "ReceiptNumber",
+                    "filterValue": receiptNumber,
+                    "filterType": 0,
+                    "RefTable": "InventoryDetail"
+                  },
+                if (quantity != null && quantity.isNotEmpty)
+                  {
+                    "fieldName": "Quantity",
+                    "filterValue": quantity,
+                    "filterType": 0,
+                    "RefTable": "Inventory"
+                  },
+                if (item != null)
+                  {
+                    "fieldName": "Id",
+                    "filterValue": "$item",
+                    "filterType": 5,
+                    "RefTable": "LastItem"
+                  },
+                if(typeFilter != null && typeFilter.isNotEmpty && typeFilter != 'انتخاب کنید')
+                  {
+                    "fieldName": "Type",
+                    "filterValue": typeFilter == 'دریافت' ? '0' : '1',
+                    "filterType": 5,
+                    "RefTable": "InventoryDetail"
+                  },
               ],
             }
           ],
@@ -169,6 +201,10 @@ class InventoryRepository {
           "item": {
             "name": detail.item?.name,
             "id": detail.item?.id,
+            "infos": []
+          },
+          "itemUnit": {
+            "id": detail.itemUnit?.id,
             "infos": []
           },
           "laboratory":{
@@ -327,6 +363,112 @@ class InventoryRepository {
   }
 
   Future<Map<String, dynamic>> updateDetailInventoryReceive({
+    required int inventoryId,
+    required int inventoryDetailId,
+    required String date,
+    required int accountId,
+    required String accountName,
+    required int type,
+    required String? description,
+    required int walletId,
+    required int itemId,
+    required int itemUnitId,
+    required String itemName,
+    required double quantity,
+    required double impurity,
+    required double weight750,
+    required double weight,
+    required int carat,
+    required String receiptNumber,
+    required int stateMode,
+    required int? laboratoryId,
+    required String laboratoryName,
+    required String recId,
+    required String recIdParent,
+
+  })async{
+    try{
+      Map<String, dynamic> inventoryData= {
+        "date": date,
+        "inventoryId": inventoryId,
+        "inputItemId": null,
+        "wallet": {
+          "address": "43314b3c-2980-4563-90ae-61edc6866126",
+          "account": {
+            "code": "1",
+            "name": accountName,
+            "accountGroup": {
+              "infos": []
+            },
+            "accountItemGroup": {
+              "infos": []
+            },
+            "accountPriceGroup": {
+              "infos": []
+            },
+            "id": accountId,
+            "infos": []
+          },
+          "item": {
+            "itemGroup": {
+              "infos": []
+            },
+            "itemUnit": {
+              "infos": []
+            },
+            "infos": []
+          },
+          "id": walletId,
+          "infos": []
+        },
+        "item": {
+          "itemGroup": {
+            "infos": []
+          },
+          "itemUnit": {
+            "infos": []
+          },
+          "name": itemName,
+          "id": itemId,
+          "infos": []
+        },
+        "itemUnit": {
+          "id": itemUnitId,
+          "infos": []
+        },
+        "laboratory":{
+          "name":laboratoryName,
+          "id":laboratoryId!=0?laboratoryId:null,
+        },
+        "quantity": weight750,
+        "impurity": impurity,
+        "weight750": weight750,
+        "weight": quantity,
+        "carat": carat,
+        "receiptNumber": receiptNumber.isNotEmpty?receiptNumber:null,
+        "type": type,
+        "stateMode":stateMode,
+        "id": inventoryDetailId,
+        "isDeleted": false,
+        "rowNum": 1,
+        "attribute": "cus",
+        "recId": recId,
+        "recIdParent": recIdParent,
+        "infos": [],
+        "description": description,
+      };
+      print('Request Before Update inventoryData updateDetailInventoryReceive: $inventoryData');
+      var response=await inventoryDio.put('Inventory/updateDetail',data: inventoryData);
+      print('Status Code updateDetailInventoryReceive: ${response.statusCode}');
+      print('Response Data updateDetailInventoryReceive: ${response.data}');
+      print('Request inventoryData updateDetailInventoryReceive: $inventoryData');
+      return response.data;
+
+    }catch(e){
+      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    }
+  }
+  /*Future<Map<String, dynamic>> updateDetailInventoryReceive({
     required int id,
     required int inventoryDetailId,
     required String date,
@@ -346,99 +488,71 @@ class InventoryRepository {
     required int laboratoryId,
     required String laboratoryName,
     required String recId,
-
+    required double weight,
+    required double quantityRemainded,
+    required int inputItemId,
   })async{
     try{
       Map<String, dynamic> inventoryData= {
-        "date": date,
-        "account": {
-          "code": "1",
-          "name": accountName,
-          "accountGroup": {
-            "infos": []
-          },
-          "accountItemGroup": {
-            "infos": []
-          },
-          "accountPriceGroup": {
-            "infos": []
-          },
-          "id": accountId,
-          "infos": []
-        },
-        "type": type,
-        "isDeleted": false,
-        "inventoryDetails": [
-          {
-            "inventoryId": id,
-            "wallet": {
-              "address": "43314b3c-2980-4563-90ae-61edc6866126",
-              "account": {
-                "accountGroup": {
-                  "infos": []
-                },
-                "accountItemGroup": {
-                  "infos": []
-                },
-                "accountPriceGroup": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "item": {
-                "itemGroup": {
-                  "infos": []
-                },
-                "itemUnit": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "id": walletId,
+        "inventoryId": id,
+        "inputItemId": inputItemId,
+        "wallet": {
+          "account": {
+            "accountGroup": {
               "infos": []
             },
-            "item": {
-              "itemGroup": {
-                "infos": []
-              },
-              "itemUnit": {
-                "infos": []
-              },
-              "name": itemName,
-              "id": itemId,
+            "accountSubGroup": {
+              "infos": []
+            },
+            "infos": []
+          },
+          "item": {
+            "itemGroup": {
               "infos": []
             },
             "itemUnit": {
-              "name": "گرم",
-              "id": 1,
               "infos": []
             },
-            "laboratory":{
-              "name":laboratoryName,
-              "id":laboratoryId!=0?laboratoryId:null,
-            },
-            "quantity": quantity,
-            "impurity": impurity,
-            "weight750": weight750,
-            "carat": carat,
-            "receiptNumber": receiptNumber!=''?receiptNumber:null,
-            "type": type,
-            "stateMode":stateMode,
-            "id": inventoryDetailId,
-            "isDeleted": false,
-            "rowNum": 1,
-            "attribute": "cus",
-            "recId": recId,
-            "infos": [],
-            "description": description,
-          }
-        ],
+            "infos": []
+          },
+          "infos": []
+        },
+        "laboratory": {
+          "name": laboratoryName,
+          "id": laboratoryId != 0 ? laboratoryId : null,
+          "infos": []
+        },
+        "item": {
+          "itemGroup": {
+            "infos": []
+          },
+          "itemUnit": {
+            "infos": []
+          },
+          "name": itemName,
+          "id": itemId,
+          "infos": []
+        },
+        "itemUnit": {
+          "infos": []
+        },
+        "quantity": quantity,
+        "carat": carat,
+        "weight750": weight750,
+        "weight": weight,
+        "quantityRemainded": quantityRemainded,
+        "impurity": impurity,
+        "receiptNumber": receiptNumber != '' ? receiptNumber : null,
+        "type": type,
+        "isDeleted": false,
+        "attachments": [],
         "rowNum": 1,
-        "id": id,
+        "id": inventoryDetailId,
         "attribute": "cus",
-        "infos": [],
+        "recId": recId,
+        "infos": []
       };
-      var response=await inventoryDio.put('Inventory/update',data: inventoryData);
+      var response=await inventoryDio.put('Inventory/updateDetail',data: inventoryData);
       print('Status Code updateDetailInventoryReceive: ${response.statusCode}');
       print('Response Data updateDetailInventoryReceive: ${response.data}');
       print('inventoryData updateDetailInventoryReceive: $inventoryData');
@@ -448,6 +562,18 @@ class InventoryRepository {
       throw ErrorException('خطا در آپدیت اطلاعات:$e');
     }
   }
+
+  Future<List<InventoryDetailModel>> getInventoryDetail(int inventoryId)async{
+    try{
+      final response=await inventoryDio.get('Inventory/getInventoryDetail',queryParameters: {"id":inventoryId});
+      print('Status Code getInventoryDetail: ${response.statusCode}');
+      print('Response Data getInventoryDetail: ${response.data}');
+      List<dynamic> data=response.data;
+      return data.map((inventoryDetail)=>InventoryDetailModel.fromJson(inventoryDetail)).toList();
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }*/
 
   Future<List<InventoryDetailModel>> getInventoryDetail(int inventoryId)async{
     try{
@@ -485,105 +611,17 @@ class InventoryRepository {
   }
 
   Future<Map<String, dynamic>> deleteInventoryDetail({
-    required String date,
     required int id,
-    required int inventoryDetailId,
-    required int accountId,
-    required int itemId,
-    required int walletId,
-    required double quantity,
-    required int stateMode,
-    required int type,
 
   })async{
     try{
       Map<String, dynamic> inventoryData= {
-        "date": date,
-        "account": {
-          "code": "1",
-          "name": "",
-          "accountGroup": {
-            "infos": []
-          },
-          "accountItemGroup": {
-            "infos": []
-          },
-          "accountPriceGroup": {
-            "infos": []
-          },
-          "id": accountId,
-          "infos": []
-        },
-        "type": type,
-        "isDeleted": false,
-        "inventoryDetails": [
-          {
-            "inventoryId": id,
-            "wallet": {
-              "address": "844B8EC4-0C39-410C-9C5C-D693842A61F7",
-              "account": {
-                "accountGroup": {
-                  "infos": []
-                },
-                "accountItemGroup": {
-                  "infos": []
-                },
-                "accountPriceGroup": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "item": {
-                "itemGroup": {
-                  "infos": []
-                },
-                "itemUnit": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "id": walletId,
-              "infos": []
-            },
-            "item": {
-              "itemGroup": {
-                "infos": []
-              },
-              "itemUnit": {
-                "infos": []
-              },
-              "name": "",
-              "id": itemId,
-              "infos": []
-            },
-            "itemUnit": {
-              "name": "عدد",
-              "id": 2,
-              "infos": []
-            },
-            "quantity": quantity,
-            "impurity": 0.0000,
-            "weight750": 0,
-            "carat": 0,
-            "type": type,
-            "isDeleted": true,
-            "rowNum": 1,
-            "id": inventoryDetailId,
-            "stateMode":stateMode,
-            "attribute": "cus",
-            "recId": null,
-            "infos": []
-          }
-        ],
-        "rowNum": 1,
         "id": id,
-        "attribute": "cus",
-        "recId": "5e5a084e-0b2b-438f-9ede-724d0618e19d",
-        "infos": []
       };
-      var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
+      var response=await inventoryDio.delete('Inventory/updateToIsDeletedDetail',data: inventoryData);
+      print('Request deleteInventoryDetail: $inventoryData');
+      print('Status deleteInventoryDetail: ${response.statusCode}');
+      print('Response deleteInventoryDetail: ${response.data}');
       return response.data;
 
     }catch(e){
@@ -738,6 +776,10 @@ class InventoryRepository {
           "item": {
             "name": detail.item?.name,
             "id": detail.item?.id,
+            "infos": []
+          },
+          "itemUnit": {
+            "id": detail.itemUnit?.id,
             "infos": []
           },
           "laboratory":{
@@ -901,7 +943,7 @@ class InventoryRepository {
   }
 
   Future<Map<String, dynamic>> updateDetailInventoryPayment({
-    required int id,
+    required int inventoryId,
     required int inventoryDetailId,
     required String date,
     required int accountId,
@@ -911,113 +953,96 @@ class InventoryRepository {
     required String? description,
     required int walletId,
     required int itemId,
+    required int itemUnitId,
     required String itemName,
     required double quantity,
     required double impurity,
     required double weight750,
+    required double weight,
     required int carat,
-    required String? receiptNumber,
+    required String receiptNumber,
     required int stateMode,
-    required int? laboratoryId,
-    required String? laboratoryName,
+    required int laboratoryId,
+    required String laboratoryName,
     required String recId,
+    required String recIdParent,
 
   })async{
     try{
       Map<String, dynamic> inventoryData= {
         "date": date,
-        "account": {
-          "code": "1",
-          "name": accountName,
-          "accountGroup": {
-            "infos": []
-          },
-          "accountItemGroup": {
-            "infos": []
-          },
-          "accountPriceGroup": {
-            "infos": []
-          },
-          "id": accountId,
-          "infos": []
-        },
-        "type": type,
-        "isDeleted": false,
-        "inventoryDetails": [
-          {
-            "inventoryId": id,
-            "wallet": {
-              "address": "43314b3c-2980-4563-90ae-61edc6866126",
-              "account": {
-                "accountGroup": {
-                  "infos": []
-                },
-                "accountItemGroup": {
-                  "infos": []
-                },
-                "accountPriceGroup": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "item": {
-                "itemGroup": {
-                  "infos": []
-                },
-                "itemUnit": {
-                  "infos": []
-                },
-                "infos": []
-              },
-              "id": walletId,
+        "inventoryId": inventoryId,
+        "inputItemId": inputItemId ?? null,
+        "wallet": {
+          "address": "43314b3c-2980-4563-90ae-61edc6866126",
+          "account": {
+            "code": "1",
+            "name": accountName,
+            "accountGroup": {
               "infos": []
             },
-            "item": {
-              "itemGroup": {
-                "infos": []
-              },
-              "itemUnit": {
-                "infos": []
-              },
-              "name": itemName,
-              "id": itemId,
+            "accountItemGroup": {
+              "infos": []
+            },
+            "accountPriceGroup": {
+              "infos": []
+            },
+            "id": accountId,
+            "infos": []
+          },
+          "item": {
+            "itemGroup": {
               "infos": []
             },
             "itemUnit": {
-              "name": "گرم",
-              "id": 1,
               "infos": []
             },
-            "laboratory":{
-              "name":laboratoryName,
-              "id":laboratoryId!=0 ? laboratoryId : null,
-            },
-            "quantity": quantity,
-            "impurity": impurity,
-            "weight750": weight750,
-            "carat": carat,
-            "receiptNumber": receiptNumber!='' ? receiptNumber : null,
-            "type": type,
-            "inputItemId":inputItemId,
-            "stateMode":stateMode,
-            "id": inventoryDetailId,
-            "isDeleted": false,
-            "rowNum": 1,
-            "attribute": "cus",
-            "recId": recId,
-            "infos": [],
-            "description": description,
-          }
-        ],
+            "infos": []
+          },
+          "id": walletId,
+          "infos": []
+        },
+        "item": {
+          "itemGroup": {
+            "infos": []
+          },
+          "itemUnit": {
+            "infos": []
+          },
+          "name": itemName,
+          "id": itemId,
+          "infos": []
+        },
+        "itemUnit": {
+          "id": itemUnitId,
+          "infos": []
+        },
+        "laboratory":{
+          "name":laboratoryName,
+          "id":laboratoryId!=0?laboratoryId:null,
+          "infos": []
+        },
+        "quantity": weight750,
+        "impurity": impurity,
+        "weight750": weight750,
+        "weight": quantity,
+        "carat": carat,
+        "receiptNumber": receiptNumber.isNotEmpty ? receiptNumber:null,
+        "type": type,
+        "stateMode":stateMode,
+        "id": inventoryDetailId,
+        "isDeleted": false,
         "rowNum": 1,
-        "id": id,
         "attribute": "cus",
+        "recId": recId,
+        "recIdParent": recIdParent,
         "infos": [],
+        "description": description ?? null,
       };
-      var response=await inventoryDio.put('Inventory/update',data: inventoryData);
+      var response=await inventoryDio.put('Inventory/updateDetail',data: inventoryData);
       print('Status Code: ${response.statusCode}');
+      print('Request Data updateDetailInventoryPayment: $inventoryData');
       print('Response Data updateDetailInventoryPayment: ${response.data}');
-      print('Response Data updateDetailInventoryPayment: $inventoryData');
       return response.data;
 
     }catch(e){

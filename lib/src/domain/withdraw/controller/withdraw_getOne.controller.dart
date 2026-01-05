@@ -12,11 +12,14 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
+import '../../../config/repository/deposit.repository.dart';
+import '../../../config/repository/deposit_request.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/withdraw.repository.dart';
 import '../../../config/repository/withdraw_getOne.repository.dart';
 import '../../account/model/account.model.dart';
+import '../../deposit/model/deposit.model.dart';
 import '../model/withdraw.model.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:path/path.dart' as path;
@@ -35,12 +38,16 @@ class WithdrawGetOneController extends GetxController{
   final AccountRepository accountRepository=AccountRepository();
   final WithdrawGetOneRepository withdrawGetOneRepository=WithdrawGetOneRepository();
   final RemittanceRepository remittanceRepository=RemittanceRepository();
+  final DepositRequestRepository depositRequestRepository=DepositRequestRepository();
+  final DepositRepository depositRepository=DepositRepository();
 
  var id=0.obs;
   final Rxn<WithdrawModel> getOneWithdraw = Rxn<WithdrawModel>();
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var isLoading=true.obs;
   var isLoadingRegister=true.obs;
+  var isLoadingExtraAmount=true.obs;
+  var isLoadingSendTelegram=true.obs;
   var errorMessage=''.obs;
   RxList<String> imageList = <String>[].obs;
   final PageController pageController = PageController();
@@ -48,6 +55,21 @@ class WithdrawGetOneController extends GetxController{
 
   final List<AccountModel> filterAccountList=<AccountModel>[].obs;
   var withdrawList=<WithdrawModel>[].obs;
+
+  // Add TabController to maintain tab state
+  late TabController tabController;
+  RxInt currentTabIndex = 0.obs;
+  // Filter variables for deposits
+  final TextEditingController amountFilterController = TextEditingController();
+  final TextEditingController userNameFilterController = TextEditingController();
+  final TextEditingController trackingNumberFilterController = TextEditingController();
+
+  var amountFilter = ''.obs;
+  var userNameFilter = ''.obs;
+  var trackingNumberFilter = ''.obs;
+
+  // Filtered deposits list
+  RxList<DepositModel> filteredDeposits = <DepositModel>[].obs;
 
   @override
   void onInit() {
@@ -61,6 +83,18 @@ class WithdrawGetOneController extends GetxController{
   @override void onClose() {
     scrollController.dispose();
     super.onClose();
+  }
+  // Method to set TabController from the view
+  void setTabController(TabController controller) {
+    tabController = controller;
+  }
+
+  // Method to change tab programmatically
+  void changeTab(int index) {
+    currentTabIndex.value = index;
+    if (tabController.length > index) {
+      tabController.animateTo(index);
+    }
   }
   void setupScrollListener() {
     scrollController.addListener(() {
@@ -89,6 +123,8 @@ class WithdrawGetOneController extends GetxController{
         state.value=PageState.list;
         //EasyLoading.dismiss();
         print('deposits:  ${getOneWithdraw.value?.deposits?.length}');
+        // Apply filters when data is loaded
+        applyDepositFilters();
       }else{
         state.value=PageState.empty;
       }
@@ -146,6 +182,8 @@ class WithdrawGetOneController extends GetxController{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoadingRegister.value = true;
+      // Store current tab index before updating
+      int currentTab = currentTabIndex.value;
       var response = await withdrawGetOneRepository.updateRegistered(
         depositId: depositId,
         registered: registered,
@@ -158,7 +196,12 @@ class WithdrawGetOneController extends GetxController{
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
         //depositController.fetchDepositList();
-        fetchGetOneWithdraw(id.value);
+        await fetchGetOneWithdraw(id.value);
+
+        // Restore the tab index after data refresh
+        Future.delayed(Duration(milliseconds: 100), () {
+          changeTab(currentTab);
+        });
       }
 
     } catch (e) {
@@ -167,6 +210,169 @@ class WithdrawGetOneController extends GetxController{
     } finally {
       EasyLoading.dismiss();
       isLoading.value = false;
+    }
+
+    return null;
+  }
+
+  Future<List<dynamic>?> insertFromDeposit(int depositId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingRegister.value = true;
+      // Store current tab index before updating
+      int currentTab = currentTabIndex.value;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await withdrawGetOneRepository.insertFromDeposit(
+        depositId: depositId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar("موفقیت آمیز","برگشتی موفقیت آمیز بود",
+            titleText: Text("موفقیت آمیز",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text("برگشتی موفقیت آمیز بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        //depositController.fetchDepositList();
+        await fetchGetOneWithdraw(id.value);
+        withdrawController.getWithdrawListPager();
+
+        // Restore the tab index after data refresh
+        Future.delayed(Duration(milliseconds: 100), () {
+          changeTab(currentTab);
+        });
+      }
+
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","برگشتی ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("برگشتی ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در برگشت: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoading.value = false;
+    }
+
+    return null;
+  }
+
+  Future<List<dynamic>?> changeExteraAmount(int depositId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingExtraAmount.value = true;
+      // Store current tab index before updating
+      int currentTab = currentTabIndex.value;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await withdrawGetOneRepository.changeExteraAmount(
+        depositId: depositId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar("موفقیت آمیز","انتقال اضافه واریزی موفقیت آمیز بود",
+            titleText: Text("موفقیت آمیز",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text("انتقال اضافه واریزی موفقیت آمیز بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        //depositController.fetchDepositList();
+        await fetchGetOneWithdraw(id.value);
+        withdrawController.getWithdrawListPager();
+
+        // Restore the tab index after data refresh
+        Future.delayed(Duration(milliseconds: 100), () {
+          changeTab(currentTab);
+        });
+      }
+
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","انتقال اضافه واریزی ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("انتقال اضافه واریزی ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در برگشت: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoading.value = false;
+    }
+
+    return null;
+  }
+
+  Future<List<dynamic>?> sendTelegramDepositRequest(int depositRequestId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingSendTelegram.value = true;
+      int currentTab = currentTabIndex.value;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await depositRequestRepository.sendTelegramDepositRequest(
+        depositRequestId: depositRequestId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar(response.first["title"],response.first["description"],
+            titleText: Text(response.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        await fetchGetOneWithdraw(id.value);
+        withdrawController.getWithdrawListPager();
+
+        Future.delayed(Duration(milliseconds: 100), () {
+          changeTab(currentTab);
+        });
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","ارسال به تلگرام ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("ارسال به تلگرام ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در ارسال: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingSendTelegram.value = false;
+    }
+    return null;
+  }
+
+  Future<List<dynamic>?> sendTelegramDeposit(int depositId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingSendTelegram.value = true;
+      int currentTab = currentTabIndex.value;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await depositRepository.sendTelegramDeposit(
+        depositId: depositId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar(response.first["title"],response.first["description"],
+            titleText: Text(response.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        await fetchGetOneWithdraw(id.value);
+        withdrawController.getWithdrawListPager();
+
+        Future.delayed(Duration(milliseconds: 100), () {
+          changeTab(currentTab);
+        });
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","ارسال به تلگرام ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("ارسال به تلگرام ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در ارسال: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingSendTelegram.value = false;
     }
 
     return null;
@@ -233,5 +439,64 @@ class WithdrawGetOneController extends GetxController{
       }
     }
   }
+
+  // Filter methods for deposits
+  void applyDepositFilters() {
+    final deposits = getOneWithdraw.value?.deposits ?? [];
+
+    filteredDeposits.assignAll(deposits.where((deposit) {
+      // Filter by amount
+      bool amountMatch = true;
+      if (amountFilter.value.isNotEmpty) {
+        try {
+          final filterAmount = int.parse(amountFilter.value.replaceAll(',', ''));
+          if (deposit.amount != null) {
+            // Convert deposit amount to string for partial matching
+            final depositAmountStr = deposit.amount.toString();
+            final filterAmountStr = filterAmount.toString();
+            // Check if the filter amount is contained in the deposit amount
+            amountMatch = depositAmountStr.contains(filterAmountStr);
+          } else {
+            amountMatch = false;
+          }
+        } catch (e) {
+          amountMatch = false;
+        }
+      }
+
+      // Filter by user name
+      bool userNameMatch = true;
+      if (userNameFilter.value.isNotEmpty) {
+        final userName = deposit.wallet?.account?.name ?? '';
+        userNameMatch = userName.toLowerCase().contains(userNameFilter.value.toLowerCase());
+      }
+
+      // Filter by tracking number
+      bool trackingNumberMatch = true;
+      if (trackingNumberFilter.value.isNotEmpty) {
+        final trackingNumber = deposit.trackingNumber ?? '';
+        trackingNumberMatch = trackingNumber.toLowerCase().contains(trackingNumberFilter.value.toLowerCase());
+      }
+
+      return amountMatch && userNameMatch && trackingNumberMatch;
+    }).toList());
+  }
+
+  void clearDepositFilters() {
+    amountFilterController.clear();
+    userNameFilterController.clear();
+    trackingNumberFilterController.clear();
+    amountFilter.value = '';
+    userNameFilter.value = '';
+    trackingNumberFilter.value = '';
+    applyDepositFilters();
+  }
+
+  bool hasActiveDepositFilters() {
+    return amountFilter.value.isNotEmpty ||
+        userNameFilter.value.isNotEmpty ||
+        trackingNumberFilter.value.isNotEmpty;
+  }
+
 
 }

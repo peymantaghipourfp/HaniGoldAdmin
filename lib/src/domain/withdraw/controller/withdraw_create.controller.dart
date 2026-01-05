@@ -1,7 +1,11 @@
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/bank.repository.dart';
@@ -27,8 +31,10 @@ import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
+import '../../order/model/tooltip_total_balance.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../model/bank_account.model.dart';
+import 'package:universal_html/html.dart' as html;
 
 enum PageState{loading,err,empty,list}
 
@@ -39,7 +45,9 @@ class WithdrawCreateController extends GetxController{
   final WithdrawPendingController withdrawPendingController=Get.find<WithdrawPendingController>();
 
   final TextEditingController searchController = TextEditingController();
+  final TextEditingController searchBankController = TextEditingController();
   final FocusNode searchFocusNode = FocusNode();
+  final FocusNode searchFocusNodeBank = FocusNode();
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController amountController=TextEditingController();
   final TextEditingController numberController=TextEditingController();
@@ -63,17 +71,21 @@ class WithdrawCreateController extends GetxController{
   Rx<PageState> state=Rx<PageState>(PageState.list);
   var errorMessage=''.obs;
   var isLoading=true.obs;
-  var isLoadingBalance=true.obs;
+  //var isLoadingBalance=true.obs;
 
+  // TooltipTotalBalanceModel state variables
+  final Rxn<TooltipTotalBalanceModel> tooltipTotalBalanceModel = Rxn<TooltipTotalBalanceModel>();
+  var isLoadingTooltipBalance = true.obs;
 
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<BankAccountModel> selectedBankAccount = Rxn<BankAccountModel>();
   final Rxn<BankModel> selectedBank = Rxn<BankModel>();
   Rx<int> selectedWalletId = Rx<int>(0);
   String? selectedIndex ;
-  Rx<int> selectedBankId = Rx<int>(0);
-  Rx<String> selectedBankName = Rx<String>("");
+  /*Rx<int> selectedBankId = Rx<int>(0);
+  Rx<String> selectedBankName = Rx<String>("");*/
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
+  RxList<BankModel> searchedBanks = <BankModel>[].obs;
   Timer? debounce;
   final ImagePicker _picker = ImagePicker();
   RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
@@ -81,6 +93,7 @@ class WithdrawCreateController extends GetxController{
   var uuid = Uuid();
   RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploadingDesktop = false.obs;
+  var dropdownError="".obs;
 
 
 
@@ -94,24 +107,18 @@ class WithdrawCreateController extends GetxController{
     } else {
       bankAccountList.clear();
     }*/
-    getBalanceList(newValue?.id ?? 0);
-    isLoadingBalance.value=false;
+    //getBalanceList(newValue?.id ?? 0);
+    //isLoadingBalance.value=false;
+    getTooltipTotalBalance(newValue?.id ?? 0);
     bankList.clear();
     fetchBankList();
     update();
   }
 
-   changeSelectedBank(String newValue){
-    selectedIndex=newValue;
-    selectedBankId.value=int.parse(newValue);
-    for(int i=0 ;i<bankList.length;i++){
-      if(selectedBankId.value==bankList[i].id){
-        selectedBankName.value=bankList[i].name ?? "";
-      }
-    }
+   changeSelectedBank(BankModel? newValue){
+    selectedBank.value=newValue;
+
     update();
-    print(selectedBankName.value);
-    print( selectedBankId.value);
   }
 
   /*void changeSelectedBankAccount(BankAccountModel? newValue) {
@@ -135,9 +142,10 @@ class WithdrawCreateController extends GetxController{
 
   @override
   void onInit() {
-    searchController.addListener(onSearchChanged);
     fetchAccountList();
     fetchBankList();
+    searchController.addListener(onSearchChanged);
+    searchBankController.addListener(onSearchChangedBank);
     super.onInit();
   }
   void onDropdownMenuStateChange(bool isOpen) {
@@ -150,11 +158,23 @@ class WithdrawCreateController extends GetxController{
       resetAccountSearch();
     }
   }
+  void onDropdownMenuStateChangeBank(bool isOpen) {
+    if (isOpen) {
+      // Add a small delay to ensure the dropdown is fully opened
+      Future.delayed(const Duration(milliseconds: 100), () {
+        searchFocusNodeBank.requestFocus();
+      });
+    } else {
+      resetBankSearch();
+    }
+  }
+
   @override
   void onClose() {
     debounce?.cancel();
     searchController.dispose();
     searchFocusNode.dispose();
+    searchFocusNodeBank.dispose();
     super.onClose();
   }
 
@@ -166,6 +186,33 @@ class WithdrawCreateController extends GetxController{
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> handleDroppedFiles(List<XFile> files) async {
+    try {
+      // Filter only image files
+      final imageFiles = files.where((file) {
+        // Use file.name instead of file.path for dropped files
+        final fileName = file.name.toLowerCase();
+        final extension = fileName.contains('.') ? fileName.split('.').last : '';
+
+        // Also check MIME type as a fallback
+        final mimeType = file.mimeType?.toLowerCase() ?? '';
+        final isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+        final isImageByMimeType = mimeType.startsWith('image/');
+
+        return isImageByExtension || isImageByMimeType;
+      }).toList();
+
+      if (imageFiles.isNotEmpty) {
+        selectedImagesDesktop.addAll(imageFiles);
+        Get.snackbar("موفقیت", "${imageFiles.length} تصویر اضافه شد");
+      } else {
+        Get.snackbar("خطا", "فقط فایل‌های تصویری قابل قبول هستند");
+      }
+    } catch (e) {
+      Get.snackbar("خطا", "خطا در پردازش فایل‌های رها شده");
     }
   }
 
@@ -257,6 +304,7 @@ class WithdrawCreateController extends GetxController{
     }
   }
 
+
   //لیست بانک ها
   Future<void> fetchBankList() async{
     try{
@@ -264,6 +312,7 @@ class WithdrawCreateController extends GetxController{
       state.value=PageState.loading;
       var fetchedBankList=await bankRepository.getBankList();
       bankList.assignAll(fetchedBankList);
+      searchedBanks.assignAll(fetchedBankList);
       state.value=PageState.list;
       if(bankList.isEmpty){
         state.value=PageState.empty;
@@ -274,6 +323,31 @@ class WithdrawCreateController extends GetxController{
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
       isLoading.value=false;
+    }
+  }
+
+  void onSearchChangedBank(){
+    if (debounce?.isActive ?? false) debounce!.cancel();
+    debounce=Timer(const Duration(seconds: 4), () async {
+      await searchBankList(searchBankController.text.trim());
+
+    });
+  }
+
+  Future<void> searchBankList(String name) async {
+    try {
+      isLoading.value = true;
+      if (name.length>2) {
+        searchedBanks.assignAll(bankList);
+      } else {
+        final results = await bankRepository.searchBankList(name);
+        searchedBanks.assignAll(results);
+        state.value=PageState.list;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در جستجوی بانک ها');
+    } finally {
+      isLoading.value = false;
     }
   }
 
@@ -348,8 +422,8 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
           accountId: selectedAccount.value?.id ?? 0,
           accountName: selectedAccount.value?.name ?? "",
           //bankAccountId: selectedBankAccount.value?.id ?? 0,
-          bankId: selectedBankId.value,
-          bankName: selectedBankName.value,
+          bankId: selectedBank.value?.id ?? 0,
+          bankName: selectedBank.value?.name ?? "",
           ownerName: ownerNameController.text,
           amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
           number: numberController.text,
@@ -387,7 +461,7 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
   }
 
   // لیست بالانس
-  Future<void> getBalanceList(int id) async{
+  /*Future<void> getBalanceList(int id) async{
     print("getBalanceList : $id");
     balanceList.clear();
     try{
@@ -406,6 +480,27 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
       state.value=PageState.err;
     }finally{
     }
+  }*/
+
+  // دریافت تراز کامل کاربر
+  Future<void> getTooltipTotalBalance(int accountId) async {
+    print("getTooltipTotalBalance : $accountId");
+    if (accountId == 0) {
+      tooltipTotalBalanceModel.value = null;
+      isLoadingTooltipBalance.value = false;
+      return;
+    }
+    try {
+      isLoadingTooltipBalance.value = true;
+      final result = await withdrawController.getTooltipTotalBalance(accountId);
+      tooltipTotalBalanceModel.value = result;
+      print("TooltipTotalBalance fetched successfully");
+    } catch (e) {
+      print('Error fetching tooltip balance: $e');
+      tooltipTotalBalanceModel.value = null;
+    } finally {
+      isLoadingTooltipBalance.value = false;
+    }
   }
 
   void clearList(){
@@ -416,14 +511,49 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
     cardNumberController.clear();
     shebaController.clear();
     selectedAccount.value=null;
-    //selectedBankAccount.value=null;
-    bankAccountList.clear();
-    bankList.clear();
+    selectedBank.value=null;
     descriptionController.clear();
+    // Clear tooltip balance data
+    tooltipTotalBalanceModel.value = null;
+    isLoadingTooltipBalance.value = true;
   }
   void resetAccountSearch() {
     searchController.clear();
     searchedAccounts.assignAll(accountList);
+  }
+  void resetBankSearch() {
+    searchBankController.clear();
+    searchedBanks.assignAll(bankList);
+  }
+
+  Future<void> captureBalanceScreenshot(BuildContext context, GlobalKey balanceKey) async {
+    try {
+      RenderRepaintBoundary boundary = balanceKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        final pngBytes = byteData.buffer.asUint8List();
+        if (kIsWeb) {
+          final blob = html.Blob([pngBytes], 'image/png');
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..setAttribute('download', 'user_balance_screenshot_${selectedAccount.value?.name}.png')
+            ..click();
+          html.Url.revokeObjectUrl(url);
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        } else {
+          await FileSaver.instance.saveFile(
+            name: "user_balance_screenshot_${selectedAccount.value?.name}",
+            bytes: pngBytes,
+            fileExtension: 'png',
+            mimeType: MimeType.png,
+          );
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        }
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
+    }
   }
 
 }

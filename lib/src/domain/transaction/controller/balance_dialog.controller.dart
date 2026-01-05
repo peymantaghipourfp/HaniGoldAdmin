@@ -1,12 +1,12 @@
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/transaction.repository.dart';
-import 'package:hanigold_admin/src/domain/transaction/model/all_balances.model.dart';
+import 'package:hanigold_admin/src/domain/transaction/model/all_balances_new.model.dart';
 
 class BalanceDialogController extends GetxController {
   final TransactionRepository _transactionRepository = TransactionRepository();
 
   // Observable variables for reactive UI
-  final RxList<AllBalancesModel> balances = <AllBalancesModel>[].obs;
+  final Rx<AllBalancesNewModel?> allBalances = Rx<AllBalancesNewModel?>(null);
   final RxBool isLoading = true.obs;
   final RxString error = ''.obs;
   final RxString entityName = ''.obs;
@@ -29,14 +29,14 @@ class BalanceDialogController extends GetxController {
     try {
       isLoading.value = true;
       error.value = '';
-      balances.clear();
+      allBalances.value = null;
 
       // Set entity info for display
       entityName.value = name ?? 'نامشخص';
       entityType.value = type;
 
-      final balanceList = await _transactionRepository.getAllBalancesList(id, type );
-      balances.addAll(balanceList);
+      final balanceData = await _transactionRepository.getAllBalancesNewList(id, type);
+      allBalances.value = balanceData;
 
       isLoading.value = false;
     } catch (e) {
@@ -46,20 +46,23 @@ class BalanceDialogController extends GetxController {
   }
 
   /// Get coin balances (مانده سکه)
-  List<AllBalancesModel> get coinBalances =>
-      balances.where((b) => b.unitName == 'عدد').toList();
+  List<BalanceModel> get coinBalances =>
+      allBalances.value?.balances?.where((b) => b.unitName == 'عدد').toList() ?? [];
 
   /// Get rial balances (مانده ریالی)
-  List<AllBalancesModel> get rialBalances =>
-      balances.where((b) => b.unitName == 'ریال').toList();
+  List<BalanceModel> get rialBalances =>
+      allBalances.value?.balances?.where((b) => b.unitName == 'ریال').toList() ?? [];
 
   /// Get gold balances (مانده طلایی)
-  List<AllBalancesModel> get goldBalances =>
-      balances.where((b) => b.unitName == 'گرم').toList();
+  List<BalanceModel> get goldBalances =>
+      allBalances.value?.balances?.where((b) => b.unitName == 'گرم').toList() ?? [];
 
   /// Get currency balances (مانده ارز)
-  List<AllBalancesModel> get currencyBalances =>
-      balances.where((b) => b.unitName == 'دلار' || b.unitName == 'یورو' || b.unitName == 'پوند').toList();
+  List<BalanceModel> get currencyBalances =>
+      allBalances.value?.balances?.where((b) => b.unitName == 'دلار' || b.unitName == 'یورو' || b.unitName == 'پوند').toList() ?? [];
+
+  /// Get total value
+  double get totalValue => allBalances.value?.totalValue ?? 0.0;
 
   /// Refresh balances
   Future<void> refreshBalances() async {
@@ -74,7 +77,7 @@ class BalanceDialogController extends GetxController {
 
   /// Clear all data
   void clearData() {
-    balances.clear();
+    allBalances.value = null;
     isLoading.value = false;
     error.value = '';
     entityName.value = '';

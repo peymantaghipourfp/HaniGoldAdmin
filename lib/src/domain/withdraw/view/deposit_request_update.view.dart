@@ -7,6 +7,8 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../../widget/custom_dropdown1.widget.dart';
+import '../../account/model/account.model.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/withdraw.controller.dart';
 import '../model/deposit_request.model.dart';
@@ -77,94 +79,44 @@ class _UpdateDepositRequestWidgetState extends State<UpdateDepositRequestWidget>
                           style: AppTextStyle.labelText,
                         ),
                       ),
-                      SizedBox(height: 12),
-
+                      SizedBox(height: 10),
                       // Dropdown انتخاب کاربر
+                      withdrawController.accountList.isEmpty ?
+                      Center(
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColor.textColor),
+                        ),
+                      ) :
                       Container(
-                        padding: EdgeInsets.only(bottom: 5),
-                        child: CustomDropdownWidget(
-                          dropdownSearchData: DropdownSearchData<String>(
-                            searchController: withdrawController.searchController,
-                            searchInnerWidgetHeight: 50,
-                            searchInnerWidget: Container(
-                              height: 50,
-                              padding: const EdgeInsets.only(
-                                top: 8,
-                                right: 15,
-                                left: 15,
-                              ),
-                              child: TextFormField(
-                                style: AppTextStyle.bodyText,
-                                controller: withdrawController.searchController,
-                                focusNode: withdrawController.searchFocusNode,
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  contentPadding:
-                                  const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 8,
-                                  ),
-                                  hintText: 'جستجوی کاربر...',
-                                  hintStyle: AppTextStyle.labelText,
-                                  border: OutlineInputBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(8),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          value: withdrawController.selectedAccount.value,
-                          validator: (value) {
-                            if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                              return 'کاربر را انتخاب کنید';
-                            }
-                            return null;
+                        padding: EdgeInsets.only(
+                            bottom: 5),
+                        child: CustomDropdown<AccountModel>(
+                          items: withdrawController.accountList,
+                          selectedItem: withdrawController.selectedAccount.value,
+                          enableSearch: true,
+                          errorText: withdrawController.dropdownError.value,
+                          itemLabel: (account) =>
+                          account.name ??
+                              "",
+                          /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                          onChanged: (account) {
+                            setState(() {
+                              withdrawController.selectedAccount.value = account;
+                              withdrawController.dropdownError.value = "";
+
+                              withdrawController.changeSelectedAccount(
+                                  account);
+                            });
+                            debugPrint(
+                              "کاربر انتخاب شد: ${account?.name}",
+                            );
                           },
-                          showSearchBox: true,
-                          items: [
-                            'انتخاب کنید',
-                            ...withdrawController
-                                .searchedAccounts.map((
-                                account) =>
-                            '${account.id}:${account.name ?? ""}')
-                          ].toList(),
-                          selectedValue: withdrawController
-                              .selectedAccount.value != null
-                              ? '${withdrawController.selectedAccount.value!.id}:${withdrawController.selectedAccount.value!.name}'
-                              : null,
-                          onChanged: (String? newValue) {
-                            if (newValue ==
-                                'انتخاب کنید') {
-                              withdrawController
-                                  .changeSelectedAccount(
-                                  null);
-                            } else {
-                              var accountId = int.tryParse(newValue!.split(':')[0]);
-                              if (accountId != null) {
-                                var selectedAccount = withdrawController
-                                    .searchedAccounts
-                                    .firstWhere((account) =>
-                                account.id == accountId);
-                                withdrawController
-                                    .changeSelectedAccount(
-                                    selectedAccount);
-                              }
-                            }
-                          },
-                          /*onMenuStateChange: (isOpen) {
-                            if (!isOpen) {
-                              withdrawController.resetAccountSearch();
-                            }
-                          },*/
-                          onMenuStateChange: withdrawController.onDropdownMenuStateChange,
-                          backgroundColor: AppColor.textFieldColor,
-                          borderRadius: 7,
-                          borderColor: AppColor.secondaryColor,
-                          hideUnderline: true,
+                          isIcon: false,
                         ),
                       ),
-                      SizedBox(height: 15),
 
                       // فیلد مبلغ
                       Container(

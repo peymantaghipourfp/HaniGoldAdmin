@@ -29,21 +29,21 @@ class RemittancesPendingListView extends StatefulWidget {
 class _RemittancesPendingListViewState extends State<RemittancesPendingListView> {
   final RemittancePendingController controller = Get.find<RemittancePendingController>();
   final GlobalKey _dataTableKey = GlobalKey();
-  final Map<int, GlobalKey> _rowKeys = {};
+  //final Map<int, GlobalKey> _rowKeys = {};
 
   @override
   void initState() {
     super.initState();
-    controller.remittanceList.listen((list) {
+   /* controller.remittanceList.listen((list) {
       _prepareScreenshotKeys(list);
       if (mounted) {
         setState(() {});
       }
     });
-    _prepareScreenshotKeys(controller.remittanceList);
+    _prepareScreenshotKeys(controller.remittanceList);*/
   }
 
-  void _prepareScreenshotKeys(List<RemittanceModel> remittances) {
+  /*void _prepareScreenshotKeys(List<RemittanceModel> remittances) {
     final newKeys = <int>{};
     for (var remittance in remittances) {
       if (remittance.id != null) {
@@ -54,7 +54,7 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
       }
     }
     _rowKeys.removeWhere((key, value) => !newKeys.contains(key));
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +80,7 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
                 child: Column(
                   children: [
                     //فیلد جستجو
+                    isDesktop ? SizedBox.shrink() :
                     Container(
                       margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                       padding: EdgeInsets.symmetric(horizontal: 20),
@@ -128,11 +129,12 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
                     ),
 
                     Container(
-                      margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
-                      padding: EdgeInsets.symmetric(horizontal: 10,vertical: 20),
-                      color: AppColor.appBarColor.withOpacity(0.5),
+                      margin: EdgeInsets.symmetric(horizontal: 30,vertical: 15),
+                      padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5),
+                      color: AppColor.backGroundColor1.withAlpha(150),
                       child: Column(
                         children: [
+                          isDesktop ? SizedBox.shrink() :
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
                             child: Row(
@@ -1031,10 +1033,464 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
                             child: Row(
                               children: [
                                 SingleChildScrollView(
-                                  child: Column(
+                                  child: Column(crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
+                                      Container(
+                                        padding: EdgeInsets.symmetric( vertical: 5),
+                                        child: Row(
+                                          children: [
+                                            Container(
+                                              width: 400,
+                                              child: TextFormField(
+                                                controller: controller.searchController,
+                                                style: AppTextStyle.labelText,
+                                                textInputAction: TextInputAction.search,
+                                                onFieldSubmitted: (value) async {
+                                                  if (value.isNotEmpty) {
+                                                    await controller.searchAccounts(value);
+                                                    showSearchResults(context);
+                                                  } else {
+                                                    controller.clearSearch();
+                                                  }
+                                                },
+                                                decoration: InputDecoration(
+                                                  border: OutlineInputBorder(
+                                                    borderRadius: BorderRadius.circular(10),
+                                                  ),
+                                                  filled: true,
+                                                  fillColor: AppColor.textFieldColor,
+                                                  hintText: "جستجو ... ",
+                                                  hintStyle: AppTextStyle.labelText,
+                                                  prefixIcon: IconButton(
+                                                      onPressed: ()async{
+                                                        if (controller.searchController.text.isNotEmpty) {
+                                                          await controller.searchAccounts(
+                                                              controller.searchController.text
+                                                          );
+                                                          showSearchResults(context);
+                                                        }else {
+                                                          controller.clearSearch();
+                                                        }
+                                                      },
+                                                      icon: Icon(Icons.search,color: AppColor.textColor,size: 30,)
+                                                  ),
+                                                  suffixIcon: IconButton(
+                                                    onPressed: controller.clearSearch,
+                                                    icon: Icon(Icons.close, color: AppColor.textColor),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(width: 10,),
+                                            Row(
+                                              children: [
+                                                //لیست حواله ها
+                                                TextButton.icon(
+                                                  onPressed: () {
+                                                    Get.toNamed('/remittance');
+                                                  },
+                                                  icon: SvgPicture.asset(
+                                                    'assets/svg/list-square.svg',
+                                                    height: 24,
+                                                  ),
+                                                    label: Text(
+                                                      'لیست حواله ها',
+                                                      style: AppTextStyle.labelText,
+                                                    ),
+                                                ),
+                                                SizedBox(width: 5),
+                                                // فیلتر
+                                                OutlinedButton.icon(
+                                                    onPressed: () async {
+                                                      showGeneralDialog(
+                                                          context: context,
+                                                          barrierDismissible: true,
+                                                          barrierLabel: MaterialLocalizations.of(context)
+                                                              .modalBarrierDismissLabel,
+                                                          barrierColor: Colors.black45,
+                                                          transitionDuration: const Duration(milliseconds: 200),
+                                                          pageBuilder: (BuildContext buildContext,
+                                                              Animation animation,
+                                                              Animation secondaryAnimation) {
+                                                            return Center(
+                                                              child: Material(
+                                                                color: Colors.transparent,
+                                                                child: Container(
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius: BorderRadius.circular(8),
+                                                                      color: AppColor.backGroundColor
+                                                                  ),
+                                                                  width:isDesktop?  Get.width * 0.2:Get.width * 0.5,
+                                                                  height:isDesktop?  Get.height * 0.5:Get.height * 0.7,
+                                                                  padding: EdgeInsets.all(20),
+                                                                  child: SingleChildScrollView(
+                                                                    child: Column(
+                                                                      children: [
+                                                                        Padding(
+                                                                          padding: const EdgeInsets.all(8.0),
+                                                                          child: Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.end,
+                                                                            children: [
+                                                                              Expanded(
+                                                                                child: Center(
+                                                                                  child: Text(
+                                                                                    'فیلتر',
+                                                                                    style: AppTextStyle.labelText.copyWith(
+                                                                                      fontSize: 15,
+                                                                                      fontWeight: FontWeight.normal,
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                              SizedBox(
+                                                                                width: 50,height: 27,
+                                                                                child: ElevatedButton(
+                                                                                  style: ButtonStyle(
+                                                                                      padding: WidgetStatePropertyAll(
+                                                                                          EdgeInsets.symmetric(horizontal: 2,vertical: 1)),
+                                                                                      // elevation: WidgetStatePropertyAll(5),
+                                                                                      backgroundColor:
+                                                                                      WidgetStatePropertyAll(AppColor.accentColor.withOpacity(0.5)),
+                                                                                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                                          borderRadius: BorderRadius.circular(5)))),
+                                                                                  onPressed: () async {
+                                                                                    controller.clearFilter();
+                                                                                    controller.getRemittanceListStatusPager();
+                                                                                    Get.back();
+                                                                                  },
+                                                                                  child: Text(
+                                                                                    'حذف فیلتر',
+                                                                                    style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 9 : 8),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                        Container(
+                                                                          color: AppColor.textColor,height: 0.2,
+                                                                        ),
+                                                                        Padding(
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                                          child: Column(
+                                                                            children: [
+                                                                              SizedBox(height: 8,),
+                                                                              Column(
+                                                                                crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    'نام بدهکار',
+                                                                                    style: AppTextStyle.labelText.copyWith(
+                                                                                        fontSize: 11,
+                                                                                        fontWeight: FontWeight.normal,
+                                                                                        color: AppColor.textColor),
+                                                                                  ),
+                                                                                  SizedBox(height: 10,),
+                                                                                  IntrinsicHeight(
+                                                                                    child: TextFormField(
+                                                                                      autovalidateMode: AutovalidateMode
+                                                                                          .onUserInteraction,
+                                                                                      controller: controller.namePayerController,
+                                                                                      style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                                      textAlign: TextAlign.start,
+                                                                                      keyboardType:TextInputType.text,
+                                                                                      decoration: InputDecoration(
+                                                                                        contentPadding:
+                                                                                        const EdgeInsets.symmetric(
+                                                                                            vertical: 11,horizontal: 15
+                                                                                        ),
+                                                                                        isDense: true,
+                                                                                        border: OutlineInputBorder(
+                                                                                          borderRadius:
+                                                                                          BorderRadius.circular(6),
+                                                                                        ),
+                                                                                        filled: true,
+                                                                                        fillColor: AppColor.textFieldColor,
+                                                                                        errorMaxLines: 1,
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              SizedBox(height: 8,),
+                                                                              Column(
+                                                                                crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    'نام بستانکار',
+                                                                                    style: AppTextStyle.labelText.copyWith(
+                                                                                        fontSize: 11,
+                                                                                        fontWeight: FontWeight.normal,
+                                                                                        color: AppColor.textColor),
+                                                                                  ),
+                                                                                  SizedBox(height: 10,),
+                                                                                  IntrinsicHeight(
+                                                                                    child: TextFormField(
+                                                                                      autovalidateMode: AutovalidateMode
+                                                                                          .onUserInteraction,
+                                                                                      controller: controller.nameRecieptController,
+                                                                                      style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                                      textAlign: TextAlign.start,
+                                                                                      keyboardType:TextInputType.text,
+                                                                                      decoration: InputDecoration(
+                                                                                        contentPadding:
+                                                                                        const EdgeInsets.symmetric(
+                                                                                            vertical: 11,horizontal: 15
+                                                                                        ),
+                                                                                        isDense: true,
+                                                                                        border: OutlineInputBorder(
+                                                                                          borderRadius:
+                                                                                          BorderRadius.circular(6),
+                                                                                        ),
+                                                                                        filled: true,
+                                                                                        fillColor: AppColor.textFieldColor,
+                                                                                        errorMaxLines: 1,
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              SizedBox(height: 8,),
+                                                                              /*Column(
+                                                              crossAxisAlignment:
+                                                              CrossAxisAlignment.start,
+                                                              children: [
+                                                                Text(
+                                                                  'شماره تماس',
+                                                                  style: AppTextStyle.labelText.copyWith(
+                                                                      fontSize: 11,
+                                                                      fontWeight: FontWeight.normal,
+                                                                      color: AppColor.textColor),
+                                                                ),
+                                                                SizedBox(height: 10,),
+                                                                IntrinsicHeight(
+                                                                  child: TextFormField(
+                                                                    autovalidateMode: AutovalidateMode
+                                                                        .onUserInteraction,
+                                                                    controller: controller.mobileFilterController,
+                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 15),
+                                                                    textAlign: TextAlign.center,
+                                                                    keyboardType:TextInputType.phone,
+                                                                    inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'^[\d٠-٩۰-۹]*\.?[\d٠-٩۰-۹]*$')),
+                                                                      TextInputFormatter.withFunction((oldValue, newValue) {
+                                                                        // تبدیل اعداد فارسی به انگلیسی برای پردازش راحت‌تر
+                                                                        String newText = newValue.text
+                                                                            .replaceAll('٠', '0')
+                                                                            .replaceAll('١', '1')
+                                                                            .replaceAll('٢', '2')
+                                                                            .replaceAll('٣', '3')
+                                                                            .replaceAll('٤', '4')
+                                                                            .replaceAll('٥', '5')
+                                                                            .replaceAll('٦', '6')
+                                                                            .replaceAll('٧', '7')
+                                                                            .replaceAll('٨', '8')
+                                                                            .replaceAll('٩', '9');
+
+                                                                        return newValue.copyWith(text: newText, selection: TextSelection.collapsed(offset: newText.length));
+                                                                      }),
+                                                                    ],
+                                                                    decoration: InputDecoration(
+                                                                      contentPadding:
+                                                                      const EdgeInsets.symmetric(
+                                                                          vertical: 11,horizontal: 15
+
+                                                                      ),
+                                                                      isDense: true,
+                                                                      border: OutlineInputBorder(
+                                                                        borderRadius:
+                                                                        BorderRadius.circular(6),
+                                                                      ),
+
+                                                                      filled: true,
+                                                                      fillColor: AppColor.textFieldColor,
+                                                                      errorMaxLines: 1,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),*/
+                                                                              /*SizedBox(height: 8),*/
+                                                                              Column(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    'از تاریخ',
+                                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                        fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                                  ),
+                                                                                  Container(
+                                                                                    //height: 50,
+                                                                                    padding: EdgeInsets.only(bottom: 5),
+                                                                                    child: IntrinsicHeight(
+                                                                                      child: TextFormField(
+                                                                                        validator: (value){
+                                                                                          if(value==null || value.isEmpty){
+                                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                                          }
+                                                                                          return null;
+                                                                                        },
+                                                                                        controller: controller.dateStartController,
+                                                                                        readOnly: true,
+                                                                                        style: AppTextStyle.labelText,
+                                                                                        decoration: InputDecoration(
+                                                                                          suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                          border: OutlineInputBorder(
+                                                                                            borderRadius: BorderRadius.circular(10),
+                                                                                          ),
+                                                                                          filled: true,
+                                                                                          fillColor: AppColor.textFieldColor,
+                                                                                          errorMaxLines: 1,
+                                                                                        ),
+                                                                                        onTap: () async {
+                                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                                            context: context,
+                                                                                            initialDate: Jalali.now(),
+                                                                                            firstDate: Jalali(1400,1,1),
+                                                                                            lastDate: Jalali(1450,12,29),
+                                                                                            initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                            initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                            locale: Locale("fa","IR"),
+                                                                                          );
+                                                                                          Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                          controller.startDateFilter.value =
+                                                                                          "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                          controller.dateStartController.text =
+                                                                                          "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                        },
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+                                                                              SizedBox(height: 8),
+                                                                              Column(
+                                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    'تا تاریخ',
+                                                                                    style: AppTextStyle.labelText.copyWith(fontSize: 13,
+                                                                                        fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                                                  ),
+                                                                                  Container(
+                                                                                    //height: 50,
+                                                                                    padding: EdgeInsets.only(bottom: 5),
+                                                                                    child: IntrinsicHeight(
+                                                                                      child: TextFormField(
+                                                                                        validator: (value){
+                                                                                          if(value==null || value.isEmpty){
+                                                                                            return 'لطفا تاریخ را انتخاب کنید';
+                                                                                          }
+                                                                                          return null;
+                                                                                        },
+                                                                                        controller: controller.dateEndController,
+                                                                                        readOnly: true,
+                                                                                        style: AppTextStyle.labelText,
+                                                                                        decoration: InputDecoration(
+                                                                                          suffixIcon: Icon(Icons.calendar_month, color: AppColor.textColor),
+                                                                                          border: OutlineInputBorder(
+                                                                                            borderRadius: BorderRadius.circular(10),
+                                                                                          ),
+                                                                                          filled: true,
+                                                                                          fillColor: AppColor.textFieldColor,
+                                                                                          errorMaxLines: 1,
+                                                                                        ),
+                                                                                        onTap: () async {
+                                                                                          Jalali? pickedDate = await showPersianDatePicker(
+                                                                                            context: context,
+                                                                                            initialDate: Jalali.now(),
+                                                                                            firstDate: Jalali(1400,1,1),
+                                                                                            lastDate: Jalali(1450,12,29),
+                                                                                            initialEntryMode: PersianDatePickerEntryMode.calendar,
+                                                                                            initialDatePickerMode: PersianDatePickerMode.day,
+                                                                                            locale: Locale("fa","IR"),
+                                                                                          );
+                                                                                          // DateTime date=DateTime.now();
+                                                                                          Gregorian gregorian= pickedDate!.toGregorian();
+                                                                                          controller.endDateFilter.value =
+                                                                                          "${gregorian.year}-${gregorian.month.toString().padLeft(2, '0')}-${gregorian.day.toString().padLeft(2, '0')}";
+
+                                                                                          controller.dateEndController.text =
+                                                                                          "${pickedDate.year}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.day.toString().padLeft(2, '0')}";
+
+                                                                                        },
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ],
+                                                                              ),
+
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                        //Spacer(),
+                                                                        Container(
+                                                                          margin: EdgeInsets.symmetric(horizontal: 20,vertical: 10),
+                                                                          width: double.infinity,
+                                                                          height: 40,
+                                                                          child: ElevatedButton(
+                                                                            style: ButtonStyle(
+                                                                                padding: WidgetStatePropertyAll(
+                                                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                // elevation: WidgetStatePropertyAll(5),
+                                                                                backgroundColor:
+                                                                                WidgetStatePropertyAll(AppColor.appBarColor),
+                                                                                shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor),
+                                                                                    borderRadius: BorderRadius.circular(5)))),
+                                                                            onPressed: () async {
+                                                                              controller.getRemittanceListStatusPager();
+                                                                              Get.back();
+
+                                                                            },
+                                                                            child: controller.isLoading.value?
+                                                                            CircularProgressIndicator(
+                                                                              valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor),
+                                                                            ) :
+                                                                            Text(
+                                                                              'فیلتر',
+                                                                              style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          });
+                                                    },
+                                                    label: Text(
+                                                      'فیلتر',
+                                                      style: AppTextStyle
+                                                          .labelText
+                                                          .copyWith(
+                                                          fontSize: isDesktop
+                                                              ? 12
+                                                              : 10,color:  controller.namePayerController.text!="" || controller.nameRecieptController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!="" ?AppColor.accentColor: AppColor.textColor),
+                                                    ),
+                                                  icon: SvgPicture.asset(
+                                                      'assets/svg/filter3.svg',
+                                                      height: 17,
+                                                      colorFilter:
+                                                      ColorFilter
+                                                          .mode(
+                                                        controller.namePayerController.text!="" || controller.nameRecieptController.text!="" || controller.dateStartController.text!="" || controller.dateEndController.text!="" ?AppColor.accentColor:  AppColor
+                                                            .textColor,
+                                                        BlendMode
+                                                            .srcIn,
+                                                      )),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
                                       RepaintBoundary(
-                                        key: _dataTableKey,
+                                        //key: _dataTableKey,
                                         child: DataTable(
                                           sortColumnIndex: controller.sortColumnIndex.value,
                                           sortAscending: controller.sortAscending.value,
@@ -1048,10 +1504,10 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
                                           ),
                                           dataRowMaxHeight: 100,
                                           //dataRowColor: WidgetStatePropertyAll(AppColor.secondaryColor),
-                                          //headingRowColor: WidgetStatePropertyAll(AppColor.primaryColor.withOpacity(0.2)),
-                                          headingRowHeight: 50,
-                                          columnSpacing: 20,
-                                          horizontalMargin: 10,
+                                          headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
+                                          headingRowHeight: 40,
+                                          columnSpacing: 30,
+                                          horizontalMargin: 15,
                                         ),
                                       ),
                                     ],
@@ -1084,7 +1540,7 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
                   height: 70,
                   margin: EdgeInsets.symmetric(horizontal: 50,vertical: 10),
                   padding: EdgeInsets.symmetric(horizontal: 20),
-                  color: AppColor.appBarColor.withOpacity(0.5),
+                  //color: AppColor.appBarColor.withOpacity(0.5),
                   alignment: Alignment.bottomCenter,
                   child:PagerWidget(countPage: controller.paginated!.totalCount??0, callBack: (int index) {
                     controller.isChangePage(index);
@@ -1162,12 +1618,12 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
       ),
       DataColumn(
           label: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 80),
-              child: Column(
+              constraints: BoxConstraints(maxWidth: 100),
+              child: Row(
                 children: [
                   Text('بدهکار ',
                       style: AppTextStyle.labelText
-                          .copyWith(color: AppColor.accentColor, fontSize: 12)),
+                          .copyWith(color: AppColor.accentColor, fontSize: 12,fontWeight: FontWeight.bold)),
                   SvgPicture.asset('assets/svg/refresh.svg',
                       height: 16,
                       colorFilter: ColorFilter.mode(
@@ -1176,7 +1632,7 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
                       )),
                   Text(' بستانکار',
                       style: AppTextStyle.labelText.copyWith(
-                          color: AppColor.primaryColor, fontSize: 12)),
+                          color: AppColor.primaryColor, fontSize: 12,fontWeight: FontWeight.bold)),
                 ],
               )),
           headingRowAlignment: MainAxisAlignment.center),
@@ -1215,48 +1671,47 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
 
   List<DataRow> buildDataRows(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    return controller.remittanceList.map((remittance) {
-      //print(" تسسسسسسسست ${inventory.inventoryDetails?.first.itemUnit?.name}");
+    return controller.remittanceList.asMap().entries.map((entry) {
+      final index = entry.key;
+      final remittance = entry.value;
+      final rowColor = index.isEven
+          ? AppColor.backGroundColor
+          : AppColor.secondaryColor.withAlpha(100);
       return DataRow(
+        color: WidgetStateProperty.all(rowColor),
         cells: [
           // ردیف
           DataCell(
             Center(
               child:
-              Row(mainAxisAlignment: MainAxisAlignment.center,
+              Row(
                 children: [
-                  /*GestureDetector(
-                    onTap: () {
-                      controller.captureRowScreenshot(remittance, _dataTableKey, _rowKeys);
-                    },
-                    child: Row(
-                      children: [
-                        SvgPicture.asset(
-                            'assets/svg/camera.svg',
-                            height: 20,
-                            colorFilter: ColorFilter.mode(
-                              AppColor.iconViewColor,
-                              BlendMode.srcIn,
-                            )
-                        ),
-                      ],
-                    ),
-                  ),*/
-                  //SizedBox(width: 5,),
-                  // رجیستر
-                  /*Checkbox(
-                    value: remittance.registered ?? false,
-                    onChanged: (value) async{
-                      if (value != null) {
-                        //EasyLoading.show(status: 'لطفا منتظر بمانید');
-                        await controller.updateRegistered(
-                            remittance.id!,
-                            value
-                        );
-                      }
-                    },
-                  ),*/
-                  /*SizedBox(width: 5,),*/
+                  Tooltip(
+                    message: 'کلیک: تصویر ردیف | نگه داشتن: تصویر کل جدول',
+                    child: GestureDetector(
+                      onTap: () {
+                        if (remittance.id != null) {
+                          controller.captureTableScreenshot(remittance, _dataTableKey);
+                        }
+                      },
+                      onLongPress: () {
+                        // Long press to capture entire table
+                        controller.captureEntireTable(_dataTableKey);
+                      },
+                      child: Row(
+                        children: [
+                          SvgPicture.asset(
+                              'assets/svg/camera.svg',
+                              height: 20,
+                              colorFilter: ColorFilter.mode(
+                                AppColor.iconViewColor,
+                                BlendMode.srcIn,
+                              )
+                          ),
+                        ],
+                      ),
+                    ),),
+                  SizedBox(width: 5,),
                   Text("${remittance.rowNum}",
                     style:
                     AppTextStyle.bodyText,
@@ -1492,7 +1947,7 @@ class _RemittancesPendingListViewState extends State<RemittancesPendingListView>
           // شرح
           DataCell(Center(
             child: Column(
-              key: _rowKeys[remittance.id],
+              //key: _rowKeys[remittance.id],
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Row(

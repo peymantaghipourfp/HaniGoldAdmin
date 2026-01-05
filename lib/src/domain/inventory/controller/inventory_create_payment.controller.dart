@@ -117,6 +117,7 @@ class InventoryCreatePaymentController extends GetxController{
   var verificationChecked = false.obs;
   var itemCountTemp=''.obs;
   var calculatedWeight = 0.0.obs;
+  var dropdownError="".obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     if (tempDetails.isNotEmpty) {
@@ -258,12 +259,12 @@ class InventoryCreatePaymentController extends GetxController{
 
   @override
   void onInit() {
-    searchController.addListener(onSearchChanged);
-    quantityController.addListener(updateW750);
-    caratController.addListener(updateW750);
     fetchAccountList();
     fetchWalletAccountList();
     getForPaymentListPager();
+    searchController.addListener(onSearchChanged);
+    quantityController.addListener(updateW750);
+    caratController.addListener(updateW750);
     var now = Jalali.now();
     DateTime date=DateTime.now();
     dateController.text =
@@ -574,11 +575,13 @@ class InventoryCreatePaymentController extends GetxController{
       final newDetail = InventoryDetailModel(
         wallet: selectedWalletAccount.value!,
         item: selectedWalletAccount.value!.item!,
+        itemUnit: selectedWalletAccount.value!.item!.itemUnit,
         quantity: double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         weight: selectedWalletAccount.value?.item?.id==10 ||
             selectedWalletAccount.value?.item?.id==12 ||
             selectedWalletAccount.value?.item?.id==15 ||
-            selectedWalletAccount.value?.item?.id==16 ? double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0
+            selectedWalletAccount.value?.item?.id==16 ||
+            selectedWalletAccount.value!.item?.id==14 ? double.tryParse(weight750Controller.text.toEnglishDigit()) ?? 0.0
             : selectedWalletAccount.value!.item?.id==1 && calculatedWeight.value!=0 ? calculatedWeight.value :
         double.tryParse(quantityController.text.toEnglishDigit()) ?? 0.0,
         type: 1,
@@ -602,14 +605,14 @@ class InventoryCreatePaymentController extends GetxController{
       }
       selectedInputItem.value = null;
       // ریست کردن فیلدها
-      /*quantityController.clear();
-      receiptNumberController.clear();
-      descriptionController.clear();
-      impurityController.clear();
-      weight750Controller.clear();
-      caratController.clear();
-      selectedWalletAccount.value = null;
-      selectedLaboratory.value=null;*/
+      quantityController.clear();
+      //receiptNumberController.clear();
+      //descriptionController.clear();
+      //impurityController.clear();
+      //weight750Controller.clear();
+      //caratController.clear();
+      //selectedWalletAccount.value = null;
+      //selectedLaboratory.value=null;
       Get.snackbar("موفق", "آیتم به لیست موقت اضافه شد");
     } catch (e) {
       throw ErrorException('خطا در افزودن آیتم: ${e.toString()}');
@@ -872,6 +875,10 @@ class InventoryCreatePaymentController extends GetxController{
                       ),*/
                       ]
                   ),
+                  pw.Container(
+                    width: 250,
+                    child: buildBalanceGoldWidget(inventoryCreateLayoutController.balanceList),
+                  ),
                   pw.SizedBox(height: 20),
                   buildInvoiceFooter(inventoryDetails),
                 ];
@@ -1013,10 +1020,11 @@ class InventoryCreatePaymentController extends GetxController{
   pw.TableRow buildInvoiceDataRow(InventoryDetailModel detail, int index) {
     return pw.TableRow(
       children: [
-        buildDataCell(detail.item?.id==1  ? " گرم ${detail.quantity}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.weight750}, عیار: ${detail.carat}"  :
-        detail.itemUnit?.id==2 && detail.item?.id!=1 && detail.item?.id!=10 && detail.item?.id!=13 && detail.item?.id!=15 && detail.item?.id!=16 ? " گرم ${detail.quantity}, عیار: ${detail.carat}" :
-        detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
-        " عدد ${itemCountTemp.value.toString()}" ?? '' : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
+        buildDataCell(detail.item?.id==1  ? " گرم ${detail.weight}, آزمایشگاه: ${detail.laboratory?.name}, شماره آزمایشگاه: ${detail.laboratory?.id}, وزن ترازو: ${detail.quantity}, عیار: ${detail.carat}"  :
+        detail.itemUnit?.id==2 && detail.item?.id==10 || detail.item?.id==12 || detail.item?.id==13 || detail.item?.id==14 || detail.item?.id==15 || detail.item?.id==16 ? " گرم ${detail.weight}, عیار: ${detail.carat}, وزن ترازو: ${detail.quantity} "
+        /*detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
+        " عدد ${itemCountTemp.value.toString()}" ?? '' */
+            : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
         buildDataCell(" (پرداخت) ${detail.item?.name}" ?? ''),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
@@ -1122,6 +1130,62 @@ class InventoryCreatePaymentController extends GetxController{
           ),
         ],
       );
+  }
+
+  pw.Widget buildBalanceGoldWidget(List<BalanceItemModel> balanceList) {
+    final totalGram = balanceList
+        .where((balance) => balance.item?.itemUnit?.name == "گرم")
+        .fold(0.0, (sum, balance) => sum + (balance.balance ?? 0));
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('مانده طلایی', style: pw.TextStyle(fontSize: 12,)),
+        pw.SizedBox(height: 5),
+        pw.Table(
+          border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
+          columnWidths: {
+            0: pw.FlexColumnWidth(2.5),
+            1: pw.FlexColumnWidth(1),
+            2: pw.FlexColumnWidth(2),
+          },
+          children: [
+            pw.TableRow(
+              decoration: pw.BoxDecoration(color: PdfColors.grey300),
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مقدار', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('واحد', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                /* pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مانده طلایی', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),*/
+              ],
+            ),
+            pw.TableRow(
+              children: [
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text((totalGram.toStringAsFixed(2).seRagham(separator: ',')).toString() , style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('گرم', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),
+                /*pw.Padding(
+                  padding: const pw.EdgeInsets.all(4),
+                  child: pw.Text('مانده طلایی', style: pw.TextStyle(fontSize: 10), textAlign: pw.TextAlign.center),
+                ),*/
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
   pw.Widget buildBalanceWidgetBefore(List<BalanceItemModel> balanceList, List<InventoryDetailModel> details) {
@@ -1240,6 +1304,8 @@ class InventoryCreatePaymentController extends GetxController{
     selectedInputItem.value = null;
     factorBalanceChecked.value=false;
     factorChecked.value=false;
+    balanceList.clear();
+    tempDetails.clear();
     clearVerificationState();
     var now = Jalali.now();
     DateTime date=DateTime.now();

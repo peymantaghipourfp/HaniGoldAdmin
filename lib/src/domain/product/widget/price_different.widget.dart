@@ -101,6 +101,31 @@ class PriceDifferentWidgetState extends State<PriceDifferentWidget> {
   }
 
   @override
+  void didUpdateWidget(covariant PriceDifferentWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Update controllers if props changed (e.g., from socket update)
+    // Only update if the user is not currently editing (no focus on any field)
+    bool userIsEditing = focusNode1.hasFocus || focusNode2.hasFocus || focusNode3.hasFocus;
+
+    if (!userIsEditing && !isSubmitting) {
+      // Check if any price prop changed
+      if (widget.differentPrice1 != oldWidget.differentPrice1 ||
+          widget.differentPrice2 != oldWidget.differentPrice2 ||
+          widget.differentPrice3 != oldWidget.differentPrice3) {
+        // Update text controllers with new values
+        differentPriceController1.text = widget.differentPrice1;
+        differentPriceController2.text = widget.differentPrice2;
+        differentPriceController3.text = widget.differentPrice3;
+
+        // Reset initial values for validation
+        initialDifferentPrice1 = widget.differentPrice1;
+        initialDifferentPrice2 = widget.differentPrice2;
+        initialDifferentPrice3 = widget.differentPrice3;
+      }
+    }
+  }
+
+  @override
   void dispose() {
     focusNode1.dispose();
     focusNode2.dispose();
@@ -170,7 +195,7 @@ class PriceDifferentWidgetState extends State<PriceDifferentWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 1),
           child: SizedBox(
             height: 30,
-            width: isMobile ? 45 : 60,
+            width: isMobile ? 55 : 60,
             child: TextFormField(
               textAlign: TextAlign.center,
               maxLength: 3,
@@ -204,7 +229,7 @@ class PriceDifferentWidgetState extends State<PriceDifferentWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 1),
           child: SizedBox(
             height: 30,
-            width: isMobile ? 45 : 60,
+            width: isMobile ? 55 : 60,
             child: TextFormField(
               textAlign: TextAlign.center,
               maxLength: 3,
@@ -238,7 +263,7 @@ class PriceDifferentWidgetState extends State<PriceDifferentWidget> {
           padding: const EdgeInsets.symmetric(horizontal: 1),
           child: SizedBox(
             height: 30,
-            width: isMobile ? 45 : 60,
+            width: isMobile ? 55 : 60,
             child: TextFormField(
               textAlign: TextAlign.center,
               maxLength: 3,

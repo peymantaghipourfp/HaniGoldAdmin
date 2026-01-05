@@ -9,6 +9,8 @@ String totalBalanceModelToJson(List<TotalBalanceModel> data) => json.encode(List
 
 @JsonSerializable()
 class TotalBalanceModel {
+  @JsonKey(name: "itemId")
+  final int? itemId;
   @JsonKey(name: "itemName")
   final String? itemName;
   @JsonKey(name: "itemGroupName")
@@ -45,6 +47,7 @@ class TotalBalanceModel {
   final double? profit;
 
   TotalBalanceModel({
+    required this.itemId,
     required this.itemName,
     required this.itemGroupName,
     required this.unitName,

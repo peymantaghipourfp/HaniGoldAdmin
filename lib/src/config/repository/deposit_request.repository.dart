@@ -539,4 +539,18 @@ class DepositRequestRepository{
       throw ErrorException('خطا در حذف:$e');
     }
   }
+
+  Future<List< dynamic>> sendTelegramDepositRequest({
+    required int depositRequestId,
+  })async{
+    try {
+      final response = await depositRequestDio.post('DepositRequest/SendTelegram', queryParameters: {'id': depositRequestId});
+      print('Status Code sendTelegramDepositRequest: ${response.statusCode}');
+      print('Response Data sendTelegramDepositRequest: ${response.data}');
+      return response.data;
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 }

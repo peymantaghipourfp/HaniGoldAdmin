@@ -29,6 +29,7 @@ import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/socket_withdraw.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -41,6 +42,7 @@ import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
+import '../../order/model/tooltip_total_balance.model.dart';
 import '../../users/model/balance_item.model.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
@@ -55,7 +57,7 @@ enum PageState{loading,err,empty,list}
 class WithdrawController extends BaseController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
   ScrollController horizontalScrollController = ScrollController();
@@ -75,7 +77,7 @@ class WithdrawController extends BaseController{
   final TextEditingController dateEndController=TextEditingController();
   final TextEditingController nameFilterController=TextEditingController();
   final TextEditingController ownerNameFilterController=TextEditingController();
-  final TextEditingController paidAmountFilterController=TextEditingController();
+  final TextEditingController amountFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
   RxList<WithdrawModel> withdrawList = RxList([]);
   RxList<WithdrawModel> withdrawListStatus = RxList([]);
@@ -96,6 +98,7 @@ class WithdrawController extends BaseController{
   Rx<PageState> stateRR=Rx<PageState>(PageState.list);
   RxnInt expandedIndex = RxnInt();
   var isLoadingBalance=true.obs;
+  var isLoadingSendTelegram=true.obs;
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
 
@@ -108,6 +111,7 @@ class WithdrawController extends BaseController{
 
   RxnInt sortColumnIndex = RxnInt();
   RxBool sortAscending = true.obs;
+  var dropdownError="".obs;
 
   StreamSubscription? socketSubscription;
 
@@ -116,8 +120,8 @@ class WithdrawController extends BaseController{
     errorMessage.value=message;
   }
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getWithdrawListPager();
   }
   void changeSelectedAccount(AccountModel? newValue) {
@@ -172,10 +176,10 @@ class WithdrawController extends BaseController{
 
   @override
   void onInit() {
+    fetchAccountList();
     socketSubscription?.cancel();
     _listenToSocket();
     getWithdrawListPager();
-    fetchAccountList();
     setupScrollListener();
     getWithdrawListStatusPager();
     super.onInit();
@@ -238,17 +242,22 @@ class WithdrawController extends BaseController{
       try {
         final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
         final toIndex = nextPage * itemsPerPage.value;
-        var fetchedWithdrawList = await withdrawRepository.getWithdrawList(
+        var fetchedWithdrawList = await withdrawRepository.getWithdrawListPager(
           startIndex: startIndex,
           toIndex: toIndex,
           accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
           startDate: startDateFilter.value, endDate: endDateFilter.value,
+          name: nameFilterController.text,
+          ownerName: ownerNameFilterController.text,
+          amountFilter: amountFilterController.text.replaceAll(',', ''),
         );
-        if (fetchedWithdrawList.isNotEmpty) {
-          withdrawList.addAll(fetchedWithdrawList);
+        if (fetchedWithdrawList.withdrawRequests!.isNotEmpty) {
+          withdrawList.addAll(fetchedWithdrawList.withdrawRequests ?? []);
           currentPage.value = nextPage;
-          hasMore.value = fetchedWithdrawList.length == itemsPerPage.value;
-
+          hasMore.value = fetchedWithdrawList.withdrawRequests?.length == itemsPerPage.value;
+          paginated.value = fetchedWithdrawList.paginated;
+          withdrawList.refresh();
+          update();
         } else {
           hasMore.value = false;
         }
@@ -311,7 +320,9 @@ class WithdrawController extends BaseController{
   }
 
   void clearSearch() {
+    paginated.value=null;
     currentPage.value = 1;
+    itemsPerPage.value=25;
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
@@ -432,7 +443,7 @@ class WithdrawController extends BaseController{
         startIndex: currentPage.value,accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
         name: nameFilterController.text,
         ownerName: ownerNameFilterController.text,
-        paidAmount: paidAmountFilterController.text,
+        amountFilter: amountFilterController.text.replaceAll(',', ''),
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
@@ -458,7 +469,7 @@ class WithdrawController extends BaseController{
         startIndex: currentPage.value,accountId: selectedAccountId.value == 0 ? null : selectedAccountId.value,
         name: nameFilterController.text,
         ownerName: ownerNameFilterController.text,
-        paidAmount: paidAmountFilterController.text,
+        amountFilter: amountFilterController.text.replaceAll(',', ''),
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
@@ -467,7 +478,6 @@ class WithdrawController extends BaseController{
       withdrawListStatus.assignAll(pendingWithdraws);
       paginated.value=response.paginated;
       state.value=PageState.list;
-
       update();
     }
     catch (e) {
@@ -586,7 +596,7 @@ class WithdrawController extends BaseController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('وضعیت درخواست برداشت با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-        //fetchWithdrawList();
+        getWithdrawListPager();
       }
 
     } catch (e) {
@@ -616,8 +626,9 @@ class WithdrawController extends BaseController{
               textAlign: TextAlign.center,
               style: TextStyle(color: AppColor.textColor),),
             messageText: Text('وضعیت درخواست واریزی با موفقیت تغییر کرد',textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-
+        getWithdrawListPager();
       }
+
 
     } catch (e) {
       EasyLoading.dismiss();
@@ -860,7 +871,7 @@ class WithdrawController extends BaseController{
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -1139,7 +1150,7 @@ class WithdrawController extends BaseController{
   void clearFilter() {
     nameFilterController.clear();
     ownerNameFilterController.clear();
-    paidAmountFilterController.clear();
+    amountFilterController.clear();
     dateStartController.clear();
     dateEndController.clear();
     startDateFilter.value="";
@@ -1175,29 +1186,15 @@ class WithdrawController extends BaseController{
       final tablePosition = tableBox.localToGlobal(Offset.zero);
       final tableSize = tableBox.size;
 
-      final RenderBox cellContentBox = rowKey.currentContext!.findRenderObject() as RenderBox;
+      // The key is now directly on the Container that wraps the Row
+      // So we can directly use it as the row render object
+      final RenderBox rowContainerBox = rowKey.currentContext!.findRenderObject() as RenderBox;
 
-      RenderObject? tableCellRenderObject = cellContentBox;
-      while (tableCellRenderObject != null && tableCellRenderObject.parentData is! TableCellParentData) {
-        if (tableCellRenderObject.parent is RenderObject) {
-          tableCellRenderObject = tableCellRenderObject.parent as RenderObject;
-        } else {
-          tableCellRenderObject = null;
-          break;
-        }
-      }
-
-      if (tableCellRenderObject == null || tableCellRenderObject is! RenderBox) {
-        Get.snackbar('خطا', 'render object ردیف جدول پیدا نشد.');
-        return;
-      }
-
-      final RenderBox rowCellBox = tableCellRenderObject;
-      final rowCellPosition = rowCellBox.localToGlobal(Offset.zero);
-      final rowHeight = rowCellBox.size.height;
+      final rowPosition = rowContainerBox.localToGlobal(Offset.zero);
+      final rowHeight = rowContainerBox.size.height;
 
       final cropRect = Rect.fromLTWH(0, // Start from the very left of the table
-        rowCellPosition.dy - tablePosition.dy,
+        rowPosition.dy - tablePosition.dy,
         tableSize.width,
         rowHeight,
       );
@@ -1228,7 +1225,7 @@ class WithdrawController extends BaseController{
         await FileSaver.instance.saveFile(
           name: "row_screenshot_${withdraw.id}",
           bytes: uint8List,
-          ext: 'png',
+          fileExtension: 'png',
           mimeType: MimeType.png,
         );
       }
@@ -1238,6 +1235,82 @@ class WithdrawController extends BaseController{
     } catch (e) {
       Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
     }
+  }
+
+  // Method to fetch user tooltip total balance data
+  Future<TooltipTotalBalanceModel?> getTooltipTotalBalance(int userId) async {
+    try {
+      final tooltipTotalBalance = await userInfoTransactionRepository.getTooltipTotalBalance(userId);
+      return tooltipTotalBalance;
+    } catch (e) {
+      print('Error fetching tooltip total balance: $e');
+      return null;
+    }
+  }
+
+  Future<List<dynamic>?> sendTelegramWithdrawRequest(int withdrawRequestId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingSendTelegram.value = true;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await withdrawRepository.sendTelegramWithdrawRequest(
+        withdrawRequestId: withdrawRequestId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar(response.first["title"],response.first["description"],
+            titleText: Text(response.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        getWithdrawListPager();
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","ارسال به تلگرام ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("ارسال به تلگرام ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در ارسال: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingSendTelegram.value = false;
+    }
+    return null;
+  }
+
+  Future<List<dynamic>?> sendTelegramDepositRequest(int depositRequestId,int withdrawId) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingSendTelegram.value = true;
+      if (Get.isDialogOpen!) Get.back();
+      var response = await depositRequestRepository.sendTelegramDepositRequest(
+        depositRequestId: depositRequestId,
+      );
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar(response.first["title"],response.first["description"],
+            titleText: Text(response.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        fetchDepositRequestList(withdrawId);
+        getWithdrawListPager();
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar("ناموفق","ارسال به تلگرام ناموفق بود",
+          titleText: Text("ناموفق",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.accentColor),),
+          messageText: Text("ارسال به تلگرام ناموفق بود",textAlign: TextAlign.center,style: TextStyle(color: AppColor.accentColor)));
+      throw ErrorException('خطا در ارسال: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingSendTelegram.value = false;
+    }
+    return null;
   }
 
 }

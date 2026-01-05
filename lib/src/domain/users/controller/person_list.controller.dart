@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/domain/users/model/item_user.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
 import 'package:path_provider/path_provider.dart';
@@ -20,6 +21,7 @@ import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/const/app_color.dart';
+import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
@@ -55,11 +57,14 @@ class PersonListController extends GetxController {
   final TextEditingController emailUpdateEndController = TextEditingController();
   final TextEditingController userNameUpdateEndController = TextEditingController();
   final TextEditingController mobileUpdateEndController = TextEditingController();
+  final TextEditingController passwordController=TextEditingController();
+  final TextEditingController retypePasswordController=TextEditingController();
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
   RxList<BalanceItemModel> balanceList = <BalanceItemModel>[].obs;
   RxList<ItemUserModel> userList = <ItemUserModel>[].obs;
   PaginatedModel? paginated;
   BalanceModel? balanceModel;
+  RxBool showPasswordNew = true.obs;
 
   String? indexAccountPayerGet;
   var isLoading = false.obs;
@@ -123,7 +128,33 @@ class PersonListController extends GetxController {
     } catch (e) {
       state.value = PageStateUser.err;
     } finally {}
-  }// لیست کاربران
+  }
+
+  Future<Map<String , dynamic>?> changePasswordByAdmin(int id) async{
+
+    if(passwordController.text==retypePasswordController.text){
+      try{
+        EasyLoading.show(status: 'لطفا منتظر بمانید');
+        var fetch=await userRepository.changePasswordByAdmin(passwordController.text.toEnglishDigit(),id);
+        print(fetch["infos"][0]["title"]);
+        if (Get.isDialogOpen!) Get.back();
+        Get.back();
+        Get.snackbar(fetch["infos"][0]["title"], fetch["infos"][0]["description"]);
+      }
+      catch(e){
+        print("خطا در تغییر رمز عبور: $e");
+        Get.snackbar("خطا", "خطا در تغییر رمز عبور: $e");
+        //  state.value=PageState.err;
+      }finally{
+        EasyLoading.dismiss();
+      }
+    }else{
+      Get.snackbar("رمز عبور", "عدم تطابق رمز عبور و تکرار آن");
+    }
+    return null;
+  }
+
+
   Future<void> updateUserAccount(int id) async {
     EasyLoading.show(
       status: 'لطفا صبر کنید',
@@ -176,5 +207,9 @@ class PersonListController extends GetxController {
   void clearFilter() {
     nameFilterController.clear();
     mobileFilterController.clear();
+  }
+  void clearChangePasswordForm() {
+    passwordController.clear();
+    retypePasswordController.clear();
   }
 }

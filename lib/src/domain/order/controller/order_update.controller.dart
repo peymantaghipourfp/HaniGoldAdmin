@@ -10,13 +10,18 @@ import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/item.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+import 'package:hanigold_admin/src/domain/base/base_controller.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
+import 'package:hanigold_admin/src/utils/convert_jalali_to_gregorian_custom_date.component.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
 import '../../../config/const/socket.service.dart';
+import '../../../config/repository/account_sales_group.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
+import '../../account/model/account_level_get_one_item.model.dart';
+import '../../accountSalesGroup/model/account_sales_group_get_one_item.model.dart';
 import '../../product/model/socket_item.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../model/order.model.dart';
@@ -31,7 +36,7 @@ class OrderTypeModel{
   OrderTypeModel({this.id, this.name});
 }
 
-class OrderUpdateController extends GetxController{
+class OrderUpdateController extends BaseController{
 
   final OrderController orderController=Get.find<OrderController>();
 
@@ -45,6 +50,7 @@ class OrderUpdateController extends GetxController{
 
   final ItemRepository itemRepository=ItemRepository();
   final AccountRepository accountRepository=AccountRepository();
+  final AccountSalesGroupRepository accountSalesGroupRepository=AccountSalesGroupRepository();
   final OrderRepository orderRepository=OrderRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
 
@@ -75,9 +81,14 @@ class OrderUpdateController extends GetxController{
   var isCardChecked = false.obs;
   final Rxn<OrderModel> getOneOrder = Rxn<OrderModel>();
   var priceTemp=''.obs;
+  var dropdownError="".obs;
+  final Rxn<AccountLevelGetOneItemModel> selectedAccountLevelItem = Rxn<AccountLevelGetOneItemModel>();
+  var isLoadingAccountLevelItem = false.obs;
+  final Rxn<AccountSalesGroupGetOneItemModel> selectedAccountSalesGroupItem = Rxn<AccountSalesGroupGetOneItemModel>();
+  var isLoadingAccountSalesGroupItem = false.obs;
 
-  /*final SocketService socketService = Get.find();
-  StreamSubscription? _socketSubscription;*/
+  //final SocketService socketService = Get.find();
+  StreamSubscription? socketSubscription;
 
   void changeSelectedBuySell(OrderTypeModel? newValue) {
     selectedBuySell.value = newValue;
@@ -121,27 +132,30 @@ class OrderUpdateController extends GetxController{
         priceTemp.value=(((selectedItem.value!.price!)-(selectedItem.value!.differentPrice!)).toDouble()).toString().seRagham(separator: ',');
       }
     }
-    maxItemSell.value=newValue!.maxSell!;
-    maxItemBuy.value=newValue.maxBuy!;
+    //maxItemSell.value=newValue!.maxSell!;
+    //maxItemBuy.value=newValue.maxBuy!;
+    _fetchAccountLevelForCurrentSelection();
+    _fetchAccountSalesGroupForCurrentSelection();
   }
 
-  /*void _listenToSocket() {
-    _socketSubscription = socketService.messageStream.listen((message) {
+  void _listenToSocket() {
+    socketSubscription?.cancel();
+    socketSubscription = socketService.messageStream.listen((message) {
       if (message is String) {
         try {
           final data = json.decode(message);
           if (data['channel'] == 'itemPrice') {
             final socketItem = SocketItemModel.fromJson(data);
-            Get.snackbar('تغییر قیمت', 'قیمت ${socketItem.name} تغییر کرد.',
+            /*Get.snackbar('تغییر قیمت', 'قیمت ${socketItem.name} تغییر کرد.',
               titleText: Text('تغییر قیمت',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
               messageText: Text(
                 'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
-            );
-            print("sssssss:::${socketItem.mesghalPrice}");
-            changePriceItem(socketItem);
+            );*/
+            print("socketItem.mesghalPrice:::${socketItem.mesghalPrice}");
+            _fetchAccountSalesGroupForCurrentSelection();
           }
         } catch (e) {
           Get.log('Error processing socket message in ProductController: $e');
@@ -150,7 +164,7 @@ class OrderUpdateController extends GetxController{
     }, onError: (error) {
       Get.log('Socket stream error in ProductController: $error');
     });
-  }*/
+  }
 
   /*void changePriceItem(SocketItemModel socketItem){
     for(int i=0 ; i<itemList.length ; i++){
@@ -169,8 +183,16 @@ class OrderUpdateController extends GetxController{
 
   void changeSelectedAccount(AccountModel? newValue){
     selectedAccount.value = newValue;
-    getBalanceList(newValue?.id ?? 0);
-    isLoadingBalance.value=false;
+    selectedAccountLevelItem.value = null;
+    selectedAccountSalesGroupItem.value = null;
+    //getBalanceList(newValue?.id ?? 0);
+    //isLoadingBalance.value=false;
+    if (newValue != null) {
+      isLoadingBalance.value=true;
+      getBalanceList(newValue.id ?? 0);
+      _fetchAccountLevelForCurrentSelection();
+      _fetchAccountSalesGroupForCurrentSelection();
+    }
     debounce?.cancel();
   }
 
@@ -209,6 +231,8 @@ class OrderUpdateController extends GetxController{
   @override
   void onInit() async{
     //searchController.addListener(onSearchChanged);
+    socketSubscription?.cancel();
+    _listenToSocket();
     fetchAccountList();
     fetchItemList();
     orderId.value = int.parse(Get.parameters['id']!);
@@ -218,12 +242,11 @@ class OrderUpdateController extends GetxController{
       existingOrder=getOneOrder.value!;
       setOrderDetails(existingOrder);
       if (existingOrder.account != null) {
+        getBalanceList(existingOrder.account?.id ?? 0);
         accountList.add(existingOrder.account!);
         searchedAccounts.add(existingOrder.account!);
-        getBalanceList(existingOrder.account?.id ?? 0);
       }
     }
-    //_listenToSocket();
     super.onInit();
   }
 
@@ -246,6 +269,7 @@ class OrderUpdateController extends GetxController{
     searchFocusNode.dispose();
     //searchController.dispose();
     //Get.delete<OrderUpdateController>(force: true);
+    socketSubscription?.cancel();
     super.onClose();
   }
 
@@ -266,6 +290,8 @@ class OrderUpdateController extends GetxController{
           selectedItem.value = match;
           maxItemSell.value=match.maxSell!;
           maxItemBuy.value=match.maxBuy!;
+          _fetchAccountLevelForCurrentSelection();
+          _fetchAccountSalesGroupForCurrentSelection();
         }
       }
     }
@@ -349,8 +375,9 @@ class OrderUpdateController extends GetxController{
     try {
       isLoading.value = true;
 
-      String gregorianDate = convertJalaliToGregorian(dateController.text);
+      String gregorianDate = convertJalaliToGregorianCustomDate(dateController.text);
      // Gregorian date=existingOrder.date!.toGregorian();
+      if (Get.isDialogOpen!) Get.back();
      var response = await orderRepository.updateOrder(
         orderId: orderId.value,
         //date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
@@ -363,7 +390,7 @@ class OrderUpdateController extends GetxController{
         price: double.parse(priceTemp.value.replaceAll(',', '').toEnglishDigit()),
         quantity: double.parse(quantityController.text.toEnglishDigit()),
         description: descriptionController.text,
-        notLimit:notLimitChecked.value,
+        notLimit:true,
         manualPrice:manualPriceChecked.value,
        isCard: isCardChecked.value,
       );
@@ -371,15 +398,17 @@ class OrderUpdateController extends GetxController{
      if(response!= null){
        OrderModel orderResponse=OrderModel.fromJson(response);
        //Get.toNamed('/orderList');
-       if (Get.isDialogOpen!) Get.back();
        Get.back();
        Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
            titleText: Text(orderResponse.infos!.first['title'],
              textAlign: TextAlign.center,
              style: TextStyle(color: AppColor.textColor),),
            messageText: Text(orderResponse.infos!.first["description"] , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
-       orderController.getOrderListPager();
-       orderController.fetchTotalBalanceList();
+       /*orderController.getOrderListPager();
+       orderController.fetchTotalBalanceList();*/
+       // Use silent refresh to update list without UI flicker
+       orderController.refreshOrderListSilently();
+       orderController.refreshTotalBalanceSilently();
        balanceList.clear();
        clearList();
      }
@@ -404,12 +433,21 @@ class OrderUpdateController extends GetxController{
     quantityController.text = order.quantity?.toStringAsFixed(2) ?? '';
     totalPriceController.text = order.totalPrice?.toStringAsFixed(0).seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
-    isLoadingBalance.value=true;
+    //isLoadingBalance.value=true;
     priceTemp.value=order.price!.toStringAsFixed(0).seRagham(separator: ',');
     selectedAccount.value=order.account;
     isCardChecked.value=order.isCard!;
+    // Load balance data for the selected account
+    if (order.account != null) {
+      isLoadingBalance.value=true;
+      getBalanceList(order.account!.id ?? 0);
+    }
+    // Fetch account level item data if both account and item are available
+    if (order.account != null && order.item != null) {
+      _fetchAccountLevelForCurrentSelection();
+      _fetchAccountSalesGroupForCurrentSelection();
+    }
     print("تاریخ ست:::${dateController.text}");
-
   }
 
   // لیست بالانس
@@ -419,9 +457,10 @@ class OrderUpdateController extends GetxController{
     try{
       state.value=PageState.loading;
       var response=await userInfoTransactionRepository.getBalanceList(id);
-      balanceList.addAll(response);
+      balanceList.assignAll(response);
       balanceList.removeWhere((r)=>r.balance==0);
-      isLoadingBalance.value=true;
+      //isLoadingBalance.value=true;
+      isLoadingBalance.value=false;
       state.value=PageState.list;
       if(balanceList.isEmpty){
         state.value=PageState.empty;
@@ -431,6 +470,48 @@ class OrderUpdateController extends GetxController{
     catch(e){
       state.value=PageState.err;
     }finally{
+    }
+  }
+
+  Future<void> _fetchAccountLevelForCurrentSelection() async {
+    final accountId = selectedAccount.value?.id;
+    final itemId = selectedItem.value?.id;
+    if (accountId == null || itemId == null) {
+      selectedAccountLevelItem.value = null;
+      return;
+    }
+    try {
+      isLoadingAccountLevelItem.value = true;
+      final result = await accountRepository.accountLevelGetOneItem(
+        accountId: accountId,
+        itemId: itemId,
+      );
+      selectedAccountLevelItem.value = result;
+    } catch (_) {
+      selectedAccountLevelItem.value = null;
+    } finally {
+      isLoadingAccountLevelItem.value = false;
+    }
+  }
+
+  Future<void> _fetchAccountSalesGroupForCurrentSelection() async {
+    final accountId = selectedAccount.value?.id;
+    final itemId = selectedItem.value?.id;
+    if (accountId == null || itemId == null) {
+      selectedAccountSalesGroupItem.value = null;
+      return;
+    }
+    try {
+      isLoadingAccountSalesGroupItem.value = true;
+      final result = await accountSalesGroupRepository.accountSalesGroupGetOneItem(
+        accountId: accountId,
+        itemId: itemId,
+      );
+      selectedAccountSalesGroupItem.value = result;
+    } catch (_) {
+      selectedAccountSalesGroupItem.value = null;
+    } finally {
+      isLoadingAccountSalesGroupItem.value = false;
     }
   }
 
@@ -444,6 +525,8 @@ class OrderUpdateController extends GetxController{
     selectedBuySell.value=null;
     selectedItem.value=null;
     selectedAccount.value=null;
+    selectedAccountLevelItem.value = null;
+    selectedAccountSalesGroupItem.value = null;
     manualPriceChecked.value=false;
     notLimitChecked.value=false;
   }
@@ -454,6 +537,8 @@ class OrderUpdateController extends GetxController{
     descriptionController.clear();
     totalPriceController.clear();
     selectedItem.value=null;
+    selectedAccountLevelItem.value = null;
+    selectedAccountSalesGroupItem.value = null;
     manualPriceChecked.value=false;
     notLimitChecked.value=false;
   }
@@ -461,5 +546,11 @@ class OrderUpdateController extends GetxController{
     debounce?.cancel();
     searchController.clear();
     searchedAccounts.assignAll(accountList);
+  }
+
+  // Set price from sales group
+  void setPriceFromSalesGroup(double mesghalPrice) {
+    priceController.text = mesghalPrice.toStringAsFixed(0).toPersianDigit().seRagham(separator: ',');
+    updateTotalPrice();
   }
 }

@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_payment.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:hanigold_admin/src/domain/laboratory/model/laboratory.model.dart';
+import 'package:hanigold_admin/src/widget/pager_widget1.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -14,7 +15,10 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../../widget/custom_dropdown1.widget.dart';
 import '../../../widget/pager_widget.dart';
+import '../../account/model/account.model.dart';
+import '../../wallet/model/wallet.model.dart';
 import '../controller/inventory_create_receive.controller.dart';
 import 'item_temp_detail_payment.widget.dart';
 import 'dart:io';
@@ -45,11 +49,13 @@ class _InventoryCreatePaymentTabWidgetState
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: isDesktop ? 40 : 20,
-            vertical: isDesktop ? 30 : 20
+            horizontal: isMobile ? 8 : isTablet ? 16 : 40,
+            vertical: isMobile ? 12 : isTablet ? 20 : 30
         ),
 
         child: Obx(() {
@@ -60,6 +66,8 @@ class _InventoryCreatePaymentTabWidgetState
               children: [
                 SizedBox(height: 8,),
                 // کاربر
+                inventoryCreatePaymentController.accountList.isEmpty ?
+                SizedBox.shrink():
                 Container(
                   padding: EdgeInsets.only(
                       bottom: 3, top: 5),
@@ -69,102 +77,53 @@ class _InventoryCreatePaymentTabWidgetState
                   ),
                 ),
                 // کاربر
+                inventoryCreatePaymentController.accountList.isEmpty ?
+                Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColor.textColor),
+                  ),
+                ) :
                 Container(
                   padding: EdgeInsets.only(
                       bottom: 5),
-                  child:
-                  CustomDropdownWidget(
-
-                    dropdownSearchData: DropdownSearchData<String>(
-                      searchController: inventoryCreatePaymentController
-                          .searchController,
-                      searchInnerWidgetHeight: 50,
-                      searchInnerWidget: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          right: 15,
-                          left: 15,
-                        ),
-                        child: TextFormField(style: AppTextStyle.bodyText,
-                          controller: inventoryCreatePaymentController
-                              .searchController,
-                          focusNode: inventoryCreatePaymentController.searchFocusNode,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding:
-                            const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            hintText: 'جستجوی کاربر...',
-                            hintStyle: AppTextStyle.labelText,
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    value: inventoryCreatePaymentController.selectedAccount
-                        .value,
-                    validator: (value) {
-                      if (value == 'انتخاب کنید' || value == null ||
-                          value.isEmpty) {
-                        return 'کاربر را انتخاب کنید';
-                      }
-                      return null;
+                  child: CustomDropdown<AccountModel>(
+                    isOpen:inventoryCreatePaymentController.tempDetails.isNotEmpty ? true :false ,
+                    items: inventoryCreatePaymentController.accountList,
+                    selectedItem: inventoryCreatePaymentController.selectedAccount.value,
+                    enableSearch: true,
+                    errorText: inventoryCreatePaymentController.dropdownError.value,
+                    itemLabel: (account) =>
+                    account.name ??
+                        "",
+                    /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                    onChanged: (account) {
+                      setState(() {
+                        inventoryCreatePaymentController.selectedAccount.value = account;
+                        inventoryCreatePaymentController.dropdownError.value = "";
+                        //inventoryCreateReceiveController.getWalletAccount(account?.id ?? 0);
+                        inventoryCreatePaymentController.tempDetails.isNotEmpty
+                            ? null
+                            :
+                        inventoryCreatePaymentController.changeSelectedAccount(
+                            account);
+                        inventoryCreatePaymentController.tempDetails.isNotEmpty
+                            ? null
+                            :
+                        widget.callBack(account?.id ?? 0);
+                      });
+                      debugPrint(
+                        "کاربر انتخاب شد: ${account?.name}",
+                      );
                     },
-                    showSearchBox: true,
-                    items: [
-                      'انتخاب کنید',
-                      ...inventoryCreatePaymentController
-                          .searchedAccounts.map((
-                          account) =>
-                      '${account.id}:${account.name ?? ""}')
-                    ].toList(),
-                    selectedValue: inventoryCreatePaymentController
-                        .selectedAccount.value != null
-                        ? '${inventoryCreatePaymentController.selectedAccount.value!.id}:${inventoryCreatePaymentController.selectedAccount.value!.name}'
-                        : null,
-                    onChanged: (String? newValue) {
-                      if (newValue == 'انتخاب کنید') {
-                        inventoryCreatePaymentController.changeSelectedAccount(null);
-                      } else {
-                        var accountId = int.tryParse(newValue!.split(':')[0]);
-                        if (accountId != null) {
-                          var selectedAccount = inventoryCreatePaymentController
-                              .searchedAccounts
-                              .firstWhere((account) => account.id == accountId);
-                          inventoryCreatePaymentController.tempDetails.isNotEmpty
-                              ? null
-                              :
-                          inventoryCreatePaymentController.changeSelectedAccount(
-                              selectedAccount);
-                          inventoryCreatePaymentController.tempDetails.isNotEmpty
-                              ? null
-                              :
-                          widget.callBack(selectedAccount.id!);
-                        }
-                      }
-                    },
-                    /*onMenuStateChange: (isOpen) {
-                      if (!isOpen) {
-                        inventoryCreatePaymentController.resetAccountSearch();
-                      }
-                    },*/
-                    onMenuStateChange: inventoryCreatePaymentController.onDropdownMenuStateChange,
-                    backgroundColor: AppColor.textFieldColor,
-                    borderRadius: 7,
-                    borderColor: AppColor.secondaryColor,
-                    hideUnderline: true,
+                    isIcon: false,
                   ),
                 ),
                 // Show warning when dropdown is disabled
                 Obx(() => inventoryCreatePaymentController.tempDetails.isNotEmpty
                     ? Container(
-                  padding: EdgeInsets.only(top: 5),
                   child: Text(
                     '⚠️ ابتدا آیتم‌های موقت را پاک کنید تا بتوانید کاربر را تغییر دهید',
                     style: AppTextStyle.labelText.copyWith(
@@ -175,6 +134,8 @@ class _InventoryCreatePaymentTabWidgetState
                 )
                     : SizedBox.shrink()),
                 // ولت اکانت
+                inventoryCreatePaymentController.walletAccountList.isEmpty ?
+                SizedBox.shrink() :
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
                   child: Text(
@@ -183,92 +144,43 @@ class _InventoryCreatePaymentTabWidgetState
                   ),
                 ),
                 // ولت اکانت
+                inventoryCreatePaymentController.walletAccountList.isEmpty ?
+                SizedBox.shrink() :
                 Container(
-                  padding: EdgeInsets.only(bottom: 5),
-                  child: DropdownButton2(
-                    isExpanded: true,
-                    hint: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "انتخاب کنید",
-                            style: AppTextStyle.labelText.copyWith(
-                              fontSize: 14,
-                              color: AppColor.textColor,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    items:
-                    inventoryCreatePaymentController.walletAccountList.map((
-                        wallet) {
-                      return DropdownMenuItem(
-                          value: wallet,
-                          child: Row(
-                            children: [
-                              Text("${wallet.item?.name}" ?? "",
-                                style: AppTextStyle.bodyText,),
-                            ],
-                          ));
-                    }).toList(),
-                    value: inventoryCreatePaymentController
-                        .selectedWalletAccount
-                        .value,
-                    onChanged: (newValue) {
-                      if (newValue != null) {
+                  padding: EdgeInsets.only(
+                      bottom: 5),
+                  child: CustomDropdown<WalletModel>(
+                    isOpen:inventoryCreatePaymentController.tempDetails.isNotEmpty ? true :false ,
+                    items: inventoryCreatePaymentController.walletAccountList,
+                    selectedItem: inventoryCreatePaymentController.selectedWalletAccount.value,
+                    enableSearch: true,
+                    errorText: inventoryCreatePaymentController.dropdownError.value,
+                    itemLabel: (walletAccount) =>
+                    walletAccount.item?.name ??
+                        "",
+                    /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                    onChanged: (walletAccount) {
+                      setState(() {
+                        inventoryCreatePaymentController.selectedWalletAccount.value = walletAccount;
+                        inventoryCreatePaymentController.dropdownError.value = "";
                         inventoryCreatePaymentController.tempDetails.isNotEmpty
                             ? null
                             :
-                        inventoryCreatePaymentController
-                            .changeSelectedWalletAccount(
-                            newValue);
-                      }
+                        inventoryCreatePaymentController.changeSelectedWalletAccount(
+                            walletAccount);
+                      });
+                      debugPrint(
+                        "حساب ولت انتخاب شد: ${walletAccount?.item?.name}",
+                      );
                     },
-                    buttonStyleData: ButtonStyleData(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(7),
-                        color: inventoryCreatePaymentController.tempDetails.isNotEmpty
-                            ? AppColor.textFieldColor.withOpacity(0.5)
-                            : AppColor.textFieldColor,
-                        border: Border.all(
-                            color: AppColor.backGroundColor, width: 1),
-                      ),
-                      elevation: 0,
-                    ),
-                    iconStyleData: IconStyleData(
-                      icon: const Icon(Icons.keyboard_arrow_down),
-                      iconSize: 23,
-                      iconEnabledColor: inventoryCreatePaymentController.tempDetails.isNotEmpty
-                          ? Colors.grey
-                          : AppColor.textColor,
-                      iconDisabledColor: Colors.grey,
-                    ),
-                    dropdownStyleData: DropdownStyleData(
-                      maxHeight: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(7),
-                        color: AppColor.textFieldColor,
-                      ),
-                      offset: const Offset(0, 0),
-                      scrollbarTheme: ScrollbarThemeData(
-                        radius: const Radius.circular(7),
-                        thickness: WidgetStateProperty.all(6),
-                        thumbVisibility: WidgetStateProperty.all(true),
-                      ),
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                    ),
+                    isIcon: false,
                   ),
                 ),
                 // Show warning when dropdown is disabled
                 Obx(() => inventoryCreatePaymentController.tempDetails.isNotEmpty
                     ? Container(
-                  padding: EdgeInsets.only(top: 5),
                   child: Text(
                     '⚠️ ابتدا آیتم‌های موقت را پاک کنید تا بتوانید حساب wallet را تغییر دهید',
                     style: AppTextStyle.labelText.copyWith(
@@ -386,7 +298,7 @@ class _InventoryCreatePaymentTabWidgetState
                 ) : SizedBox.shrink(),
                 // تعداد
                 SizedBox(height: 3),
-                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id == 10 ||
+                inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id == 10 ||
                     inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id == 13 ||
                     inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id == 15 ||
                     inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id == 16
@@ -396,18 +308,19 @@ class _InventoryCreatePaymentTabWidgetState
                     Text(
                       ' تعداد: ',
                       style: AppTextStyle
-                          .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                          .labelText.copyWith(color: AppColor.textColor.withAlpha(130)),),
                     Text(inventoryCreatePaymentController.itemCountTemp.value,
                       style: AppTextStyle.bodyText
                           .copyWith(color: AppColor
-                          .primaryColor.withOpacity(0.8)),)
+                          .primaryColor.withAlpha(200)),)
                   ],
                 ) :
                 SizedBox(),
-                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
+                inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
                     inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==12 ||
                     inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==15 ||
-                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==16 ?
+                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==16 ||
+                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==14 ?
                 // عیار
                 Column(crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -425,10 +338,10 @@ class _InventoryCreatePaymentTabWidgetState
                       child:
                       IntrinsicHeight(
                         child: TextFormField(
-                          readOnly: inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
+                          /*readOnly: inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
                               inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==12 ||
                               inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==15 ||
-                              inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==16 ? true :false ,
+                              inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==16 ? true :false ,*/
                           onChanged: (value) {
                             inventoryCreatePaymentController.updateW750();
                           },
@@ -484,7 +397,8 @@ class _InventoryCreatePaymentTabWidgetState
                 inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==10 ||
                     inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==12 ||
                     inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==15 ||
-                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==16 ?
+                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==16 ||
+                    inventoryCreatePaymentController.selectedWalletAccount.value?.item?.id==14 ?
                 // وزن 750
                 Column(crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -718,11 +632,11 @@ class _InventoryCreatePaymentTabWidgetState
                               child: Text('ثبت کد',
                                   style: AppTextStyle.bodyText),
                               onPressed: () {
-                                  print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
-                                  inventoryCreatePaymentController.checkVerificationCode(
-                                    inventoryCreatePaymentController.selectedAccount.value?.id ?? 0,
-                                    int.parse(inventoryCreatePaymentController.verificationCodeController.text),
-                                  );
+                                print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
+                                inventoryCreatePaymentController.checkVerificationCode(
+                                  inventoryCreatePaymentController.selectedAccount.value?.id ?? 0,
+                                  int.parse(inventoryCreatePaymentController.verificationCodeController.text),
+                                );
                               },
                             ),
                             SizedBox(width: 10,),
@@ -765,7 +679,7 @@ class _InventoryCreatePaymentTabWidgetState
                 Row(
                   children: [
                     Checkbox(
-                      hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                      hoverColor: AppColor.textFieldColor.withAlpha(200),
                       value: inventoryCreatePaymentController.verificationChecked
                           .value,
                       onChanged: (value) async {
@@ -807,8 +721,8 @@ class _InventoryCreatePaymentTabWidgetState
                 // بخش لیست موقت
                 Center(
                   child: SizedBox(
-                    width: Get.width * (isDesktop ? 0.6 : 1),
-                    height: isDesktop ? 300 : 200,
+                    width: Get.width * (isDesktop ? 0.6 : isMobile ? 0.95 : 0.8),
+                    height: isMobile ? 180 : isDesktop ? 300 : 250,
                     child: Card(color: AppColor.secondaryColor,
                       child: Column(
                         children: [
@@ -816,7 +730,7 @@ class _InventoryCreatePaymentTabWidgetState
                           Text(
                             'آیتم‌های موقت (${inventoryCreatePaymentController
                                 .tempDetails.length})',
-                            style: AppTextStyle.bodyText,),
+                            style: AppTextStyle.bodyText.copyWith(fontSize: isMobile ? 12 : 14,),),
                           Expanded(
                             child: ListView.builder(
                               shrinkWrap: true,
@@ -827,6 +741,10 @@ class _InventoryCreatePaymentTabWidgetState
                                 final detail = inventoryCreatePaymentController
                                     .tempDetails[index];
                                 return ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: isMobile ? 8 : 16,
+                                    vertical: isMobile ? 2 : 4,
+                                  ),
                                   title:
                                   ItemTempDetailWidgetPayment(
                                     detail: detail,
@@ -854,7 +772,9 @@ class _InventoryCreatePaymentTabWidgetState
                                   ),
                                   trailing: IconButton(
                                       icon: Icon(Icons.delete,
-                                        color: AppColor.accentColor,),
+                                        color: AppColor.accentColor,
+                                        size: isMobile ? 20 : 24,
+                                      ),
                                       onPressed: () {
                                         final removedDetail = inventoryCreatePaymentController
                                             .tempDetails.removeAt(index);
@@ -882,7 +802,7 @@ class _InventoryCreatePaymentTabWidgetState
                     Row(mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Checkbox(
-                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                          hoverColor: AppColor.textFieldColor.withAlpha(200),
                           value: inventoryCreatePaymentController.factorBalanceChecked
                               .value,
                           onChanged: (value) async {
@@ -899,7 +819,7 @@ class _InventoryCreatePaymentTabWidgetState
                     Row(mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Checkbox(
-                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                          hoverColor: AppColor.textFieldColor.withAlpha(200),
                           value: inventoryCreatePaymentController.factorChecked
                               .value,
                           onChanged: (value) async {
@@ -919,105 +839,109 @@ class _InventoryCreatePaymentTabWidgetState
                         // دکمه ثبت
                         inventoryCreatePaymentController.selectedWalletAccount
                             .value?.item?.id != 1 ?
-                        ElevatedButton(
-                          style: ButtonStyle(
-                              fixedSize: WidgetStatePropertyAll(Size(
-                                  isDesktop ? Get.width * 0.12 : Get.width *
-                                      0.25,
-                                  isDesktop ? 50 : 30
-                              ),
-                              ),
-                              padding: WidgetStatePropertyAll(
-                                EdgeInsets.symmetric(
-                                    horizontal: isDesktop ? 20 : 7
-                                ),),
-                              elevation: WidgetStatePropertyAll(5),
-                              backgroundColor:
-                              WidgetStatePropertyAll(AppColor.buttonColor),
-                              shape: WidgetStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          10)))),
-                          onPressed: () {
-                            if (formKey.currentState!.validate()) {
-                              if(inventoryCreatePaymentController.selectedAccount.value!=null && inventoryCreatePaymentController.selectedWalletAccount.value!=null){
-                                inventoryCreatePaymentController.addToTempList();
-                                inventoryCreatePaymentController
-                                    .descriptionController.clear();
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ButtonStyle(
+                                fixedSize: WidgetStatePropertyAll(Size(
+                                    isDesktop ? Get.width * 0.12 : Get.width *
+                                        0.25,
+                                    isDesktop ? 50 : 30
+                                ),
+                                ),
+                                padding: WidgetStatePropertyAll(
+                                  EdgeInsets.symmetric(
+                                      horizontal: isDesktop ? 20 : 7
+                                  ),),
+                                elevation: WidgetStatePropertyAll(5),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.buttonColor),
+                                shape: WidgetStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            10)))),
+                            onPressed: () {
+                              if (formKey.currentState!.validate()) {
+                                if(inventoryCreatePaymentController.selectedAccount.value!=null && inventoryCreatePaymentController.selectedWalletAccount.value!=null){
+                                  inventoryCreatePaymentController.addToTempList();
+                                  inventoryCreatePaymentController
+                                      .descriptionController.clear();
+                                }
                               }
-                            }
-                          },
-                          child: inventoryCreatePaymentController.isLoading
-                              .value
-                              ?
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColor.textColor),
-                          ) :
-                          Text(
-                            'ثبت',
-                            style: AppTextStyle.bodyText,
+                            },
+                            child: inventoryCreatePaymentController.isLoading
+                                .value
+                                ?
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColor.textColor),
+                            ) :
+                            Text(
+                              'ثبت',
+                              style: AppTextStyle.bodyText,
+                            ),
                           ),
                         ) : SizedBox.shrink(),
                         SizedBox(width: 10,),
                         // دکمه ثبت نهایی
-                        ElevatedButton(
-                          style: ButtonStyle(
-                              fixedSize: WidgetStatePropertyAll(Size(
-                                  isDesktop ? Get.width * 0.12 : Get.width *
-                                      0.25,
-                                  isDesktop ? 50 : 30
-                              ),),
-                              padding: WidgetStatePropertyAll(
-                                EdgeInsets.symmetric(
-                                    horizontal: isDesktop ? 20 : 7
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ButtonStyle(
+                                fixedSize: WidgetStatePropertyAll(Size(
+                                    isDesktop ? Get.width * 0.12 : Get.width *
+                                        0.25,
+                                    isDesktop ? 50 : 30
                                 ),),
-                              elevation: WidgetStatePropertyAll(5),
-                              backgroundColor:
-                              WidgetStatePropertyAll(AppColor.primaryColor),
-                              shape: WidgetStatePropertyAll(
-                                  RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(
-                                          10)))),
-                          onPressed: () async {
-                            if (inventoryCreatePaymentController.tempDetails
-                                .isNotEmpty) {
-                              if(inventoryCreatePaymentController.verificationChecked.value==true){
-                                await inventoryCreatePaymentController
-                                    .uploadImagesDesktop(
-                                    "image", "InventoryDetail");
-                              }else if(inventoryCreatePaymentController.verificationChecked.value==false && inventoryCreatePaymentController.isCodeVerified.value==true){
-                                await inventoryCreatePaymentController
-                                    .uploadImagesDesktop(
-                                    "image", "InventoryDetail");
-                              }else{
-                                Get.snackbar(
+                                padding: WidgetStatePropertyAll(
+                                  EdgeInsets.symmetric(
+                                      horizontal: isDesktop ? 20 : 7
+                                  ),),
+                                elevation: WidgetStatePropertyAll(5),
+                                backgroundColor:
+                                WidgetStatePropertyAll(AppColor.primaryColor),
+                                shape: WidgetStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            10)))),
+                            onPressed: () async {
+                              if (inventoryCreatePaymentController.tempDetails
+                                  .isNotEmpty) {
+                                if(inventoryCreatePaymentController.verificationChecked.value==true){
+                                  await inventoryCreatePaymentController
+                                      .uploadImagesDesktop(
+                                      "image", "InventoryDetail");
+                                }else if(inventoryCreatePaymentController.verificationChecked.value==false && inventoryCreatePaymentController.isCodeVerified.value==true){
+                                  await inventoryCreatePaymentController
+                                      .uploadImagesDesktop(
+                                      "image", "InventoryDetail");
+                                }else{
+                                  Get.snackbar(
                                     "هشدار",
                                     "درخواست کد بدهید یا \n تیک ضمانت کاربر را بزنید",
-                                  titleText: Text(
-                                    "هشدار",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: AppColor.textColor),
-                                  ),
-                                  messageText: Text(
-                                    "درخواست کد بدهید یا \n تیک ضمانت کاربر را بزنید",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(color: AppColor.textColor),
-                                  ),
-                                );
+                                    titleText: Text(
+                                      "هشدار",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: AppColor.textColor),
+                                    ),
+                                    messageText: Text(
+                                      "درخواست کد بدهید یا \n تیک ضمانت کاربر را بزنید",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(color: AppColor.textColor),
+                                    ),
+                                  );
+                                }
                               }
-                            }
-                          },
-                          child: inventoryCreatePaymentController.isFinalizing
-                              .value
-                              ?
-                          CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                AppColor.textColor),
-                          ) :
-                          Text(
-                            'ثبت نهایی',
-                            style: AppTextStyle.bodyText,
+                            },
+                            child: inventoryCreatePaymentController.isFinalizing
+                                .value
+                                ?
+                            CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                  AppColor.textColor),
+                            ) :
+                            Text(
+                              'ثبت نهایی',
+                              style: AppTextStyle.bodyText,
+                            ),
                           ),
                         ),
 
@@ -1035,15 +959,19 @@ class _InventoryCreatePaymentTabWidgetState
 
 
   void showForPaymentModal() {
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+
     Get.dialog(
       SingleChildScrollView(
         child: Dialog(
           backgroundColor: AppColor.backGroundColor,
-          insetPadding: EdgeInsets.all(20),
+          insetPadding: EdgeInsets.all(isMobile ? 8 : isTablet ? 16 : 20),
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              maxWidth: 600,
-              maxHeight: Get.height * 0.8,
+              maxWidth: isMobile ? Get.width * 0.95 : isTablet ? 500 : 600,
+              maxHeight: isMobile ? Get.height * 0.9 : Get.height * 0.9,
             ),
             child: Column(
               children: [
@@ -1055,13 +983,14 @@ class _InventoryCreatePaymentTabWidgetState
                       children: [
                         inventoryCreatePaymentController.paginated.value != null
                             ? Container(
-                            height: 70,
+                            height: isMobile ? 70 : 80,
                             margin: EdgeInsets.symmetric(
-                                horizontal: 70, vertical: 10),
-                            padding: EdgeInsets.symmetric(horizontal: 20),
-                            color: AppColor.appBarColor.withOpacity(0.5),
+                                horizontal: isMobile ? 20 : isTablet ? 50 : 70,
+                                vertical: isMobile ? 5 : 10),
+                            padding: EdgeInsets.symmetric(horizontal: isMobile ? 10 : 20),
+                            color: AppColor.appBarColor.withAlpha(130),
                             alignment: Alignment.bottomCenter,
-                            child: PagerWidget(
+                            child: PagerWidget1(
                               countPage: inventoryCreatePaymentController
                                   .paginated.value?.totalCount ?? 0,
                               callBack: (int index) {
@@ -1088,6 +1017,10 @@ class _InventoryCreatePaymentTabWidgetState
   }
 
   Widget buildForPaymentDetail() {
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+
     return Obx(() {
       return
         inventoryCreatePaymentController.isLoading.value ?
@@ -1098,33 +1031,43 @@ class _InventoryCreatePaymentTabWidgetState
         ) :
         // لیست ForPayment مربوط به هر ولت
         SizedBox(
-          height: Get.height * 0.65, // تعیین ارتفاع ثابت
-          width: Get.width * 0.5,
+          height: isMobile ? Get.height * 0.8 : Get.height * 0.75, // تعیین ارتفاع ثابت
+          width: isMobile ? Get.width * 0.9 : isTablet ? Get.width * 0.7 : Get.width * 0.5,
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: 12,),
+                SizedBox(height: isMobile ? 8 : 12,),
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 15),
                   child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('لیست دریافتی ها', style: AppTextStyle.smallTitleText),
+                      Text(
+                          'لیست دریافتی ها',
+                          style: AppTextStyle.smallTitleText.copyWith(
+                              fontSize: isMobile ? 14 : 16
+                          )
+                      ),
                       IconButton(
                           onPressed: Get.back,
-                          icon: Icon(Icons.close))
+                          icon: Icon(
+                            Icons.close,
+                            size: isMobile ? 20 : 24,
+                          ))
                     ],
                   ),
                 ),
-                SizedBox(height: 12,),
+                SizedBox(height: isMobile ? 8 : 12,),
                 Row(
                   children: [
                     Expanded(
                       child: SizedBox(
-                        height: 41,
+                        height: isMobile ? 45 : 41,
                         child: TextFormField(
                           controller: inventoryCreatePaymentController
                               .searchLaboratoryController,
-                          style: AppTextStyle.labelText,
+                          style: AppTextStyle.labelText.copyWith(
+                            fontSize: isMobile ? 12 : 14,
+                          ),
                           textInputAction: TextInputAction.search,
                           onFieldSubmitted: (value) async {
                             if (value.isNotEmpty) {
@@ -1142,7 +1085,9 @@ class _InventoryCreatePaymentTabWidgetState
                             filled: true,
                             fillColor: AppColor.textFieldColor,
                             hintText: "جستجو ... ",
-                            hintStyle: AppTextStyle.labelText,
+                            hintStyle: AppTextStyle.labelText.copyWith(
+                              fontSize: isMobile ? 12 : 14,
+                            ),
                             prefixIcon: IconButton(
                                 onPressed: () async {
                                   if (inventoryCreatePaymentController
@@ -1161,7 +1106,7 @@ class _InventoryCreatePaymentTabWidgetState
                                 },
                                 icon: Icon(
                                   Icons.search, color: AppColor.textColor,
-                                  size: 30,)
+                                  size: isMobile ? 24 : 30,)
                             ),
                             suffixIcon: inventoryCreatePaymentController
                                 .selectedLaboratoryId.value > 0
@@ -1181,7 +1126,7 @@ class _InventoryCreatePaymentTabWidgetState
                 inventoryCreatePaymentController.forPaymentList.isNotEmpty ?
                 ConstrainedBox(
                   constraints: BoxConstraints(
-                    maxHeight: Get.height * 0.65,
+                    maxHeight: isMobile ? Get.height * 0.65 : Get.height * 0.6,
                   ),
                   child:
                   ListView.builder(
@@ -1190,184 +1135,254 @@ class _InventoryCreatePaymentTabWidgetState
                         .length,
                     itemBuilder: (context,
                         index) {
-                        final forPayment = inventoryCreatePaymentController
-                            .forPaymentList[index];
-                        print("itemUnit:::${inventoryCreatePaymentController.forPaymentList[index].itemUnit?.id}");
+                      final forPayment = inventoryCreatePaymentController
+                          .forPaymentList[index];
+                      print("itemUnit:::${inventoryCreatePaymentController.forPaymentList[index].itemUnit?.id}");
 
-                        return ListTile(
-                          onTap: () async {
-                            Get.back();
-                            List<XFile> xFiles = [];
-                            if (forPayment.id != null) {
-                              inventoryCreatePaymentController
-                                  .selectedForPaymentId.add(forPayment.id!);
-                              if(forPayment.recId!=null && forPayment.recId!.isNotEmpty){
-                                List<String> imageUrls = await inventoryCreatePaymentController.getImage(
-                                    forPayment.recId!,
-                                    "InventoryDetail"
-                                );
-                                // تبدیل هر URL به XFile
-                                for (String url in imageUrls) {
-                                  try {
-                                    final response = await http.get(Uri.parse("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$url"));
-                                    if (response.statusCode == 200) {
-                                      xFiles.add(XFile.fromData(
-                                        response.bodyBytes,
-                                        name: url.split('/').last,
-                                        mimeType: _getMimeType(url),
-                                      ));
-                                    }
-                                  } catch (e) {
-                                    print('Error converting URL to XFile: $e');
+                      return ListTile(
+                        onTap: () async {
+                          Get.back();
+                          List<XFile> xFiles = [];
+                          if (forPayment.id != null) {
+                            inventoryCreatePaymentController
+                                .selectedForPaymentId.add(forPayment.id!);
+                            if(forPayment.recId!=null && forPayment.recId!.isNotEmpty){
+                              List<String> imageUrls = await inventoryCreatePaymentController.getImage(
+                                  forPayment.recId!,
+                                  "InventoryDetail"
+                              );
+                              // تبدیل هر URL به XFile
+                              for (String url in imageUrls) {
+                                try {
+                                  final response = await http.get(Uri.parse("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$url"));
+                                  if (response.statusCode == 200) {
+                                    xFiles.add(XFile.fromData(
+                                      response.bodyBytes,
+                                      name: url.split('/').last,
+                                      mimeType: _getMimeType(url),
+                                    ));
                                   }
+                                } catch (e) {
+                                  print('Error converting URL to XFile: $e');
                                 }
                               }
-                              print('Fetched images count: ${xFiles.length}');
-                              print('Fetched image names: ${xFiles.map((e) => e.name).toList()}');
-                              forPayment.listXfile = xFiles;
-                              print('Assigned images count: ${forPayment.listXfile?.length}');
                             }
+                            print('Fetched images count: ${xFiles.length}');
+                            print('Fetched image names: ${xFiles.map((e) => e.name).toList()}');
+                            forPayment.listXfile = xFiles;
+                            print('Assigned images count: ${forPayment.listXfile?.length}');
+                          }
 
-                            inventoryCreatePaymentController.selectedInputItem
-                                .value = forPayment;
-                            inventoryCreatePaymentController.clearItemFields();
+                          inventoryCreatePaymentController.selectedInputItem
+                              .value = forPayment;
+                          inventoryCreatePaymentController.clearItemFields();
 
-                            inventoryCreatePaymentController.selectQuantity(
-                                forPayment.weightRemainded ?? 0.0);
-                            inventoryCreatePaymentController.selectedLaboratory
-                                .value = forPayment.laboratory;
-                            inventoryCreatePaymentController.quantityController
-                                .text =
-                                forPayment.weightRemainded?.toString() ?? '0';
-                            inventoryCreatePaymentController.impurityController
-                                .text = forPayment.impurity?.toString() ?? '0';
-                            inventoryCreatePaymentController.weight750Controller
-                                .text = forPayment.weight750?.toString() ?? '0';
-                            inventoryCreatePaymentController.caratController
-                                .text = forPayment.carat?.toString() ?? '0';
-                            inventoryCreatePaymentController
-                                .receiptNumberController.text =
-                                forPayment.receiptNumber ?? '';
+                          inventoryCreatePaymentController.selectQuantity(
+                              forPayment.weightRemainded ?? 0.0);
+                          inventoryCreatePaymentController.selectedLaboratory
+                              .value = forPayment.laboratory;
+                          inventoryCreatePaymentController.quantityController
+                              .text =
+                              forPayment.weightRemainded?.toString() ?? '0';
+                          inventoryCreatePaymentController.impurityController
+                              .text = forPayment.impurity?.toString() ?? '0';
+                          inventoryCreatePaymentController.weight750Controller
+                              .text = forPayment.weight750?.toString() ?? '0';
+                          inventoryCreatePaymentController.caratController
+                              .text = forPayment.carat?.toString() ?? '0';
+                          inventoryCreatePaymentController
+                              .receiptNumberController.text =
+                              forPayment.receiptNumber ?? '';
 
-                            inventoryCreatePaymentController.addToTempList();
-                            inventoryCreatePaymentController.descriptionController
-                                .clear();
-                            inventoryCreatePaymentController.clearItemFields();
-                          },
-                          contentPadding: EdgeInsets.zero,
-                          title: Card(
-                            color: inventoryCreatePaymentController
-                                .selectedForPaymentId.contains(forPayment.id)
-                                ? AppColor.textFieldColor
-                                : AppColor.secondaryColor,
-                            child: Padding(
-                              padding: const EdgeInsets
-                                  .only(
-                                  top: 8,
-                                  left: 12,
-                                  right: 12,
-                                  bottom: 8),
-                              child: Column(
-                                children: [
-                                  // آزمایشگاه
-                                  Row(
-                                    children: [
-                                      Text(
-                                          ' آزمایشگاه: ',
-                                          style: AppTextStyle
-                                              .labelText),
-                                      Text(
+                          inventoryCreatePaymentController.addToTempList();
+                          inventoryCreatePaymentController.descriptionController
+                              .clear();
+                          inventoryCreatePaymentController.clearItemFields();
+                        },
+                        contentPadding: EdgeInsets.zero,
+                        title: Card(
+                          color: inventoryCreatePaymentController
+                              .selectedForPaymentId.contains(forPayment.id)
+                              ? AppColor.textFieldColor
+                              : AppColor.secondaryColor,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                                top: isMobile ? 6 : 8,
+                                left: isMobile ? 8 : 12,
+                                right: isMobile ? 8 : 12,
+                                bottom: isMobile ? 6 : 8),
+                            child: Column(
+                              children: [
+                                // آزمایشگاه
+                                Row(
+                                  children: [
+                                    Text(
+                                        ' آزمایشگاه: ',
+                                        style: AppTextStyle
+                                            .labelText.copyWith(
+                                          fontSize: isMobile ? 11 : 12,
+                                        )),
+                                    Expanded(
+                                      child: Text(
                                           forPayment.laboratory?.name ?? '',
                                           style: AppTextStyle
-                                              .bodyText),
-                                    ],
-                                  ),
-                                  SizedBox(height: 5,),
-                                  Divider(
-                                    height: 1, color: AppColor.dividerColor,),
-                                  SizedBox(height: 5,),
-                                  // عیار-وزن 750
-                                  Row(mainAxisAlignment: MainAxisAlignment
-                                      .spaceEvenly,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                              ' وزن ترازو: ',
-                                              style: AppTextStyle
-                                                  .labelText),
-                                          Text(
-                                              '${forPayment.weight ??
-                                                  0}',
-                                              style: AppTextStyle
-                                                  .bodyText),
-                                        ],
-                                      ),
-                                      SizedBox(width: 15,),
-                                      Row(
-                                        children: [
-                                          Text(
-                                              ' عیار: ',
-                                              style: AppTextStyle
-                                                  .labelText),
-                                          Text(
-                                              '${forPayment.carat ??
-                                                  0}',
-                                              style: AppTextStyle
-                                                  .bodyText),
-                                        ],
-                                      ),
-                                      SizedBox(width: 15,),
-                                      Row(
-                                        children: [
-                                          Text(
-                                              ' وزن 750: ',
-                                              style: AppTextStyle
-                                                  .bodyText
-                                          ),
-                                          Text(
-                                              '${forPayment.weight750 ??
-                                                  0} ${forPayment.itemUnit
-                                                  ?.name ?? ""}',
-                                              style: AppTextStyle
-                                                  .bodyText
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 8,),
-                                  Divider(
-                                    height: 1, color: AppColor.dividerColor,),
-                                  SizedBox(height: 5,),
-                                  // باقیمانده
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Text(
-                                              ' باقیمانده: ',
-                                              style: AppTextStyle
-                                                  .labelText),
-                                          Text(
-                                              '${forPayment.weightRemainded ??
-                                                  0} ${forPayment.itemUnit
-                                                  ?.name ?? ""}',
-                                              style: AppTextStyle
-                                                  .bodyText
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 5,),
-                                ],
-                              ),
+                                              .bodyText.copyWith(
+                                            fontSize: isMobile ? 12 : 14,
+                                          )),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: isMobile ? 3 : 5,),
+                                Divider(
+                                  height: 1, color: AppColor.dividerColor,),
+                                SizedBox(height: isMobile ? 3 : 5,),
+                                // عیار-وزن 750
+                                isMobile
+                                    ? Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' وزن ترازو: ',
+                                            style: AppTextStyle
+                                                .labelText.copyWith(
+                                              fontSize: 11,
+                                            )),
+                                        Text(
+                                            '${forPayment.weight ??
+                                                0}',
+                                            style: AppTextStyle
+                                                .bodyText.copyWith(
+                                              fontSize: 12,
+                                            )),
+                                      ],
+                                    ),
+                                    SizedBox(height: 3,),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' عیار: ',
+                                            style: AppTextStyle
+                                                .labelText.copyWith(
+                                              fontSize: 11,
+                                            )),
+                                        Text(
+                                            '${forPayment.carat ??
+                                                0}',
+                                            style: AppTextStyle
+                                                .bodyText.copyWith(
+                                              fontSize: 12,
+                                            )),
+                                      ],
+                                    ),
+                                    SizedBox(height: 3,),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' وزن 750: ',
+                                            style: AppTextStyle
+                                                .bodyText.copyWith(
+                                              fontSize: 11,
+                                            )
+                                        ),
+                                        Text(
+                                            '${forPayment.weight750 ??
+                                                0} ${forPayment.itemUnit
+                                                ?.name ?? ""}',
+                                            style: AppTextStyle
+                                                .bodyText.copyWith(
+                                              fontSize: 12,
+                                            )
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                )
+                                    : Row(mainAxisAlignment: MainAxisAlignment
+                                    .spaceEvenly,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' وزن ترازو: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${forPayment.weight ??
+                                                0}',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    SizedBox(width: 15,),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' عیار: ',
+                                            style: AppTextStyle
+                                                .labelText),
+                                        Text(
+                                            '${forPayment.carat ??
+                                                0}',
+                                            style: AppTextStyle
+                                                .bodyText),
+                                      ],
+                                    ),
+                                    SizedBox(width: 15,),
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' وزن 750: ',
+                                            style: AppTextStyle
+                                                .bodyText
+                                        ),
+                                        Text(
+                                            '${forPayment.weight750 ??
+                                                0} ${forPayment.itemUnit
+                                                ?.name ?? ""}',
+                                            style: AppTextStyle
+                                                .bodyText
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: isMobile ? 5 : 8,),
+                                Divider(
+                                  height: 1, color: AppColor.dividerColor,),
+                                SizedBox(height: isMobile ? 3 : 5,),
+                                // باقیمانده
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                            ' باقیمانده: ',
+                                            style: AppTextStyle
+                                                .labelText.copyWith(
+                                              fontSize: isMobile ? 11 : 12,
+                                            )),
+                                        Text(
+                                            '${forPayment.weightRemainded ??
+                                                0} ${forPayment.itemUnit
+                                                ?.name ?? ""}',
+                                            style: AppTextStyle
+                                                .bodyText.copyWith(
+                                              fontSize: isMobile ? 12 : 14,
+                                            )
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(
+                                  height: isMobile ? 3 : 5,),
+                              ],
                             ),
                           ),
-                        );
+                        ),
+                      );
                     },
                   ),
                 ) :
@@ -1380,6 +1395,7 @@ class _InventoryCreatePaymentTabWidgetState
         );
     });
   }
+
   String _getMimeType(String url) {
     final extension = url.split('.').last.toLowerCase();
     switch (extension) {
@@ -1400,14 +1416,23 @@ class _InventoryCreatePaymentTabWidgetState
   }
 
   void showSearchResults(BuildContext context) {
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
+
     showDialog(
       context: context,
       builder: (context) =>
-          AlertDialog(backgroundColor: AppColor.backGroundColor,
-            title: Text('انتخاب کنید', style: AppTextStyle.smallTitleText,),
+          AlertDialog(
+            backgroundColor: AppColor.backGroundColor,
+            title: Text(
+              'انتخاب کنید',
+              style: AppTextStyle.smallTitleText.copyWith(
+                fontSize: isMobile ? 14 : 16,
+              ),
+            ),
             content: SizedBox(
-              width: Get.width * 0.5,
-              height: Get.height * 0.5,
+              width: isMobile ? Get.width * 0.8 : isTablet ? Get.width * 0.6 : Get.width * 0.5,
+              height: isMobile ? Get.height * 0.4 : Get.height * 0.5,
               child: ListView.builder(
                 shrinkWrap: true,
                 itemCount: inventoryCreatePaymentController.searchedLaboratories
@@ -1416,8 +1441,12 @@ class _InventoryCreatePaymentTabWidgetState
                   final laboratory = inventoryCreatePaymentController
                       .searchedLaboratories[index];
                   return ListTile(
-                      title: Text(laboratory.name ?? '',
-                        style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
+                      title: Text(
+                        laboratory.name ?? '',
+                        style: AppTextStyle.bodyText.copyWith(
+                          fontSize: isMobile ? 13 : 15,
+                        ),
+                      ),
                       onTap: () {
                         inventoryCreatePaymentController.selectLaboratory(
                             laboratory);
@@ -1429,7 +1458,12 @@ class _InventoryCreatePaymentTabWidgetState
             actions: [
               TextButton(
                 onPressed: () => Get.back(),
-                child: Text('بستن', style: AppTextStyle.bodyText,),
+                child: Text(
+                  'بستن',
+                  style: AppTextStyle.bodyText.copyWith(
+                    fontSize: isMobile ? 12 : 14,
+                  ),
+                ),
               ),
             ],
           ),

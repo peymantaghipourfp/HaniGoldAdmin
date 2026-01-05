@@ -2,6 +2,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/widget/item_temp_detail_receive.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -9,6 +10,9 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
+import '../../../widget/custom_dropdown1.widget.dart';
+import '../../laboratory/model/laboratory.model.dart';
+import '../../wallet/model/wallet.model.dart';
 import '../controller/inventory_create_receive.controller.dart';
 
 typedef SelectCallBack = Function(int id);
@@ -23,7 +27,6 @@ class InventoryCreateReceiveTabWidget extends StatefulWidget {
   @override
   State<InventoryCreateReceiveTabWidget> createState() => _InventoryCreateReceiveTabWidgetState();
 }
-
 class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceiveTabWidget> {
   final formKey = GlobalKey<FormState>();
   InventoryCreateReceiveController inventoryCreateReceiveController = Get.find<
@@ -32,11 +35,13 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
     return SingleChildScrollView(
       child: Padding(
         padding: EdgeInsets.symmetric(
-            horizontal: isDesktop ? 40 : 20,
-            vertical: isDesktop ? 30 : 20
+            horizontal: isMobile ? 8 : isTablet ? 16 : 40,
+            vertical: isMobile ? 12 : isTablet ? 20 : 30
         ),
         child: Obx(() {
           return Form(
@@ -46,6 +51,8 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
               children: [
                 SizedBox(height: 8,),
                 // کاربر
+                inventoryCreateReceiveController.accountList.isEmpty ?
+                    SizedBox.shrink():
                 Container(
                   padding: EdgeInsets.only(
                       bottom: 3, top: 5),
@@ -55,100 +62,55 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                   ),
                 ),
                 // کاربر
-                Container(
-                  padding: EdgeInsets.only(
-                      bottom: 5),
-                  child:
-                  CustomDropdownWidget(
-
-                    dropdownSearchData: DropdownSearchData<String>(
-                      searchController: inventoryCreateReceiveController
-                          .searchController,
-                      searchInnerWidgetHeight: 50,
-                      searchInnerWidget: Container(
-                        height: 50,
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          right: 15,
-                          left: 15,
-                        ),
-                        child: TextFormField(style: AppTextStyle.bodyText,
-                          controller: inventoryCreateReceiveController
-                              .searchController,
-                          focusNode: inventoryCreateReceiveController.searchFocusNode,
-                          decoration: InputDecoration(
-                            isDense: true,
-                            contentPadding:
-                            const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            hintText: 'جستجوی کاربر...',
-                            hintStyle: AppTextStyle.labelText,
-                            border: OutlineInputBorder(
-                              borderRadius:
-                              BorderRadius.circular(8),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    value: inventoryCreateReceiveController.selectedAccount.value,
-                    validator: (value) {
-                    if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                      return 'کاربر را انتخاب کنید';
-                    }
-                    return null;
-                  },
-                    showSearchBox: true,
-                    items: [
-                      'انتخاب کنید',
-                      ...inventoryCreateReceiveController
-                          .searchedAccounts.map((
-                          account) =>
-                      '${account.id}:${account.name ?? ""}')
-                    ].toList(),
-                    selectedValue: inventoryCreateReceiveController
-                        .selectedAccount.value != null
-                        ? '${inventoryCreateReceiveController.selectedAccount.value!.id}:${inventoryCreateReceiveController.selectedAccount.value!.name}'
-                        : null,
-                    onChanged: (String? newValue) {
-                      if (newValue == 'انتخاب کنید') {
-                        inventoryCreateReceiveController.changeSelectedAccount(null);
-                      } else {
-                        var accountId = int.tryParse(newValue!.split(':')[0]);
-                        if (accountId != null) {
-                          var selectedAccount = inventoryCreateReceiveController
-                              .searchedAccounts
-                              .firstWhere((account) => account.id == accountId);
+                inventoryCreateReceiveController.accountList.isEmpty ?
+                Center(
+                  child: CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                        AppColor.textColor),
+                  ),
+                ) :
+                  Container(
+                    padding: EdgeInsets.only(
+                        bottom: 5),
+                    child: CustomDropdown<AccountModel>(
+                      isOpen:inventoryCreateReceiveController.tempDetails.isNotEmpty ? true :false ,
+                      items: inventoryCreateReceiveController.accountList,
+                      selectedItem: inventoryCreateReceiveController.selectedAccount.value,
+                      enableSearch: true,
+                      errorText: inventoryCreateReceiveController.dropdownError.value,
+                      itemLabel: (account) =>
+                      account.name ??
+                          "",
+                      /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                      onChanged: (account) {
+                        setState(() {
+                          inventoryCreateReceiveController.selectedAccount.value = account;
+                          inventoryCreateReceiveController.dropdownError.value = "";
+                          //inventoryCreateReceiveController.getWalletAccount(account?.id ?? 0);
                           inventoryCreateReceiveController.tempDetails.isNotEmpty
                               ? null
                               :
                           inventoryCreateReceiveController.changeSelectedAccount(
-                              selectedAccount);
+                              account);
                           inventoryCreateReceiveController.tempDetails.isNotEmpty
                               ? null
                               :
-                          widget.callBack(selectedAccount.id!);
-                        }
-                      }
-                    },
-                    /*onMenuStateChange: (isOpen) {
-                      if (!isOpen) {
-                        inventoryCreateReceiveController.resetAccountSearch();
-                      }
-                    },*/
-                    onMenuStateChange: inventoryCreateReceiveController.onDropdownMenuStateChange,
-                    backgroundColor: AppColor.textFieldColor,
-                    borderRadius: 7,
-                    borderColor: AppColor.secondaryColor,
-                    hideUnderline: true,
+                          widget.callBack(account?.id ?? 0);
+                        });
+                        debugPrint(
+                          "کاربر انتخاب شد: ${account?.name}",
+                        );
+                      },
+                      isIcon: false,
+                    ),
                   ),
-                ),
+
                 // Show warning when dropdown is disabled
                 Obx(() => inventoryCreateReceiveController.tempDetails.isNotEmpty
                     ? Container(
-                  padding: EdgeInsets.only(top: 5),
+                  //padding: EdgeInsets.only(top: 5),
                   child: Text(
                     '⚠️ ابتدا آیتم‌های موقت را پاک کنید تا بتوانید کاربر را تغییر دهید',
                     style: AppTextStyle.labelText.copyWith(
@@ -159,6 +121,8 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                 )
                     : SizedBox.shrink()),
                 // ولت اکانت
+                inventoryCreateReceiveController.walletAccountList.isEmpty ?
+                SizedBox.shrink() :
                 Container(
                   padding: EdgeInsets.only(bottom: 3, top: 5),
                   child: Text(
@@ -167,89 +131,44 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                   ),
                 ),
                 // ولت اکانت
+                inventoryCreateReceiveController.walletAccountList.isEmpty ?
+                SizedBox.shrink() :
                 Container(
-                  padding: EdgeInsets.only(bottom: 5),
-                  child: DropdownButton2(
-                    isExpanded: true,
-                    hint: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "انتخاب کنید",
-                            style: AppTextStyle.labelText.copyWith(
-                              fontSize: 14,
-                              color: AppColor.textColor,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    items:
-                    inventoryCreateReceiveController.walletAccountList.map((wallet) {
-                      return DropdownMenuItem(
-                          value: wallet,
-                          child: Row(
-                            children: [
-                              Text("${wallet.item?.name}" ?? "",
-                                style: AppTextStyle.bodyText,),
-                            ],
-                          ));
-                    }).toList(),
-                    value: inventoryCreateReceiveController.selectedWalletAccount
-                        .value,
-                    onChanged: (newValue) {
-                      if (newValue != null) {
+                  padding: EdgeInsets.only(
+                      bottom: 5),
+                  child: CustomDropdown<WalletModel>(
+                    isOpen:inventoryCreateReceiveController.tempDetails.isNotEmpty ? true :false ,
+                    items: inventoryCreateReceiveController.walletAccountList,
+                    selectedItem: inventoryCreateReceiveController.selectedWalletAccount.value,
+                    enableSearch: true,
+                    errorText: inventoryCreateReceiveController.dropdownError.value,
+                    itemLabel: (walletAccount) =>
+                    walletAccount.item?.name ??
+                        "",
+                    /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                    onChanged: (walletAccount) {
+                      setState(() {
+                        inventoryCreateReceiveController.selectedWalletAccount.value = walletAccount;
+                        inventoryCreateReceiveController.dropdownError.value = "";
                         inventoryCreateReceiveController.tempDetails.isNotEmpty
                             ? null
                             :
                         inventoryCreateReceiveController.changeSelectedWalletAccount(
-                            newValue);
-                      }
+                            walletAccount);
+                      });
+                      debugPrint(
+                        "حساب ولت انتخاب شد: ${walletAccount?.item?.name}",
+                      );
                     },
-                    buttonStyleData: ButtonStyleData(
-                      padding: const EdgeInsets.symmetric(horizontal: 5),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(7),
-                        color: inventoryCreateReceiveController.tempDetails.isNotEmpty
-                            ? AppColor.textFieldColor.withOpacity(0.5)
-                            : AppColor.textFieldColor,
-                        border: Border.all(
-                            color: AppColor.backGroundColor, width: 1),
-                      ),
-                      elevation: 0,
-                    ),
-                    iconStyleData: IconStyleData(
-                      icon: const Icon(Icons.keyboard_arrow_down),
-                      iconSize: 23,
-                      iconEnabledColor: inventoryCreateReceiveController.tempDetails.isNotEmpty
-                          ? Colors.grey
-                          : AppColor.textColor,
-                      iconDisabledColor: Colors.grey,
-                    ),
-                    dropdownStyleData: DropdownStyleData(
-                      maxHeight: 200,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(7),
-                        color: AppColor.textFieldColor,
-                      ),
-                      offset: const Offset(0, 0),
-                      scrollbarTheme: ScrollbarThemeData(
-                        radius: const Radius.circular(7),
-                        thickness: WidgetStateProperty.all(6),
-                        thumbVisibility: WidgetStateProperty.all(true),
-                      ),
-                    ),
-                    menuItemStyleData: const MenuItemStyleData(
-                      height: 40,
-                      padding: EdgeInsets.symmetric(horizontal: 10),
-                    ),
+                    isIcon: false,
                   ),
                 ),
                 // Show warning when dropdown is disabled
                 Obx(() => inventoryCreateReceiveController.tempDetails.isNotEmpty
                     ? Container(
-                  padding: EdgeInsets.only(top: 5),
+                  //padding: EdgeInsets.only(top: 5),
                   child: Text(
                     '⚠️ ابتدا آیتم‌های موقت را پاک کنید تا بتوانید حساب wallet را تغییر دهید',
                     style: AppTextStyle.labelText.copyWith(
@@ -274,80 +193,30 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                     ),
                     // آزمایشگاه
                     Container(
-                      padding: EdgeInsets.only(bottom: 5),
-                      child:
-                      CustomDropdownWidget(
+                      padding: EdgeInsets.only(
+                          bottom: 5),
+                      child: CustomDropdown<LaboratoryModel>(
+                        items: inventoryCreateReceiveController.laboratoryList,
+                        selectedItem: inventoryCreateReceiveController.selectedLaboratory.value,
+                        enableSearch: true,
+                        errorText: inventoryCreateReceiveController.dropdownError.value,
+                        itemLabel: (laboratory) =>
+                        laboratory.name ??
+                            "",
+                        /*itemIcon: (bank) =>
+                      bank.icon ??
+                          "",*/
+                        onChanged: (laboratory) {
+                          setState(() {
+                            inventoryCreateReceiveController.selectedLaboratory.value = laboratory;
+                            inventoryCreateReceiveController.dropdownError.value = "";
 
-                        dropdownSearchData: DropdownSearchData<String>(
-                          searchController: inventoryCreateReceiveController
-                              .searchLaboratoryController,
-                          searchInnerWidgetHeight: 50,
-                          searchInnerWidget: Container(
-                            height: 50,
-                            padding: const EdgeInsets.only(
-                              top: 8,
-                              right: 15,
-                              left: 15,
-                            ),
-                            child: TextFormField(style: AppTextStyle.bodyText,
-                              controller: inventoryCreateReceiveController
-                                  .searchLaboratoryController,
-                              focusNode: inventoryCreateReceiveController.searchLaboratoryFocusNode,
-                              decoration: InputDecoration(
-                                isDense: true,
-                                contentPadding:
-                                const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 8,
-                                ),
-                                hintText: 'جستجوی آزمایشگاه...',
-                                hintStyle: AppTextStyle.labelText,
-                                border: OutlineInputBorder(
-                                  borderRadius:
-                                  BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        value: inventoryCreateReceiveController.selectedLaboratory.value,
-                        validator: (value) {
-                          if (value == 'انتخاب کنید' || value == null || value.isEmpty) {
-                            return 'آزمایشگاه را انتخاب کنید';
-                          }
-                          return null;
+                          });
+                          debugPrint(
+                            "آزمایشگاه انتخاب شد: ${laboratory?.name}",
+                          );
                         },
-                        showSearchBox: true,
-                        items: [
-                          'انتخاب کنید',
-                          ...inventoryCreateReceiveController.searchedLaboratories.map((
-                              laboratory) => laboratory.name ?? "")
-                        ].toList(),
-                        selectedValue: inventoryCreateReceiveController.selectedLaboratory
-                            .value?.name,
-                        onChanged: (String? newValue) {
-                          if (newValue == 'انتخاب کنید') {
-                            inventoryCreateReceiveController.changeSelectedLaboratory(
-                                null);
-                          } else {
-                            var selectedLaboratory = inventoryCreateReceiveController
-                                .searchedLaboratories
-                                .firstWhere((laboratory) =>
-                            laboratory.name == newValue);
-                            inventoryCreateReceiveController.changeSelectedLaboratory(
-                                selectedLaboratory);
-                          }
-                        },
-                        /*onMenuStateChange: (isOpen) {
-                          if (!isOpen) {
-                            inventoryCreateReceiveController.resetLaboratorySearch();
-                          }
-                        },*/
-                        onMenuStateChange: inventoryCreateReceiveController.onLaboratoryDropdownMenuStateChange,
-                        backgroundColor: AppColor.textFieldColor,
-                        borderRadius: 7,
-                        borderColor: AppColor.secondaryColor,
-                        hideUnderline: true,
+                        isIcon: false,
                       ),
                     ),
                   ],
@@ -516,11 +385,11 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                     Text(
                       ' تعداد: ',
                       style: AppTextStyle
-                          .labelText.copyWith(color: AppColor.textColor.withOpacity(0.5)),),
+                          .labelText.copyWith(color: AppColor.textColor.withAlpha(130)),),
                     Text(inventoryCreateReceiveController.itemCountTemp.value,
                       style: AppTextStyle.bodyText
                           .copyWith(color: AppColor
-                          .primaryColor.withOpacity(0.8)),)
+                          .primaryColor.withAlpha(200)),)
                   ],
                 ) :
                 SizedBox(),
@@ -551,10 +420,10 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                           onChanged: (value) {
                             inventoryCreateReceiveController.updateW750();
                           },
-                          readOnly: inventoryCreateReceiveController.selectedWalletAccount.value?.item?.id==10 ||
+                          /*readOnly: inventoryCreateReceiveController.selectedWalletAccount.value?.item?.id==10 ||
                               inventoryCreateReceiveController.selectedWalletAccount.value?.item?.id==12 ||
                               inventoryCreateReceiveController.selectedWalletAccount.value?.item?.id==15 ||
-                              inventoryCreateReceiveController.selectedWalletAccount.value?.item?.id==16 ? true :false ,
+                              inventoryCreateReceiveController.selectedWalletAccount.value?.item?.id==16 ? true :false ,*/
                           autovalidateMode: AutovalidateMode.onUserInteraction,
                           controller: inventoryCreateReceiveController.caratController,
                           style: AppTextStyle.labelText,
@@ -820,15 +689,15 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                 // بخش لیست موقت
                 Center(
                   child: SizedBox(
-                    width: Get.width * (isDesktop ? 0.6 : 1),
-                    height: isDesktop ? 300 : 200,
+                    width: Get.width * (isDesktop ? 0.6 : isMobile ? 0.95 : 0.8),
+                    height: isMobile ? 180 : isDesktop ? 300 : 250,
                     child: Card(color: AppColor.secondaryColor,
                       child: Column(
                         children: [
                           SizedBox(height: 5,),
                           Text('آیتم‌های موقت (${inventoryCreateReceiveController
                               .tempDetails.length})',
-                            style: AppTextStyle.bodyText,),
+                            style: AppTextStyle.bodyText.copyWith(fontSize: isMobile ? 12 : 14,),),
                           Expanded(
                             child: ListView.builder(
                               shrinkWrap: true,
@@ -838,6 +707,10 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                                 final detail = inventoryCreateReceiveController
                                     .tempDetails[index];
                                 return ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                    horizontal: isMobile ? 8 : 16,
+                                    vertical: isMobile ? 2 : 4,
+                                  ),
                                   title:
                                   ItemTempDetailWidgetReceive(
                                     detail: detail,
@@ -854,7 +727,9 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                                   ),
                                   trailing: IconButton(
                                       icon: Icon(Icons.delete,
-                                        color: AppColor.accentColor,),
+                                        color: AppColor.accentColor,
+                                        size: isMobile ? 20 : 24,
+                                      ),
                                       onPressed: () {
                                          inventoryCreateReceiveController.tempDetails.removeAt(index);
                                       }
@@ -874,7 +749,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                     Row(mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Checkbox(
-                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                          hoverColor: AppColor.textFieldColor.withAlpha(200),
                           value: inventoryCreateReceiveController.factorBalanceChecked.value,
                           onChanged: (value) async{
                             inventoryCreateReceiveController.factorBalanceChecked.value = value!;
@@ -887,7 +762,7 @@ class _InventoryCreateReceiveTabWidgetState extends State<InventoryCreateReceive
                     Row(mainAxisAlignment: MainAxisAlignment.start,
                       children: [
                         Checkbox(
-                          hoverColor: AppColor.textFieldColor.withOpacity(0.8),
+                          hoverColor: AppColor.textFieldColor.withAlpha(200),
                           value: inventoryCreateReceiveController.factorChecked.value,
                           onChanged: (value) async{
                             inventoryCreateReceiveController.factorChecked.value = value!;

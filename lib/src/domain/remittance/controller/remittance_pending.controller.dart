@@ -39,10 +39,10 @@ enum PageState{loading,err,empty,list}
 class RemittancePendingController extends BaseController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
-
+  ScrollController scrollControllerMobile = ScrollController();
   final AccountRepository accountRepository=AccountRepository();
   final RemittanceRepository remittanceRepository=RemittanceRepository();
   final ReasonRejectionRepository reasonRejectionRepository=ReasonRejectionRepository();
@@ -80,8 +80,8 @@ class RemittancePendingController extends BaseController{
   }
 
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getRemittanceListStatusPager();
   }
 
@@ -110,6 +110,7 @@ class RemittancePendingController extends BaseController{
   @override void onClose() {
     socketSubscription?.cancel();
     scrollController.dispose();
+    scrollControllerMobile.dispose();
     remittanceList.clear();
     super.onClose();
   }
@@ -135,9 +136,9 @@ class RemittancePendingController extends BaseController{
   }
 
   void setupScrollListener() {
-    scrollController.addListener(() {
-      if (scrollController.position.pixels >=
-          scrollController.position.maxScrollExtent - 200 &&
+    scrollControllerMobile.addListener(() {
+      if (scrollControllerMobile.position.pixels >=
+          scrollControllerMobile.position.maxScrollExtent - 200 &&
           hasMore.value &&
           !isLoading.value) {
         loadMore();
@@ -146,7 +147,7 @@ class RemittancePendingController extends BaseController{
   }
 
   Future<void> loadMore() async {
-    if (!scrollController.hasClients || hasMore.value && !isLoading.value) {
+    if (!scrollControllerMobile.hasClients || hasMore.value && !isLoading.value) {
       isLoading.value = true;
       final nextPage = currentPage.value + 1;
       try {
@@ -223,6 +224,7 @@ class RemittancePendingController extends BaseController{
   }
 
   void clearSearch() {
+    paginated=null;
     currentPage.value = 1;
     selectedAccountId.value = 0;
     searchController.clear();
@@ -437,7 +439,7 @@ class RemittancePendingController extends BaseController{
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -479,7 +481,7 @@ class RemittancePendingController extends BaseController{
     endDateFilter.value="";
   }
 
-  Future<void> captureRowScreenshot(RemittanceModel remittance, GlobalKey dataTableKey, Map<int, GlobalKey> rowKeys) async {
+  /*Future<void> captureRowScreenshot(RemittanceModel remittance, GlobalKey dataTableKey, Map<int, GlobalKey> rowKeys) async {
     final rowKey = rowKeys[remittance.id!];
     if (rowKey == null || rowKey.currentContext == null) {
       Get.snackbar('خطا', 'ردیفی برای ثبت پیدا نشد. کلید آماده نیست.');
@@ -569,6 +571,117 @@ class RemittancePendingController extends BaseController{
 
     } catch (e) {
       Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
+    }
+  }*/
+// Capture a specific row of the DataTable without relying on row-specific GlobalKeys
+  Future<void> captureTableScreenshot(RemittanceModel remittance, GlobalKey dataTableKey) async {
+    try {
+      if (dataTableKey.currentContext == null) {
+        Get.snackbar('خطا', 'جدولی برای ثبت پیدا نشد.');
+        return;
+      }
+
+      // Find row index
+      final rowIndex = remittanceList.indexWhere((r) => r.id == remittance.id);
+      if (rowIndex == -1) {
+        Get.snackbar('خطا', 'ردیف مورد نظر پیدا نشد.');
+        return;
+      }
+
+      // Match DataTable config
+      const double headerHeight = 50.0; // headingRowHeight
+      const double rowHeight = 100.0; // dataRowMaxHeight
+
+      final RenderRepaintBoundary boundary = dataTableKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 1.0);
+
+      final RenderBox tableBox = dataTableKey.currentContext!.findRenderObject() as RenderBox;
+      final tableSize = tableBox.size;
+
+      final Rect cropRect = Rect.fromLTWH(
+        0,
+        headerHeight + (rowIndex * rowHeight),
+        tableSize.width,
+        rowHeight,
+      );
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final paint = Paint();
+      canvas.drawImageRect(
+        image,
+        cropRect,
+        Rect.fromLTWH(0, 0, cropRect.width, cropRect.height),
+        paint,
+      );
+
+      final picture = recorder.endRecording();
+      final croppedImage = await picture.toImage(cropRect.width.toInt(), cropRect.height.toInt());
+      final byteData = await croppedImage.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        Get.snackbar('خطا', 'دریافت داده‌های تصویر ناموفق بود.');
+        return;
+      }
+      final uint8List = byteData.buffer.asUint8List();
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'image/png');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'remittance_row_${remittance.id}.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: "remittance_row_${remittance.id}",
+          bytes: uint8List,
+          fileExtension: 'png',
+          mimeType: MimeType.png,
+        );
+      }
+
+      Get.snackbar('موفقیت', 'تصویر ردیف با موفقیت ذخیره شد.');
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در ثبت تصویر: $e');
+    }
+  }
+
+  // Capture the entire DataTable
+  Future<void> captureEntireTable(GlobalKey dataTableKey) async {
+    try {
+      if (dataTableKey.currentContext == null) {
+        Get.snackbar('خطا', 'جدولی برای ثبت پیدا نشد.');
+        return;
+      }
+
+      final RenderRepaintBoundary boundary = dataTableKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final ui.Image image = await boundary.toImage(pixelRatio: 2.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) {
+        Get.snackbar('خطا', 'دریافت داده‌های تصویر ناموفق بود.');
+        return;
+      }
+      final uint8List = byteData.buffer.asUint8List();
+
+      if (kIsWeb) {
+        final blob = html.Blob([uint8List], 'image/png');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        final anchor = html.AnchorElement(href: url)
+          ..setAttribute('download', 'remittance_table_${DateTime.now().millisecondsSinceEpoch}.png')
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await FileSaver.instance.saveFile(
+          name: "remittance_table_${DateTime.now().millisecondsSinceEpoch}",
+          bytes: uint8List,
+          fileExtension: 'png',
+          mimeType: MimeType.png,
+        );
+      }
+
+      Get.snackbar('موفقیت', 'تصویر جدول با موفقیت ذخیره شد.');
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در ثبت تصویر جدول: $e');
     }
   }
 }

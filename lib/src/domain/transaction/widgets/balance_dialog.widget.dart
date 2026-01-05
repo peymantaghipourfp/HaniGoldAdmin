@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/transaction/controller/balance_dialog.controller.dart';
-import 'package:hanigold_admin/src/domain/transaction/model/all_balances.model.dart';
+import 'package:hanigold_admin/src/domain/transaction/model/all_balances_new.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
@@ -135,7 +135,7 @@ class BalanceDialog extends StatelessWidget {
                 return Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: AppColor.accentColor.withOpacity(0.1),
+                    color: AppColor.accentColor.withAlpha(25),
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: AppColor.accentColor),
                   ),
@@ -223,6 +223,9 @@ class BalanceDialog extends StatelessWidget {
                           balances: controller.currencyBalances,
                           color: AppColor.accentColor,
                         ),
+                        const SizedBox(height: 16),
+                        // Total Value (تراز لحظه)
+                        _buildTotalValueSection(controller),
                       ],
                     ),
                   ),
@@ -267,7 +270,7 @@ class BalanceDialog extends StatelessWidget {
   Widget _buildBalanceSection({
     required String title,
     required IconData icon,
-    required List<AllBalancesModel> balances,
+    required List<BalanceModel> balances,
     required Color color,
   }) {
     // Calculate total for گرم units if this is the gold balance section
@@ -280,9 +283,9 @@ class BalanceDialog extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withAlpha(25),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withAlpha(75)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -320,7 +323,7 @@ class BalanceDialog extends StatelessWidget {
               'هیچ مانده‌ای یافت نشد',
               style: AppTextStyle.bodyText.copyWith(
                 fontSize: 12,
-                color: AppColor.textColor.withOpacity(0.6),
+                color: AppColor.textColor.withAlpha(150),
                 fontStyle: FontStyle.italic,
               ),
             )
@@ -340,9 +343,15 @@ class BalanceDialog extends StatelessWidget {
                   Row(
                     children: [
                       Text(textDirection: TextDirection.ltr,
-                        balance.unitName == 'ریال' || balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند'
-                            ? (balance.balance?.toInt().toString().seRagham(separator: ',') ?? '0')
-                            : (balance.balance?.toString() ?? '0'),
+                        balance.unitName == 'ریال' && (balance.balance ?? 0) < 0 ?
+                        "-${(balance.balance?.toInt().abs().toStringAsFixed(0).seRagham(separator: ',') ?? '0')}" :
+                        balance.unitName == 'ریال' && (balance.balance ?? 0) > 0 ?
+                        (balance.balance?.toStringAsFixed(0).seRagham() ?? '0'):
+                        ( balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند') && (balance.balance ?? 0) < 0
+                            ? "-${(balance.balance?.toInt().abs().toString().seRagham(separator: ',') ?? '0')}"
+                            : ( balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند') && (balance.balance ?? 0) > 0 ?
+                        (balance.balance?.toString().seRagham() ?? '0'):
+                        (balance.balance?.toString() ?? '0'),
                         style: AppTextStyle.bodyText.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
@@ -354,7 +363,7 @@ class BalanceDialog extends StatelessWidget {
                         balance.unitName ?? '',
                         style: AppTextStyle.bodyText.copyWith(
                           fontSize: 11,
-                          color: AppColor.textColor.withOpacity(0.7),
+                          color: AppColor.textColor.withAlpha(180),
                         ),
                       ),
                     ],
@@ -362,6 +371,51 @@ class BalanceDialog extends StatelessWidget {
                 ],
               ),
             )).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTotalValueSection(BalanceDialogController controller) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColor.primaryColor.withAlpha(25),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColor.primaryColor.withAlpha(75)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.account_balance,
+                color: AppColor.primaryColor,
+                size: 24,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'تراز لحظه',
+                style: AppTextStyle.bodyText.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColor.primaryColor,
+                ),
+              ),
+            ],
+          ),
+          Obx(() => Text(
+            textDirection: TextDirection.ltr,
+            controller.totalValue < 0 ?
+            "-${controller.totalValue.abs().toStringAsFixed(0).seRagham()}":
+            controller.totalValue.toStringAsFixed(0).seRagham(),
+            style: AppTextStyle.bodyText.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: controller.totalValue > 0 ? AppColor.primaryColor : AppColor.accentColor,
+            ),
+          )),
         ],
       ),
     );

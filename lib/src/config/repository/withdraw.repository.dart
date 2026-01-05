@@ -79,7 +79,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
     required String endDate,
   required String name,
   required String ownerName,
-  required String paidAmount,
+  required String amountFilter,
 })async{
     try{
       Map<String , dynamic> options=
@@ -118,15 +118,40 @@ Future<ListWithdrawModel> getWithdrawListPager({
                       "filterType": 0,
                       "RefTable": "WithdrawRequest"
                     },
-                  if(paidAmount!="")
-                    {
-                      "fieldName": "PaidAmount",
-                      "filterValue": paidAmount,
-                      "filterType": 0,
-                      "RefTable": "WithdrawRequest"
-                    },
               ],
-            }
+            },
+            // Amount filter
+            if(amountFilter != null && amountFilter.isNotEmpty)
+              {
+                "innerCondition": 1,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "RequestAmount",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "WithdrawRequest"
+                  },
+                  {
+                    "fieldName": "Amount",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "WithdrawRequest"
+                  },
+                  {
+                    "fieldName": "DividedAmount",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "DividedAmountsPerWithdrawRequest"
+                  },
+                  {
+                    "fieldName": "PaidAmount",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "PaidAmountsPerWithdrawRequest"
+                  },
+                ]
+              }
           ],
           "orderBy": "withdrawrequest.requestDate",
           "orderByType": "desc",
@@ -352,6 +377,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
     required String? description,
     required String date,
     required int status,
+    required String recId,
   })async{
     try{
       Map<String,dynamic> withdrawData={
@@ -404,7 +430,8 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "status":status,
         "attribute": "cus",
         "infos": [],
-        "description": description
+        "description": description,
+        "recId": recId,
       };
       print("WithdrawData Update Withdraw:${withdrawData}");
 
@@ -532,4 +559,18 @@ Future<ListWithdrawModel> getWithdrawListPager({
       throw ErrorException('خطا در آپدیت تاریخ:$e');
     }
   }
+
+  Future<List< dynamic>> sendTelegramWithdrawRequest({
+    required int withdrawRequestId,
+  })async{
+    try {
+      final response = await withdrawDio.post('WithdrawRequest/sendTelegram', queryParameters: {'withdrawRequestId': withdrawRequestId});
+      print('Status Code sendTelegramWithdrawRequest: ${response.statusCode}');
+      print('Response Data sendTelegramWithdrawRequest: ${response.data}');
+      return response.data;
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 }

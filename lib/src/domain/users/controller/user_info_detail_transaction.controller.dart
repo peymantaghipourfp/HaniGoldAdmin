@@ -2,15 +2,29 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'package:dio/dio.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/config/repository/account.repository.dart';
+import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
+import 'package:hanigold_admin/src/domain/users/service/transaction_invoice_generation_without_balance.service.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import '../../../config/const/app_color.dart';
+import '../../../config/network/error/network.error.dart';
+import '../../../config/repository/item.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
+import '../../account/model/social.model.dart';
+import '../../product/model/item.model.dart';
+import '../../transaction/controller/transaction.controller.dart';
 import '../model/balance_item.model.dart';
 import '../model/header_info_user_transaction.model.dart';
 import '../model/list_transaction_info_item.model.dart';
@@ -25,32 +39,51 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../model/transaction_info_item_list_pager.model.dart';
+import '../service/transaction_invoice_generation.service.dart';
+
 
 
 enum PageStateDe{loading,err,empty,list}
-
+class TypeModel{
+  final String? type;
+  final String? name;
+  TypeModel({this.type, this.name});
+}
 class UserInfoDetailTransactionController extends GetxController{
 
   Rx<PageStateDe> state=Rx<PageStateDe>(PageStateDe.list);
   RxInt currentPageIndex = 1.obs;
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
+  final ItemRepository itemRepository=ItemRepository();
+  final AccountRepository accountRepository=AccountRepository();
+  final WalletRepository walletRepository=WalletRepository();
   ScrollController scrollController = ScrollController();
+  ScrollController scrollControllerMobile = ScrollController();
   final TextEditingController searchController=TextEditingController();
   final TextEditingController dateStartController=TextEditingController();
   final TextEditingController dateEndController=TextEditingController();
+  final TextEditingController amountFilterController=TextEditingController();
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
    RxList<BalanceItemModel> balanceList=<BalanceItemModel>[].obs;
   RxList<TransactionInfoItemModel> transactionInfoList=<TransactionInfoItemModel>[].obs;
   RxList<TransactionInfoItemModel> transactionInfoListPdf=<TransactionInfoItemModel>[].obs;
+  final Rxn<ItemModel> selectedItemFilter=Rxn<ItemModel>();
+  final List<ItemModel> itemList=<ItemModel>[].obs;
+  RxList<String> imageList = <String>[].obs;
   final Rxn<PaginatedModel> paginated = Rxn<PaginatedModel>();
   BalanceModel? balanceModel;
   String? indexAccountPayerGet;
   var isLoading=false.obs;
+  var isLoadingTransfer=false.obs;
+  var isLoadingChecked=false.obs;
+  var isLoadingCheckedAll=false.obs;
   var namePayer="".obs;
   var mobilePayer="".obs;
   var sort = true.obs; // or `false`...
@@ -58,6 +91,31 @@ class UserInfoDetailTransactionController extends GetxController{
   var id = 0.obs; // or `false`...
   var startDateFilter=''.obs;
   var endDateFilter=''.obs;
+  var errorMessage = "".obs;
+  final PageController pageController = PageController();
+  RxInt currentImagePage = 0.obs;
+  RxString typeFilter1="".obs;
+  RxString typeFilter="انتخاب کنید".obs;
+  final List<TypeModel> typeList=<TypeModel>[].obs;
+  var amountFilter=''.obs;
+  final Rxn<SocialModel> socialStatus = Rxn<SocialModel>();
+  var isLoadingSocialStatus = false.obs;
+
+  void changeSelectedType(String newValue) {
+    typeFilter.value = newValue;
+    for(int i=0;i<typeList.length;i++){
+      if(newValue==typeList[i].name){
+        typeFilter1.value=typeList[i].type!;
+      }
+    }
+    update();
+    print(typeFilter1.value);
+  }
+
+  void changeSelectedItemFilter(ItemModel? newValue) {
+    selectedItemFilter.value = newValue;
+    update();
+  }
 
 
   onSortColum(int columnIndex, bool ascending) {
@@ -68,7 +126,6 @@ class UserInfoDetailTransactionController extends GetxController{
         transactionInfoList.sort((a, b) => b.toWallet!.account!.name!.toString().compareTo(a.toWallet!.account!.name!.toString()));
       }
     }
-
     transactionInfoList.refresh();
     update();
   }
@@ -86,7 +143,85 @@ class UserInfoDetailTransactionController extends GetxController{
     id.value=int.parse(Get.parameters['accountId']!);
     getHeaderTransaction(int.parse(Get.parameters['accountId']!));
     getTransactionInfoListPager(id.value.toString());
+    fetchItemList();
+    setupScrollListener();
+    typeList.addAll([
+      TypeModel(type:null, name: 'انتخاب کنید'),
+      TypeModel(type:'issue',name: 'حواله دریافتی'),
+      TypeModel(type:'reciept',name: 'حواله پرداختی'),
+      TypeModel(type:'payment',name: 'پرداخت'),
+      TypeModel(type:'receive',name: 'دریافت'),
+      TypeModel(type:'sell',name: 'فروش'),
+      TypeModel(type:'buy',name: 'خرید'),
+      TypeModel(type:'buy,sell',name: 'خرید و فروش'),
+      TypeModel(type:'deposit',name: 'واریز'),
+      TypeModel(type:'withdraw',name: 'برداشت'),
+      TypeModel(type:'initial',name: 'اول دوره'),
+    ]);
+  }
 
+  @override void onClose() {
+    scrollControllerMobile.dispose();
+    super.onClose();
+  }
+
+  void setupScrollListener() {
+    scrollControllerMobile.addListener(() {
+      if (scrollControllerMobile.position.pixels >=
+          scrollControllerMobile.position.maxScrollExtent - 200 &&
+          hasMore.value &&
+          !isLoading.value &&
+          !isOpenMore.value) {
+        loadMore();
+      }
+    });
+  }
+
+  Future<void> loadMore() async {
+    // بررسی شرایط برای بارگذاری بیشتر
+    if (scrollControllerMobile.hasClients &&
+        hasMore.value &&
+        !isLoading.value &&
+        !isOpenMore.value) {
+
+      isLoading.value = true;
+      final nextPage = currentPage.value + 1;
+
+      try {
+        final startIndex = (nextPage - 1) * itemsPerPage.value + 1;
+        final toIndex = nextPage * itemsPerPage.value;
+
+        var fetchedListTransactionInfo = await userInfoTransactionRepository.getTransactionInfoListPager(
+          startIndex: startIndex,
+          toIndex: toIndex,
+          accountId: id.value.toString(),
+          startDate: startDateFilter.value,
+          endDate: endDateFilter.value,
+          type: typeFilter1.value,
+          amountFilter: amountFilter.value,
+          item: selectedItemFilter.value?.id,
+        );
+
+        if (fetchedListTransactionInfo.transactionInfoItems!.isNotEmpty) {
+          transactionInfoList.addAll(fetchedListTransactionInfo.transactionInfoItems ?? []);
+          currentPage.value = nextPage;
+
+          hasMore.value = fetchedListTransactionInfo.transactionInfoItems!.length >= itemsPerPage.value;
+
+          paginated.value = fetchedListTransactionInfo.paginated;
+
+          transactionInfoList.refresh();
+          update();
+        } else {
+          hasMore.value = false;
+        }
+      } catch (e) {
+        hasMore.value = false;
+        print("خطا در بارگذاری بیشتر: ${e.toString()}");
+      } finally {
+        isLoading.value = false;
+      }
+    }
   }
 
   /*void nextPage() {
@@ -140,7 +275,7 @@ class UserInfoDetailTransactionController extends GetxController{
     try{
       state.value=PageStateDe.loading;
       var response=await userInfoTransactionRepository.getBalanceList(id);
-      balanceList.addAll(response);
+      balanceList.assignAll(response);
       balanceList.removeWhere((r)=>r.balance==0);
       state.value=PageStateDe.list;
       // if(balanceList.isEmpty){
@@ -154,10 +289,119 @@ class UserInfoDetailTransactionController extends GetxController{
     }
   }
 
+  // انتقال ولت
+  Future<void> getChangeOneWallet(int accountId,int itemId) async{
+    print("getChangeOneWallet : $accountId , $itemId");
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try{
+      isLoadingTransfer.value=true;
+      var response=await userInfoTransactionRepository.getChangeOneWallet(accountId,itemId);
+      if(response!= null){
+
+        Get.snackbar("تغییر ولت", "موفقیت آمیز",
+            titleText: Text("تغییر ولت",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text("موفقیت آمیز" , textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        getBalanceList(id.value);
+        getTransactionInfoListPager(id.value.toString());
+      }
+      isLoadingTransfer.value=false;
+    }
+    catch(e){
+      EasyLoading.dismiss();
+      //state.value=PageState.err;
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }
+
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getTransactionInfoListPager(id.value.toString());
+  }
+
+  // لیست عکس ها
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      EasyLoading.dismiss();
+    }
+  }
+  void downloadImage(String guidId) async {
+    if (kIsWeb){
+      final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+      final anchor = html.AnchorElement(href: url)
+        ..download = "image_$guidId"
+        ..style.display = 'none';
+
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+    }else{
+      try {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) return;
+
+        final dio = Dio();
+        final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access downloads directory');
+        }
+        String fileExtension = path.extension(guidId);
+        if(fileExtension.isEmpty) fileExtension = '.png';
+        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+        final savePath = path.join(downloadsDir.path, fileName);
+        /*final dir = await getApplicationDocumentsDirectory();
+        final path = '${dir.path}/images_$guidId.png';*/
+        await dio.download(url, savePath);
+        print(savePath);
+        Get.snackbar(
+          'موفقیت',
+          'تصویر با موفقیت ذخیره شد',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'خطا',
+          'خطا در دانلود تصویر: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
+    }
+  }
+
+  // لیست محصولات
+  Future<void> fetchItemList() async{
+    try{
+      // state.value=PageState.loading;
+      var fetchedItemList=await itemRepository.getItemList();
+      itemList.assignAll(fetchedItemList);
+      //  state.value=PageState.list;
+      if(itemList.isEmpty){
+        //   state.value=PageState.empty;
+      }
+    }
+    catch(e){
+      // state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+
+    }
   }
 
   // لیست تراکنش های کاربر
@@ -172,6 +416,9 @@ class UserInfoDetailTransactionController extends GetxController{
           toIndex: itemsPerPage.value,
           accountId: id,
         startDate: startDateFilter.value, endDate: endDateFilter.value,
+        type: typeFilter1.value,
+        amountFilter: amountFilter.value,
+        item: selectedItemFilter.value?.id,
       );
       isOpenMore.value=false;
       transactionInfoList.addAll(response.transactionInfoItems ?? []);
@@ -181,8 +428,82 @@ class UserInfoDetailTransactionController extends GetxController{
       update();
     }
     catch (e) {
+      isOpenMore.value=false;
       state.value = PageStateDe.err;
-    } finally {}
+    } finally {
+      isOpenMore.value=false;
+    }
+  }
+
+  Future<List<dynamic>?> removeCheckedAll(int accountId,bool checked) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingCheckedAll.value = true;
+      var response = await userInfoTransactionRepository.removeCheckedAll(accountId, false);
+      Get.snackbar(response.first['title'],response.first["description"],
+          titleText: Text(response.first['title'],
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),),
+          messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+      getTransactionInfoListPager(id.value.toString());
+      clearFilter();
+    } catch (e) {
+      EasyLoading.dismiss();
+      throw ErrorException('خطا در برداشتن چک باکس: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingCheckedAll.value = false;
+    }
+    return null;
+  }
+
+  Future< List<dynamic>?> updateChecked(int transactionId,bool checked) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      isLoadingChecked.value = true;
+      // Optimistic UI update: immediately apply the change locally
+      final int txIndex = transactionInfoList.indexWhere((t) => (t.id ?? 0) == transactionId);
+      bool? previousChecked;
+      if (txIndex != -1) {
+        previousChecked = transactionInfoList[txIndex].checked;
+        transactionInfoList[txIndex].checked = checked;
+        transactionInfoList.refresh();
+        update();
+      }
+      var response = await userInfoTransactionRepository.updateChecked(transactionId, checked,);
+      if(response!= null){
+        EasyLoading.dismiss();
+        Get.snackbar(response.first['title'],response.first["description"],
+            titleText: Text(response.first['title'],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        /*getTransactionInfoListPager(id.value.toString());
+        clearFilter();*/
+      } else {
+        // Revert if backend did not confirm
+        if (txIndex != -1) {
+          transactionInfoList[txIndex].checked = previousChecked;
+          transactionInfoList.refresh();
+          update();
+        }
+      }
+
+    } catch (e) {
+      // Revert optimistic update on error
+      final int txIndex = transactionInfoList.indexWhere((t) => (t.id ?? 0) == transactionId);
+      if (txIndex != -1) {
+        transactionInfoList[txIndex].checked = !(checked);
+        transactionInfoList.refresh();
+        update();
+      }
+      throw ErrorException('خطا در checked: $e');
+    } finally {
+      EasyLoading.dismiss();
+      isLoadingChecked.value = false;
+    }
+
+    return null;
   }
 
   //فایل اکسل
@@ -209,7 +530,7 @@ class UserInfoDetailTransactionController extends GetxController{
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -248,7 +569,7 @@ class UserInfoDetailTransactionController extends GetxController{
           await FileSaver.instance.saveFile(
             name: "user_balance_screenshot_${headerInfoUserTransactionModel?.accountName}",
             bytes: pngBytes,
-            ext: 'png',
+            fileExtension: 'png',
             mimeType: MimeType.png,
           );
           Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
@@ -343,6 +664,41 @@ class UserInfoDetailTransactionController extends GetxController{
       Get.snackbar('خطا', 'خطا در دریافت فایل PDF: \n${e.toString()}');
       print(e.toString());
   }
+  }
+
+  Future<void> exportGetGoldPdf(String id) async {
+    try {
+
+      WidgetsFlutterBinding.ensureInitialized();
+      EasyLoading.show(status: 'دریافت فایل PDF...');
+
+      var response = await userInfoTransactionRepository.getGoldPdf(
+        startIndex: 1,
+        toIndex: 100000,
+        accountId: id,
+        startDate: startDateFilter.value, endDate: endDateFilter.value,
+      );
+      final fileName = 'user_transactions_${headerInfoUserTransactionModel?.accountName ?? ''}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      if (kIsWeb) {
+        final blob = html.Blob([response], 'application/pdf');
+        final url = html.Url.createObjectUrlFromBlob(blob);
+        html.AnchorElement(href: url)
+          ..download = fileName
+          ..click();
+        html.Url.revokeObjectUrl(url);
+      } else {
+        await Printing.sharePdf(
+          bytes: response,
+          filename: fileName,
+        );
+      }
+      EasyLoading.dismiss();
+      Get.snackbar('موفق', 'فایل PDF با موفقیت دریافت شد');
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar('خطا', 'خطا در دریافت فایل PDF: \n${e.toString()}');
+      print(e.toString());
+    }
   }
 
   Map<int, pw.TableColumnWidth> getColumnWidthsPdf() {
@@ -444,7 +800,242 @@ class UserInfoDetailTransactionController extends GetxController{
     paginated.value==null;
     dateStartController.clear();
     dateEndController.clear();
+    amountFilterController.clear();
     startDateFilter.value="";
     endDateFilter.value="";
+    amountFilter.value="";
+    typeFilter1.value='';
+    typeFilter.value='انتخاب کنید';
+    selectedItemFilter.value = null;
   }
+  bool hasActiveFilters() {
+    return dateStartController.text.isNotEmpty ||
+        dateEndController.text.isNotEmpty||
+        /*descriptionFilterController.text.isNotEmpty ||*/
+        amountFilterController.text.isNotEmpty ||
+        (typeFilter.value != 'انتخاب کنید' && typeFilter.value.isNotEmpty);
+  }
+
+
+  /// Generate invoice for a single transaction row
+  Future<void> generateInvoiceForTransaction(TransactionInfoItemModel trans) async {
+    try {
+      EasyLoading.show(status: 'در حال تولید فاکتور...');
+
+      final invoiceService = TransactionInvoiceGenerationService();
+
+      // Get balance list for this account
+      List<BalanceItemModel> balances = [];
+      if (id.value != 0) {
+        balances = await userInfoTransactionRepository.getBalanceList(id.value);
+        balances.removeWhere((b) => (b.balance ?? 0) == 0);
+      }
+
+      await invoiceService.generateInvoice(
+        transaction: trans,
+        accountName: headerInfoUserTransactionModel?.accountName ?? '-',
+        balanceList: balances,
+      );
+
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "موفقیت",
+        "فاکتور تراکنش با موفقیت تولید شد",
+        titleText: Text(
+          "موفقیت",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "فاکتور تراکنش با موفقیت تولید شد",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "خطا",
+        "خطا در تولید فاکتور تراکنش: ${e.toString()}",
+        titleText: Text(
+          "خطا",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "خطا در تولید فاکتور تراکنش: ${e.toString()}",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+    }
+  }
+
+  /// Generate invoice for a single transaction row without balance
+  Future<void> generateInvoiceForTransactionWithoutBalance(TransactionInfoItemModel trans) async {
+    try {
+      EasyLoading.show(status: 'در حال تولید فاکتور...');
+
+      final invoiceService = TransactionInvoiceGenerationWithoutBalanceService();
+
+      // Get balance list for this account
+      List<BalanceItemModel> balances = [];
+      if (id.value != 0) {
+        balances = await userInfoTransactionRepository.getBalanceList(id.value);
+        balances.removeWhere((b) => (b.balance ?? 0) == 0);
+      }
+
+      await invoiceService.generateInvoice(
+        transaction: trans,
+        accountName: headerInfoUserTransactionModel?.accountName ?? '-',
+        balanceList: balances,
+      );
+
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "موفقیت",
+        "فاکتور تراکنش با موفقیت تولید شد",
+        titleText: Text(
+          "موفقیت",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "فاکتور تراکنش با موفقیت تولید شد",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "خطا",
+        "خطا در تولید فاکتور تراکنش: ${e.toString()}",
+        titleText: Text(
+          "خطا",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "خطا در تولید فاکتور تراکنش: ${e.toString()}",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+    }
+  }
+
+  /// Check social status (Telegram and WhatsApp) for the account
+  Future<void> checkAccountSocialStatus() async {
+    try {
+      isLoadingSocialStatus.value = true;
+      EasyLoading.show(status: 'در حال بررسی وضعیت...');
+      final response = await accountRepository.checkSocialStatus(accountId: id.value);
+      socialStatus.value = response;
+      EasyLoading.dismiss();
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "خطا",
+        "خطا در بررسی وضعیت: ${e.toString()}",
+        titleText: Text(
+          "خطا",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "خطا در بررسی وضعیت: ${e.toString()}",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+      print("خطا در بررسی وضعیت: ${e.toString()}");
+    } finally {
+      isLoadingSocialStatus.value = false;
+    }
+  }
+
+  /// Required input: accountId (int) - uses id.value from controller
+  Future<void> sendBalanceToTelegram() async {
+    try {
+      EasyLoading.show(status: 'در حال ارسال به تلگرام...');
+      final response = await walletRepository.sendBalanceToTelegram(accountId: id.value);
+      EasyLoading.dismiss();
+
+      // Check if response indicates success
+      if (response != null && response.isNotEmpty) {
+        // Response is a list, check first element for status
+        final firstItem = response.first;
+        if (firstItem is Map) {
+          final title = firstItem['title'] ?? 'موفقیت';
+          final description = firstItem['description'] ?? 'مانده حساب با موفقیت به تلگرام ارسال شد';
+
+          Get.snackbar(
+            title.toString(),
+            description.toString(),
+            titleText: Text(
+              title.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),
+            ),
+            messageText: Text(
+              description.toString(),
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),
+            ),
+          );
+        } else {
+          // Simple success message if response format is different
+          Get.snackbar(
+            "موفقیت",
+            "مانده حساب با موفقیت به تلگرام ارسال شد",
+            titleText: Text(
+              "موفقیت",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),
+            ),
+            messageText: Text(
+              "مانده حساب با موفقیت به تلگرام ارسال شد",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),
+            ),
+          );
+        }
+      } else {
+        // Empty response - still consider it success
+        Get.snackbar(
+          "موفقیت",
+          "مانده حساب با موفقیت به تلگرام ارسال شد",
+          titleText: Text(
+            "موفقیت",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+          messageText: Text(
+            "مانده حساب با موفقیت به تلگرام ارسال شد",
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColor.textColor),
+          ),
+        );
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      Get.snackbar(
+        "خطا",
+        "خطا در ارسال به تلگرام: ${e.toString()}",
+        titleText: Text(
+          "خطا",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+        messageText: Text(
+          "خطا در ارسال به تلگرام: ${e.toString()}",
+          textAlign: TextAlign.center,
+          style: TextStyle(color: AppColor.textColor),
+        ),
+      );
+    }
+  }
+
+
 }

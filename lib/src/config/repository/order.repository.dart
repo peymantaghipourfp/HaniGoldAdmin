@@ -1,7 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
+import 'package:hanigold_admin/src/domain/order/model/list_order_byAccount_report.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
-import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
+import 'package:hanigold_admin/src/domain/order/model/total_balance_new.model.dart';
 import '../../domain/order/model/list_order.model.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
@@ -15,6 +16,7 @@ class OrderRepository{
     orderDio.options.connectTimeout=Duration(seconds: 30);
     orderDio.interceptors.add(DioInterceptor());
   }
+
   Future<List<OrderModel>> getOrderList({
     required int startIndex,
     required int toIndex,
@@ -79,6 +81,10 @@ class OrderRepository{
     required String startDate,
     required String endDate,
     required String name,
+    required int? byAdmin,
+    required int? type,
+    String? amountFilter,
+    int? item,
   }) async{
     try{
       Map<String, dynamic> options =
@@ -110,8 +116,61 @@ class OrderRepository{
                   "filterType": 0,
                   "RefTable": "Account"
                 },
+                if (byAdmin != null)
+                  {
+                    "fieldName": "byAdmin",
+                    "filterValue": "$byAdmin",
+                    "filterType": 4,
+                    "RefTable": "Orders"
+                  },
+                if (type != null)
+                  {
+                    "fieldName": "type",
+                    "filterValue": "$type",
+                    "filterType": 4,
+                    "RefTable": "Orders"
+                  },
+                if (item != null)
+                  {
+                    "fieldName": "Id",
+                    "filterValue": "$item",
+                    "filterType": 5,
+                    "RefTable": "Item"
+                  },
               ],
-            }
+            },
+            // Amount filter
+            if(amountFilter != null && amountFilter.isNotEmpty)
+              {
+                "innerCondition": 1,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "Quantity",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  },
+                  {
+                    "fieldName": "MesghalPrice",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  },
+                  {
+                    "fieldName": "Price",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  },
+                  {
+                    "fieldName": "TotalPrice",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  }
+                ]
+              }
           ],
           "orderBy": "Orders.date",
           "orderByType": "desc",
@@ -132,7 +191,8 @@ class OrderRepository{
 
   Future<Uint8List> getOrderExcel({
     required String startDate,
-    required String endDate
+    required String endDate,
+    required int? type,
 }) async{
     try{
       Map<String, dynamic> options =
@@ -148,6 +208,13 @@ class OrderRepository{
                     "fieldName": "Date",
                     "filterValue": "$startDate|$endDate",
                     "filterType": 25,
+                    "RefTable": "Orders"
+                  },
+                if (type != null)
+                  {
+                    "fieldName": "type",
+                    "filterValue": "$type",
+                    "filterType": 4,
                     "RefTable": "Orders"
                   }
               ]
@@ -457,16 +524,297 @@ class OrderRepository{
     }
   }
 
-  Future<List<TotalBalanceModel>> getTotalBalanceList()async{
+  Future<List<TotalBalanceNewModel>> getTotalBalanceList()async{
+  //Future<List<TotalBalanceModel>> getTotalBalanceList()async{
     try{
-      final response=await orderDio.get('Order/OrderBalanceDay');
+      final response=await orderDio.get('Order/marketDailyResult');
+      //final response=await orderDio.get('Order/OrderBalanceDay');
       print('Status Code getBalanceList: ${response.statusCode}');
       print("response getBalanceList : ${response.data}" );
-      List<dynamic> data=response.data;
-      return data.isNotEmpty ? data.map((totalBalance)=>TotalBalanceModel.fromJson(totalBalance)).toList() : [];
+      if (response.data == null) {
+        return [];
+      }
+      List<dynamic> data = response.data;
+      return data.isNotEmpty ? data.map((totalBalance)=>TotalBalanceNewModel.fromJson(totalBalance)).toList() : [];
+      //return data.isNotEmpty ? data.map((totalBalance)=>TotalBalanceModel.fromJson(totalBalance)).toList() : [];
     }
     catch(e){
       throw ErrorException('خطا:$e');
     }
   }
+
+  Future<ListOrderByAccountReportModel> getOrderByAccountReportPager({
+    required int startIndex,
+    required int toIndex,
+    required String startDate,
+    required String endDate,
+    int? accountId,
+    required String name,
+    String? orderBy,
+    String? orderByType,
+  })async{
+    try{
+      Map<String , dynamic> options=
+      {
+        "options" : { "order" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(accountId != null)
+                  {
+                    "fieldName": "AccountId",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "Orders"
+                  },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Orders"
+                  },
+                if(name!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Account"
+                  },
+              ],
+            }
+          ],
+          "orderBy": orderBy ?? "InnerQuery.reportDate",
+          "orderByType": orderByType ?? "DESC",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      };
+      final response=await orderDio.post('Order/balanceDayByAccountReport',data: options);
+      print("url getOrderByAccountReportPager : Order/balanceDayByAccountReport" );
+      print("request getOrderByAccountReportPager : $options" );
+      print("response getOrderByAccountReportPager : ${response.data}" );
+      if(response.statusCode==200){
+        return ListOrderByAccountReportModel.fromJson(response.data);
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<Uint8List> getOrderByAccountReportPdf({
+    int? accountId,
+    required String name,
+    required String startDate,
+    required String endDate
+  })async{
+    try{
+      Map<String , dynamic> options=
+      {
+        "options" : { "order" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(accountId != null)
+                  {
+                    "fieldName": "AccountId",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "Orders"
+                  },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Orders"
+                  },
+                if(name!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Account"
+                  },
+              ],
+            }
+          ],
+          "orderBy": "InnerQuery.reportDate",
+          "orderByType": "DESC",
+          "StartIndex": 1,
+          "ToIndex": 10000000
+        }
+        }
+      };
+      final response=await orderDio.post('Order/balanceDayByAccountPdf',data: options,options: Options(responseType: ResponseType.bytes));
+      print("request getOrderByAccountReportPdf : $options" );
+      print("response getOrderByAccountReportPdf : ${response.data}" );
+      return Uint8List.fromList(response.data);
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<ListOrderModel> getOrderEditedReportPager({
+    required int startIndex,
+    required int toIndex,
+    int? accountId,
+    required String startDate,
+    required String endDate,
+    required String startCreatedOnDate,
+    required String endCreatedOnDate,
+    required String startModifiedOnDate,
+    required String endModifiedOnDate,
+    required String name,
+    required int? byAdmin,
+    required int? type,
+    String? amountFilter,
+    int? item,
+    String? orderBy,
+    String? orderByType,
+  })async{
+    try{
+      Map<String , dynamic> options=
+      {
+        "options" : { "order" : {
+          "Predicate": [
+            {
+              "innerCondition": 0,
+              "outerCondition": 0,
+              "filters": [
+                if(accountId != null)
+                  {
+                    "fieldName": "AccountId",
+                    "filterValue": accountId.toString(),
+                    "filterType": 5,
+                    "RefTable": "Orders"
+                  },
+                if(startDate!="")
+                  {
+                    "fieldName": "Date",
+                    "filterValue": "$startDate|$endDate",
+                    "filterType": 25,
+                    "RefTable": "Orders"
+                  },
+                if(startCreatedOnDate!="")
+                  {
+                    "fieldName": "CreatedOn",
+                    "filterValue": "$startCreatedOnDate|$endCreatedOnDate",
+                    "filterType": 25,
+                    "RefTable": "Orders"
+                  },
+                if(startModifiedOnDate!="")
+                  {
+                    "fieldName": "ModifiedOn",
+                    "filterValue": "$startModifiedOnDate|$endModifiedOnDate",
+                    "filterType": 25,
+                    "RefTable": "Orders"
+                  },
+                if(name!="")
+                  {
+                    "fieldName": "Name",
+                    "filterValue": name,
+                    "filterType": 0,
+                    "RefTable": "Account"
+                  },
+                if (byAdmin != null)
+                  {
+                    "fieldName": "byAdmin",
+                    "filterValue": "$byAdmin",
+                    "filterType": 4,
+                    "RefTable": "Orders"
+                  },
+                if (type != null)
+                  {
+                    "fieldName": "type",
+                    "filterValue": "$type",
+                    "filterType": 4,
+                    "RefTable": "Orders"
+                  },
+                if (item != null)
+                  {
+                    "fieldName": "Id",
+                    "filterValue": "$item",
+                    "filterType": 5,
+                    "RefTable": "Item"
+                  },
+              ],
+            },
+            // Amount filter
+            if(amountFilter != null && amountFilter.isNotEmpty)
+              {
+                "innerCondition": 1,
+                "outerCondition": 0,
+                "filters": [
+                  {
+                    "fieldName": "Quantity",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  },
+                  {
+                    "fieldName": "MesghalPrice",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  },
+                  {
+                    "fieldName": "Price",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  },
+                  {
+                    "fieldName": "TotalPrice",
+                    "filterValue": amountFilter,
+                    "filterType": 0,
+                    "RefTable": "Orders"
+                  }
+                ]
+              }
+          ],
+          "orderBy": orderBy ?? "orders.date",
+          "orderByType": orderByType ?? "DESC",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }
+        }
+      };
+      final response=await orderDio.post('Order/getEditedWrapper',data: options);
+      print("url getOrderEditedReportPager : Order/getEditedWrapper" );
+      print("request getOrderEditedReportPager : $options" );
+      print("response getOrderEditedReportPager : ${response.data}" );
+      if(response.statusCode==200){
+        return ListOrderModel.fromJson(response.data);
+      }else{
+        throw ErrorException('خطا');
+      }
+    }
+    catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
+  Future<List< dynamic>> sendTelegramOrder({
+    required int orderId,
+  })async{
+    try {
+      final response = await orderDio.post('Order/sendTelegram', queryParameters: {'orderId': orderId});
+      print('Status Code sendTelegramOrder: ${response.statusCode}');
+      print('Response Data sendTelegramOrder: ${response.data}');
+      return response.data;
+    }catch(e){
+      throw ErrorException('خطا:$e');
+    }
+  }
+
 }

@@ -65,6 +65,16 @@ class SideMenu extends StatelessWidget {
                   icon: Icons.assessment,
                   route: '/productInventory',
                 ),
+                _buildSubMenuItem(
+                  title: 'موجودی محصولات',
+                  icon: Icons.assessment,
+                  route: '/productInventoryQuantity',
+                ),
+                _buildSubMenuItem(
+                  title: 'سفارش های ویرایش شده',
+                  icon: Icons.list_alt,
+                  route: '/orderEditedReportList',
+                ),
               ],
             ),
             _buildMenuButton(
@@ -122,6 +132,21 @@ class SideMenu extends StatelessWidget {
                   route: '/listUserInfoTransaction',
                 ),
                 _buildSubMenuItem(
+                  title: 'مانده کاربران طلایی',
+                  icon: Icons.perm_contact_cal_outlined,
+                  route: '/listUserInfoGoldTransaction',
+                ),
+                _buildSubMenuItem(
+                  title: 'مانده کاربران (تاریخ)',
+                  icon: Icons.perm_contact_cal_outlined,
+                  route: '/userInfoDateTransaction',
+                ),
+                _buildSubMenuItem(
+                  title: 'پیگیری مطالبات',
+                  icon: Icons.perm_contact_cal_outlined,
+                  route: '/transactionsWalletReceivables',
+                ),
+                _buildSubMenuItem(
                   title: 'لیست اکانت ها',
                   icon: Icons.list_alt,
                   route: '/userList',
@@ -141,6 +166,18 @@ class SideMenu extends StatelessWidget {
                     }),
               ],
             ),
+            /*_buildMenuButton(
+                  title: 'مدیریت دسترسی ها',
+                  icon: Icons.security,
+                  menuKey: 'roles',
+                  subItems: [
+                    _buildSubMenuItem(
+                      title: 'افزودن نقش جدید',
+                      icon: Icons.scale,
+                      route: '/roleCreation',
+                    ),
+                  ],
+                ),*/
             _buildMenuButton(
               title: 'دریافت و پرداخت',
               icon: Icons.inventory,
@@ -385,7 +422,7 @@ void _showChangePassword() {
                 textDirection: TextDirection.rtl,
                 controller: controller.passwordOldController,
                 autofillHints: const [AutofillHints.password],
-                obscureText: true,
+                obscureText: controller.showPasswordOld.value,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 16,
@@ -395,6 +432,17 @@ void _showChangePassword() {
                   labelStyle: TextStyle(color: AppColor.textColor),
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   prefixIconColor: AppColor.textColor,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      controller.showPasswordOld.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: AppColor.textColor,
+                    ),
+                    onPressed: () {
+                      controller.showPasswordOld.value = !controller.showPasswordOld.value;
+                    },
+                  ),
                   border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -416,7 +464,7 @@ void _showChangePassword() {
                 textDirection: TextDirection.rtl,
                 controller: controller.passwordController,
                 autofillHints: const [AutofillHints.password],
-                obscureText: true,
+                obscureText: controller.showPasswordNew.value,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 16,
@@ -426,6 +474,17 @@ void _showChangePassword() {
                   labelStyle: TextStyle(color: AppColor.textColor),
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   prefixIconColor: AppColor.textColor,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      controller.showPasswordNew.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: AppColor.textColor,
+                    ),
+                    onPressed: () {
+                      controller.showPasswordNew.value = !controller.showPasswordNew.value;
+                    },
+                  ),
                   border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -445,7 +504,7 @@ void _showChangePassword() {
                 textDirection: TextDirection.rtl,
                 controller: controller.retypePasswordController,
                 autofillHints: const [AutofillHints.password],
-                obscureText: true,
+                obscureText: controller.showPasswordNew.value,
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.symmetric(
                     vertical: 16,
@@ -455,6 +514,17 @@ void _showChangePassword() {
                   labelStyle: TextStyle(color: AppColor.textColor),
                   prefixIcon: const Icon(Icons.lock_outline_rounded),
                   prefixIconColor: AppColor.textColor,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      controller.showPasswordNew.value
+                          ? Icons.visibility_off
+                          : Icons.visibility,
+                      color: AppColor.textColor,
+                    ),
+                    onPressed: () {
+                      controller.showPasswordNew.value = !controller.showPasswordNew.value;
+                    },
+                  ),
                   border:
                   OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   floatingLabelBehavior: FloatingLabelBehavior.always,

@@ -3,14 +3,12 @@ import 'dart:typed_data';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'dart:async';
-import 'dart:convert';
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -19,14 +17,15 @@ import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/const/app_color.dart';
+import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
 import '../model/balance_item.model.dart';
 import '../model/header_info_user_transaction.model.dart';
-import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
-import '../model/transaction_info_item.model.dart';
+import '../../../config/repository/wallet.repository.dart';
+import '../../../domain/product/model/item.model.dart';
 
 enum PageStateUser { loading, err, empty, list }
 
@@ -39,21 +38,23 @@ class UserListController extends GetxController {
   RxBool isOpenMore = false.obs;
   RxBool isOpenMoreB = false.obs;
   DataPagerController dataPagerController = DataPagerController();
-  UserInfoTransactionRepository userInfoTransactionRepository =
-      UserInfoTransactionRepository();
+  UserInfoTransactionRepository userInfoTransactionRepository = UserInfoTransactionRepository();
   UserRepository userRepository = UserRepository();
+  WalletRepository walletRepository = WalletRepository();
   ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
   final TextEditingController nameFilterController = TextEditingController();
   final TextEditingController mobileFilterController = TextEditingController();
   final TextEditingController dateStartController = TextEditingController();
   final TextEditingController dateEndController = TextEditingController();
+  final TextEditingController mobileTelegramController = TextEditingController();
   HeaderInfoUserTransactionModel? headerInfoUserTransactionModel;
   RxList<BalanceItemModel> balanceList = <BalanceItemModel>[].obs;
   RxList<AccountModel> accountList = <AccountModel>[].obs;
+  RxList<ItemModel> itemsNoWallet = <ItemModel>[].obs;
+  RxList<int> selectedItemIds = <int>[].obs;
   PaginatedModel? paginated;
   BalanceModel? balanceModel;
-
   String? indexAccountPayerGet;
   var isLoading = false.obs;
   var namePayer = "".obs;
@@ -63,6 +64,7 @@ class UserListController extends GetxController {
   var id = 0.obs; // or `false`...
   var startDateFilter = ''.obs;
   var endDateFilter = ''.obs;
+  var isWalletLoading = false.obs;
 
   onSortColum(int columnIndex, bool ascending) {
     if (columnIndex > 0) {
@@ -231,7 +233,7 @@ class UserListController extends GetxController {
           await FileSaver.instance.saveFile(
             name: 'users',
             bytes: uint8List,
-            ext: 'xlsx',
+            fileExtension: 'xlsx',
             mimeType: MimeType.microsoftExcel,
           );
         }
@@ -431,7 +433,111 @@ class UserListController extends GetxController {
   }
 
   void clearFilter() {
+    paginated=null;
+    currentPage.value = 1;
+    itemsPerPage.value=10;
     nameFilterController.clear();
     mobileFilterController.clear();
   }
+  void clearSearch() {
+    paginated=null;
+    currentPage.value = 1;
+    itemsPerPage.value=10;
+    searchController.clear();
+    nameFilterController.clear();
+    getUserList();
+  }
+
+  Future<void> insertMobileTelegram(int id,String mobile,String name) async {
+    EasyLoading.show(
+      status: 'لطفا صبر کنید',
+      dismissOnTap: false,
+    );
+    print("insertMobileTelegram : 1");
+    try {
+      if (Get.isDialogOpen!) Get.back();
+      var response = await userRepository.insertMobileTelegram(
+        id: id,
+        mobile: mobile,
+        name: name,
+      );
+      if(response!=null){
+        Get.back();
+        Get.snackbar(response.first["title"],response.first["description"],
+            titleText: Text(response.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(response.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        getUserList();
+      }
+      update();
+    } catch (e) {
+      throw ErrorException('خطا: $e');
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> getItemNoTWalletForAccount(int accountId) async {
+    isWalletLoading.value = true;
+    itemsNoWallet.clear();
+    selectedItemIds.clear();
+    try {
+      final items = await walletRepository.getItemNotWallet(accountId: accountId);
+      itemsNoWallet.assignAll(items);
+      if (items.isEmpty) {
+        Get.snackbar('اطلاعات', 'آیتمی برای اضافه کردن وجود ندارد');
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در بارگذاری آیتم های بدون ولت: $e');
+    } finally {
+      isWalletLoading.value = false;
+    }
+  }
+
+  void toggleItemSelection(int itemId) {
+    if (selectedItemIds.contains(itemId)) {
+      selectedItemIds.remove(itemId);
+    } else {
+      selectedItemIds.add(itemId);
+    }
+    selectedItemIds.refresh();
+    update();
+  }
+
+  Future<void> insertWalletForSelected(int accountId) async {
+    if (selectedItemIds.isEmpty) {
+      Get.snackbar('اطلاعات', 'لطفا حداقل یک مورد را برای اضافه کردن انتخاب کنید');
+      return;
+    }
+    EasyLoading.show(
+      status: 'در حال ثبت آیتم‌ها...',
+      dismissOnTap: false,
+    );
+    try {
+      if (Get.isDialogOpen!) Get.back();
+      final response = await walletRepository.insertWallet(
+        accountId: accountId,
+        itemIds: selectedItemIds.toList(),
+      );
+      final infos = response['infos'];
+      if(response!=null){
+        Get.back();
+        Get.snackbar(infos.first["title"],infos.first["description"],
+            titleText: Text(infos.first["title"],
+              textAlign: TextAlign.center,
+              style: TextStyle(color: AppColor.textColor),),
+            messageText: Text(infos.first["description"],textAlign: TextAlign.center,style: TextStyle(color: AppColor.textColor)));
+        getUserList();
+      }
+      update();
+    } catch (e) {
+      Get.snackbar('خطا', 'خطا در اضافه کردن آیتم ها: $e');
+      print('خطا در اضافه کردن آیتم ها: $e');
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+
 }

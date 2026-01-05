@@ -55,7 +55,7 @@ enum PageState{loading,err,empty,list}
 class WithdrawPendingController extends BaseController{
 
   RxInt currentPage = 1.obs;
-  RxInt itemsPerPage = 10.obs;
+  RxInt itemsPerPage = 25.obs;
   RxBool hasMore = true.obs;
   ScrollController scrollController = ScrollController();
   ScrollController horizontalScrollController = ScrollController();
@@ -112,8 +112,8 @@ class WithdrawPendingController extends BaseController{
     errorMessage.value=message;
   }
   void isChangePage(int index){
-    currentPage.value=(index*10-10)+1;
-    itemsPerPage.value=index*10;
+    currentPage.value=(index*25-25)+1;
+    itemsPerPage.value=index*25;
     getWithdrawListStatusPager();
   }
   void changeSelectedAccount(AccountModel? newValue) {
@@ -294,7 +294,9 @@ class WithdrawPendingController extends BaseController{
   }
 
   void clearSearch() {
+    paginated.value=null;
     currentPage.value = 1;
+    itemsPerPage.value=25;
     selectedAccountId.value = 0;
     searchController.clear();
     searchedAccounts.clear();
@@ -816,7 +818,7 @@ class WithdrawPendingController extends BaseController{
         await FileSaver.instance.saveFile(
           name: fileName,
           bytes: excelBytes,
-          ext: 'xlsx',
+          fileExtension: 'xlsx',
           mimeType: MimeType.microsoftExcel,
         );
       }
@@ -1183,7 +1185,7 @@ class WithdrawPendingController extends BaseController{
         await FileSaver.instance.saveFile(
           name: "row_screenshot_${withdraw.id}",
           bytes: uint8List,
-          ext: 'png',
+          fileExtension: 'png',
           mimeType: MimeType.png,
         );
       }

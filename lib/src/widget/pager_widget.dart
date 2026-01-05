@@ -16,7 +16,7 @@ class PagerWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<String> listStr = (countPage/10).toString().split('.');
+    List<String> listStr = (countPage/25).toString().split('.');
     return Padding(
         padding: const EdgeInsets.all(8.0),
         child:   SizedBox(
@@ -25,7 +25,7 @@ class PagerWidget extends StatelessWidget {
             data: SfDataPagerThemeData(
                 itemColor: Colors.transparent,
                 selectedItemColor: AppColor.secondary3Color,
-                backgroundColor: AppColor.backGroundColor,
+                backgroundColor: AppColor.secondary10Color,
                 itemTextStyle:  AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
                 disabledItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor.withOpacity(0.5)),
                 selectedItemTextStyle: AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.textColor),
@@ -38,7 +38,7 @@ class PagerWidget extends StatelessWidget {
                 callBack(value+1);
               },
               delegate: DataPagerDelegate(),
-              direction: Axis.horizontal, pageCount:listStr.length>1? ((countPage.toDouble()/10)+1):(countPage.toDouble()/10),
+              direction: Axis.horizontal, pageCount:listStr.isNotEmpty? ((countPage.toDouble()/25)+1):(countPage.toDouble()/25),
             ),
           ):SizedBox(),
         )

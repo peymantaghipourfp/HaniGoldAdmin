@@ -1,17 +1,14 @@
 
-
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/const/socket.service.dart';
-import 'package:hanigold_admin/src/domain/product/model/socket_item.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/item.repository.dart';
 import '../model/item.model.dart';
+import './product.controller.dart';
 
 
 enum PageState{loading,err,empty,list}
@@ -249,6 +246,10 @@ class ProductEditController extends GetxController{
         clearList();
         fetchActiveItemList();
         fetchInactiveItemList();
+        // Notify main ProductController to refresh silently
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().refreshItemListsSilently();
+        }
       }
       return false;
     }catch(e){
@@ -285,6 +286,10 @@ class ProductEditController extends GetxController{
         clearList();
         fetchActiveItemList();
         fetchInactiveItemList();
+        // Notify main ProductController to refresh silently
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().refreshItemListsSilently();
+        }
       }
       return false;
     }catch(e){
@@ -310,6 +315,10 @@ class ProductEditController extends GetxController{
       );
       fetchActiveItemList();
       fetchInactiveItemList();
+      // Notify main ProductController to refresh silently
+      if (Get.isRegistered<ProductController>()) {
+        Get.find<ProductController>().refreshItemListsSilently();
+      }
       Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
           titleText: Text(response.infos?.first["title"],
             textAlign: TextAlign.center,
@@ -348,6 +357,10 @@ class ProductEditController extends GetxController{
         activeItemList.clear();
         clearList();
         fetchActiveItemList();
+        // Notify main ProductController to refresh silently
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().refreshItemListsSilently();
+        }
       }
       return false;
     }catch(e){
@@ -422,6 +435,10 @@ class ProductEditController extends GetxController{
         fetchGetOneItem(itemId.value);
         fetchActiveItemList();
         fetchInactiveItemList();
+        // Notify main ProductController to refresh silently
+        if (Get.isRegistered<ProductController>()) {
+          Get.find<ProductController>().refreshItemListsSilently();
+        }
       }
 
     } catch (e) {

@@ -1,5 +1,10 @@
 
+import 'dart:ui' as ui;
+
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
@@ -31,6 +36,7 @@ import '../../withdraw/model/bank_account_req.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/predicate.model.dart';
 import 'deposit_pending.controller.dart';
+import 'package:universal_html/html.dart' as html;
 
 enum PageState{loading,err,empty,list}
 
@@ -43,6 +49,7 @@ class DepositUpdateController extends GetxController{
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController accountController=TextEditingController();
   final TextEditingController amountController=TextEditingController();
+  final TextEditingController extraAmountController=TextEditingController();
   final TextEditingController numberController=TextEditingController();
   final TextEditingController cardNumberController=TextEditingController();
   final TextEditingController shebaController=TextEditingController();
@@ -255,7 +262,6 @@ class DepositUpdateController extends GetxController{
       final List<XFile?> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
         selectedImagesDesktop.addAll(images);
-
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
@@ -354,6 +360,7 @@ class DepositUpdateController extends GetxController{
           depositRequestId: depositRequests.value,
           //bankAccountId: selectedBankAccount.value?.id ?? 0,
           amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
+          extraAmount:extraAmountController.text.isEmpty ? 0 : double.parse(extraAmountController.text.replaceAll(',', '').toEnglishDigit()),
           accountId: deposit.value?.wallet?.account?.id ?? 0,
           accountName: deposit.value?.wallet?.account?.name ?? "",
           // bankId: selectedBankId.value,
@@ -367,6 +374,7 @@ class DepositUpdateController extends GetxController{
           status: statusId.value,
           trackingNumber: trackingNumberController.text,
         recId: getOneDeposit.value?.recId ?? "",
+        description: extraAmountController.text.isEmpty || extraAmountController.text=="0" ? "واریز به حساب: ${ownerNameController.text}" : "واریز به حساب: ${ownerNameController.text} - اضافه واریزی: ${extraAmountController.text}",
       );
 
       if(response!=null) {
@@ -405,7 +413,8 @@ class DepositUpdateController extends GetxController{
     selectedWalletId.value=deposit.wallet?.id ?? 0;
     depositRequests.value=deposit.depositRequest?.id ?? 0;
     amountController.text=deposit.amount.toString().seRagham(separator:  ',') ?? '';
-    // ownerNameController.text=deposit.bankAccount?.ownerName ?? '';
+    extraAmountController.text=deposit.extraAmount.toString().seRagham(separator:  ',') ?? '';
+    ownerNameController.text=deposit.ownerName ?? '';
     // numberController.text=deposit.bankAccount?.number.toString() ?? '';
     // cardNumberController.text=deposit.bankAccount?.cardNumber.toString() ?? '';
     // shebaController.text=deposit.bankAccount?.sheba.toString() ?? '';
@@ -460,6 +469,7 @@ class DepositUpdateController extends GetxController{
     accountController.clear();
     ownerNameController.clear();
     amountController.clear();
+    extraAmountController.clear();
     numberController.clear();
     cardNumberController.clear();
     shebaController.clear();
@@ -468,6 +478,36 @@ class DepositUpdateController extends GetxController{
     dateController.clear();
     selectedBankAccount.value=null;
 
+  }
+
+  Future<void> captureBalanceScreenshot(BuildContext context, GlobalKey balanceKey) async {
+    try {
+      RenderRepaintBoundary boundary = balanceKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        final pngBytes = byteData.buffer.asUint8List();
+        if (kIsWeb) {
+          final blob = html.Blob([pngBytes], 'image/png');
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..setAttribute('download', 'user_balance_screenshot_${accountController.text}.png')
+            ..click();
+          html.Url.revokeObjectUrl(url);
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        } else {
+          await FileSaver.instance.saveFile(
+            name: "user_balance_screenshot_${accountController.text}",
+            bytes: pngBytes,
+            fileExtension: 'png',
+            mimeType: MimeType.png,
+          );
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        }
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
+    }
   }
 
 }

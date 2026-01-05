@@ -42,6 +42,8 @@ DepositRequestModel _$DepositRequestModelFromJson(Map<String, dynamic> json) =>
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
       depositCount: (json['depositCount'] as num?)?.toInt(),
+      isSendTelegram: json['isSendTelegram'] as bool?,
+      isSendWhatsapp: json['isSendWhatsapp'] as bool?,
     );
 
 Map<String, dynamic> _$DepositRequestModelToJson(
@@ -66,4 +68,6 @@ Map<String, dynamic> _$DepositRequestModelToJson(
       'recId': instance.recId,
       'infos': instance.infos,
       'depositCount': instance.depositCount,
+      'isSendTelegram': instance.isSendTelegram,
+      'isSendWhatsapp': instance.isSendWhatsapp,
     };

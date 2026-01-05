@@ -150,7 +150,7 @@ class SocketService extends GetxService {
   void _handleMessage(dynamic data) {
     try {
       // Handle heartbeat response
-      if (data is String && data == 'pong') {
+      if (data is String && data == 'ping') {
         print('WebSocket: Heartbeat received');
         _lastHeartbeatResponse = DateTime.now();
         return;

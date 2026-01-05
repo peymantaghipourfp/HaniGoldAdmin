@@ -87,13 +87,13 @@ class ChatDialog extends StatelessWidget {
                         Icon(
                           Icons.chat_bubble_outline,
                           size: 64,
-                          color: AppColor.textColor.withOpacity(0.5),
+                          color: AppColor.textColor.withAlpha(130),
                         ),
                         const SizedBox(height: 16),
                         Text(
                           'هیچ گفتگویی یافت نشد',
                           style: AppTextStyle.bodyText.copyWith(
-                            color: AppColor.textColor.withOpacity(0.7),
+                            color: AppColor.textColor.withAlpha(175),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -159,10 +159,10 @@ class ChatDialog extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8,left: 10,right: 5),
       decoration: BoxDecoration(
-        color: isSelected ? AppColor.primaryColor.withOpacity(0.1) : Colors.transparent,
+        color: isSelected ? AppColor.primaryColor.withAlpha(25) : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
-          color: isSelected ? AppColor.primaryColor : AppColor.textColor.withOpacity(0.2),
+          color: isSelected ? AppColor.primaryColor : AppColor.textColor.withAlpha(50),
         ),
       ),
       child: ListTile(
@@ -191,7 +191,7 @@ class ChatDialog extends StatelessWidget {
               chatUser.lastMessageDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? '',
               style: AppTextStyle.bodyText.copyWith(
                 fontSize: 12,
-                color: AppColor.textColor.withOpacity(0.7),
+                color: AppColor.textColor.withAlpha(175),
               ),
             ),
             // Show current topic for this chat if selected and topic exists
@@ -342,15 +342,15 @@ class ChatDialog extends StatelessWidget {
                 style: AppTextStyle.bodyText.copyWith(color: AppColor.textColor),
                 decoration: InputDecoration(
                   hintText: 'جستجوی کاربر...',
-                  hintStyle: TextStyle(color: AppColor.textColor.withOpacity(0.7)),
+                  hintStyle: TextStyle(color: AppColor.textColor.withAlpha(175)),
                   prefixIcon: Icon(Icons.search, color: AppColor.textColor),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: AppColor.textColor.withOpacity(0.3)),
+                    borderSide: BorderSide(color: AppColor.textColor.withAlpha(80)),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
-                    borderSide: BorderSide(color: AppColor.textColor.withOpacity(0.3)),
+                    borderSide: BorderSide(color: AppColor.textColor.withAlpha(80)),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -372,7 +372,7 @@ class ChatDialog extends StatelessWidget {
                       child: Text(
                         'هیچ کاربری یافت نشد',
                         style: AppTextStyle.bodyText.copyWith(
-                          color: AppColor.textColor.withOpacity(0.7),
+                          color: AppColor.textColor.withAlpha(175),
                         ),
                       ),
                     );
@@ -401,21 +401,21 @@ class ChatDialog extends StatelessWidget {
                             account.name ?? 'کاربر ناشناس',
                             style: AppTextStyle.bodyText.copyWith(
                               fontWeight: FontWeight.bold,
-                              color: isInChatList ? AppColor.textColor.withOpacity(0.5) : AppColor.textColor,
+                              color: isInChatList ? AppColor.textColor.withAlpha(130) : AppColor.textColor,
                             ),
                           ),
                           trailing: isInChatList
                               ? Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             decoration: BoxDecoration(
-                              color: AppColor.textColor.withOpacity(0.2),
+                              color: AppColor.textColor.withAlpha(50),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
                               'در گفتگو',
                               style: AppTextStyle.bodyText.copyWith(
                                 fontSize: 10,
-                                color: AppColor.textColor.withOpacity(0.7),
+                                color: AppColor.textColor.withAlpha(175),
                               ),
                             ),
                           )
@@ -498,13 +498,13 @@ class ChatDialog extends StatelessWidget {
                           Icon(
                             Icons.topic_outlined,
                             size: 64,
-                            color: AppColor.textColor.withOpacity(0.5),
+                            color: AppColor.textColor.withAlpha(130),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'هیچ موضوعی یافت نشد',
                             style: AppTextStyle.bodyText.copyWith(
-                              color: AppColor.textColor.withOpacity(0.7),
+                              color: AppColor.textColor.withAlpha(175),
                             ),
                           ),
                         ],
@@ -538,7 +538,7 @@ class ChatDialog extends StatelessWidget {
                           topic.code ?? '',
                           style: AppTextStyle.bodyText.copyWith(
                             fontSize: 12,
-                            color: AppColor.textColor.withOpacity(0.7),
+                            color: AppColor.textColor.withAlpha(175),
                           ),
                         ),
                         trailing: Icon(
@@ -602,7 +602,7 @@ class ChatDialog extends StatelessWidget {
                           chatUser.lastMessageDate?.toPersianDate(twoDigits: true, showTime: true, timeSeprator: '-') ?? '',
                           style: AppTextStyle.bodyText.copyWith(
                             fontSize: 12,
-                            color: AppColor.textColor.withOpacity(0.7),
+                            color: AppColor.textColor.withAlpha(175),
                           ),
                         ),
                         // Show current topic for existing chats
@@ -666,9 +666,9 @@ class ChatDialog extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     margin: const EdgeInsets.only(bottom: 8),
                     decoration: BoxDecoration(
-                      color: AppColor.primaryColor.withOpacity(0.1),
+                      color: AppColor.primaryColor.withAlpha(25),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: AppColor.primaryColor.withOpacity(0.3)),
+                      border: Border.all(color: AppColor.primaryColor.withAlpha(75)),
                     ),
                     child: Row(
                       children: [
@@ -709,13 +709,13 @@ class ChatDialog extends StatelessWidget {
                           Icon(
                             Icons.chat_bubble_outline,
                             size: 64,
-                            color: AppColor.textColor.withOpacity(0.5),
+                            color: AppColor.textColor.withAlpha(130),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'هیچ پیامی در این گفتگو وجود ندارد',
                             style: AppTextStyle.bodyText.copyWith(
-                              color: AppColor.textColor.withOpacity(0.7),
+                              color: AppColor.textColor.withAlpha(175),
                             ),
                           ),
                         ],
@@ -777,14 +777,14 @@ class ChatDialog extends StatelessWidget {
                         hintText: controller.replyToMessage.value != null
                             ? 'پاسخ خود را بنویسید...'
                             : 'پیام خود را بنویسید...',
-                        hintStyle: TextStyle(color: AppColor.textColor.withOpacity(0.7)),
+                        hintStyle: TextStyle(color: AppColor.textColor.withAlpha(175)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide(color: AppColor.textColor.withOpacity(0.3)),
+                          borderSide: BorderSide(color: AppColor.textColor.withAlpha(75)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide(color: AppColor.textColor.withOpacity(0.3)),
+                          borderSide: BorderSide(color: AppColor.textColor.withAlpha(75)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
@@ -861,7 +861,7 @@ class ChatDialog extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: AppColor.primaryColor.withOpacity(0.1),
+                            color: AppColor.primaryColor.withAlpha(25),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Row(
@@ -906,13 +906,13 @@ class ChatDialog extends StatelessWidget {
                           Icon(
                             Icons.chat_bubble_outline,
                             size: 64,
-                            color: AppColor.textColor.withOpacity(0.5),
+                            color: AppColor.textColor.withAlpha(130),
                           ),
                           const SizedBox(height: 16),
                           Text(
                             'هیچ پیامی در این گفتگو وجود ندارد',
                             style: AppTextStyle.bodyText.copyWith(
-                              color: AppColor.textColor.withOpacity(0.7),
+                              color: AppColor.textColor.withAlpha(175),
                             ),
                           ),
                         ],
@@ -974,14 +974,14 @@ class ChatDialog extends StatelessWidget {
                         hintText: controller.replyToMessage.value != null
                             ? 'پاسخ خود را بنویسید...'
                             : 'پیام خود را بنویسید...',
-                        hintStyle: TextStyle(color: AppColor.textColor.withOpacity(0.7)),
+                        hintStyle: TextStyle(color: AppColor.textColor.withAlpha(175)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide(color: AppColor.textColor.withOpacity(0.3)),
+                          borderSide: BorderSide(color: AppColor.textColor.withAlpha(75)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
-                          borderSide: BorderSide(color: AppColor.textColor.withOpacity(0.3)),
+                          borderSide: BorderSide(color: AppColor.textColor.withAlpha(75)),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(25),
@@ -1025,7 +1025,7 @@ class ChatDialog extends StatelessWidget {
           if (!isFromCurrentUser) ...[
             CircleAvatar(
               radius: 16,
-              backgroundColor: AppColor.textColor.withOpacity(0.1),
+              backgroundColor: AppColor.textColor.withAlpha(25),
               child: Text(
                 message.fromUser?.name?.substring(0, 1).toUpperCase() ?? 'U',
                 style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold),
@@ -1042,7 +1042,7 @@ class ChatDialog extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 decoration: BoxDecoration(
-                  color: isFromCurrentUser ? Color(0xFF506E98) : AppColor.textColor.withOpacity(0.1),
+                  color: isFromCurrentUser ? Color(0xFF506E98) : AppColor.textColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(18),
                 ),
                 child: Column(
@@ -1058,13 +1058,13 @@ class ChatDialog extends StatelessWidget {
                           message.replyMessage?.id != null ?
                         BoxDecoration(
                           color: isFromCurrentUser
-                              ? Colors.white.withOpacity(0.1)
-                              : AppColor.primaryColor.withOpacity(0.1),
+                              ? Colors.white.withAlpha(25)
+                              : AppColor.primaryColor.withAlpha(25),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: isFromCurrentUser
-                                ? Colors.white.withOpacity(0.3)
-                                : AppColor.primaryColor.withOpacity(0.3),
+                                ? Colors.white.withAlpha(75)
+                                : AppColor.primaryColor.withAlpha(75),
                           ),
                         ): BoxDecoration(),
                         child: SizedBox(

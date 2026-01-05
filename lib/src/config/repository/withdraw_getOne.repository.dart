@@ -47,4 +47,35 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
       throw ErrorException('خطا در ریجیستر:$e');
     }
   }
+
+  Future<List< dynamic>> insertFromDeposit({
+    required int depositId,
+  })async{
+    try{
+
+      var response=await withdrawGetOneDio.get('Remittance/insertFromDeposit',queryParameters: {"id": depositId});
+      print('Status Code insertFromDeposit: ${response.statusCode}');
+      print('Response Data insertFromDeposit: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در برگشت واریزی:$e');
+    }
+  }
+
+  Future<List< dynamic>> changeExteraAmount({
+    required int depositId,
+  })async{
+    try{
+
+      var response=await withdrawGetOneDio.put('Deposit/changeExteraAmount',queryParameters: {"id": depositId});
+      print('Status Code changeExteraAmount: ${response.statusCode}');
+      print('Response Data changeExteraAmount: ${response.data}');
+      return response.data;
+    }
+    catch(e){
+      throw ErrorException('خطا در اضافه واریزی:$e');
+    }
+  }
+
 }

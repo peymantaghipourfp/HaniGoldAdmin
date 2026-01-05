@@ -1,5 +1,10 @@
 
+import 'dart:ui' as ui;
+
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
@@ -28,6 +33,7 @@ import '../../withdraw/model/options.model.dart';
 import '../../withdraw/model/bank_account_req.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/predicate.model.dart';
+import 'package:universal_html/html.dart' as html;
 
 enum PageState{loading,err,empty,list}
 
@@ -38,6 +44,7 @@ class DepositCreateController extends GetxController{
   final TextEditingController ownerNameController=TextEditingController();
   final TextEditingController accountController=TextEditingController();
   final TextEditingController amountController=TextEditingController();
+  final TextEditingController extraAmountController=TextEditingController();
   final TextEditingController numberController=TextEditingController();
   final TextEditingController cardNumberController=TextEditingController();
   final TextEditingController shebaController=TextEditingController();
@@ -107,6 +114,7 @@ class DepositCreateController extends GetxController{
   void onInit() {
     DepositRequestModel depositRequest=Get.arguments;
     accountController.text=depositRequest.account?.name ?? "";
+    ownerNameController.text=depositRequest.withdrawRequest?.ownerName ?? "";
     if(depositRequest.account?.id!=null){
       getBankAccount(depositRequest.account?.id ?? 0);
       fetchWallet(depositRequest.account?.id ?? 0);
@@ -210,10 +218,38 @@ class DepositCreateController extends GetxController{
     }
   }
 
+  Future<void> handleDroppedFiles(List<XFile> files) async {
+    try {
+      // Filter only image files
+      final imageFiles = files.where((file) {
+        // Use file.name instead of file.path for dropped files
+        final fileName = file.name.toLowerCase();
+        final extension = fileName.contains('.') ? fileName.split('.').last : '';
+
+        // Also check MIME type as a fallback
+        final mimeType = file.mimeType?.toLowerCase() ?? '';
+        final isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+        final isImageByMimeType = mimeType.startsWith('image/');
+
+        return isImageByExtension || isImageByMimeType;
+      }).toList();
+
+      if (imageFiles.isNotEmpty) {
+        selectedImagesDesktop.addAll(imageFiles);
+        Get.snackbar("موفقیت", "${imageFiles.length} تصویر اضافه شد");
+      } else {
+        Get.snackbar("خطا", "فقط فایل‌های تصویری قابل قبول هستند");
+      }
+    } catch (e) {
+      Get.snackbar("خطا", "خطا در پردازش فایل‌های رها شده");
+    }
+  }
+
   Future<void> uploadImagesDesktop( String type, String entityType,) async {
 
     recordId.value=uuid.v4();
     if (selectedImagesDesktop.isEmpty) {
+      //Get.snackbar("هشدار", "لیست تصاویر خالی است.");
       insertDeposit(recordId.value);
 
     } else{
@@ -266,6 +302,7 @@ class DepositCreateController extends GetxController{
         depositRequestId:depositRequest.id,
         //bankAccountId: selectedBankAccount.value?.id ?? 0,
         amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
+        extraAmount:extraAmountController.text.isEmpty ? 0 : double.parse(extraAmountController.text.replaceAll(',', '').toEnglishDigit()),
         accountId:depositRequest.account?.id ?? 0,
         //accountName: depositRequest.account?.name ?? "",
         // bankId: selectedBankId.value,
@@ -274,13 +311,14 @@ class DepositCreateController extends GetxController{
         // number: numberController.text,
         // cardNumber: cardNumberController.text,
         // sheba: shebaController.text,
+        description: extraAmountController.text.isEmpty || extraAmountController.text=="0" ? "واریز به حساب: ${ownerNameController.text}" : "واریز به حساب: ${ownerNameController.text} - اضافه واریزی: ${extraAmountController.text}",
         date: gregorianDate,
         trackingNumber: trackingNumberController.text,
         status: 1,
         recId:recId,
       );
       if(response.id!=null) {
-        Get.back();
+        //Get.back();
         Get.snackbar(response.infos?.first.title ?? "", response.infos?.first.description ?? "",
             titleText: Text(response.infos?.first.title ?? "",
               textAlign: TextAlign.center,
@@ -290,8 +328,12 @@ class DepositCreateController extends GetxController{
                 style: TextStyle(color: AppColor.textColor)));
       }
       withdrawController.getWithdrawListPager();
-      withdrawController.withdrawList.refresh();
+      //withdrawController.withdrawList.refresh();
       withdrawController.fetchDepositRequestList(depositRequest.withdrawRequest?.id ?? 0);
+      amountController.clear();
+      extraAmountController.clear();
+      trackingNumberController.clear();
+      selectedImagesDesktop.clear();
     }catch(e){
       EasyLoading.dismiss();
       throw ErrorException('خطا:$e');
@@ -328,6 +370,7 @@ class DepositCreateController extends GetxController{
     accountController.clear();
     ownerNameController.clear();
     amountController.clear();
+    extraAmountController.clear();
     numberController.clear();
     cardNumberController.clear();
     shebaController.clear();
@@ -336,6 +379,36 @@ class DepositCreateController extends GetxController{
     dateController.clear();
     selectedBankAccount.value=null;
 
+  }
+
+  Future<void> captureBalanceScreenshot(BuildContext context, GlobalKey balanceKey) async {
+    try {
+      RenderRepaintBoundary boundary = balanceKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        final pngBytes = byteData.buffer.asUint8List();
+        if (kIsWeb) {
+          final blob = html.Blob([pngBytes], 'image/png');
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..setAttribute('download', 'user_balance_screenshot_${accountController.text}.png')
+            ..click();
+          html.Url.revokeObjectUrl(url);
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        } else {
+          await FileSaver.instance.saveFile(
+            name: "user_balance_screenshot_${accountController.text}",
+            bytes: pngBytes,
+            fileExtension: 'png',
+            mimeType: MimeType.png,
+          );
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        }
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
+    }
   }
 
 }

@@ -119,10 +119,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           scaffoldBackgroundColor: AppColor.backGroundColor1,
           iconTheme: IconThemeData(color: AppColor.textColor),
           scrollbarTheme: ScrollbarThemeData().copyWith(
-            thumbColor: WidgetStateProperty.all(AppColor.dividerColor),
+            thumbColor: WidgetStateProperty.all(AppColor.secondaryColor.withAlpha(200)),
           ),
           textSelectionTheme: TextSelectionThemeData(
-            selectionColor: Colors.white.withOpacity(0.4),
+            selectionColor: Colors.white.withAlpha(100),
           )
       ),
       debugShowCheckedModeBanner: false,
@@ -154,10 +154,22 @@ void configLoading() {
     ..radius = 10.0
     ..progressColor = AppColor.accentColor
     ..backgroundColor = AppColor.secondary3Color
+    ..errorWidget = Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColor.errorColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Icon(
+        Icons.error,
+        color: AppColor.appBarColor,
+        size: 38,
+      ),
+    )
     ..indicatorColor = AppColor.backGroundColor1
     ..textColor = AppColor.backGroundColor1
-    ..maskColor = Colors.blue.withOpacity(0.5)
+    ..maskColor = AppColor.secondary200Color.withAlpha(60)
     ..textStyle=AppTextStyle.bodyText.copyWith(color: AppColor.backGroundColor1,fontWeight: FontWeight.bold)
     ..userInteractions = true
-    ..dismissOnTap = false;
+    ..dismissOnTap = true;
 }

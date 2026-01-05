@@ -1,25 +1,35 @@
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
+import 'package:file_saver/file_saver.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/bank.repository.dart';
 import '../../../config/repository/bank_account.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
 import '../../../config/repository/withdraw.repository.dart';
 import '../../../config/repository/withdraw_getOne.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
+import '../../order/model/tooltip_total_balance.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../model/bank.model.dart';
@@ -28,6 +38,7 @@ import '../model/bank_account_req.model.dart';
 import '../model/filter.model.dart';
 import '../model/options.model.dart';
 import '../model/predicate.model.dart';
+import 'package:universal_html/html.dart' as html;
 
 enum PageState{loading,err,empty,list}
 class WithdrawUpdateController extends GetxController{
@@ -52,6 +63,8 @@ class WithdrawUpdateController extends GetxController{
   final WalletRepository walletRepository=WalletRepository();
   UserInfoTransactionRepository userInfoTransactionRepository=UserInfoTransactionRepository();
   final WithdrawGetOneRepository withdrawGetOneRepository=WithdrawGetOneRepository();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
 
   final List<AccountModel> accountList=<AccountModel>[].obs;
   final List<BankModel> bankList=<BankModel>[].obs;
@@ -62,6 +75,11 @@ class WithdrawUpdateController extends GetxController{
   var errorMessage=''.obs;
   var isLoading=true.obs;
   var isLoadingBalance=true.obs;
+  RxBool isUploadingDesktop = false.obs;
+
+  // TooltipTotalBalanceModel state variables
+  final Rxn<TooltipTotalBalanceModel> tooltipTotalBalanceModel = Rxn<TooltipTotalBalanceModel>();
+  var isLoadingTooltipBalance = true.obs;
 
   final Rxn<AccountModel> selectedAccount = Rxn<AccountModel>();
   final Rxn<BankAccountModel> selectedBankAccount = Rxn<BankAccountModel>();
@@ -76,6 +94,13 @@ class WithdrawUpdateController extends GetxController{
   final RxInt withdrawId=0.obs;
   final RxInt statusId=0.obs;
   final Rxn<WithdrawModel> getOneWithdraw = Rxn<WithdrawModel>();
+  RxList<String> imageList = <String>[].obs;
+  RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
+  final ImagePicker _picker = ImagePicker();
+  var recordId="".obs;
+  var uuid = Uuid();
+  RxList<bool> uploadStatusesDesktop = RxList<bool>();
+  var dropdownError="".obs;
 
   void changeSelectedAccount(AccountModel? newValue) {
     selectedAccount.value = newValue;
@@ -87,20 +112,21 @@ class WithdrawUpdateController extends GetxController{
       //bankAccountList.clear();
       selectedWalletId.value = 0;
     }
-    getBalanceList(newValue?.id ?? 0);
+    getTooltipTotalBalance(newValue?.id ?? 0);
     isLoadingBalance.value=false;
     debounce?.cancel();
     update();
   }
 
-  changeSelectedBank(String newValue){
-    selectedIndex.value=newValue;
+  changeSelectedBank(BankModel? newValue){
+    selectedBank.value=newValue;
+    /*selectedIndex.value=newValue;
     selectedBankId.value=int.parse(newValue);
     for(int i=0 ;i<bankList.length;i++){
       if(selectedBankId.value==bankList[i].id){
         selectedBankName.value=bankList[i].name ?? "";
       }
-    }
+    }*/
     update();
     print(selectedBankName.value);
     print( selectedBankId.value);
@@ -139,7 +165,7 @@ class WithdrawUpdateController extends GetxController{
       if(existingWithdraw?.wallet?.account!=null){
         accountList.add(existingWithdraw!.wallet!.account!);
         searchedAccounts.add(existingWithdraw!.wallet!.account!);
-        getBalanceList(existingWithdraw?.wallet?.account?.id ?? 0);
+        getTooltipTotalBalance(existingWithdraw?.wallet?.account?.id ?? 0);
         selectedWalletId.value=existingWithdraw!.wallet!.id!;
       }
     }
@@ -155,6 +181,96 @@ class WithdrawUpdateController extends GetxController{
       });
     } else {
       resetAccountSearch();
+    }
+  }
+
+  Future<void> pickImageDesktop( ) async {
+    try{
+      final List<XFile?> images = await _picker.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesDesktop.addAll(images);
+
+      }
+    }catch(e){
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+
+  }
+
+  Future<void> uploadImagesDesktop( String type, String entityType,) async {
+
+    recordId.value=uuid.v4();
+    if (selectedImagesDesktop.isEmpty) {
+      updateWithdraw(recordId.value);
+    } else{
+      isUploadingDesktop.value = true;
+      uploadStatusesDesktop.assignAll(List.filled(selectedImagesDesktop.length, false));
+
+      try {
+        for (int i = 0; i < selectedImagesDesktop.length; i++) {
+          final file = selectedImagesDesktop[i];
+          if(file!=null) {
+            try{
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: existingWithdraw?.recId ?? "",
+                type: type,
+                entityType: entityType,
+              );
+
+              uploadStatusesDesktop[i] = success.isNotEmpty;
+            }catch(e){
+              Get.snackbar("خطا", "خطا در آپلود تصویر ${i + 1}");
+            }
+          }
+        }
+        if (uploadStatusesDesktop.every((status) => status)) {
+          Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+          updateWithdraw(recordId.value);
+          Get.back();
+        }
+      } finally {
+        isUploadingDesktop.value = false;
+        selectedImagesDesktop.clear();
+        uploadStatusesDesktop.clear();
+      }
+    }
+
+  }
+
+  Future<void> getImage(String fileName,String type) async{
+    print('تعداد image:');
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      print('تعداد image:${imageList.first}');
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
+  }
+
+  Future<void> deleteImage(String fileName,) async{
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    print('تعداد image:');
+    try{
+      var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
+      if(fetch){
+        getImage(existingWithdraw?.recId ??"", "WithdrawRequest");
+      }
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+      EasyLoading.dismiss();
     }
   }
 
@@ -319,7 +435,7 @@ class WithdrawUpdateController extends GetxController{
     }
   }
 
-  Future<WithdrawModel?> updateWithdraw() async {
+  Future<WithdrawModel?> updateWithdraw(String recId) async {
     if(withdrawId.value==0){
       return null;
     }
@@ -336,8 +452,8 @@ class WithdrawUpdateController extends GetxController{
           accountId: selectedAccount.value?.id ?? 0,
           accountName: selectedAccount.value?.name ?? "",
           //bankAccountId: selectedBankAccount.value?.id ?? 0,
-          bankId: selectedBankId.value,
-          bankName: selectedBankName.value,
+          bankId: selectedBank.value?.id ?? 0,
+          bankName: selectedBank.value?.name ?? "",
           ownerName: ownerNameController.text,
           amount: double.parse(amountController.text.replaceAll(',', '').toEnglishDigit()),
           number: numberController.text,
@@ -346,7 +462,8 @@ class WithdrawUpdateController extends GetxController{
           description: descriptionController.text,
           //date: "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
           date: gregorianDate,
-          status: statusId.value
+          status: statusId.value,
+        recId: existingWithdraw?.recId ?? "",
       );
 
       if(response!= null){
@@ -376,7 +493,7 @@ class WithdrawUpdateController extends GetxController{
     withdrawId.value=withdraw.id ?? 0;
     ownerNameController.text=withdraw.ownerName ?? '';
     amountController.text=withdraw.amount.toString().seRagham(separator:  ',') ?? '';
-    cardNumberController.text=withdraw.cardNumber==null ? "" : withdraw.cardNumber.toString() ?? '';
+    cardNumberController.text=withdraw.cardNumber==null ? "" : withdraw.cardNumber?.trim().toString() ?? '';
     numberController.text=withdraw.number==null ? "" : withdraw.number.toString() ?? '';
     shebaController.text=withdraw.sheba==null ? "" : withdraw.sheba.toString() ?? '';
     descriptionController.text=withdraw.description ?? '';
@@ -385,12 +502,14 @@ class WithdrawUpdateController extends GetxController{
     dateController.text=withdraw.requestDate?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? ''
     : dateController.text=withdraw.requestDate?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
     selectedAccount.value = withdraw.wallet?.account;
+    selectedBank.value=withdraw.bank;
+    getImage(existingWithdraw?.recId ?? '', "WithdrawRequest");
     print("selectedAccount.value:::::::::${selectedAccount.value}");
-    if (withdraw.bank?.id != null) {
+    /*if (withdraw.bank?.id != null) {
       selectedBankId.value = withdraw.bank!.id!;
       selectedBankName.value = withdraw.bank!.name!;
       selectedIndex.value = withdraw.bank?.id.toString();
-    }
+    }*/
 
     /*if (withdraw.bankAccount != null) {
       final bankAccountMatch = bankAccountList.firstWhereOrNull(
@@ -404,7 +523,7 @@ class WithdrawUpdateController extends GetxController{
   }
 
   // لیست بالانس
-  Future<void> getBalanceList(int id) async{
+  /*Future<void> getBalanceList(int id) async{
     print("getBalanceList : $id");
     balanceList.clear();
     try{
@@ -423,6 +542,27 @@ class WithdrawUpdateController extends GetxController{
       state.value=PageState.err;
     }finally{
     }
+  }*/
+
+  // دریافت تراز کامل کاربر
+  Future<void> getTooltipTotalBalance(int accountId) async {
+    print("getTooltipTotalBalance : $accountId");
+    if (accountId == 0) {
+      tooltipTotalBalanceModel.value = null;
+      isLoadingTooltipBalance.value = false;
+      return;
+    }
+    try {
+      isLoadingTooltipBalance.value = true;
+      final result = await withdrawController.getTooltipTotalBalance(accountId);
+      tooltipTotalBalanceModel.value = result;
+      print("TooltipTotalBalance fetched successfully");
+    } catch (e) {
+      print('Error fetching tooltip balance: $e');
+      tooltipTotalBalanceModel.value = null;
+    } finally {
+      isLoadingTooltipBalance.value = false;
+    }
   }
 
   void clearList(){
@@ -435,10 +575,42 @@ class WithdrawUpdateController extends GetxController{
     selectedAccount.value=null;
     selectedBankAccount.value=null;
     bankAccountList.clear();
+    tooltipTotalBalanceModel.value = null;
+    isLoadingTooltipBalance.value = true;
   }
   void resetAccountSearch() {
     searchController.clear();
     searchedAccounts.assignAll(accountList);
+  }
+
+  Future<void> captureBalanceScreenshot(BuildContext context, GlobalKey balanceKey) async {
+    try {
+      RenderRepaintBoundary boundary = balanceKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData != null) {
+        final pngBytes = byteData.buffer.asUint8List();
+        if (kIsWeb) {
+          final blob = html.Blob([pngBytes], 'image/png');
+          final url = html.Url.createObjectUrlFromBlob(blob);
+          final anchor = html.AnchorElement(href: url)
+            ..setAttribute('download', 'user_balance_screenshot_${selectedAccount.value?.name}.png')
+            ..click();
+          html.Url.revokeObjectUrl(url);
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        } else {
+          await FileSaver.instance.saveFile(
+            name: "user_balance_screenshot_${selectedAccount.value?.name}",
+            bytes: pngBytes,
+            fileExtension: 'png',
+            mimeType: MimeType.png,
+          );
+          Get.snackbar('موفق', 'اسکرین شات با موفقیت ذخیره شد.');
+        }
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'ثبت اسکرین شات ناموفق بود: $e');
+    }
   }
 
 }

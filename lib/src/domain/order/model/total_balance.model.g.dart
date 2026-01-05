@@ -8,6 +8,7 @@ part of 'total_balance.model.dart';
 
 TotalBalanceModel _$TotalBalanceModelFromJson(Map<String, dynamic> json) =>
     TotalBalanceModel(
+      itemId: (json['itemId'] as num?)?.toInt(),
       itemName: json['itemName'] as String?,
       itemGroupName: json['itemGroupName'] as String?,
       unitName: json['unitName'] as String?,
@@ -29,6 +30,7 @@ TotalBalanceModel _$TotalBalanceModelFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$TotalBalanceModelToJson(TotalBalanceModel instance) =>
     <String, dynamic>{
+      'itemId': instance.itemId,
       'itemName': instance.itemName,
       'itemGroupName': instance.itemGroupName,
       'unitName': instance.unitName,

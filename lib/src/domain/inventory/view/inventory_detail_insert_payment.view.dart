@@ -734,7 +734,7 @@ class _InventoryDetailInsertPaymentViewState
                             margin: EdgeInsets.symmetric(
                                 horizontal: 70, vertical: 10),
                             padding: EdgeInsets.symmetric(horizontal: 20),
-                            color: AppColor.appBarColor.withOpacity(0.5),
+                            color: AppColor.appBarColor.withAlpha(130),
                             alignment: Alignment.bottomCenter,
                             child: PagerWidget(
                               countPage: inventoryDetailInsertPaymentController

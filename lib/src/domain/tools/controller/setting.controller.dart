@@ -38,7 +38,7 @@ class SettingController extends GetxController {
       startTimeController.text = setting.value?.startTime ?? '';
       endTimeController.text = setting.value?.endTime ?? '';
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch settings');
+      Get.snackbar('خطا', 'خطا در نمایش تنظیمات');
     }
   }
 

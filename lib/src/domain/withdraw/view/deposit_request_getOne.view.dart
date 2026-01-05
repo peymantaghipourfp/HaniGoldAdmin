@@ -150,6 +150,25 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                         .center),
                                               ),
                                             ),
+                                            SizedBox(width: 40,),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment
+                                                  .end,
+                                              children: [
+                                                Text('تلگرام: ',
+                                                  style: AppTextStyle
+                                                      .labelText,),
+                                                getDepositRequest.isSendTelegram == true ?
+                                                Icon(Icons.check,
+                                                  color: AppColor
+                                                      .primaryColor,
+                                                  size: 20,) :
+                                                Icon(Icons.close,
+                                                  color: AppColor
+                                                      .accentColor,
+                                                  size: 20,)
+                                              ],
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -173,11 +192,16 @@ class DepositRequestGetOneView extends StatelessWidget {
                                       // مبلغ تعیین شده
                                       Padding(
                                         padding: const EdgeInsets.only(top: 10),
-                                        child: Row(
+                                        child: Row(mainAxisAlignment: MainAxisAlignment
+                                            .spaceBetween,
                                           children: [
                                             Text(
                                               'مبلغ کل: ${getDepositRequest.amount== null ? 0 :
                                               getDepositRequest.amount?.toInt().toString().seRagham(separator: ',') } ریال ',
+                                              style: AppTextStyle.bodyText,
+                                            ),
+                                            Text(
+                                              'نام صاحب حساب: ${getDepositRequest.withdrawRequest?.wallet?.account?.name ?? "" }',
                                               style: AppTextStyle.bodyText,
                                             ),
                                           ],
@@ -255,7 +279,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                               children: [
 
                                                 Card(
-                                                  color: AppColor.secondaryColor,
+                                                  color: getOneDeposit?.registered==true ? AppColor.primaryColor.withAlpha(40) : getOneDeposit?.status==4 ? AppColor.accentColor.withAlpha(40) : AppColor.secondaryColor,
                                                   elevation: 0,
                                                   child: Padding(
                                                     padding: const EdgeInsets.only(
@@ -288,252 +312,353 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                   //EasyLoading.dismiss();
                                                                 },
                                                               ),
-                                                              Text(
+                                                              SizedBox(width: 10,),
+                                                              // مبلغ واریز شده
+                                                              Expanded(
+                                                                child: SizedBox(
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        'مبلغ: ',
+                                                                        style:
+                                                                        AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold,fontSize: 13),
+                                                                      ),
+                                                                      Text(
+                                                                        ' ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
+                                                                        style:
+                                                                        AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              // اضافه واریزی
+                                                              Expanded(
+                                                                child: SizedBox(
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Text(
+                                                                        'اضافه واریزی: ',
+                                                                        style:
+                                                                        AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold,fontSize: 13),
+                                                                      ),
+                                                                      Text(
+                                                                        ' ${getOneDeposit?.extraAmount == null ? 0 : getOneDeposit?.extraAmount?.toInt().toString().seRagham(separator: ',')} ریال ',
+                                                                        style:
+                                                                        AppTextStyle.bodyText.copyWith(color: AppColor.dividerColor),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              /*Text(
                                                                 'مبلغ: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
                                                                 style:
                                                                 AppTextStyle.bodyText,
-                                                              ),
-                                                              // نمایش عکس
-                                                              GestureDetector(
-                                                                onTap: () async{
-                                                                  await depositRequestGetOneController.getImage(getOneDeposit?.recId ??"", "Deposit");
-                                                                  Future.delayed(const Duration(milliseconds: 200), () {
-                                                                    showDialog(
-                                                                      context: context,
-                                                                      builder: (BuildContext context) {
-                                                                        return Dialog(
-                                                                          backgroundColor: AppColor
-                                                                              .backGroundColor,
-                                                                          shape: RoundedRectangleBorder(
-                                                                            borderRadius: BorderRadius
-                                                                                .circular(
-                                                                                10),
+                                                              ),*/
+                                                              // نمایش عکس و ارسال تلگرام
+                                                              Row(
+                                                                children: [
+                                                                  // ارسال تلگرام
+                                                                  GestureDetector(
+                                                                    onTap: () {
+                                                                      getOneDeposit?.isSendTelegram == true ?
+                                                                      Get.defaultDialog(
+                                                                          backgroundColor: AppColor.backGroundColor,
+                                                                          title: "ارسال مجدد",
+                                                                          titleStyle: AppTextStyle.smallTitleText.copyWith(color: AppColor.errorColor),
+                                                                          middleText: "آیا از ارسال مجدد واریزی مطمئن هستید؟",
+                                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                                          confirm: ElevatedButton(
+                                                                              style: ButtonStyle(
+                                                                                  backgroundColor: WidgetStatePropertyAll(
+                                                                                      AppColor.primaryColor)),
+                                                                              onPressed: () {
+                                                                                Get.back();
+                                                                                depositRequestGetOneController.sendTelegramDeposit(getOneDeposit?.id ?? 0);
+                                                                              },
+                                                                              child: Text(
+                                                                                'ارسال مجدد',
+                                                                                style: AppTextStyle.bodyText,
+                                                                              ))
+                                                                      ) :
+                                                                      Get.defaultDialog(
+                                                                          backgroundColor: AppColor.backGroundColor,
+                                                                          title: "ارسال به تلگرام",
+                                                                          titleStyle: AppTextStyle.smallTitleText.copyWith(color: Color(0xff0ab6f0)),
+                                                                          middleText: "آیا از ارسال واریزی مطمئن هستید؟",
+                                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                                          confirm: ElevatedButton(
+                                                                              style: ButtonStyle(
+                                                                                  backgroundColor: WidgetStatePropertyAll(
+                                                                                      AppColor.primaryColor)),
+                                                                              onPressed: () {
+                                                                                Get.back();
+                                                                                depositRequestGetOneController.sendTelegramDeposit(getOneDeposit?.id ?? 0);
+                                                                              },
+                                                                              child: Text(
+                                                                                'ارسال',
+                                                                                style: AppTextStyle.bodyText,
+                                                                              ))
+                                                                      );
+                                                                    },
+                                                                    child: Tooltip(
+                                                                      message: getOneDeposit?.isSendTelegram == true ?  "ارسال مجدد واریزی به تلگرام" : "ارسال واریزی به تلگرام",
+                                                                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Text(' ارسال',style: AppTextStyle.labelText.copyWith(color: getOneDeposit?.isSendTelegram == true ? AppColor.successColor : Color(0xff0ab6f0), fontSize: 11,fontWeight: FontWeight.w400),),
+                                                                          SvgPicture.asset(
+                                                                            'assets/svg/telegram.svg',height: 20,
+                                                                            colorFilter: ColorFilter.mode(getOneDeposit?.isSendTelegram == true ? AppColor.successColor : Color(0xff0ab6f0), BlendMode.srcIn) ,
                                                                           ),
-                                                                          child: Container(
-                                                                            padding: EdgeInsets
-                                                                                .all(
-                                                                                8),
-                                                                            child: Column(
-                                                                              mainAxisSize: MainAxisSize
-                                                                                  .min,
-                                                                              children: [
-                                                                                // نمایش اسلایدی عکس‌ها
-                                                                                SizedBox(
-                                                                                  width: 500,
-                                                                                  height: 500,
-                                                                                  child: Stack(
-                                                                                    children: [
-                                                                                      PageView.builder(
-                                                                                        controller: depositRequestGetOneController
-                                                                                            .pageController,
-                                                                                        itemCount: depositRequestGetOneController.imageList.length,
-                                                                                        onPageChanged: (index) =>
-                                                                                        depositRequestGetOneController
-                                                                                            .currentImagePage
-                                                                                            .value =
-                                                                                            index,
-                                                                                        itemBuilder: (context,
-                                                                                            index) {
-                                                                                          final attachment = depositRequestGetOneController.imageList[index];
-                                                                                          return Column(
-                                                                                            children: [
-                                                                                              if (kIsWeb)
-                                                                                                Padding(
-                                                                                                  padding: const EdgeInsets.only(right: 50),
-                                                                                                  child: Row(mainAxisAlignment: MainAxisAlignment.start,
-                                                                                                    children: [
-                                                                                                      IconButton(
-                                                                                                        icon: Icon(Icons.download, color: AppColor.dividerColor),
-                                                                                                        onPressed: () => depositRequestGetOneController.downloadImage(
-                                                                                                          attachment,
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(width: 10,),
+                                                                  // عکس
+                                                                  GestureDetector(
+                                                                    onTap: () async{
+                                                                      await depositRequestGetOneController.getImage(getOneDeposit?.recId ??"", "Deposit");
+                                                                      Future.delayed(const Duration(milliseconds: 200), () {
+                                                                        showDialog(
+                                                                          context: context,
+                                                                          builder: (BuildContext context) {
+                                                                            return Dialog(
+                                                                              backgroundColor: AppColor
+                                                                                  .backGroundColor,
+                                                                              shape: RoundedRectangleBorder(
+                                                                                borderRadius: BorderRadius
+                                                                                    .circular(
+                                                                                    10),
+                                                                              ),
+                                                                              child: Container(
+                                                                                padding: EdgeInsets
+                                                                                    .all(
+                                                                                    8),
+                                                                                child: Column(
+                                                                                  mainAxisSize: MainAxisSize
+                                                                                      .min,
+                                                                                  children: [
+                                                                                    // نمایش اسلایدی عکس‌ها
+                                                                                    SizedBox(
+                                                                                      width: 500,
+                                                                                      height: 500,
+                                                                                      child: Stack(
+                                                                                        children: [
+                                                                                          PageView.builder(
+                                                                                            controller: depositRequestGetOneController
+                                                                                                .pageController,
+                                                                                            itemCount: depositRequestGetOneController.imageList.length,
+                                                                                            onPageChanged: (index) =>
+                                                                                            depositRequestGetOneController
+                                                                                                .currentImagePage
+                                                                                                .value =
+                                                                                                index,
+                                                                                            itemBuilder: (context,
+                                                                                                index) {
+                                                                                              final attachment = depositRequestGetOneController.imageList[index];
+                                                                                              return Column(
+                                                                                                children: [
+                                                                                                  if (kIsWeb)
+                                                                                                    Padding(
+                                                                                                      padding: const EdgeInsets.only(right: 50),
+                                                                                                      child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                        children: [
+                                                                                                          IconButton(
+                                                                                                            icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                                                                            onPressed: () => depositRequestGetOneController.downloadImage(
+                                                                                                              attachment,
+                                                                                                            ),
+                                                                                                          ),
+                                                                                                        ],
+                                                                                                      ),
+                                                                                                    ),
+                                                                                                  SizedBox(
+                                                                                                    width: 450,
+                                                                                                    height: 450,
+                                                                                                    child: Image.network(
+                                                                                                      "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                                                      loadingBuilder: (context,
+                                                                                                          child,
+                                                                                                          loadingProgress) {
+                                                                                                        if (loadingProgress ==
+                                                                                                            null)
+                                                                                                          return child;
+                                                                                                        return Center(
+                                                                                                          child: CircularProgressIndicator(),
+                                                                                                        );
+                                                                                                      },
+                                                                                                      errorBuilder: (context,
+                                                                                                          error,
+                                                                                                          stackTrace) =>
+                                                                                                          Icon(
+                                                                                                              Icons
+                                                                                                                  .error,
+                                                                                                              color: Colors
+                                                                                                                  .red),
+                                                                                                      fit: BoxFit.contain,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                ],
+                                                                                              );
+                                                                                            },
+                                                                                          ),
+                                                                                          SizedBox(
+                                                                                            height: 2,),
+                                                                                          Obx(() {
+                                                                                            return Positioned(
+                                                                                                left: 10,
+                                                                                                top: 0,
+                                                                                                bottom: 0,
+                                                                                                child: Visibility(
+                                                                                                  visible: depositRequestGetOneController
+                                                                                                      .currentImagePage.value > 0,
+                                                                                                  child: IconButton(
+                                                                                                    style: ButtonStyle(
+                                                                                                      backgroundColor: WidgetStateProperty
+                                                                                                          .all(Colors.black54),
+                                                                                                      shape: WidgetStateProperty.all(
+                                                                                                          CircleBorder()),
+                                                                                                      padding: WidgetStateProperty.all(
+                                                                                                          EdgeInsets.all(8)),
+                                                                                                    ),
+                                                                                                    icon: Icon(Icons.chevron_left,
+                                                                                                      color: Colors.white,
+                                                                                                      size: 40,
+                                                                                                      shadows: [
+                                                                                                        Shadow(
+                                                                                                          blurRadius: 10,
+                                                                                                          color: Colors.black,
+                                                                                                          offset: Offset(0, 0),
+                                                                                                        )
+                                                                                                      ],
+                                                                                                    ),
+                                                                                                    onPressed: () {
+                                                                                                      depositRequestGetOneController.pageController
+                                                                                                          .previousPage(
+                                                                                                        duration: Duration(
+                                                                                                            milliseconds: 300),
+                                                                                                        curve: Curves.easeInOut,
+                                                                                                      );
+                                                                                                    },
+                                                                                                  ),
+                                                                                                )
+                                                                                            );
+                                                                                          }),
+                                                                                          Obx(() {
+                                                                                            return Positioned(
+                                                                                                right: 10,
+                                                                                                top: 0,
+                                                                                                bottom: 0,
+                                                                                                child: Visibility(
+                                                                                                  visible: depositRequestGetOneController
+                                                                                                      .currentImagePage.value <
+                                                                                                      (depositRequestGetOneController.imageList.length ?? 1) -
+                                                                                                          1,
+                                                                                                  child: IconButton(
+                                                                                                    style: ButtonStyle(
+                                                                                                      backgroundColor: WidgetStateProperty
+                                                                                                          .all(Colors.black54),
+                                                                                                      shape: WidgetStateProperty.all(
+                                                                                                          CircleBorder()),
+                                                                                                      padding: WidgetStateProperty.all(
+                                                                                                          EdgeInsets.all(8)),
+                                                                                                    ),
+                                                                                                    icon: Icon(Icons.chevron_right,
+                                                                                                      color: Colors.white,
+                                                                                                      size: 40,
+                                                                                                      shadows: [
+                                                                                                        Shadow(
+                                                                                                          blurRadius: 10,
+                                                                                                          color: Colors.black,
+                                                                                                          offset: Offset(0, 0),
+                                                                                                        ),
+                                                                                                      ],
+                                                                                                    ),
+                                                                                                    onPressed: () {
+                                                                                                      depositRequestGetOneController.pageController
+                                                                                                          .nextPage(
+                                                                                                        duration: Duration(
+                                                                                                            milliseconds: 300),
+                                                                                                        curve: Curves.easeInOut,
+                                                                                                      );
+                                                                                                    },
+                                                                                                  ),
+                                                                                                )
+                                                                                            );
+                                                                                          }),
+                                                                                          SizedBox(
+                                                                                            height: 2,),
+                                                                                          // نمایش نقاط راهنما
+                                                                                          Obx(() =>
+                                                                                              Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment
+                                                                                                    .center,
+                                                                                                children: List
+                                                                                                    .generate(
+                                                                                                  depositRequestGetOneController.imageList.length,
+                                                                                                      (index) =>
+                                                                                                      Container(
+                                                                                                        width: 8,
+                                                                                                        height: 8,
+                                                                                                        margin: EdgeInsets
+                                                                                                            .symmetric(
+                                                                                                            horizontal: 4),
+                                                                                                        decoration: BoxDecoration(
+                                                                                                          shape: BoxShape
+                                                                                                              .circle,
+                                                                                                          color: depositRequestGetOneController
+                                                                                                              .currentImagePage
+                                                                                                              .value ==
+                                                                                                              index
+                                                                                                              ? Colors
+                                                                                                              .blue
+                                                                                                              : Colors
+                                                                                                              .grey,
                                                                                                         ),
                                                                                                       ),
-                                                                                                    ],
-                                                                                                  ),
                                                                                                 ),
-                                                                                              SizedBox(
-                                                                                                width: 450,
-                                                                                                height: 450,
-                                                                                                child: Image.network(
-                                                                                                  "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
-                                                                                                  loadingBuilder: (context,
-                                                                                                      child,
-                                                                                                      loadingProgress) {
-                                                                                                    if (loadingProgress ==
-                                                                                                        null)
-                                                                                                      return child;
-                                                                                                    return Center(
-                                                                                                      child: CircularProgressIndicator(),
-                                                                                                    );
-                                                                                                  },
-                                                                                                  errorBuilder: (context,
-                                                                                                      error,
-                                                                                                      stackTrace) =>
-                                                                                                      Icon(
-                                                                                                          Icons
-                                                                                                              .error,
-                                                                                                          color: Colors
-                                                                                                              .red),
-                                                                                                  fit: BoxFit.contain,
-                                                                                                ),
-                                                                                              ),
-                                                                                            ],
-                                                                                          );
-                                                                                        },
+                                                                                              )),
+                                                                                          SizedBox(
+                                                                                              height: 10),
+                                                                                        ],
                                                                                       ),
-                                                                                      SizedBox(
-                                                                                        height: 2,),
-                                                                                      Obx(() {
-                                                                                        return Positioned(
-                                                                                            left: 10,
-                                                                                            top: 0,
-                                                                                            bottom: 0,
-                                                                                            child: Visibility(
-                                                                                              visible: depositRequestGetOneController
-                                                                                                  .currentImagePage.value > 0,
-                                                                                              child: IconButton(
-                                                                                                style: ButtonStyle(
-                                                                                                  backgroundColor: WidgetStateProperty
-                                                                                                      .all(Colors.black54),
-                                                                                                  shape: WidgetStateProperty.all(
-                                                                                                      CircleBorder()),
-                                                                                                  padding: WidgetStateProperty.all(
-                                                                                                      EdgeInsets.all(8)),
-                                                                                                ),
-                                                                                                icon: Icon(Icons.chevron_left,
-                                                                                                  color: Colors.white,
-                                                                                                  size: 40,
-                                                                                                  shadows: [
-                                                                                                    Shadow(
-                                                                                                      blurRadius: 10,
-                                                                                                      color: Colors.black,
-                                                                                                      offset: Offset(0, 0),
-                                                                                                    )
-                                                                                                  ],
-                                                                                                ),
-                                                                                                onPressed: () {
-                                                                                                  depositRequestGetOneController.pageController
-                                                                                                      .previousPage(
-                                                                                                    duration: Duration(
-                                                                                                        milliseconds: 300),
-                                                                                                    curve: Curves.easeInOut,
-                                                                                                  );
-                                                                                                },
-                                                                                              ),
-                                                                                            )
-                                                                                        );
-                                                                                      }),
-                                                                                      Obx(() {
-                                                                                        return Positioned(
-                                                                                            right: 10,
-                                                                                            top: 0,
-                                                                                            bottom: 0,
-                                                                                            child: Visibility(
-                                                                                              visible: depositRequestGetOneController
-                                                                                                  .currentImagePage.value <
-                                                                                                  (depositRequestGetOneController.imageList.length ?? 1) -
-                                                                                                      1,
-                                                                                              child: IconButton(
-                                                                                                style: ButtonStyle(
-                                                                                                  backgroundColor: WidgetStateProperty
-                                                                                                      .all(Colors.black54),
-                                                                                                  shape: WidgetStateProperty.all(
-                                                                                                      CircleBorder()),
-                                                                                                  padding: WidgetStateProperty.all(
-                                                                                                      EdgeInsets.all(8)),
-                                                                                                ),
-                                                                                                icon: Icon(Icons.chevron_right,
-                                                                                                  color: Colors.white,
-                                                                                                  size: 40,
-                                                                                                  shadows: [
-                                                                                                    Shadow(
-                                                                                                      blurRadius: 10,
-                                                                                                      color: Colors.black,
-                                                                                                      offset: Offset(0, 0),
-                                                                                                    ),
-                                                                                                  ],
-                                                                                                ),
-                                                                                                onPressed: () {
-                                                                                                  depositRequestGetOneController.pageController
-                                                                                                      .nextPage(
-                                                                                                    duration: Duration(
-                                                                                                        milliseconds: 300),
-                                                                                                    curve: Curves.easeInOut,
-                                                                                                  );
-                                                                                                },
-                                                                                              ),
-                                                                                            )
-                                                                                        );
-                                                                                      }),
-                                                                                      SizedBox(
-                                                                                        height: 2,),
-                                                                                      // نمایش نقاط راهنما
-                                                                                      Obx(() =>
-                                                                                          Row(
-                                                                                            mainAxisAlignment: MainAxisAlignment
-                                                                                                .center,
-                                                                                            children: List
-                                                                                                .generate(
-                                                                                              depositRequestGetOneController.imageList.length,
-                                                                                                  (index) =>
-                                                                                                  Container(
-                                                                                                    width: 8,
-                                                                                                    height: 8,
-                                                                                                    margin: EdgeInsets
-                                                                                                        .symmetric(
-                                                                                                        horizontal: 4),
-                                                                                                    decoration: BoxDecoration(
-                                                                                                      shape: BoxShape
-                                                                                                          .circle,
-                                                                                                      color: depositRequestGetOneController
-                                                                                                          .currentImagePage
-                                                                                                          .value ==
-                                                                                                          index
-                                                                                                          ? Colors
-                                                                                                          .blue
-                                                                                                          : Colors
-                                                                                                          .grey,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                            ),
-                                                                                          )),
-                                                                                      SizedBox(
-                                                                                          height: 10),
-                                                                                    ],
-                                                                                  ),
+                                                                                    ),
+                                                                                    TextButton(
+                                                                                      onPressed: () =>
+                                                                                          Get
+                                                                                              .back(),
+                                                                                      child: Text(
+                                                                                        "بستن",
+                                                                                        style: AppTextStyle
+                                                                                            .bodyText,),
+                                                                                    ),
+                                                                                  ],
                                                                                 ),
-                                                                                TextButton(
-                                                                                  onPressed: () =>
-                                                                                      Get
-                                                                                          .back(),
-                                                                                  child: Text(
-                                                                                    "بستن",
-                                                                                    style: AppTextStyle
-                                                                                        .bodyText,),
-                                                                                ),
-                                                                              ],
-                                                                            ),
-                                                                          ),
+                                                                              ),
+                                                                            );
+                                                                          },
                                                                         );
-                                                                      },
-                                                                    );
 
-                                                                  });
+                                                                      });
 
 
-                                                                },
-                                                                child: Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                                  children: [
-                                                                    SvgPicture.asset('assets/svg/picture.svg',height: 20,
-                                                                        colorFilter: ColorFilter.mode(
+                                                                    },
+                                                                    child: Row(
+                                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                                      children: [
+                                                                        SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                                                                            colorFilter: ColorFilter.mode(
 
-                                                                          AppColor.textColor,
+                                                                              AppColor.textColor,
 
-                                                                          BlendMode.srcIn,
-                                                                        )),
-                                                                  ],
-                                                                ),
+                                                                              BlendMode.srcIn,
+                                                                            )),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                ],
                                                               ),
                                                             ],
                                                           ),
@@ -546,47 +671,80 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                           child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                             children: [
                                                               // وضعیت
-                                                              Card(
-                                                                shape: RoundedRectangleBorder(
-                                                                  borderRadius: BorderRadius
-                                                                      .circular(
-                                                                      5),
-                                                                ),
-                                                                color: getOneDeposit?.status ==
-                                                                    2
-                                                                    ? AppColor
-                                                                    .accentColor
-                                                                    : getOneDeposit
-                                                                    ?.status ==
-                                                                    1
-                                                                    ? AppColor
-                                                                    .primaryColor
-                                                                    : AppColor
-                                                                    .secondaryColor
-                                                                ,
-                                                                margin: EdgeInsets
-                                                                    .symmetric(
-                                                                    vertical: 0,
-                                                                    horizontal: 5),
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets
-                                                                      .all(
-                                                                      2),
-                                                                  child: Text(
-                                                                      getOneDeposit
-                                                                          ?.status ==
-                                                                          2
-                                                                          ? 'تایید نشده'
-                                                                          : getOneDeposit
-                                                                          ?.status ==
-                                                                          1
-                                                                          ? 'تایید شده'
-                                                                          : 'در انتظار',
-                                                                      style: AppTextStyle
-                                                                          .labelText,
-                                                                      textAlign: TextAlign
-                                                                          .center),
-                                                                ),
+                                                              Row(
+                                                                children: [
+                                                                  Card(
+                                                                    shape: RoundedRectangleBorder(
+                                                                      borderRadius: BorderRadius
+                                                                          .circular(
+                                                                          5),
+                                                                    ),
+                                                                    color: getOneDeposit?.status ==
+                                                                        2
+                                                                        ? AppColor
+                                                                        .accentColor
+                                                                        : getOneDeposit
+                                                                        ?.status ==
+                                                                        1
+                                                                        ? AppColor
+                                                                        .primaryColor
+                                                                        : getOneDeposit
+                                                                        ?.status ==
+                                                                        4
+                                                                        ? AppColor
+                                                                        .accentColor
+                                                                        : AppColor
+                                                                        .secondaryColor
+                                                                    ,
+                                                                    margin: EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical: 0,
+                                                                        horizontal: 5),
+                                                                    child: Padding(
+                                                                      padding: const EdgeInsets
+                                                                          .all(
+                                                                          2),
+                                                                      child: Text(
+                                                                          getOneDeposit
+                                                                              ?.status ==
+                                                                              2
+                                                                              ? 'تایید نشده'
+                                                                              : getOneDeposit
+                                                                              ?.status ==
+                                                                              1
+                                                                              ? 'تایید شده'
+                                                                              : getOneDeposit
+                                                                              ?.status ==
+                                                                              4
+                                                                              ? 'برگشتی'
+                                                                              : 'در انتظار',
+                                                                          style: AppTextStyle
+                                                                              .labelText,
+                                                                          textAlign: TextAlign
+                                                                              .center),
+                                                                    ),
+                                                                  ),
+                                                                  SizedBox(width: 10,),
+                                                                  // تلگرام
+                                                                  Row(
+                                                                    mainAxisAlignment: MainAxisAlignment
+                                                                        .end,
+                                                                    children: [
+                                                                      Text('تلگرام: ',
+                                                                        style: AppTextStyle
+                                                                            .labelText,),
+                                                                      getOneDeposit?.isSendTelegram == true ?
+                                                                      Icon(Icons.check,
+                                                                        color: AppColor
+                                                                            .primaryColor,
+                                                                        size: 20,) :
+                                                                      Icon(Icons.close,
+                                                                        color: AppColor
+                                                                            .accentColor,
+                                                                        size: 20,)
+                                                                    ],
+                                                                  ),
+                                                                ],
                                                               ),
                                                               // کد رهگیری
                                                               Row(
@@ -600,6 +758,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                 ],
                                                               ),
                                                               // آیکون ویرایش و آیکون حذف کردن
+                                                              getOneDeposit?.status==4 ? SizedBox.shrink() :
                                                               Row(
                                                                 children: [
                                                                   GestureDetector(
@@ -740,12 +899,11 @@ class DepositRequestGetOneView extends StatelessWidget {
                     )
                       :
                   SizedBox(
-                    width: Get.width*0.9,
-                    height: Get.height,
+                    /*width: Get.width*0.95,
+                    height: Get.height,*/
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: SingleChildScrollView(
-                        child: Obx(() {
+                      child: Obx(() {
                           var getDepositRequest =
                               depositRequestGetOneController.getOneDepositRequest.value;
                           if (depositRequestGetOneController.state.value ==
@@ -767,8 +925,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                               return Center(child: Text('اطلاعات واریزی یافت نشد'));
                             }
                             return
-                            SingleChildScrollView(
-                              child: Column(
+                             Column(mainAxisSize: MainAxisSize.min,
                                 children: [
                                   // اطلاعات واریزی
                                   Card(
@@ -778,7 +935,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                     child: Padding(
                                       padding: const EdgeInsets.only(
                                           top: 5, left: 10, right: 10, bottom: 10),
-                                      child: Column(
+                                      child: Column(mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Padding(
                                             padding: const EdgeInsets.only(bottom: 10),
@@ -808,46 +965,69 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                   style: AppTextStyle.bodyText,
                                                 ),
                                                 SizedBox(width: 40,),
-                                                Text(
-                                                  'وضعیت: ',
-                                                  style: AppTextStyle.bodyText,
+                                                Row(
+                                                  children: [
+                                                    Text(
+                                                      'وضعیت: ',
+                                                      style: AppTextStyle.bodyText,
+                                                    ),
+                                                    Card(
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(5),
+                                                      ),
+                                                      color: getDepositRequest
+                                                          .status ==
+                                                          2
+                                                          ? AppColor
+                                                          .accentColor
+                                                          : getDepositRequest
+                                                          .status ==
+                                                          1
+                                                          ? AppColor
+                                                          .primaryColor
+                                                          : AppColor
+                                                          .secondaryColor
+                                                      ,
+                                                      margin: EdgeInsets.symmetric(
+                                                          vertical: 0, horizontal: 5),
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.all(2),
+                                                        child: Text(
+                                                            getDepositRequest
+                                                                .status ==
+                                                                2
+                                                                ? 'تایید نشده'
+                                                                : getDepositRequest
+                                                                .status ==
+                                                                1
+                                                                ? 'تایید شده'
+                                                                : 'در انتظار',
+                                                            style: AppTextStyle
+                                                                .labelText,
+                                                            textAlign: TextAlign
+                                                                .center),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
-                                                Card(
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(5),
-                                                  ),
-                                                  color: getDepositRequest
-                                                      .status ==
-                                                      2
-                                                      ? AppColor
-                                                      .accentColor
-                                                      : getDepositRequest
-                                                      .status ==
-                                                      1
-                                                      ? AppColor
-                                                      .primaryColor
-                                                      : AppColor
-                                                      .secondaryColor
-                                                  ,
-                                                  margin: EdgeInsets.symmetric(
-                                                      vertical: 0, horizontal: 5),
-                                                  child: Padding(
-                                                    padding: const EdgeInsets.all(2),
-                                                    child: Text(
-                                                        getDepositRequest
-                                                            .status ==
-                                                            2
-                                                            ? 'تایید نشده'
-                                                            : getDepositRequest
-                                                            .status ==
-                                                            1
-                                                            ? 'تایید شده'
-                                                            : 'در انتظار',
-                                                        style: AppTextStyle
-                                                            .labelText,
-                                                        textAlign: TextAlign
-                                                            .center),
-                                                  ),
+                                                SizedBox(width: 30,),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment
+                                                      .end,
+                                                  children: [
+                                                    Text('تلگرام: ',
+                                                      style: AppTextStyle
+                                                          .labelText,),
+                                                    getDepositRequest.isSendTelegram == true ?
+                                                    Icon(Icons.check,
+                                                      color: AppColor
+                                                          .primaryColor,
+                                                      size: 20,) :
+                                                    Icon(Icons.close,
+                                                      color: AppColor
+                                                          .accentColor,
+                                                      size: 20,)
+                                                  ],
                                                 ),
                                               ],
                                             ),
@@ -860,7 +1040,11 @@ class DepositRequestGetOneView extends StatelessWidget {
                                               children: [
                                                 Text(
                                                   'نام: ${getDepositRequest.account?.name ?? ""}',
-                                                  style: AppTextStyle.bodyText,
+                                                  style: AppTextStyle.labelText,
+                                                ),
+                                                Text(
+                                                  'صاحب حساب: ${getDepositRequest.withdrawRequest?.wallet?.account?.name ?? "" }',
+                                                  style: AppTextStyle.labelText,
                                                 ),
                                               ],
                                             ),
@@ -955,7 +1139,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                           color: AppColor.secondaryColor,
                                           elevation: 5,
                                           child: ListView.builder(
-
+                                            physics: NeverScrollableScrollPhysics(),
                                               shrinkWrap: true,
                                               itemCount: depositRequestGetOneController.getOneDepositRequest.value?.deposits?.length,
                                               itemBuilder: (context, index) {
@@ -964,13 +1148,13 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                 return Column(
                                                   children: [
                                                     Card(
-                                                      color: AppColor.secondaryColor,
+                                                      color: getOneDeposit?.registered==true ? AppColor.primaryColor.withAlpha(40) : getOneDeposit?.status==4 ? AppColor.accentColor.withAlpha(40) : AppColor.secondaryColor,
                                                       elevation: 0,
                                                       child: Padding(
                                                         padding: const EdgeInsets.only(
                                                             top: 5,
                                                             left: 7,
-                                                            right: 7,
+                                                            right: 2,
                                                             bottom: 5),
                                                         child: Column(
                                                           mainAxisAlignment:
@@ -983,146 +1167,85 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                   top: 2, bottom: 2),
                                                               child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                 children: [
-                                                                  Checkbox(
-                                                                    value: getOneDeposit?.registered ?? false,
-                                                                    onChanged: (value) async{
-                                                                      if (value != null) {
-                                                                        //EasyLoading.show(status: 'لطفا منتظر بمانید');
-                                                                        await depositRequestGetOneController.updateRegistered(
-                                                                            getOneDeposit!.id!,
-                                                                            value
-                                                                        );
-                                                                      }
-                                                                      //EasyLoading.dismiss();
-                                                                    },
-                                                                  ),
-                                                                  Text(
-                                                                    'مبلغ: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
-                                                                    style:
-                                                                    AppTextStyle.bodyText,
-                                                                  ),
-                                                                  // نمایش عکس
+                                                                      Text(
+                                                                        'مبلغ: ${getOneDeposit?.amount == null ? 0 : getOneDeposit?.amount?.toInt().toString().seRagham(separator: ',')} ریال ',
+                                                                        style:
+                                                                        AppTextStyle.bodyText,
+                                                                      ),
+                                                                  // ارسال تلگرام
                                                                   GestureDetector(
                                                                     onTap: () {
-                                                                      if (getOneDeposit?.attachments == null ||
-                                                                          getOneDeposit!.attachments!.isEmpty) {
-                                                                        Get
-                                                                            .snackbar(
-                                                                            'پیغام',
-                                                                            'تصویری ثبت نشده است');
-                                                                        return;
-                                                                      }
-
-                                                                      showDialog(
-                                                                        context: context,
-                                                                        builder: (
-                                                                            BuildContext context) {
-                                                                          return Dialog(
-                                                                            backgroundColor: AppColor.backGroundColor,
-                                                                            shape: RoundedRectangleBorder(
-                                                                              borderRadius: BorderRadius.circular(10),
-                                                                            ),
-                                                                            child: Container(
-                                                                              padding: EdgeInsets.all(8),
-                                                                              child: Column(
-                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                children: [
-                                                                                  SizedBox(
-                                                                                    width: 500,
-                                                                                    height: 500,
-                                                                                    child: PageView.builder(
-                                                                                      itemCount: getOneDeposit.attachments!.length,
-                                                                                      itemBuilder: (context, index) {
-                                                                                        final attachment = getOneDeposit.attachments![index];
-                                                                                        return Column(
-                                                                                          children: [
-                                                                                            Row(mainAxisAlignment: MainAxisAlignment.start,
-                                                                                              children: [
-                                                                                                IconButton(
-                                                                                                  icon: Icon(Icons.download, color: AppColor.dividerColor),
-                                                                                                  onPressed: () => depositRequestGetOneController.downloadImage(
-                                                                                                    attachment.guidId!,
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ],
-                                                                                            ),
-                                                                                            SizedBox(
-                                                                                              width: 450,
-                                                                                              height: 450,
-                                                                                              child: Image.network(
-                                                                                                "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=${attachment.guidId}",
-                                                                                                loadingBuilder: (context,
-                                                                                                    child,
-                                                                                                    loadingProgress) {
-                                                                                                  if (loadingProgress ==
-                                                                                                      null) {
-                                                                                                    return child;
-                                                                                                  }
-                                                                                                  return Center(
-                                                                                                    child: CircularProgressIndicator(),
-                                                                                                  );
-                                                                                                },
-                                                                                                errorBuilder: (context, error, stackTrace) =>
-                                                                                                    Icon(Icons.error,
-                                                                                                        color: Colors.red),
-                                                                                                fit: BoxFit.contain,
-                                                                                              ),
-                                                                                            ),
-                                                                                          ],
-                                                                                        );
-                                                                                      },
-                                                                                    ),
-                                                                                  ),
-                                                                                  SizedBox(
-                                                                                      height: 10),
-                                                                                  TextButton(
-                                                                                    onPressed: () =>
-                                                                                        Get
-                                                                                            .back(),
-                                                                                    child: Text(
-                                                                                      "بستن",
-                                                                                      style: AppTextStyle
-                                                                                          .bodyText,),
-                                                                                  ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          );
-                                                                        },
+                                                                      getOneDeposit?.isSendTelegram == true ?
+                                                                      Get.defaultDialog(
+                                                                          backgroundColor: AppColor.backGroundColor,
+                                                                          title: "ارسال مجدد",
+                                                                          titleStyle: AppTextStyle.smallTitleText.copyWith(color: AppColor.errorColor),
+                                                                          middleText: "آیا از ارسال مجدد واریزی مطمئن هستید؟",
+                                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                                          confirm: ElevatedButton(
+                                                                              style: ButtonStyle(
+                                                                                  backgroundColor: WidgetStatePropertyAll(
+                                                                                      AppColor.primaryColor)),
+                                                                              onPressed: () {
+                                                                                Get.back();
+                                                                                depositRequestGetOneController.sendTelegramDeposit(getOneDeposit?.id ?? 0);
+                                                                              },
+                                                                              child: Text(
+                                                                                'ارسال مجدد',
+                                                                                style: AppTextStyle.bodyText,
+                                                                              ))
+                                                                      ) :
+                                                                      Get.defaultDialog(
+                                                                          backgroundColor: AppColor.backGroundColor,
+                                                                          title: "ارسال به تلگرام",
+                                                                          titleStyle: AppTextStyle.smallTitleText.copyWith(color: Color(0xff0ab6f0)),
+                                                                          middleText: "آیا از ارسال واریزی مطمئن هستید؟",
+                                                                          middleTextStyle: AppTextStyle.bodyText,
+                                                                          confirm: ElevatedButton(
+                                                                              style: ButtonStyle(
+                                                                                  backgroundColor: WidgetStatePropertyAll(
+                                                                                      AppColor.primaryColor)),
+                                                                              onPressed: () {
+                                                                                Get.back();
+                                                                                depositRequestGetOneController.sendTelegramDeposit(getOneDeposit?.id ?? 0);
+                                                                              },
+                                                                              child: Text(
+                                                                                'ارسال',
+                                                                                style: AppTextStyle.bodyText,
+                                                                              ))
                                                                       );
                                                                     },
-                                                                    child: Row(
-                                                                      children: [
-                                                                        SizedBox(
-                                                                          width: 25,
-                                                                          height: 25,
-                                                                          child: SvgPicture
-                                                                              .asset(
-                                                                            'assets/svg/picture.svg',
-                                                                            colorFilter: ColorFilter
-                                                                                .mode(
-                                                                              AppColor
-                                                                                  .iconViewColor,
-                                                                              BlendMode
-                                                                                  .srcIn,
-                                                                            ),
+                                                                    child: Tooltip(
+                                                                      message: getOneDeposit?.isSendTelegram == true ?  "ارسال مجدد واریزی به تلگرام" : "ارسال واریزی به تلگرام",
+                                                                      child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                        children: [
+                                                                          Text(' ارسال',style: AppTextStyle.labelText.copyWith(color: getOneDeposit?.isSendTelegram == true ? AppColor.successColor : Color(0xff0ab6f0), fontSize: 11,fontWeight: FontWeight.w400),),
+                                                                          SvgPicture.asset(
+                                                                            'assets/svg/telegram.svg',height: 20,
+                                                                            colorFilter: ColorFilter.mode(getOneDeposit?.isSendTelegram == true ? AppColor.successColor : Color(0xff0ab6f0), BlendMode.srcIn) ,
                                                                           ),
-                                                                        ),
-                                                                        Text(
-                                                                          ' (${getOneDeposit
-                                                                              ?.attachments
-                                                                              ?.length ??
-                                                                              0}) ',
-                                                                          style: AppTextStyle
-                                                                              .bodyText
-                                                                              .copyWith(
-                                                                              color: AppColor
-                                                                                  .iconViewColor
-                                                                          ),
-                                                                        ),
-                                                                      ],
+                                                                        ],
+                                                                      ),
                                                                     ),
                                                                   ),
+                                                                      // اضافه واریزی
+                                                                      SizedBox(
+                                                                          child: Row(
+                                                                            children: [
+                                                                              Text(
+                                                                                'اضافه واریزی: ',
+                                                                                style:
+                                                                                AppTextStyle.bodyText,
+                                                                              ),
+                                                                              Text(
+                                                                                ' ${getOneDeposit?.extraAmount == null ? 0 : getOneDeposit?.extraAmount?.toInt().toString().seRagham(separator: ',')} ریال ',
+                                                                                style:
+                                                                                AppTextStyle.bodyText.copyWith(color: AppColor.dividerColor),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+
                                                                 ],
                                                               ),
                                                             ),
@@ -1130,52 +1253,82 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                             // آیکون های عملیات حذف و آپدیت و کد رهگیری
                                                             Padding(
                                                               padding: const EdgeInsets.only(
-                                                                  top: 10, bottom: 2),
+                                                                  top: 5, bottom: 2),
                                                               child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                 children: [
-                                                                  // وضعیت
-                                                                  Card(
-                                                                    shape: RoundedRectangleBorder(
-                                                                      borderRadius: BorderRadius
-                                                                          .circular(
-                                                                          5),
-                                                                    ),
-                                                                    color: getOneDeposit?.status ==
-                                                                        2
-                                                                        ? AppColor
-                                                                        .accentColor
-                                                                        : getOneDeposit
-                                                                        ?.status ==
-                                                                        1
-                                                                        ? AppColor
-                                                                        .primaryColor
-                                                                        : AppColor
-                                                                        .secondaryColor
-                                                                    ,
-                                                                    margin: EdgeInsets
-                                                                        .symmetric(
-                                                                        vertical: 0,
-                                                                        horizontal: 5),
-                                                                    child: Padding(
-                                                                      padding: const EdgeInsets
-                                                                          .all(
-                                                                          2),
-                                                                      child: Text(
-                                                                          getOneDeposit
-                                                                              ?.status ==
-                                                                              2
-                                                                              ? 'تایید نشده'
-                                                                              : getOneDeposit
-                                                                              ?.status ==
-                                                                              1
-                                                                              ? 'تایید شده'
-                                                                              : 'در انتظار',
-                                                                          style: AppTextStyle
-                                                                              .labelText,
-                                                                          textAlign: TextAlign
-                                                                              .center),
-                                                                    ),
-                                                                  ),
+                                                                   Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                     children: [
+                                                                       Checkbox(
+                                                                          value: getOneDeposit?.registered ?? false,
+                                                                          onChanged: (value) async{
+                                                                            if (value != null) {
+                                                                              //EasyLoading.show(status: 'لطفا منتظر بمانید');
+                                                                              await depositRequestGetOneController.updateRegistered(
+                                                                                  getOneDeposit!.id!,
+                                                                                  value
+                                                                              );
+                                                                            }
+                                                                            //EasyLoading.dismiss();
+                                                                          },
+                                                                        ),
+                                                                       // وضعیت
+                                                                       Card(
+                                                                        shape: RoundedRectangleBorder(
+                                                                          borderRadius: BorderRadius
+                                                                              .circular(
+                                                                              5),
+                                                                        ),
+                                                                        color: getOneDeposit?.status ==
+                                                                            2
+                                                                            ? AppColor
+                                                                            .accentColor
+                                                                            : getOneDeposit
+                                                                            ?.status ==
+                                                                            1
+                                                                            ? AppColor
+                                                                            .primaryColor
+                                                                            : getOneDeposit
+                                                                            ?.status ==
+                                                                            4
+                                                                            ? AppColor
+                                                                            .accentColor
+                                                                            : AppColor
+                                                                            .secondaryColor
+                                                                        ,
+                                                                        margin: EdgeInsets
+                                                                            .symmetric(
+                                                                            vertical: 0,
+                                                                            horizontal: 0),
+                                                                        child: Padding(
+                                                                          padding: const EdgeInsets
+                                                                              .all(
+                                                                              2),
+                                                                          child: Text(
+                                                                              getOneDeposit
+                                                                                  ?.status ==
+                                                                                  2
+                                                                                  ? 'تایید نشده'
+                                                                                  : getOneDeposit
+                                                                                  ?.status ==
+                                                                                  1
+                                                                                  ? 'تایید شده'
+                                                                                  : getOneDeposit
+                                                                                  ?.status ==
+                                                                                  4
+                                                                                  ? 'برگشتی'
+                                                                                  : 'در انتظار',
+                                                                              style: AppTextStyle
+                                                                                  .labelText,
+                                                                              textAlign: TextAlign
+                                                                                  .center),
+                                                                        ),
+                                                                                                                                         ),
+                                                                       /*SizedBox(width: 8,),
+                                                                       getOneDeposit?.isSendTelegram == true ?
+                                                                       SvgPicture.asset('assets/svg/telegram-check.svg',width: 18,height: 18,) :
+                                                                       SvgPicture.asset('assets/svg/telegram-close.svg',width: 18,height: 18,),*/
+                                                                     ],
+                                                                   ),
                                                                   // کد رهگیری
                                                                   Row(
                                                                     children: [
@@ -1190,6 +1343,257 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                   // آیکون ویرایش و آیکون حذف کردن
                                                                   Row(
                                                                     children: [
+                                                                      // نمایش عکس
+                                                                      GestureDetector(
+                                                                        onTap: () async{
+                                                                          await depositRequestGetOneController.getImage(getOneDeposit?.recId ??"", "Deposit");
+                                                                          Future.delayed(const Duration(milliseconds: 200), () {
+                                                                            showDialog(
+                                                                              context: context,
+                                                                              builder: (BuildContext context) {
+                                                                                return Dialog(
+                                                                                  backgroundColor: AppColor
+                                                                                      .backGroundColor,
+                                                                                  shape: RoundedRectangleBorder(
+                                                                                    borderRadius: BorderRadius
+                                                                                        .circular(
+                                                                                        10),
+                                                                                  ),
+                                                                                  child: Container(
+                                                                                    padding: EdgeInsets
+                                                                                        .all(
+                                                                                        8),
+                                                                                    child: Column(
+                                                                                      mainAxisSize: MainAxisSize
+                                                                                          .min,
+                                                                                      children: [
+                                                                                        // نمایش اسلایدی عکس‌ها
+                                                                                        SizedBox(
+                                                                                          width: 500,
+                                                                                          height: 500,
+                                                                                          child: Stack(
+                                                                                            children: [
+                                                                                              PageView.builder(
+                                                                                                controller: depositRequestGetOneController
+                                                                                                    .pageController,
+                                                                                                itemCount: depositRequestGetOneController.imageList.length,
+                                                                                                onPageChanged: (index) =>
+                                                                                                depositRequestGetOneController
+                                                                                                    .currentImagePage
+                                                                                                    .value =
+                                                                                                    index,
+                                                                                                itemBuilder: (context,
+                                                                                                    index) {
+                                                                                                  final attachment = depositRequestGetOneController.imageList[index];
+                                                                                                  return Column(
+                                                                                                    children: [
+                                                                                                      if (kIsWeb)
+                                                                                                        Padding(
+                                                                                                          padding: const EdgeInsets.only(right: 50),
+                                                                                                          child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                                                                            children: [
+                                                                                                              IconButton(
+                                                                                                                icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                                                                                onPressed: () => depositRequestGetOneController.downloadImage(
+                                                                                                                  attachment,
+                                                                                                                ),
+                                                                                                              ),
+                                                                                                            ],
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                      SizedBox(
+                                                                                                        width: 450,
+                                                                                                        height: 450,
+                                                                                                        child: Image.network(
+                                                                                                          "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                                                          loadingBuilder: (context,
+                                                                                                              child,
+                                                                                                              loadingProgress) {
+                                                                                                            if (loadingProgress ==
+                                                                                                                null)
+                                                                                                              return child;
+                                                                                                            return Center(
+                                                                                                              child: CircularProgressIndicator(),
+                                                                                                            );
+                                                                                                          },
+                                                                                                          errorBuilder: (context,
+                                                                                                              error,
+                                                                                                              stackTrace) =>
+                                                                                                              Icon(
+                                                                                                                  Icons
+                                                                                                                      .error,
+                                                                                                                  color: Colors
+                                                                                                                      .red),
+                                                                                                          fit: BoxFit.contain,
+                                                                                                        ),
+                                                                                                      ),
+                                                                                                    ],
+                                                                                                  );
+                                                                                                },
+                                                                                              ),
+                                                                                              SizedBox(
+                                                                                                height: 2,),
+                                                                                              Obx(() {
+                                                                                                return Positioned(
+                                                                                                    left: 10,
+                                                                                                    top: 0,
+                                                                                                    bottom: 0,
+                                                                                                    child: Visibility(
+                                                                                                      visible: depositRequestGetOneController
+                                                                                                          .currentImagePage.value > 0,
+                                                                                                      child: IconButton(
+                                                                                                        style: ButtonStyle(
+                                                                                                          backgroundColor: WidgetStateProperty
+                                                                                                              .all(Colors.black54),
+                                                                                                          shape: WidgetStateProperty.all(
+                                                                                                              CircleBorder()),
+                                                                                                          padding: WidgetStateProperty.all(
+                                                                                                              EdgeInsets.all(8)),
+                                                                                                        ),
+                                                                                                        icon: Icon(Icons.chevron_left,
+                                                                                                          color: Colors.white,
+                                                                                                          size: 40,
+                                                                                                          shadows: [
+                                                                                                            Shadow(
+                                                                                                              blurRadius: 10,
+                                                                                                              color: Colors.black,
+                                                                                                              offset: Offset(0, 0),
+                                                                                                            )
+                                                                                                          ],
+                                                                                                        ),
+                                                                                                        onPressed: () {
+                                                                                                          depositRequestGetOneController.pageController
+                                                                                                              .previousPage(
+                                                                                                            duration: Duration(
+                                                                                                                milliseconds: 300),
+                                                                                                            curve: Curves.easeInOut,
+                                                                                                          );
+                                                                                                        },
+                                                                                                      ),
+                                                                                                    )
+                                                                                                );
+                                                                                              }),
+                                                                                              Obx(() {
+                                                                                                return Positioned(
+                                                                                                    right: 10,
+                                                                                                    top: 0,
+                                                                                                    bottom: 0,
+                                                                                                    child: Visibility(
+                                                                                                      visible: depositRequestGetOneController
+                                                                                                          .currentImagePage.value <
+                                                                                                          (depositRequestGetOneController.imageList.length ?? 1) -
+                                                                                                              1,
+                                                                                                      child: IconButton(
+                                                                                                        style: ButtonStyle(
+                                                                                                          backgroundColor: WidgetStateProperty
+                                                                                                              .all(Colors.black54),
+                                                                                                          shape: WidgetStateProperty.all(
+                                                                                                              CircleBorder()),
+                                                                                                          padding: WidgetStateProperty.all(
+                                                                                                              EdgeInsets.all(8)),
+                                                                                                        ),
+                                                                                                        icon: Icon(Icons.chevron_right,
+                                                                                                          color: Colors.white,
+                                                                                                          size: 40,
+                                                                                                          shadows: [
+                                                                                                            Shadow(
+                                                                                                              blurRadius: 10,
+                                                                                                              color: Colors.black,
+                                                                                                              offset: Offset(0, 0),
+                                                                                                            ),
+                                                                                                          ],
+                                                                                                        ),
+                                                                                                        onPressed: () {
+                                                                                                          depositRequestGetOneController.pageController
+                                                                                                              .nextPage(
+                                                                                                            duration: Duration(
+                                                                                                                milliseconds: 300),
+                                                                                                            curve: Curves.easeInOut,
+                                                                                                          );
+                                                                                                        },
+                                                                                                      ),
+                                                                                                    )
+                                                                                                );
+                                                                                              }),
+                                                                                              SizedBox(
+                                                                                                height: 2,),
+                                                                                              // نمایش نقاط راهنما
+                                                                                              Obx(() =>
+                                                                                                  Row(
+                                                                                                    mainAxisAlignment: MainAxisAlignment
+                                                                                                        .center,
+                                                                                                    children: List
+                                                                                                        .generate(
+                                                                                                      depositRequestGetOneController.imageList.length,
+                                                                                                          (index) =>
+                                                                                                          Container(
+                                                                                                            width: 8,
+                                                                                                            height: 8,
+                                                                                                            margin: EdgeInsets
+                                                                                                                .symmetric(
+                                                                                                                horizontal: 4),
+                                                                                                            decoration: BoxDecoration(
+                                                                                                              shape: BoxShape
+                                                                                                                  .circle,
+                                                                                                              color: depositRequestGetOneController
+                                                                                                                  .currentImagePage
+                                                                                                                  .value ==
+                                                                                                                  index
+                                                                                                                  ? Colors
+                                                                                                                  .blue
+                                                                                                                  : Colors
+                                                                                                                  .grey,
+                                                                                                            ),
+                                                                                                          ),
+                                                                                                    ),
+                                                                                                  )),
+                                                                                              SizedBox(
+                                                                                                  height: 10),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                        TextButton(
+                                                                                          onPressed: () =>
+                                                                                              Get
+                                                                                                  .back(),
+                                                                                          child: Text(
+                                                                                            "بستن",
+                                                                                            style: AppTextStyle
+                                                                                                .bodyText,),
+                                                                                        ),
+                                                                                      ],
+                                                                                    ),
+                                                                                  ),
+                                                                                );
+                                                                              },
+                                                                            );
+
+                                                                          });
+
+
+                                                                        },
+                                                                        child: Row(
+                                                                          children: [
+                                                                            SizedBox(
+                                                                              width: 25,
+                                                                              height: 25,
+                                                                              child: SvgPicture
+                                                                                  .asset(
+                                                                                'assets/svg/picture.svg',
+                                                                                colorFilter: ColorFilter
+                                                                                    .mode(
+                                                                                  AppColor
+                                                                                      .iconViewColor,
+                                                                                  BlendMode
+                                                                                      .srcIn,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                      SizedBox(width: 10,),
+                                                                      getOneDeposit?.status==4 ? SizedBox.shrink() :
                                                                       GestureDetector(
                                                                         onTap: () {
                                                                           /*if ( getOneDeposit?.status==1){
@@ -1217,11 +1621,11 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                     .iconViewColor,
                                                                                   BlendMode.srcIn,)
                                                                             ),
-                                                                            Text(' ویرایش',style: AppTextStyle.labelText.copyWith(color: AppColor.iconViewColor),),
                                                                           ],
                                                                         ),
                                                                       ),
                                                                       SizedBox(width: 10,),
+                                                                      getOneDeposit?.status==4 ? SizedBox.shrink() :
                                                                       GestureDetector(
                                                                         onTap: () {
                                                                           /*if (getOneDeposit?.status==1){
@@ -1266,10 +1670,10 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                     .accentColor,
                                                                                   BlendMode.srcIn,)
                                                                             ),
-                                                                            Text(' حذف',style: AppTextStyle.labelText.copyWith(color: AppColor.accentColor),),
                                                                           ],
                                                                         ),
                                                                       ),
+
                                                                     ],
                                                                   ),
                                                                 ],
@@ -1311,8 +1715,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                     ],
                                   ),
                                 ],
-                              ),
-                            );
+                              );
                           }
                           return ErrPage(
                             callback: () {
@@ -1322,7 +1725,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                             des: 'برای مشاهده درخواست برداشت مجددا تلاش کنید',
                           );
                         }),
-                      ),
+
                     ),
                   ),
                 ),
@@ -1330,7 +1733,7 @@ class DepositRequestGetOneView extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: isDesktop ? FloatingActionButton(
         onPressed: () {
           Get.dialog(const ChatDialog());
         },
@@ -1339,7 +1742,7 @@ class DepositRequestGetOneView extends StatelessWidget {
           Icons.chat,
           color: Colors.white,
         ),
-      ),
+      ): SizedBox.shrink(),
       floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
     );
   }

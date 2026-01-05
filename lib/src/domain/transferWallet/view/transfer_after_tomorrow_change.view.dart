@@ -120,7 +120,25 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
                           onPressed: disabled
                               ? null
                               : () async {
-                            await controller.submitTransfer();
+                            await Get.defaultDialog(
+                                backgroundColor: AppColor.backGroundColor,
+                                title: "انتقال",
+                                titleStyle: AppTextStyle.smallTitleText,
+                                middleText: "آیا از انتقال مطمئن هستید؟",
+                                middleTextStyle: AppTextStyle.bodyText,
+                                confirm: ElevatedButton(
+                                    style: ButtonStyle(
+                                        backgroundColor: WidgetStatePropertyAll(
+                                            AppColor.primaryColor)),
+                                    onPressed: () {
+                                      Get.back();
+                                      controller.submitTransfer();
+                                    },
+                                    child: Text(
+                                      'انتقال',
+                                      style: AppTextStyle.bodyText,
+                                    ))
+                            );
                           },
                           style: ButtonStyle(
                             padding: WidgetStateProperty.all(

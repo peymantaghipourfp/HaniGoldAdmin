@@ -16,11 +16,36 @@ class ItemRepository{
     itemDio.options.baseUrl=BaseUrl.baseUrl;
     itemDio.interceptors.add(DioInterceptor());
   }
-  Future<List<ItemModel>> getItemList()async{
+  Future<List<ItemModel>> getItemList({
+    String? accountId,
+    String? showChart,
+})async{
     try{
       Map<String , dynamic> options= {
         "options" : {
           "item" :{
+            "Predicate": [
+              {
+                "innerCondition": 0,
+                "outerCondition": 1,
+                "filters": [
+                  if (accountId != null && accountId.isNotEmpty)
+                  {
+                    "fieldName": "AccountId",
+                    "filterValue": accountId,
+                    "filterType": 5,
+                    "RefTable": "Account"
+                  },
+                  if (showChart != null && showChart.isNotEmpty)
+                  {
+                    "fieldName": "ShowChart",
+                    "filterValue": "1",
+                    "filterType": 5,
+                    "RefTable": "Item"
+                  }
+                ]
+              }
+            ],
           "orderBy": "Item.Id",
           "orderByType": "asc",
           "StartIndex": 1,

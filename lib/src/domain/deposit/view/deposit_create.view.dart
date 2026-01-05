@@ -16,6 +16,7 @@ import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../home/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
+import '../widget/image_drop_zone.widget.dart';
 
 class DepositCreateView extends StatefulWidget {
   const DepositCreateView({super.key});
@@ -26,6 +27,7 @@ class DepositCreateView extends StatefulWidget {
 
 class _DepositCreateViewState extends State<DepositCreateView> {
   final formKey = GlobalKey<FormState>();
+  final GlobalKey _balanceKey = GlobalKey();
   final DepositCreateController depositCreateController = Get.find<DepositCreateController>();
 
   @override
@@ -66,6 +68,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                               Center(child: CircularProgressIndicator(),)
                                   :
                               BalanceWidget(
+                                title: "${depositCreateController.accountController.text} ${Jalali.now().year}/${Jalali.now().month.toString().padLeft(2, '0')}/${Jalali.now().day.toString().padLeft(2, '0')}",
                                 listBalance: depositCreateController
                                     .balanceList,
                                 size: 400,),
@@ -102,10 +105,48 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                           Padding(
                                             padding: const EdgeInsets.only(
                                                 right: 40, bottom: 10),
-                                            child: Text(
-                                              'ثبت واریزی',
-                                              style: AppTextStyle
-                                                  .smallTitleText,
+                                            child: Row(
+                                              children: [
+                                                Text(
+                                                  'ثبت واریزی',
+                                                  style: AppTextStyle
+                                                      .smallTitleText,
+                                                ),
+                                                SizedBox(width: 10,),
+                                                Container(
+                                                  margin: EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                                                  padding: EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColor.primaryColor.withOpacity(0.1),
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    border: Border.all(
+                                                      color: AppColor.primaryColor.withOpacity(0.3),
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    children: [
+                                                      SvgPicture.asset(
+                                                        'assets/svg/sticker-smile.svg',
+                                                        height: 30,
+                                                        colorFilter: ColorFilter.mode(
+                                                          AppColor.accentColor,
+                                                          BlendMode.srcIn,
+                                                        ),
+                                                      ),
+                                                      SizedBox(width: 10),
+                                                      Text(
+                                                          depositCreateController.ownerNameController.text,
+                                                          style: AppTextStyle.labelText.copyWith(
+                                                              color: AppColor.primaryColor,
+                                                              fontWeight: FontWeight.bold,
+                                                              fontSize: 14
+                                                          ),
+                                                        ),
+
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
@@ -818,8 +859,71 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                     ),
                                                   ),
                                                 ),
+                                                // اضافه واریزی
+                                                Container(
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 3, top: 5),
+                                                  child: Text(
+                                                    'اضافه واریزی (ریال)',
+                                                    style: AppTextStyle
+                                                        .labelText.copyWith(
+                                                        fontSize: isDesktop
+                                                            ? 12
+                                                            : 10),
+                                                  ),
+                                                ),
+                                                // اضافه واریزی
+                                                Container(
+                                                  height: 60,
+                                                  padding: EdgeInsets.only(
+                                                      bottom: 5),
+                                                  child: TextFormField(
+                                                    autovalidateMode: AutovalidateMode.onUserInteraction,
+                                                    controller: depositCreateController
+                                                        .extraAmountController,
+                                                    style: AppTextStyle
+                                                        .labelText,
+                                                    keyboardType: TextInputType
+                                                        .number,
+                                                    inputFormatters: [
+                                                      FilteringTextInputFormatter.allow(RegExp(r'[۰-۹0-9]')),
+                                                    ],
+                                                    onChanged: (value) {
+                                                      // حذف کاماهای قبلی و فرمت جدید
+                                                      String cleanedValue = value
+                                                          .replaceAll(',', '');
+                                                      if (cleanedValue
+                                                          .isNotEmpty) {
+                                                        depositCreateController
+                                                            .extraAmountController
+                                                            .text =
+                                                            cleanedValue
+                                                                .toPersianDigit()
+                                                                .seRagham();
+                                                        depositCreateController
+                                                            .extraAmountController
+                                                            .selection =
+                                                            TextSelection
+                                                                .collapsed(
+                                                                offset: depositCreateController
+                                                                    .extraAmountController
+                                                                    .text
+                                                                    .length);
+                                                      }
+                                                    },
+                                                    decoration: InputDecoration(
+                                                      border: OutlineInputBorder(
+                                                        borderRadius: BorderRadius
+                                                            .circular(10),
+                                                      ),
+                                                      filled: true,
+                                                      fillColor: AppColor
+                                                          .textFieldColor,
+                                                    ),
+                                                  ),
+                                                ),
                                                 // بارگذاری عکس
-                                                Row(
+                                                /*Row(
                                                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                   children: [
                                                     Obx(() {
@@ -894,6 +998,159 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                     ),
 
                                                   ],
+                                                ),*/
+                                                // بارگذاری عکس
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    // Drag and Drop Zone
+                                                    GestureDetector(
+                                                      onTap: () => depositCreateController.pickImageDesktop(),
+                                                      child: ImageDropZone(
+                                                        controller: depositCreateController,
+                                                        isDesktop: isDesktop,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(height: 16),
+                                                    // Selected Images Preview
+                                                    Obx(() {
+                                                      if (depositCreateController.isUploadingDesktop.value) {
+                                                        return Container(
+                                                          padding: const EdgeInsets.all(16),
+                                                          decoration: BoxDecoration(
+                                                            color: AppColor.textFieldColor,
+                                                            borderRadius: BorderRadius.circular(8),
+                                                          ),
+                                                          child: Row(
+                                                            mainAxisAlignment: MainAxisAlignment.center,
+                                                            children: [
+                                                              Text(
+                                                                'در حال بارگزاری عکس',
+                                                                style: AppTextStyle.labelText.copyWith(
+                                                                  fontSize: 12,
+                                                                  fontWeight: FontWeight.normal,
+                                                                  color: AppColor.textColor,
+                                                                ),
+                                                              ),
+                                                              const SizedBox(width: 10),
+                                                              const CircularProgressIndicator(),
+                                                            ],
+                                                          ),
+                                                        );
+                                                      }
+
+                                                      if (depositCreateController.selectedImagesDesktop.isEmpty) {
+                                                        return const SizedBox.shrink();
+                                                      }
+
+                                                      return Container(
+                                                        height: 100,
+                                                        padding: const EdgeInsets.all(8),
+                                                        decoration: BoxDecoration(
+                                                          color: AppColor.textFieldColor,
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          border: Border.all(
+                                                            color: AppColor.textColor.withOpacity(0.3),
+                                                          ),
+                                                        ),
+                                                        child: SingleChildScrollView(
+                                                          scrollDirection: Axis.horizontal,
+                                                          child: Row(
+                                                            children: depositCreateController.selectedImagesDesktop.map((image) {
+                                                              return Stack(
+                                                                children: [
+                                                                  GestureDetector(
+                                                                    onTap: () {
+                                                                      showGeneralDialog(
+                                                                        context: context,
+                                                                        barrierDismissible: true,
+                                                                        barrierLabel: MaterialLocalizations.of(context)
+                                                                            .modalBarrierDismissLabel,
+                                                                        barrierColor: Colors.black45,
+                                                                        transitionDuration: const Duration(milliseconds: 200),
+                                                                        pageBuilder: (BuildContext buildContext,
+                                                                            Animation animation,
+                                                                            Animation secondaryAnimation) {
+                                                                          return Center(
+                                                                            child: Material(
+                                                                              color: Colors.transparent,
+                                                                              child: Container(
+                                                                                margin: EdgeInsets.all(10),
+                                                                                decoration: BoxDecoration(
+                                                                                  borderRadius: BorderRadius.circular(8),
+                                                                                  border: Border.all(color: AppColor.textColor),
+                                                                                  image: DecorationImage(
+                                                                                    image: NetworkImage(image!.path),
+                                                                                    fit: BoxFit.contain,
+                                                                                  ),
+                                                                                ),
+                                                                                height: Get.height * 0.8,
+                                                                                width: Get.width * 0.4,
+                                                                              ),
+                                                                            ),
+                                                                          );
+                                                                        },
+                                                                      );
+                                                                    },
+                                                                    child: Container(
+                                                                      margin: const EdgeInsets.all(4),
+                                                                      decoration: BoxDecoration(
+                                                                        borderRadius: BorderRadius.circular(8),
+                                                                        border: Border.all(color: AppColor.textColor),
+                                                                        boxShadow: [
+                                                                          BoxShadow(
+                                                                            color: Colors.black.withOpacity(0.1),
+                                                                            blurRadius: 4,
+                                                                            offset: const Offset(0, 2),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                      height: 80,
+                                                                      width: 80,
+                                                                      child: ClipRRect(
+                                                                        borderRadius: BorderRadius.circular(8),
+                                                                        child: Image.network(
+                                                                          image!.path,
+                                                                          fit: BoxFit.cover,
+                                                                          errorBuilder: (context, error, stackTrace) {
+                                                                            return Container(
+                                                                              color: AppColor.textColor.withOpacity(0.1),
+                                                                              child: Icon(
+                                                                                Icons.image,
+                                                                                color: AppColor.textColor.withOpacity(0.5),
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  Positioned(
+                                                                    top: 0,
+                                                                    right: 0,
+                                                                    child: GestureDetector(
+                                                                      onTap: () {
+                                                                        depositCreateController.selectedImagesDesktop.remove(image);
+                                                                      },
+                                                                      child: CircleAvatar(
+                                                                        backgroundColor: AppColor.accentColor,
+                                                                        radius: 12,
+                                                                        child: Icon(
+                                                                          Icons.clear,
+                                                                          color: AppColor.textColor,
+                                                                          size: 16,
+                                                                        ),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ],
+                                                              );
+                                                            }).toList(),
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                  ],
                                                 ),
                                                 // دکمه ایجاد درخواست
                                                 SizedBox(height: 20,),
@@ -962,10 +1219,31 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                   false ?
                               Center(child: CircularProgressIndicator(),)
                                   :
-                              BalanceWidget(
-                                listBalance: depositCreateController
-                                    .balanceList,
-                                size: 400,),
+                              Row(mainAxisAlignment: MainAxisAlignment.end,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  IconButton(
+                                    icon: SvgPicture.asset(
+                                      'assets/svg/camera.svg',
+                                      height: 24,
+                                      colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),
+                                    ),
+                                    tooltip: 'گرفتن اسکرین شات',
+                                    onPressed: () => depositCreateController.captureBalanceScreenshot(context, _balanceKey),
+                                  ),
+                                  RepaintBoundary(
+                                      key: _balanceKey,
+                                      child: BalanceWidget(
+                                        title: "${depositCreateController.accountController.text.length > 35
+                                            ? '${depositCreateController.accountController.text.substring(0, 35)}...'
+                                            : depositCreateController.accountController.text}${Jalali.now().year}/${Jalali.now().month.toString().padLeft(2, '0')}/${Jalali.now().day.toString().padLeft(2, '0')}",
+                                        listBalance: depositCreateController
+                                            .balanceList,
+                                        size: 400,),
+                                    ),
+
+                                ],
+                              ),
                             ),
                         ],
                       )
@@ -974,7 +1252,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
+        floatingActionButton: isDesktop ? FloatingActionButton(
           onPressed: () {
             Get.dialog(const ChatDialog());
           },
@@ -983,7 +1261,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
             Icons.chat,
             color: Colors.white,
           ),
-        ),
+        ) : SizedBox.shrink(),
         floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
       );
     });

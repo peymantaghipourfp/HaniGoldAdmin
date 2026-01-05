@@ -557,7 +557,7 @@ class ChatController extends GetxController {
             'انتخاب موضوع',
             'لطفا موضوع گفتگو را انتخاب کنید.\nبرای انتخاب موضوع، از منوی "+" استفاده کنید.',
             duration: Duration(seconds: 5),
-            backgroundColor: Colors.orange.withOpacity(0.8)
+            backgroundColor: Colors.orange.withAlpha(200)
         );
         return false;
       }
