@@ -28,18 +28,12 @@ class UploadRepository{
       FormData formData = FormData.fromMap({
         "file": await MultipartFile.fromFile(imageFile.path, filename: fileName),
       });
-      print(fileName);
-      print(recordId);
-      print(type);
-      print(entityType);
       final response = await uploadDio.post("Attachment/uploadAttachment", data: formData,
         options: Options(headers: {
         "Content-Type": "multipart/form-data","recordId": recordId, "type": type, "entityType": entityType,
         },
       ),
       );
-      print('Status Code uploadImage: ${response.statusCode}');
-      print('Response Data uploadImage: ${response.data}');
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response.data;
       } else {
@@ -72,18 +66,12 @@ class UploadRepositoryDesktop{
     FormData formData = FormData.fromMap({
       "file": multipartFile,
     });
-    print(fileName);
-    print(recordId);
-    print(type);
-    print(entityType);
     final response = await uploadDio.post("Attachment/uploadAttachment", data: formData,
       options: Options(headers: {
         "Content-Type": "multipart/form-data","recordId": recordId, "type": type, "entityType": entityType,
       },
       ),
     );
-    print('Status Code uploadImageDesktop: ${response.statusCode}');
-    print('Response Data uploadImageDesktop: ${response.data}');
     if (response.statusCode == 200 || response.statusCode == 201) {
       return response.data;
     } else {

@@ -353,7 +353,7 @@ class _ProductInventoryFilterWidgetState
                 'دریافت',
                 'پرداخت',
               ],
-              selectedValue: widget.controller.typeFilter.value ?? '',
+              selectedValue: widget.controller.typeFilter.value,
               onChanged: (String? newValue) {
                 widget.controller.changeSelectedType(newValue!);
               },
@@ -481,7 +481,7 @@ class _ProductInventoryFilterWidgetState
       child: ElevatedButton(
         style: ButtonStyle(
             padding: WidgetStatePropertyAll(
-                EdgeInsets.symmetric(horizontal: 23, vertical: 19)
+                EdgeInsets.symmetric(horizontal: 23)
             ),
             backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
             shape: WidgetStatePropertyAll(

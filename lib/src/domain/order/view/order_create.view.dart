@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:math' as math;
-
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hanigold_admin/src/widget/background_image.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -15,13 +13,12 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
 import '../../account/model/account.model.dart';
 import '../../account/widget/account_level_get_one_item.widget.dart';
 import '../../accountSalesGroup/widget/account_sales_group_get_one_item.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../product/model/item.model.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../../users/widgets/user_create_dialog.widget.dart';
@@ -112,7 +109,6 @@ class _OrderCreateViewState extends State<OrderCreateView> {
     _limitCheckDebounce?.cancel();
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
@@ -504,7 +500,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                         padding: EdgeInsets.only(bottom: isDesktop ? 2 : 5),
                                                         child: Row(
                                                           children: mostUsedProducts.asMap().entries.map((entry) {
-                                                            final index = entry.key;
+                                                            //final index = entry.key;
                                                             final item = entry.value;
                                                             final isSelected = orderCreateController.selectedItem.value?.id == item.id;
                                                             return Container(
@@ -1781,7 +1777,7 @@ class _OrderCreateViewState extends State<OrderCreateView> {
                                                                       Icon(Icons.circle,size: 5,color: AppColor.primaryColor,),
                                                                       SizedBox(width: 2,),
                                                                       Text('مقدار: ', style: AppTextStyle.bodyText.copyWith(fontWeight: FontWeight.bold),),
-                                                                      Text(formatQuantity(double.parse(orderCreateController.quantityController.text)), style: AppTextStyle.bodyText,),
+                                                                      Text(formatQuantity(double.parse(_cleanNumber(orderCreateController.quantityController.text))), style: AppTextStyle.bodyText,),
                                                                     ],
                                                                   ),
                                                                   SizedBox(height: 5,),

@@ -13,6 +13,10 @@ class SocketItemModel {
   late double? differentPrice;
   late double? mesghalPrice;
   late double? mesghalDifferentPrice;
+  late double? basePrice;
+  late double? baseDifferentPrice;
+  late double? baseMesghalPrice;
+  late double? baseMesghalDifferentPrice;
   late double? salesRange;
   late double? buyRange;
   final DateTime? date;
@@ -27,6 +31,10 @@ class SocketItemModel {
     required this.differentPrice,
     required this.mesghalPrice,
     required this.mesghalDifferentPrice,
+    required this.basePrice,
+    required this.baseDifferentPrice,
+    required this.baseMesghalPrice,
+    required this.baseMesghalDifferentPrice,
     required this.salesRange,
     required this.buyRange,
     required this.date,
@@ -42,6 +50,10 @@ class SocketItemModel {
     differentPrice: json["differentPrice"]?.toDouble(),
     mesghalPrice: json["mesghalPrice"]?.toDouble(),
     mesghalDifferentPrice: json["mesghalDifferentPrice"]?.toDouble(),
+    basePrice: json["basePrice"]?.toDouble(),
+    baseDifferentPrice: json["baseDifferentPrice"]?.toDouble(),
+    baseMesghalPrice: json["baseMesghalPrice"]?.toDouble(),
+    baseMesghalDifferentPrice: json["baseMesghalDifferentPrice"]?.toDouble(),
     salesRange: json["salesRange"]?.toDouble(),
     buyRange: json["buyRange"]?.toDouble(),
     date: json['date'] == null ? null : DateTime.parse(json['date'] as String),
@@ -57,6 +69,10 @@ class SocketItemModel {
     "differentPrice": differentPrice,
     "mesghalPrice": mesghalPrice,
     "mesghalDifferentPrice": mesghalDifferentPrice,
+    "basePrice": basePrice,
+    "baseDifferentPrice": baseDifferentPrice,
+    "baseMesghalPrice": baseMesghalPrice,
+    "baseMesghalDifferentPrice": baseMesghalDifferentPrice,
     "salesRange": salesRange,
     "buyRange": buyRange,
     'date': date?.toIso8601String(),

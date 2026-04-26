@@ -14,10 +14,9 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import 'deposit_request_create.view.dart';
 
 
@@ -962,7 +961,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                     SizedBox(width: 10,),
 
                                                                                                     // برگشت واریزی
-                                                                                                    if(getOneDeposit?.status!=4)
+                                                                                                    if(getOneDeposit?.status!=4 && getOneDeposit?.extraAmount==0)
                                                                                                     Tooltip(
                                                                                                       message: "برگشت واریزی",
                                                                                                       child: GestureDetector(
@@ -997,6 +996,40 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                               ),
                                                                                                       ),
                                                                                                     ),
+                                                                                                    if(getOneDeposit?.extraAmount!=0)
+                                                                                                      Tooltip(
+                                                                                                        message: "برگشت واریزی",
+                                                                                                        child: GestureDetector(
+                                                                                                          onTap: () {
+                                                                                                            Get.defaultDialog(
+                                                                                                                backgroundColor: AppColor
+                                                                                                                    .backGroundColor,
+                                                                                                                title: "برگشت واریزی",
+                                                                                                                titleStyle: AppTextStyle
+                                                                                                                    .smallTitleText,
+                                                                                                                middleText: "ابتدا تکلیف اضافه واریزی را مشخص کنید!!!",
+                                                                                                                middleTextStyle: AppTextStyle
+                                                                                                                    .bodyText.copyWith(color: AppColor.dividerColor),
+                                                                                                                confirm: ElevatedButton(
+                                                                                                                    style: ButtonStyle(
+                                                                                                                        backgroundColor: WidgetStatePropertyAll(
+                                                                                                                            AppColor.primaryColor)),
+                                                                                                                    onPressed: () {
+                                                                                                                      Get.back();
+                                                                                                                    },
+                                                                                                                    child: Text(
+                                                                                                                      'برگشت',
+                                                                                                                      style: AppTextStyle
+                                                                                                                          .bodyText,
+                                                                                                                    )));
+                                                                                                          },
+                                                                                                          child: SvgPicture.asset(
+                                                                                                            'assets/svg/back-deposit.svg',
+                                                                                                            height: 20,
+                                                                                                            colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                      ),
                                                                                                     SizedBox(width: 8,),
 
                                                                                                     // وضعیت
@@ -1132,7 +1165,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                                                 final attachment = withdrawGetOneController.imageList[index];
                                                                                                                                 return Column(
                                                                                                                                   children: [
-                                                                                                                                    if (kIsWeb)
+                                                                                                                                    //if (kIsWeb)
                                                                                                                                       Padding(
                                                                                                                                         padding: const EdgeInsets.only(right: 50),
                                                                                                                                         child: Row(mainAxisAlignment: MainAxisAlignment.start,
@@ -1226,7 +1259,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                                                   child: Visibility(
                                                                                                                                     visible: withdrawGetOneController
                                                                                                                                         .currentImagePage.value <
-                                                                                                                                        (withdrawGetOneController.imageList.length ?? 1) -
+                                                                                                                                        (withdrawGetOneController.imageList.length) -
                                                                                                                                             1,
                                                                                                                                     child: IconButton(
                                                                                                                                       style: ButtonStyle(
@@ -2532,7 +2565,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                         final attachment = withdrawGetOneController.imageList[index];
                                                                                                         return Column(
                                                                                                           children: [
-                                                                                                            if (kIsWeb)
+                                                                                                            //if (kIsWeb)
                                                                                                               Padding(
                                                                                                                 padding: const EdgeInsets.only(right: 50),
                                                                                                                 child: Row(mainAxisAlignment: MainAxisAlignment.start,
@@ -2626,7 +2659,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                           child: Visibility(
                                                                                                             visible: withdrawGetOneController
                                                                                                                 .currentImagePage.value <
-                                                                                                                (withdrawGetOneController.imageList.length ?? 1) -
+                                                                                                                (withdrawGetOneController.imageList.length) -
                                                                                                                     1,
                                                                                                             child: IconButton(
                                                                                                               style: ButtonStyle(
@@ -2779,7 +2812,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                               ),
                                                                             SizedBox(width: 10,),
                                                                             // برگشت واریزی
-                                                                            if(getOneDeposit?.status!=4)
+                                                                            if(getOneDeposit?.status!=4 && getOneDeposit?.extraAmount==0)
                                                                               GestureDetector(
                                                                                 onTap: () {
                                                                                   Get.defaultDialog(
@@ -2809,6 +2842,37 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                   'assets/svg/back-deposit.svg',
                                                                                   height: 30,width:40,
                                                                                   colorFilter: ColorFilter.mode(AppColor.dividerColor, BlendMode.srcIn),
+                                                                                ),
+                                                                              ),
+                                                                            if(getOneDeposit?.extraAmount!=0)
+                                                                              GestureDetector(
+                                                                                onTap: () {
+                                                                                  Get.defaultDialog(
+                                                                                      backgroundColor: AppColor
+                                                                                          .backGroundColor,
+                                                                                      title: "برگشت واریزی",
+                                                                                      titleStyle: AppTextStyle
+                                                                                          .smallTitleText,
+                                                                                      middleText: "ابتدا تکلیف اضافه واریزی را مشخص کنید!!!",
+                                                                                      middleTextStyle: AppTextStyle
+                                                                                          .bodyText.copyWith(color: AppColor.dividerColor),
+                                                                                      confirm: ElevatedButton(
+                                                                                          style: ButtonStyle(
+                                                                                              backgroundColor: WidgetStatePropertyAll(
+                                                                                                  AppColor.primaryColor)),
+                                                                                          onPressed: () {
+                                                                                            Get.back();
+                                                                                          },
+                                                                                          child: Text(
+                                                                                            'برگشت',
+                                                                                            style: AppTextStyle
+                                                                                                .bodyText,
+                                                                                          )));
+                                                                                },
+                                                                                child: SvgPicture.asset(
+                                                                                  'assets/svg/back-deposit.svg',
+                                                                                  height: 30,width:40,
+                                                                                  colorFilter: ColorFilter.mode(AppColor.iconViewColor, BlendMode.srcIn),
                                                                                 ),
                                                                               ),
                                                                           ],

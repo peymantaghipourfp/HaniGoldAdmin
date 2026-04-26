@@ -9,7 +9,6 @@ import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../product/model/item.model.dart';
 import '../controller/credit_helper.controller.dart';
-import '../model/credit_type.model.dart';
 
 class CreditHelperFilterWidget extends StatefulWidget {
   final CreditHelperController controller;
@@ -447,7 +446,7 @@ class _CreditHelperFilterWidgetState
       child: ElevatedButton(
         style: ButtonStyle(
             padding: WidgetStatePropertyAll(
-                EdgeInsets.symmetric(horizontal: 23, vertical: 19)
+                EdgeInsets.symmetric(horizontal: 23)
             ),
             backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
             shape: WidgetStatePropertyAll(

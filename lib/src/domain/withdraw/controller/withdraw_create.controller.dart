@@ -16,10 +16,6 @@ import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank_account_req.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -29,7 +25,6 @@ import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
-import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../../order/model/tooltip_total_balance.model.dart';
 import '../../users/model/balance_item.model.dart';
@@ -135,9 +130,6 @@ class WithdrawCreateController extends GetxController{
     selectedBankAccount.value!.sheba==null ? "" :
     shebaController.text=selectedBankAccount.value!.sheba.toString();
 
-    print(selectedBankAccount.value?.bank?.name);
-    print(selectedBankAccount.value?.bank?.id);
-    print(selectedIndex);
   }*/
 
   @override
@@ -180,14 +172,46 @@ class WithdrawCreateController extends GetxController{
 
   Future<void> pickImageDesktop( ) async {
     try{
-      final List<XFile?> images = await _picker.pickMultiImage();
+      final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        selectedImagesDesktop.addAll(images);
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+
+        selectedImagesDesktop.value = newList;
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
   }
+
+  Future<void> pickImageMobile(ImageSource source) async {
+    try {
+      if (source == ImageSource.camera) {
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 70,
+        );
+        if (photo == null) return;
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..add(photo);
+
+        selectedImagesDesktop.value = newList;
+
+      }
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+
+        if (images.isEmpty) return;
+
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+        selectedImagesDesktop.value = newList;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'امکان انتخاب تصویر وجود ندارد');
+    }
+  }
+
 
   Future<void> handleDroppedFiles(List<XFile> files) async {
     try {
@@ -434,7 +458,6 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
         status: 1,
         recId:recId,
       );
-      //print(response);
       if (response != null) {
         //Get.toNamed('/withdrawsList');
         Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
@@ -462,7 +485,6 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
 
   // لیست بالانس
   /*Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;
@@ -484,7 +506,6 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
 
   // دریافت تراز کامل کاربر
   Future<void> getTooltipTotalBalance(int accountId) async {
-    print("getTooltipTotalBalance : $accountId");
     if (accountId == 0) {
       tooltipTotalBalanceModel.value = null;
       isLoadingTooltipBalance.value = false;
@@ -494,7 +515,6 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
       isLoadingTooltipBalance.value = true;
       final result = await withdrawController.getTooltipTotalBalance(accountId);
       tooltipTotalBalanceModel.value = result;
-      print("TooltipTotalBalance fetched successfully");
     } catch (e) {
       print('Error fetching tooltip balance: $e');
       tooltipTotalBalanceModel.value = null;
@@ -536,7 +556,7 @@ Future<WithdrawModel?> insertWithdraw(String recId)async{
         if (kIsWeb) {
           final blob = html.Blob([pngBytes], 'image/png');
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
+          html.AnchorElement(href: url)
             ..setAttribute('download', 'user_balance_screenshot_${selectedAccount.value?.name}.png')
             ..click();
           html.Url.revokeObjectUrl(url);

@@ -14,10 +14,10 @@ import '../../domain/users/model/header_info_user_transaction.model.dart';
 import '../../domain/users/model/list_transaction_info.model.dart';
 import '../../domain/users/model/list_transaction_info_item.model.dart';
 import 'dart:typed_data';
-
-import '../../domain/users/model/transaction_info_item.model.dart';
 import '../../domain/users/model/transaction_info_item_list_pager.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class UserInfoTransactionRepository{
 
@@ -32,9 +32,6 @@ class UserInfoTransactionRepository{
         "id": id,
       };
       final response=await userInfoTransactionDio.get('Transaction/getTransactionsHeader',queryParameters: option);
-      print("url : Transaction/getTransactionsHeader" );
-      print("request getHeaderUserInfoTransaction : $option" );
-      print("response getHeaderUserInfoTransaction : ${response.data}" );
       if(response.statusCode==200){
 
         return HeaderInfoUserTransactionModel.fromJson(response.data);
@@ -42,8 +39,9 @@ class UserInfoTransactionRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getHeaderUserInfoTransaction failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
   Future<List<BalanceItemModel>> getBalanceList(int id)async{
@@ -52,9 +50,6 @@ class UserInfoTransactionRepository{
         "id": id,
       };
       final response=await userInfoTransactionDio.get('Wallet/getBalance',queryParameters: option);
-      print("url : Wallet/getBalance" );
-      print("request getBalanceList : $option" );
-      print("response getBalanceList : ${response.data}" );
       if(response.statusCode==200){
         if(response.data == null) {
           return <BalanceItemModel>[];
@@ -65,8 +60,9 @@ class UserInfoTransactionRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getBalanceList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -76,9 +72,6 @@ class UserInfoTransactionRepository{
         "id": id,
       };
       final response=await userInfoTransactionDio.get('Wallet/getTotalBalance',queryParameters: option);
-      print("url : Wallet/getTotalBalance" );
-      print("request getTooltipTotalBalance : $option" );
-      print("response getTooltipTotalBalance : ${response.data}" );
       if(response.statusCode==200){
         if(response.data == null) {
           return TooltipTotalBalanceModel(
@@ -106,8 +99,9 @@ class UserInfoTransactionRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTooltipTotalBalance failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -119,9 +113,6 @@ class UserInfoTransactionRepository{
         "itemId": itemId,
       };
       final response=await userInfoTransactionDio.get('TransferWallet/changeOne',queryParameters: option);
-      print("url : TransferWallet/changeOne" );
-      print("request getChangeOneWallet : $option" );
-      print("response getChangeOneWallet : ${response.data}" );
       if(response.statusCode==200){
         Map<String, dynamic> data=response.data;
         return WalletModel.fromJson(data);
@@ -129,8 +120,9 @@ class UserInfoTransactionRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getChangeOneWallet failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -230,14 +222,13 @@ class UserInfoTransactionRepository{
         }}
       };
       final response=await userInfoTransactionDio.post('Transaction/getWrapper',data: options);
-      print("request getTransactionInfoListPager : $options" );
-      print("response getTransactionInfoListPager : ${response.data}" );
 
       return TransactionInfoItemListPagerModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTransactionInfoListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -436,14 +427,13 @@ class UserInfoTransactionRepository{
         }}
       };
       final response=await userInfoTransactionDio.post('Transaction/getGoldWrapper',data: options);
-      print("request getTransactionInfoGoldListPager : $options" );
-      print("response getTransactionInfoGoldListPager : ${response.data}" );
 
       return TransactionInfoGoldListPagerModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTransactionInfoGoldListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -485,12 +475,11 @@ class UserInfoTransactionRepository{
         }}
       };
       final response=await userInfoTransactionDio.post('Transaction/getWrapper',data: options);
-      print("request getTransactionInfoListPager : $options" );
-      print("response getTransactionInfoListPager : ${response.data}" );
       return TransactionInfoItemListPagerModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTransactionInfoListForPdf failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -535,12 +524,11 @@ class UserInfoTransactionRepository{
           data: options,
           options: Options(responseType: ResponseType.bytes)
       );
-      print("request getTransactionInfoListPager : $options" );
-      print("response getTransactionInfoListPager : ${response.data}" );
       return Uint8List.fromList(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getGoldPdf failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -580,14 +568,13 @@ class UserInfoTransactionRepository{
           }
       ;
       final response=await userInfoTransactionDio.post('Transaction/getWalletBalance',data: options);
-      print("request getListTransactionInfoList : $options" );
-      print("response getListTransactionInfoList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((transaction)=>ListTransactionInfoItemModel.fromJson(transaction)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getListTransactionInfoList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -634,13 +621,12 @@ class UserInfoTransactionRepository{
         }}
       };
       final response=await userInfoTransactionDio.post('Transaction/getWalletBalanceWrapper',data: options);
-      print("request getListTransactionInfoListPager : $options" );
-      print("response getListTransactionInfoListPager : ${response.data}" );
       return ListTransactionInfoModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getListTransactionInfoListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -686,13 +672,12 @@ class UserInfoTransactionRepository{
         }}
       };
       final response=await userInfoTransactionDio.post('Transaction/getWalletBalanceDate',data: options);
-      print("request getListTransactionInfoDateListPager : $options" );
-      print("response getListTransactionInfoDateListPager : ${response.data}" );
       return ListTransactionInfoModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getListTransactionInfoDateListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -729,13 +714,12 @@ class UserInfoTransactionRepository{
         }}
       };
       final response=await userInfoTransactionDio.post('Transaction/getTransactionsWalletReceivablesWrapper',data: options);
-      print("request getTransactionsWalletReceivablesListPager : $options" );
-      print("response getTransactionsWalletReceivablesListPager : ${response.data}" );
       return ListTransactionsWalletReceivablesModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTransactionsWalletReceivablesListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -780,14 +764,13 @@ class UserInfoTransactionRepository{
       }
       ;
       final response=await userInfoTransactionDio.post('Transaction/getWalletBalanceFooter',data: options);
-      print("request getTransactionInfoFooter : $options" );
-      print("response getTransactionInfoFooter : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((transaction)=>TransactionInfoFooterModel.fromJson(transaction)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTransactionInfoFooter failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -832,11 +815,10 @@ class UserInfoTransactionRepository{
           'Transaction/getExcel',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request userInfoTransactionDetailExcel : $options" );
-      print("response userInfoTransactionDetailExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getUserInfoTransactionDetailExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -881,11 +863,10 @@ class UserInfoTransactionRepository{
           'Transaction/getGoldExcel',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request userInfoTransactionDetailExcel : $options" );
-      print("response userInfoTransactionDetailExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getGoldExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -931,11 +912,10 @@ class UserInfoTransactionRepository{
           'Transaction/getExcelWalletBalance',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request getListUserInfoTransactionExcel : $options" );
-      print("response getListUserInfoTransactionExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getListUserInfoTransactionExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -945,15 +925,12 @@ class UserInfoTransactionRepository{
         "checked": checked,
         "id": id,
       };
-      print("request updateChecked : $option" );
       var response=await userInfoTransactionDio.put('Transaction/updateChecked',queryParameters: option);
-      print("url : Transaction/updateChecked" );
-      print('Status Code updateChecked: ${response.statusCode}');
-      print('Response Data updateChecked: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در checked:$e');
+    catch (e, s) {
+      AppLogger.e('updateChecked failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -963,15 +940,12 @@ class UserInfoTransactionRepository{
         "checked": checked,
         "accountId": accountId,
       };
-      print("request removeCheckedAll : $option" );
       var response=await userInfoTransactionDio.put('Transaction/updateAllChecked',queryParameters: option);
-      print("url : Transaction/updateAllChecked" );
-      print('Status Code removeCheckedAll: ${response.statusCode}');
-      print('Response Data removeCheckedAll: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در checkedAll:$e');
+    catch (e, s) {
+      AppLogger.e('removeCheckedAll failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -981,9 +955,6 @@ class UserInfoTransactionRepository{
         "id": id,
       };
       final response=await userInfoTransactionDio.get('Transaction/checkResult',queryParameters: option);
-      print("url : Transaction/checkResult" );
-      print("request getCheckResult : $option" );
-      print("response getCheckResult : ${response.data}" );
       if(response.statusCode==200){
         final dynamic body = response.data;
         if (body == null) {
@@ -1000,8 +971,9 @@ class UserInfoTransactionRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getCheckResult failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -1011,9 +983,6 @@ class UserInfoTransactionRepository{
         "name": name,
       };
       final response=await userInfoTransactionDio.get('ReportSetting/getOneByName',queryParameters: option);
-      print("url : ReportSetting/getOneByName" );
-      print("request getOneReportSetting : $option" );
-      print("response getOneReportSetting : ${response.data}" );
       if(response.statusCode==200){
         Map<String, dynamic> data=response.data;
         return ReportSettingModel.fromJson(data);
@@ -1021,8 +990,9 @@ class UserInfoTransactionRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getOneReportSetting failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -1044,9 +1014,7 @@ class UserInfoTransactionRepository{
         "infos": reportSetting.infos ?? [],
       };
       final response=await userInfoTransactionDio.put('ReportSetting/update',data: data);
-      print("url : ReportSetting/update" );
-      print("request updateReportSetting : $data" );
-      print("response updateReportSetting : ${response.data}" );
+
       if(response.statusCode==200){
         Map<String, dynamic> responseData=response.data;
         return ReportSettingModel.fromJson(responseData);
@@ -1054,8 +1022,9 @@ class UserInfoTransactionRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('updateReportSetting failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -1156,11 +1125,6 @@ class UserInfoTransactionRepository{
   //     };
   //
   //     var response=await userInfoTransactionDio.post('Remittance/insert',data: orderData);
-  //     /*if(response.statusCode==200){
-  //       print('ثبت با موفقیت انجام شد');
-  //     }else{
-  //       throw ErrorException('خطا');
-  //     }*/
   //     return RemittanceModel.fromJson(response.data);
   //   }
   //   catch(e){

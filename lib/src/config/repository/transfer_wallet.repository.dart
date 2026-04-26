@@ -1,20 +1,14 @@
-import 'dart:convert';
+
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/list_remittance.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/list_remittance_request.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
+import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:hanigold_admin/src/domain/transferWallet/model/list_transfer_wallet.model.dart';
-import 'package:hanigold_admin/src/domain/transferWallet/model/transfer_wallet.model.dart';
 
-import '../../domain/remittance/model/image_guid_model.dart';
-import 'dart:typed_data';
-
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class TransferWalletRepository{
 
@@ -76,17 +70,15 @@ class TransferWalletRepository{
         }
       };
       final response=await transferWalletDio.post('TransferWallet/getWrapper',data: options);
-      print("url getTransferWalletListPager : TransferWallet/getWrapper" );
-      print("request getTransferWalletListPager : $options" );
-      print("response getTransferWalletListPager : ${response.data}" );
       if(response.statusCode==200){
         return ListTransferWalletModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTransferWalletListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -101,28 +93,52 @@ class TransferWalletRepository{
         "isDeleted" : isDeleted,
       };
 
-      print(transferWalletData);
 
       var response=await transferWalletDio.delete('TransferWallet/UpdateToIsDeleted',data: transferWalletData);
-      print('Status Code deleteTransferWallet: ${response.statusCode}');
-      print('Response Data deleteTransferWallet: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch (e, s) {
+      AppLogger.e('deleteTransferWallet failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
-  Future<TransferWalletModel> changeTransferAfterTomorrow(String date)async{
+  Future<List< dynamic>> changeTransferAfterTomorrow(String date)async{
     try{
       final response = await transferWalletDio.post(
           'TransferWallet/transferAfterTomorrow', queryParameters: {'date': date});
-      print('Status Code insertTransferAfterTomorrow: ${response.statusCode}');
-      print('Response Data insertTransferAfterTomorrow: ${response.data}');
-      Map<String, dynamic> data=response.data;
-      return TransferWalletModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+      return response.data;
+    }catch (e, s) {
+      AppLogger.e('changeTransferAfterTomorrow failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
+    }
+  }
+
+
+  Future<List<OrderModel>> getAfterNotChange() async{
+    try{
+      final response=await transferWalletDio.post('Order/getAfterNotChange');
+      if(response.statusCode==200){
+        final dynamic body = response.data;
+        if (body == null) {
+          return <OrderModel>[];
+        }
+        if (body is List) {
+          return body.map((e) => OrderModel.fromJson(e as Map<String, dynamic>)).toList();
+        }
+        if (body is Map<String, dynamic>) {
+          return <OrderModel>[OrderModel.fromJson(body)];
+        }
+        return <OrderModel>[];
+      }else{
+        throw ErrorException('خطا');
+      }
+      /*List<dynamic> data=response.data;
+      return data.map((order) => OrderModel.fromJson(order)).toList();*/
+
+    }catch (e, s) {
+      AppLogger.e('getAfterNotChange failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

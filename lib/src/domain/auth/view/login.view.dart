@@ -1,14 +1,11 @@
-import 'dart:async';
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/auth/controller/auth.controller.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../widget/version.widget.dart';

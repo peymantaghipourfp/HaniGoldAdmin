@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -10,10 +10,9 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/user_info_transaction.controller.dart';
 import '../widgets/filter_dialog_report_setting.widget.dart';
 
@@ -313,7 +312,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                                                   child:
                                                                   ElevatedButton(
                                                                     style: ButtonStyle(
-                                                                        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                                         // elevation: WidgetStatePropertyAll(5),
                                                                         backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                                         shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -852,7 +851,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                                                 return Padding(
                                                                   padding: EdgeInsets.only(bottom: 8),
                                                                   child: _buildNetFooterItem(
-                                                                    title: "" ?? "ارز",
+                                                                    title: "",
                                                                     netValue: netValue,
                                                                     unit: item.unitName,
                                                                   ),
@@ -1847,7 +1846,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     FontWeight
                                         .bold)),
                             Text(
-                              trans.coinBalanceBes.toString(),
+                              trans.coinBalanceBes?.toDisplayString() ?? "",
                               style: AppTextStyle.bodyText
                                   .copyWith(
                                   fontSize: 11,
@@ -1884,7 +1883,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     FontWeight
                                         .bold)),
                             Text(
-                              trans.halfCoinBalanceBes.toString(),
+                              trans.halfCoinBalanceBes?.toDisplayString() ?? "",
                               style: AppTextStyle.bodyText
                                   .copyWith(
                                   fontSize: 11,
@@ -1921,7 +1920,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     FontWeight
                                         .bold)),
                             Text(
-                              trans.quarterCoinBalanceBes.toString(),
+                              trans.quarterCoinBalanceBes?.toDisplayString() ?? "",
                               style: AppTextStyle.bodyText
                                   .copyWith(
                                   fontSize: 11,
@@ -1971,7 +1970,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     FontWeight
                                         .bold)),
                             Text(
-                              "-${trans.coinBalanceBed?.abs().toString()}",
+                              "-${trans.coinBalanceBed?.abs().toDisplayString()}",
                               style: AppTextStyle.bodyText
                                   .copyWith(
                                   fontSize: 11,
@@ -2008,7 +2007,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     FontWeight
                                         .bold)),
                             Text(
-                              "-${trans.halfCoinBalanceBed?.abs().toString()}",
+                              "-${trans.halfCoinBalanceBed?.abs().toDisplayString()}",
                               style: AppTextStyle.bodyText
                                   .copyWith(
                                   fontSize: 11,
@@ -2045,7 +2044,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                     FontWeight
                                         .bold)),
                             Text(
-                              "-${trans.quarterCoinBalanceBed?.abs().toString()}",
+                              "-${trans.quarterCoinBalanceBed?.abs().toDisplayString()}",
                               style: AppTextStyle.bodyText
                                   .copyWith(
                                   fontSize: 11,
@@ -2097,7 +2096,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   FontWeight
                                       .bold)),
                           Text(
-                            e.balance.toString(),
+                            e.balance?.toDisplayString() ?? "",
                             style: AppTextStyle.bodyText
                                 .copyWith(
                                 fontSize: 10,
@@ -2156,7 +2155,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                   FontWeight
                                       .bold)),
                           Text(
-                            e.balance.toString(),
+                            e.balance?.toDisplayString() ?? "",
                             style: AppTextStyle.bodyText
                                 .copyWith(
                                 fontSize: 10,
@@ -2788,7 +2787,7 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                                           child:
                                           ElevatedButton(
                                             style: ButtonStyle(
-                                                padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                 // elevation: WidgetStatePropertyAll(5),
                                                 backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                 shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -2936,10 +2935,10 @@ class ListUserInfoTransactionView extends GetView<UserInfoTransactionController>
                     // Coin balances
                     if((trans.coinBalanceBes ?? 0) != 0 || (trans.halfCoinBalanceBes ?? 0) != 0 || (trans.quarterCoinBalanceBes ?? 0) != 0)
                       _mobileLine("سکه بستانکار",
-                          "تمام ${trans.coinBalanceBes} / نیم ${trans.halfCoinBalanceBes} / ربع ${trans.quarterCoinBalanceBes}", AppColor.primaryColor,"عدد"),
+                          "تمام ${trans.coinBalanceBes?.toDisplayString()} / نیم ${trans.halfCoinBalanceBes?.toDisplayString()} / ربع ${trans.quarterCoinBalanceBes?.toDisplayString()}", AppColor.primaryColor,"عدد"),
                     if((trans.coinBalanceBed ?? 0) != 0 || (trans.halfCoinBalanceBed ?? 0) != 0 || (trans.quarterCoinBalanceBed ?? 0) != 0)
                       _mobileLine("سکه بدهکار",
-                          "-تمام ${(trans.coinBalanceBed??0).abs()}- / نیم ${(trans.halfCoinBalanceBed??0).abs()}- / ربع ${(trans.quarterCoinBalanceBed??0).abs()}", AppColor.accentColor,"عدد"),
+                          "-تمام ${(trans.coinBalanceBed??0).abs().toDisplayString()}- / نیم ${(trans.halfCoinBalanceBed??0).abs().toDisplayString()}- / ربع ${(trans.quarterCoinBalanceBed??0).abs().toDisplayString()}", AppColor.accentColor,"عدد"),
                     // Currency sample (USD)
                     if((trans.balances??[]).any((e)=> e.unitName=="دلار" && (e.balance??0)>0))
                       _mobileLine("ارز بستانکار",

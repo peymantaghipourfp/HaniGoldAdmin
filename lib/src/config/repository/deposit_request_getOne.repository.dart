@@ -4,8 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class DepositRequestGetOneRepository{
   Dio depositRequestGetOneDio=Dio();
@@ -20,12 +22,11 @@ class DepositRequestGetOneRepository{
       final response=await depositRequestGetOneDio.get(
         'DepositRequest/getOne',queryParameters: {'id':depositRequestId}
       );
-      print('Status Code getOneDepositRequest: ${response.statusCode}');
-      print('Response Data getOneDepositRequest: ${response.data}');
       Map<String, dynamic> data=response.data;
       return DepositRequestModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('getOneDepositRequest failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

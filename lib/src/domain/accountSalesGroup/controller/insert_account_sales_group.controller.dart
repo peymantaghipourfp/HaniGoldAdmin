@@ -20,6 +20,9 @@ class SelectedItemPrice {
   final String? icon;
   final double buyRange;
   final double salesRange;
+  final bool? sellStatus;
+  final bool? buyStatus;
+
   /*final double maxBuy;
   final double maxSell;*/
 
@@ -29,6 +32,8 @@ class SelectedItemPrice {
     this.icon,
     required this.buyRange,
     required this.salesRange,
+    this.sellStatus,
+    this.buyStatus,
     /*required this.maxBuy,
     required this.maxSell,*/
   });
@@ -48,8 +53,11 @@ class InsertAccountSalesGroupController extends GetxController {
   final TextEditingController nameController=TextEditingController();
   final TextEditingController buyRangeController=TextEditingController();
   final TextEditingController salesRangeController=TextEditingController();
-  final TextEditingController maxBuyController=TextEditingController();
-  final TextEditingController maxSellController=TextEditingController();
+  //final TextEditingController maxBuyController=TextEditingController();
+  //final TextEditingController maxSellController=TextEditingController();
+
+  RxBool sellStatus = RxBool(true);
+  RxBool buyStatus = RxBool(true);
 
   // Get available items (not already selected)
   List<ItemModel> get availableItems {
@@ -62,8 +70,18 @@ class InsertAccountSalesGroupController extends GetxController {
     // Clear input fields when item changes
     buyRangeController.clear();
     salesRangeController.clear();
-    maxBuyController.clear();
-    maxSellController.clear();
+    sellStatus.value = true;
+    buyStatus.value = true;
+    //maxBuyController.clear();
+    //maxSellController.clear();
+  }
+
+  void changeSellStatus(bool newValue) {
+    sellStatus.value = newValue;
+  }
+
+  void changeBuyStatus(bool newValue) {
+    buyStatus.value = newValue;
   }
 
   @override
@@ -103,8 +121,10 @@ class InsertAccountSalesGroupController extends GetxController {
 
     final buyRangeText = buyRangeController.text.trim();
     final salesRangeText = salesRangeController.text.trim();
-    final maxBuyText = maxBuyController.text.trim();
-    final maxSellText = maxSellController.text.trim();
+    //final sellStatusValue = sellStatus.value;
+    //final buyStatusValue = buyStatus.value;
+    //final maxBuyText = maxBuyController.text.trim();
+    //final maxSellText = maxSellController.text.trim();
 
     // Validate inputs
     if (buyRangeText.isEmpty) {
@@ -141,8 +161,8 @@ class InsertAccountSalesGroupController extends GetxController {
 
     final buyRange = double.tryParse(buyRangeText.replaceAll(',', '').toEnglishDigit());
     final salesRange = double.tryParse(salesRangeText.replaceAll(',', '').toEnglishDigit());
-    final maxBuy = double.tryParse(maxBuyText.replaceAll(',', '').toEnglishDigit());
-    final maxSell = double.tryParse(maxSellText.replaceAll(',', '').toEnglishDigit());
+    //final maxBuy = double.tryParse(maxBuyText.replaceAll(',', '').toEnglishDigit());
+    //final maxSell = double.tryParse(maxSellText.replaceAll(',', '').toEnglishDigit());
 
     if (buyRange == null) {
       Get.snackbar('خطا', 'محدوده خرید باید یک عدد معتبر باشد',
@@ -208,6 +228,8 @@ class InsertAccountSalesGroupController extends GetxController {
       icon: selectedItem.value?.icon,
       buyRange: buyRange,
       salesRange: salesRange,
+      sellStatus: sellStatus.value,
+      buyStatus: buyStatus.value,
       /*maxBuy: maxBuy,
       maxSell: maxSell,*/
     ));
@@ -216,8 +238,10 @@ class InsertAccountSalesGroupController extends GetxController {
     selectedItem.value = null;
     buyRangeController.clear();
     salesRangeController.clear();
-    maxBuyController.clear();
-    maxSellController.clear();
+    sellStatus.value = true;
+    buyStatus.value = true;
+    //maxBuyController.clear();
+    //maxSellController.clear();
 
     /*Get.snackbar('موفق', 'محصول با موفقیت اضافه شد',
         snackPosition: SnackPosition.BOTTOM,
@@ -258,6 +282,8 @@ class InsertAccountSalesGroupController extends GetxController {
           'itemId': itemPrice.itemId,
           'buyRange': itemPrice.buyRange,
           'salesRange': itemPrice.salesRange,
+          'sellStatus': itemPrice.sellStatus,
+          'buyStatus': itemPrice.buyStatus,
           /*'maxBuy': itemPrice.maxBuy,
           'maxSell': itemPrice.maxSell,*/
         };
@@ -289,8 +315,10 @@ class InsertAccountSalesGroupController extends GetxController {
         selectedItem.value = null;
         buyRangeController.clear();
         salesRangeController.clear();
-        maxBuyController.clear();
-        maxSellController.clear();
+        sellStatus.value = true;
+        buyStatus.value = true;
+        //maxBuyController.clear();
+        //maxSellController.clear();
 
         // Navigate back
         Get.offNamed('/accountSalesGroupList');

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/model/tooltip_total_balance.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -20,7 +18,7 @@ class TotalBalanceGoldValue extends StatefulWidget {
 class _TotalBalanceGoldValueState extends State<TotalBalanceGoldValue> {
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Container(
       width: widget.size,
       padding: EdgeInsets.symmetric(horizontal: 20,vertical: 15),

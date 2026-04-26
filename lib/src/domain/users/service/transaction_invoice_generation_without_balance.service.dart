@@ -280,9 +280,9 @@ class TransactionInvoiceGenerationWithoutBalanceService {
     final unitId = tx.item?.itemUnit?.id;
     final amount = tx.amount ?? 0;
     final itemName = tx.item?.name ?? '';
-    if (unitId == 1) return amount < 0 ? '${amount?.abs()}- عدد $itemName' : '$amount عدد $itemName';
-    if (unitId == 2) return amount < 0 ? '${amount?.abs()}- گرم $itemName' : '$amount گرم $itemName';
-    return amount < 0 ? '${amount?.abs().toString().seRagham()}- ریال $itemName' : '${amount.toString().seRagham()} ریال $itemName';
+    if (unitId == 1) return amount < 0 ? '${amount.abs()}- عدد $itemName' : '$amount عدد $itemName';
+    if (unitId == 2) return amount < 0 ? '${amount.abs()}- گرم $itemName' : '$amount گرم $itemName';
+    return amount < 0 ? '${amount.abs().toString().seRagham()}- ریال $itemName' : '${amount.toString().seRagham()} ریال $itemName';
   }
 
   String _amountText(TransactionInfoItemModel tx) {

@@ -2,9 +2,7 @@
 //
 //     final listUserAccountModel = listUserAccountModelFromJson(jsonString);
 
-import 'package:hanigold_admin/src/domain/auth/model/user_login.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/paginated.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 

@@ -3,10 +3,8 @@
 //     final transactionInfoItemModel = transactionInfoItemModelFromJson(jsonString);
 
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
-import 'package:hanigold_admin/src/domain/users/model/balance_item.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/transaction_info_detail_item.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 

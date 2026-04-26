@@ -6,8 +6,10 @@ import 'package:hanigold_admin/src/domain/analyticalReports/model/candle_price_c
 
 import '../../domain/analyticalReports/model/statistics_report.model.dart';
 import '../../domain/analyticalReports/model/statistics_report_header.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class AnalyticalReportsRepository {
 
@@ -23,11 +25,8 @@ class AnalyticalReportsRepository {
     try{
 
       final response=await analyticalReportsDio.get('Order/statisticsReport',queryParameters: {'startDate':startDate,'endDate':endDate});
-      print("Request parameters: startDate=$startDate, endDate=$endDate");
-      print("response getStatisticsReportList : ${response.data}" );
 
       if (response.data == null) {
-        print("API داده های خالی را برگرداند - هیچ داده ای برای پارامترهای مشخص شده موجود نیست");
         return <StatisticsReportModel>[];
       }
 
@@ -35,9 +34,9 @@ class AnalyticalReportsRepository {
       return data.map((statisticsReport)=>StatisticsReportModel.fromJson(statisticsReport)).toList();
 
     }
-    catch(e){
-      print("Error in getStatisticsReportList: $e");
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getStatisticsReportList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -45,11 +44,8 @@ class AnalyticalReportsRepository {
     try{
 
       final response=await analyticalReportsDio.get('Order/statisticsReportHeader',queryParameters: {'startDate':startDate,'endDate':endDate});
-      print("Request parameters: startDate=$startDate, endDate=$endDate");
-      print("response getStatisticsReportHeader : ${response.data}" );
 
       if (response.data == null) {
-        print("API داده های خالی را برگرداند - هیچ داده ای برای پارامترهای مشخص شده موجود نیست");
         return StatisticsReportHeaderModel(
             adminOrders: 0,approvedOrders: 0,buyAccountCount: 0,rejectedOrders: 0,sellAccountCount: 0,totalActiveAccounts: 0,userOrders: 0
         );
@@ -58,9 +54,9 @@ class AnalyticalReportsRepository {
       return StatisticsReportHeaderModel.fromJson(response.data);
 
     }
-    catch(e){
-      print("Error in getStatisticsReportList: $e");
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getStatisticsReportHeader failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -68,11 +64,8 @@ class AnalyticalReportsRepository {
     try{
 
       final response=await analyticalReportsDio.get('ItemPrice/getCandlePrice',queryParameters: { 'itemId':itemId,'timeFrame':timeFrame,'date':date,'startTime':startTime,'endTime':endTime});
-      print("Request parameters: startTime=$startTime, endTime=$endTime, date=$date, timeFrame=$timeFrame, itemId=$itemId");
-      print("response getCandlePriceChartList : ${response.data}" );
 
       if (response.data == null) {
-        print("API داده های خالی را برگرداند - هیچ داده ای برای پارامترهای مشخص شده موجود نیست");
         return <CandlePriceChartModel>[];
       }
 
@@ -80,9 +73,9 @@ class AnalyticalReportsRepository {
       return data.map((candlePriceChart)=>CandlePriceChartModel.fromJson(candlePriceChart)).toList();
 
     }
-    catch(e){
-      print("Error in getCandlePriceChartList: $e");
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getCandlePriceChartList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

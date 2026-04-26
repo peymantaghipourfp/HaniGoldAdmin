@@ -1,6 +1,5 @@
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
+
 import 'package:hanigold_admin/src/domain/accountSalesGroup/model/account_sales_group_item.model.dart';
-import 'package:hanigold_admin/src/domain/product/model/item_price.model.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 

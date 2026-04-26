@@ -3,9 +3,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:core';
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:excel/excel.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -16,11 +14,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/upload.repository.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
-import 'package:hanigold_admin/src/domain/deposit/model/socket_deposit.model.dart';
 import 'package:image_picker/image_picker.dart';
-
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
@@ -76,7 +70,7 @@ class DepositController extends BaseController{
   RxInt selectedAccountId = 0.obs;
   RxList<AccountModel> searchedAccounts = <AccountModel>[].obs;
 
-  final ImagePicker _picker = ImagePicker();
+  //final ImagePicker _picker = ImagePicker();
   Rx<XFile?> selectedImage = Rx<XFile?>(null);
   Rx<XFile?> selectedImageDesktop = Rx<XFile?>(null);
   RxBool isUploading = false.obs;
@@ -145,7 +139,7 @@ class DepositController extends BaseController{
         try {
           final data = json.decode(message);
           if (data['channel'] == 'deposit') {
-            final socketDeposit = SocketDepositModel.fromJson(data);
+            //final socketDeposit = SocketDepositModel.fromJson(data);
 
             getDepositListPager();
           }
@@ -242,7 +236,6 @@ class DepositController extends BaseController{
           selectedImage.value = File(image.path);
           await uploadImage(recordId, type, entityType);
         }
-        print("Imaggggge: ${selectedImage}");
   }*/
   /*Future<void> uploadImage(String recordId, String type, String entityType) async {
     EasyLoading.show(status: 'لطفا منتظر بمانید');
@@ -278,7 +271,6 @@ class DepositController extends BaseController{
             entityType);
       }
 
-    print("Imaggggge: ${selectedImageDesktop}");
   }*/
 
   /*Future<void> uploadImageDesktop(String recordId, String type, String entityType) async {
@@ -337,7 +329,6 @@ class DepositController extends BaseController{
   }
 // لیست دریافت ها با صفحه بندی
   Future<void> getDepositListPager() async {
-    print("### getDepositListPager ###");
     depositList.clear();
     isLoading.value=true;
     try {
@@ -388,7 +379,6 @@ class DepositController extends BaseController{
   //         depositList.addAll(fetchedDepositList);
   //       }
   //     }
-  //     print(depositList.length);
   //     state.value = depositList.isEmpty ? PageState.empty : PageState.list;
   //     //EasyLoading.dismiss();
   //       depositList.refresh();
@@ -620,7 +610,7 @@ class DepositController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);

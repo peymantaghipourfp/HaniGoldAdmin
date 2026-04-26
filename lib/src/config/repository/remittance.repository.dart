@@ -1,18 +1,17 @@
 
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/list_remittance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 
 import '../../domain/remittance/model/image_guid_model.dart';
 import 'dart:typed_data';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class RemittanceRepository{
 
@@ -49,9 +48,6 @@ class RemittanceRepository{
         }
       };
       final response=await remittanceDio.post('Remittance/get',data: options);
-      print("url getRemittanceList : Remittance/get" );
-      print("request getRemittanceList : $options" );
-      print("response getRemittanceList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((account)=>RemittanceModel.fromJson(account)).toList();
@@ -59,8 +55,9 @@ class RemittanceRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getRemittanceList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -72,13 +69,11 @@ class RemittanceRepository{
        "type":type
       };
       final response=await remittanceDio.get('Attachment/downloadAttachmentGuidList',queryParameters: options);
-      print("url getImage : Attachment/downloadAttachmentGuidList" );
-      print("request getImage : $options" );
-      print("response getImage : ${response.data}" );
         return ImageGuidModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getImage failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -195,17 +190,15 @@ class RemittanceRepository{
         }
       };
       final response=await remittanceDio.post('Remittance/getWrapper',data: options);
-      print("url getRemittanceListPager : Remittance/getWrapper" );
-      print("request getRemittanceListPager : $options" );
-      print("response getRemittanceListPager : ${response.data}" );
       if(response.statusCode==200){
         return ListRemittanceModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getRemittanceListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -272,17 +265,15 @@ class RemittanceRepository{
         }
       };
       final response=await remittanceDio.post('Remittance/getWrapper',data: options);
-      print("url getRemittanceListPendingPager : Remittance/getWrapper" );
-      print("request getRemittanceListPendingPager : $options" );
-      print("response getRemittanceListPendingPager : ${response.data}" );
       if(response.statusCode==200){
         return ListRemittanceModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getRemittanceListPendingPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -320,11 +311,10 @@ class RemittanceRepository{
           'Remittance/getExcel',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request getRemittanceExcel : $options" );
-      print("response getRemittanceExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getRemittanceExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -428,17 +418,11 @@ class RemittanceRepository{
       };
 
       var response=await remittanceDio.post('Remittance/insert',data: orderData);
-      print('Status Code insertRemittance: ${response.statusCode}');
-      print('Response Data insertRemittance: ${response.data}');
-      /*if(response.statusCode==200){
-        print('ثبت با موفقیت انجام شد');
-      }else{
-        throw ErrorException('خطا');
-      }*/
       return RemittanceModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('insertRemittance failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -541,20 +525,13 @@ class RemittanceRepository{
           "infos": []
 
       };
-      print(remittanceData);
 
       var response=await remittanceDio.put('Remittance/update',data: remittanceData);
-      print('Status Code updateRemittance: ${response.statusCode}');
-      print('Response Data updateRemittance: ${response.data}');
-      /*if(response.statusCode==200){
-        print('ثبت با موفقیت انجام شد');
-      }else{
-        throw ErrorException('خطا');
-      }*/
       return RemittanceModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('updateRemittance failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -567,15 +544,13 @@ class RemittanceRepository{
         "registered": registered,
         "id": remittanceId,
       };
-      print(remittanceData);
 
       var response=await remittanceDio.put('Remittance/updateRegistered',data: remittanceData);
-      print('Status Code updateRegistered: ${response.statusCode}');
-      print('Response Data updateRegistered: ${response.data}');
       return RemittanceModel.fromJson(response.data) ;
     }
-    catch(e){
-      throw ErrorException('خطا در ریجیستر:$e');
+    catch (e, s) {
+      AppLogger.e('updateRegistered failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -586,15 +561,13 @@ class RemittanceRepository{
       Map<String,dynamic> remittanceData={
         "fileName":fileName,
       };
-      print(remittanceData);
 
       var response=await remittanceDio.delete('Attachment/Delete',queryParameters: remittanceData);
-      print('Status Code deleteImage: ${response.statusCode}');
-      print('Response Data deleteImage: ${response.data}');
       return response.data ;
     }
-    catch(e){
-      throw ErrorException('خطا در ریجیستر:$e');
+    catch (e, s) {
+      AppLogger.e('deleteImage failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -605,15 +578,13 @@ class RemittanceRepository{
       Map<String,dynamic> remittanceData={
         "id": id,
       };
-      print(remittanceData);
 
       var response=await remittanceDio.get('Remittance/getOne',queryParameters: remittanceData);
-      print('Status Code getOneRemittance: ${response.statusCode}');
-      print('Response Data getOneRemittance: ${response.data}');
       return RemittanceModel.fromJson(response.data) ;
     }
-    catch(e){
-      throw ErrorException('خطا در دریافت:$e');
+    catch (e, s) {
+      AppLogger.e('getOneRemittance failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -627,15 +598,13 @@ class RemittanceRepository{
         "isDeleted" : isDeleted,
       };
 
-      print(remittanceData);
 
       var response=await remittanceDio.delete('Remittance/updateToIsDeleted',data: remittanceData);
-      print('Status Code deleteRemittance: ${response.statusCode}');
-      print('Response Data deleteRemittance: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch (e, s) {
+      AppLogger.e('deleteRemittance failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -654,15 +623,13 @@ class RemittanceRepository{
         "id": remittanceId,
 
       };
-      print(remittanceData);
 
       var response=await remittanceDio.put('Remittance/updateStatus',data: remittanceData);
-      print('Status Code updateStatusRemittance: ${response.statusCode}');
-      print('Response Data updateStatusRemittance: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در تغییر وضعیت:$e');
+    catch (e, s) {
+      AppLogger.e('updateStatusRemittance failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 }

@@ -7,7 +7,6 @@ import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/user.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 

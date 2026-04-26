@@ -4,7 +4,9 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 
 import '../../domain/laboratory/model/laboratory.model.dart';
 import '../../domain/laboratory/model/list_laboratory.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class LaboratoryRepository {
 
@@ -26,8 +28,6 @@ class LaboratoryRepository {
         }}
       };
       final response = await laboratoryDio.post('Laboratory/get', data: options);
-      print("request getLaboratoryList : $options" );
-      print("response getLaboratoryList : ${response.data}" );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((laboratories) =>
@@ -37,8 +37,9 @@ class LaboratoryRepository {
         throw ErrorException('خطا');
       }
     }
-    catch (e) {
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getLaboratoryList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -77,8 +78,6 @@ class LaboratoryRepository {
             }}
           };
       final response = await laboratoryDio.post('Laboratory/getWrapper', data: options);
-      print("request getLaboratoryListPager : $options" );
-      print("response getLaboratoryListPager : ${response.data}" );
       if (response.statusCode == 200) {
         return
           ListLaboratoryModel.fromJson(response.data);
@@ -87,8 +86,9 @@ class LaboratoryRepository {
         throw ErrorException('خطا');
       }
     }
-    catch (e) {
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getLaboratoryListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -144,10 +144,7 @@ class LaboratoryRepository {
           "attribute": "cus",
           "recId": null,
       };
-      print(options);
       final response = await laboratoryDio.post('Laboratory/insert', data: options);
-      print('Status Code insertLaboratory: ${response.statusCode}');
-      print('Response Data insertLaboratory: ${response.data}');
       if (response.statusCode == 200) {
         return
           LaboratoryModel.fromJson(response.data);
@@ -174,10 +171,7 @@ class LaboratoryRepository {
           "attribute": "cus",
           "recId": null,
       };
-      print(options);
       final response = await laboratoryDio.put('Laboratory/update', data: options);
-      print('Status Code updateLaboratory: ${response.statusCode}');
-      print('Response Data updateLaboratory: ${response.data}');
       if (response.statusCode == 200) {
         return
           LaboratoryModel.fromJson(response.data);
@@ -200,8 +194,6 @@ class LaboratoryRepository {
       };
 
       var response=await laboratoryDio.delete('Laboratory/Delete',data: laboratoryData);
-      print('Status Code deleteLaboratory: ${response.statusCode}');
-      print('Response Data deleteLaboratory: ${response.data}');
       if (response.data is List) {
         return response.data;
       } else {

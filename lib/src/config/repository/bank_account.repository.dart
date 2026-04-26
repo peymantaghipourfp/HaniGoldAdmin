@@ -17,7 +17,6 @@ class BankAccountRepository{
 
   Future<List<BankAccountModel>> getBankAccountList(BankAccountReqModel bankAccountReqModel)async{
     final response=await bankAccountDio.post('BankAccount/get',data: {"options":bankAccountReqModel});
-    print(response);
     List<dynamic> data=response.data;
     return data.map((bankAccount)=>BankAccountModel.fromJson(bankAccount)).toList();
   }

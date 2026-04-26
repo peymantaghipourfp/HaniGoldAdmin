@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
@@ -8,23 +7,32 @@ class AudioService {
   factory AudioService() => _instance;
   AudioService._internal();
 
-  final AudioPlayer _audioPlayer = AudioPlayer();
+  // Use lazy initialization to avoid crash on Windows
+  // AudioPlayer is only created when first accessed
+  AudioPlayer? _audioPlayer;
   bool _isInitialized = false;
 
   // Define all available sound files
   static const Map<String, String> _soundFiles = {
     'notification': 'sounds/notification.mp3',
+    'notificationCoin': 'sounds/notificationCoin.mp3',
     'notificationAll': 'sounds/notificationAll.mp3',
     // 'error': 'sounds/error.mp3',
     // 'warning': 'sounds/warning.mp3',
   };
+
+  /// Lazily create AudioPlayer only when needed
+  AudioPlayer _getPlayer() {
+    _audioPlayer ??= AudioPlayer();
+    return _audioPlayer!;
+  }
 
   Future<void> initialize() async {
     if (_isInitialized) return;
 
     try {
       // Set audio mode for better web compatibility
-      await _audioPlayer.setReleaseMode(ReleaseMode.stop);
+      await _getPlayer().setReleaseMode(ReleaseMode.stop);
       _isInitialized = true;
     } catch (e) {
       Get.log('Error initializing audio service: $e');
@@ -58,11 +66,11 @@ class AudioService {
 
       if (kIsWeb) {
         // Web-specific handling with proper source
-        await _audioPlayer.setSource(audioSource);
-        await _audioPlayer.resume();
+        await _getPlayer().setSource(audioSource);
+        await _getPlayer().resume();
       } else {
         // Mobile/desktop handling
-        await _audioPlayer.play(audioSource);
+        await _getPlayer().play(audioSource);
       }
 
       Get.log('Playing sound: $soundName');
@@ -74,7 +82,7 @@ class AudioService {
         final soundPath = _soundFiles[soundName];
         if (soundPath != null) {
           Get.log('Trying fallback with AssetSource: $soundPath');
-          await _audioPlayer.play(AssetSource(soundPath));
+          await _getPlayer().play(AssetSource(soundPath));
         }
       } catch (fallbackError) {
         Get.log('Fallback error playing sound $soundName: $fallbackError');
@@ -85,6 +93,9 @@ class AudioService {
   /// Play notification sound (backward compatibility)
   Future<void> playNotificationSound() async {
     await playSound('notification');
+  }
+  Future<void> playNotificationSoundCoin() async {
+    await playSound('notificationCoin');
   }
   Future<void> playNotificationSoundAll() async {
     await playSound('notificationAll');
@@ -97,8 +108,8 @@ class AudioService {
   bool hasSound(String soundName) => _soundFiles.containsKey(soundName);
 
   Future<void> dispose() async {
-    await _audioPlayer.dispose();
+    await _audioPlayer?.dispose();
+    _audioPlayer = null;
     _isInitialized = false;
   }
 }
-

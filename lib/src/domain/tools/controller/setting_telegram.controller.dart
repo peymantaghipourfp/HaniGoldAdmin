@@ -45,7 +45,6 @@ class SettingTelegramController extends GetxController {
 
     // Get status directly as boolean from repository
     final bool status = await _repository.getStatusTelegram();
-    print('Telegram status (bool): $status');
 
     isConnected.value = status;
     statusMessage.value = status ? 'تلگرام متصل است' : 'تلگرام متصل نیست';
@@ -62,7 +61,6 @@ class SettingTelegramController extends GetxController {
 
     // Get result directly as string from repository
     final String result = await _repository.startSendCodeTelegram();
-    print('Send code result (string): $result');
 
     // Determine if it's an error based on common error indicators
     final bool isError = _isErrorMessage(result);
@@ -115,7 +113,6 @@ class SettingTelegramController extends GetxController {
 
     // Get result directly as string from repository
     final String result = await _repository.getSubmitTelegram(code);
-    print('Submit code result (string): $result');
 
     // Determine if it's an error based on common error indicators
     final bool isError = _isErrorMessage(result);

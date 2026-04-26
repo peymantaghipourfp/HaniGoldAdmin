@@ -1,18 +1,15 @@
 
-
-
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/const/app_color.dart';
 
 import '../config/const/app_text_style.dart';
 
 class EmptyPage extends StatelessWidget {
-  const EmptyPage({super.key, this.title, this.des, this.child, this.body,this.callback});
+  const EmptyPage({super.key, this.title, this.des,this.tryText, this.child, this.body,this.callback});
 
   final String? title;
   final String? des;
+  final String? tryText;
   final Widget? child;
   final Widget? body;
   final VoidCallback? callback;
@@ -37,7 +34,7 @@ class EmptyPage extends StatelessWidget {
               ),
               Text(
                 title ?? 'اطلاعاتی وجود ندارد',
-                style: AppTextStyle.madiumbodyText.copyWith(fontWeight: FontWeight.bold),
+                style: AppTextStyle.mediumBodyText.copyWith(fontWeight: FontWeight.bold),
               ),
               const SizedBox(
                 height: 10,
@@ -48,7 +45,7 @@ class EmptyPage extends StatelessWidget {
               ),
               SizedBox(height: 10,),
               if (callback != null)
-                GestureDetector(onTap:callback, child: Text('تلاش مجدد',
+                GestureDetector(onTap:callback, child: Text(tryText ?? 'تلاش مجدد',
                   style: context.textTheme.titleMedium!.copyWith(color: Colors.blueAccent),)),
               const SizedBox(
                 height: 10,

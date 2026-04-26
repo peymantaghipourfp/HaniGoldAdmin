@@ -8,7 +8,6 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/view/deposit_request_create.view.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -20,8 +19,7 @@ import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
-import 'deposit_request_update.view.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class WithdrawsPendingListView extends StatefulWidget {
   WithdrawsPendingListView({super.key});
@@ -370,7 +368,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -588,7 +586,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -626,7 +624,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                               ElevatedButton(
                                 style: ButtonStyle(
                                     padding: WidgetStatePropertyAll(
-                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                        EdgeInsets.symmetric(horizontal: 23)),
                                     // elevation: WidgetStatePropertyAll(5),
                                     backgroundColor:
                                     WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
@@ -926,7 +924,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                       child: ElevatedButton(
                                                         style: ButtonStyle(
                                                             padding: WidgetStatePropertyAll(
-                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                             // elevation: WidgetStatePropertyAll(5),
                                                             backgroundColor:
                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1386,7 +1384,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                                                   child: ElevatedButton(
                                                                                     style: ButtonStyle(
                                                                                         padding: WidgetStatePropertyAll(
-                                                                                            EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                            EdgeInsets.symmetric(horizontal: 23)),
                                                                                         // elevation: WidgetStatePropertyAll(5),
                                                                                         backgroundColor:
                                                                                         WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1484,7 +1482,6 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                             itemCount: withdrawController.withdrawListStatus.length +
                                 (withdrawController.hasMore.value ? 1 : 0),
                             itemBuilder: (context, index) {
-                              print(withdrawController.withdrawListStatus.length);
                               if (index >= withdrawController.withdrawListStatus.length) {
                                 return withdrawController.hasMore.value
                                     ? Center(child: CircularProgressIndicator())
@@ -1494,8 +1491,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                   .withdrawListStatus[index];
                               return
                                 Obx(() {
-                                  bool isExpanded = withdrawController
-                                      .isItemExpanded(index);
+                                  //bool isExpanded = withdrawController.isItemExpanded(index);
                                   return Card(
                                     margin: EdgeInsets.all(isDesktop ? 12 : 4),
                                     color: AppColor.secondaryColor,
@@ -1694,7 +1690,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                         SizedBox(width: 3,),
                                                         Text("`${withdraws
                                                             .reasonRejection
-                                                            ?.name}`" ?? "",
+                                                            ?.name}`",
                                                           style: AppTextStyle
                                                               .bodyText,),
                                                       ],
@@ -1871,7 +1867,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                             labelTextStyle: WidgetStateProperty
                                                                 .all(
                                                                 AppTextStyle
-                                                                    .madiumbodyText
+                                                                    .mediumBodyText
                                                             ),
                                                             value: 1,
                                                             child: Row(
@@ -1890,7 +1886,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                                 ) :
                                                                 Text('تایید',
                                                                   style: AppTextStyle
-                                                                      .madiumbodyText
+                                                                      .mediumBodyText
                                                                       .copyWith(
                                                                       color: AppColor
                                                                           .primaryColor,
@@ -1905,7 +1901,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                             labelTextStyle: WidgetStateProperty
                                                                 .all(
                                                                 AppTextStyle
-                                                                    .madiumbodyText
+                                                                    .mediumBodyText
                                                             ),
                                                             child: Row(
                                                               mainAxisAlignment: MainAxisAlignment
@@ -1923,7 +1919,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                                 ) :
                                                                 Text('رد',
                                                                   style: AppTextStyle
-                                                                      .madiumbodyText
+                                                                      .mediumBodyText
                                                                       .copyWith(
                                                                       color: AppColor
                                                                           .accentColor,
@@ -2256,7 +2252,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
-                                  .madiumbodyText
+                                  .mediumBodyText
                           ),
                           value: 1,
                           child: Row(
@@ -2275,7 +2271,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                               ) :
                               Text('تایید',
                                 style: AppTextStyle
-                                    .madiumbodyText
+                                    .mediumBodyText
                                     .copyWith(
                                     color: AppColor
                                         .primaryColor,
@@ -2290,7 +2286,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
-                                  .madiumbodyText
+                                  .mediumBodyText
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
@@ -2308,7 +2304,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                               ) :
                               Text('رد',
                                 style: AppTextStyle
-                                    .madiumbodyText
+                                    .mediumBodyText
                                     .copyWith(
                                     color: AppColor
                                         .accentColor,
@@ -2405,7 +2401,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                             final attachment = withdrawController.imageList[index];
                                             return Column(
                                               children: [
-                                                if (kIsWeb)
+                                                //if (kIsWeb)
                                                   Padding(
                                                     padding: const EdgeInsets.only(right: 50),
                                                     child: Row(mainAxisAlignment: MainAxisAlignment.start,
@@ -2499,7 +2495,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                               child: Visibility(
                                                 visible: withdrawController
                                                     .currentImagePage.value <
-                                                    (withdrawController.imageList.length ?? 1) - 1,
+                                                    (withdrawController.imageList.length) - 1,
                                                 child: IconButton(
                                                   style: ButtonStyle(
                                                     backgroundColor: WidgetStateProperty
@@ -2617,7 +2613,6 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                       /*GestureDetector(
                         onTap: () {
                           Get.toNamed('/withdrawGetOne', parameters:{"id":withdraw.id.toString()});
-                          //print(withdraws.id);
                         },
                         child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [

@@ -1,45 +1,49 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/config/const/socket.service.dart';
+import 'package:hanigold_admin/src/config/open_in_new_tab.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
 import 'package:hanigold_admin/src/widget/version.widget.dart';
-import 'package:universal_html/html.dart' as html;
-
 import '../config/const/app_color.dart';
 import '../config/const/app_text_style.dart';
+import '../domain/home/controller/home_tabs.controller.dart';
 import 'socket_status_indicator.widget.dart';
 
-void _openInNewTab(String route) {
-  if (kIsWeb) {
-    try {
-      final currentUrl = html.window.location.href;
-      final baseUrl = currentUrl.split('/#/')[0];
-      final newUrl = '$baseUrl/#$route';
-      html.window.open(newUrl, '_blank');
-
-      // Show a brief snackbar to confirm the action
-      Get.snackbar(
-        'باز شد',
-        'صفحه در تب جدید باز شد - اتصال سوکت در حال برقراری است',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColor.primaryColor.withOpacity(0.9),
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
-        margin: const EdgeInsets.all(8),
-        borderRadius: 8,
-      );
-    } catch (e) {
-      // Fallback to normal navigation if there's an error
-      Get.offNamed(route);
+Future<void> _openInNewTab(String route, String title, IconData icon) async {
+  try {
+    //await openRouteInNewTab(route);
+    //_showNewTabSnackbar();
+    // Web: use real browser tabs.
+    if (kIsWeb) {
+      await openRouteInNewTab(route);
+      return;
     }
+
+    // Desktop (Windows/macOS/Linux): use internal tabs instead of new window.
+    final HomeTabsController tabsController = Get.put(HomeTabsController());
+    tabsController.openTab(route: route, title: title, icon: icon);
+  } catch (e) {
+    // Fallback to normal navigation if there's an error
+    Get.offNamed(route);
   }
 }
+
+/*void _showNewTabSnackbar() {
+  Get.snackbar(
+    'باز شد',
+    'صفحه در تب جدید باز شد - اتصال سوکت در حال برقراری است',
+    snackPosition: SnackPosition.BOTTOM,
+    backgroundColor: AppColor.primaryColor.withOpacity(0.9),
+    colorText: Colors.white,
+    duration: const Duration(seconds: 3),
+    margin: const EdgeInsets.all(8),
+    borderRadius: 8,
+  );
+}*/
 
 class SideMenuFix extends StatelessWidget {
   const SideMenuFix({super.key});
@@ -535,7 +539,7 @@ Widget _buildSubMenuItem({
   String? route,
   VoidCallback? onTap,
 }) {
-  final showNewTabIcon = route != null && kIsWeb;
+  final showNewTabIcon = route != null && supportsOpenInNewTab;
   return Container(
     margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 4),
     decoration: BoxDecoration(
@@ -545,8 +549,13 @@ Widget _buildSubMenuItem({
     child:
     Tooltip(
       message: showNewTabIcon ? '' : '',
-      child: GestureDetector(
-        onSecondaryTap: route != null ? () => _openInNewTab(route!) : null,
+      child: Listener(
+        onPointerDown: (PointerDownEvent event) {
+          if (route != null &&
+              (event.buttons & kSecondaryMouseButton) != 0) {
+            _openInNewTab(route, title, icon);
+          }
+        },
         child: ListTile(
           leading: Container(
             padding: const EdgeInsets.all(4),

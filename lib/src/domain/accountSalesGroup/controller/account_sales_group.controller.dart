@@ -34,7 +34,6 @@ class AccountSalesGroupController extends GetxController {
 
   // لیست گروه ها
   Future<void> getAccountSalesGroupList() async {
-    print("### getAccountSalesGroupList ###");
     accountSalesGroupList.clear();
     isLoading.value=true;
     try {
@@ -43,7 +42,7 @@ class AccountSalesGroupController extends GetxController {
       isLoading.value=false;
       accountSalesGroupList.assignAll(response);
       state.value=PageState.list;
-      update();
+      //update();
     }
     catch (e) {
       state.value = PageState.err;
@@ -136,13 +135,12 @@ class AccountSalesGroupController extends GetxController {
       } else {
         assignDialogState.value = PageState.list;
       }
-      print('تعداد :${accountListForSalesGroup.length}');
     }
     catch(e){
       assignDialogState.value = PageState.err;
       " خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
     }finally{
-      isLoading.value=false;
+      //isLoading.value=false;
     }
   }
 
@@ -267,7 +265,7 @@ class AccountSalesGroupController extends GetxController {
 
   void resetAssignmentState() {
     selectedAccountsForAssignment.clear();
-    accountListForSalesGroup.clear();
+    //accountListForSalesGroup.clear();
     assignDialogState.value = PageState.loading;
   }
 
@@ -317,6 +315,7 @@ class AccountSalesGroupController extends GetxController {
         accountSalesGroupId: accountSalesGroupId,
         accounts: accountsPayload,
       );
+      await fetchAccountListSalesGroup(accountSalesGroupId.toString());
       EasyLoading.dismiss();
       Get.back();
       Get.snackbar(
@@ -326,8 +325,8 @@ class AccountSalesGroupController extends GetxController {
         backgroundColor: AppColor.primaryColor.withOpacity(0.8),
         colorText: AppColor.textColor,
       );
+      await getAccountSalesGroupList();
       resetAssignmentState();
-      await fetchAccountListSalesGroup(accountSalesGroupId.toString());
     } catch (e) {
       EasyLoading.dismiss();
       Get.snackbar(

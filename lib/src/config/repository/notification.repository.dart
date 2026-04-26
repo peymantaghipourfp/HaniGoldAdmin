@@ -5,8 +5,10 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/notification/model/list_notification.model.dart';
 import 'package:hanigold_admin/src/domain/notification/model/notification.model.dart';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class NotificationRepository{
 
@@ -81,11 +83,10 @@ class NotificationRepository{
             }}
           };
       final response=await notificationDio.post('Notification/getWrapper',data: options);
-      print("request getNotificationListPager : $options" );
-      print("response getNotificationListPager : ${response.data}" );
       return ListNotificationModel.fromJson(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getNotificationListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -97,15 +98,13 @@ class NotificationRepository{
         "id": notificationId,
       };
 
-      print(notificationData);
 
       var response=await notificationDio.delete('Notification/delete',data: notificationData);
-      print('Status Code deleteNotification: ${response.statusCode}');
-      print('Response Data deleteNotification: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch (e, s) {
+      AppLogger.e('deleteNotification failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -119,11 +118,10 @@ class NotificationRepository{
         "id": id,
       };
       final response = await notificationDio.put('Notification/updateStatus', data: options);
-      print("request updateStatusNotification : $options" );
-      print("response updateStatusNotification : ${response.data}" );
       return NotificationModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('updateStatusNotification failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -147,10 +145,7 @@ class NotificationRepository{
         "status": status,
         "id": id,
       };
-      print(options);
       final response = await notificationDio.put('Notification/update', data: options);
-      print('Status Code updateNotification: ${response.statusCode}');
-      print('Response Data updateNotification: ${response.data}');
       if (response.statusCode == 200) {
         return
           NotificationModel.fromJson(response.data);
@@ -159,8 +154,9 @@ class NotificationRepository{
         throw ErrorException('خطا');
       }
     }
-    catch (e) {
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('updateNotification failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -185,12 +181,11 @@ class NotificationRepository{
       };
 
       var response=await notificationDio.post('Notification/insert',data: notificationData);
-      print('Status Code insertNotification: ${response.statusCode}');
-      print('Response Data insertNotification: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در درج اطلاعیه:$e');
+    }catch (e, s) {
+      AppLogger.e('insertNotification failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

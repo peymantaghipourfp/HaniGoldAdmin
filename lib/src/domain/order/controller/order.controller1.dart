@@ -1,21 +1,16 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:excel/excel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
-import 'package:hanigold_admin/src/domain/order/model/socket_order.model.dart';
-import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/total_balance_new.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
@@ -24,14 +19,10 @@ import 'package:pdf/pdf.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:printing/printing.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:path_provider/path_provider.dart';
-import 'package:excel/excel.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../../config/const/app_color.dart';
-import '../../../config/const/audio.service.dart';
-import '../../../config/const/socket.service.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
@@ -186,7 +177,7 @@ class OrderController extends BaseController{
         try {
           final data = json.decode(message);
           if (data['channel'] == 'order') {
-            final socketOrder = SocketOrderModel.fromJson(data);
+            //final socketOrder = SocketOrderModel.fromJson(data);
             /*Get.snackbar('سفارش جدید', 'یک سفارش جدید ثبت شد.',
               titleText: Text('سفارش جدید',
                 textAlign: TextAlign.center,
@@ -323,12 +314,10 @@ class OrderController extends BaseController{
 
 // لیست سفارشات با صفحه بندی
   Future<void> getOrderListPager() async {
-    print("### getOrderListPager ###");
     orderList.clear();
     isLoading.value=true;
     try {
       state.value=PageState.loading;
-      print("selectedAccountId.value:::::${selectedAccountId.value}");
       var response = await orderRepository.getOrderListPager(
         startIndex: currentPage.value,
         toIndex: itemsPerPage.value,
@@ -341,7 +330,7 @@ class OrderController extends BaseController{
         item: selectedItemFilter.value?.id,
       );
       isLoading.value=false;
-      orderList.assignAll(response.orders??[]);
+      orderList.assignAll(response.orders);
       paginated.value=response.paginated;
       state.value=PageState.list;
 
@@ -371,7 +360,6 @@ class OrderController extends BaseController{
         totalBalanceList.assignAll(fetchedTotalBalanceList);
       }
       isLoadingBalance.value==false;
-      print("totalBalanceListLength::::::${fetchedTotalBalanceList.length}");
       stateBalance.value=PageState.list;
       if(totalBalanceList.isEmpty){
         stateBalance.value=PageState.empty;
@@ -401,7 +389,6 @@ class OrderController extends BaseController{
   //       startDate: startDateFilter.value, endDate: endDateFilter.value,
   //     );
   //     hasMore.value = fetchedOrderList.length == itemsPerPage.value;
-  //     //print("بالانس: ${orderList.first.balances}");
   //
   //     if (selectedAccountId.value == 0) {
   //       orderList.assignAll(fetchedOrderList);
@@ -528,7 +515,7 @@ class OrderController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);

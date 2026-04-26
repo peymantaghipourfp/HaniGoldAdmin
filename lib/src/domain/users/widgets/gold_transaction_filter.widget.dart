@@ -322,7 +322,7 @@ class _GoldTransactionFilterWidgetState
                     .where((type) => type.type != null)
                     .map((type) => type.name ?? '')
               ].toList(),
-              selectedValue: widget.controller.typeFilter.value ?? '',
+              selectedValue: widget.controller.typeFilter.value,
               onChanged: (String? newValue) {
                 widget.controller.changeSelectedType(newValue!);
               },

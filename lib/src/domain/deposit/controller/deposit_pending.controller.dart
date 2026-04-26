@@ -2,9 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:excel/excel.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +19,7 @@ import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -31,8 +27,6 @@ import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../users/model/paginated.model.dart';
 import 'package:universal_html/html.dart' as html;
-
-import '../model/socket_deposit.model.dart';
 
 enum PageState{loading,err,empty,list}
 
@@ -123,7 +117,7 @@ class DepositPendingController extends BaseController{
         try {
           final data = json.decode(message);
           if (data['channel'] == 'deposit') {
-            final socketDeposit = SocketDepositModel.fromJson(data);
+            //final socketDeposit = SocketDepositModel.fromJson(data);
 
             getDepositListStatusPager();
           }
@@ -234,7 +228,6 @@ class DepositPendingController extends BaseController{
 
   // لیست واریزهای در انتظار با صفحه بندی
   Future<void> getDepositListStatusPager() async {
-    print("### getDepositListStatusPager ###");
     depositList.clear();
     //isLoading.value=true;
     try {
@@ -439,7 +432,7 @@ class DepositPendingController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -564,7 +557,7 @@ class DepositPendingController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'image/png');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'deposit_screenshot_${deposit.id}.png')
           ..click();
         html.Url.revokeObjectUrl(url);

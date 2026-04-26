@@ -5,8 +5,10 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import '../../domain/account/model/account.model.dart';
 import '../../domain/accountSalesGroup/model/account_sales_group.model.dart';
 import '../../domain/accountSalesGroup/model/account_sales_group_get_one_item.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class AccountSalesGroupRepository{
   Dio accountSalesGroupDio=Dio();
@@ -29,13 +31,12 @@ class AccountSalesGroupRepository{
         }
       };
       final response=await accountSalesGroupDio.post('AccountSalesGroup/get',data: options);
-      print("request getAccountSalesGroupList : $options" );
-      print("response getAccountSalesGroupList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((accountSalesGroup) => AccountSalesGroupModel.fromJson(accountSalesGroup)).toList();
 
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e, s){
+      AppLogger.e('getAccountSalesGroupList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -43,19 +44,16 @@ class AccountSalesGroupRepository{
     required int accountSalesGroupId,
   }) async {
     try {
-      print("Request getOneAccountSalesGroup - accountSalesGroupId: $accountSalesGroupId");
       final response = await accountSalesGroupDio.get(
         'AccountSalesGroup/getOne',
         queryParameters: {'id': accountSalesGroupId},
       );
-      print("url getOneAccountSalesGroup : AccountSalesGroup/getOne");
-      print('Status Code getOneAccountSalesGroup: ${response.statusCode}');
-      print('Response Data getOneAccountSalesGroup: ${response.data}');
 
       Map<String, dynamic> data = response.data;
       return AccountSalesGroupModel.fromJson(data);
-    } catch (e) {
-      throw ErrorException('خطا در دریافت جزئیات زیر گروه قیمت گذاری: $e');
+    } catch (e,s) {
+      AppLogger.e('خطا در دریافت جزئیات زیر گروه قیمت گذاری:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -70,18 +68,15 @@ class AccountSalesGroupRepository{
       };
 
       var response=await accountSalesGroupDio.delete('AccountSalesGroup/delete',data: accountSalesGroupData);
-      print("url deleteAccountSalesGroup : AccountSalesGroup/delete" );
-      print('request deleteAccountSalesGroup: $accountSalesGroupData');
-      print('Status Code deleteAccountSalesGroup: ${response.statusCode}');
-      print('Response Data deleteAccountSalesGroup: ${response.data}');
       if (response.data is List) {
         return response.data;
       } else {
         return [response.data];
       }
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch(e,s){
+      AppLogger.e('خطا در حذف:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -100,6 +95,12 @@ class AccountSalesGroupRepository{
         }
         if (itemPrice.containsKey('salesRange')) {
           cleanItem['salesRange'] = itemPrice['salesRange'];
+        }
+        if (itemPrice.containsKey('sellStatus')) {
+          cleanItem['sellStatus'] = itemPrice['sellStatus'];
+        }
+        if (itemPrice.containsKey('buyStatus')) {
+          cleanItem['buyStatus'] = itemPrice['buyStatus'];
         }
        /* if (itemPrice.containsKey('maxBuy')) {
           cleanItem['maxBuy'] = itemPrice['maxBuy'];
@@ -133,14 +134,11 @@ class AccountSalesGroupRepository{
         "infos": [],*/
         "accountSalesGroupItems": cleanItemPrices,
       };
-      print("Request data insertAccountSalesGroup: $accountSalesGroupData");
       var response = await accountSalesGroupDio.post('AccountSalesGroup/insert', data: accountSalesGroupData);
-      print("url insertAccountSalesGroup : AccountSalesGroup/insert");
-      print('Status Code insertAccountSalesGroup: ${response.statusCode}');
-      print('Response Data insertAccountSalesGroup: ${response.data}');
         return response.data;
-    } catch (e) {
-      throw ErrorException('خطا در ایجاد زیر گروه قیمت گذاری: $e');
+    } catch (e,s) {
+      AppLogger.e('خطا در ایجاد زیر گروه قیمت گذاری:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -157,16 +155,13 @@ class AccountSalesGroupRepository{
       };
 
       var response = await accountSalesGroupDio.put('AccountSalesGroup/update', data: accountSalesGroupData);
-      print("url updateAccountSalesGroup : AccountSalesGroup/update");
-      print('request updateAccountSalesGroup: $accountSalesGroupData');
-      print('Status Code updateAccountSalesGroup: ${response.statusCode}');
-      print('Response Data updateAccountSalesGroup: ${response.data}');
       if (response.data is Map<String, dynamic>) {
         return response.data as Map<String, dynamic>;
       }
       return {'data': response.data};
-    } catch (e) {
-      throw ErrorException('خطا در ویرایش زیر گروه قیمت گذاری: $e');
+    } catch (e,s) {
+      AppLogger.e('خطا در ویرایش زیر گروه قیمت گذاری:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -192,7 +187,7 @@ class AccountSalesGroupRepository{
                   if (accountSalesGroupId != null && accountSalesGroupId.isNotEmpty)
                   {
                     "fieldName": "AccountSalesGroupId",
-                    "filterValue": accountSalesGroupId ?? "1",
+                    "filterValue": accountSalesGroupId,
                     "filterType": 5,
                     "RefTable": "Account"
                   }
@@ -219,10 +214,7 @@ class AccountSalesGroupRepository{
           }
         }
       };
-      print("request getAccountListForSalesGroup : $options" );
       final response=await accountSalesGroupDio.post('Account/get',data: options);
-      print("request getAccountListForSalesGroup : $options" );
-      print("response getAccountListForSalesGroup : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((account)=>AccountModel.fromJson(account)).toList();
@@ -230,8 +222,9 @@ class AccountSalesGroupRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getAccountListForSalesGroup failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -275,16 +268,15 @@ class AccountSalesGroupRepository{
         }
       };
       final response = await accountSalesGroupDio.post('Account/get', data: options);
-      print("request getAssignedAccountsForSalesGroup : $options");
-      print("response getAssignedAccountsForSalesGroup : ${response.data}");
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((account) => AccountModel.fromJson(account)).toList();
       } else {
         throw ErrorException('خطا');
       }
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e,s) {
+      AppLogger.e('getAssignedAccountsForSalesGroup failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -309,16 +301,14 @@ class AccountSalesGroupRepository{
         'accountSalesGroupId': accountSalesGroupId,
       };
       final response = await accountSalesGroupDio.put('AccountSalesGroup/assignment', data: data);
-      print("url : AccountSalesGroup/assignment");
-      print("request updateAssignedAccountsForSalesGroup : $data");
-      print("response updateAssignedAccountsForSalesGroup : ${response.data}");
 
       if (response.data is Map<String, dynamic>) {
         return response.data;
       }
       return {'data': response.data};
-    } catch (e) {
-      throw ErrorException('خطا در به‌روزرسانی حساب‌های زیر گروه قیمت گذاری: $e');
+    } catch (e,s) {
+      AppLogger.e('خطا در به‌روزرسانی حساب‌های زیر گروه قیمت گذاری:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -327,19 +317,16 @@ class AccountSalesGroupRepository{
     required int itemId,
   }) async {
     try {
-      print("Request accountSalesGroupGetOneItem - accountId: $accountId - itemId: $itemId");
       final response = await accountSalesGroupDio.get(
         'AccountSalesGroup/getOneByAccount',
         queryParameters: {'accountId': accountId , 'itemId': itemId},
       );
-      print("url accountSalesGroupGetOneItem : AccountSalesGroup/getOneByAccount");
-      print('Status Code accountSalesGroupGetOneItem: ${response.statusCode}');
-      print('Response Data accountSalesGroupGetOneItem: ${response.data}');
 
       Map<String, dynamic> data = response.data;
       return AccountSalesGroupGetOneItemModel.fromJson(data);
-    } catch (e) {
-      throw ErrorException('خطا در دریافت یک گروه قیمت گذاری برای یک آیتم: $e');
+    } catch (e,s) {
+      AppLogger.e('خطا در دریافت یک گروه قیمت گذاری برای یک آیتم:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

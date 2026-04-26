@@ -7,7 +7,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/invoice_preview.controller.dart';
 import '../model/transaction_info_item.model.dart';
 

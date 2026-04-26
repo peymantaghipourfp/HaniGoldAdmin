@@ -1,12 +1,13 @@
 
 
 import 'package:dio/dio.dart';
-import 'package:get/get_utils/get_utils.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class ItemRepository{
 
@@ -16,6 +17,7 @@ class ItemRepository{
     itemDio.options.baseUrl=BaseUrl.baseUrl;
     itemDio.interceptors.add(DioInterceptor());
   }
+
   Future<List<ItemModel>> getItemList({
     String? accountId,
     String? showChart,
@@ -54,8 +56,6 @@ class ItemRepository{
         }
       };
       final response=await itemDio.post('Item/get',data: options);
-      print("request getItemList : $options" );
-      print("response getItemList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((items)=>ItemModel.fromJson(items)).toList();
@@ -64,20 +64,20 @@ class ItemRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getItemList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
   Future<ItemModel> getOneItem(int itemId)async{
     try {
       final response = await itemDio.get(
           'Item/getOne', queryParameters: {'id': itemId});
-      print('Status Code getOneItem: ${response.statusCode}');
-      print('Response Data getOneItem: ${response.data}');
       Map<String, dynamic> data=response.data;
       return ItemModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOneItem failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -99,12 +99,11 @@ class ItemRepository{
       };
 
       var response=await itemDio.post('ItemPrice/insert',data: itemData);
-      print('Status Code insertPriceItem: ${response.statusCode}');
-      print('Response Data insertPriceItem: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    }catch (e, s) {
+      AppLogger.e('insertPriceItem failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -126,12 +125,11 @@ class ItemRepository{
       };
 
       var response=await itemDio.post('ItemPrice/insert',data: itemData);
-      print('Status Code insertDifferentPriceItem: ${response.statusCode}');
-      print('Response Data insertDifferentPriceItem: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    }catch (e, s) {
+      AppLogger.e('insertDifferentPriceItem failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -149,11 +147,10 @@ class ItemRepository{
         "buyStatus": buyStatus,
       };
       final response = await itemDio.put('Item/updateStatus', data: options);
-      print("request updateStatusItem : $options" );
-      print("response updateStatusItem : ${response.data}" );
       return ItemModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('updateStatusItem failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -174,12 +171,11 @@ class ItemRepository{
       };
 
       var response=await itemDio.put('Item/updateRange',data: itemData);
-      print('Status Code updateItemRange: ${response.statusCode}');
-      print('Response Data updateItemRange: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    }catch (e, s) {
+      AppLogger.e('updateItemRange failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -254,13 +250,12 @@ class ItemRepository{
         "infos": [],
       };
       var response=await itemDio.put('Item/update',data: itemData );
-      print('Status Code updateItem: ${response.statusCode}');
-      print('Response Data updateItem: ${response.data}');
 
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('updateItem failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

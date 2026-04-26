@@ -78,11 +78,19 @@ class UpdateAccountSalesGroupView extends GetView<UpdateAccountSalesGroupControl
                         Expanded(child: _buildMaxSellField(isDesktop: true)),*/
                       ]),
                       const SizedBox(height: 10),
-                      Row(
+                      Row(crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
                           Expanded(child: _buildBuyRangeField(isDesktop: true)),
                           const SizedBox(width: 16),
                           Expanded(child: _buildSalesRangeField(isDesktop: true)),
+                          const SizedBox(width: 16),
+                          Row(
+                            children: [
+                              _buildBuyStatusField(isDesktop: true),
+                              const SizedBox(width: 16),
+                              _buildSellStatusField(isDesktop: true),
+                            ],
+                          ),
                         ],
                       ),
                     ],
@@ -153,6 +161,17 @@ class UpdateAccountSalesGroupView extends GetView<UpdateAccountSalesGroupControl
               const SizedBox(width: 12),
               Expanded(child: _buildSalesRangeField(isDesktop: false)),
             ]),
+            Row(
+                children: [
+                  Expanded(
+                    child: _buildBuyStatusField(isDesktop: false),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildSellStatusField(isDesktop: false),
+                  ),
+                ]
+            ),
             const SizedBox(height: 12),
             /*Row(
               children: [
@@ -369,7 +388,59 @@ class UpdateAccountSalesGroupView extends GetView<UpdateAccountSalesGroupControl
     );
   }
 
-  Widget _buildMaxBuyField({required bool isDesktop}) {
+  Widget _buildSellStatusField({required bool isDesktop}) {
+    return Obx(() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text("وضعیت فروش", style: AppTextStyle.labelText.copyWith(
+              fontSize: 11, color: AppColor.textColor)),
+          Transform.scale(
+            scale: 0.75,
+            child: Switch(
+              value: controller.sellStatus.value,
+              onChanged: (value) {
+                controller.changeSellStatus(value);
+              },
+              activeThumbColor: AppColor.primaryColor,
+              inactiveThumbColor: AppColor.accentColor,
+              activeTrackColor: AppColor.primaryColor.withAlpha(100),
+              inactiveTrackColor: AppColor.accentColor.withAlpha(100),
+            ),
+          ),
+        ],
+      );
+    }
+    );
+  }
+
+  Widget _buildBuyStatusField({required bool isDesktop}) {
+    return Obx(() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text("وضعیت خرید", style: AppTextStyle.labelText.copyWith(
+              fontSize: 11, color: AppColor.textColor)),
+          Transform.scale(
+            scale: 0.75,
+            child: Switch(
+              value: controller.buyStatus.value,
+              onChanged: (value) {
+                controller.changeBuyStatus(value);
+              },
+              activeThumbColor: AppColor.primaryColor,
+              inactiveThumbColor: AppColor.accentColor,
+              activeTrackColor: AppColor.primaryColor.withAlpha(100),
+              inactiveTrackColor: AppColor.accentColor.withAlpha(100),
+            ),
+          ),
+        ],
+      );
+    }
+    );
+  }
+
+  /*Widget _buildMaxBuyField({required bool isDesktop}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -416,9 +487,9 @@ class UpdateAccountSalesGroupView extends GetView<UpdateAccountSalesGroupControl
         ),
       ],
     );
-  }
+  }*/
 
-  Widget _buildMaxSellField({required bool isDesktop}) {
+  /*Widget _buildMaxSellField({required bool isDesktop}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -465,7 +536,7 @@ class UpdateAccountSalesGroupView extends GetView<UpdateAccountSalesGroupControl
         ),
       ],
     );
-  }
+  }*/
 
   Widget _buildErrorBanner() {
     return Obx(() {
@@ -660,6 +731,28 @@ class UpdateAccountSalesGroupView extends GetView<UpdateAccountSalesGroupControl
               )),
             ],
           ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildItemStatusField(
+                  label: 'وضعیت خرید',
+                  isDesktop: isDesktop,
+                  item: item,
+                  isBuyStatus: true,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildItemStatusField(
+                  label: 'وضعیت فروش',
+                  isDesktop: isDesktop,
+                  item: item,
+                  isBuyStatus: false,
+                ),
+              ),
+            ],
+          ),
           /*const SizedBox(height: 8),
           Row(
             children: [
@@ -691,6 +784,49 @@ class UpdateAccountSalesGroupView extends GetView<UpdateAccountSalesGroupControl
         ],
       ),
     );
+  }
+
+  Widget _buildItemStatusField({
+    required String label,
+    required bool isDesktop,
+    required SelectedItemPriceUpdate item,
+    required bool isBuyStatus,
+  }) {
+    return Obx(() {
+      // Get the current item from the controller to ensure reactivity
+      final currentItem = controller.selectedItemPrices.firstWhere(
+            (i) => i.itemId == item.itemId,
+        orElse: () => item,
+      );
+
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text(label, style: AppTextStyle.labelText.copyWith(
+              fontSize: isDesktop ? 11 : 10, color: AppColor.textColor)),
+          Transform.scale(
+            scale: 0.75,
+            child: Switch(
+              value: isBuyStatus ? (currentItem.buyStatus ?? true) : (currentItem.sellStatus ?? true),
+              onChanged: (value) {
+                final currentBuyStatus = currentItem.buyStatus ?? true;
+                final currentSellStatus = currentItem.sellStatus ?? true;
+
+                if (isBuyStatus) {
+                  controller.updateItemStatus(item.itemId ?? 0, value, currentSellStatus);
+                } else {
+                  controller.updateItemStatus(item.itemId ?? 0, currentBuyStatus, value);
+                }
+              },
+              activeThumbColor: AppColor.primaryColor,
+              inactiveThumbColor: AppColor.accentColor,
+              activeTrackColor: AppColor.primaryColor.withAlpha(100),
+              inactiveTrackColor: AppColor.accentColor.withAlpha(100),
+            ),
+          ),
+        ],
+      );
+    });
   }
 
   Widget _buildRangeField({

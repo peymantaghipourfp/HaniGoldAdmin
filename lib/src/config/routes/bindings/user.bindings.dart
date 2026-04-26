@@ -4,8 +4,6 @@ import 'package:hanigold_admin/src/domain/users/controller/transactions_wallet_r
 import 'package:hanigold_admin/src/domain/users/controller/user_info_date_transaction.controller.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_info_detail_gold_transaction.controller.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_info_gold_transaction.controller.dart';
-import 'package:hanigold_admin/src/domain/users/view/list_user_info_gold_transaction.view.dart';
-import '../../../domain/home/controller/home.controller.dart';
 import '../../../domain/users/controller/insert_user.controller.dart';
 import '../../../domain/users/controller/user_detail.controller.dart';
 import '../../../domain/users/controller/user_info_detail_transaction.controller.dart';

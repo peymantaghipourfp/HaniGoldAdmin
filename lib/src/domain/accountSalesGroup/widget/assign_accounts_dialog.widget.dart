@@ -57,12 +57,12 @@ class AssignAccountsDialogState extends State<AssignAccountsDialog> {
     widget.controller.clearAllAccountsForAssignment(accounts);
   }
 
-  void _handleClearAllNew(List<AccountModel> accounts) {
+  /*void _handleClearAllNew(List<AccountModel> accounts) {
     if (widget.controller.selectedAccountsForAssignment.isEmpty) {
       return;
     }
     widget.controller.clearSelectedAccountsForAssignment();
-  }
+  }*/
 
   List<AccountModel> _getFilteredAccounts(List<AccountModel> accounts) {
     if (_searchText.isEmpty) {
@@ -91,9 +91,9 @@ class AssignAccountsDialogState extends State<AssignAccountsDialog> {
       final accounts = widget.controller.accountListForSalesGroup;
       final selectedAccounts = widget.controller.selectedAccountsForAssignment;
       final hasSelection = selectedAccounts.isNotEmpty;
-      final filteredAccountsForAll = dialogState == PageState.list
+      /*final filteredAccountsForAll = dialogState == PageState.list
           ? _getFilteredAccounts(accounts)
-          : <AccountModel>[];
+          : <AccountModel>[];*/
 
       return Padding(
         padding: padding,

@@ -17,6 +17,8 @@ class SelectedItemPriceUpdate {
   final String? icon;
   double buyRange;
   double salesRange;
+  bool? sellStatus;
+  bool? buyStatus;
   /*double maxBuy;
   double maxSell;*/
 
@@ -27,6 +29,8 @@ class SelectedItemPriceUpdate {
     this.icon,
     required this.buyRange,
     required this.salesRange,
+    this.sellStatus,
+    this.buyStatus,
     /*required this.maxBuy,
     required this.maxSell,*/
   });
@@ -49,6 +53,8 @@ class UpdateAccountSalesGroupController extends GetxController {
   final List<SelectedItemPriceUpdate> removedItemPrices = <SelectedItemPriceUpdate>[].obs;
   final List<ItemModel> itemList = <ItemModel>[].obs;
   final Rxn<ItemModel> selectedItem = Rxn<ItemModel>();
+  final RxBool sellStatus = RxBool(true);
+  final RxBool buyStatus = RxBool(true);
 
   final RxBool isLoading = false.obs;
   final RxnString errorStatus = RxnString();
@@ -64,8 +70,18 @@ class UpdateAccountSalesGroupController extends GetxController {
     selectedItem.value = newValue;
     buyRangeController.clear();
     salesRangeController.clear();
-    maxBuyController.clear();
-    maxSellController.clear();
+    sellStatus.value = true;
+    buyStatus.value = true;
+    /*maxBuyController.clear();
+    maxSellController.clear();*/
+  }
+
+  void changeSellStatus(bool newValue) {
+    sellStatus.value = newValue;
+  }
+
+  void changeBuyStatus(bool newValue) {
+    buyStatus.value = newValue;
   }
 
   @override
@@ -81,7 +97,6 @@ class UpdateAccountSalesGroupController extends GetxController {
       errorStatus.value = 'failure';
       errorMessage.value = 'شناسه زیرگروه معتبر نیست';
       errorCode.value = 'INVALID_ID';
-      print({'status': 'failure', 'message': errorMessage.value, 'code': errorCode.value});
     }
     fetchItemList();
   }
@@ -90,7 +105,6 @@ class UpdateAccountSalesGroupController extends GetxController {
     isLoading.value = true;
     // Tool: getOneAccountSubGroup | purpose: prefill update form | inputs: id
     try {
-      print('Tool: getOneAccountSalesGroup | purpose: prefill update form | inputs: {id: ' + id.toString() + '}');
       final sub = await accountSalesGroupRepository.getOneAccountSalesGroup(accountSalesGroupId: id);
       current.value = sub;
       nameController.text = sub.name ?? '';
@@ -102,19 +116,19 @@ class UpdateAccountSalesGroupController extends GetxController {
         icon: ip.itemIcon ?? '',
         buyRange: ip.buyRange ?? 0,
         salesRange: ip.salesRange ?? 0,
+        sellStatus: ip.sellStatus,
+        buyStatus: ip.buyStatus,
         /*maxBuy: ip.maxBuy ?? 0,
         maxSell: ip.maxSell ?? 0,*/
       ))
           .toList());
       removedItemPrices.clear();
       isLoading.value = false;
-      print({'status': 'success', 'message': 'جزئیات با موفقیت بارگذاری شد'});
     } catch (e) {
       isLoading.value = false;
       errorStatus.value = 'failure';
       errorMessage.value = 'بارگذاری جزئیات ناموفق: $e';
       errorCode.value = 'FETCH_FAILED';
-      print({'status': 'failure', 'message': errorMessage.value, 'code': errorCode.value});
     }
   }
 
@@ -143,8 +157,10 @@ class UpdateAccountSalesGroupController extends GetxController {
 
     final buyRangeText = buyRangeController.text.trim();
     final salesRangeText = salesRangeController.text.trim();
-    final maxBuyText = maxBuyController.text.trim();
-    final maxSellText = maxSellController.text.trim();
+    final sellStatusValue = sellStatus.value;
+    final buyStatusValue = buyStatus.value;
+    /*final maxBuyText = maxBuyController.text.trim();
+    final maxSellText = maxSellController.text.trim();*/
 
     if (buyRangeText.isEmpty) {
       Get.snackbar('خطا', 'لطفا محدوده خرید را وارد کنید',
@@ -177,8 +193,8 @@ class UpdateAccountSalesGroupController extends GetxController {
 
     final buyRange = double.tryParse(buyRangeText.replaceAll(',', '').toEnglishDigit());
     final salesRange = double.tryParse(salesRangeText.replaceAll(',', '').toEnglishDigit());
-    final maxBuy = double.tryParse(maxBuyText.replaceAll(',', '').toEnglishDigit());
-    final maxSell = double.tryParse(maxSellText.replaceAll(',', '').toEnglishDigit());
+    /*final maxBuy = double.tryParse(maxBuyText.replaceAll(',', '').toEnglishDigit());
+    final maxSell = double.tryParse(maxSellText.replaceAll(',', '').toEnglishDigit());*/
     if (buyRange == null) {
       Get.snackbar('خطا', 'محدوده خرید باید یک عدد معتبر باشد',
           snackPosition: SnackPosition.BOTTOM,
@@ -239,6 +255,8 @@ class UpdateAccountSalesGroupController extends GetxController {
       icon: sel.icon,
       buyRange: buyRange,
       salesRange: salesRange,
+      sellStatus: sellStatusValue,
+      buyStatus: buyStatusValue,
       /*maxBuy: maxBuy,
       maxSell: maxSell,*/
     ));
@@ -246,13 +264,34 @@ class UpdateAccountSalesGroupController extends GetxController {
     selectedItem.value = null;
     buyRangeController.clear();
     salesRangeController.clear();
-    maxBuyController.clear();
-    maxSellController.clear();
+    sellStatus.value = true;
+    buyStatus.value = true;
+    /*maxBuyController.clear();
+    maxSellController.clear();*/
 
     Get.snackbar('موفق', 'محصول با موفقیت اضافه شد',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: AppColor.secondary2Color,
         colorText: AppColor.textColor);
+  }
+
+  void updateItemStatus(int itemId, bool buyStatus, bool sellStatus) {
+    final index = selectedItemPrices.indexWhere((e) => e.itemId == itemId);
+    if (index == -1) return;
+
+    final oldItem = selectedItemPrices[index];
+    final updatedItem = SelectedItemPriceUpdate(
+      StateMode: oldItem.StateMode,
+      itemId: oldItem.itemId,
+      itemName: oldItem.itemName,
+      icon: oldItem.icon,
+      buyRange: oldItem.buyRange,
+      salesRange: oldItem.salesRange,
+      sellStatus: sellStatus,
+      buyStatus: buyStatus,
+    );
+
+    selectedItemPrices[index] = updatedItem;
   }
 
   void removeItemPrice(int itemId) {
@@ -275,6 +314,8 @@ class UpdateAccountSalesGroupController extends GetxController {
       icon: removed.icon,
       buyRange: removed.buyRange,
       salesRange: removed.salesRange,
+      sellStatus: removed.sellStatus,
+      buyStatus: removed.buyStatus,
      /* maxBuy: removed.maxBuy,
       maxSell: removed.maxSell,*/
     ));
@@ -319,7 +360,6 @@ class UpdateAccountSalesGroupController extends GetxController {
   Future<void> submitUpdate() async {
     final validation = validateAll();
     if (validation != null) {
-      print(validation);
       Get.snackbar('خطا', validation['message'],
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColor.accentColor,
@@ -330,7 +370,6 @@ class UpdateAccountSalesGroupController extends GetxController {
     final id = accountSalesGroupId.value;
     if (id == null) {
       final result = {'status': 'failure', 'message': 'شناسه نامعتبر است', 'code': 'INVALID_ID'};
-      print(result);
       Get.snackbar('خطا', result['message']!,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColor.accentColor,
@@ -350,6 +389,8 @@ class UpdateAccountSalesGroupController extends GetxController {
       "itemId" : e.itemId,
       'buyRange': e.buyRange,
       'salesRange': e.salesRange,
+      'sellStatus': e.sellStatus,
+      'buyStatus': e.buyStatus,
       /*'maxBuy': e.maxBuy,
       'maxSell': e.maxSell,*/
     })
@@ -358,7 +399,7 @@ class UpdateAccountSalesGroupController extends GetxController {
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       // Summary before request
-      final summary = {
+      /*final summary = {
         'action': 'updateAccountSalesGroup',
         'purpose': 'ارسال درخواست ویرایش زیرگروه',
         'endpoint': 'AccountSalesGroup/update',
@@ -368,8 +409,7 @@ class UpdateAccountSalesGroupController extends GetxController {
           'itemPricesSample': itemPrices.isNotEmpty ? itemPrices.first : null,
           'itemPricesCount': itemPrices.length,
         }
-      };
-      print('Summary: $summary');
+      };*/
       final response = await accountSalesGroupRepository.updateAccountSalesGroup(
         accountSalesGroupId: id,
         name: name,
@@ -377,7 +417,6 @@ class UpdateAccountSalesGroupController extends GetxController {
       );
 
       EasyLoading.dismiss();
-      print({'status': 'success', 'message': 'ویرایش با موفقیت انجام شد'});
       if(response.isNotEmpty){
         Get.back();
         Get.snackbar('موفق', 'ویرایش با موفقیت انجام شد',
@@ -398,7 +437,6 @@ class UpdateAccountSalesGroupController extends GetxController {
       errorStatus.value = 'failure';
       errorMessage.value = result['message'];
       errorCode.value = result['code'];
-      print(result);
       Get.snackbar('خطا', result['message']!,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: AppColor.accentColor,

@@ -10,20 +10,16 @@ import 'package:hanigold_admin/src/domain/notification/model/notification.model.
 
 import 'package:hanigold_admin/src/widget/background_image.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
-import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
 import 'package:hanigold_admin/src/widget/empty.dart';
 import 'package:hanigold_admin/src/widget/err_page.dart';
-import 'package:path/path.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/pager_widget.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 
-import '../../home/widget/chat_dialog.widget.dart';
-import 'insert_notification.view.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class NotificationView extends StatefulWidget {
   NotificationView({super.key});

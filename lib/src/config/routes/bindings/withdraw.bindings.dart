@@ -8,8 +8,6 @@ import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_getOne.co
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_update.controller.dart';
 
-import '../../../domain/home/controller/home.controller.dart';
-
 class WithdrawBindings implements Bindings{
   @override
   void dependencies() {

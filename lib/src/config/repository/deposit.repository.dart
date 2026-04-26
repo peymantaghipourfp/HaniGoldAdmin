@@ -3,9 +3,12 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 
 import '../../domain/deposit/model/list_deposit.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 import 'dart:typed_data';
+
+import '../network/error_handler.dart';
 
 class DepositRepository{
   Dio depositDio=Dio();
@@ -76,13 +79,12 @@ class DepositRepository{
         }}
       };
       final response=await depositDio.post('Deposit/get',data: options);
-      print("request getDepositList : $options" );
-      print("response getDepositList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((deposit)=>DepositModel.fromJson(deposit)).toList();
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getDepositList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
   Future<ListDepositModel> getDepositListPager({
@@ -166,12 +168,11 @@ class DepositRepository{
         }
       };
       final response=await depositDio.post('Deposit/getWrapper',data: options);
-      print("request getDepositListPager : $options" );
-      print("response getDepositListPager : ${response.data}" );
       return ListDepositModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getDepositListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -254,12 +255,11 @@ class DepositRepository{
         }
       };
       final response=await depositDio.post('Deposit/getWrapper',data: options);
-      print("request getDepositListPendingPager : $options" );
-      print("response getDepositListPendingPager : ${response.data}" );
       return ListDepositModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getDepositListPendingPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -298,11 +298,10 @@ class DepositRepository{
           'Deposit/getExcel',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request getDepositExcel : $options" );
-      print("response getDepositExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('getDepositExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -432,12 +431,10 @@ class DepositRepository{
         "infos": []
       };
       var response=await depositDio.post('Deposit/insert',data: depositData);
-      print('request insertDeposit: $depositData');
-      print('Status Code insertDeposit: ${response.statusCode}');
-      print('Response Data insertDeposit: ${response.data}');
       return DepositModel.fromJson(response.data) ;
-    }catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('insertDeposit failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -569,25 +566,22 @@ class DepositRepository{
         "infos": []
       };
       var response=await depositDio.put('Deposit/update',data: depositData);
-      print('request updateDeposit: $depositData');
-      print('Status Code updateDeposit: ${response.statusCode}');
-      print('Response Data updateDeposit: ${response.data}');
       return DepositModel.fromJson(response.data) ;
 
-    }catch(e){
-      throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('updateDeposit failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
   Future<DepositModel> getOneDeposit(int depositId)async{
     try {
       final response = await depositDio.get('Deposit/getOne', queryParameters: {'id': depositId});
-      print('Status Code getOneDeposit: ${response.statusCode}');
-      print('Response Data getOneDeposit: ${response.data}');
       Map<String, dynamic> data=response.data;
       return DepositModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('getOneDeposit failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -601,19 +595,17 @@ class DepositRepository{
         "isDeleted" : isDeleted,
       };
 
-      print(depositData);
 
       var response=await depositDio.delete('Deposit/updateToIsDeleted',data: depositData);
-      print('Status Code deleteDeposit: ${response.statusCode}');
-      print('Response Data deleteDeposit: ${response.data}');
       if (response.data is List) {
         return response.data;
       } else {
         return [response.data];
       }
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch(e,s){
+      AppLogger.e('deleteDeposit failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -717,15 +709,13 @@ class DepositRepository{
         "recId": null,
         "infos": []
       };
-      print(depositData);
 
       var response=await depositDio.put('Deposit/updateStatus',data: depositData);
-      print('Status Code updateStatusDeposit: ${response.statusCode}');
-      print('Response Data updateStatusDeposit: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در تغییر وضعیت:$e');
+    catch(e,s){
+      AppLogger.e('updateStatusDeposit failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -738,15 +728,13 @@ class DepositRepository{
         "registered": registered,
         "id": depositId,
       };
-      print(depositData);
 
       var response=await depositDio.put('Deposit/updateRegistered',data: depositData);
-      print('Status Code updateRegistered: ${response.statusCode}');
-      print('Response Data updateRegistered: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ریجیستر:$e');
+    catch(e,s){
+      AppLogger.e('updateRegistered failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -755,11 +743,10 @@ class DepositRepository{
       })async{
     try {
       final response = await depositDio.post('Deposit/sendTelegram', queryParameters: {'depositId': depositId});
-      print('Status Code sendTelegramDeposit: ${response.statusCode}');
-      print('Response Data sendTelegramDeposit: ${response.data}');
       return response.data;
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('sendTelegramDeposit failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 }

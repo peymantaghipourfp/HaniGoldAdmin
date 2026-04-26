@@ -113,8 +113,6 @@ class InventoryDetailInsertReceiveController extends GetxController{
       weight750Controller.clear();
       caratController.clear();
     }
-    print(selectedWalletAccount.value?.item?.id);
-    print(selectedWalletAccount.value?.item?.name);
   }
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
     selectedLaboratory.value=newValue;
@@ -378,8 +376,6 @@ class InventoryDetailInsertReceiveController extends GetxController{
     try{
       isLoading.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
-      print(inventoryId.value);
-      print(accountName.value);
       var response=await inventoryRepository.insertDetailInventoryReceive(
         id: inventoryId.value,
         date: gregorianDate,
@@ -401,7 +397,6 @@ class InventoryDetailInsertReceiveController extends GetxController{
         recId: recId,
 
       );
-      print(response);
       if (response != null) {
         Get.toNamed('/inventoryList');
         inventoryController.getInventoryListPager();
@@ -428,7 +423,6 @@ class InventoryDetailInsertReceiveController extends GetxController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;

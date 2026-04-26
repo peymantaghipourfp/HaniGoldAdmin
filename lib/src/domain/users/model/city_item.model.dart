@@ -3,9 +3,7 @@
 //     final citytemModel = citytemModelFromJson(jsonString);
 
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'dart:convert';
 
 part 'city_item.model.g.dart';
 

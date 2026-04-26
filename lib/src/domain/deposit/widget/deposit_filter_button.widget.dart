@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../controller/deposit.controller.dart';
@@ -41,7 +40,7 @@ class DepositFilterButton extends StatelessWidget {
     /*ElevatedButton(
       style: ButtonStyle(
         padding: WidgetStatePropertyAll(
-          EdgeInsets.symmetric(horizontal: 23, vertical: 19),
+          EdgeInsets.symmetric(horizontal: 23),
         ),
         backgroundColor: WidgetStatePropertyAll(
           AppColor.appBarColor.withOpacity(0.5),

@@ -7,20 +7,16 @@ part of 'topic.model.dart';
 // **************************************************************************
 
 TopicModel _$TopicModelFromJson(Map<String, dynamic> json) => TopicModel(
-      user: json['user'] == null
-          ? null
-          : UserModel.fromJson(json['user'] as Map<String, dynamic>),
+      topicId: (json['topicId'] as num?)?.toInt(),
       code: json['code'] as String?,
-      topic: json['topic'] as String?,
-      id: (json['id'] as num?)?.toInt(),
-      infos: json['infos'] as List<dynamic>?,
+      title: json['title'] as String?,
+      sortOrder: (json['sortOrder'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$TopicModelToJson(TopicModel instance) =>
     <String, dynamic>{
-      'user': instance.user,
+      'topicId': instance.topicId,
       'code': instance.code,
-      'topic': instance.topic,
-      'id': instance.id,
-      'infos': instance.infos,
+      'title': instance.title,
+      'sortOrder': instance.sortOrder,
     };

@@ -1,7 +1,10 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class SettingTelegramRepository {
   Dio settingTelegramDio = Dio();
@@ -14,8 +17,6 @@ class SettingTelegramRepository {
   Future<bool> getStatusTelegram() async {
     try {
       final response = await settingTelegramDio.get('Telegram/status');
-      print('Status Code getStatusTelegram: ${response.statusCode}');
-      print('Response Data getStatusTelegram: ${response.data}');
 
       final data = response.data;
 
@@ -49,7 +50,6 @@ class SettingTelegramRepository {
       // Default to false if unable to parse
       return false;
     } catch (e) {
-      print('Error in getStatusTelegram: $e');
       return false;
     }
   }
@@ -65,32 +65,28 @@ class SettingTelegramRepository {
         'telegram/login/submit',
         queryParameters: {'code': code},
       );
-      print('Status Code getSubmitTelegram: ${response.statusCode}');
-      print('Response Data getSubmitTelegram: ${response.data}');
 
       final data = response.data;
 
       // Extract message from response
       return _extractMessage(data, 'تأیید با موفقیت انجام شد');
-    } catch (e) {
-      print('Error in getSubmitTelegram: $e');
-      return 'خطا در تأیید کد';
+    } catch (e,s) {
+      AppLogger.e('خطا در تأیید کد', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
   Future<String> startSendCodeTelegram() async {
     try {
       final response = await settingTelegramDio.post('telegram/login/start');
-      print('Status Code startSendCodeTelegram: ${response.statusCode}');
-      print('Response Data startSendCodeTelegram: ${response.data}');
 
       final data = response.data;
 
       // Extract message from response
       return _extractMessage(data, 'کد ارسال شد');
-    } catch (e) {
-      print('Error in startSendCodeTelegram: $e');
-      return 'خطا در ارسال کد';
+    } catch (e,s) {
+      AppLogger.e('خطا در ارسال کد', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
+import 'package:hanigold_admin/src/widget/empty.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/credit_helper.controller.dart';
 import '../widget/credit_helper_filter.widget.dart';
 import '../widget/credit_helper_create_dialog.widget.dart';
@@ -140,7 +139,6 @@ class CreditHelperListView extends GetView<CreditHelperController> {
                                           children: [
                                             // ایجاد اعتبار جدید
                                             TextButton.icon(
-                                              //onPressed: () => Get.toNamed('/orderCreate'),
                                               onPressed: () {
                                                 Get.dialog(
                                                   const CreditHelperCreateDialogWidget(),
@@ -206,7 +204,17 @@ class CreditHelperListView extends GetView<CreditHelperController> {
                   ],
                 ),
               ),
-            )
+            ) :
+            controller.state.value == PageState.empty ?
+                EmptyPage(
+                  tryText: "ایجاد اعتبار جدید",
+                  callback: (){
+                    Get.dialog(
+                      const CreditHelperCreateDialogWidget(),
+                      barrierDismissible: false,
+                    );
+                  },
+                )
                 : Center(
               child: ErrPage(
                 callback: () {
@@ -398,7 +406,7 @@ class CreditHelperListView extends GetView<CreditHelperController> {
           // مقدار
           DataCell(Center(
             child: Text(
-              "${creditHelper.amount?.toString().seRagham() ?? ''} ${creditHelper.item?.itemUnit?.name!=null ? creditHelper.item?.itemUnit?.name : ''}",
+              "${creditHelper.amount?.toDisplayString().seRagham() ?? ''} ${creditHelper.item?.itemUnit?.name!=null ? creditHelper.item?.itemUnit?.name : ''}",
               style: AppTextStyle.bodyText
                   .copyWith(color: AppColor.textColor, fontSize: 11),
               textDirection: TextDirection.rtl,
@@ -630,7 +638,7 @@ class CreditHelperListView extends GetView<CreditHelperController> {
                       ),
                       child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          _mobileLine("مقدار:", "${creditHelper.amount?.toString().seRagham()} ${creditHelper.item?.itemUnit?.name!=null ? creditHelper.item?.itemUnit?.name : ''}" ?? '', AppColor.primaryColor,),
+                          _mobileLine("مقدار:", "${creditHelper.amount?.toDisplayString().seRagham()} ${creditHelper.item?.itemUnit?.name ?? ''}", AppColor.primaryColor,),
                         ],
                       ),
                     ),

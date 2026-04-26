@@ -1,4 +1,4 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -9,7 +9,6 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
 import '../../laboratory/model/laboratory.model.dart';
 import '../../wallet/model/wallet.model.dart';

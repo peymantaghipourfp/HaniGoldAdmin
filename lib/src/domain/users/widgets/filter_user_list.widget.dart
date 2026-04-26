@@ -330,7 +330,7 @@ class _FitterUserListWidgetState extends State<FitterUserListWidget> {
                 child: ElevatedButton(
                   style: ButtonStyle(
                       padding: WidgetStatePropertyAll(
-                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                          EdgeInsets.symmetric(horizontal: 23)),
                       // elevation: WidgetStatePropertyAll(5),
                       backgroundColor:
                       WidgetStatePropertyAll(AppColor.appBarColor),

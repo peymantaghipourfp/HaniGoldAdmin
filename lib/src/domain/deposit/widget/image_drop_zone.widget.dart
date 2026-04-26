@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:universal_html/html.dart' as html;
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart';

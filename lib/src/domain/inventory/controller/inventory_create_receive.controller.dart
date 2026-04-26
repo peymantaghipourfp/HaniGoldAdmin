@@ -30,7 +30,6 @@ import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../../laboratory/model/laboratory.model.dart';
 import '../../users/model/balance_item.model.dart';
-import '../../users/widgets/balance.widget.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../../withdraw/model/filter.model.dart';
 import '../../withdraw/model/options.model.dart';
@@ -181,8 +180,6 @@ class InventoryCreateReceiveController extends GetxController{
       itemCountTemp.value=(quantity/9.5).toString();
     }*/
     viewCountItem();
-    print(selectedWalletAccount.value?.item?.id);
-    print(selectedWalletAccount.value?.item?.name);
   }
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
     selectedLaboratory.value=newValue;
@@ -196,7 +193,7 @@ class InventoryCreateReceiveController extends GetxController{
     }
   }
 
-  void updateDetail(int index, String recId,List<XFile> listXfile) {
+  /*void updateDetail(int index, String recId,List<XFile> listXfile) {
     if (index >= 0 && index < tempDetails.length) {
       final oldDetail = tempDetails[index];
       List<XFile> list = tempDetails[index].listXfile!=null?tempDetails[index].listXfile!:[];
@@ -205,10 +202,31 @@ class InventoryCreateReceiveController extends GetxController{
       }
       final newDetail = oldDetail.copyWith(recId: recId,listXfile: list);
       tempDetails[index] = newDetail;
-      print("reccccccc::${recId}");
-      print("reccccciddd::${tempDetails[index].recId}");
       update();
     }
+  }*/
+  void updateDetail(int index, String recId, List<XFile> listXfile) {
+    if (index < 0 || index >= tempDetails.length) return;
+
+    final oldDetail = tempDetails[index];
+
+    // لیست قبلی (اگر null بود → خالی)
+    final existing = oldDetail.listXfile ?? [];
+    //  جلوگیری از عکس تکراری + immutable
+    final updatedList = [
+      ...existing,
+      ...listXfile.where(
+            (f) => !existing.any((e) => e.path == f.path),
+      ),
+    ];
+    final newDetail = oldDetail.copyWith(
+      recId: recId,
+      listXfile: updatedList,
+    );
+
+    tempDetails[index] = newDetail;
+
+    update();
   }
 
 
@@ -516,7 +534,6 @@ class InventoryCreateReceiveController extends GetxController{
           details:tempDetails,
           recId: null
       );
-      print(response);
       if (response != null) {
         //Get.back();
         tempDetails.clear();
@@ -719,7 +736,7 @@ class InventoryCreateReceiveController extends GetxController{
     /*detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
         " عدد ${itemCountTemp.value.toString()}" ?? '' */
         : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
-        buildDataCell(" (دریافت) ${detail.item?.name}" ?? ''),
+        buildDataCell(" (دریافت) ${detail.item?.name}"),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
     );
@@ -883,7 +900,6 @@ class InventoryCreateReceiveController extends GetxController{
 
   // لیست بالانس
   /*Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;

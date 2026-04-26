@@ -1,7 +1,6 @@
 
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
@@ -32,10 +31,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:path/path.dart' as path;
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-
 import '../service/gold_transaction_invoice_generation.service.dart';
 
 
@@ -108,7 +104,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
       }
     }
     update();
-    print(typeFilter1.value);
   }
 
   void changeSelectedItemFilter(ItemModel? newValue) {
@@ -138,7 +133,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
   @override
   void onInit() {
     super.onInit();
-    print(int.parse(Get.parameters['accountId']!));
     id.value=int.parse(Get.parameters['accountId']!);
     getHeaderTransaction(int.parse(Get.parameters['accountId']!));
     getTransactionInfoGoldListPager(id.value.toString());
@@ -229,8 +223,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
       currentPageIndex.value++;
       currentPage.value+=7;
       itemsPerPage.value+=7;
-      print(currentPage.value);
-      print(itemsPerPage.value);
       getTransactionInfoListPager(id.value.toString());
 
     }
@@ -241,8 +233,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
       currentPageIndex.value--;
       currentPage.value-=7;
       itemsPerPage.value-=7;
-      print(currentPage.value);
-      print(itemsPerPage.value);
       getTransactionInfoListPager(id.value.toString());
     }
   }*/
@@ -251,7 +241,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
 
   // هدر مانده کاربر
   Future<void> getHeaderTransaction(int id) async{
-    print("getHeaderTransaction : $id");
     try{
       state.value=PageStateDe.loading;
       var response=await userInfoTransactionRepository.getHeaderUserInfoTransaction(id);
@@ -270,7 +259,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
   }
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageStateDe.loading;
@@ -291,7 +279,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
 
   // انتقال ولت
   Future<void> getChangeOneWallet(int accountId,int itemId) async{
-    print("getChangeOneWallet : $accountId , $itemId");
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoadingTransfer.value=true;
@@ -324,13 +311,11 @@ class UserInfoDetailGoldTransactionController extends GetxController{
 
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -369,7 +354,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
         /*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*/
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',
@@ -406,7 +390,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
 
   // لیست تراکنش های کاربر
   Future<void> getTransactionInfoGoldListPager(String id) async {
-    print("getTransactionInfoListPager ::::::::: 1");
     transactionInfoGoldList.clear();
     isOpenMore.value=true;
     try {
@@ -423,7 +406,6 @@ class UserInfoDetailGoldTransactionController extends GetxController{
       );
       isOpenMore.value=false;
       transactionInfoGoldList.addAll(response.transactionReportGolds ?? []);
-      print(transactionInfoGoldList.length);
       paginated.value=response.paginated;
       //state.value=PageStateDe.list;
       update();
@@ -523,7 +505,7 @@ class UserInfoDetailGoldTransactionController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -561,7 +543,7 @@ class UserInfoDetailGoldTransactionController extends GetxController{
         if (kIsWeb) {
           final blob = html.Blob([pngBytes], 'image/png');
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
+          html.AnchorElement(href: url)
             ..setAttribute('download', 'user_balance_screenshot_${headerInfoUserTransactionModel?.accountName}.png')
             ..click();
           html.Url.revokeObjectUrl(url);

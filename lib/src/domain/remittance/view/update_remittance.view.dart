@@ -1,25 +1,25 @@
+
 import 'dart:io';
 
-import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import 'package:image/image.dart' as img;
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
 import '../../account/model/account.model.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/remittance.controller.dart';
 
@@ -39,6 +39,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     return Obx(()=>Scaffold(
       appBar: CustomAppbar1(
         title: 'ویرایش حواله',
@@ -54,7 +55,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
           BackgroundImage(),
           SafeArea(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 30,vertical: 15),
+              padding: EdgeInsets.symmetric(horizontal:isDesktop ? 30 : 5,vertical:isDesktop ? 15 : 5),
               height: Get.height,
               width: Get.width,
               child: SingleChildScrollView(
@@ -563,144 +564,201 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
 
 
                             //  controller.imageList.isNotEmpty?
-                              SizedBox(
-                                width: Get.width * 0.7,
-                                height: 100,
-                                child: Row(
-                                  children: controller.imageList.map((e)=>
-                                      Stack(
-                                        children: [
-                                          GestureDetector(
-                                            onTap:(){
-                                              showGeneralDialog(
-                                                  context: context,
-                                                  barrierDismissible: true,
-                                                  barrierLabel: MaterialLocalizations.of(context)
-                                                      .modalBarrierDismissLabel,
-                                                  barrierColor: Colors.black45,
-                                                  transitionDuration: const Duration(milliseconds: 200),
-                                                  pageBuilder: (BuildContext buildContext,
-                                                      Animation animation,
-                                                      Animation secondaryAnimation) {
-                                                    return Center(
-                                                      child: Material(
-                                                        color: Colors.transparent,
-                                                        child: Container(
-                                                          margin: EdgeInsets.all(10),
-                                                          decoration: BoxDecoration(
-                                                              borderRadius: BorderRadius.circular(8),
-                                                              border: Border.all(color: AppColor.textColor),
-                                                              image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.fill,
-                                                              )
+                              Container(
+                                padding: EdgeInsets.only(bottom: 5),
+                                //width: Get.width * 0.7,
+                                height: 90,
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    children: controller.imageList.map((e)=>
+                                        Stack(
+                                          children: [
+                                            GestureDetector(
+                                              onTap:(){
+                                                showGeneralDialog(
+                                                    context: context,
+                                                    barrierDismissible: true,
+                                                    barrierLabel: MaterialLocalizations.of(context)
+                                                        .modalBarrierDismissLabel,
+                                                    barrierColor: Colors.black45,
+                                                    transitionDuration: const Duration(milliseconds: 200),
+                                                    pageBuilder: (BuildContext buildContext,
+                                                        Animation animation,
+                                                        Animation secondaryAnimation) {
+                                                      return Center(
+                                                        child: Material(
+                                                          color: Colors.transparent,
+                                                          child: Container(
+                                                            margin: EdgeInsets.all(10),
+                                                            decoration: BoxDecoration(
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                border: Border.all(color: AppColor.textColor),
+                                                                image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.fill,
+                                                                )
+                                                            ),
+                                                            height: Get.height * 0.8,width: Get.width * 0.4,
+                                                            // child: Image.network(e!.path,fit: BoxFit.cover,),
                                                           ),
-                                                          height: Get.height * 0.8,width: Get.width * 0.4,
-                                                          // child: Image.network(e!.path,fit: BoxFit.cover,),
                                                         ),
-                                                      ),
-                                                    );
-                                                  });
-                                            },
-                                            child: Container(
-                                              margin: EdgeInsets.all(10),
-                                              decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  border: Border.all(color: AppColor.textColor),
-                                                  image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
-                                                  )
+                                                      );
+                                                    });
+                                              },
+                                              child: Container(
+                                                margin: EdgeInsets.all(10),
+                                                decoration: BoxDecoration(
+                                                    borderRadius: BorderRadius.circular(8),
+                                                    border: Border.all(color: AppColor.textColor),
+                                                    image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
+                                                    )
+                                                ),
+                                                height: 60,width: 60,
+                                                // child: Image.network(e!.path,fit: BoxFit.cover,),
                                               ),
-                                              height: 60,width: 60,
-                                              // child: Image.network(e!.path,fit: BoxFit.cover,),
                                             ),
-                                          ),
-                                          GestureDetector(
-                                            child: CircleAvatar(
-                                              backgroundColor: AppColor.accentColor,radius: 10,
-                                              child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
-                                            ),
-                                            onTap: (){
-                                              controller.deleteImage(e);
-                                            },
-                                          )
-                                        ],
-                                      ),).toList(),
+                                            GestureDetector(
+                                              child: CircleAvatar(
+                                                backgroundColor: AppColor.accentColor,radius: 10,
+                                                child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                              ),
+                                              onTap: (){
+                                                controller.deleteImage(e);
+                                              },
+                                            )
+                                          ],
+                                        ),).toList(),
+                                  ),
                                 ),
                               ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                children: [
-                                  Obx(() {
-                                    if (controller
-                                        .isUploadingDesktop
-                                        .value) {
-                                      return Row(
-                                        children: [
-                                          Text(
-                                            'در حال بارگزاری عکس',
-                                            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
-                                          ),
-                                          SizedBox(width: 10,),
-                                          CircularProgressIndicator(),
-                                        ],
-                                      );
-                                    }
-                                    return SizedBox(
-                                      height: 80,
-                                      width: Get.width * 0.3,
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          children: controller.selectedImagesDesktop.map((e){
-                                            return  Stack(
-                                              children: [
-                                                Container(
-                                                  margin: EdgeInsets.all(10),
-                                                  decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius.circular(8),
-                                                      border: Border.all(color: AppColor.textColor),
-                                                      image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
-                                                  ),
-                                                  height: 60,width: 60,
-                                                  // child: Image.network(e!.path,fit: BoxFit.cover,),
-                                                ),
-                                                GestureDetector(
-                                                  child: CircleAvatar(
-                                                    backgroundColor: AppColor.accentColor,radius: 10,
-                                                    child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
-                                                  ),
-                                                  onTap: (){
-                                                    controller.selectedImagesDesktop.remove(e);
-                                                  },
-                                                )
-                                              ],
-                                            );
-                                          }).toList(),
+                              Container(
+                                padding: EdgeInsets.only(bottom: 5),
+                                child: SingleChildScrollView(
+                                  scrollDirection: Axis.horizontal,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      GestureDetector(
+                                        onTap: () =>
+                                            controller.pickImageDesktop(
+                                            ),
+                                        child: Container(
+                                          constraints: BoxConstraints(maxWidth: 100),
+                                          child: SvgPicture
+                                              .asset(
+                                            'assets/svg/camera.svg',
+                                            width: 30,
+                                            height: 30,
+                                            colorFilter: ColorFilter
+                                                .mode(
+                                                AppColor
+                                                    .iconViewColor,
+                                                BlendMode
+                                                    .srcIn),),
                                         ),
+
                                       ),
-                                    );
-                                  }),
-                                  GestureDetector(
-                                    onTap: () =>
-                                        controller.pickImageDesktop(
-                                        ),
-                                    child: Container(
-                                      constraints: BoxConstraints(maxWidth: 100),
-                                      child: SvgPicture
-                                          .asset(
-                                        'assets/svg/camera.svg',
-                                        width: 30,
-                                        height: 30,
-                                        colorFilter: ColorFilter
-                                            .mode(
-                                            AppColor
-                                                .iconViewColor,
-                                            BlendMode
-                                                .srcIn),),
-                                    ),
-
+                                      Obx(() {
+                                        if (controller
+                                            .isUploadingDesktop
+                                            .value) {
+                                          return Row(
+                                            children: [
+                                              Text(
+                                                'در حال بارگزاری عکس',
+                                                style: AppTextStyle.labelText.copyWith(fontSize: 12,
+                                                    fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                              ),
+                                              SizedBox(width: 10,),
+                                              CircularProgressIndicator(),
+                                            ],
+                                          );
+                                        }
+                                        return Container(
+                                          padding: EdgeInsets.only(bottom: 5),
+                                          height: 80,
+                                          //width: Get.width * 0.3,
+                                          child: Row(
+                                              children: controller.selectedImagesDesktop.map((e){
+                                                return  Stack(
+                                                  children: [
+                                                    GestureDetector(
+                                                      onTap:(){
+                                                        showGeneralDialog(
+                                                            context: context,
+                                                            barrierDismissible: true,
+                                                            barrierLabel: MaterialLocalizations.of(context)
+                                                                .modalBarrierDismissLabel,
+                                                            barrierColor: Colors.black45,
+                                                            transitionDuration: const Duration(milliseconds: 200),
+                                                            pageBuilder: (BuildContext buildContext,
+                                                                Animation animation,
+                                                                Animation secondaryAnimation) {
+                                                              return Center(
+                                                                child: Material(
+                                                                  color: Colors.transparent,
+                                                                  child: Container(
+                                                                    margin: EdgeInsets.all(isMobile ? 20 : 10),
+                                                                    decoration: BoxDecoration(
+                                                                        borderRadius: BorderRadius.circular(8),
+                                                                        border: Border.all(color: AppColor.textColor),
+                                                                        image: DecorationImage(
+                                                                          image:e.path.startsWith('http') || kIsWeb ?
+                                                                          NetworkImage(e.path,)
+                                                                              : FileImage(File(e.path)) as ImageProvider,
+                                                                          fit: BoxFit.cover,
+                                                                        )
+                                                                    ),
+                                                                    height: isMobile ? Get.height * 0.6 : Get.height * 0.8,
+                                                                    width: isMobile ? Get.width * 0.8 : Get.width * 0.4,
+                                                                  ),
+                                                                ),
+                                                              );
+                                                            });
+                                                      },
+                                                      child: Container(
+                                                        margin: EdgeInsets.all(10),
+                                                        decoration: BoxDecoration(
+                                                            borderRadius: BorderRadius.circular(8),
+                                                            border: Border.all(color: AppColor.textColor),
+                                                            image: DecorationImage(
+                                                              image:e!.path.startsWith('http') || kIsWeb ?
+                                                              NetworkImage(e.path)
+                                                                  : FileImage(File(e.path)) as ImageProvider,
+                                                              fit: BoxFit.cover,
+                                                            )
+                                                        ),
+                                                        height: 60,width: 60,
+                                                        // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                      ),
+                                                    ),
+                                                    /*Container(
+                                                      margin: EdgeInsets.all(10),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          border: Border.all(color: AppColor.textColor),
+                                                          image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
+                                                      ),
+                                                      height: 60,width: 60,
+                                                      // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                    ),*/
+                                                    GestureDetector(
+                                                      child: CircleAvatar(
+                                                        backgroundColor: AppColor.accentColor,radius: 10,
+                                                        child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                      ),
+                                                      onTap: (){
+                                                        controller.selectedImagesDesktop.remove(e);
+                                                      },
+                                                    )
+                                                  ],
+                                                );
+                                              }).toList(),
+                                            ),
+                                        );
+                                      }),
+                                    ],
                                   ),
-
-                                ],
+                                ),
                               ),
                               //     :
                               // Row(
@@ -845,7 +903,7 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                   children: [
                     // SizedBox(height: 10,),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0,vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 0,vertical: 2),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
@@ -858,8 +916,8 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                             constraints: BoxConstraints(
                               // maxHeight: controller.isOpenMore.value?300:120,
                             ),
-                            padding: EdgeInsets.symmetric(horizontal: 20,vertical: 15),
-                            margin: EdgeInsets.symmetric(horizontal: 20,vertical: 15),
+                            padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5),
+                            margin: EdgeInsets.symmetric(horizontal: 20,vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 color: AppColor.secondaryColor
@@ -874,17 +932,17 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
                             constraints: BoxConstraints(
                               // maxHeight: controller.isOpenMore.value?300:120,
                             ),
-                            padding: EdgeInsets.symmetric(horizontal: 20,vertical: 15),
-                            margin: EdgeInsets.symmetric(horizontal: 20,vertical: 15),
+                            padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5),
+                            margin: EdgeInsets.symmetric(horizontal: 20,vertical: 5),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 color: AppColor.secondaryColor
                             ),
                           ),
                           Container(
-                            width: Get.width * 0.9 ,
-                            padding: EdgeInsets.symmetric(horizontal: 30,vertical: 15),
-                            margin: EdgeInsets.symmetric(horizontal: 10,vertical: 30),
+                            width: Get.width * 0.95 ,
+                            padding: EdgeInsets.symmetric(horizontal: 20,vertical: 5),
+                            margin: EdgeInsets.symmetric(horizontal: 10,vertical: 10),
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
                                 color: AppColor.secondaryColor
@@ -1352,144 +1410,241 @@ class _UpdateRemittanceViewState extends State<UpdateRemittanceView> {
 
                                       ],
                                     ),
-                                    SizedBox(
-                                      width: Get.width * 0.7,
-                                      height: 100,
-                                      child: Row(
-                                        children: controller.imageList.map((e)=>
-                                            Stack(
-                                              children: [
-                                                GestureDetector(
-                                                  onTap:(){
-                                                    showGeneralDialog(
-                                                        context: context,
-                                                        barrierDismissible: true,
-                                                        barrierLabel: MaterialLocalizations.of(context)
-                                                            .modalBarrierDismissLabel,
-                                                        barrierColor: Colors.black45,
-                                                        transitionDuration: const Duration(milliseconds: 200),
-                                                        pageBuilder: (BuildContext buildContext,
-                                                            Animation animation,
-                                                            Animation secondaryAnimation) {
-                                                          return Center(
-                                                            child: Material(
-                                                              color: Colors.transparent,
-                                                              child: Container(
-                                                                margin: EdgeInsets.all(10),
-                                                                decoration: BoxDecoration(
-                                                                    borderRadius: BorderRadius.circular(8),
-                                                                    border: Border.all(color: AppColor.textColor),
-                                                                    image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
-                                                                    )
+                                    Container(
+                                      padding: EdgeInsets.only(bottom: 5),
+                                      //width: Get.width * 0.7,
+                                      height: 90,
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          children: controller.imageList.map((e)=>
+                                              Stack(
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap:(){
+                                                      showGeneralDialog(
+                                                          context: context,
+                                                          barrierDismissible: true,
+                                                          barrierLabel: MaterialLocalizations.of(context)
+                                                              .modalBarrierDismissLabel,
+                                                          barrierColor: Colors.black45,
+                                                          transitionDuration: const Duration(milliseconds: 200),
+                                                          pageBuilder: (BuildContext buildContext,
+                                                              Animation animation,
+                                                              Animation secondaryAnimation) {
+                                                            return Center(
+                                                              child: Material(
+                                                                color: Colors.transparent,
+                                                                child: Container(
+                                                                  margin: EdgeInsets.all(10),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius: BorderRadius.circular(8),
+                                                                      border: Border.all(color: AppColor.textColor),
+                                                                      image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.fill,
+                                                                      )
+                                                                  ),
+                                                                  height: isMobile ? Get.height * 0.6 : Get.height * 0.8,
+                                                                  width: isMobile ? Get.width * 0.8 : Get.width * 0.4,
+                                                                  // child: Image.network(e!.path,fit: BoxFit.cover,),
                                                                 ),
-                                                                height: 200,width: 200,
-                                                                // child: Image.network(e!.path,fit: BoxFit.cover,),
                                                               ),
-                                                            ),
-                                                          );
-                                                        });
-                                                  },
-                                                  child: Container(
-                                                    margin: EdgeInsets.all(10),
-                                                    decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(8),
-                                                        border: Border.all(color: AppColor.textColor),
-                                                        image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
-                                                        )
+                                                            );
+                                                          });
+                                                    },
+                                                    child: Container(
+                                                      margin: EdgeInsets.all(10),
+                                                      decoration: BoxDecoration(
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          border: Border.all(color: AppColor.textColor),
+                                                          image: DecorationImage(image: NetworkImage("${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$e"),fit: BoxFit.cover,
+                                                          )
+                                                      ),
+                                                      height: 60,width: 60,
+                                                      // child: Image.network(e!.path,fit: BoxFit.cover,),
                                                     ),
-                                                    height: 60,width: 60,
-                                                    // child: Image.network(e!.path,fit: BoxFit.cover,),
                                                   ),
-                                                ),
-                                                GestureDetector(
-                                                  child: CircleAvatar(
-                                                    backgroundColor: AppColor.accentColor,radius: 10,
-                                                    child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
-                                                  ),
-                                                  onTap: (){
-                                                    controller.imageList.remove(e);
-                                                  },
-                                                )
-                                              ],
-                                            ),).toList(),
+                                                  GestureDetector(
+                                                    child: CircleAvatar(
+                                                      backgroundColor: AppColor.accentColor,radius: 10,
+                                                      child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                    ),
+                                                    onTap: (){
+                                                      controller.deleteImage(e);
+                                                    },
+                                                  )
+                                                ],
+                                              ),).toList(),
+                                        ),
                                       ),
                                     ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                      children: [
-                                        Obx(() {
-                                          if (controller
-                                              .isUploadingDesktop
-                                              .value) {
-                                            return Row(
-                                              children: [
-                                                Text(
-                                                  'در حال بارگزاری عکس',
-                                                  style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                                                      fontWeight: FontWeight.normal,color: AppColor.textColor ),
-                                                ),
-                                                SizedBox(width: 10,),
-                                                CircularProgressIndicator(),
-                                              ],
-                                            );
-                                          }
-                                          return SizedBox(
-                                            height: 80,
-                                            width: Get.width * 0.3,
-                                            child: SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              child: Row(
-                                                children: controller.selectedImagesDesktop.map((e){
-                                                  return  Stack(
-                                                    children: [
-                                                      Container(
-                                                        margin: EdgeInsets.all(10),
-                                                        decoration: BoxDecoration(
-                                                            borderRadius: BorderRadius.circular(8),
-                                                            border: Border.all(color: AppColor.textColor),
-                                                            image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
+                                    Container(
+                                      padding: EdgeInsets.only(bottom: 5),
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisAlignment: MainAxisAlignment.end,
+                                          children: [
+                                            GestureDetector(
+                                              onTap: () {
+                                                if (isMobile) {
+                                                  showModalBottomSheet(
+                                                    context: context,
+                                                    builder: (_) {
+                                                      return SafeArea(
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                              color:AppColor.secondary200Color,
+                                                              borderRadius: BorderRadius.circular(15)
+                                                          ),
+                                                          child: Wrap(
+                                                            children: [
+                                                              ListTile(
+                                                                leading: Icon(Icons.photo_library,color: AppColor.textColor,),
+                                                                title: Text('گالری',style: AppTextStyle.bodyText.copyWith(fontSize: 16,fontWeight: FontWeight.w700),),
+                                                                onTap: () {
+                                                                  Get.back();
+                                                                  controller
+                                                                      .pickImageMobile(ImageSource.gallery);
+                                                                },
+                                                              ),
+                                                              ListTile(
+                                                                leading: Icon(Icons.camera_alt,color: AppColor.textColor,),
+                                                                title: Text('دوربین',style: AppTextStyle.bodyText.copyWith(fontSize: 16,fontWeight: FontWeight.w700),),
+                                                                onTap: () {
+                                                                  Get.back();
+                                                                  controller
+                                                                      .pickImageMobile(ImageSource.camera);
+                                                                },
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
-                                                        height: 60,width: 60,
-                                                        // child: Image.network(e!.path,fit: BoxFit.cover,),
-                                                      ),
-                                                      GestureDetector(
-                                                        child: CircleAvatar(
-                                                          backgroundColor: AppColor.accentColor,radius: 10,
-                                                          child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
-                                                        ),
-                                                        onTap: (){
-                                                          controller.selectedImagesDesktop.remove(e);
-                                                        },
-                                                      )
-                                                    ],
+                                                      );
+                                                    },
                                                   );
-                                                }).toList(),
+                                                } else {
+                                                  controller.pickImageDesktop();
+                                                }
+                                              },
+                                                  //controller.pickImageDesktop(),
+                                              child: Container(
+                                                constraints: BoxConstraints(maxWidth: 100),
+                                                child: SvgPicture
+                                                    .asset(
+                                                  'assets/svg/camera.svg',
+                                                  width: 30,
+                                                  height: 30,
+                                                  colorFilter: ColorFilter
+                                                      .mode(
+                                                      AppColor
+                                                          .iconViewColor,
+                                                      BlendMode
+                                                          .srcIn),),
                                               ),
+
                                             ),
-                                          );
-                                        }),
-                                        GestureDetector(
-                                          onTap: () =>
-                                              controller.pickImageDesktop(
-                                              ),
-                                          child: Container(
-                                            constraints: BoxConstraints(maxWidth: 100),
-                                            child: SvgPicture
-                                                .asset(
-                                              'assets/svg/camera.svg',
-                                              width: 30,
-                                              height: 30,
-                                              colorFilter: ColorFilter
-                                                  .mode(
-                                                  AppColor
-                                                      .iconViewColor,
-                                                  BlendMode
-                                                      .srcIn),),
-                                          ),
-
+                                            Obx(() {
+                                              if (controller
+                                                  .isUploadingDesktop
+                                                  .value) {
+                                                return Row(
+                                                  children: [
+                                                    Text(
+                                                      'در حال بارگزاری عکس',
+                                                      style: AppTextStyle.labelText.copyWith(fontSize: 12,
+                                                          fontWeight: FontWeight.normal,color: AppColor.textColor ),
+                                                    ),
+                                                    SizedBox(width: 10,),
+                                                    CircularProgressIndicator(),
+                                                  ],
+                                                );
+                                              }
+                                              return Container(
+                                                padding: EdgeInsets.only(bottom: 5),
+                                                height: 80,
+                                                //width: Get.width * 0.3,
+                                                child: Row(
+                                                    children: controller.selectedImagesDesktop.map((e){
+                                                      return  Stack(
+                                                        children: [
+                                                          GestureDetector(
+                                                            onTap:(){
+                                                              showGeneralDialog(
+                                                                  context: context,
+                                                                  barrierDismissible: true,
+                                                                  barrierLabel: MaterialLocalizations.of(context)
+                                                                      .modalBarrierDismissLabel,
+                                                                  barrierColor: Colors.black45,
+                                                                  transitionDuration: const Duration(milliseconds: 200),
+                                                                  pageBuilder: (BuildContext buildContext,
+                                                                      Animation animation,
+                                                                      Animation secondaryAnimation) {
+                                                                    return Center(
+                                                                      child: Material(
+                                                                        color: Colors.transparent,
+                                                                        child: Container(
+                                                                          margin: EdgeInsets.all(isMobile ? 20 : 10),
+                                                                          decoration: BoxDecoration(
+                                                                              borderRadius: BorderRadius.circular(8),
+                                                                              border: Border.all(color: AppColor.textColor),
+                                                                              image: DecorationImage(
+                                                                                image:e.path.startsWith('http') || kIsWeb ?
+                                                                                NetworkImage(e.path,)
+                                                                                    : FileImage(File(e.path)) as ImageProvider,
+                                                                                fit: BoxFit.fill,
+                                                                              )
+                                                                          ),
+                                                                          height: isMobile ? Get.height * 0.6 : Get.height * 0.8,
+                                                                          width: isMobile ? Get.width * 0.8 : Get.width * 0.4,
+                                                                        ),
+                                                                      ),
+                                                                    );
+                                                                  });
+                                                            },
+                                                            child: Container(
+                                                              margin: EdgeInsets.all(10),
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius: BorderRadius.circular(8),
+                                                                  border: Border.all(color: AppColor.textColor),
+                                                                  image: DecorationImage(
+                                                                    image:e!.path.startsWith('http') || kIsWeb ?
+                                                                    NetworkImage(e.path)
+                                                                        : FileImage(File(e.path)) as ImageProvider,
+                                                                    fit: BoxFit.cover,
+                                                                  )
+                                                              ),
+                                                              height: 60,width: 60,
+                                                              // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                            ),
+                                                          ),
+                                                          /*Container(
+                                                            margin: EdgeInsets.all(10),
+                                                            decoration: BoxDecoration(
+                                                                borderRadius: BorderRadius.circular(8),
+                                                                border: Border.all(color: AppColor.textColor),
+                                                                image: DecorationImage(image: NetworkImage(e!.path,),fit: BoxFit.cover,)
+                                                            ),
+                                                            height: 60,width: 60,
+                                                            // child: Image.network(e!.path,fit: BoxFit.cover,),
+                                                          ),*/
+                                                          GestureDetector(
+                                                            child: CircleAvatar(
+                                                              backgroundColor: AppColor.accentColor,radius: 10,
+                                                              child: Center(child: Icon(Icons.clear,color: AppColor.textColor,size: 15,)),
+                                                            ),
+                                                            onTap: (){
+                                                              controller.selectedImagesDesktop.remove(e);
+                                                            },
+                                                          )
+                                                        ],
+                                                      );
+                                                    }).toList(),
+                                                  ),
+                                              );
+                                            }),
+                                          ],
                                         ),
-
-                                      ],
+                                      ),
                                     ),
 
                                     Container(

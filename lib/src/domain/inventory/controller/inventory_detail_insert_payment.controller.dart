@@ -106,7 +106,6 @@ class InventoryDetailInsertPaymentController extends GetxController{
     selectedLaboratoryId.value = 0;
     searchLaboratoryController.clear();
     getForPaymentListPager();
-    print("idItemUnit: ${newValue?.item?.itemUnit?.id}");
 
   }
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
@@ -305,7 +304,6 @@ class InventoryDetailInsertPaymentController extends GetxController{
   }
   // لیست دریافتی ها با صفحه بندی
   Future<void> getForPaymentListPager() async {
-    print("### getForPaymentListPager ###");
     //isLoading.value=true;
     try {
       //state.value=PageState.loading;
@@ -414,8 +412,6 @@ class InventoryDetailInsertPaymentController extends GetxController{
       dateController.text =
       "${now.year}/${now.month.toString().padLeft(2, '0')}/${now.day.toString().padLeft(2, '0')} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}";*/
       String gregorianDate = convertJalaliToGregorian(dateController.text);
-      print(inventoryId.value);
-      print(accountName.value);
       if (selectedInputItem.value?.id != null &&
           !selectedForPaymentId.contains(selectedInputItem.value!.id)) {
         selectedForPaymentId.add(selectedInputItem.value!.id!);
@@ -441,7 +437,6 @@ class InventoryDetailInsertPaymentController extends GetxController{
         inputItemId: selectedWalletAccount.value!.item?.itemUnit?.id==2 ? selectedInputItem.value?.id : null,
         recId: recId,
       );
-      print(response);
       if (response != null) {
         Get.toNamed('/inventoryList');
         inventoryController.getInventoryListPager();
@@ -468,7 +463,6 @@ class InventoryDetailInsertPaymentController extends GetxController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;

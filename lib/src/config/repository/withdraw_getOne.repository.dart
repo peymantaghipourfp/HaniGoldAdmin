@@ -4,8 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class WithdrawGetOneRepository{
   Dio withdrawGetOneDio=Dio();
@@ -19,12 +21,11 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
     try {
       final response = await withdrawGetOneDio.get(
           'WithdrawRequest/getOne', queryParameters: {'id': withdrawId});
-      print('Status Code getOneWithdraw: ${response.statusCode}');
-      print('Response Data getOneWithdraw: ${response.data}');
       Map<String, dynamic> data=response.data;
       return WithdrawModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOneWithdraw failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
 }
   Future<List< dynamic>> updateRegistered({
@@ -36,15 +37,13 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
         "registered": registered,
         "id": depositId,
       };
-      print(depositData);
 
       var response=await withdrawGetOneDio.put('Deposit/updateRegistered',data: depositData);
-      print('Status Code updateRegistered: ${response.statusCode}');
-      print('Response Data updateRegistered: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ریجیستر:$e');
+    catch (e, s) {
+      AppLogger.e('updateRegistered failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -54,12 +53,11 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
     try{
 
       var response=await withdrawGetOneDio.get('Remittance/insertFromDeposit',queryParameters: {"id": depositId});
-      print('Status Code insertFromDeposit: ${response.statusCode}');
-      print('Response Data insertFromDeposit: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در برگشت واریزی:$e');
+    catch (e, s) {
+      AppLogger.e('خطا در برگشت واریزی:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -69,12 +67,11 @@ Future<WithdrawModel> getOneWithdraw(int withdrawId)async{
     try{
 
       var response=await withdrawGetOneDio.put('Deposit/changeExteraAmount',queryParameters: {"id": depositId});
-      print('Status Code changeExteraAmount: ${response.statusCode}');
-      print('Response Data changeExteraAmount: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در اضافه واریزی:$e');
+    catch (e, s) {
+      AppLogger.e('خطا در اضافه واریزی:', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

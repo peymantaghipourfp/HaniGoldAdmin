@@ -6,7 +6,7 @@ import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:hanigold_admin/src/domain/base/base_controller.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/socket_remittance.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -22,14 +22,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_getOne.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:uuid/uuid.dart';
@@ -48,7 +45,6 @@ import '../../product/model/item.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../../users/model/paginated.model.dart';
 import '../model/remittance.model.dart';
-import '../view/update_remittance.view.dart';
 import 'dart:ui' as ui;
 import 'package:flutter/rendering.dart';
 import 'package:path/path.dart' as path;
@@ -177,8 +173,6 @@ class RemittanceController extends BaseController{
       tempBalanceChangesPayer.refresh();
       tempBalanceChangesRecipt.refresh();
       update();
-      print("tempBalanceChangesPayer::::$tempBalanceChangesPayer");
-      print("tempBalanceChangesRecipt::::$tempBalanceChangesRecipt");
 
     } catch (e) {
       print('Error in tempBalanceView: $e');
@@ -215,7 +209,6 @@ class RemittanceController extends BaseController{
       }
     }
     update();
-    print(namePayer.value);
 
   }
   void changeSelectedItem(ItemModel? newValue) {
@@ -448,7 +441,7 @@ class RemittanceController extends BaseController{
         try {
           final data = json.decode(message);
           if (data['channel'] == 'remittance') {
-            final socketRemittance = SocketRemittanceModel.fromJson(data);
+            //final socketRemittance = SocketRemittanceModel.fromJson(data);
             //getRemittanceListPager();
           }
         } catch (e) {
@@ -520,15 +513,45 @@ class RemittanceController extends BaseController{
 
   Future<void> pickImageDesktop( ) async {
     try{
-      final List<XFile?> images = await _picker.pickMultiImage();
+      final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        selectedImagesDesktop.addAll(images);
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+
+        selectedImagesDesktop.value = newList;
       }
-      print(selectedImagesDesktop.length);
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
 
+  }
+
+  Future<void> pickImageMobile(ImageSource source) async {
+    try {
+      if (source == ImageSource.camera) {
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 70,
+        );
+        if (photo == null) return;
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..add(photo);
+
+        selectedImagesDesktop.value = newList;
+
+      }
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+
+        if (images.isEmpty) return;
+
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+        selectedImagesDesktop.value = newList;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'امکان انتخاب تصویر وجود ندارد');
+    }
   }
 
 
@@ -607,6 +630,7 @@ class RemittanceController extends BaseController{
         if (uploadStatusesDesktop.every((status) => status)) {
           Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
           updateRemittance(recordId.value);
+          Get.back();
         }
       } finally {
         isUploadingDesktop.value = false;
@@ -620,7 +644,6 @@ class RemittanceController extends BaseController{
 
   // لیست بالانس
   Future<List<BalanceItemModel>?> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     isLoadingBalance.value=false;
     // balanceList.clear();
     // balanceListP.clear();
@@ -646,7 +669,6 @@ class RemittanceController extends BaseController{
   }
   // // لیست حواله
   // Future<void> fetchRemittanceList() async{
-  //   print("kkkkkkkkkk");
   //   remittanceList.clear();
   //   try{
   //     state.value=PageState.loading;
@@ -669,7 +691,6 @@ class RemittanceController extends BaseController{
 
   Future<void> getOneRemittance(int id) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
-    print("getOneRemittance");
     try{
       var remittance=await remittanceRepository.getOneRemittance(id: id);
       remittanceModel=remittance;
@@ -677,7 +698,7 @@ class RemittanceController extends BaseController{
       nameRecieptController.text=remittanceModel?.walletReciept?.account?.name??"";
       dateController.text=remittanceModel?.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English)??"";
       descController.text=remittanceModel?.description??"";
-      quantityPayerController.text="${remittanceModel?.quantity.toString().seRagham(separator: ',')??0}";
+      quantityPayerController.text="${remittanceModel?.quantity?.toDisplayString().seRagham(separator: ',')??0}";
       mobileReciptController.text=remittanceModel?.walletReciept?.account?.contactInfo??"";
       selectedAccountPayer.value=remittanceModel?.walletPayer!.account;
       selectedAccountRecipt.value=remittanceModel?.walletReciept!.account;
@@ -698,7 +719,6 @@ class RemittanceController extends BaseController{
     }
   }
 
-
   // لیست کاربران
   /*Future<void> fetchAccountListRecipt(String name) async{
     try{
@@ -710,7 +730,6 @@ class RemittanceController extends BaseController{
       if(accountListRecipt.isEmpty){
      //   state.value=PageState.empty;
       }
-      print('تعداد :${accountListRecipt.length}');
 
     }
     catch(e){
@@ -721,12 +740,10 @@ class RemittanceController extends BaseController{
   }*/
  // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -739,7 +756,6 @@ class RemittanceController extends BaseController{
  // لیست عکس ها
   Future<void> deleteImage(String fileName,) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
-    print('تعداد image:');
     try{
       var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
      if(fetch){
@@ -760,7 +776,6 @@ class RemittanceController extends BaseController{
       var fetchedAccountList=await accountRepository.getAccountList("");
       accountListPayer.assignAll(fetchedAccountList);
       searchedAccountsPayer.assignAll(fetchedAccountList);
-      print('تعداد Payer:${accountListPayer.length}');
     }
     catch(e){
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -772,7 +787,6 @@ class RemittanceController extends BaseController{
       var fetchedAccountList=await accountRepository.getAccountList("");
       accountListRecipt.assignAll(fetchedAccountList);
       searchedAccountsRecipt.assignAll(fetchedAccountList);
-      print('تعداد Recipt:${accountListRecipt.length}');
     }
     catch(e){
       errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
@@ -822,7 +836,7 @@ class RemittanceController extends BaseController{
     try {
       isLoading.value = true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
-      Gregorian date=remittanceModel!.date!.toGregorian();
+      //Gregorian date=remittanceModel!.date!.toGregorian();
       RemittanceModel response = await remittanceRepository.updateRemittance(
         //date:"${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}T${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}",
         date: gregorianDate,
@@ -892,7 +906,6 @@ class RemittanceController extends BaseController{
   }
   // لیست حواله ها با صفحه بندی
   Future<void> getRemittanceListPager() async {
-    print("### getRemittanceListPager ###");
     isOpenMore.value = false;
     remittanceList.clear();
     try {
@@ -921,7 +934,6 @@ class RemittanceController extends BaseController{
 
 // لیست حواله ها با صفحه بندی
   Future<void> getRemittanceListStatusPager() async {
-    print("### getRemittanceListPager ###");
     isOpenMore.value = false;
     remittanceListStatus.clear();
     try {
@@ -1199,7 +1211,7 @@ class RemittanceController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -1267,7 +1279,7 @@ class RemittanceController extends BaseController{
               ? "${remittance.quantity} عدد "
               : remittance.item?.itemUnit?.id == 2
               ? "${remittance.quantity} گرم "
-              : "${remittance.quantity.toString().seRagham()} ریال " } ${remittance.item?.name} "?? ''),
+              : "${remittance.quantity.toString().seRagham()} ریال " } ${remittance.item?.name} "),
           TextCellValue(remittance.description ?? ''),
           TextCellValue("بد:${remittance.balancePayer?.where((e) => e.unitName == "ریال").map((e)=> "\u202B${e.balance ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")} بس:${remittance.balanceReciept?.where((e) => e.unitName == "ریال").map((e)=> "\u202B${e.balance ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
           TextCellValue("بد:${remittance.balancePayer?.where((e) => e.unitName == "گرم").map((e) => "\u202B${e.balance ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")} بس:${remittance.balanceReciept?.where((e) => e.unitName == "گرم").map((e) => "\u202B${e.balance ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
@@ -1282,7 +1294,7 @@ class RemittanceController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'remittances_${DateTime.now().millisecondsSinceEpoch}.xlsx')
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -1501,7 +1513,7 @@ class RemittanceController extends BaseController{
           ? "${remittance.quantity} عدد "
           : remittance.item?.itemUnit?.id == 2
           ? "${remittance.quantity} گرم "
-          : "${remittance.quantity.toString().seRagham()} ریال " } ${remittance.item?.name} "?? ''),
+          : "${remittance.quantity.toString().seRagham()} ریال " } ${remittance.item?.name} "),
         buildDataCell(getStatusText(remittance.status ?? 0 ),isCenter: true),
         buildDataCell(remittance.quantity?.toString().seRagham(separator: ",") ?? '',isCenter: true),
         buildDataCell(remittance.item?.name ?? '',isCenter: true),
@@ -1674,7 +1686,6 @@ class RemittanceController extends BaseController{
         /*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*/
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',
@@ -1743,7 +1754,7 @@ class RemittanceController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'image/png');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'remittance_row_${remittance.id}.png')
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -1782,7 +1793,7 @@ class RemittanceController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'image/png');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'remittance_table_${DateTime.now().millisecondsSinceEpoch}.png')
           ..click();
         html.Url.revokeObjectUrl(url);

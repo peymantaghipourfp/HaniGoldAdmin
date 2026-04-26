@@ -3,17 +3,14 @@ import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
-import 'package:hanigold_admin/src/domain/order/model/info.model.dart';
-import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
 
 import '../../domain/users/model/city_item.model.dart';
 import '../../domain/users/model/list_user_account.model.dart';
 import '../../domain/users/model/state_item.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class UserRepository {
   Dio userDio = Dio();
@@ -55,11 +52,10 @@ class UserRepository {
         }
       };
       final response = await userDio.post('Account/getWrapper', data: options);
-      print("request getUserListExport : $options" );
-      print("response getUserListExport : ${response.data}" );
       return ListUserModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('getUserListExport failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -115,11 +111,10 @@ class UserRepository {
               }
             };
       final response = await userDio.post('Account/getWrapper', data: options);
-      print("request getUserList : $options" );
-      print("response getUserList : ${response.data}" );
       return ListUserModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('getUserList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -188,11 +183,10 @@ class UserRepository {
       };
 
       final response = await userDio.post('User/getWrapper', data: options);
-      print("request getUserAccountListPager : $options" );
-      print("response getUserAccountListPager : ${response.data}" );
       return ListUserAccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('getUserAccountListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -212,12 +206,11 @@ class UserRepository {
         }
       };
       final response = await userDio.post('City/get', data: options);
-      print("request getCityList : $options" );
-      print("response getCityList : ${response.data}" );
       List<dynamic> data = response.data;
       return data.map((city) => CityItemModel.fromJson(city)).toList();
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('getCityList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -237,12 +230,11 @@ class UserRepository {
         }
       };
       final response = await userDio.post('State/get', data: options);
-      print("request getStateList : $options" );
-      print("response getStateList : ${response.data}" );
       List<dynamic> data = response.data;
       return data.map((state) => StateItemModel.fromJson(state)).toList();
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('getStateList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -257,12 +249,11 @@ class UserRepository {
         }}
       };
       final response = await userDio.post('AccountGroup/get', data: options);
-      print("request getAccountGroup : $options" );
-      print("response getAccountGroup : ${response.data}" );
       List<dynamic> data = response.data;
       return data.map((group) => AccountGroupModel.fromJson(group)).toList();
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('getAccountGroup failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -284,6 +275,7 @@ class UserRepository {
     required String city,
     required int idCity,
     required String address,
+    required String recId,
   }) async {
     try {
       Map<String, dynamic> options = {
@@ -375,15 +367,14 @@ class UserRepository {
         "rowNum": 1,
         "id": null,
         "attribute": "cus",
+        "recId": recId,
         "infos": []
       };
       final response = await userDio.post('Account/insert', data: options);
-      print('Status Code insertUser: ${response.statusCode}');
-      print("request insertUser : $options" );
-      print("response insertUser : ${response.data}" );
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('insertUser failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -413,6 +404,7 @@ class UserRepository {
     required int contactInfoId0,
     required int contactInfoId1,
     required int contactInfoId2,
+    required String recId,
     //required int addressId,
   }) async {
     try {
@@ -509,15 +501,14 @@ class UserRepository {
         "id": id,
         "status":status,
         "attribute": "cus",
+        "recId": recId,
         "infos": []
       };
       final response = await userDio.put('Account/Update', data: options);
-      print('Status Code updateUser: ${response.statusCode}');
-      print("request updateUser : $options" );
-      print("response updateUser : ${response.data}" );
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('updateUser failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -552,12 +543,10 @@ class UserRepository {
         "infos": []
       };
       final response = await userDio.put('User/update', data: options);
-      print('Status Code updateUserAccount: ${response.statusCode}');
-      print("request updateUserAccount : $options" );
-      print("response updateUserAccount : ${response.data}" );
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('updateUserAccount failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -591,12 +580,10 @@ class UserRepository {
         "infos": []
       };
       final response = await userDio.put('User/updateStatus', data: options);
-      print('Status Code updateStatusUserAccount: ${response.statusCode}');
-      print("request updateStatusUserAccount : $options" );
-      print("response updateStatusUserAccount : ${response.data}" );
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('updateStatusUserAccount failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -607,11 +594,10 @@ class UserRepository {
     try {
       final response = await userDio
           .put('Account/updateStatus', data: {"status": status, "id": id});
-      print('Status Code updateStatus: ${response.statusCode}');
-      print("response updateStatus : ${response.data}" );
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('updateStatus failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -621,11 +607,10 @@ class UserRepository {
     try {
       final response =
           await userDio.get('Account/getOne', queryParameters: {"id": id});
-      print('Status Code getOneAccount: ${response.statusCode}');
-      print("response getOneAccount : ${response.data}" );
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('getOneAccount failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -639,12 +624,11 @@ class UserRepository {
         }
       };
       final response = await userDio.post('Login/changePasswordByAdmin', data: options);
-      print("request changePasswordByAdmin : $options");
-      print("response changePasswordByAdmin : ${response.data}");
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('changePasswordByAdmin failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -660,12 +644,10 @@ class UserRepository {
         "TelegramFirstName": name
       };
       final response = await userDio.post('Account/setTelegramInfo', data: options);
-      print('Status Code insertMobileTelegram: ${response.statusCode}');
-      print("request insertMobileTelegram : $options" );
-      print("response insertMobileTelegram : ${response.data}" );
       return response.data;
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('insertMobileTelegram failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -765,11 +747,6 @@ class UserRepository {
   //     };
   //
   //     var response=await userInfoTransactionDio.post('Remittance/insert',data: orderData);
-  //     /*if(response.statusCode==200){
-  //       print('ثبت با موفقیت انجام شد');
-  //     }else{
-  //       throw ErrorException('خطا');
-  //     }*/
   //     return RemittanceModel.fromJson(response.data);
   //   }
   //   catch(e){

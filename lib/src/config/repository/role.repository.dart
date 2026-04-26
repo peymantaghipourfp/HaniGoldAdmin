@@ -7,7 +7,9 @@ import 'package:hanigold_admin/src/domain/role/model/element.model.dart';
 import 'package:hanigold_admin/src/domain/role/model/element_getOne.model.dart';
 import 'package:hanigold_admin/src/domain/role/model/role.model.dart';
 
+import '../logger/app_logger.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class RoleRepository{
   Dio roleDio=Dio();
@@ -28,9 +30,6 @@ class RoleRepository{
         }}
       };
       final response=await roleDio.post('Element/get',data: options);
-      print("url : Element/get" );
-      print("request getElementList : $options" );
-      print("response getElementList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((elements)=>ElementModel.fromJson(elements)).toList();
@@ -39,8 +38,9 @@ class RoleRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getElementList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -48,13 +48,11 @@ class RoleRepository{
     try {
       final response = await roleDio.get(
           'Element/getOne', queryParameters: {'id': elementId});
-      print("url : Element/getOne" );
-      print('Status Code getOneElement: ${response.statusCode}');
-      print('Response Data getOneElement: ${response.data}');
       Map<String, dynamic> data=response.data;
       return ElementGetOneModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOneElement failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -69,9 +67,6 @@ class RoleRepository{
         }}
       };
       final response=await roleDio.post('Role/get',data: options);
-      print("url : Role/get" );
-      print("request getRoleList : $options" );
-      print("response getRoleList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((roles)=>RoleModel.fromJson(roles)).toList();
@@ -80,8 +75,9 @@ class RoleRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getRoleList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

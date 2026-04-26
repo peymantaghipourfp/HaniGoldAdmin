@@ -1,21 +1,21 @@
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/transferWallet/controller/transfer_wallet_list.controller.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class TransferWalletListView extends StatefulWidget {
   const TransferWalletListView({super.key});
@@ -115,7 +115,7 @@ class _TransferWalletListViewState extends State<TransferWalletListView> {
                                 ElevatedButton(
                                   style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(
-                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                          EdgeInsets.symmetric(horizontal: 23)),
                                       // elevation: WidgetStatePropertyAll(5),
                                       backgroundColor:
                                       WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
@@ -356,7 +356,7 @@ class _TransferWalletListViewState extends State<TransferWalletListView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -713,7 +713,7 @@ class _TransferWalletListViewState extends State<TransferWalletListView> {
                                                                           child: ElevatedButton(
                                                                             style: ButtonStyle(
                                                                                 padding: WidgetStatePropertyAll(
-                                                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                    EdgeInsets.symmetric(horizontal: 23)),
                                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                                 backgroundColor:
                                                                                 WidgetStatePropertyAll(AppColor.appBarColor),
@@ -940,7 +940,7 @@ class _TransferWalletListViewState extends State<TransferWalletListView> {
   }
 
   List<DataRow> buildDataRows(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return controller.transferWalletList.asMap().entries.map((entry) {
       final index = entry.key;
       final transferWallet = entry.value;
@@ -1010,7 +1010,7 @@ class _TransferWalletListViewState extends State<TransferWalletListView> {
             Row(
               children: [
                 Text(
-                   "${transferWallet.quantity}", style: transferWallet.quantity!<0 ? AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold): AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                   "${transferWallet.quantity?.toDisplayString()}", style: transferWallet.quantity!<0 ? AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold): AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
                   textDirection: TextDirection.ltr,
                 ),
                 Text(
@@ -1021,7 +1021,7 @@ class _TransferWalletListViewState extends State<TransferWalletListView> {
             Row(
               children: [
                 Text(
-                   "${transferWallet.quantity}", style: transferWallet.quantity!<0 ? AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold): AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),textDirection: TextDirection.ltr,
+                   "${transferWallet.quantity?.toDisplayString()}", style: transferWallet.quantity!<0 ? AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold): AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),textDirection: TextDirection.ltr,
                 ),
                 Text(
                   " گرم ", style: AppTextStyle.bodyText.copyWith(fontSize: 12,),
@@ -1031,7 +1031,8 @@ class _TransferWalletListViewState extends State<TransferWalletListView> {
             Row(
               children: [
                 Text(
-                   "${transferWallet.quantity?.toStringAsFixed(0).seRagham()} ریال ", style: transferWallet.quantity!<0 ? AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold): AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
+                  transferWallet.quantity!<0 ? "-${transferWallet.quantity?.abs().toStringAsFixed(0).seRagham()}" : "${transferWallet.quantity?.toStringAsFixed(0).seRagham()}",
+                  style: transferWallet.quantity!<0 ? AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.accentColor,fontWeight: FontWeight.bold): AppTextStyle.bodyText.copyWith(fontSize: 12,color: AppColor.primaryColor,fontWeight: FontWeight.bold),
                   textDirection: TextDirection.ltr,
                 ),
                 Text(

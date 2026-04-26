@@ -546,7 +546,6 @@ class _CandlePriceChartViewState extends State<CandlePriceChartView> {
       ],
     ));
   }
-
   Future<void> _selectDate() async {
     try {
       final Jalali? picked = await showPersianDatePicker(
@@ -1292,7 +1291,7 @@ class _PersianDateFormat extends DateFormat {
   @override
   String format(DateTime date) {
     try {
-      final jalali = Jalali.fromDateTime(date);
+      //final jalali = Jalali.fromDateTime(date);
       final hour = date.hour.toString().padLeft(2, '0');
       final minute = date.minute.toString().padLeft(2, '0');
 

@@ -165,13 +165,13 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
     return diffRatio > 0.1;
   }
 
-  String formatQuantity(double value) {
+  /*String formatQuantity(double value) {
     if (value == value.truncate()) {
       return value.toInt().toString();
     } else {
-      return value.toStringAsFixed(2);
+      return value.toString();
     }
-  }
+  }*/
 
   void _showConfirmDialog() {
     bool isBuy = orderCreateController.selectedBuySell.value?.id == 1;
@@ -204,9 +204,7 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
               SizedBox(height: 5),
               _buildDetailRow(
                 'مقدار:',
-                formatQuantity(
-                  double.tryParse(orderCreateController.quantityController.text) ?? 0,
-                ),
+                  orderCreateController.quantityController.text,
               ),
               SizedBox(height: 5),
               _buildDetailRow(
@@ -277,7 +275,7 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
         child: Container(
           width: isDesktop ? Get.width * 0.65 : Get.width * 0.95,
           constraints: BoxConstraints(
-            maxHeight: Get.height * 0.85,
+            maxHeight: Get.height * 0.9,
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -375,62 +373,65 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
   }
 
   Widget _buildDesktopLayout() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Right side - Form
-        Expanded(
-          child: _buildOrderForm(),
-        ),
-        SizedBox(width: 16),
-        // Left side - Balance
-         Expanded(
-           child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                orderCreateController.isLoadingBalance.value == false
-                    ? Center(child: CircularProgressIndicator())
-                    : LayoutBuilder(
-                    builder: (context, constraints) {
-                        return BalanceWidget(
-                          title: orderCreateController.selectedAccount.value?.name,
-                          listBalance: orderCreateController.balanceList,
-                          size: constraints.maxWidth,
-                        );
-                      }
-                    ),
-                _buildErrorWidget(),
-                const SizedBox(height: 8),
-                Obx(() {
-                  return AccountSalesGroupGetOneItemWidget(
-                    data: orderCreateController.selectedAccountSalesGroupItem.value,
-                    width: double.infinity,
-                    title: orderCreateController
-                        .selectedAccount.value?.accountSalesGroup?.name,
-                    isLoading:
-                    orderCreateController.isLoadingAccountSalesGroupItem.value,
-                    selectedItemId: orderCreateController.selectedItem.value?.id,
-                    selectedBuySellId: orderCreateController.selectedBuySell.value?.id,
-                    onPriceSelected: (mesghlPrice) {
-                      orderCreateController.setPriceFromSalesGroup(mesghlPrice);
-                    },
-                  );
-                }),
-                SizedBox(height: 8),
-                Obx(() {
-                  return AccountLevelGetOneItemWidget(
-                    data: orderCreateController.selectedAccountLevelItem.value,
-                    width: double.infinity,
-                    title: orderCreateController
-                        .selectedAccount.value?.accountLevel?.name,
-                    isLoading:
-                    orderCreateController.isLoadingAccountLevelItem.value,
-                  );
-                }),
-              ],
-            ),
-         ),
-      ],
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Right side - Form
+          Expanded(
+            child: _buildOrderForm(),
+          ),
+          SizedBox(width: 16),
+          // Left side - Balance
+           Expanded(
+             child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  orderCreateController.isLoadingBalance.value == false
+                      ? Center(child: CircularProgressIndicator())
+                      : LayoutBuilder(
+                      builder: (context, constraints) {
+                          return BalanceWidget(
+                            title: orderCreateController.selectedAccount.value?.name,
+                            listBalance: orderCreateController.balanceList,
+                            size: constraints.maxWidth,
+                          );
+                        }
+                      ),
+                  _buildErrorWidget(),
+                  const SizedBox(height: 8),
+                  Obx(() {
+                    return AccountSalesGroupGetOneItemWidget(
+                      data: orderCreateController.selectedAccountSalesGroupItem.value,
+                      width: double.infinity,
+                      title: orderCreateController
+                          .selectedAccount.value?.accountSalesGroup?.name,
+                      isLoading:
+                      orderCreateController.isLoadingAccountSalesGroupItem.value,
+                      selectedItemId: orderCreateController.selectedItem.value?.id,
+                      selectedBuySellId: orderCreateController.selectedBuySell.value?.id,
+                      onPriceSelected: (mesghlPrice) {
+                        orderCreateController.setPriceFromSalesGroup(mesghlPrice);
+                      },
+                    );
+                  }),
+                  SizedBox(height: 8),
+                  Obx(() {
+                    return AccountLevelGetOneItemWidget(
+                      data: orderCreateController.selectedAccountLevelItem.value,
+                      width: double.infinity,
+                      title: orderCreateController
+                          .selectedAccount.value?.accountLevel?.name,
+                      isLoading:
+                      orderCreateController.isLoadingAccountLevelItem.value,
+                    );
+                  }),
+                ],
+              ),
+           ),
+        ],
+      ),
     );
   }
 
@@ -609,7 +610,7 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
                             padding: EdgeInsets.only(bottom: isDesktop ? 2 : 5),
                             child: Row(
                               children: mostUsedProducts.asMap().entries.map((entry) {
-                                final index = entry.key;
+                                //final index = entry.key;
                                 final item = entry.value;
                                 final isSelected = orderCreateController.selectedItem.value?.id == item.id;
                                 return Container(
@@ -1196,7 +1197,7 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
     );
   }
 
-  Widget _buildLabel(String text) {
+  /*Widget _buildLabel(String text) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Container(
       padding: EdgeInsets.only(bottom: 3, top: 5),
@@ -1205,7 +1206,7 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
         style: AppTextStyle.labelText.copyWith(fontSize: isDesktop ? 12 : 10),
       ),
     );
-  }
+  }*/
 
   Widget _buildLabelCompact(String text) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);

@@ -3,24 +3,27 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/transferWallet/controller/transfer_after_tomorrow_change.controller.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
+import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../widget/app_drawer.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../../widget/empty.dart';
+import '../../../widget/err_page.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class TransferAfterTomorrowChangeView extends StatelessWidget {
   const TransferAfterTomorrowChangeView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final TransferAfterTomorrowChangeController controller =
-    Get.find<TransferAfterTomorrowChangeController>();
+    final TransferAfterTomorrowChangeController controller = Get.find<TransferAfterTomorrowChangeController>();
     final bool isMobile = Get.width < 600;
 
     return Scaffold(
       appBar: CustomAppbar1(
         title: 'تغییر تاریخ انتقال',
-        onBackTap: () => Get.toNamed('/home'),
+        onBackTap: () => Get.offNamed('/home'),
       ),
       drawer: const AppDrawer(),
       body: Container(
@@ -34,6 +37,7 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
         child: Center(
           child: Container(
             width: isMobile ? Get.width * 0.95 : Get.width * 0.55,
+            margin: EdgeInsets.symmetric(vertical: isMobile ? 10 : 15,horizontal: isMobile ? 10 : 15),
             padding: EdgeInsets.all(isMobile ? 12.0 : 24.0),
             decoration: BoxDecoration(
               color: AppColor.secondaryColor.withOpacity(0.8),
@@ -41,7 +45,7 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
             ),
             child: SingleChildScrollView(
               child: Container(
-                padding: EdgeInsets.all(isMobile ? 16.0 : 40.0),
+                padding: EdgeInsets.all(isMobile ? 10 : 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -112,7 +116,7 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
                         },
                       ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 10),
                     Center(
                       child: Obx(() {
                         final bool disabled = controller.isLoading.value;
@@ -161,6 +165,169 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
                         );
                       }),
                     ),
+                    const SizedBox(height: 20),
+                    // لیست سفارش‌های انتقال داده نشده
+                    Obx(() {
+                      final pageState = controller.state.value;
+
+                      if (pageState == PageState.loading) {
+                        return const Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16.0),
+                            child: CircularProgressIndicator(),
+                          ),
+                        );
+                      }
+
+                      if (pageState == PageState.err) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(
+                            child: ErrPage(
+                              callback: () {
+                                controller.getAfterNotChange();
+                              },
+                              title: "خطا در دریافت لیست سفارش ها",
+                              des: 'برای دریافت لیست سفارش ها مجددا تلاش کنید',
+                            ),
+                          ),
+                        );
+                      }
+
+                      if (pageState == PageState.empty) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(
+                            child: EmptyPage(
+                              tryText: "سفارشی برای نمایش وجود ندارد.",
+                              callback: (){
+                                controller.getAfterNotChange();
+                              },
+                            )
+                          ),
+                        );
+                      }
+
+                      // حالت نمایش لیست
+                      final orders = controller.orderAfterNotChangeList;
+                      if (orders.isEmpty) {
+                        return const SizedBox.shrink();
+                      }
+
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'سفارش‌های انتقال داده نشده',
+                              style: AppTextStyle.smallTitleText,
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: Get.height,
+                              child: ListView.separated(
+                                shrinkWrap: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                itemCount: orders.length,
+                                separatorBuilder: (_, __) =>
+                                const SizedBox(height: 8),
+                                itemBuilder: (context, index) {
+                                  final order = orders[index];
+                                  return Container(
+                                    margin: const EdgeInsets.only(bottom: 2),
+                                    padding: const EdgeInsets.only(top: 5,right: 10,left: 10,bottom: 5),
+                                    decoration: BoxDecoration(
+                                      color: AppColor.secondary50Color.withAlpha(150),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: const Color(
+                                          0xFF91D9A5)),
+                                      boxShadow: [
+                                      BoxShadow(
+                                      color: Colors.black54,
+                                      blurRadius: 10,
+                                      offset: const Offset(0,3),
+                                      ),
+                                      ],
+                                    ),
+                                    child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    '${order.account?.name}',
+                                                    style: AppTextStyle.bodyText.copyWith(fontSize: 13,fontWeight: FontWeight.w600, color: AppColor.textErrorColor),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Text(
+                                                    '${order.date?.toPersianDate(showTime: false)}',
+                                                    style: AppTextStyle.bodyText.copyWith(fontSize: 12 , fontWeight: FontWeight.w700, color: AppColor.textErrorColor ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                        SizedBox(height: 3,),
+                                        Divider(color: AppColor.secondary2Color.withAlpha(100), height: 5,),
+                                        Container(
+                                            margin: const EdgeInsets.symmetric(vertical: 4),
+                                            padding: const EdgeInsets.all(5),
+                                            decoration: BoxDecoration(
+                                              color:AppColor.primaryColor.withAlpha(10),
+                                              borderRadius: BorderRadius.circular(10),
+                                              border: Border.all(color: const Color(0xFF64748B)),
+                                            ),
+                                            child: Row(mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    '${order.item?.name}',
+                                                    style: AppTextStyle.bodyText.copyWith(fontSize: 13,fontWeight: FontWeight.w600, color: AppColor.primaryColor),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Row(
+                                                    children: [
+                                                      Text("مقدار: ",style: AppTextStyle.labelText.copyWith(fontSize: 10,fontWeight: FontWeight.w400,),),
+                                                      Text(
+                                                        '${order.quantity?.toDisplayString().seRagham()} ${order.item?.itemUnit?.name}',
+                                                        style: AppTextStyle.bodyText.copyWith(fontSize: 13,fontWeight: FontWeight.w700, color: AppColor.errorColor),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(),
+                                              ],
+                                            ),
+                                          ),
+                                        Container(
+                                          margin: const EdgeInsets.symmetric(vertical: 4),
+                                          padding: const EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            color:AppColor.primaryColor.withAlpha(10),
+                                            borderRadius: BorderRadius.circular(10),
+                                            border: Border.all(color: const Color(0xFF64748B)),
+                                          ),
+                                          child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'مبلغ کل: ${order.totalPrice?.toStringAsFixed(0).seRagham()}',
+                                                style: AppTextStyle.bodyText.copyWith(fontSize: 13,fontWeight: FontWeight.w600, color: AppColor.dividerColor),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }),
                   ],
                 ),
               ),

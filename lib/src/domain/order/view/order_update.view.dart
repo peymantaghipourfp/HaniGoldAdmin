@@ -1,4 +1,4 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -12,13 +12,11 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
 import '../../account/model/account.model.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/order_update.controller.dart';
-import '../model/order.model.dart';
 
 class OrderUpdateView extends StatefulWidget {
   const OrderUpdateView({super.key});
@@ -601,7 +599,6 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                                 if (item >= orderUpdateController.maxItemSell.value) {
                                                                   orderUpdateController.quantityController.text =
                                                                       orderUpdateController.maxItemSell.value.toString();
-                                                                  print(item);
                                                                 }
                                                               });
                                                             }*/
@@ -711,7 +708,6 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                                                                         : value.replaceAll(" ", "").toEnglishDigit()) ?? 0;
                                                                 if (item >= orderUpdateController.maxItemBuy.value) {
                                                                   orderUpdateController.quantityController.text = orderUpdateController.maxItemBuy.value.toString();
-                                                                  print(item);
                                                                 }
                                                               });
                                                             }*/

@@ -23,7 +23,6 @@ import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../config/repository/wallet.repository.dart';
-import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account.model.dart';
 import '../../laboratory/model/laboratory.model.dart';
 import '../../users/model/balance_item.model.dart';
@@ -141,7 +140,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
     if(newValue?.item?.id != null && newValue!.item!.id! > 0) {
       getForPaymentListPager();
     }
-    print("idItemUnit: ${newValue?.item?.itemUnit?.id}");
   }
 
   void changeSelectedLaboratory(LaboratoryModel? newValue) {
@@ -396,7 +394,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
 
   // لیست دریافتی ها با صفحه بندی
   Future<void> getForPaymentListPager() async {
-    print("### getForPaymentListPager ###");
     try {
       if(selectedWalletAccount.value?.item?.id != null && selectedWalletAccount.value!.item!.id! > 0) {
         var response = await inventoryRepository.getForPaymentlistPager(
@@ -446,8 +443,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
             getWalletAccount(accountId.value);
             getBalanceList(accountId.value);
           }
-          print("Debug - accountId: ${accountId.value}");
-          print("Debug - wallet: ${inventoryDetail?.wallet?.item?.name}");
           stateGetOne.value=PageState.list;
         }else{
           stateGetOne.value=PageState.empty;
@@ -464,12 +459,43 @@ class InventoryDetailUpdatePaymentController extends GetxController{
 
   Future<void> pickImageDesktop() async {
     try{
-      final List<XFile?> images = await _picker.pickMultiImage();
+      final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        selectedImagesDesktop.addAll(images);
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+
+        selectedImagesDesktop.value = newList;
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> pickImageMobile(ImageSource source) async {
+    try {
+      if (source == ImageSource.camera) {
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 70,
+        );
+        if (photo == null) return;
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..add(photo);
+
+        selectedImagesDesktop.value = newList;
+
+      }
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+
+        if (images.isEmpty) return;
+
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+        selectedImagesDesktop.value = newList;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'امکان انتخاب تصویر وجود ندارد');
     }
   }
 
@@ -513,12 +539,10 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   }
 
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.length}');
       imageList.refresh();
       update();
     }
@@ -557,11 +581,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         finalInputItemId = selectedId > 0 ? selectedId : null;
       }
 
-      print("Debug - inventoryId: ${inventoryId.value}");
-      print("Debug - inventoryDetailId: ${inventoryDetailId.value}");
-      print("Debug - accountId: ${accountId.value}");
-      print("Debug - accountName: ${accountName.value}");
-
       var response=await inventoryRepository.updateDetailInventoryPayment(
         inventoryId: inventoryId.value,
         inventoryDetailId: inventoryDetailId.value,
@@ -598,7 +617,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
         inputItemId: finalInputItemId,
         //inputItemId: selectedWalletAccount.value?.item?.itemUnit?.id==2 ? ((selectedInputItem.value?.id ?? inputItemId.value) == 0 ? Null : (selectedInputItem.value?.id ?? inputItemId.value)) : Null,
       );
-      print("Debug - response: $response");
       if (response != null) {
         if (Get.isDialogOpen!) Get.back();
         Get.back();
@@ -628,7 +646,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
   }
 
   void setInventoryDetail(InventoryDetailModel inventoryDetail){
-    print("Debug - Setting inventory detail: ${inventoryDetail.id}");
     inventoryId.value=inventoryDetail.inventoryId ?? 0;
     quantityController.text=inventoryDetail.weight?.toString() ?? '';
     impurityController.text=inventoryDetail.impurity?.toString() ?? '';
@@ -653,7 +670,6 @@ class InventoryDetailUpdatePaymentController extends GetxController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;

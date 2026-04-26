@@ -3,23 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
-import 'package:hanigold_admin/src/domain/inventory/controller/inventory_update_receive.controller.dart';
 import 'package:hanigold_admin/src/widget/background_image.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
-import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../controller/inventory_detail_insert_payment.controller.dart';
-import '../controller/inventory_detail_insert_receive.controller.dart';
 
 class InventoryDetailInsertPaymentView extends StatefulWidget {
   const InventoryDetailInsertPaymentView({super.key});
@@ -197,7 +191,7 @@ class _InventoryDetailInsertPaymentViewState
                                                         child: Row(
                                                           children: [
                                                             Text("${wallet.item
-                                                                ?.name}" ?? "",
+                                                                ?.name}",
                                                               style: AppTextStyle
                                                                   .bodyText,),
                                                           ],
@@ -294,15 +288,6 @@ class _InventoryDetailInsertPaymentViewState
                                                                 10)))),
                                                 onPressed: () async {
                                                   showForPaymentModal();
-                                                  print(
-                                                      'idIttttem ${inventoryDetailInsertPaymentController
-                                                          .selectedWalletAccount
-                                                          .value?.item?.id}');
-                                                  print(
-                                                      'idIttttemUnnnnitId ${inventoryDetailInsertPaymentController
-                                                          .selectedWalletAccount
-                                                          .value?.item?.itemUnit
-                                                          ?.id}');
                                                 },
                                                 child: inventoryDetailInsertPaymentController
                                                     .isLoading.value

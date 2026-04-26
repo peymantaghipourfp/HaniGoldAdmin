@@ -10,23 +10,20 @@ String topicModelToJson(List<TopicModel> data) => json.encode(List<dynamic>.from
 
 @JsonSerializable()
 class TopicModel {
-  @JsonKey(name: "user")
-  final UserModel? user;
+  @JsonKey(name: "topicId")
+  final int? topicId;
   @JsonKey(name: "code")
   final String? code;
-  @JsonKey(name: "topic")
-  final String? topic;
-  @JsonKey(name: "id")
-  final int? id;
-  @JsonKey(name: "infos")
-  final List<dynamic>? infos;
+  @JsonKey(name: "title")
+  final String? title;
+  @JsonKey(name: "sortOrder")
+  final int? sortOrder;
 
   TopicModel({
-    required this.user,
+    required this.topicId,
     required this.code,
-    required this.topic,
-    required this.id,
-    required this.infos,
+    required this.title,
+    required this.sortOrder,
   });
 
   factory TopicModel.fromJson(Map<String, dynamic> json) => _$TopicModelFromJson(json);

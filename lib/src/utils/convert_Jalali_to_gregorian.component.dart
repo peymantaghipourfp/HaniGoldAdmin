@@ -63,7 +63,7 @@ String convertJalaliToGregorian(String jalaliDateTime) {
     // تقسیم رشته به بخش تاریخ و زمان
     List<String> dateTimeParts = jalaliDateTime.split(' ');
     String jalaliDate = dateTimeParts[0];
-    String timePart = dateTimeParts.length > 1 ? dateTimeParts[1]:'';
+    //String timePart = dateTimeParts.length > 1 ? dateTimeParts[1]:'';
 
     DateTime date=DateTime.now();
 

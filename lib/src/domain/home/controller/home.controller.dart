@@ -5,24 +5,21 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:hanigold_admin/src/config/repository/url/web_socket_url.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/socket_deposit.model.dart';
-import 'package:hanigold_admin/src/domain/home/model/socket_chat.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/socket_inventory.model.dart';
 import 'package:hanigold_admin/src/domain/notification/model/notification.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/socket_remittance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/socket_remittanceRequest.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/socket_withdraw.model.dart';
-import '../../../config/const/app_color.dart';
 import '../../../config/const/audio.service.dart';
 import '../../../config/const/socket.service.dart';
+import '../../../config/const/toast.service.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/auth.repository.dart';
-import '../../account/model/account.model.dart';
 import '../../auth/model/user_login.model.dart';
+import '../../chat/controller/chat.controller.dart';
+import '../../chat/model/socket_chat.model.dart';
 import '../../order/model/socket_order.model.dart';
 import '../../product/model/socket_item.model.dart';
 
@@ -35,7 +32,6 @@ import '../../inventory/controller/inventory.controller.dart';
 import '../../remittance/controller/remittance.controller.dart';
 import '../../remittance/controller/remittance_pending.controller.dart';
 import '../../notification/controller/notification.controller.dart';
-import '../controller/chat.controller.dart';
 
 class HomeController extends GetxController{
   /*final List<Map<String,dynamic>> homeListView=[
@@ -48,6 +44,7 @@ class HomeController extends GetxController{
   SocketService socketService = Get.find<SocketService>();
   StreamSubscription? _socketSubscription;
   final AudioService _audioService = AudioService();
+  final toastService = ToastService();
 
   final AuthRepository authRepository=AuthRepository();
   final AccountRepository accountRepository = AccountRepository();
@@ -91,6 +88,9 @@ class HomeController extends GetxController{
 
   Future<void> playNotificationSound() async {
     await _audioService.playNotificationSound();
+  }
+  Future<void> playNotificationSoundCoin() async {
+    await _audioService.playNotificationSoundCoin();
   }
   Future<void> playNotificationSoundAll() async {
     await _audioService.playNotificationSoundAll();
@@ -152,7 +152,7 @@ class HomeController extends GetxController{
         case 'message':
         // Refresh chat data if controller exists
           if (Get.isRegistered<ChatController>()) {
-            Get.find<ChatController>().loadChatUserList(refresh: true);
+            Get.find<ChatController>().loadChatAccountList(refresh: true);
           }
           break;
       }
@@ -176,10 +176,10 @@ class HomeController extends GetxController{
       if (message is String) {
         try {
           final data = json.decode(message);
-          print(data['channel']);
           if (data['channel'] == 'itemPrice') {
             final socketItem = SocketItemModel.fromJson(data);
-            Fluttertoast.showToast(
+            toastService.show('قیمت ${socketItem.name} تغییر کرد');
+            /*Fluttertoast.showToast(
               msg: ' قیمت ${socketItem.name} تغییر کرد',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -189,13 +189,18 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
               webPosition: "center"
-            );
+            );*/
             // Refresh product data
             _refreshDataForChannel('itemPrice');
           }else if(data['channel'] == 'order'){
             final socketOrder = SocketOrderModel.fromJson(data);
-            playNotificationSound();
-            Fluttertoast.showToast(
+            if(socketOrder.itemName=="طلای آبشده"){
+              playNotificationSound();
+            }else if(socketOrder.itemName=="تمام سکه بانکی"){
+              playNotificationSoundCoin();
+            }
+            toastService.show(' یک سفارش ${socketOrder.itemName} ثبت شد.');
+            /*Fluttertoast.showToast(
               msg: ' یک سفارش ${socketOrder.itemName} ثبت شد.',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -205,11 +210,12 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }else if(data['channel'] == 'deposit'){
             final socketDeposit = SocketDepositModel.fromJson(data);
             //playNotificationSound();
-            Fluttertoast.showToast(
+            toastService.show(' یک واریزی برای ${socketDeposit.accountName} ثبت شد.');
+            /*Fluttertoast.showToast(
               msg: ' یک واریزی برای ${socketDeposit.accountName} ثبت شد.',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -219,11 +225,12 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }else if(data['channel'] == 'withdrawRequest'){
             final socketWithdarw = SocketWithdrawModel.fromJson(data);
             //playNotificationSound();
-            Fluttertoast.showToast(
+            toastService.show(' یک درخواست برداشت برای ${socketWithdarw.accountName} ثبت شد.');
+            /*Fluttertoast.showToast(
               msg: ' یک درخواست برداشت برای ${socketWithdarw.accountName} ثبت شد.',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -233,11 +240,12 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }else if(data['channel'] == 'inventory'){
             final socketInventory = SocketInventoryModel.fromJson(data);
             //playNotificationSound();
-            Fluttertoast.showToast(
+            toastService.show(' یک دریافت/پرداخت برای ${socketInventory.accountName} ثبت شد.');
+            /*Fluttertoast.showToast(
               msg: ' یک دریافت/پرداخت برای ${socketInventory.accountName} ثبت شد.',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -247,11 +255,12 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }else if(data['channel'] == 'remittance'){
-            final socketRemittance = SocketRemittanceModel.fromJson(data);
+            //final socketRemittance = SocketRemittanceModel.fromJson(data);
             //playNotificationSound();
-            Fluttertoast.showToast(
+            toastService.show(' یک حواله ثبت شد.');
+            /*Fluttertoast.showToast(
               msg: ' یک حواله ثبت شد.',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -261,11 +270,12 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }else if(data['channel'] == 'remittanceRequest'){
             final socketRemittanceRequest = SocketRemittanceRequestModel.fromJson(data);
             //playNotificationSound();
-            Fluttertoast.showToast(
+            toastService.show(' یک درخواست حواله برای ${socketRemittanceRequest.accountName} ثبت شد.');
+            /*Fluttertoast.showToast(
               msg: ' یک درخواست حواله برای ${socketRemittanceRequest.accountName} ثبت شد.',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -275,13 +285,13 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }
           else if(data['channel'] == 'notification'){
             final socketNotification = NotificationModel.fromJson(data);
-            print("socketNotification:::::${socketNotification.title}");
             playNotificationSoundAll();
-            Fluttertoast.showToast(
+            toastService.show(' اعلان جدید ${socketNotification.title} ');
+            /*Fluttertoast.showToast(
               msg: ' اعلان جدید ${socketNotification.title} ',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -291,12 +301,11 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }else if(data['channel'] == 'message'){
             final socketChat = SocketChatModel.fromJson(data);
-            print("socketChat:::::${socketChat.userName}");
-
-            Fluttertoast.showToast(
+            toastService.show(' پیام جدید از ${socketChat.userName} ');
+            /*Fluttertoast.showToast(
               msg: ' پیام جدید از ${socketChat.userName} ',
               toastLength: Toast.LENGTH_SHORT,
               gravity: ToastGravity.TOP,
@@ -306,7 +315,7 @@ class HomeController extends GetxController{
               fontSize: 15,
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
-            );
+            );*/
           }
           else{
             print(data['channel']);
@@ -339,7 +348,6 @@ class HomeController extends GetxController{
       try{
         EasyLoading.show(status: 'لطفا منتظر بمانید');
         var fetch=await authRepository.changePassword(box.read("mobile"),passwordController.text,passwordOldController.text,box.read("id")as int);
-        print(fetch["infos"][0]["title"]);
         Get.back();
         Get.snackbar(fetch["infos"][0]["title"], fetch["infos"][0]["description"]);
       }

@@ -1,37 +1,17 @@
-import 'dart:ui' as ui;
+
 import 'package:flutter/rendering.dart';
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:excel/excel.dart';
-import 'package:file_saver/file_saver.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/repository/remittance.repository.dart';
-import 'package:hanigold_admin/src/config/repository/reason_rejection.repository.dart';
-import 'package:hanigold_admin/src/config/repository/remittance_request.repository.dart';
 import 'package:hanigold_admin/src/config/repository/transfer_wallet.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/remittance_request.model.dart';
 import 'package:hanigold_admin/src/domain/transferWallet/model/transfer_wallet.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
-import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../users/model/paginated.model.dart';
-import 'package:universal_html/html.dart' as html;
 
 enum PageState{loading,err,empty,list}
 
@@ -200,7 +180,6 @@ class TransferWalletController extends GetxController{
 
   // لیست حواله‌های انتقال ولت با صفحه بندی
   Future<void> getTransferWalletListPager() async {
-    print("### getTransferWalletListPager ###");
     transferWalletList.clear();
     try {
       state.value=PageState.loading;

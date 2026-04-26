@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 
 import '../../../config/const/app_color.dart';
-import '../../../config/const/app_text_style.dart';
 
 class SellStatusWidget extends StatefulWidget {
   final ItemModel item;

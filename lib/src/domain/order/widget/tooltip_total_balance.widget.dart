@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/model/tooltip_total_balance.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -20,7 +19,7 @@ class TooltipTotalBalanceWidget extends StatefulWidget {
 class _TooltipTotalBalanceWidgetState extends State<TooltipTotalBalanceWidget> {
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Container(
       width: widget.size,
       padding: EdgeInsets.symmetric(horizontal: 20,vertical: 15),
@@ -86,8 +85,8 @@ class _TooltipTotalBalanceWidgetState extends State<TooltipTotalBalanceWidget> {
                         ):
                         Text(
                           (balance.balance ?? 0.0) < 0 ?
-                          "-${balance.balance?.abs().toString().seRagham()??0.0}":
-                          "${balance.balance?.abs().toString().seRagham()??0.0}",
+                          "-${balance.balance?.abs().toDisplayString().seRagham()??0.0}":
+                          "${balance.balance?.abs().toDisplayString().seRagham()??0.0}",
                           style: AppTextStyle.labelText.copyWith(fontSize: 14,
                               fontWeight: FontWeight.bold,color:(balance.balance ?? 0.0) > 0?AppColor.primaryColor: (balance.balance ?? 0.0) < 0 ? AppColor.accentColor : AppColor.textColor ),textDirection: TextDirection.ltr,
                         ),

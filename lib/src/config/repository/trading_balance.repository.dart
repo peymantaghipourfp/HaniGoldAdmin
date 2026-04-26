@@ -3,8 +3,11 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import '../../domain/balance/model/balance_trading.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import 'dart:typed_data';
+
+import '../network/error_handler.dart';
 
 class TradingBalanceRepository{
 
@@ -18,11 +21,8 @@ class TradingBalanceRepository{
     try{
 
       final response=await tradingBalanceDio.get('Order/balanceResultBetweenDay',queryParameters: {'itemId': itemId,'startDate':startDate,'endDate':endDate});
-      print("Request parameters: itemId=$itemId, startDate=$startDate, endDate=$endDate");
-      print("response getTradingBalanceList : ${response.data}" );
 
       if (response.data == null) {
-        print("API returned null data - no trading data available for the specified parameters");
         return <BalanceTradingModel>[];
       }
 
@@ -30,9 +30,9 @@ class TradingBalanceRepository{
       return data.map((transaction)=>BalanceTradingModel.fromJson(transaction)).toList();
 
     }
-    catch(e){
-      print("Error in getTradingBalanceList: $e");
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTradingBalanceList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -43,15 +43,13 @@ class TradingBalanceRepository{
           queryParameters: {'itemId': itemId,'startDate':startDate,'endDate':endDate},
           options: Options(responseType: ResponseType.bytes)
       );
-      print("Request getTradingBalanceExcel parameters: itemId=$itemId, startDate=$startDate, endDate=$endDate");
-      print("response getTradingBalanceExcel : ${response.data}" );
 
       return Uint8List.fromList(response.data);
 
     }
-    catch(e){
-      print("Error in getTradingBalanceExcel: $e");
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTradingBalanceExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

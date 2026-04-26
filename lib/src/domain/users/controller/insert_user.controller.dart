@@ -1,30 +1,25 @@
 
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_level.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_list.controller.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'package:uuid/uuid.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/repository/account_sales_group.repository.dart';
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 import '../../../config/repository/user.repository.dart';
-import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
 import '../../accountSalesGroup/model/account_sales_group.model.dart';
-import '../model/balance_item.model.dart';
 import '../model/city_item.model.dart';
-import '../model/header_info_user_transaction.model.dart';
-import '../model/list_transaction_info_item.model.dart';
-import '../model/paginated.model.dart';
-import '../model/transaction_info_item.model.dart';
 
 
 enum PageState{loading,err,empty,list}
@@ -41,7 +36,21 @@ class InsertUserController extends GetxController{
   UserRepository userRepository=UserRepository();
   AccountSalesGroupRepository accountSalesGroupRepository=AccountSalesGroupRepository();
   AccountRepository accountRepository=AccountRepository();
+  UploadRepositoryDesktop uploadRepositoryDesktop=UploadRepositoryDesktop();
+  RemittanceRepository remittanceRepository=RemittanceRepository();
   ScrollController scrollController = ScrollController();
+  // Image upload related fields
+  final ImagePicker _pickerNationalCode = ImagePicker();
+  final ImagePicker _pickerBusinessLicense = ImagePicker();
+  RxList<XFile?> selectedImagesNationalCodeDesktop = RxList<XFile?>();
+  RxList<XFile?> selectedImagesBusinessLicenseDesktop = RxList<XFile?>();
+  RxBool isUploadingNationalCodeDesktop = false.obs;
+  RxBool isUploadingBusinessLicenseDesktop = false.obs;
+  RxList<bool> uploadStatusesNationalCodeDesktop = RxList<bool>();
+  RxList<bool> uploadStatusesBusinessLicenseDesktop = RxList<bool>();
+  var recordId="".obs;
+  var uuid = Uuid();
+
   final TextEditingController nameController=TextEditingController();
   final TextEditingController nationalCodeController=TextEditingController();
   final TextEditingController userController=TextEditingController();
@@ -112,7 +121,6 @@ class InsertUserController extends GetxController{
 
   // لیست استان ها
   Future<void> getStateList() async {
-    print("getStateList : 1");
     stateList.clear();
     try {
        state.value=PageState.loading;
@@ -133,7 +141,6 @@ class InsertUserController extends GetxController{
   }
 // لیست شهر ها
   Future<void> getCityList() async {
-    print("getCityList : 1");
     cityList.clear();
     try {
        state.value=PageState.loading;
@@ -233,9 +240,7 @@ class InsertUserController extends GetxController{
   }
 
 
-  Future<void> insertUser(
-      ) async {
-    print("insertUser : 1");
+  Future<void> insertUser(String recId) async {
     EasyLoading.show(
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
@@ -258,9 +263,10 @@ class InsertUserController extends GetxController{
            idState: selectedState.value?.id??0,
            city: selectedCity.value?.name??"",
            idCity: selectedCity.value?.id??0,
-           address: addressController.text
+           address: addressController.text,
+         recId:recId,
           );
-       Get.back();
+       Get.toNamed('/userList');
        Get.snackbar(response.infos?.first["title"],response.infos?.first["description"],
            titleText: Text(response.infos?.first["title"],
              textAlign: TextAlign.center,
@@ -286,9 +292,7 @@ class InsertUserController extends GetxController{
     }
   }
 
-  Future<void> updateUser(
-      ) async {
-    print("insertUser : 1");
+  Future<void> updateUser(String recId) async {
     EasyLoading.show(
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
@@ -320,6 +324,7 @@ class InsertUserController extends GetxController{
          contactInfoId0: contactInfoId0.value,
          contactInfoId1: contactInfoId1.value,
          contactInfoId2: contactInfoId2.value,
+         recId:"",
          //addressId: addressId.value,
           );
        Get.back();
@@ -366,17 +371,14 @@ class InsertUserController extends GetxController{
           mobileController.text=accountModel?.contactInfos?[i].value??"";
           contactId.value=accountModel?.contactInfos?[i].contact?.id ?? 0;
           contactInfoId0.value=accountModel?.contactInfos?[i].id ?? 0;
-          print("contactInfoId::type0:::${contactInfoId0.value=accountModel?.contactInfos?[i].id ?? 0}");
         }else  if(accountModel!.contactInfos![i].type==1){
           phoneController.text=accountModel?.contactInfos?[i].value??"";
           contactId.value=accountModel?.contactInfos?[i].contact?.id ?? 0;
           contactInfoId1.value=accountModel?.contactInfos?[i].id ?? 0;
-          print("contactInfoId::type1:::${contactInfoId1.value=accountModel?.contactInfos?[i].id ?? 0}");
         }else  if(accountModel!.contactInfos![i].type==2){
           emailController.text=accountModel?.contactInfos?[i].value??"";
           contactId.value=accountModel?.contactInfos?[i].contact?.id ?? 0;
           contactInfoId2.value=accountModel?.contactInfos?[i].id ?? 0;
-          print("contactInfoId::type2:::${contactInfoId2.value=accountModel?.contactInfos?[i].id ?? 0}");
         }
       }
       userController.text="";
@@ -391,7 +393,6 @@ class InsertUserController extends GetxController{
       code.value=accountModel?.code ?? "";
       accountId.value=idUser.value;
       //addressId.value=accountModel?.addresses?.first.id ?? 0;
-      //  print(paginated?.totalCount??0);
 
       update();
     }
@@ -414,6 +415,174 @@ class InsertUserController extends GetxController{
     selectedAccountLevel.value=null;
     selectedCity.value=null;
     selectedState.value=null;
+    // Clear image-related state
+    selectedImagesNationalCodeDesktop.clear();
+    selectedImagesBusinessLicenseDesktop.clear();
+    uploadStatusesNationalCodeDesktop.clear();
+    uploadStatusesBusinessLicenseDesktop.clear();
+    isUploadingNationalCodeDesktop.value = false;
+    isUploadingBusinessLicenseDesktop.value = false;
+  }
+
+  // Image handling methods
+  Future<void> pickImageNationalCodeDesktop() async {
+    try {
+      final List<XFile?> images = await _pickerNationalCode.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesNationalCodeDesktop.addAll(images);
+      }
+    } catch (e) {
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> pickImageBusinessLicenseDesktop() async {
+    try {
+      final List<XFile?> images = await _pickerBusinessLicense.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesBusinessLicenseDesktop.addAll(images);
+      }
+    } catch (e) {
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> handleDroppedFilesNationalCode(List<XFile> files) async {
+    try {
+      final imageFiles = files.where((file) {
+        final fileName = file.name.toLowerCase();
+        final extension = fileName.contains('.') ? fileName.split('.').last : '';
+        final mimeType = file.mimeType?.toLowerCase() ?? '';
+        final isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+        final isImageByMimeType = mimeType.startsWith('image/');
+        return isImageByExtension || isImageByMimeType;
+      }).toList();
+
+      if (imageFiles.isNotEmpty) {
+        selectedImagesNationalCodeDesktop.addAll(imageFiles);
+        Get.snackbar("موفقیت", "${imageFiles.length} تصویر اضافه شد");
+      } else {
+        Get.snackbar("خطا", "فقط فایل‌های تصویری قابل قبول هستند");
+      }
+    } catch (e) {
+      Get.snackbar("خطا", "خطا در پردازش فایل‌های رها شده");
+    }
+  }
+
+  Future<void> handleDroppedFilesBusinessLicense(List<XFile> files) async {
+    try {
+      final imageFiles = files.where((file) {
+        final fileName = file.name.toLowerCase();
+        final extension = fileName.contains('.') ? fileName.split('.').last : '';
+        final mimeType = file.mimeType?.toLowerCase() ?? '';
+        final isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+        final isImageByMimeType = mimeType.startsWith('image/');
+        return isImageByExtension || isImageByMimeType;
+      }).toList();
+
+      if (imageFiles.isNotEmpty) {
+        selectedImagesBusinessLicenseDesktop.addAll(imageFiles);
+        Get.snackbar("موفقیت", "${imageFiles.length} تصویر اضافه شد");
+      } else {
+        Get.snackbar("خطا", "فقط فایل‌های تصویری قابل قبول هستند");
+      }
+    } catch (e) {
+      Get.snackbar("خطا", "خطا در پردازش فایل‌های رها شده");
+    }
+  }
+
+  Future<void> uploadAllImagesAndInsertUser() async {
+    recordId.value = uuid.v4();
+
+    final hasNationalCodeImages = selectedImagesNationalCodeDesktop.isNotEmpty;
+    final hasBusinessLicenseImages = selectedImagesBusinessLicenseDesktop.isNotEmpty;
+    final hasAnyImages = hasNationalCodeImages || hasBusinessLicenseImages;
+
+    if (!hasAnyImages) {
+      await insertUser(recordId.value);
+      return;
+    }
+
+    isUploadingNationalCodeDesktop.value = true;
+    isUploadingBusinessLicenseDesktop.value = true;
+
+    uploadStatusesNationalCodeDesktop.assignAll(
+        List.filled(selectedImagesNationalCodeDesktop.length, false)
+    );
+    uploadStatusesBusinessLicenseDesktop.assignAll(
+        List.filled(selectedImagesBusinessLicenseDesktop.length, false)
+    );
+
+    bool allUploadsSuccessful = true;
+
+    try {
+      if (hasNationalCodeImages) {
+        for (int i = 0; i < selectedImagesNationalCodeDesktop.length; i++) {
+          final file = selectedImagesNationalCodeDesktop[i];
+          if (file != null) {
+            try {
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: "image",
+                entityType: "NationalCode",
+              );
+              uploadStatusesNationalCodeDesktop[i] = success.isNotEmpty;
+            } catch (e) {
+              uploadStatusesNationalCodeDesktop[i] = false;
+              allUploadsSuccessful = false;
+              Get.snackbar("خطا", "خطا در آپلود تصویر کارت ملی ${i + 1}");
+            }
+          }
+        }
+      }
+
+      if (hasBusinessLicenseImages) {
+        for (int i = 0; i < selectedImagesBusinessLicenseDesktop.length; i++) {
+          final file = selectedImagesBusinessLicenseDesktop[i];
+          if (file != null) {
+            try {
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recordId.value,
+                type: "image",
+                entityType: "BusinessLicense",
+              );
+              uploadStatusesBusinessLicenseDesktop[i] = success.isNotEmpty;
+            } catch (e) {
+              uploadStatusesBusinessLicenseDesktop[i] = false;
+              allUploadsSuccessful = false;
+              Get.snackbar("خطا", "خطا در آپلود تصویر جواز کسب ${i + 1}");
+            }
+          }
+        }
+      }
+
+      final nationalCodeSuccess = !hasNationalCodeImages ||
+          uploadStatusesNationalCodeDesktop.every((status) => status);
+      final businessLicenseSuccess = !hasBusinessLicenseImages ||
+          uploadStatusesBusinessLicenseDesktop.every((status) => status);
+
+      if (nationalCodeSuccess && businessLicenseSuccess) {
+        Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+        await insertUser(recordId.value);
+        Get.back();
+      } else {
+        Get.snackbar("خطا", "برخی از آپلودها با شکست مواجه شدند");
+      }
+
+    } finally {
+      isUploadingNationalCodeDesktop.value = false;
+      isUploadingBusinessLicenseDesktop.value = false;
+      selectedImagesNationalCodeDesktop.clear();
+      selectedImagesBusinessLicenseDesktop.clear();
+      uploadStatusesNationalCodeDesktop.clear();
+      uploadStatusesBusinessLicenseDesktop.clear();
+    }
   }
 
 }

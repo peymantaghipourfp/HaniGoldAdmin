@@ -15,12 +15,12 @@ enum ChartPageState { loading, error, empty, loaded }
 
 /// Timeframe options for candlestick chart
 enum ChartTimeFrame {
-  fiveMinutes(5, '۵ دقیقه'),
-  fifteenMinutes(15, '۱۵ دقیقه'),
-  thirtyMinutes(30, '۳۰ دقیقه'),
-  oneHour(60, '1 ساعت'),
-  fourHours(240, '4 ساعت'),
-  oneDay(720, '1 روز');
+  fiveMinutes(5, '۵m'),
+  fifteenMinutes(15, '۱۵m'),
+  thirtyMinutes(30, '۳۰m'),
+  oneHour(60, '1h'),
+  fourHours(240, '4h'),
+  oneDay(720, '1d');
 
   final int value;
   final String label;
@@ -99,7 +99,6 @@ class CandlePriceChartController extends BaseController {
   void _setupSocketReconnectionHandler() {
     ever(isSocketConnected, (bool connected) {
       if (connected) {
-        print('CandlePriceChartController: Socket reconnected, re-subscribing...');
         _listenToSocket();
       }
     });
@@ -119,14 +118,12 @@ class CandlePriceChartController extends BaseController {
 
         if (data != null && data['channel'] == 'itemPrice') {
           final socketItem = SocketItemModel.fromJson(data);
-          print('CandlePriceChartController: Price update received - ID: ${socketItem.id}, Name: ${socketItem.name}');
 
           // Update the specific item in itemsList without full refresh
           _updateItemPrice(socketItem);
 
           // If the updated item is the currently selected item, silently refresh chart data
           if (selectedItem.value?.id == socketItem.id) {
-            print('CandlePriceChartController: Selected item price changed, refreshing chart data silently...');
             _refreshCandleDataSilently();
           }
         }
@@ -156,7 +153,6 @@ class CandlePriceChartController extends BaseController {
       // Trigger reactive update
       itemsList.refresh();
 
-      print('CandlePriceChartController: Item ${socketItem.name} price updated in list');
     }
   }
 
@@ -182,7 +178,6 @@ class CandlePriceChartController extends BaseController {
 
       if (data.isNotEmpty) {
         candleData.assignAll(data);
-        print('CandlePriceChartController: Chart data refreshed silently with ${data.length} candles');
       }
     } catch (e) {
       print('Error in silent candle data refresh: $e');
@@ -280,7 +275,6 @@ class CandlePriceChartController extends BaseController {
       final startTime = startTimeController.text;
       final endTime = endTimeController.text;
 
-      print("Loading candle data: itemId=$itemId, timeFrame=$timeFrame, date=$date, startTime=$startTime, endTime=$endTime");
 
       final data = await _analyticalReportsRepository.getCandlePriceChartList(
         itemId,

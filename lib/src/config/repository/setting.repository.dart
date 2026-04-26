@@ -4,8 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 
 import '../../domain/tools/model/setting.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class SettingRepository{
   Dio settingDio=Dio();
@@ -19,12 +21,11 @@ class SettingRepository{
     try {
       final response = await settingDio.get(
           'Setting/getOne', queryParameters: {'id': settingId});
-      print('Status Code getOneSetting: ${response.statusCode}');
-      print('Response Data getOneSetting: ${response.data}');
       Map<String, dynamic> data=response.data;
       return SettingModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOneSetting failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -50,14 +51,12 @@ class SettingRepository{
         "infos": []
       };
       var response=await settingDio.put('Setting/update',data: settingData );
-      print('Status Code updateSetting: ${response.statusCode}');
-      print('settingData updateSetting: $settingData');
-      print('Response Data updateSetting: ${response.data}');
 
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('updateSetting failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 }

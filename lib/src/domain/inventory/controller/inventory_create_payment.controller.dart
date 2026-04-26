@@ -19,7 +19,6 @@ import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
-import '../../../config/const/app_text_style.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
@@ -39,7 +38,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 import 'dart:typed_data';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:flutter_svg/svg.dart';
 
 import 'inventory_create_layout.controller.dart';
 
@@ -97,7 +95,7 @@ class InventoryCreatePaymentController extends GetxController{
   RxBool isEditing = false.obs;
   final RxSet<int> selectedForPaymentId = RxSet<int>();
   RxInt selectedLaboratoryId = RxInt(0);
-  final ImagePicker _picker = ImagePicker();
+  //final ImagePicker _picker = ImagePicker();
   RxList<XFile?> selectedImagesDesktop = RxList<XFile?>();
   RxList<bool> uploadStatusesDesktop = RxList<bool>();
   RxBool isUploadingDesktop = false.obs;
@@ -195,8 +193,6 @@ class InventoryCreatePaymentController extends GetxController{
     getForPaymentListPager();
 
     viewCountItem();
-    print(selectedWalletAccount.value?.item?.id);
-    print(selectedWalletAccount.value?.item?.name);
   }
 
 
@@ -230,7 +226,6 @@ class InventoryCreatePaymentController extends GetxController{
         final carat = oldDetail.carat ?? 0;
         if (newQuantity > 0 && carat > 0) {
           calculatedWeight.value = (newQuantity * carat) / 750;
-          print('طلای آبشده22222 - Calculated weight: ($newQuantity * $carat) / 750 = $calculatedWeight');
         }
       }
 
@@ -241,7 +236,7 @@ class InventoryCreatePaymentController extends GetxController{
       tempDetails[index] = newDetail;
     }
   }
-  void updateDetail(int index, String recId,List<XFile> listXfile) {
+  /*void updateDetail(int index, String recId,List<XFile> listXfile) {
     if (index >= 0 && index < tempDetails.length) {
       final oldDetail = tempDetails[index];
       List<XFile> list = tempDetails[index].listXfile!=null?tempDetails[index].listXfile!:[];
@@ -250,10 +245,31 @@ class InventoryCreatePaymentController extends GetxController{
       }
       final newDetail = oldDetail.copyWith(recId: recId,listXfile: list);
       tempDetails[index] = newDetail;
-      print("reccccccc::${recId}");
-      print("reccccciddd::${tempDetails[index].recId}");
       update();
     }
+  }*/
+  void updateDetail(int index, String recId, List<XFile> listXfile) {
+    if (index < 0 || index >= tempDetails.length) return;
+
+    final oldDetail = tempDetails[index];
+
+    // لیست قبلی (اگر null بود → خالی)
+    final existing = oldDetail.listXfile ?? [];
+    //  جلوگیری از عکس تکراری + immutable
+    final updatedList = [
+      ...existing,
+      ...listXfile.where(
+            (f) => !existing.any((e) => e.path == f.path),
+      ),
+    ];
+    final newDetail = oldDetail.copyWith(
+      recId: recId,
+      listXfile: updatedList,
+    );
+
+    tempDetails[index] = newDetail;
+
+    update();
   }
 
 
@@ -293,15 +309,12 @@ class InventoryCreatePaymentController extends GetxController{
 
   // لیست عکس ها
   Future<List<String>> getImage(String fileName,String type) async{
-    print('تعداد image:');
     //imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       /*imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();*/
-      print('تعداد image:${fetch.guidIds.length}');
       return fetch.guidIds;
     }
     catch(e){
@@ -314,7 +327,6 @@ class InventoryCreatePaymentController extends GetxController{
 
   /*Future<void> deleteImage(String fileName,) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
-    print('تعداد image:');
     try{
       var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
       if(fetch){
@@ -487,7 +499,6 @@ class InventoryCreatePaymentController extends GetxController{
 
   // لیست دریافتی ها با صفحه بندی
   Future<void> getForPaymentListPager() async {
-    print("### getForPaymentListPager ###");
     //isLoading.value=true;
     try {
       //state.value=PageState.loading;
@@ -564,13 +575,10 @@ class InventoryCreatePaymentController extends GetxController{
           quantityController.text.isEmpty) {
         throw ErrorException('لطفا فیلدهای ضروری را پر کنید');
       }
-      print(calculatedWeight.value);
       if(selectedWalletAccount.value!.item?.id==1){
         calculatedWeight.value=(double.tryParse(quantityController.text.toEnglishDigit())! * double.parse(caratController.text.toEnglishDigit())) / 750;
       }
 
-      print("weight750Controller.text::::${weight750Controller.text}");
-      print("caratController.text::::${caratController.text}");
 
       final newDetail = InventoryDetailModel(
         wallet: selectedWalletAccount.value!,
@@ -621,7 +629,6 @@ class InventoryCreatePaymentController extends GetxController{
 
   // تایمر
   void startTimer() {
-    print("Starting timer");
     isTimerActive.value = true;
     countdownSeconds.value = 180;
     _timer?.cancel();
@@ -636,21 +643,18 @@ class InventoryCreatePaymentController extends GetxController{
   }
 
   void stopTimer() {
-    print("Stopping timer");
     _timer?.cancel();
     isTimerActive.value = false;
     countdownSeconds.value = 180;
   }
 
   void resetTimer() {
-    print("Resetting timer");
     stopTimer();
     isTimerActive.value = false;
     countdownSeconds.value = 180;
   }
 
   void resendVerificationCode() {
-    print("Resending verification code");
     if (selectedAccount.value?.id != null && selectedAccount.value!.id! > 0) {
       // Reset verification state
       isVerification.value = false;
@@ -701,7 +705,6 @@ class InventoryCreatePaymentController extends GetxController{
       isCodeVerified.value=false;
       var response=await inventoryRepository.sendVerificationCode(accountId);
       isVerification.value=true;
-      print("sendVerificationCode");
       if (response == true) {
         startTimer();
         Get.snackbar(
@@ -751,7 +754,6 @@ class InventoryCreatePaymentController extends GetxController{
       //isVerification.value=true;
       var response=await inventoryRepository.checkVerificationCode(accountId,code);
       //isVerification.value=false;
-      print("checkVerificationCode");
       if (response == true) {
         isCodeVerified.value = true;
         isVerification.value = false;
@@ -808,7 +810,6 @@ class InventoryCreatePaymentController extends GetxController{
       isLoading.value=true;
       isFinalizing.value=true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
-      print('verificationChecked.value:::${verificationChecked.value}');
       var response=await inventoryRepository.insertInventoryPayment(
         date: gregorianDate,
         accountId: selectedAccount.value?.id ?? 0,
@@ -819,7 +820,6 @@ class InventoryCreatePaymentController extends GetxController{
         confirmByAdmin: verificationChecked.value,
         recipient: recipientNameController.text,
       );
-      print(response);
       if (response != null) {
         //Get.back();
         tempDetails.clear();
@@ -1025,7 +1025,7 @@ class InventoryCreatePaymentController extends GetxController{
         /*detail.item?.id==10 ||detail.item?.id==13 ||detail.item?.id==15 ||detail.item?.id==16 ?
         " عدد ${itemCountTemp.value.toString()}" ?? '' */
             : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
-        buildDataCell(" (پرداخت) ${detail.item?.name}" ?? ''),
+        buildDataCell(" (پرداخت) ${detail.item?.name}"),
         buildDataCell(detail.rowNum.toString(), isCenter: true),
       ],
     );
@@ -1221,7 +1221,7 @@ class InventoryCreatePaymentController extends GetxController{
                 ],
               ),
               ...balanceList.map((e){
-                final detail = details.firstWhere(
+                details.firstWhere(
                       (d) => d.item?.id == e.item?.id,
                 );
                 return pw.TableRow(
@@ -1249,7 +1249,6 @@ class InventoryCreatePaymentController extends GetxController{
 
   // لیست بالانس
   /*Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
-import 'package:intl/intl.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/notification.controller.dart';
 
 class InsertNotificationView extends StatefulWidget {
@@ -83,9 +82,9 @@ class _InsertNotificationViewState extends State<InsertNotificationView> {
         : 1;
   }
 
-  String _getPageTitle() {
+  /*String _getPageTitle() {
     return _safeNotificationType == 1 ? 'افزودن اطلاعیه' : 'افزودن هدر';
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -352,7 +351,7 @@ class _InsertNotificationViewState extends State<InsertNotificationView> {
                             const SizedBox(width: 8),
                             Text(
                               'انصراف',
-                              style: AppTextStyle.madiumbodyText,
+                              style: AppTextStyle.mediumBodyText,
                             ),
                           ],
                         ),
@@ -401,7 +400,7 @@ class _InsertNotificationViewState extends State<InsertNotificationView> {
         readOnly: readOnly,
         onTap: onTap,
         maxLines: maxLines,
-        style: AppTextStyle.madiumbodyText,
+        style: AppTextStyle.mediumBodyText,
         decoration: InputDecoration(
           labelText: label,
           hintText: hint,

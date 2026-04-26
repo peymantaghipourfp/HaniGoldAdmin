@@ -1,6 +1,5 @@
 
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_info_gold_transaction.controller.dart';
@@ -64,15 +63,14 @@ class _FilterDialogGoldState extends State<FilterDialogGold> {
     try {
       // Ensure accounts are loaded before mapping IDs to names
       await widget.controller.fetchAccountList();
-      print('Account list loaded successfully');
       // Load saved report settings
       await widget.controller.fetchGetOneReportSetting(_reportSettingName);
 
       final setting = widget.controller.getOneReportSetting.value;
       if (setting != null) {
         // Determine current mode based on saved settings
-        final hasIncludes = (setting.includes ?? []).isNotEmpty;
-        final hasExcludes = (setting.excludes ?? []).isNotEmpty;
+        //final hasIncludes = (setting.includes ?? []).isNotEmpty;
+        //final hasExcludes = (setting.excludes ?? []).isNotEmpty;
 
         _selectedMode = 'all';
 
@@ -195,7 +193,6 @@ class _FilterDialogGoldState extends State<FilterDialogGold> {
             infos: currentSetting?.infos ?? [],
           ),
         );
-        print('✓ Include mode: Updated includes, preserved ${previousExcludes.length} excludes');
         Get.back();
       } else if (_selectedMode == 'exclude') {
         // Set filterType 33 for exclude mode
@@ -229,7 +226,6 @@ class _FilterDialogGoldState extends State<FilterDialogGold> {
           ),
         );
         Get.back();
-        print('✓ Exclude mode: Updated excludes, preserved ${previousIncludes.length} includes');
       } else if (_selectedMode == 'custom') {
         // Clear filters for custom mode (can be extended later)
         widget.controller.filteredAccountIds = _selectedAccounts.toList();
@@ -320,12 +316,10 @@ class _FilterDialogGoldState extends State<FilterDialogGold> {
                         for (final item in (setting.includes ?? const [])) {
                           if (item.id != null) _selectedAccounts.add(item.id!);
                         }
-                        print('✓ Loaded ${_selectedAccounts.length} include accounts');
                       } else if (value == 'exclude') {
                         for (final item in (setting.excludes ?? const [])) {
                           if (item.id != null) _selectedAccounts.add(item.id!);
                         }
-                        print('✓ Loaded ${_selectedAccounts.length} exclude accounts');
                       }
                     });
                   }

@@ -2,8 +2,6 @@
 //
 //     final listTransactionInfoItemModel = listTransactionInfoItemModelFromJson(jsonString);
 
-import 'package:hanigold_admin/src/domain/users/model/balance_item.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 

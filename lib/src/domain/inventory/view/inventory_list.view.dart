@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -14,19 +15,15 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
-import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../product/model/item.model.dart';
 import '../../transaction/widgets/balance_dialog.widget.dart';
-import '../../users/model/balance_item.model.dart';
-import '../service/invoice_generation.service.dart';
 
 class InventoryListView extends StatefulWidget {
   InventoryListView({super.key});
@@ -231,7 +228,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                       borderRadius: BorderRadius.circular(8),
                                                       color: AppColor.backGroundColor
                                                   ),
-                                                  width:isDesktop?  Get.width * 0.4:Get.width * 0.6,
+                                                  width:isDesktop?  Get.width * 0.4:Get.width * 0.7,
                                                   height:isDesktop?  Get.height * 0.75:Get.height * 0.75,
                                                   padding: EdgeInsets.all(20),
                                                   child: SingleChildScrollView(
@@ -482,7 +479,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                           'دریافت',
                                                                           'پرداخت',
                                                                         ],
-                                                                        selectedValue: inventoryController.typeFilter.value ?? '',
+                                                                        selectedValue: inventoryController.typeFilter.value,
                                                                         onChanged: (String? newValue) {
                                                                           inventoryController.changeSelectedType(newValue!);
                                                                         },
@@ -618,7 +615,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                           child: ElevatedButton(
                                                             style: ButtonStyle(
                                                                 padding: WidgetStatePropertyAll(
-                                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                    EdgeInsets.symmetric(horizontal: 23)),
                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                 backgroundColor:
                                                                 WidgetStatePropertyAll(AppColor.appBarColor),
@@ -904,7 +901,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1122,7 +1119,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1160,7 +1157,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                               ElevatedButton(
                                 style: ButtonStyle(
                                     padding: WidgetStatePropertyAll(
-                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                        EdgeInsets.symmetric(horizontal: 23)),
                                     // elevation: WidgetStatePropertyAll(5),
                                     backgroundColor:
                                     WidgetStatePropertyAll(AppColor.appBarColor.withAlpha(130)),
@@ -1431,7 +1428,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                       'دریافت',
                                                                       'پرداخت',
                                                                     ],
-                                                                    selectedValue: inventoryController.typeFilter.value ?? '',
+                                                                    selectedValue: inventoryController.typeFilter.value,
                                                                     onChanged: (String? newValue) {
                                                                       inventoryController.changeSelectedType(newValue!);
                                                                     },
@@ -1567,7 +1564,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                       child: ElevatedButton(
                                                         style: ButtonStyle(
                                                             padding: WidgetStatePropertyAll(
-                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                             // elevation: WidgetStatePropertyAll(5),
                                                             backgroundColor:
                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1917,7 +1914,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                   child: ElevatedButton(
                                                                                     style: ButtonStyle(
                                                                                         padding: WidgetStatePropertyAll(
-                                                                                            EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                            EdgeInsets.symmetric(horizontal: 23)),
                                                                                         // elevation: WidgetStatePropertyAll(5),
                                                                                         backgroundColor:
                                                                                         WidgetStatePropertyAll(AppColor.appBarColor),
@@ -2127,7 +2124,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                   child: ElevatedButton(
                                                                                     style: ButtonStyle(
                                                                                         padding: WidgetStatePropertyAll(
-                                                                                            EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                            EdgeInsets.symmetric(horizontal: 23)),
                                                                                         // elevation: WidgetStatePropertyAll(5),
                                                                                         backgroundColor:
                                                                                         WidgetStatePropertyAll(AppColor.appBarColor),
@@ -2432,7 +2429,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                                     'دریافت',
                                                                                                     'پرداخت',
                                                                                                   ],
-                                                                                                  selectedValue: inventoryController.typeFilter.value ?? '',
+                                                                                                  selectedValue: inventoryController.typeFilter.value,
                                                                                                   onChanged: (String? newValue) {
                                                                                                     inventoryController.changeSelectedType(newValue!);
                                                                                                   },
@@ -2568,7 +2565,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                     child: ElevatedButton(
                                                                                       style: ButtonStyle(
                                                                                           padding: WidgetStatePropertyAll(
-                                                                                              EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                              EdgeInsets.symmetric(horizontal: 23)),
                                                                                           // elevation: WidgetStatePropertyAll(5),
                                                                                           backgroundColor:
                                                                                           WidgetStatePropertyAll(AppColor.appBarColor),
@@ -2681,7 +2678,6 @@ class _InventoryListViewState extends State<InventoryListView> {
                                   .length +
                                   (inventoryController.hasMore.value ? 1 : 0),
                               itemBuilder: (context, index) {
-                                print(inventoryController.inventoryList.length);
                                 if (index >=
                                     inventoryController.inventoryList.length) {
                                   return inventoryController.hasMore.value
@@ -2788,7 +2784,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                     .bodyText.copyWith(fontSize: 11)
                                                             ),
                                                             Text(
-                                                                '${inventories.totalQuantity.toString().seRagham() ?? 0} ${inventories.item?.itemUnit?.name ?? ""}',
+                                                                '${inventories.totalQuantity?.toDisplayString().seRagham() ?? 0} ${inventories.item?.itemUnit?.name ?? ""}',
                                                                 style: AppTextStyle
                                                                     .bodyText.copyWith(fontSize: 12,fontWeight: FontWeight.bold,color: inventories.type == 0 ?AppColor.primaryColor :AppColor.accentColor)
                                                             ),
@@ -2859,7 +2855,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                     .bodyText.copyWith(fontSize: 11)
                                                             ),
                                                             Text(
-                                                                '${inventories.totalQuantity.toString().seRagham() ?? 0} ${inventories.item?.itemUnit?.name ?? ""}',
+                                                                '${inventories.totalQuantity?.toDisplayString().seRagham() ?? 0} ${inventories.item?.itemUnit?.name ?? ""}',
                                                                 style: AppTextStyle
                                                                     .bodyText.copyWith(fontSize: 11,color: inventories.type == 0 ?AppColor.primaryColor :AppColor.accentColor)
                                                             ),
@@ -3133,7 +3129,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                 Expanded(
                                                                                   child: Text(
                                                                                     getInventoryDetails
-                                                                                        ?.item
+                                                                                        .item
                                                                                         ?.name ??
                                                                                         "",
                                                                                     style: AppTextStyle
@@ -3149,7 +3145,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .bodyText.copyWith(fontSize: 11)
                                                                                     ),
                                                                                     Text(
-                                                                                        '${getInventoryDetails.weight.toString().seRagham() ?? 0} ${getInventoryDetails.item?.itemUnit?.name ?? ""}',
+                                                                                        '${getInventoryDetails.weight.toString().seRagham()} ${getInventoryDetails.item?.itemUnit?.name ?? ""}',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)
                                                                                     ),
@@ -3167,7 +3163,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                         .bodyText
                                                                                 ),
                                                                                 Text(
-                                                                                    '${getInventoryDetails.id.toString() ?? 0}',
+                                                                                    '${getInventoryDetails.id.toString()}',
                                                                                     style: AppTextStyle
                                                                                         .bodyText
                                                                                 ),
@@ -3187,7 +3183,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                 Expanded(
                                                                                   child: Text(
                                                                                     getInventoryDetails
-                                                                                        ?.item
+                                                                                        .item
                                                                                         ?.name ??
                                                                                         "",
                                                                                     style: AppTextStyle
@@ -3203,7 +3199,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .bodyText.copyWith(fontSize: 11)
                                                                                     ),
                                                                                     Text(
-                                                                                        '${getInventoryDetails.weight.toString().seRagham() ?? 0} ${getInventoryDetails.item?.itemUnit?.name ?? ""}',
+                                                                                        '${getInventoryDetails.weight.toString().seRagham()} ${getInventoryDetails.item?.itemUnit?.name ?? ""}',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)
                                                                                     ),
@@ -3221,7 +3217,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                         .bodyText
                                                                                 ),
                                                                                 Text(
-                                                                                    '${getInventoryDetails.id.toString() ?? 0}',
+                                                                                    '${getInventoryDetails.id.toString()}',
                                                                                     style: AppTextStyle
                                                                                         .bodyText
                                                                                 ),
@@ -3246,7 +3242,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.carat ??
+                                                                                            .carat ??
                                                                                             0}',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3261,7 +3257,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.weight750 ??
+                                                                                            .weight750?.toDisplayString() ??
                                                                                             0} گرم ',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3276,7 +3272,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.impurity ??
+                                                                                            .impurity?.toDisplayString() ??
                                                                                             0} گرم ',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3341,7 +3337,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.carat ??
+                                                                                            .carat ??
                                                                                             0}',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3356,7 +3352,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.weight750 ??
+                                                                                            .weight750?.toDisplayString() ??
                                                                                             0} گرم ',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3371,7 +3367,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.impurity ??
+                                                                                            .impurity?.toDisplayString() ??
                                                                                             0} گرم ',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3436,7 +3432,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                                     .labelText.copyWith(fontSize: 11)),
                                                                                             Text(
                                                                                                 '${getInventoryDetails
-                                                                                                    ?.carat ??
+                                                                                                    .carat ??
                                                                                                     0}',
                                                                                                 style: AppTextStyle
                                                                                                     .bodyText.copyWith(fontSize: 11)),
@@ -3451,7 +3447,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                                     .labelText.copyWith(fontSize: 11)),
                                                                                             Text(
                                                                                                 '${getInventoryDetails
-                                                                                                    ?.weight750 ??
+                                                                                                    .weight750?.toDisplayString() ??
                                                                                                     0} گرم ',
                                                                                                 style: AppTextStyle
                                                                                                     .bodyText.copyWith(fontSize: 11)),
@@ -3466,7 +3462,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                                     .labelText.copyWith(fontSize: 11)),
                                                                                             Text(
                                                                                                 '${getInventoryDetails
-                                                                                                    ?.impurity ??
+                                                                                                    .impurity?.toDisplayString() ??
                                                                                                     0} گرم ',
                                                                                                 style: AppTextStyle
                                                                                                     .bodyText.copyWith(fontSize: 11)),
@@ -3488,7 +3484,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.carat ??
+                                                                                            .carat ??
                                                                                             0}',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3503,7 +3499,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.weight750 ??
+                                                                                            .weight750?.toDisplayString() ??
                                                                                             0} گرم ',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3518,7 +3514,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                                             .labelText.copyWith(fontSize: 11)),
                                                                                     Text(
                                                                                         '${getInventoryDetails
-                                                                                            ?.impurity ??
+                                                                                            .impurity?.toDisplayString() ??
                                                                                             0} گرم ',
                                                                                         style: AppTextStyle
                                                                                             .bodyText.copyWith(fontSize: 11)),
@@ -3589,7 +3585,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                                                             Expanded(
                                                                               child: Text(
                                                                                 getInventoryDetails
-                                                                                    ?.description ?? '',
+                                                                                    .description ?? '',
                                                                                 style: AppTextStyle
                                                                                     .bodyText.copyWith(fontSize: isMobile ? 11 : null),
                                                                                 overflow: TextOverflow.ellipsis,
@@ -4008,7 +4004,7 @@ class _InventoryListViewState extends State<InventoryListView> {
               Center(
                 child: Text(
                     inventory.id !=null
-                        ? '${inventory.totalQuantity.toString().seRagham() ?? 0} ${inventory.item?.itemUnit?.name ?? ""}'
+                        ? '${inventory.totalQuantity?.toDisplayString().seRagham() ?? 0} ${inventory.item?.itemUnit?.name ?? ""}'
                         : "",
                     style: AppTextStyle.bodyText.copyWith(color: AppColor.primaryColor,fontWeight: FontWeight.bold)
                 ),
@@ -4475,23 +4471,19 @@ class _InventoryListViewState extends State<InventoryListView> {
           // صدور فاکتور
           DataCell(
             Center(
-              child: SizedBox(
-                width: 70,
-                height: 30,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColor.secondary2Color.withGreen(130),
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    textStyle: TextStyle(fontSize: 10),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5)),
-                    fixedSize: Size(20, 15)
-                  ),
-                  child: Text('صدور فاکتور'),
-                  onPressed: () async {
-                    await inventoryController.generateInvoice(inventory);
-                  },
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  await inventoryController.generateInvoice(inventory);
+                },
+                label: Text(
+                  'صدور فاکتور',
+                  style: AppTextStyle
+                      .labelText.copyWith(color: AppColor.textColor,fontSize: 11),
+                ),
+                style: ButtonStyle(
+                    padding: WidgetStateProperty.all(EdgeInsets.symmetric(horizontal: 3)),
+                    shape:WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                    backgroundColor: WidgetStateProperty.all(AppColor.secondary2Color.withGreen(130))
                 ),
               ),
             ),
@@ -4987,7 +4979,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                     child: _buildInfoCard(
                                       icon: Icons.scale,
                                       label: 'مقدار',
-                                      value: '${getInventoryDetails.weight.toString().seRagham() ?? 0} ${getInventoryDetails.item?.itemUnit?.name ?? ""}',
+                                      value: '${getInventoryDetails.weight?.toDisplayString().seRagham() ?? 0} ${getInventoryDetails.item?.itemUnit?.name ?? ""}',
                                       color: AppColor.buttonColor,
                                     ),
                                   ),
@@ -4997,13 +4989,13 @@ class _InventoryListViewState extends State<InventoryListView> {
                                     _buildInfoCard(
                                       icon: Icons.numbers,
                                       label: 'شناسه دریافت',
-                                      value: '${getInventoryDetails.id.toString() ?? 0}',
+                                      value: getInventoryDetails.id.toString(),
                                       color: AppColor.dividerColor,
                                     ):
                                     _buildInfoCard(
                                       icon: Icons.numbers,
                                       label: 'شناسه پرداخت',
-                                      value: '${getInventoryDetails.id.toString() ?? 0}',
+                                      value: '${getInventoryDetails.id.toString()}',
                                       color: AppColor.dividerColor,
                                     )
                                     ,
@@ -5031,7 +5023,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                           child: _buildInfoCard(
                                             icon: Icons.monitor_weight,
                                             label: 'وزن 750',
-                                            value: '${getInventoryDetails.weight750 ?? 0} گرم',
+                                            value: '${getInventoryDetails.weight750?.toDisplayString() ?? 0} گرم',
                                             color: AppColor.secondary3Color,
                                           ),
                                         ),
@@ -5040,7 +5032,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                           child: _buildInfoCard(
                                             icon: Icons.remove_circle_outline,
                                             label: 'ناخالصی',
-                                            value: '${getInventoryDetails.impurity ?? 0} گرم',
+                                            value: '${getInventoryDetails.impurity?.toDisplayString() ?? 0} گرم',
                                             color: AppColor.textColor,
                                           ),
                                         ),
@@ -5099,7 +5091,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                       child: _buildInfoCard(
                                         icon: Icons.monitor_weight,
                                         label: 'وزن 750',
-                                        value: '${getInventoryDetails.weight750 ?? 0} گرم',
+                                        value: '${getInventoryDetails.weight750?.toDisplayString() ?? 0} گرم',
                                         color: AppColor.secondary3Color,
                                       ),
                                     ),
@@ -5108,7 +5100,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                                       child: _buildInfoCard(
                                         icon: Icons.remove_circle_outline,
                                         label: 'ناخالصی',
-                                        value: '${getInventoryDetails.impurity ?? 0} گرم',
+                                        value: '${getInventoryDetails.impurity?.toDisplayString() ?? 0} گرم',
                                         color: AppColor.textColor,
                                       ),
                                     ),
@@ -5625,7 +5617,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                       child: ElevatedButton(
                         style: ButtonStyle(
                             padding: WidgetStatePropertyAll(
-                                EdgeInsets.symmetric(horizontal: 23, vertical: 19)
+                                EdgeInsets.symmetric(horizontal: 23)
                             ),
                             backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                             shape: WidgetStatePropertyAll(
@@ -5721,7 +5713,7 @@ class _InventoryListViewState extends State<InventoryListView> {
   }
 
   // Helper method for filter dialog
-  void _showFilterDialog(BuildContext context) {
+  /*void _showFilterDialog(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     showGeneralDialog(
         context: context,
@@ -5813,7 +5805,7 @@ class _InventoryListViewState extends State<InventoryListView> {
                         child: ElevatedButton(
                           style: ButtonStyle(
                               padding: WidgetStatePropertyAll(
-                                  EdgeInsets.symmetric(horizontal: 23, vertical: 19)
+                                  EdgeInsets.symmetric(horizontal: 23)
                               ),
                               backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                               shape: WidgetStatePropertyAll(
@@ -5845,10 +5837,10 @@ class _InventoryListViewState extends State<InventoryListView> {
           );
         }
     );
-  }
+  }*/
 
   // Helper method for filter field
-  Widget _buildFilterField(String label, TextEditingController controller) {
+  /*Widget _buildFilterField(String label, TextEditingController controller) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -5882,5 +5874,5 @@ class _InventoryListViewState extends State<InventoryListView> {
         ),
       ],
     );
-  }
+  }*/
 }

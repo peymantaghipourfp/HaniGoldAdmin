@@ -10,7 +10,7 @@ TransactionModel _$TransactionModelFromJson(Map<String, dynamic> json) =>
     TransactionModel(
       toId: (json['toId'] as num?)?.toInt(),
       fromId: (json['fromId'] as num?)?.toInt(),
-      amount: (json['amount'] as num?)?.toInt(),
+      amount: (json['amount'] as num?)?.toDouble(),
       date: json['date'] as String?,
       type: json['type'] as String?,
       price: (json['price'] as num?)?.toDouble(),

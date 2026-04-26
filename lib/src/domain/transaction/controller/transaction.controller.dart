@@ -6,20 +6,15 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import '../../../config/const/app_color.dart';
-import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/account.repository.dart';
-import '../../../config/repository/laboratory.repository.dart';
 import '../../../config/repository/remittance.repository.dart';
 import '../../../config/repository/transaction.repository.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../account/model/account.model.dart';
 import '../../users/model/paginated.model.dart';
-import '../../users/model/transaction_item.model.dart';
 import '../model/transaction_item.model.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:universal_html/html.dart' as html;
@@ -106,7 +101,6 @@ class TransactionController extends GetxController{
       }
     }
     update();
-    print(typeFilter1.value);
   }
 
   void onSort(int columnIndex, bool ascending) {
@@ -168,13 +162,11 @@ class TransactionController extends GetxController{
 
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -214,7 +206,6 @@ class TransactionController extends GetxController{
         /*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*/
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',
@@ -243,7 +234,6 @@ class TransactionController extends GetxController{
         startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       transactionList.assignAll((response.transactionJournals??[]));
-      print(transactionList.length);
       paginated=response.paginated;
       state.value=PageStateTrans.list;
     }
@@ -302,21 +292,21 @@ class TransactionController extends GetxController{
               " ${transaction.details?.map((e)=> {"عیار: ${e.carat ?? 0}","مقدار: ${e.quantity ?? 0}","ناخالصی: ${e.impurity ?? 0}","نام آزمایشگاه: ${e.name ?? ""}"}).toList()} "
           ) :
           TextCellValue(
-          transaction.item?.itemUnit?.id==1 ? "${transaction.amount} عدد ${transaction.item?.name ?? ''} \n ${transaction.price != null ? "قیمت واحد: ${transaction.price.toString().seRagham() ?? 0} ریال " "-" "${transaction.totalPrice.toString().seRagham() ?? 0} ریال " : '' }"
-              : transaction.item?.itemUnit?.id==2 ? "${transaction.amount} گرم ${transaction.item?.name ?? ''} \n ${transaction.price != null ? "قیمت واحد: ${transaction.price.toString().seRagham() ?? 0} ریال " "-" "${transaction.totalPrice.toString().seRagham() ?? 0} ریال " : '' }" :
-          "${transaction.amount.toString().seRagham().toPersianDigit()} ریال ${transaction.item?.name ?? ''} \n ${transaction.price != null ? "قیمت واحد: ${transaction.price.toString().seRagham() ?? 0} ریال " "-" "${transaction.totalPrice.toString().seRagham() ?? 0} ریال " : '' }"
+          transaction.item?.itemUnit?.id==1 ? "${transaction.amount} عدد ${transaction.item?.name ?? ''} \n ${transaction.price != null ? "قیمت واحد: ${transaction.price.toString().seRagham()} ریال " "-" "${transaction.totalPrice.toString().seRagham()} ریال " : '' }"
+              : transaction.item?.itemUnit?.id==2 ? "${transaction.amount} گرم ${transaction.item?.name ?? ''} \n ${transaction.price != null ? "قیمت واحد: ${transaction.price.toString().seRagham()} ریال " "-" "${transaction.totalPrice.toString().seRagham()} ریال " : '' }" :
+          "${transaction.amount.toString().seRagham().toPersianDigit()} ریال ${transaction.item?.name ?? ''} \n ${transaction.price != null ? "قیمت واحد: ${transaction.price.toString().seRagham()} ریال " "-" "${transaction.totalPrice.toString().seRagham()} ریال " : '' }"
           ),
           TextCellValue(
               transaction.item?.itemUnit?.id==1 ? "${transaction.amount} عدد "
                   : transaction.item?.itemUnit?.id==2 ? "${transaction.amount} گرم " :
               "${transaction.amount.toString().seRagham().toPersianDigit()} ریال "
           ),
-          TextCellValue("${transaction.balances?.where((e) => e.unitName == "ریال").map((e)=> "\u202B${e.balance.toString().seRagham() ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
-          TextCellValue("${transaction.balances?.where((e) => e.unitName == "گرم").map((e)=> "\u202B${e.balance.toString().seRagham() ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
-          TextCellValue("${transaction.balances?.where((e) => e.unitName == "عدد").map((e)=> "\u202B${e.balance.toString().seRagham() ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
-          TextCellValue("${transaction.tobalances?.where((e) => e.unitName == "ریال").map((e)=> "\u202B${e.balance.toString().seRagham() ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
-          TextCellValue("${transaction.tobalances?.where((e) => e.unitName == "گرم").map((e)=> "\u202B${e.balance.toString().seRagham() ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
-          TextCellValue("${transaction.tobalances?.where((e) => e.unitName == "عدد").map((e)=> "\u202B${e.balance.toString().seRagham() ?? 0}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
+          TextCellValue("${transaction.balances?.where((e) => e.unitName == "ریال").map((e)=> "\u202B${e.balance.toString().seRagham()}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
+          TextCellValue("${transaction.balances?.where((e) => e.unitName == "گرم").map((e)=> "\u202B${e.balance.toString().seRagham()}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
+          TextCellValue("${transaction.balances?.where((e) => e.unitName == "عدد").map((e)=> "\u202B${e.balance.toString().seRagham()}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
+          TextCellValue("${transaction.tobalances?.where((e) => e.unitName == "ریال").map((e)=> "\u202B${e.balance.toString().seRagham()}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
+          TextCellValue("${transaction.tobalances?.where((e) => e.unitName == "گرم").map((e)=> "\u202B${e.balance.toString().seRagham()}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
+          TextCellValue("${transaction.tobalances?.where((e) => e.unitName == "عدد").map((e)=> "\u202B${e.balance.toString().seRagham()}\u202C ${e.unitName ?? ''} ${e.itemName ?? ''}").join(", ")}"),
         ]);
       }
 
@@ -327,7 +317,7 @@ class TransactionController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'transactions_${DateTime.now().millisecondsSinceEpoch}.xlsx')
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -448,7 +438,7 @@ class TransactionController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'image/png');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'row_screenshot_${transaction.id}.png')
           ..click();
         html.Url.revokeObjectUrl(url);

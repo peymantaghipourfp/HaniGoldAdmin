@@ -43,10 +43,6 @@ class SettingController extends GetxController {
   }
 
   Future<SettingModel?> updateSetting() async {
-    print("statusSwitch:::${statusSwitch.value}");
-    print("orderStatusSwitch:::${orderStatusSwitch.value}");
-    print("startTimeController:::${startTimeController.text}");
-    print("endTimeController:::${endTimeController.text}");
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try {
       isLoading.value = true;

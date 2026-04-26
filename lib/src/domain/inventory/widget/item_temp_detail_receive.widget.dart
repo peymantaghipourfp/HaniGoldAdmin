@@ -1,5 +1,8 @@
 
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -9,7 +12,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../controller/inventory_create_payment.controller.dart';
+import '../../../config/logger/app_logger.dart';
 import '../model/inventory_detail.model.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -55,11 +58,78 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
     }
   }
 
+
+  Future<void> pickImageMobile() async {
+    recordId.value = uuid.v4();
+
+    try {
+      final ImageSource? source = await showModalBottomSheet<ImageSource>(
+        context: context,
+        builder: (context) {
+          return SafeArea(
+            child: Container(
+              decoration: BoxDecoration(
+                color:AppColor.secondary200Color,
+                borderRadius: BorderRadius.circular(15)
+              ),
+              child: Wrap(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.camera_alt,color: AppColor.textColor,),
+                    title: Text('دوربین',style: AppTextStyle.bodyText.copyWith(fontSize: 16,fontWeight: FontWeight.w700),),
+                    onTap: () => Navigator.pop(context, ImageSource.camera),
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.photo_library,color: AppColor.textColor,),
+                    title: Text('گالری',style: AppTextStyle.bodyText.copyWith(fontSize: 16,fontWeight: FontWeight.w700),),
+                    onTap: () => Navigator.pop(context, ImageSource.gallery),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+
+      if (source == null) return;
+
+      // اگر دوربین انتخاب شد → تک عکس
+      if (source == ImageSource.camera) {
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 70,
+        );
+
+        if (photo == null) return;
+
+          widget.image.add(photo);
+          widget.recId?.call(recordId.value, List<XFile>.from(widget.image));
+          setState(() {});
+
+      }
+
+      // اگر گالری انتخاب شد → چند عکس
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+
+        if (images.isEmpty) return;
+
+          widget.image.addAll(images);
+          widget.recId?.call(recordId.value, List<XFile>.from(widget.image));
+          setState(() {});
+
+      }
+    } catch (e,s) {
+      AppLogger.e("pickImageMobile error:",e,s);
+      Get.snackbar('خطا', 'امکان انتخاب تصویر وجود ندارد');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     final isMobile = ResponsiveBreakpoints.of(context).isMobile;
-    final isTablet = ResponsiveBreakpoints.of(context).isTablet;
+    //final isTablet = ResponsiveBreakpoints.of(context).isTablet;
 
     return Card(
       color: AppColor.backGroundColor,
@@ -225,7 +295,9 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                                         borderRadius: BorderRadius.circular(6),
                                         border: Border.all(color: AppColor.textColor),
                                         image: DecorationImage(
-                                          image: NetworkImage(e.path),
+                                          image: e.path.startsWith('http')|| kIsWeb
+                                              ? NetworkImage(e.path)
+                                              : FileImage(File(e.path)) as ImageProvider,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -265,7 +337,7 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                     // Camera button - full width on mobile
                     SizedBox(height: 8),
                     GestureDetector(
-                      onTap: () => pickImageDesktop(),
+                      onTap: () => isMobile ? pickImageMobile() : pickImageDesktop(),
                       child: Container(
                         width: double.infinity,
                         height: 40,
@@ -350,7 +422,9 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                                         borderRadius: BorderRadius.circular(8),
                                         border: Border.all(color: AppColor.textColor),
                                         image: DecorationImage(
-                                          image: NetworkImage(e.path),
+                                          image: e.path.startsWith('http') || kIsWeb
+                                              ? NetworkImage(e.path)
+                                              : FileImage(File(e.path)) as ImageProvider,
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -386,7 +460,7 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                     }),
 
                     GestureDetector(
-                      onTap: () => pickImageDesktop(),
+                      onTap: () =>isMobile ? pickImageMobile() : pickImageDesktop(),
                       child: Container(
                         constraints: BoxConstraints(maxWidth: 80),
                         child: SvgPicture.asset(
@@ -429,7 +503,9 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColor.textColor),
                 image: DecorationImage(
-                  image: NetworkImage(image.path),
+                  image: image.path.startsWith('http') || kIsWeb
+                      ? NetworkImage(image.path)
+                      : FileImage(File(image.path)) as ImageProvider,
                   fit: BoxFit.cover,
                 ),
               ),

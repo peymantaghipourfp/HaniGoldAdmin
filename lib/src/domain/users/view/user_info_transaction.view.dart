@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/transaction/widgets/balance_dialog_id.widget.dart';
 import 'package:hanigold_admin/src/domain/users/widgets/balance_user.widget.dart';
 import 'package:hanigold_admin/src/domain/users/widgets/check_result.widget.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -19,9 +20,8 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/user_info_detail_transaction.controller.dart';
-import '../widgets/balance.widget.dart';
 import '../widgets/tabel_info.widget.dart';
 
 import 'package:flutter/services.dart';
@@ -437,7 +437,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                                   EdgeInsets
                                                                       .symmetric(
                                                                       horizontal: 23,
-                                                                      vertical: 19)),
+                                                                      )),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(
@@ -666,7 +666,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1644,7 +1644,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                                         EdgeInsets
                                                                             .symmetric(
                                                                             horizontal: 23,
-                                                                            vertical: 19)),
+                                                                            )),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(
@@ -1868,7 +1868,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                               child: ElevatedButton(
                                                                 style: ButtonStyle(
                                                                     padding: WidgetStatePropertyAll(
-                                                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        EdgeInsets.symmetric(horizontal: 23)),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(AppColor.appBarColor),
@@ -3113,7 +3113,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                                                     EdgeInsets
                                                                         .symmetric(
                                                                         horizontal: 23,
-                                                                        vertical: 19)),
+                                                                        )),
                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                 backgroundColor:
                                                                 WidgetStatePropertyAll(
@@ -3313,7 +3313,6 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
-            print(columnIndex);
             controller.setSort(columnIndex,ascending);
 
             controller.onSortColum(columnIndex, ascending);
@@ -3331,7 +3330,6 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
-            print(ascending);
             controller.setSort(columnIndex,ascending);
 
             controller.onSortColum(columnIndex, ascending);
@@ -3707,10 +3705,10 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                           children: [
                             SelectableText(
                               trans.item?.itemUnit?.id == 1
-                                  ? " ${trans.amount} "
+                                  ? " ${trans.amount?.toDisplayString()} "
                                   : trans.item?.itemUnit?.id == 2
-                                  ? "${trans.amount} "
-                                  : (trans.amount ?? 0 ) < 0 ? "-${trans.amount?.abs().toString().seRagham()}" : "${trans.amount.toString().seRagham()}",
+                                  ? "${trans.amount?.toDisplayString()} "
+                                  : (trans.amount ?? 0 ) < 0 ? "-${trans.amount?.abs().toDisplayString().seRagham()}" : "${trans.amount?.toDisplayString().seRagham()}",
                               style: AppTextStyle.bodyText.copyWith(
                                   color: (trans.amount ?? 0 ) < 0 ? AppColor.accentColor : (trans.amount ?? 0 ) > 0 ? AppColor.primaryColor : AppColor.textColor,
                                   fontWeight: FontWeight.w700,
@@ -3756,7 +3754,7 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                                   fontSize: 10),
                             ),
                             SelectableText(
-                                "${trans.mesghalPrice ?? 0}".seRagham() +
+                                "${trans.mesghalPrice?.toDisplayString() ?? 0}".seRagham() +
                                     "  ریال  ",
                                 style: AppTextStyle.bodyText.copyWith(
                                     color: AppColor.textColor,
@@ -4020,16 +4018,16 @@ class _UserInfoTransactionViewState extends State<UserInfoTransactionView> {
                   children: [
                     Text(
                       trans.item?.itemUnit?.id == 1
-                          ? "${trans.amount} "
+                          ? "${trans.amount?.toDisplayString()} "
                           : trans.item?.itemUnit?.id == 2 && (trans.amount ?? 0) < 0
-                          ? "-${trans.amount?.abs().toString().seRagham()} " :
+                          ? "-${trans.amount?.abs().toDisplayString().seRagham()} " :
                       trans.item?.itemUnit?.id == 2 && (trans.amount ?? 0) > 0
-                          ? "${trans.amount.toString().seRagham()} "
+                          ? "${trans.amount?.toDisplayString().seRagham()} "
                           :trans.item?.itemUnit?.id == 3 && (trans.amount ?? 0) < 0 ?
                       "-${trans.amount?.abs().toStringAsFixed(0).seRagham()} "
                           :trans.item?.itemUnit?.id == 3 && (trans.amount ?? 0) > 0 ?
                       "${trans.amount?.toStringAsFixed(0).seRagham()} "
-                          : "${trans.amount.toString().seRagham()} ",
+                          : "${trans.amount?.toDisplayString().seRagham()} ",
                       style: AppTextStyle.bodyText.copyWith(
                           color: trans.amount!>0 ? AppColor.primaryColor :AppColor.accentColor,
                           fontSize: 12,

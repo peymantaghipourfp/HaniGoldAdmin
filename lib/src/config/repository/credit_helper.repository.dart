@@ -3,8 +3,10 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/creditHelper/model/credit_helper.model.dart';
 import 'package:hanigold_admin/src/domain/creditHelper/model/list_credit_helper.model.dart';
 import '../../domain/creditHelper/model/credit_type.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class CreditHelperRepository {
   Dio creditHelperDio = Dio();
@@ -101,12 +103,11 @@ class CreditHelperRepository {
         }}
       };
       final response=await creditHelperDio.post('CreditHelper/getWrapper',data: options);
-      print("request getCreditHelperListPager : $options" );
-      print("response getCreditHelperListPager : ${response.data}" );
       return ListCreditHelperModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getCreditHelperListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -121,8 +122,6 @@ class CreditHelperRepository {
         }}
       };
       final response=await creditHelperDio.post('CreditHelper/getType',data: options);
-      print("request getTypeCreditHelper : $options" );
-      print("response getTypeCreditHelper : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((types)=>CreditTypeModel.fromJson(types)).toList();
@@ -131,8 +130,9 @@ class CreditHelperRepository {
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getTypeCreditHelper failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -140,12 +140,11 @@ class CreditHelperRepository {
     try {
       final response = await creditHelperDio.get(
           'CreditHelper/getOne', queryParameters: {'id': id});
-      print('Status Code getOneCreditHelper: ${response.statusCode}');
-      print('Response Data getOneCreditHelper: ${response.data}');
       Map<String, dynamic> data=response.data;
       return CreditHelperModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('getOneCreditHelper failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -176,13 +175,11 @@ class CreditHelperRepository {
       };
 
       var response=await creditHelperDio.post('CreditHelper/insert',data: creditHelperData);
-      print('request insertCreditHelper: $creditHelperData');
-      print('Status Code insertCreditHelper: ${response.statusCode}');
-      print('Response Data insertCreditHelper: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    catch(e,s){
+      AppLogger.e('insertCreditHelper failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -214,13 +211,11 @@ class CreditHelperRepository {
         "description": description,
       };
       var response=await creditHelperDio.put('CreditHelper/update',data: creditHelperData );
-      print('request updateCreditHelper: $creditHelperData');
-      print('Status Code updateCreditHelper: ${response.statusCode}');
-      print('Response Data updateCreditHelper: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    catch(e,s){
+      AppLogger.e('updateCreditHelper failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -233,16 +228,13 @@ class CreditHelperRepository {
         "isActive": isActive,
         "id": id,
       };
-      print(creditHelperData);
 
       var response=await creditHelperDio.put('CreditHelper/updateActive',data: creditHelperData);
-      print('request updateActiveCreditHelper: $creditHelperData');
-      print('Status Code updateActiveCreditHelper: ${response.statusCode}');
-      print('Response Data updateActiveCreditHelper: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در isActive:$e');
+    catch(e,s){
+      AppLogger.e('updateActiveCreditHelper failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -256,19 +248,17 @@ class CreditHelperRepository {
         "isDeleted" : isDeleted,
       };
 
-      print(creditHelperData);
 
       var response=await creditHelperDio.delete('CreditHelper/updateToIsDeleted',data: creditHelperData);
-      print('Status Code deleteCreditHelper: ${response.statusCode}');
-      print('Response Data deleteCreditHelper: ${response.data}');
       if (response.data is List) {
         return response.data;
       } else {
         return [response.data];
       }
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch(e,s){
+      AppLogger.e('deleteCreditHelper failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

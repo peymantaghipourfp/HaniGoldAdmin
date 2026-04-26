@@ -4,8 +4,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/controller/person_list.controller.dart';
 import 'package:hanigold_admin/src/widget/pager_widget1.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
-import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
@@ -14,8 +12,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/err_page.dart';
-import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../widgets/filter_user_list.widget.dart';
 
 class PersonListView extends GetView<PersonListController> {
@@ -160,7 +157,7 @@ class PersonListView extends GetView<PersonListController> {
                                           padding: WidgetStatePropertyAll(
                                               EdgeInsets.symmetric(
                                                   horizontal: 23,
-                                                  vertical: 19)),
+                                                  )),
                                           // elevation: WidgetStatePropertyAll(5),
                                           backgroundColor:
                                           WidgetStatePropertyAll(
@@ -464,7 +461,6 @@ class PersonListView extends GetView<PersonListController> {
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
-            print(columnIndex);
             controller.setSort(columnIndex, ascending);
           },
           label: Text('نام',

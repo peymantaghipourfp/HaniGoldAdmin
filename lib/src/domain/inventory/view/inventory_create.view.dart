@@ -1,21 +1,16 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_layout.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
 import 'package:hanigold_admin/src/widget/background_image.widget.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
-import '../../../widget/custom_dropdown.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
-import '../../users/widgets/balance.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../widget/total_balance_gold_value.widget.dart';
 import '../controller/inventory_create_payment.controller.dart';
 import '../widget/inventory_create_payment_tab.widget.dart';

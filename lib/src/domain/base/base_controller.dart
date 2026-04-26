@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../config/const/socket.service.dart';
-import '../../config/repository/url/web_socket_url.dart';
+import '../../config/logger/app_logger.dart';
 
 // Base controller that ensures socket connection for all controllers
 class BaseController extends GetxController {
@@ -30,7 +30,9 @@ class BaseController extends GetxController {
 
       if (wasConnected != isNowConnected) {
         isSocketConnected.value = isNowConnected;
-        print('BaseController: Socket status changed to: ${isNowConnected ? 'connected' : 'disconnected'}');
+        AppLogger.i(
+          'BaseController: Socket status changed → ${isNowConnected ? 'connected' : 'disconnected'}',
+        );
       }
 
       // Stop timer if controller is disposed
@@ -47,20 +49,28 @@ class BaseController extends GetxController {
       final token = box.read('Authorization');
 
       if (userId != null && token != null) {
-        print('BaseController: Ensuring socket connection for userId: $userId');
+        AppLogger.i(
+          'BaseController: Ensuring socket connection for userId: $userId',
+        );
         // Ensure socket is connected
         await socketService.ensureConnected(clientId: userId.toString());
 
         // If this is a new tab and socket was just connected, send identification
         if (socketService.connectionStatus == 'connected') {
           socketService.send('{"clientId": "$userId"}');
-          print('BaseController: Socket connected and identification sent');
+          AppLogger.d(
+            'BaseController: Socket connected and identification sent',
+          );
         }
       } else {
-        print('BaseController: No user data found for socket connection');
+        AppLogger.w(
+          'BaseController: No user data found for socket connection',
+        );
       }
-    } catch (e) {
-      print('Error ensuring socket connection in BaseController: $e');
+    } catch (e , s) {
+      AppLogger.e(
+        'BaseController: Error ensuring socket connection', e, s,
+      );
     }
   }
 

@@ -86,7 +86,7 @@ class InsertAccountSalesGroupView extends GetView<InsertAccountSalesGroupControl
                       ],
                     ),
                     const SizedBox(height: 10),
-                    Row(
+                    Row(crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Expanded(
                           child: _buildBuyRangeField(isDesktop: true),
@@ -95,6 +95,15 @@ class InsertAccountSalesGroupView extends GetView<InsertAccountSalesGroupControl
                         Expanded(
                           child: _buildSalesRangeField(isDesktop: true),
                         ),
+                        const SizedBox(width: 16),
+                         Row(
+                            children: [
+                              _buildBuyStatusField(isDesktop: true),
+                              const SizedBox(width: 16),
+                              _buildSellStatusField(isDesktop: true),
+                            ],
+                          ),
+
                       ],
                     ),
                   ],
@@ -202,19 +211,18 @@ class InsertAccountSalesGroupView extends GetView<InsertAccountSalesGroupControl
                 ),
               ],
             ),
-            const SizedBox(height: 12),
-            /*Row(
+            Row(
               children: [
                 Expanded(
-                  child: _buildMaxBuyField(isDesktop: false),
+                  child: _buildBuyStatusField(isDesktop: false),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildMaxSellField(isDesktop: false),
+                  child: _buildSellStatusField(isDesktop: false),
                 ),
               ]
             ),
-            const SizedBox(height: 12),*/
+            const SizedBox(height: 12),
 
             SizedBox(
               width: double.infinity,
@@ -546,7 +554,59 @@ class InsertAccountSalesGroupView extends GetView<InsertAccountSalesGroupControl
     );
   }
 
-  Widget _buildMaxBuyField({required bool isDesktop}) {
+  Widget _buildSellStatusField({required bool isDesktop}) {
+    return Obx(() {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Text("وضعیت فروش", style: AppTextStyle.labelText.copyWith(
+                fontSize: 11, color: AppColor.textColor)),
+            Transform.scale(
+              scale: 0.75,
+              child: Switch(
+                value: controller.sellStatus.value,
+                onChanged: (value) {
+                  controller.changeSellStatus(value);
+                },
+                activeThumbColor: AppColor.primaryColor,
+                inactiveThumbColor: AppColor.accentColor,
+                activeTrackColor: AppColor.primaryColor.withAlpha(100),
+                inactiveTrackColor: AppColor.accentColor.withAlpha(100),
+              ),
+            ),
+          ],
+        );
+      }
+    );
+  }
+
+  Widget _buildBuyStatusField({required bool isDesktop}) {
+    return Obx(() {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Text("وضعیت خرید", style: AppTextStyle.labelText.copyWith(
+              fontSize: 11, color: AppColor.textColor)),
+          Transform.scale(
+            scale: 0.75,
+            child: Switch(
+              value: controller.buyStatus.value,
+              onChanged: (value) {
+                controller.changeBuyStatus(value);
+              },
+              activeThumbColor: AppColor.primaryColor,
+              inactiveThumbColor: AppColor.accentColor,
+              activeTrackColor: AppColor.primaryColor.withAlpha(100),
+              inactiveTrackColor: AppColor.accentColor.withAlpha(100),
+            ),
+          ),
+        ],
+      );
+    }
+    );
+  }
+
+  /*Widget _buildMaxBuyField({required bool isDesktop}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -608,9 +668,9 @@ class InsertAccountSalesGroupView extends GetView<InsertAccountSalesGroupControl
         ),
       ],
     );
-  }
+  }*/
 
-  Widget _buildMaxSellField({required bool isDesktop}) {
+  /*Widget _buildMaxSellField({required bool isDesktop}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -672,7 +732,7 @@ class InsertAccountSalesGroupView extends GetView<InsertAccountSalesGroupControl
         ),
       ],
     );
-  }
+  }*/
 
   Widget _buildSelectedItemsList({required bool isDesktop}) {
     return Obx(() => Container(
@@ -803,38 +863,40 @@ class InsertAccountSalesGroupView extends GetView<InsertAccountSalesGroupControl
                     ),
                   ],
                 ),
-                /*const SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Text(
-                      'سقف خرید: ',
+                      'وضعیت خرید: ',
                       style: AppTextStyle.bodyText.copyWith(
                         fontSize: isDesktop ? 12 : 11,
                         color: AppColor.textColor.withAlpha(175),
                       ),
                     ),
                     Text(
-                      itemPrice.maxBuy.toString().seRagham(),
+                      itemPrice.buyStatus==true ? "فعال" : "غیر فعال",
                       style: AppTextStyle.bodyText.copyWith(
                         fontSize: isDesktop ? 12 : 11,
+                        color: itemPrice.buyStatus==true ? AppColor.primaryColor : AppColor.accentColor,
                       ),
                     ),
                     const SizedBox(width: 25),
                     Text(
-                      'سقف فروش: ',
+                      'وضعیت فروش: ',
                       style: AppTextStyle.bodyText.copyWith(
                         fontSize: isDesktop ? 12 : 11,
                         color: AppColor.textColor.withAlpha(175),
                       ),
                     ),
                     Text(
-                      itemPrice.maxSell.toString().seRagham(),
+                      itemPrice.sellStatus==true ? "فعال" : "غیر فعال",
                       style: AppTextStyle.bodyText.copyWith(
                         fontSize: isDesktop ? 12 : 11,
+                        color: itemPrice.sellStatus==true ? AppColor.primaryColor : AppColor.accentColor,
                       ),
                     ),
                   ],
-                ),*/
+                ),
               ],
             ),
           ),

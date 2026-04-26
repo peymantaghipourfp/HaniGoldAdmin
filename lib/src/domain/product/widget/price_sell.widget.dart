@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
-import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -20,11 +19,12 @@ class PriceSellWidget extends StatefulWidget {
   final double mesghalDifferent;
   final int id;
   final int itemUnitId;
+  final int itemId;
   final Refrence? refrence;
 
   const PriceSellWidget({
 
-    super.key, required this.price1, required this.price2, required this.price3, required this.price4, required this.mesghalDifferent, required this.id, required this.itemUnitId, required this.refrence
+    super.key, required this.price1, required this.price2, required this.price3, required this.price4, required this.mesghalDifferent, required this.id, required this.itemUnitId, required this.itemId, required this.refrence
   });
 
 
@@ -169,6 +169,181 @@ class PriceSellWidgetState extends State<PriceSellWidget> {
     return double.parse('$formattedP4$formattedP3$formattedP2$formattedP1'.toEnglishDigit());
   }
 
+  // Helper to get predefined quick adjustment values based on itemId
+  List<(int, int)> _getQuickAdjustValues() {
+    switch (widget.itemId) {
+      case 1:
+        return [(10, 100000), (20, 200000), (40, 400000), (50, 500000),(100,1000000),(200,2000000)];
+      case 2:
+        return [(20, 200000), (50, 500000), (100, 1000000), (200, 2000000), (500, 5000000)];
+      case 3:
+        return [(20, 200000), (50, 500000), (100, 1000000), (200, 2000000), (500, 5000000)];
+      case 4:
+        return [(20, 200000), (50, 500000), (100, 1000000), (200, 2000000), (500, 5000000)];
+      default:
+        return [];
+    }
+  }
+
+  // Adjust price by adding/subtracting amount and update text controllers
+  void _adjustPrice(int amount, bool isIncrement) {
+    final int adjustment = isIncrement ? amount : -amount;
+
+    // Get current price from controllers
+    final currentPrice = _buildPrice(
+      priceController1.text,
+      priceController2.text,
+      priceController3.text,
+      priceController4.text,
+    );
+
+    // Calculate new price
+    final newPrice = currentPrice + adjustment;
+
+    // Ensure price doesn't go below 0
+    final clampedPrice = newPrice < 0 ? 0 : newPrice;
+
+    // Convert back to string and split into 4 parts
+    final priceString = clampedPrice.toStringAsFixed(0);
+    final parts = _splitPriceString(priceString);
+
+    // Update controllers
+    setState(() {
+      priceController1.text = parts.item1;
+      priceController2.text = parts.item2;
+      priceController3.text = parts.item3;
+      priceController4.text = parts.item4;
+    });
+    submitPrice(showSnackbar: false);
+  }
+
+  // Restore focus to the first text field after button adjustment
+  /*void _restoreFocusAfterAdjustment() {
+    // Use a slight delay to ensure the UI has updated before focusing
+    Future.delayed(const Duration(milliseconds: 50), () {
+      if (mounted) {
+        focusNode2.requestFocus();
+      }
+    });
+  }*/
+
+  // Build increment buttons row
+  Widget _buildIncrementButtons() {
+    final isDesktop = ResponsiveBreakpoints.of(context).isDesktop;
+    final values = _getQuickAdjustValues();
+    if (values.isEmpty) return SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: values.map((value) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3),
+          child: GestureDetector(
+              onTap: () => _adjustPrice(value.$2, true),
+              child: isDesktop ? Container(
+                width:35,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  //color: Color(0xff02807e),
+                  color: Color(0xff069178),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  '${value.$1}+',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 10),
+                  textAlign: TextAlign.center,
+                ),
+              ):
+              Container(
+                width:40,
+                height: 20,
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  //color: Color(0xff02807e),
+                  color: Color(0xff069178),
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Text(
+                  '${value.$1}+',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 10),
+                  textAlign: TextAlign.center,
+                ),
+              )
+            ),
+        );
+      }).toList(),
+    );
+  }
+
+  // Build decrement buttons row
+  Widget _buildDecrementButtons() {
+    final isDesktop = ResponsiveBreakpoints.of(context).isDesktop;
+    final values = _getQuickAdjustValues();
+    if (values.isEmpty) return SizedBox.shrink();
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: values.map((value) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 3),
+          child: GestureDetector(
+            onTap: () => _adjustPrice(value.$2, false),
+            child: isDesktop ? Container(
+              width: 35,
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                //color: Color(0xffd2329b),
+                color: Color(0xffe01571),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Text(
+                '${value.$1}-',
+                style: AppTextStyle.labelText.copyWith(fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
+            ):
+            Container(
+              width: 40,
+              height: 20,
+              padding: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                //color: Color(0xffd2329b),
+                color: Color(0xffe01571),
+                borderRadius: BorderRadius.circular(5),
+              ),
+              child: Text(
+                '${value.$1}-',
+                style: AppTextStyle.labelText.copyWith(fontSize: 10),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  // Helper to split price string into 4 parts (similar to _splitPrice but for strings)
+  _PriceParts _splitPriceString(String priceString) {
+    String remaining = priceString;
+    List<String> parts = [];
+    int count = 0;
+    while (remaining.isNotEmpty && count < 3) {
+      int end = remaining.length;
+      int start = end - 3;
+      if (start < 0) start = 0;
+      String part = remaining.substring(start, end);
+      parts.add(part);
+      remaining = remaining.substring(0, start);
+      count++;
+    }
+    String item1 = parts.isNotEmpty ? parts[0] : '0';
+    String item2 = parts.length >= 2 ? parts[1] : '0';
+    String item3 = parts.length >= 3 ? parts[2] : '0';
+    String item4 = remaining;
+    return _PriceParts(item1, item2, item3, item4);
+  }
+
   bool _validatePriceChange() {
 
     String oldP1 = initialPrice1 ?? widget.price1;
@@ -177,7 +352,6 @@ class PriceSellWidgetState extends State<PriceSellWidget> {
     String oldP4 = initialPrice4 ?? widget.price4;
 
     double oldPrice = _buildPrice(oldP1, oldP2, oldP3, oldP4);
-    print("oldPrice::::::${oldPrice}");
 
 
     double newPrice = _buildPrice(
@@ -186,13 +360,11 @@ class PriceSellWidgetState extends State<PriceSellWidget> {
       priceController3.text,
       priceController4.text,
     );
-    print("newPrice::::::${newPrice}");
 
     if (oldPrice == 0) return true;
 
     double percentageDifference = ((newPrice - oldPrice).abs() / oldPrice) * 100;
 
-    print("percentageDifference::::::${percentageDifference}");
 
     if (percentageDifference > 5) {
       // ریست oldPrice
@@ -289,192 +461,206 @@ class PriceSellWidgetState extends State<PriceSellWidget> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    return FocusTraversalGroup(
-      policy: OrderedTraversalPolicy(),
-      child: isDesktop ?
-      Row(
-          children: [
-            isLoading ?
-            CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
-            SizedBox(height: 27,width: 45,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                    padding: WidgetStatePropertyAll(
-                        EdgeInsets.symmetric(horizontal: 4)),
-                    elevation: WidgetStatePropertyAll(5),
-                    backgroundColor:
-                    widget.refrence==null ? WidgetStatePropertyAll(AppColor.primaryColor) : WidgetStatePropertyAll(AppColor.iconViewColor),
-                    shape: WidgetStatePropertyAll(RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)))),
-                onPressed: () {
-                  widget.refrence==null ?
-                    submitPrice(showSnackbar: true):
-                      SizedBox.shrink();
-                },
-                child: Text(
-                  'تایید',
-                  style: AppTextStyle.labelText,
-                ),
-      
-              ),
-            ),
-            SizedBox(width: 3,),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(4),
-              child: SizedBox(
-                height: 35,
-                width: 60,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 3,bottom: 1),
-                  child: TextFormField(
-                    textAlign: TextAlign.center,
-                    maxLength: 3,
-                    controller: priceController1,
-                    focusNode: focusNode1,
-                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: AppTextStyle.labelText,
-                    onFieldSubmitted: (value) => submitPrice(showSnackbar: true),
-                    onTap: () {
-                      priceController1.selection = TextSelection(
-                        baseOffset: 0,
-                        extentOffset: priceController1.text.length,
-                      );
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
+    return isDesktop ?
+      Column(mainAxisSize: MainAxisSize.min,
+        children: [
+          // Increment buttons
+          _buildIncrementButtons(),
+          SizedBox(height: 3),
+          FocusTraversalGroup(
+            policy: OrderedTraversalPolicy(),
+            child: Row(
+                children: [
+                  isLoading ?
+                  CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
+                  SizedBox(height: 27,width: 45,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                          padding: WidgetStatePropertyAll(
+                              EdgeInsets.symmetric(horizontal: 4)),
+                          elevation: WidgetStatePropertyAll(5),
+                          backgroundColor:
+                          widget.refrence==null ? WidgetStatePropertyAll(AppColor.primaryColor) : WidgetStatePropertyAll(AppColor.iconViewColor),
+                          shape: WidgetStatePropertyAll(RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)))),
+                      onPressed: () {
+                        widget.refrence==null ?
+                          submitPrice(showSnackbar: true):
+                            SizedBox.shrink();
+                      },
+                      child: Text(
+                        'تایید',
+                        style: AppTextStyle.labelText,
                       ),
-                      filled: true,
-                      fillColor: AppColor.backGroundColor,
-                      counterText: '',
-                      hoverColor: AppColor.textFieldColor,
-                      isDense: true,
+
                     ),
                   ),
-                ),
-              ),
-            ),
-            SizedBox(width: 1,),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(3),
-              child: SizedBox(
-                height: 35,
-                width: 60,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 3,bottom: 1),
-                  child: TextFormField(
-                    textAlign: TextAlign.center,
-                    maxLength: 3,
-                    controller: priceController2,
-                    focusNode: focusNode2,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: AppTextStyle.labelText,
-                    onFieldSubmitted: (value) => submitPrice(),
-                    onTap: () {
-                      priceController2.selection = TextSelection(
-                        baseOffset: 0,
-                        extentOffset: priceController2.text.length,
-                      );
-                    },
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
+                  SizedBox(width: 3,),
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(4),
+                    child: SizedBox(
+                      height: 35,
+                      width: 60,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 3,bottom: 1),
+                        child: TextFormField(
+                          textAlign: TextAlign.center,
+                          maxLength: 3,
+                          controller: priceController1,
+                          focusNode: focusNode1,
+                          maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          style: AppTextStyle.labelText,
+                          onFieldSubmitted: (value) => submitPrice(showSnackbar: true),
+                          onTap: () {
+                            priceController1.selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: priceController1.text.length,
+                            );
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            filled: true,
+                            fillColor: AppColor.backGroundColor,
+                            counterText: '',
+                            hoverColor: AppColor.textFieldColor,
+                            isDense: true,
+                          ),
+                        ),
                       ),
-                      filled: true,
-                      fillColor: AppColor.backGroundColor,
-                      counterText: '',
-                      hoverColor: AppColor.textFieldColor,
-                      isDense: true,
                     ),
                   ),
-                ),
-              ),
-            ),
-            SizedBox(width: 1,),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(2),
-              child: SizedBox(
-                height: 35,
-                width: 60,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 3,bottom: 1),
-                  child: TextFormField(
-                    textAlign: TextAlign.center,
-                    maxLength: 3,
-                    controller: priceController3,
-                    focusNode: focusNode3,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: AppTextStyle.labelText,
-                    onFieldSubmitted: (value) => submitPrice(),
-                    /*onTap: () {
-                      priceController3.selection = TextSelection(
-                        baseOffset: 0,
-                        extentOffset: priceController3.text.length,
-                      );
-                    },*/
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
+                  SizedBox(width: 1,),
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(3),
+                    child: SizedBox(
+                      height: 35,
+                      width: 60,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 3,bottom: 1),
+                        child: TextFormField(
+                          textAlign: TextAlign.center,
+                          maxLength: 3,
+                          controller: priceController2,
+                          focusNode: focusNode2,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          style: AppTextStyle.labelText,
+                          onFieldSubmitted: (value) => submitPrice(),
+                          onTap: () {
+                            priceController2.selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: priceController2.text.length,
+                            );
+                          },
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            filled: true,
+                            fillColor: AppColor.backGroundColor,
+                            counterText: '',
+                            hoverColor: AppColor.textFieldColor,
+                            isDense: true,
+                          ),
+                        ),
                       ),
-                      filled: true,
-                      fillColor: AppColor.backGroundColor,
-                      counterText: '',
-                      hoverColor: AppColor.textFieldColor,
-                      isDense: true,
                     ),
                   ),
-                ),
-              ),
-            ),
-            SizedBox(width: 1,),
-            FocusTraversalOrder(
-              order: const NumericFocusOrder(1),
-              child: SizedBox(
-                height: 35,
-                width: 60,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 3,bottom: 1),
-                  child: TextFormField(
-                    textAlign: TextAlign.center,
-                    maxLength: 3,
-                    controller: priceController4,
-                    focusNode: focusNode4,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                    style: AppTextStyle.labelText,
-                    onFieldSubmitted: (value) => submitPrice(),
-                    onTap: () {
-                      priceController4.selection = TextSelection(
-                        baseOffset: 0,
-                        extentOffset: priceController4.text.length,
-                      );
-                    },
-                    textInputAction: TextInputAction.search,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(5),
+                  SizedBox(width: 1,),
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(2),
+                    child: SizedBox(
+                      height: 35,
+                      width: 60,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 3,bottom: 1),
+                        child: TextFormField(
+                          textAlign: TextAlign.center,
+                          maxLength: 3,
+                          controller: priceController3,
+                          focusNode: focusNode3,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          style: AppTextStyle.labelText,
+                          onFieldSubmitted: (value) => submitPrice(),
+                          /*onTap: () {
+                            priceController3.selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: priceController3.text.length,
+                            );
+                          },*/
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            filled: true,
+                            fillColor: AppColor.backGroundColor,
+                            counterText: '',
+                            hoverColor: AppColor.textFieldColor,
+                            isDense: true,
+                          ),
+                        ),
                       ),
-                      filled: true,
-                      fillColor: AppColor.backGroundColor,
-                      counterText: '',
-                      hoverColor: AppColor.textFieldColor,
-                      isDense: true,
                     ),
                   ),
-                ),
+                  SizedBox(width: 1,),
+                  FocusTraversalOrder(
+                    order: const NumericFocusOrder(1),
+                    child: SizedBox(
+                      height: 35,
+                      width: 60,
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 3,bottom: 1),
+                        child: TextFormField(
+                          textAlign: TextAlign.center,
+                          maxLength: 3,
+                          controller: priceController4,
+                          focusNode: focusNode4,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          style: AppTextStyle.labelText,
+                          onFieldSubmitted: (value) => submitPrice(),
+                          onTap: () {
+                            priceController4.selection = TextSelection(
+                              baseOffset: 0,
+                              extentOffset: priceController4.text.length,
+                            );
+                          },
+                          textInputAction: TextInputAction.search,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            filled: true,
+                            fillColor: AppColor.backGroundColor,
+                            counterText: '',
+                            hoverColor: AppColor.textFieldColor,
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ):
+          ),
+          SizedBox(height: 3),
+          // Decrement buttons
+          _buildDecrementButtons(),
+        ],
+      ):
       Column(
         children: [
+          // Increment buttons
+          _buildIncrementButtons(),
+          SizedBox(height: 4),
           Row(
             children: [
               FocusTraversalOrder(
@@ -630,7 +816,10 @@ class PriceSellWidgetState extends State<PriceSellWidget> {
               ),
             ],
           ),
-          SizedBox(height: 5,),
+          SizedBox(height: 4,),
+          // Decrement buttons
+          _buildDecrementButtons(),
+          SizedBox(height: 10),
           isLoading ?
           CircularProgressIndicator(
               valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor)) :
@@ -657,8 +846,14 @@ class PriceSellWidgetState extends State<PriceSellWidget> {
             ),
           ),
         ],
-      ),
-    );
-
+      );
   }
+}
+
+class _PriceParts {
+  final String item1;
+  final String item2;
+  final String item3;
+  final String item4;
+  _PriceParts(this.item1, this.item2, this.item3, this.item4);
 }

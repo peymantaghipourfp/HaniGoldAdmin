@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:universal_html/html.dart' as html;
-import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -280,7 +279,7 @@ class _ImageDropZoneWithdrawState extends State<ImageDropZoneWithdraw> {
         ),
         const SizedBox(height: 8),
         Text(
-          'برای انتخاب تصویر کلیک کنید',
+          'برای انتخاب کلیک کنید',
           style: AppTextStyle.labelText.copyWith(
             color: AppColor.textColor.withOpacity(0.7),
             fontSize: widget.isDesktop ? 12 : 10,

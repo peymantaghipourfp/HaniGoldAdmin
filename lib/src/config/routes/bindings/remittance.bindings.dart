@@ -1,6 +1,4 @@
 import 'package:get/get.dart';
-import '../../../domain/auth/controller/auth.controller.dart';
-import '../../../domain/home/controller/home.controller.dart';
 import '../../../domain/remittance/controller/remittance.controller.dart';
 import '../../../domain/remittance/controller/remittance_pending.controller.dart';
 

@@ -24,7 +24,7 @@ String convertJalaliToGregorianCustomDate(String jalaliDateTime) {
       second = int.parse(secParts[0]);
     }
 
-    DateTime date=DateTime.now();
+    //DateTime date=DateTime.now();
 
     List<String> parts = jalaliDate.split('/');
     int year = int.parse(parts[0]);

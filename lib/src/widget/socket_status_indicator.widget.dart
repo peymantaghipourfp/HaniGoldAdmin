@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../config/const/app_color.dart';
 import '../config/const/socket.service.dart';
 
 class SocketStatusIndicator extends StatelessWidget {
@@ -12,7 +11,7 @@ class SocketStatusIndicator extends StatelessWidget {
 
     return Obx(() {
       final isConnected = socketService.isConnected;
-      final status = socketService.connectionStatus;
+      //final status = socketService.connectionStatus;
 
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

@@ -1,12 +1,9 @@
 
 
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/order/controller/order_create.controller.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product_inventory_quantity.controller.dart';
-
-import '../../../domain/home/controller/home.controller.dart';
 import '../../../domain/product/controller/product_inventory.controller.dart';
 
 class ProductBindings implements Bindings{

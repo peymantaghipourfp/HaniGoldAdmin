@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/account/controller/account_level.controller.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_level.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -229,8 +229,8 @@ class AccountLevelView extends GetView<AccountLevelController> {
                     const SizedBox(height: 5),
                     _mobileLine('بالانس سطح', (accLevel.balance! < 0 ) ? "-${accLevel.balance?.abs().toStringAsFixed(0).seRagham() ?? ""}" : accLevel.balance?.toStringAsFixed(0).seRagham() ?? "" ,
                         valueColor: (accLevel.balance! < 0 ) ? AppColor.accentColor : AppColor.primaryColor, trailing: 'ریال'),
-                    _mobileLine('حد مثبت طلایی سطح', accLevel.positiveGold?.toString() ?? "" ,color: AppColor.textPrimaryColor,valueColor: AppColor.textPrimaryColor, trailing: ''),
-                    _mobileLine('حد منفی طلایی سطح', accLevel.negativeGold?.toString() ?? "" ,color: AppColor.textAccentColor,valueColor: AppColor.textAccentColor, trailing: ''),
+                    _mobileLine('حد مثبت طلایی سطح', accLevel.positiveGold?.toDisplayString() ?? "" ,color: AppColor.textPrimaryColor,valueColor: AppColor.textPrimaryColor, trailing: ''),
+                    _mobileLine('حد منفی طلایی سطح', accLevel.negativeGold?.toDisplayString() ?? "" ,color: AppColor.textAccentColor,valueColor: AppColor.textAccentColor, trailing: ''),
                     /*Row(children: [
                       Text('رنگ:', style: AppTextStyle.labelText.copyWith(fontSize: 11, color: AppColor.textColor)),
                       const SizedBox(width: 6),
@@ -487,14 +487,14 @@ class AccountLevelView extends GetView<AccountLevelController> {
                             ),
                             _buildPriceInfo(
                                 'حد مثبت طلایی سطح:',
-                                accountLevel.positiveGold?.toString() ?? "",
+                                accountLevel.positiveGold?.toDisplayString() ?? "",
                                 isDesktop,
                                 valueColor: AppColor.textPrimaryColor,
                                 unit: ""
                             ),
                             _buildPriceInfo(
                                 'حد منفی طلایی سطح:',
-                                accountLevel.negativeGold?.toString() ?? "",
+                                accountLevel.negativeGold?.toDisplayString() ?? "",
                                 isDesktop,
                                 valueColor: AppColor.textAccentColor,
                                 unit: ""
@@ -505,8 +505,8 @@ class AccountLevelView extends GetView<AccountLevelController> {
                           children: [
                             _mobileLine('بالانس سطح', (accountLevel.balance! < 0 ) ? "-${accountLevel.balance?.abs().toStringAsFixed(0).seRagham() ?? ""}" : accountLevel.balance?.toStringAsFixed(0).seRagham() ?? "" ,
                                 valueColor: (accountLevel.balance! < 0 ) ? AppColor.accentColor : AppColor.primaryColor, trailing: 'ریال'),
-                            _mobileLine('حد مثبت طلایی سطح', accountLevel.positiveGold?.toString() ?? "" ,color: AppColor.textPrimaryColor,valueColor: AppColor.textPrimaryColor, trailing: ''),
-                            _mobileLine('حد منفی طلایی سطح', accountLevel.negativeGold?.toString() ?? "" ,color: AppColor.textAccentColor,valueColor: AppColor.textAccentColor, trailing: ''),
+                            _mobileLine('حد مثبت طلایی سطح', accountLevel.positiveGold?.toDisplayString() ?? "" ,color: AppColor.textPrimaryColor,valueColor: AppColor.textPrimaryColor, trailing: ''),
+                            _mobileLine('حد منفی طلایی سطح', accountLevel.negativeGold?.toDisplayString() ?? "" ,color: AppColor.textAccentColor,valueColor: AppColor.textAccentColor, trailing: ''),
                           ],
                         )
                     ),
@@ -587,7 +587,7 @@ class AccountLevelView extends GetView<AccountLevelController> {
                                     Expanded(
                                       child: _buildPriceInfo(
                                           'سقف خرید:',
-                                          accountLevelItem.maxBuy.toString() ?? '0',
+                                          accountLevelItem.maxBuy?.toDisplayString() ?? '0',
                                           isDesktop,unit: ""
                                       ),
                                     ),
@@ -595,7 +595,7 @@ class AccountLevelView extends GetView<AccountLevelController> {
                                     Expanded(
                                       child: _buildPriceInfo(
                                           'سقف فروش:',
-                                          accountLevelItem.maxSell.toString() ?? '0',
+                                          accountLevelItem.maxSell?.toDisplayString() ?? '0',
                                           isDesktop,unit: ""
                                       ),
                                     ),

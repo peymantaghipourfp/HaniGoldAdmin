@@ -1,7 +1,6 @@
 
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
 import '../model/report_setting.model.dart';
 import '../model/transaction_info_item.model.dart';
-import 'dart:ui' as ui;
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:universal_html/html.dart' as html;
@@ -216,8 +214,6 @@ class UserInfoTransactionController extends GetxController{
   //     currentPageIndex.value++;
   //     currentPage.value+=7;
   //     itemsPerPage.value+=7;
-  //     print(currentPage.value);
-  //     print(itemsPerPage.value);
   //     getListTransactionInfoPager();
   //
   //   }
@@ -228,8 +224,6 @@ class UserInfoTransactionController extends GetxController{
   //     currentPageIndex.value--;
   //     currentPage.value-=7;
   //     itemsPerPage.value-=7;
-  //     print(currentPage.value);
-  //     print(itemsPerPage.value);
   //     getListTransactionInfoPager();
   //   }
   // }
@@ -238,7 +232,6 @@ class UserInfoTransactionController extends GetxController{
 
     // لیست مانده کاربران
   // Future<void> getListTransactionInfo() async{
-  //   print("getListTransactionInfo : ");
   //   listTransactionInfo.clear();
   //   try{
   //     state.value=PageState.loading;
@@ -258,7 +251,6 @@ class UserInfoTransactionController extends GetxController{
 
   // لیست مانده کاربران
   Future<void> getListTransactionInfoPager() async{
-    print("getListTransactionInfo : ");
     listTransactionInfo.clear();
     try{
       state.value=PageState.loading;
@@ -304,7 +296,7 @@ class UserInfoTransactionController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -343,7 +335,6 @@ class UserInfoTransactionController extends GetxController{
         filterType: accountFilterType,
       );
       listTransactionInfoFooter.assignAll(response);
-      print("Footer list updated with ${listTransactionInfoFooter.length} items");
       update();
     }
     catch(e){
@@ -380,7 +371,6 @@ class UserInfoTransactionController extends GetxController{
       if(accountList.isEmpty){
         state.value=PageState.empty;
       }
-      print('تعداد :${accountList.length}');
     }
     catch(e){
       state.value=PageState.err;

@@ -3,11 +3,10 @@ import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/transaction/model/all_balances.model.dart';
 import 'package:hanigold_admin/src/domain/transaction/model/all_balances_new.model.dart';
-
-import '../../domain/laboratory/model/laboratory.model.dart';
-import '../../domain/laboratory/model/list_laboratory.model.dart';
 import '../../domain/users/model/list_transaction.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class TransactionRepository {
 
@@ -185,8 +184,6 @@ class TransactionRepository {
         "ToIndex": toIndex
       }}};*/
       final response = await transactionDio.post('Transaction/getTransactionJournalWrapper', data: options);
-      print("request getTransactionList : $options" );
-      print("response getTransactionList : ${response.data}" );
       if (response.statusCode == 200) {
         return ListTransactionModel.fromJson(response.data);
       }
@@ -194,8 +191,9 @@ class TransactionRepository {
         throw ErrorException('خطا');
       }
     }
-    catch (e) {
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTransactionList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -206,9 +204,6 @@ class TransactionRepository {
         "type":type,
       };
       final response=await transactionDio.get('Transaction/getBalances',queryParameters: option);
-      print("url : Transaction/getBalances" );
-      print("request getAllBalancesList : $option" );
-      print("response getAllBalancesList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((balances)=>AllBalancesModel.fromJson(balances)).toList();
@@ -216,8 +211,9 @@ class TransactionRepository {
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getAllBalancesList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -228,17 +224,15 @@ class TransactionRepository {
         "type":type,
       };
       final response=await transactionDio.get('Transaction/getBalancesTotal',queryParameters: option);
-      print("url : Transaction/getBalancesTotal" );
-      print("request getAllBalancesNewList : $option" );
-      print("response getAllBalancesNewList : ${response.data}" );
       if(response.statusCode==200){
         return AllBalancesNewModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getAllBalancesNewList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -248,9 +242,6 @@ class TransactionRepository {
         "id": id,
       };
       final response=await transactionDio.get('Transaction/getBalancesById',queryParameters: option);
-      print("url : Transaction/getBalancesById" );
-      print("request getAllBalancesByIdList : $option" );
-      print("response getAllBalancesByIdList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((balances)=>AllBalancesModel.fromJson(balances)).toList();
@@ -258,8 +249,9 @@ class TransactionRepository {
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getAllBalancesByIdList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -270,9 +262,6 @@ class TransactionRepository {
         "date":date,
       };
       final response=await transactionDio.get('Transaction/getBalancesByDate',queryParameters: option);
-      print("url : Transaction/getBalancesByDate" );
-      print("request getAllBalancesDateList : $option" );
-      print("response getAllBalancesDateList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((balances)=>AllBalancesModel.fromJson(balances)).toList();
@@ -280,11 +269,10 @@ class TransactionRepository {
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getAllBalancesDateList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
-
-
 
 }

@@ -1,7 +1,6 @@
 
 
 import 'dart:async';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
@@ -24,10 +23,8 @@ import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/social.model.dart';
 import '../../product/model/item.model.dart';
-import '../../transaction/controller/transaction.controller.dart';
 import '../model/balance_item.model.dart';
 import '../model/header_info_user_transaction.model.dart';
-import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
 import '../model/transaction_info_item.model.dart';
 import 'dart:ui' as ui;
@@ -38,8 +35,6 @@ import 'package:path/path.dart' as path;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-
-import '../model/transaction_info_item_list_pager.model.dart';
 import '../service/transaction_invoice_generation.service.dart';
 
 
@@ -109,7 +104,6 @@ class UserInfoDetailTransactionController extends GetxController{
       }
     }
     update();
-    print(typeFilter1.value);
   }
 
   void changeSelectedItemFilter(ItemModel? newValue) {
@@ -139,7 +133,6 @@ class UserInfoDetailTransactionController extends GetxController{
   @override
   void onInit() {
     super.onInit();
-    print(int.parse(Get.parameters['accountId']!));
     id.value=int.parse(Get.parameters['accountId']!);
     getHeaderTransaction(int.parse(Get.parameters['accountId']!));
     getTransactionInfoListPager(id.value.toString());
@@ -229,8 +222,6 @@ class UserInfoDetailTransactionController extends GetxController{
       currentPageIndex.value++;
       currentPage.value+=7;
       itemsPerPage.value+=7;
-      print(currentPage.value);
-      print(itemsPerPage.value);
       getTransactionInfoListPager(id.value.toString());
 
     }
@@ -241,8 +232,6 @@ class UserInfoDetailTransactionController extends GetxController{
       currentPageIndex.value--;
       currentPage.value-=7;
       itemsPerPage.value-=7;
-      print(currentPage.value);
-      print(itemsPerPage.value);
       getTransactionInfoListPager(id.value.toString());
     }
   }*/
@@ -251,7 +240,6 @@ class UserInfoDetailTransactionController extends GetxController{
 
   // هدر مانده کاربر
   Future<void> getHeaderTransaction(int id) async{
-    print("getHeaderTransaction : $id");
     try{
       state.value=PageStateDe.loading;
       var response=await userInfoTransactionRepository.getHeaderUserInfoTransaction(id);
@@ -270,7 +258,6 @@ class UserInfoDetailTransactionController extends GetxController{
   }
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageStateDe.loading;
@@ -291,7 +278,6 @@ class UserInfoDetailTransactionController extends GetxController{
 
   // انتقال ولت
   Future<void> getChangeOneWallet(int accountId,int itemId) async{
-    print("getChangeOneWallet : $accountId , $itemId");
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isLoadingTransfer.value=true;
@@ -324,13 +310,11 @@ class UserInfoDetailTransactionController extends GetxController{
 
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -369,7 +353,6 @@ class UserInfoDetailTransactionController extends GetxController{
         /*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*/
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',
@@ -406,7 +389,6 @@ class UserInfoDetailTransactionController extends GetxController{
 
   // لیست تراکنش های کاربر
   Future<void> getTransactionInfoListPager(String id) async {
-    print("getTransactionInfoListPager ::::::::: 1");
     transactionInfoList.clear();
     isOpenMore.value=true;
     try {
@@ -422,7 +404,6 @@ class UserInfoDetailTransactionController extends GetxController{
       );
       isOpenMore.value=false;
       transactionInfoList.addAll(response.transactionInfoItems ?? []);
-      print(transactionInfoList.length);
       paginated.value=response.paginated;
      //state.value=PageStateDe.list;
       update();
@@ -522,7 +503,7 @@ class UserInfoDetailTransactionController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -560,7 +541,7 @@ class UserInfoDetailTransactionController extends GetxController{
         if (kIsWeb) {
           final blob = html.Blob([pngBytes], 'image/png');
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
+          html.AnchorElement(href: url)
             ..setAttribute('download', 'user_balance_screenshot_${headerInfoUserTransactionModel?.accountName}.png')
             ..click();
           html.Url.revokeObjectUrl(url);

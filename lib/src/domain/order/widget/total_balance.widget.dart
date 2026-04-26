@@ -4,11 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/model/total_balance.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../controller/order.controller.dart';
 
 class TotalBalanceWidget extends StatelessWidget {
   const TotalBalanceWidget({

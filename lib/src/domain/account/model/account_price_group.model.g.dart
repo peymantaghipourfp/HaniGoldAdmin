@@ -1,6 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
 part of 'account_price_group.model.dart';
+
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************

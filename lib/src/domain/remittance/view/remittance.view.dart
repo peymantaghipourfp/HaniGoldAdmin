@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -13,10 +13,9 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../transaction/widgets/balance_date_dialog.widget.dart';
 import '../../transaction/widgets/balance_dialog.widget.dart';
 import '../controller/remittance.controller.dart';
@@ -403,7 +402,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                                                                       child: ElevatedButton(
                                                                         style: ButtonStyle(
                                                                             padding: WidgetStatePropertyAll(
-                                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                                             // elevation: WidgetStatePropertyAll(5),
                                                                             backgroundColor:
                                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -615,7 +614,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                                                                       child: ElevatedButton(
                                                                         style: ButtonStyle(
                                                                             padding: WidgetStatePropertyAll(
-                                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                                             // elevation: WidgetStatePropertyAll(5),
                                                                             backgroundColor:
                                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -994,7 +993,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                                                                                     child: ElevatedButton(
                                                                                       style: ButtonStyle(
                                                                                           padding: WidgetStatePropertyAll(
-                                                                                              EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                              EdgeInsets.symmetric(horizontal: 23)),
                                                                                           // elevation: WidgetStatePropertyAll(5),
                                                                                           backgroundColor:
                                                                                           WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1204,7 +1203,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                                                                                     child: ElevatedButton(
                                                                                       style: ButtonStyle(
                                                                                           padding: WidgetStatePropertyAll(
-                                                                                              EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                              EdgeInsets.symmetric(horizontal: 23)),
                                                                                           // elevation: WidgetStatePropertyAll(5),
                                                                                           backgroundColor:
                                                                                           WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1507,7 +1506,7 @@ class _RemittanceViewState extends State<RemittanceView> {
   }
 
   List<DataRow> buildDataRows(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return controller.remittanceList.asMap().entries.map((entry) {
       final index = entry.key;
       final remittance = entry.value;
@@ -1629,10 +1628,10 @@ class _RemittanceViewState extends State<RemittanceView> {
           DataCell(Center(
             child: Text(
               remittance.item?.itemUnit?.id == 1
-                  ? "${remittance.quantity} عدد "
+                  ? "${remittance.quantity?.toDisplayString()} عدد "
                   : remittance.item?.itemUnit?.id == 2
-                      ? "${remittance.quantity.toString().seRagham()} گرم "
-                      : "${remittance.quantity.toString().seRagham()} ریال ",
+                      ? "${remittance.quantity?.toDisplayString().seRagham()} گرم "
+                      : "${remittance.quantity?.toDisplayString().seRagham()} ریال ",
               style: AppTextStyle.bodyText.copyWith(fontSize: 12),
             ),
           )),
@@ -1893,10 +1892,10 @@ class _RemittanceViewState extends State<RemittanceView> {
                   children: [
                     Text(
                       remittance.item?.itemUnit?.id == 1
-                          ? "${remittance.quantity} عدد "
+                          ? "${remittance.quantity?.toDisplayString()} عدد "
                           : remittance.item?.itemUnit?.id == 2
-                              ? "${remittance.quantity.toString().seRagham()} گرم "
-                              : "${remittance.quantity.toString().seRagham()} ریال ",
+                              ? "${remittance.quantity?.toDisplayString().seRagham()} گرم "
+                              : "${remittance.quantity?.toDisplayString().seRagham()} ریال ",
                       style: AppTextStyle.bodyText.copyWith(
                           color: AppColor.textColor,
                           fontWeight: FontWeight.w500,
@@ -2347,7 +2346,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                                        final attachment = controller.imageList[index];
                                        return Column(
                                          children: [
-                                           if (kIsWeb)
+                                           //if (kIsWeb)
                                              Padding(
                                                padding: const EdgeInsets.only(right: 50),
                                                child: Row(mainAxisAlignment: MainAxisAlignment.start,
@@ -2442,7 +2441,7 @@ class _RemittanceViewState extends State<RemittanceView> {
                                          child: Visibility(
                                            visible: controller
                                                .currentImagePage.value <
-                                               (controller.imageList.length ?? 1) -
+                                               (controller.imageList.length) -
                                                    1,
                                            child: IconButton(
                                              style: ButtonStyle(
@@ -2802,10 +2801,10 @@ class _RemittanceViewState extends State<RemittanceView> {
                                 Text('مقدار: ', style: AppTextStyle.labelText.copyWith(fontSize: 10)),
                                 Text(
                                   remittance.item?.itemUnit?.id == 1
-                                      ? '${remittance.quantity} عدد'
+                                      ? '${remittance.quantity?.toDisplayString()} عدد'
                                       : remittance.item?.itemUnit?.id == 2
-                                      ? '${remittance.quantity.toString().seRagham()} گرم'
-                                      : '${remittance.quantity.toString().seRagham()} ریال',
+                                      ? '${remittance.quantity?.toDisplayString().seRagham()} گرم'
+                                      : '${remittance.quantity?.toDisplayString().seRagham()} ریال',
                                   style: AppTextStyle.bodyText.copyWith(fontSize: 12),
                                 ),
                               ],
@@ -2913,47 +2912,292 @@ class _RemittanceViewState extends State<RemittanceView> {
                         // Operation icons: images, edit, delete
                         Row(
                           children: [
-                            GestureDetector(
-                              onTap: () async {
-                                await controller.getImage(remittance.recId??'', 'Remittance');
-                                Future.delayed(const Duration(milliseconds: 200), () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return Dialog(
-                                        backgroundColor: AppColor.backGroundColor,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                        child: Container(
-                                          padding: EdgeInsets.all(8),
-                                          child: Column(mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              SizedBox(width: 320, height: 320,
-                                                child: PageView.builder(
-                                                  controller: controller.pageController,
-                                                  itemCount: controller.imageList.length,
-                                                  onPageChanged: (i) => controller.currentImagePage.value = i,
-                                                  itemBuilder: (c, i) {
-                                                    final attachment = controller.imageList[i];
-                                                    return Image.network(
-                                                      '${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment',
-                                                      fit: BoxFit.contain,
-                                                      errorBuilder: (c, e, s) => Icon(Icons.error, color: Colors.red),
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                              TextButton(onPressed: () => Get.back(), child: Text('بستن', style: AppTextStyle.bodyText)),
-                                            ],
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 5,vertical: 3),
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await controller.getImage(remittance.recId??"", "Remittance");
+                                  Future.delayed(
+                                      const Duration(milliseconds: 200), () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (BuildContext context) {
+                                        return Dialog(
+                                          backgroundColor: AppColor
+                                              .backGroundColor,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius
+                                                .circular(
+                                                10),
                                           ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                });
-                              },
-                              child: Container(decoration: BoxDecoration(borderRadius: BorderRadius.circular(50),color: AppColor.buttonColor.withAlpha(70)),
-                                  padding: EdgeInsets.all(3),
-                                  child: SvgPicture.asset('assets/svg/picture.svg', height: 30, colorFilter: ColorFilter.mode(AppColor.buttonColor.withAlpha(200), BlendMode.srcIn))),
+                                          child: Container(
+                                            padding: EdgeInsets
+                                                .all(
+                                                8),
+                                            child: Column(
+                                              mainAxisSize: MainAxisSize
+                                                  .min,
+                                              children: [
+                                                // نمایش اسلایدی عکس‌ها
+                                                SizedBox(
+                                                  width: 500,
+                                                  height: 500,
+                                                  child: Stack(
+                                                    children: [
+                                                      PageView.builder(
+                                                        controller: controller
+                                                            .pageController,
+                                                        itemCount: controller
+                                                            .imageList.length,
+                                                        onPageChanged: (
+                                                            index) =>
+                                                        controller
+                                                            .currentImagePage
+                                                            .value =
+                                                            index,
+                                                        itemBuilder: (context,
+                                                            index) {
+                                                          final attachment = controller
+                                                              .imageList[index];
+                                                          return Column(
+                                                            children: [
+                                                              //if (kIsWeb)
+                                                                Padding(
+                                                                  padding: const EdgeInsets
+                                                                      .only(
+                                                                      right: 50),
+                                                                  child: Row(
+                                                                    mainAxisAlignment: MainAxisAlignment
+                                                                        .start,
+                                                                    children: [
+                                                                      IconButton(
+                                                                        icon: Icon(
+                                                                            Icons
+                                                                                .download,
+                                                                            color: AppColor
+                                                                                .dividerColor),
+                                                                        onPressed: () =>
+                                                                            controller
+                                                                                .downloadImage(
+                                                                              attachment,
+                                                                            ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                              SizedBox(
+                                                                width: 450,
+                                                                height: 450,
+                                                                child: Image.network(
+                                                                  "${BaseUrl
+                                                                      .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                  loadingBuilder: (
+                                                                      context,
+                                                                      child,
+                                                                      loadingProgress) {
+                                                                    if (loadingProgress ==
+                                                                        null)
+                                                                      return child;
+                                                                    return Center(
+                                                                      child: CircularProgressIndicator(),
+                                                                    );
+                                                                  },
+                                                                  errorBuilder: (
+                                                                      context,
+                                                                      error,
+                                                                      stackTrace) =>
+                                                                      Icon(
+                                                                          Icons
+                                                                              .error,
+                                                                          color: Colors
+                                                                              .red),
+                                                                  fit: BoxFit
+                                                                      .contain,
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      ),
+                                                      SizedBox(
+                                                        height: 2,),
+                                                      Obx(() {
+                                                        return Positioned(
+                                                            left: 10,
+                                                            top: 0,
+                                                            bottom: 0,
+                                                            child: Visibility(
+                                                              visible: controller
+                                                                  .currentImagePage
+                                                                  .value > 0,
+                                                              child: IconButton(
+                                                                style: ButtonStyle(
+                                                                  backgroundColor: WidgetStateProperty
+                                                                      .all(
+                                                                      Colors
+                                                                          .black54),
+                                                                  shape: WidgetStateProperty
+                                                                      .all(
+                                                                      CircleBorder()),
+                                                                  padding: WidgetStateProperty
+                                                                      .all(
+                                                                      EdgeInsets
+                                                                          .all(
+                                                                          8)),
+                                                                ),
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .chevron_left,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 40,
+                                                                  shadows: [
+                                                                    Shadow(
+                                                                      blurRadius: 10,
+                                                                      color: Colors
+                                                                          .black,
+                                                                      offset: Offset(
+                                                                          0,
+                                                                          0),
+                                                                    )
+                                                                  ],
+                                                                ),
+                                                                onPressed: () {
+                                                                  controller
+                                                                      .pageController
+                                                                      .previousPage(
+                                                                    duration: Duration(
+                                                                        milliseconds: 300),
+                                                                    curve: Curves
+                                                                        .easeInOut,
+                                                                  );
+                                                                },
+                                                              ),
+                                                            )
+                                                        );
+                                                      }),
+                                                      Obx(() {
+                                                        return Positioned(
+                                                            right: 10,
+                                                            top: 0,
+                                                            bottom: 0,
+                                                            child: Visibility(
+                                                              visible: controller
+                                                                  .currentImagePage
+                                                                  .value <
+                                                                  (controller
+                                                                      .imageList
+                                                                      .length) - 1,
+                                                              child: IconButton(
+                                                                style: ButtonStyle(
+                                                                  backgroundColor: WidgetStateProperty
+                                                                      .all(
+                                                                      Colors
+                                                                          .black54),
+                                                                  shape: WidgetStateProperty
+                                                                      .all(
+                                                                      CircleBorder()),
+                                                                  padding: WidgetStateProperty
+                                                                      .all(
+                                                                      EdgeInsets
+                                                                          .all(
+                                                                          8)),
+                                                                ),
+                                                                icon: Icon(
+                                                                  Icons
+                                                                      .chevron_right,
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 40,
+                                                                  shadows: [
+                                                                    Shadow(
+                                                                      blurRadius: 10,
+                                                                      color: Colors
+                                                                          .black,
+                                                                      offset: Offset(
+                                                                          0,
+                                                                          0),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                                onPressed: () {
+                                                                  controller
+                                                                      .pageController
+                                                                      .nextPage(
+                                                                    duration: Duration(
+                                                                        milliseconds: 300),
+                                                                    curve: Curves
+                                                                        .easeInOut,
+                                                                  );
+                                                                },
+                                                              ),
+                                                            )
+                                                        );
+                                                      }),
+                                                      SizedBox(
+                                                        height: 2,),
+                                                      // نمایش نقاط راهنما
+                                                      Obx(() =>
+                                                           Row(
+                                                              mainAxisAlignment: MainAxisAlignment
+                                                                  .center,
+                                                              children: List
+                                                                  .generate(
+                                                                controller
+                                                                    .imageList
+                                                                    .length,
+                                                                    (index) =>
+                                                                    Container(
+                                                                      width: 8,
+                                                                      height: 8,
+                                                                      margin: EdgeInsets
+                                                                          .symmetric(
+                                                                          horizontal: 4),
+                                                                      decoration: BoxDecoration(
+                                                                        shape: BoxShape
+                                                                            .circle,
+                                                                        color: controller
+                                                                            .currentImagePage
+                                                                            .value ==
+                                                                            index
+                                                                            ? Colors
+                                                                            .blue
+                                                                            : Colors
+                                                                            .grey,
+                                                                      ),
+                                                                    ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                      SizedBox(
+                                                          height: 10),
+                                                    ],
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () =>
+                                                      Get
+                                                          .back(),
+                                                  child: Text(
+                                                    "بستن",
+                                                    style: AppTextStyle
+                                                        .bodyText,),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  });
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    SvgPicture.asset('assets/svg/picture.svg', height: 30, colorFilter: ColorFilter.mode(AppColor.buttonColor.withAlpha(200), BlendMode.srcIn)),
+                                  ],
+                                ),
+                              ),
                             ),
                             SizedBox(width: 20),
                             GestureDetector(

@@ -1,10 +1,11 @@
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/controller/remittance_request.controller.dart';
 import 'package:hanigold_admin/src/domain/remittance/widget/hover_tooltip_balance_rem_req.widget.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -14,11 +15,9 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
-import '../../order/widget/hover_tooltip_balance.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class RemittanceRequestListView extends StatefulWidget {
   const RemittanceRequestListView({super.key});
@@ -145,7 +144,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                                         // خروجی اکسل
                                         /*ElevatedButton(
                                           style: ButtonStyle(
-                                              padding:isDesktop ? WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23,vertical: 19)) :
+                                              padding:isDesktop ? WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)) :
                                               WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 21,vertical: 17)),
                                               // elevation: WidgetStatePropertyAll(5),
                                               backgroundColor:
@@ -321,7 +320,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                                                               child: ElevatedButton(
                                                                 style: ButtonStyle(
                                                                     padding: WidgetStatePropertyAll(
-                                                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        EdgeInsets.symmetric(horizontal: 23)),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(AppColor.appBarColor),
@@ -358,7 +357,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                                         // خروجی pdf
                                         /*ElevatedButton(
                                           style: ButtonStyle(
-                                              padding:isDesktop ? WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23,vertical: 19)):
+                                              padding:isDesktop ? WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)):
                                               WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 21,vertical: 17)),
                                               // elevation: WidgetStatePropertyAll(5),
                                               backgroundColor:
@@ -534,7 +533,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                                                               child: ElevatedButton(
                                                                 style: ButtonStyle(
                                                                     padding: WidgetStatePropertyAll(
-                                                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        EdgeInsets.symmetric(horizontal: 23)),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(AppColor.appBarColor),
@@ -575,7 +574,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                                 ElevatedButton(
                                   style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(
-                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                          EdgeInsets.symmetric(horizontal: 23)),
                                       // elevation: WidgetStatePropertyAll(5),
                                       backgroundColor:
                                       WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
@@ -816,7 +815,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1173,7 +1172,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                                                                           child: ElevatedButton(
                                                                             style: ButtonStyle(
                                                                                 padding: WidgetStatePropertyAll(
-                                                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                    EdgeInsets.symmetric(horizontal: 23)),
                                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                                 backgroundColor:
                                                                                 WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1402,7 +1401,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
   }
 
   List<DataRow> buildDataRows(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return controller.remittanceRequestList.asMap().entries.map((entry) {
       final index = entry.key;
       final remittanceRequest = entry.value;
@@ -1487,10 +1486,10 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
           DataCell(Center(
             child: Text(
               remittanceRequest.wallet?.item?.itemUnit?.id == 1
-                  ? "${remittanceRequest.quantity} عدد "
+                  ? "${remittanceRequest.quantity?.toDisplayString()} عدد "
                   : remittanceRequest.wallet?.item?.itemUnit?.id == 2
-                  ? "${remittanceRequest.quantity} گرم "
-                  : "${remittanceRequest.quantity.toString().seRagham()} ریال ",
+                  ? "${remittanceRequest.quantity?.toDisplayString()} گرم "
+                  : "${remittanceRequest.quantity?.toDisplayString().seRagham()} ریال ",
               style: AppTextStyle.bodyText.copyWith(fontSize: 12),
             ),
           )),
@@ -1573,7 +1572,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
-                                  .madiumbodyText
+                                  .mediumBodyText
                           ),
                           value: 1,
                           child: Row(
@@ -1602,7 +1601,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
-                                  .madiumbodyText
+                                  .mediumBodyText
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment

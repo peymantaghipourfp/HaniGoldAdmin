@@ -6,8 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/product_inventory.repository.dart';
-import 'package:hanigold_admin/src/domain/product/model/product_inventory.model.dart';
-import 'package:hanigold_admin/src/domain/product/model/product_inventory_detail.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/product_inventory_quantity.model.dart';
 import 'package:printing/printing.dart';
 import 'package:universal_html/html.dart' as html;
@@ -110,7 +108,6 @@ class ProductInventoryQuantityController extends GetxController{
 
   // لیست موجودی محصولات
   Future<void> getProductInventoryQuantityList() async {
-    print("### getProductInventoryQuantityList ###");
     productInventoryQuantityList.clear();
     isLoading.value=true;
     try {
@@ -155,7 +152,6 @@ class ProductInventoryQuantityController extends GetxController{
 
   // لیست ریز موجودی
   Future<void> getRecieptRemaindedListPager(String itemId) async {
-    print("getRecieptRemaindedListPager ::::::::: 1");
 
     // Clear previous details and set loading state
     recieptRemaindedList.clear();
@@ -178,7 +174,6 @@ class ProductInventoryQuantityController extends GetxController{
       paginated.value = response.paginated;
       isLoadingDetails.value = false;
 
-      print("Loaded ${recieptRemaindedList.length} details for item $itemId");
       update();
     }
     catch (e) {
@@ -247,7 +242,7 @@ class ProductInventoryQuantityController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -287,7 +282,7 @@ class ProductInventoryQuantityController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([response], 'application/pdf');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -321,7 +316,7 @@ class ProductInventoryQuantityController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -363,7 +358,7 @@ class ProductInventoryQuantityController extends GetxController{
       if (kIsWeb) {
         final blob = html.Blob([response], 'application/pdf');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);

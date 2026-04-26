@@ -1,11 +1,8 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_payment.controller.dart';
-import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
-import 'package:hanigold_admin/src/domain/laboratory/model/laboratory.model.dart';
 import 'package:hanigold_admin/src/widget/pager_widget1.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -14,16 +11,11 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
-import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
-import '../../../widget/pager_widget.dart';
 import '../../account/model/account.model.dart';
 import '../../wallet/model/wallet.model.dart';
-import '../controller/inventory_create_receive.controller.dart';
 import 'item_temp_detail_payment.widget.dart';
-import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
 
 typedef SelectCallBack = Function(int id);
 
@@ -210,8 +202,6 @@ class _InventoryCreatePaymentTabWidgetState
                           borderRadius: BorderRadius.circular(10)))),
                   onPressed: () async {
                     showForPaymentModal();
-                    print('idIttttem ${inventoryCreatePaymentController
-                        .selectedWalletAccount.value?.item?.id}');
                   },
                   child: inventoryCreatePaymentController.isLoading.value
                       ?
@@ -578,7 +568,6 @@ class _InventoryCreatePaymentTabWidgetState
                             onPressed: inventoryCreatePaymentController.isTimerActive.value
                                 ? null
                                 : () {
-                              print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
                               inventoryCreatePaymentController.sendVerificationCode(inventoryCreatePaymentController.selectedAccount.value?.id ?? 0);
                             },
                             child: Text(
@@ -610,7 +599,6 @@ class _InventoryCreatePaymentTabWidgetState
                               onPressed: inventoryCreatePaymentController.isTimerActive.value
                                   ? null
                                   : () {
-                                print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
                                 inventoryCreatePaymentController.resendVerificationCode();
                               },
                               child: Text(
@@ -632,7 +620,6 @@ class _InventoryCreatePaymentTabWidgetState
                               child: Text('ثبت کد',
                                   style: AppTextStyle.bodyText),
                               onPressed: () {
-                                print('sendAccountIdddd:::::::${inventoryCreatePaymentController.selectedAccount.value?.id}');
                                 inventoryCreatePaymentController.checkVerificationCode(
                                   inventoryCreatePaymentController.selectedAccount.value?.id ?? 0,
                                   int.parse(inventoryCreatePaymentController.verificationCodeController.text),
@@ -961,7 +948,7 @@ class _InventoryCreatePaymentTabWidgetState
   void showForPaymentModal() {
     final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     final isTablet = ResponsiveBreakpoints.of(context).isTablet;
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+   // final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
 
     Get.dialog(
       SingleChildScrollView(
@@ -1019,7 +1006,7 @@ class _InventoryCreatePaymentTabWidgetState
   Widget buildForPaymentDetail() {
     final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     final isTablet = ResponsiveBreakpoints.of(context).isTablet;
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
 
     return Obx(() {
       return
@@ -1137,7 +1124,6 @@ class _InventoryCreatePaymentTabWidgetState
                         index) {
                       final forPayment = inventoryCreatePaymentController
                           .forPaymentList[index];
-                      print("itemUnit:::${inventoryCreatePaymentController.forPaymentList[index].itemUnit?.id}");
 
                       return ListTile(
                         onTap: () async {
@@ -1167,10 +1153,7 @@ class _InventoryCreatePaymentTabWidgetState
                                 }
                               }
                             }
-                            print('Fetched images count: ${xFiles.length}');
-                            print('Fetched image names: ${xFiles.map((e) => e.name).toList()}');
                             forPayment.listXfile = xFiles;
-                            print('Assigned images count: ${forPayment.listXfile?.length}');
                           }
 
                           inventoryCreatePaymentController.selectedInputItem

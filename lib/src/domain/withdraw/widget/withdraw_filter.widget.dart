@@ -4,8 +4,6 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
-import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 
 class WithdrawFilterWidget extends StatelessWidget {
@@ -176,7 +174,7 @@ class WithdrawFilterWidget extends StatelessWidget {
               child: ElevatedButton(
                 style: ButtonStyle(
                   padding: WidgetStatePropertyAll(
-                    EdgeInsets.symmetric(horizontal: 23, vertical: 19),
+                    EdgeInsets.symmetric(horizontal: 23),
                   ),
                   backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                   shape: WidgetStatePropertyAll(

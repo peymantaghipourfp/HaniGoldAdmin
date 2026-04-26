@@ -5,8 +5,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order_edited_report.controller.dart';
 import 'package:hanigold_admin/src/domain/order/widget/order_edited_filter.widget.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -16,7 +16,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class OrderEditedReportListView extends StatefulWidget {
   const OrderEditedReportListView({super.key});
@@ -717,8 +717,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                                                 padding: WidgetStatePropertyAll(
                                                                     EdgeInsets
                                                                         .symmetric(
-                                                                        horizontal: 23,
-                                                                        vertical: 19)),
+                                                                        horizontal: 23)),
                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                 backgroundColor:
                                                                 WidgetStatePropertyAll(
@@ -796,7 +795,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                   style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(
                                         EdgeInsets.symmetric(
-                                            horizontal: 23,vertical: 19
+                                            horizontal: 23
                                         ),
                                       ),
                                       elevation: WidgetStatePropertyAll(5),
@@ -1014,7 +1013,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                                       child: ElevatedButton(
                                                         style: ButtonStyle(
                                                             padding: WidgetStatePropertyAll(
-                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                             // elevation: WidgetStatePropertyAll(5),
                                                             backgroundColor:
                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1709,8 +1708,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                                                               padding: WidgetStatePropertyAll(
                                                                                   EdgeInsets
                                                                                       .symmetric(
-                                                                                      horizontal: 23,
-                                                                                      vertical: 19)),
+                                                                                      horizontal: 23)),
                                                                               // elevation: WidgetStatePropertyAll(5),
                                                                               backgroundColor:
                                                                               WidgetStatePropertyAll(
@@ -2429,7 +2427,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                                                   EdgeInsets
                                                                       .symmetric(
                                                                       horizontal: 23,
-                                                                      vertical: 19)),
+                                                                )),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(
@@ -2543,7 +2541,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                   style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(
                                         EdgeInsets.symmetric(
-                                            horizontal: 23,vertical: 19
+                                            horizontal: 23
                                         ),
                                       ),
                                       elevation: WidgetStatePropertyAll(5),
@@ -2761,7 +2759,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                                       child: ElevatedButton(
                                                         style: ButtonStyle(
                                                             padding: WidgetStatePropertyAll(
-                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                             // elevation: WidgetStatePropertyAll(5),
                                                             backgroundColor:
                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -2990,7 +2988,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                                       SizedBox(height: 3,),
                                                       funcOrderDetail(
                                                           'مقدار:',
-                                                          "${order.quantity?.toString().seRagham(separator: ",")} ${order.item?.itemUnit?.name ?? ""}",
+                                                          "${order.quantity?.toDisplayString().seRagham(separator: ",")} ${order.item?.itemUnit?.name ?? ""}",
                                                           size: 11
                                                       ),
                                                     ],
@@ -3468,7 +3466,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
           DataCell(
               Center(
                 child: Text(
-                  "${order.quantity?.toString().seRagham(
+                  "${order.quantity?.toDisplayString().seRagham(
                       separator: ",")} ${order.item?.itemUnit?.name ?? ""}",
                   style:
                   AppTextStyle.bodyText.copyWith(fontSize: 11),

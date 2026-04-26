@@ -213,7 +213,7 @@ class _OrderUpdateDialogWidgetState extends State<OrderUpdateDialogWidget>
         child: Container(
           width: isDesktop ? Get.width * 0.65 : Get.width * 0.95,
           constraints: BoxConstraints(
-            maxHeight: Get.height * 0.8,
+            maxHeight: Get.height * 0.9,
           ),
           child: Column(crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -315,63 +315,66 @@ class _OrderUpdateDialogWidgetState extends State<OrderUpdateDialogWidget>
   }
 
   Widget _buildDesktopLayout() {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Right side - Form
-        Expanded(
-          child: _buildOrderForm(),
-        ),
-        SizedBox(width: 16),
-        // Left side - Balance
-        Expanded(
-          child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                orderUpdateController.isLoadingBalance.value == true
-                    ? Center(child: CircularProgressIndicator())
-                    : LayoutBuilder(
-                    builder: (context, constraints) {
-                        return BalanceWidget(
-                          title: orderUpdateController.selectedAccount.value?.name,
-                          listBalance: orderUpdateController.balanceList,
-                          size: constraints.maxWidth,
-                        );
-                      }
-                    ),
-                _buildErrorWidget(),
-                const SizedBox(height: 8),
-                Obx(() {
-                  return AccountSalesGroupGetOneItemWidget(
-                    data: orderUpdateController.selectedAccountSalesGroupItem.value,
-                    width: double.infinity,
-                    title: orderUpdateController
-                        .selectedAccount.value?.accountSalesGroup?.name,
-                    isLoading:
-                    orderUpdateController.isLoadingAccountSalesGroupItem.value,
-                    selectedItemId: orderUpdateController.selectedItem.value?.id,
-                    selectedBuySellId: orderUpdateController.selectedBuySell.value?.id,
-                    onPriceSelected: (mesghalPrice) {
-                      orderUpdateController.setPriceFromSalesGroup(mesghalPrice);
-                    },
-                  );
-                }),
-                const SizedBox(height: 8),
-                Obx(() {
-                  return AccountLevelGetOneItemWidget(
-                    data: orderUpdateController.selectedAccountLevelItem.value,
-                    width: double.infinity,
-                    title: orderUpdateController
-                        .selectedAccount.value?.accountLevel?.name,
-                    isLoading:
-                    orderUpdateController.isLoadingAccountLevelItem.value,
-                  );
-                }),
-              ],
-            ),
-        ),
+    return SingleChildScrollView(
+      physics: BouncingScrollPhysics(),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Right side - Form
+          Expanded(
+            child: _buildOrderForm(),
+          ),
+          SizedBox(width: 16),
+          // Left side - Balance
+          Expanded(
+            child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  orderUpdateController.isLoadingBalance.value == true
+                      ? Center(child: CircularProgressIndicator())
+                      : LayoutBuilder(
+                      builder: (context, constraints) {
+                          return BalanceWidget(
+                            title: orderUpdateController.selectedAccount.value?.name,
+                            listBalance: orderUpdateController.balanceList,
+                            size: constraints.maxWidth,
+                          );
+                        }
+                      ),
+                  _buildErrorWidget(),
+                  const SizedBox(height: 8),
+                  Obx(() {
+                    return AccountSalesGroupGetOneItemWidget(
+                      data: orderUpdateController.selectedAccountSalesGroupItem.value,
+                      width: double.infinity,
+                      title: orderUpdateController
+                          .selectedAccount.value?.accountSalesGroup?.name,
+                      isLoading:
+                      orderUpdateController.isLoadingAccountSalesGroupItem.value,
+                      selectedItemId: orderUpdateController.selectedItem.value?.id,
+                      selectedBuySellId: orderUpdateController.selectedBuySell.value?.id,
+                      onPriceSelected: (mesghalPrice) {
+                        orderUpdateController.setPriceFromSalesGroup(mesghalPrice);
+                      },
+                    );
+                  }),
+                  const SizedBox(height: 8),
+                  Obx(() {
+                    return AccountLevelGetOneItemWidget(
+                      data: orderUpdateController.selectedAccountLevelItem.value,
+                      width: double.infinity,
+                      title: orderUpdateController
+                          .selectedAccount.value?.accountLevel?.name,
+                      isLoading:
+                      orderUpdateController.isLoadingAccountLevelItem.value,
+                    );
+                  }),
+                ],
+              ),
+          ),
 
-      ],
+        ],
+      ),
     );
   }
 

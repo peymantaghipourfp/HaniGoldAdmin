@@ -9,13 +9,11 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/deposit/controller/deposit.controller.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_getOne.controller.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:uuid/uuid.dart';
 
@@ -107,8 +105,6 @@ class DepositUpdateController extends GetxController{
       }
     }
     update();
-    print(selectedBankName.value);
-    print( selectedBankId.value);
   }*/
 
   /*void changeSelectedBankAccount(BankAccountModel? newValue) {
@@ -126,15 +122,11 @@ class DepositUpdateController extends GetxController{
     shebaController.text=selectedBankAccount.value!.sheba.toString();
 
 
-    print(selectedBankAccount.value?.bank?.name);
-    print(selectedBankAccount.value?.bank?.id);
-    print(selectedIndex);
   }*/
 
   @override
   void onInit() async{
       depositId.value=int.parse(Get.parameters["id"]!);
-      print("deposssssssssit : ${depositId.value}");
       await fetchGetOneDeposit(depositId.value);
       if(getOneDeposit.value!=null){
         final deposit=getOneDeposit.value;
@@ -259,14 +251,45 @@ class DepositUpdateController extends GetxController{
 
   Future<void> pickImageDesktop( ) async {
     try{
-      final List<XFile?> images = await _picker.pickMultiImage();
+      final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        selectedImagesDesktop.addAll(images);
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+
+        selectedImagesDesktop.value = newList;
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
 
+  }
+
+  Future<void> pickImageMobile(ImageSource source) async {
+    try {
+      if (source == ImageSource.camera) {
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 70,
+        );
+        if (photo == null) return;
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..add(photo);
+
+        selectedImagesDesktop.value = newList;
+
+      }
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+
+        if (images.isEmpty) return;
+
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+        selectedImagesDesktop.value = newList;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'امکان انتخاب تصویر وجود ندارد');
+    }
   }
 
   Future<void> uploadImagesDesktopUpdate( String type, String entityType,) async {
@@ -312,12 +335,10 @@ class DepositUpdateController extends GetxController{
   }
 
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -330,7 +351,6 @@ class DepositUpdateController extends GetxController{
 
   Future<void> deleteImage(String fileName,) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
-    print('تعداد image:');
     try{
       var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
       if(fetch){
@@ -406,14 +426,12 @@ class DepositUpdateController extends GetxController{
   }
 
   void setDepositDetail(DepositModel deposit){
-    print(' بانک اکانت:${deposit.bankAccount?.id}');
-    print(' اکانت:${deposit.wallet!.account!.id!}');
     walletWithdrawId.value=deposit.walletWithdraw?.id ?? 0;
     depositId.value=deposit.id ?? 0;
     selectedWalletId.value=deposit.wallet?.id ?? 0;
     depositRequests.value=deposit.depositRequest?.id ?? 0;
-    amountController.text=deposit.amount.toString().seRagham(separator:  ',') ?? '';
-    extraAmountController.text=deposit.extraAmount.toString().seRagham(separator:  ',') ?? '';
+    amountController.text=deposit.amount?.toDisplayString().seRagham(separator:  ',') ?? '';
+    extraAmountController.text=deposit.extraAmount?.toDisplayString().seRagham(separator:  ',') ?? '';
     ownerNameController.text=deposit.ownerName ?? '';
     // numberController.text=deposit.bankAccount?.number.toString() ?? '';
     // cardNumberController.text=deposit.bankAccount?.cardNumber.toString() ?? '';
@@ -445,7 +463,6 @@ class DepositUpdateController extends GetxController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;
@@ -490,7 +507,7 @@ class DepositUpdateController extends GetxController{
         if (kIsWeb) {
           final blob = html.Blob([pngBytes], 'image/png');
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
+          html.AnchorElement(href: url)
             ..setAttribute('download', 'user_balance_screenshot_${accountController.text}.png')
             ..click();
           html.Url.revokeObjectUrl(url);

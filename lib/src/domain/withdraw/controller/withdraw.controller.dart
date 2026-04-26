@@ -5,9 +5,7 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 import 'package:dio/dio.dart';
 import 'package:flutter/rendering.dart';
-import 'dart:io';
 import 'dart:typed_data';
-import 'package:excel/excel.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,19 +15,16 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit_request.repository.dart';
 import 'package:hanigold_admin/src/config/repository/reason_rejection.repository.dart';
 import 'package:hanigold_admin/src/config/repository/withdraw.repository.dart';
-import 'package:hanigold_admin/src/config/repository/withdraw_getOne.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/base/base_controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_getOne.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/filter.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/options.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/predicate.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/reason_rejection_req.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/socket_withdraw.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -48,8 +43,6 @@ import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'dart:ui' as ui;
-import 'package:flutter/rendering.dart';
 import '../../users/model/paginated.model.dart';
 
 
@@ -212,7 +205,7 @@ class WithdrawController extends BaseController{
         try {
           final data = json.decode(message);
           if (data['channel'] == 'withdrawRequest') {
-            final socketWithdraw = SocketWithdrawModel.fromJson(data);
+            //final socketWithdraw = SocketWithdrawModel.fromJson(data);
 
             getWithdrawListPager();
           }
@@ -372,12 +365,10 @@ class WithdrawController extends BaseController{
 
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -416,7 +407,6 @@ class WithdrawController extends BaseController{
         /*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*/
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',
@@ -434,7 +424,6 @@ class WithdrawController extends BaseController{
 
   // لیست درخواست ها با صفحه بندی
   Future<void> getWithdrawListPager() async {
-    print("### getWithdrawListPager ###");
     withdrawList.clear();
     isLoading.value=true;
     try {
@@ -460,7 +449,6 @@ class WithdrawController extends BaseController{
 
   // لیستدرخواست های در انتظار با صفحه بندی
   Future<void> getWithdrawListStatusPager() async {
-    print("### getWithdrawListStatusPager ###");
     withdrawListStatus.clear();
     isLoading.value=true;
     try {
@@ -673,7 +661,6 @@ class WithdrawController extends BaseController{
           amount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit()),
           requestAmount: double.parse(requestAmountController.text.replaceAll(',', '').toEnglishDigit())
       );
-      print(response);
       if(response!=null){
         DepositRequestModel depositRequestResponse=DepositRequestModel.fromJson(response);
         Get.back();
@@ -711,7 +698,6 @@ class WithdrawController extends BaseController{
           depositRequestId: depositRequest.id,
         date: "${depositRequest.date?.year}-${depositRequest.date?.month.toString().padLeft(2, '0')}-${depositRequest.date?.day.toString().padLeft(2, '0')}T${depositRequest.date?.hour.toString().padLeft(2, '0')}:${depositRequest.date?.minute.toString().padLeft(2, '0')}:${depositRequest.date?.second.toString().padLeft(2, '0')}",
       );
-      print(response);
       if(response!=null){
         DepositRequestModel depositRequestResponse=DepositRequestModel.fromJson(response);
         Get.back();
@@ -742,8 +728,7 @@ class WithdrawController extends BaseController{
           (account) => account.id == depositRequest.account?.id,
     );
    await getBalanceList(depositRequest.account?.id ?? 0);
-    requestAmountController.text = depositRequest.requestAmount?.toString().seRagham(separator: ',') ?? '';
-    print("accountIdddd: ${depositRequest.account?.id}");
+    requestAmountController.text = depositRequest.requestAmount?.toDisplayString().seRagham(separator: ',') ?? '';
   }
 
   Future<List<dynamic>?> deleteWithdraw(int withdrawId,bool isDeleted)async{
@@ -827,7 +812,6 @@ class WithdrawController extends BaseController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
       var response=await userInfoTransactionRepository.getBalanceList(id);
       balanceList.addAll(response);
@@ -863,7 +847,7 @@ class WithdrawController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -1128,7 +1112,7 @@ class WithdrawController extends BaseController{
         buildDataCell(withdraw.paidAmount?.toString().seRagham(separator: ',') ?? ''),
         buildDataCell(withdraw.undividedAmount?.toString().seRagham(separator: ',') ?? ''),
         buildDataCell(withdraw.amount?.toString().seRagham(separator: ',') ?? ''),
-        buildDataCell("${withdraw.ownerName} ${withdraw.bank?.name}" ?? ''),
+        buildDataCell("${withdraw.ownerName} ${withdraw.bank?.name}"),
         buildDataCell(withdraw.wallet?.account?.name ?? ''),
         buildDataCell(withdraw.requestDate?.toPersianDate(twoDigits: true) ?? ''),
         buildDataCell(withdraw.rowNum.toString(), isCenter: true),
@@ -1217,7 +1201,7 @@ class WithdrawController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'image/png');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'row_screenshot_${withdraw.id}.png')
           ..click();
         html.Url.revokeObjectUrl(url);

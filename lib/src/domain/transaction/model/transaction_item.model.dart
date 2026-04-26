@@ -7,7 +7,6 @@ import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
@@ -24,7 +23,7 @@ class TransactionModel {
   @JsonKey(name: "fromId")
   final int? fromId;
   @JsonKey(name: "amount")
-  final int? amount;
+  final double? amount;
   @JsonKey(name: "date")
   final String? date;
   @JsonKey(name: "type")

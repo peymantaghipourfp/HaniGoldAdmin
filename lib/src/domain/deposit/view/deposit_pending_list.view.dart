@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/deposit/controller/deposit_pending.controller.dart';
-import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:hanigold_admin/src/widget/background_image_total.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -16,7 +14,7 @@ import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class DepositsPendingListView extends StatelessWidget {
   DepositsPendingListView({super.key});
@@ -398,7 +396,7 @@ class DepositsPendingListView extends StatelessWidget {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -879,7 +877,7 @@ class DepositsPendingListView extends StatelessWidget {
                                                                                     child: ElevatedButton(
                                                                                       style: ButtonStyle(
                                                                                           padding: WidgetStatePropertyAll(
-                                                                                              EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                              EdgeInsets.symmetric(horizontal: 23)),
                                                                                           // elevation: WidgetStatePropertyAll(5),
                                                                                           backgroundColor:
                                                                                           WidgetStatePropertyAll(AppColor.appBarColor),
@@ -977,7 +975,6 @@ class DepositsPendingListView extends StatelessWidget {
                               itemCount: depositController.depositList.length +
                                   (depositController.hasMore.value ? 1 : 0),
                               itemBuilder: (context, index) {
-                                print(depositController.depositList.length);
                                 if (depositController.depositList.isEmpty){
                                   return EmptyPage(
                                     title: 'واریزی وجود ندارد',
@@ -1240,7 +1237,7 @@ class DepositsPendingListView extends StatelessWidget {
                                                                     labelTextStyle: WidgetStateProperty
                                                                         .all(
                                                                         AppTextStyle
-                                                                            .madiumbodyText
+                                                                            .mediumBodyText
                                                                     ),
                                                                     value: 1,
                                                                     child: Row(
@@ -1254,7 +1251,7 @@ class DepositsPendingListView extends StatelessWidget {
                                                                         ) :
                                                                         Text('تایید',
                                                                           style: AppTextStyle
-                                                                              .madiumbodyText
+                                                                              .mediumBodyText
                                                                               .copyWith(
                                                                               color: AppColor
                                                                                   .primaryColor,
@@ -1269,7 +1266,7 @@ class DepositsPendingListView extends StatelessWidget {
                                                                     labelTextStyle: WidgetStateProperty
                                                                         .all(
                                                                         AppTextStyle
-                                                                            .madiumbodyText
+                                                                            .mediumBodyText
                                                                     ),
                                                                     child: Row(
                                                                       mainAxisAlignment: MainAxisAlignment
@@ -1282,7 +1279,7 @@ class DepositsPendingListView extends StatelessWidget {
                                                                         ) :
                                                                         Text('رد',
                                                                           style: AppTextStyle
-                                                                              .madiumbodyText
+                                                                              .mediumBodyText
                                                                               .copyWith(
                                                                               color: AppColor
                                                                                   .accentColor,
@@ -1744,7 +1741,7 @@ class DepositsPendingListView extends StatelessWidget {
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
-                                  .madiumbodyText
+                                  .mediumBodyText
                           ),
                           value: 1,
                           child: Row(
@@ -1773,7 +1770,7 @@ class DepositsPendingListView extends StatelessWidget {
                           labelTextStyle: WidgetStateProperty
                               .all(
                               AppTextStyle
-                                  .madiumbodyText
+                                  .mediumBodyText
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment
@@ -1866,7 +1863,6 @@ class DepositsPendingListView extends StatelessWidget {
                         );
                       }else {*/
                       Get.toNamed('/depositUpdate', parameters:{"id":deposit.id.toString()});
-                      print("depositId:::::${deposit.id}");
                       //}
                     },
                     child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,

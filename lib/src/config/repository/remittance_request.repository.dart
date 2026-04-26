@@ -1,18 +1,12 @@
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/list_remittance.model.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/list_remittance_request.model.dart';
-import 'package:hanigold_admin/src/domain/remittance/model/remittance.model.dart';
 
-import '../../domain/remittance/model/image_guid_model.dart';
-import 'dart:typed_data';
-
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class RemittanceRequestRepository{
 
@@ -74,17 +68,15 @@ class RemittanceRequestRepository{
         }
       };
       final response=await remittanceRequestDio.post('RemittanceRequest/getWrapper',data: options);
-      print("url getRemittanceRequestListPager : RemittanceRequest/getWrapper" );
-      print("request getRemittanceRequestListPager : $options" );
-      print("response getRemittanceRequestListPager : ${response.data}" );
       if(response.statusCode==200){
         return ListRemittanceRequestModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getRemittanceRequestListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -99,15 +91,13 @@ class RemittanceRequestRepository{
         "isDeleted" : isDeleted,
       };
 
-      print(remittanceRequestData);
 
       var response=await remittanceRequestDio.delete('RemittanceRequest/UpdateToIsDeleted',data: remittanceRequestData);
-      print('Status Code deleteRemittanceRequest: ${response.statusCode}');
-      print('Response Data deleteRemittanceRequest: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch (e, s) {
+      AppLogger.e('deleteRemittanceRequest failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -126,15 +116,13 @@ class RemittanceRequestRepository{
         "id": remittanceRequestId,
 
       };
-      print(remittanceRequestData);
 
       var response=await remittanceRequestDio.put('RemittanceRequest/updateStatus',data: remittanceRequestData);
-      print('Status Code updateStatusRemittanceRequest: ${response.statusCode}');
-      print('Response Data updateStatusRemittanceRequest: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در تغییر وضعیت:$e');
+    catch (e, s) {
+      AppLogger.e('updateStatusRemittanceRequest failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 }

@@ -2,7 +2,6 @@
 //
 //     final balanceModel = balanceModelFromJson(jsonString);
 
-import 'package:meta/meta.dart';
 import 'dart:convert';
 
 BalanceModel balanceModelFromJson(String str) => BalanceModel.fromJson(json.decode(str));

@@ -11,8 +11,8 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:uuid/uuid.dart';
 
@@ -34,10 +34,6 @@ import '../../users/model/balance_item.model.dart';
 import '../../wallet/model/wallet.model.dart';
 import '../model/bank.model.dart';
 import '../model/bank_account.model.dart';
-import '../model/bank_account_req.model.dart';
-import '../model/filter.model.dart';
-import '../model/options.model.dart';
-import '../model/predicate.model.dart';
 import 'package:universal_html/html.dart' as html;
 
 enum PageState{loading,err,empty,list}
@@ -128,8 +124,6 @@ class WithdrawUpdateController extends GetxController{
       }
     }*/
     update();
-    print(selectedBankName.value);
-    print( selectedBankId.value);
   }
 
   /*void changeSelectedBankAccount(BankAccountModel? newValue) {
@@ -146,9 +140,6 @@ class WithdrawUpdateController extends GetxController{
     selectedBankAccount.value!.sheba==null ? "" :
     shebaController.text=selectedBankAccount.value!.sheba.toString();
 
-    print(selectedBankAccount.value?.bank?.name);
-    print(selectedBankAccount.value?.bank?.id);
-    print(selectedIndex);
   }*/
 
   late WithdrawModel? existingWithdraw;
@@ -186,15 +177,45 @@ class WithdrawUpdateController extends GetxController{
 
   Future<void> pickImageDesktop( ) async {
     try{
-      final List<XFile?> images = await _picker.pickMultiImage();
+      final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        selectedImagesDesktop.addAll(images);
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
 
+        selectedImagesDesktop.value = newList;
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
     }
 
+  }
+
+  Future<void> pickImageMobile(ImageSource source) async {
+    try {
+      if (source == ImageSource.camera) {
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 70,
+        );
+        if (photo == null) return;
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..add(photo);
+
+        selectedImagesDesktop.value = newList;
+
+      }
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+
+        if (images.isEmpty) return;
+
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+        selectedImagesDesktop.value = newList;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'امکان انتخاب تصویر وجود ندارد');
+    }
   }
 
   Future<void> uploadImagesDesktop( String type, String entityType,) async {
@@ -241,12 +262,10 @@ class WithdrawUpdateController extends GetxController{
   }
 
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -259,7 +278,6 @@ class WithdrawUpdateController extends GetxController{
 
   Future<void> deleteImage(String fileName,) async{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
-    print('تعداد image:');
     try{
       var fetch=await remittanceRepository.deleteImage(fileName: fileName,);
       if(fetch){
@@ -427,7 +445,6 @@ class WithdrawUpdateController extends GetxController{
       if (walletList!=null) {
         selectedWalletId.value = walletList?.id ?? 0;
       }
-      print("walletList::::${walletList?.id}");
     }catch(e){
       throw ErrorException('خطا:$e');
     }finally{
@@ -442,7 +459,6 @@ class WithdrawUpdateController extends GetxController{
     try{
       isLoading.value = true;
       String gregorianDate = convertJalaliToGregorian(dateController.text);
-      print("walletId updateWithdraw: ${selectedWalletId.value}");
       //Gregorian date=existingWithdraw!.requestDate!.toGregorian();
       var response=await withdrawRepository.updateWithdraw(
           withdrawId: withdrawId.value,
@@ -489,13 +505,12 @@ class WithdrawUpdateController extends GetxController{
   }
 
   void setWithdrawDetails(WithdrawModel withdraw){
-    print(' تاریخ: ${withdraw.requestDate!.toPersianDate(showTime: true, digitType: NumStrLanguage.English)}');
     withdrawId.value=withdraw.id ?? 0;
     ownerNameController.text=withdraw.ownerName ?? '';
-    amountController.text=withdraw.amount.toString().seRagham(separator:  ',') ?? '';
+    amountController.text=withdraw.amount?.toDisplayString().seRagham(separator:  ',') ?? '';
     cardNumberController.text=withdraw.cardNumber==null ? "" : withdraw.cardNumber?.trim().toString() ?? '';
-    numberController.text=withdraw.number==null ? "" : withdraw.number.toString() ?? '';
-    shebaController.text=withdraw.sheba==null ? "" : withdraw.sheba.toString() ?? '';
+    numberController.text=withdraw.number==null ? "" : withdraw.number.toString();
+    shebaController.text=withdraw.sheba==null ? "" : withdraw.sheba.toString();
     descriptionController.text=withdraw.description ?? '';
     statusId.value=withdraw.status ?? 0;
     withdraw.confirmDate==null ?
@@ -504,7 +519,6 @@ class WithdrawUpdateController extends GetxController{
     selectedAccount.value = withdraw.wallet?.account;
     selectedBank.value=withdraw.bank;
     getImage(existingWithdraw?.recId ?? '', "WithdrawRequest");
-    print("selectedAccount.value:::::::::${selectedAccount.value}");
     /*if (withdraw.bank?.id != null) {
       selectedBankId.value = withdraw.bank!.id!;
       selectedBankName.value = withdraw.bank!.name!;
@@ -524,7 +538,6 @@ class WithdrawUpdateController extends GetxController{
 
   // لیست بالانس
   /*Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;
@@ -546,7 +559,6 @@ class WithdrawUpdateController extends GetxController{
 
   // دریافت تراز کامل کاربر
   Future<void> getTooltipTotalBalance(int accountId) async {
-    print("getTooltipTotalBalance : $accountId");
     if (accountId == 0) {
       tooltipTotalBalanceModel.value = null;
       isLoadingTooltipBalance.value = false;
@@ -556,7 +568,6 @@ class WithdrawUpdateController extends GetxController{
       isLoadingTooltipBalance.value = true;
       final result = await withdrawController.getTooltipTotalBalance(accountId);
       tooltipTotalBalanceModel.value = result;
-      print("TooltipTotalBalance fetched successfully");
     } catch (e) {
       print('Error fetching tooltip balance: $e');
       tooltipTotalBalanceModel.value = null;
@@ -593,7 +604,7 @@ class WithdrawUpdateController extends GetxController{
         if (kIsWeb) {
           final blob = html.Blob([pngBytes], 'image/png');
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
+          html.AnchorElement(href: url)
             ..setAttribute('download', 'user_balance_screenshot_${selectedAccount.value?.name}.png')
             ..click();
           html.Url.revokeObjectUrl(url);

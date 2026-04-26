@@ -1,12 +1,14 @@
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
-import 'package:hanigold_admin/src/domain/home/model/chat_message.model.dart';
-import 'package:hanigold_admin/src/domain/home/model/chat_user.model.dart';
-import 'package:hanigold_admin/src/domain/home/model/topic.model.dart';
-import 'package:hanigold_admin/src/domain/home/model/user.model.dart';
+import 'package:hanigold_admin/src/domain/chat/model/chat.model.dart';
+import 'package:hanigold_admin/src/domain/chat/model/chat_account.model.dart';
 
+import '../../domain/chat/model/chat_message.model.dart';
+import '../../domain/chat/model/topic.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class ChatRepository {
   Dio chatDio = Dio();
@@ -16,96 +18,92 @@ class ChatRepository {
     chatDio.interceptors.add(DioInterceptor());
   }
 
-  // Get user chat list
-  Future<List<ChatUserModel>> getUserChatList(String userId, {int startIndex = 1, int toIndex = 10}) async {
+  // Get account chat list
+  Future<List<ChatAccountModel>> getChatAccountList({int startIndex = 1, int toIndex = 10}) async {
     try {
-      Map<String, dynamic> options = {"options" : { "message" :{
-        "Predicate": [
-          {
-            "innerCondition": 1,
-            "outerCondition": 0,
-            "filters": [
-              {
-                "fieldName": "FromUserId",
-                "filterValue": userId,
-                "filterType": 5,
-                "RefTable": "Message"
-              },
-              {
-                "fieldName": "ToUserId",
-                "filterValue": userId,
-                "filterType": 5,
-                "RefTable": "Message"
-              }
-            ]
-          }
-        ],
-        "orderBy": "Message.Id",
+      Map<String, dynamic> options = {
+        "options" : { "chat" :{
+
+        "orderBy": "Account.Id",
         "orderByType": "desc",
         "StartIndex": startIndex,
         "ToIndex": toIndex
-      }}};
+          }
+        }
+      };
 
-      print("request getUserChatList : $options");
-      final response = await chatDio.post('Message/getUserChat', data: options);
-      print("request getUserChatList : $options");
-      print("response getUserChatList : ${response.data}");
+      final response = await chatDio.post('Chat/getChatAccount', data: options);
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
-        return data.map((chat) => ChatUserModel.fromJson(chat)).toList();
+        return data.map((chatAccount) => ChatAccountModel.fromJson(chatAccount)).toList();
       } else {
-        throw ErrorException('خطا در دریافت لیست چت‌ها');
+        throw ErrorException('خطا در دریافت لیست چت ‌اکانت ها');
       }
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e,s) {
+      AppLogger.e('getChatAccountList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
-  // Get chat messages between two users
-  Future<List<ChatMessageModel>> getChatMessages(String userId, String otherUserId, {int startIndex = 1, int toIndex = 10}) async {
+  // Get chat list
+  Future<List<ChatModel>> getChatList(String accountId, {int startIndex = 1, int toIndex = 10}) async {
+    try {
+      Map<String, dynamic> options = {
+        "options" : { "chat" :{
+          "Predicate": [
+            {
+              "innerCondition": 1,
+              "outerCondition": 0,
+              "filters": [
+                {
+                  "fieldName": "accountId",
+                  "filterValue": accountId,
+                  "filterType": 5,
+                  "RefTable": "ChatSession"
+                }
+              ]
+            }
+          ],
+          "orderBy": "ChatSession.ChatId",
+          "orderByType": "desc",
+          "StartIndex": startIndex,
+          "ToIndex": toIndex
+        }}
+      };
+      final response = await chatDio.post('Chat/getChat', data: options);
+      if (response.statusCode == 200) {
+        List<dynamic> data = response.data;
+        return data.map((chat) => ChatModel.fromJson(chat)).toList();
+      } else {
+        throw ErrorException('خطا در دریافت لیست چت‌ها');
+      }
+    } catch (e,s) {
+      AppLogger.e('getChatList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
+    }
+  }
+
+  // Get chat messages
+  Future<List<ChatMessageModel>> getChatMessages(String chatId,{int startIndex = 1, int toIndex = 10}) async {
     try {
       Map<String, dynamic> options = {"options" :
-      { "message": {
+      { "chat": {
         "Predicate": [
           {
             "innerCondition": 1,
             "outerCondition": 0,
             "filters": [
               {
-                "fieldName": "FromUserId",
-                "filterValue": userId,
-                "filterType": 5,
-                "RefTable": "Message"
-              },
-              {
-                "fieldName": "ToUserId",
-                "filterValue": userId,
-                "filterType": 5,
-                "RefTable": "Message"
-              }
-            ]
-          },
-          {
-            "innerCondition": 1,
-            "outerCondition": 0,
-            "filters": [
-              {
-                "fieldName": "FromUserId",
-                "filterValue": otherUserId,
-                "filterType": 5,
-                "RefTable": "Message"
-              },
-              {
-                "fieldName": "ToUserId",
-                "filterValue": otherUserId,
-                "filterType": 5,
-                "RefTable": "Message"
+                "fieldName": "ChatId",
+                "filterValue": chatId,
+                "filterType": 4,
+                "RefTable": "ChatMessage"
               }
             ]
           }
         ],
-        "orderBy": "Message.Id",
+        "orderBy": "ChatMessage.Seq",
         "orderByType": "desc",
         "StartIndex": startIndex,
         "ToIndex": toIndex
@@ -113,9 +111,7 @@ class ChatRepository {
       }
       };
 
-      final response = await chatDio.post('Message/get', data: options);
-      print("request getChatMessages : $options");
-      print("response getChatMessages : ${response.data}");
+      final response = await chatDio.post('Chat/getChatMessagesByChatId', data: options);
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
@@ -123,18 +119,17 @@ class ChatRepository {
       } else {
         throw ErrorException('خطا در دریافت پیام‌ها');
       }
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e,s) {
+      AppLogger.e('getChatMessages failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
 
     }
   }
 
-  // Get topics for a user
-  Future<List<TopicModel>> getTopics(String userId) async {
+  // Get topics for a account
+  Future<List<TopicModel>> getTopics() async {
     try {
-      final response = await chatDio.get('Message/getTopic?id=$userId');
-      print("request getTopics : id=$userId");
-      print("response getTopics : ${response.data}");
+      final response = await chatDio.get('Chat/getTopic');
 
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
@@ -142,8 +137,9 @@ class ChatRepository {
       } else {
         throw ErrorException('خطا در دریافت موضوعات');
       }
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e,s) {
+      AppLogger.e('getTopics failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -151,32 +147,30 @@ class ChatRepository {
   Future<bool> sendMessage(Map<String, dynamic> sendData) async {
     try {
       final response = await chatDio.post('Message/insert', data: sendData);
-      print("request sendMessage : $sendData");
-      print("response sendMessage : ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
         throw ErrorException('خطا در ارسال پیام');
       }
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e,s) {
+      AppLogger.e('sendMessage failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
   Future<bool> updateSeen(String id) async {
     try {
       final response = await chatDio.put('Message/updateSeen?id=$id');
-      print("request updateSeen : id=$id");
-      print("response updateSeen : ${response.data}");
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return true;
       } else {
         throw ErrorException('خطا در آپدیت');
       }
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e,s) {
+      AppLogger.e('updateSeen failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 }

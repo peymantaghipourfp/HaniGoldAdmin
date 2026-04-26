@@ -2,12 +2,12 @@
 
 
 import 'dart:async';
-import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_level.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -50,7 +50,6 @@ class AccountLevelController extends GetxController {
 
   // لیست سطوح کاربری
   Future<void> getAccountLevelList() async {
-    print("### getAccountLevelList ###");
     accountLevelList.clear();
     isLoading.value=true;
     try {
@@ -97,8 +96,8 @@ class AccountLevelController extends GetxController {
     final balanceValue = accountLevel.balance ?? 0.0;
     final balanceStr = balanceValue.toStringAsFixed(0);
     balanceController.text = balanceStr.seRagham();
-    positiveGoldController.text = accountLevel.positiveGold?.toString() ?? '0';
-    negativeGoldController.text = accountLevel.negativeGold?.toString() ?? '0';
+    positiveGoldController.text = accountLevel.positiveGold?.toDisplayString() ?? '0';
+    negativeGoldController.text = accountLevel.negativeGold?.toDisplayString() ?? '0';
 
     // Clear existing item controllers
     _clearItemControllers();
@@ -109,10 +108,10 @@ class AccountLevelController extends GetxController {
         final itemId = item.itemId ?? 0;
         if (itemId > 0) {
           maxBuyControllers[itemId] = TextEditingController(
-            text: item.maxBuy?.toString() ?? '0',
+            text: item.maxBuy?.toDisplayString() ?? '0',
           );
           maxSellControllers[itemId] = TextEditingController(
-            text: item.maxSell?.toString() ?? '0',
+            text: item.maxSell?.toDisplayString() ?? '0',
           );
         }
       }

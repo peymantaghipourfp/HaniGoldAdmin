@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product_inventory.controller.dart';
-import 'package:hanigold_admin/src/widget/pager_widget1.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -13,7 +13,7 @@ import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../model/product_inventory.model.dart';
 import '../model/product_inventory_detail.model.dart';
 import '../widget/product_inventory_filter.widget.dart';
@@ -243,7 +243,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
           DataCell(
               Center(
                 child: Text(
-                  "${inventory.item?.w750 ?? 0}",
+                  "${inventory.item?.w750?.toDisplayString() ?? 0}",
                   style: AppTextStyle.bodyText.copyWith(
                     color: AppColor.textColor,
                     fontSize: 12,
@@ -256,8 +256,8 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                   children: [
                     Text(
                       (inventory.initBalance ?? 0) < 0 ?
-                      "-${inventory.initBalance?.abs().toString().seRagham() ?? "" }"
-                          : inventory.initBalance.toString().seRagham() ?? "",
+                      "-${inventory.initBalance?.abs().toDisplayString().seRagham() ?? "" }"
+                          : inventory.initBalance?.toDisplayString().seRagham() ?? "",
                       style: AppTextStyle.bodyText.copyWith(
                           color: (inventory.initBalance ?? 0) < 0 ?  AppColor.accentColor : (inventory.initBalance ?? 0) > 0 ?AppColor.primaryColor :AppColor.textColor,
                           fontSize: 12, fontWeight:
@@ -282,7 +282,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                 child: Row(
                   children: [
                     Text(
-                      inventory.quantityIn.toString().seRagham() ?? "",
+                      inventory.quantityIn?.toDisplayString().seRagham() ?? "",
                       style: AppTextStyle.bodyText.copyWith(
                           color: inventory.quantityIn!<0 ?  AppColor.accentColor : inventory.quantityIn!>0 ?AppColor.primaryColor :AppColor.textColor,
                           fontSize: 12, fontWeight:
@@ -308,8 +308,8 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                   children: [
                     Text(
                       inventory.quantityOut!<0 ?
-                      "-${inventory.quantityOut?.abs().toString().seRagham() ?? ""}" :
-                      inventory.quantityOut.toString().seRagham() ?? "",
+                      "-${inventory.quantityOut?.abs().toDisplayString().seRagham() ?? ""}" :
+                      inventory.quantityOut?.toDisplayString().seRagham() ?? "",
                       style: AppTextStyle.bodyText.copyWith(
                           color: inventory.quantityOut!<0 ?  AppColor.accentColor : inventory.quantityOut!>0 ?AppColor.primaryColor :AppColor.textColor,
                           fontSize: 12, fontWeight:
@@ -335,8 +335,8 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                   children: [
                     Text(
                       inventory.quantity!<0 ?
-                      "-${inventory.quantity?.abs().toString().seRagham() ?? ""}" :
-                      inventory.quantity.toString().seRagham(),
+                      "-${inventory.quantity?.abs().toDisplayString().seRagham() ?? ""}" :
+                      inventory.quantity?.toDisplayString().seRagham() ?? "",
                       style: AppTextStyle.bodyText.copyWith(
                           color: inventory.quantity!<0 ?  AppColor.accentColor : inventory.quantity!>0 ?AppColor.primaryColor :AppColor.textColor,
                           fontSize: 12, fontWeight:
@@ -363,8 +363,8 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                     inventory.itemUnit?.id==2 && inventory.item?.id!=1 ?
                     Text(
                       (inventory.quantityCount ?? 0) < 0 ?
-                      "-${inventory.quantityCount?.abs().toString().seRagham()}":
-                      inventory.quantityCount.toString().seRagham(),
+                      "-${inventory.quantityCount?.abs().toDisplayString().seRagham()}":
+                      inventory.quantityCount?.toDisplayString().seRagham() ?? "",
                       style: AppTextStyle.bodyText.copyWith(
                           color: AppColor.dividerColor,
                           fontSize: 12, fontWeight:
@@ -713,7 +713,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "${detail.quantity?.toString().seRagham() ?? "0"}",
+                    "${detail.quantity?.toDisplayString().seRagham() ?? "0"}",
                     style: AppTextStyle.bodyText.copyWith(
                       color: detail.type == 0 ?  AppColor.primaryColor : AppColor.accentColor,
                       fontSize: 12,
@@ -836,7 +836,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                   Row(
                     children: [
                       Text(
-                        "${detail.weight750.toString().seRagham()} ${detail.item?.itemUnit?.name}",
+                        "${detail.weight750?.toDisplayString().seRagham()} ${detail.item?.itemUnit?.name}",
                         style: AppTextStyle.bodyText.copyWith(
                           color: AppColor.dividerColor,
                           fontSize: 11,
@@ -1014,13 +1014,13 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
           Divider(height: 0.5, color: AppColor.dividerColor),
           SizedBox(height: 10),
           // Weight 750
-          _mobileLine("وزن 750", "${inventory.item?.w750 ?? 0}", AppColor.textColor, ""),
+          _mobileLine("وزن 750", "${inventory.item?.w750?.toDisplayString() ?? 0}", AppColor.textColor, ""),
           // Initial balance
           _mobileLine(
             "موجودی اول دوره",
             (inventory.initBalance ?? 0) < 0 ?
-            "-${inventory.initBalance?.abs().toString().seRagham() ?? "0"}":
-            inventory.initBalance?.toString().seRagham() ?? "0",
+            "-${inventory.initBalance?.abs().toDisplayString().seRagham() ?? "0"}":
+            inventory.initBalance?.toDisplayString().seRagham() ?? "0",
             (inventory.initBalance ?? 0) < 0
                 ? AppColor.accentColor
                 : (inventory.initBalance ?? 0) > 0
@@ -1040,7 +1040,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
               children: [
                 _mobileLine(
                   "ورودی",
-                  inventory.quantityIn?.toString().seRagham() ?? "0",
+                  inventory.quantityIn?.toDisplayString().seRagham() ?? "0",
                   inventory.quantityIn! < 0
                       ? AppColor.accentColor
                       : inventory.quantityIn! > 0
@@ -1051,8 +1051,8 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                 _mobileLine(
                   "خروجی",
                   inventory.quantityOut! < 0
-                      ? "-${inventory.quantityOut?.abs().toString().seRagham() ?? "0"}"
-                      : inventory.quantityOut?.toString().seRagham() ?? "0",
+                      ? "-${inventory.quantityOut?.abs().toDisplayString().seRagham() ?? "0"}"
+                      : inventory.quantityOut?.toDisplayString().seRagham() ?? "0",
                   inventory.quantityOut! < 0
                       ? AppColor.accentColor
                       : inventory.quantityOut! > 0
@@ -1074,8 +1074,8 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
             child: _mobileLine(
               "باقیمانده",
               inventory.quantity! < 0
-                  ? "-${inventory.quantity?.abs().toString().seRagham() ?? "0"}"
-                  : inventory.quantity?.toString().seRagham() ?? "0",
+                  ? "-${inventory.quantity?.abs().toDisplayString().seRagham() ?? "0"}"
+                  : inventory.quantity?.toDisplayString().seRagham() ?? "0",
               inventory.quantity! < 0
                   ? AppColor.accentColor
                   : inventory.quantity! > 0
@@ -1091,8 +1091,8 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
             _mobileLine(
               "معادل عددی",
               (inventory.quantityCount ?? 0) < 0 ?
-              "-${inventory.quantityCount?.abs().toString().seRagham() ?? "0"}":
-              inventory.quantityCount.toString().seRagham() ?? "0",
+              "-${inventory.quantityCount?.abs().toDisplayString().seRagham() ?? "0"}":
+              inventory.quantityCount?.toDisplayString().seRagham() ?? "0",
               AppColor.dividerColor,
               "عدد",
             ),
@@ -1457,7 +1457,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
           // Quantity
           _mobileDetailLine(
             "مقدار: ",
-            detail.quantity?.toString().seRagham() ?? "0",
+            detail.quantity?.toDisplayString().seRagham() ?? "0",
             detail.type == 0 ? AppColor.primaryColor : AppColor.accentColor,
               detail.item?.itemUnit?.name,10,13
           ),
@@ -1484,7 +1484,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                           if (detail.weight750 != null)
                             _mobileDetailLine(
                               "وزن ترازو: ",
-                              "${detail.weight750.toString().seRagham()}",
+                              "${detail.weight750?.toDisplayString().seRagham()}",
                               AppColor.dividerColor,
                               "گرم",10,11
                             ),
@@ -1493,14 +1493,14 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                           if (detail.weight750 != null)
                             _mobileDetailLine(
                               "وزن 750: ",
-                              "${detail.weight750.toString().seRagham()}",
+                              "${detail.weight750?.toDisplayString().seRagham()}",
                               AppColor.dividerColor,
                               "گرم",10,11
                             ),
                           if (detail.impurity != null)
                             _mobileDetailLine(
                               "ناخالصی: ",
-                              "${detail.impurity.toString().seRagham()}",
+                              "${detail.impurity?.toDisplayString().seRagham()}",
                               AppColor.dividerColor,
                               "کرم",10,11
                             ),
@@ -1508,7 +1508,7 @@ class ProductInventoryView extends GetView<ProductInventoryController> {
                           SizedBox(height: 8),
                           if (detail.weight750 != null)
                             _mobileDetailLine(
-                              "${detail.weight750.toString().seRagham()} ${detail.item?.itemUnit?.name} ",
+                              "${detail.weight750?.toDisplayString().seRagham()} ${detail.item?.itemUnit?.name} ",
                               detail.item?.name ?? "",
                               AppColor.dividerColor,
                                 "",12,12

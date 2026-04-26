@@ -9,10 +9,9 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../product/model/item.model.dart';
 import '../controller/trading_balance.controller.dart';
-import '../model/balance_trading.model.dart';
 import '../model/order_result_day.model.dart';
 
 class TradingBalanceView extends StatefulWidget {
@@ -440,7 +439,6 @@ class _TradingBalanceViewState extends State<TradingBalanceView> {
         const SizedBox(height: 8),
         GestureDetector(
           onTap: () {
-            print('Date field tapped: ${isStart ? 'Start' : 'End'} date');
             _selectDate(textController, isStart);
           },
           child: Container(
@@ -1741,7 +1739,6 @@ class _TradingBalanceViewState extends State<TradingBalanceView> {
 
   Future<void> _selectDate(TextEditingController controller, bool isStart) async {
     try {
-      print('_selectDate called for ${isStart ? 'start' : 'end'} date');
 
       final Jalali? picked = await showPersianDatePicker(
         context: context,
@@ -1763,7 +1760,6 @@ class _TradingBalanceViewState extends State<TradingBalanceView> {
         },
       );
 
-      print('Date picker result: $picked');
 
       if (picked != null) {
         // Format the date in Jalali format for display

@@ -4,8 +4,10 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class BankRepository{
   Dio bankDio=Dio();
@@ -25,14 +27,13 @@ class BankRepository{
         }}
       };
       final response=await bankDio.post('Bank/get',data: options);
-      print("request getBankList : $options" );
-      print("response getBankList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((bank)=>BankModel.fromJson(bank)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getBankList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -61,14 +62,13 @@ class BankRepository{
         }}
       };
       final response=await bankDio.post('Bank/get',data: options);
-      print("request searchBankList : $options" );
-      print("response searchBankList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((bank)=>BankModel.fromJson(bank)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('searchBankList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

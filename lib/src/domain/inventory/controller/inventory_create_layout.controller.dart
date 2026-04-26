@@ -22,7 +22,6 @@ class InventoryCreateLayoutController extends GetxController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     isLoadingBalance.value=false;
     balanceList.clear();
     try{
@@ -45,7 +44,6 @@ class InventoryCreateLayoutController extends GetxController{
 
   // دریافت تراز کامل کاربر
   Future<void> getTooltipTotalBalance(int accountId) async {
-    print("getTooltipTotalBalance : $accountId");
     if (accountId == 0) {
       tooltipTotalBalanceModel.value = null;
       isLoadingTooltipBalance.value = false;
@@ -55,7 +53,6 @@ class InventoryCreateLayoutController extends GetxController{
       isLoadingTooltipBalance.value = true;
       final result = await userInfoTransactionRepository.getTooltipTotalBalance(accountId);
       tooltipTotalBalanceModel.value = result;
-      print("TooltipTotalBalance fetched successfully");
     } catch (e) {
       print('Error fetching tooltip balance: $e');
       tooltipTotalBalanceModel.value = null;

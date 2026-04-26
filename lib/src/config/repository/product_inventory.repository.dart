@@ -4,13 +4,15 @@ import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/product/model/product_inventory.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/product_inventory_quantity.model.dart';
-import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/list_product_inventory_detail.model.dart';
 
 import '../../domain/inventory/model/list_forPayment.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 import 'dart:typed_data';
+
+import '../network/error_handler.dart';
 
 class ProductInventoryRepository{
   Dio productInventoryDio=Dio();
@@ -22,13 +24,13 @@ class ProductInventoryRepository{
   Future<List<ProductInventoryModel>> getProductInventoryList()async{
     try{
       final response=await productInventoryDio.get('Inventory/getInventoryTurnover');
-      print("response getProductInventoryList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((bank)=>ProductInventoryModel.fromJson(bank)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getProductInventoryList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -95,27 +97,26 @@ class ProductInventoryRepository{
         }}
       };
       final response=await productInventoryDio.post('Inventory/getInventoryDetailList',data: options);
-      print("request getProductInventoryDetailListPager : $options" );
-      print("response getProductInventoryDetailListPager : ${response.data}" );
 
       return ListProductInventoryDetailModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getProductInventoryDetailListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
   Future<List<ProductInventoryQuantityModel>> getProductInventoryQuantityList()async{
     try{
       final response=await productInventoryDio.get('Inventory/getInventoryQuantity');
-      print("response getProductInventoryQuantityList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((bank)=>ProductInventoryQuantityModel.fromJson(bank)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getProductInventoryQuantityList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -175,12 +176,11 @@ class ProductInventoryRepository{
         }}
       };
       final response=await productInventoryDio.post('Inventory/getRecieptRemaindedWrapper',data: options);
-      print("request getRecieptRemaindedPager : $options" );
-      print("response getRecieptRemaindedPager : ${response.data}" );
       return ListForPaymentModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getRecieptRemaindedPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -188,10 +188,10 @@ class ProductInventoryRepository{
   Future<Uint8List> getInventoryQuantityExcel() async{
     try{
       final response=await productInventoryDio.get('Inventory/inventoryQuantityExcel',options: Options(responseType: ResponseType.bytes));
-      print("response getInventoryQuantityExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getInventoryQuantityExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -201,11 +201,11 @@ class ProductInventoryRepository{
       final response=await productInventoryDio.get('Inventory/getQuantityPdf',
           options: Options(responseType: ResponseType.bytes)
       );
-      print("response getInventoryQuantityPdf : ${response.data}" );
       return Uint8List.fromList(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getInventoryQuantityPdf failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -242,11 +242,10 @@ class ProductInventoryRepository{
           'Inventory/recieptRemaindedExcel',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request getRecieptRemaindedListExcel : $options" );
-      print("response getRecieptRemaindedListExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getRecieptRemaindedListExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -283,11 +282,10 @@ class ProductInventoryRepository{
           'Inventory/getRemaindedPdf',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request getRemaindedListPdf : $options" );
-      print("response getRemaindedListPdf : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getRemaindedListPdf failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 }

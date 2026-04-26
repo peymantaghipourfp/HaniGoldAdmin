@@ -59,7 +59,6 @@ class StatisticsReportController extends GetxController{
 
   // لیست گزارش حجمی سفارشات
   Future<void> getStatisticsReportList(String startDate,String endDate) async{
-    print("getStatisticsReportList called with: startDate=$startDate, endDate=$endDate");
     statisticsReportList.clear();
     headerData.value = null;
     try{
@@ -73,13 +72,11 @@ class StatisticsReportController extends GetxController{
       var listResponse = results[0] as List<StatisticsReportModel>;
       var headerResponse = results[1] as StatisticsReportHeaderModel?;
 
-      print("Received ${listResponse.length} statistics report records");
       state.value=PageState.list;
       statisticsReportList.addAll(listResponse);
       headerData.value = headerResponse;
 
       if(statisticsReportList.isEmpty){
-        print("داده ای پیدا نشد - setting state to empty");
         state.value=PageState.empty;
       }
       update();

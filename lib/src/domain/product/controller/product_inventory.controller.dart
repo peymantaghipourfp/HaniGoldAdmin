@@ -102,7 +102,6 @@ class ProductInventoryController extends GetxController{
 
   // لیست گزارش موجودی محصولات
   Future<void> getProductInventoryList() async {
-    print("### getProductInventoryList ###");
     productInventoryList.clear();
     isLoading.value=true;
     try {
@@ -147,8 +146,7 @@ class ProductInventoryController extends GetxController{
 
   // لیست ریز گزارش موجودی
   Future<void> getProductInventoryDetailListPager(String itemId) async {
-    print("getProductInventoryDetailList ::::::::: 1");
-    int itemIdInt = int.parse(itemId);
+    //int itemIdInt = int.parse(itemId);
 
     // Clear previous details and set loading state
     productInventoryDetailList.clear();
@@ -172,7 +170,6 @@ class ProductInventoryController extends GetxController{
       paginated.value = response.paginated;
       isLoadingDetails.value = false;
 
-      print("Loaded ${productInventoryDetailList.length} details for item $itemId");
       update();
     }
     catch (e) {

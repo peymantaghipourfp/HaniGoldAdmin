@@ -1,8 +1,7 @@
-import 'dart:math' as math;
+
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
@@ -90,7 +89,7 @@ class _CreditHelperUpdateDialogWidgetState extends State<CreditHelperUpdateDialo
     );
   }
 
-  Widget _buildDetailRow(String label, String value) {
+  /*Widget _buildDetailRow(String label, String value) {
     return Row(
       children: [
         SizedBox(width: 3),
@@ -107,7 +106,7 @@ class _CreditHelperUpdateDialogWidgetState extends State<CreditHelperUpdateDialo
         ),
       ],
     );
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -607,7 +606,7 @@ class _CreditHelperUpdateDialogWidgetState extends State<CreditHelperUpdateDialo
   }
 
   Widget _buildLabelCompact(String text) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Container(
       padding: EdgeInsets.only(bottom: 3, top: 5),
       child: Text(

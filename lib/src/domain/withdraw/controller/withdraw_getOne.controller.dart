@@ -74,7 +74,6 @@ class WithdrawGetOneController extends GetxController{
   @override
   void onInit() {
     id.value=(int.parse(Get.parameters["id"]!));
-    print(id.value);
     fetchGetOneWithdraw(id.value);
     fetchWithdrawList();
     setupScrollListener();
@@ -122,7 +121,6 @@ class WithdrawGetOneController extends GetxController{
         getOneWithdraw.value = fetchedGetOne;
         state.value=PageState.list;
         //EasyLoading.dismiss();
-        print('deposits:  ${getOneWithdraw.value?.deposits?.length}');
         // Apply filters when data is loaded
         applyDepositFilters();
       }else{
@@ -380,12 +378,10 @@ class WithdrawGetOneController extends GetxController{
 
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -424,7 +420,6 @@ class WithdrawGetOneController extends GetxController{
         /*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*/
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',

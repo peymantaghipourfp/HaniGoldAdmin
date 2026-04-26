@@ -3,7 +3,6 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 class CustomDropdownWidget extends StatefulWidget {
   final dynamic value;

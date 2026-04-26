@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
-import 'package:hanigold_admin/src/domain/home/widget/custom_text_button.widget.dart';
 import 'package:hanigold_admin/src/domain/home/widget/desktop_layout.widget.dart';
 import 'package:hanigold_admin/src/domain/home/widget/menu_card.widget.dart';
-import 'package:hanigold_admin/src/domain/home/widget/dashboard_card.widget.dart';
-import 'package:hanigold_admin/src/widget/custom_appbar.widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:hanigold_admin/src/widget/background_image_total.widget.dart';
-import '../widget/chat_dialog.widget.dart';
+
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -24,7 +20,7 @@ class HomeView extends GetView<HomeController> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.connectToSocket();
     });
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     //final int mobileSelectedIndex = _selectedIndexForRoute(Get.currentRoute);
     return Scaffold(
@@ -486,7 +482,7 @@ class HomeView extends GetView<HomeController> {
         onPressed: () {
           Get.dialog(const ChatDialog());
         },
-        backgroundColor: AppColor.primaryColor,
+        backgroundColor: AppColor.buttonColor,
         child: Icon(
           Icons.chat,
           color: Colors.white,

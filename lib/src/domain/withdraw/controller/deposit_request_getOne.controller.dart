@@ -41,7 +41,6 @@ class DepositRequestGetOneController extends GetxController{
   @override
   void onInit() {
     id.value=(int.parse(Get.parameters["id"]!));
-    print("depositIdddd:${id.value}");
     fetchGetOneDepositRequest(id.value);
     super.onInit();
   }
@@ -54,7 +53,6 @@ class DepositRequestGetOneController extends GetxController{
         getOneDepositRequest.value = fetchedGetOneDepositRequest;
         state.value=PageState.list;
         //EasyLoading.dismiss();
-        print('deposits:  ${getOneDepositRequest.value?.deposits?.length}');
       }else{
         state.value=PageState.empty;
       }
@@ -154,12 +152,10 @@ class DepositRequestGetOneController extends GetxController{
 
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
     }
@@ -198,7 +194,6 @@ class DepositRequestGetOneController extends GetxController{
         /*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*/
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',

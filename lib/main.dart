@@ -1,31 +1,64 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_smart_dialog/flutter_smart_dialog.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/config/const/socket.service.dart';
+import 'package:hanigold_admin/src/config/logger/app_logger.dart';
 import 'package:hanigold_admin/src/config/routes/route_page.dart';
+import 'package:hanigold_admin/src/config/tear_off_context.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
 import 'package:hanigold_admin/src/widget/zoom_wrapper.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
-void main() async{
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
   EasyLoading.init();
   configLoading();
   await Get.putAsync(() async => SocketService(),permanent: true);
   Get.put(HomeController(), permanent: true);
-  // Initialize web tab service for right-click functionality
-  runApp(const MyApp());
+
+  String initialRoute = '/splash';
+  for (final arg in args) {
+    if (arg.startsWith('--route=')) {
+      initialRoute = arg.substring('--route='.length);
+      break;
+    }
+  }
+
+  // Parse tear-off args so the new window displays only that tab.
+  for (final arg in args) {
+    if (arg == '--tear-off') {
+      tearOffRoute = initialRoute;
+      break;
+    }
+  }
+  for (final arg in args) {
+    if (arg.startsWith('--tab-title=')) {
+      tearOffTitle = arg.substring('--tab-title='.length);
+      break;
+    }
+  }
+  for (final arg in args) {
+    if (arg.startsWith('--tab-icon=')) {
+      tearOffIconCodePoint = int.tryParse(arg.substring('--tab-icon='.length));
+      break;
+    }
+  }
+
+  runApp(MyApp(initialRoute: initialRoute));
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.initialRoute = '/splash'});
+
+  final String initialRoute;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -55,10 +88,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final socketService = Get.find<SocketService>();
         await socketService.initializeForNewTab();
       } else {
-        print('User not logged in, skipping socket initialization');
+        AppLogger.w('User not logged in, skipping socket initialization');
       }
-    } catch (e) {
-      print('Error initializing socket for new tab: $e');
+    } catch (e,s) {
+      AppLogger.e('Error initializing socket for new tab:',e,s);
     }
   }
 
@@ -100,6 +133,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       scrollBehavior: const MaterialScrollBehavior().copyWith(
         dragDevices: {PointerDeviceKind.mouse,PointerDeviceKind.touch,PointerDeviceKind.stylus,PointerDeviceKind.trackpad,},
       ),
+      navigatorObservers: [FlutterSmartDialog.observer],
+      builder: FlutterSmartDialog.init(
       builder: (context, child) {
         final responsiveChild = ResponsiveBreakpoints.builder(
           child: child!,
@@ -113,8 +148,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         final easyLoadingChild = EasyLoading.init()(context, responsiveChild);
         return ZoomWrapper(child: easyLoadingChild);
       },
+      ),
 
       theme: ThemeData(
+          fontFamily: "IranSansR",
           appBarTheme: AppBarTheme(backgroundColor: AppColor.backGroundColor),
           scaffoldBackgroundColor: AppColor.backGroundColor1,
           iconTheme: IconThemeData(color: AppColor.textColor),
@@ -123,11 +160,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
           textSelectionTheme: TextSelectionThemeData(
             selectionColor: Colors.white.withAlpha(100),
-          )
+          ),
       ),
       debugShowCheckedModeBanner: false,
       getPages: RoutePage.routePage,
-      initialRoute: '/splash',
+      initialRoute: widget.initialRoute,
       textDirection: TextDirection.rtl,
       locale: const Locale("fa","IR"),
       supportedLocales: [

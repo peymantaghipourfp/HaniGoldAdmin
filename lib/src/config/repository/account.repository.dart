@@ -5,11 +5,12 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_level.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/account_level_get_one_item.model.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_search_req.model.dart';
 import 'package:hanigold_admin/src/domain/account/model/social.model.dart';
 
 import '../../domain/users/model/list_user.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
+import '../network/error_handler.dart';
 
 class AccountRepository{
 
@@ -46,8 +47,6 @@ class AccountRepository{
         }
       };
       final response=await accountDio.post('Account/get',data: options);
-      print("request getAccountList : $options" );
-      print("response getAccountList : ${response.data}" );
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((account)=>AccountModel.fromJson(account)).toList();
@@ -55,8 +54,9 @@ class AccountRepository{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getAccountList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -64,7 +64,6 @@ class AccountRepository{
     try{
 
       final response=await accountDio.post('Account/get',data: {'options':accountSearchReqModel});
-      //print(response);
       if(response.statusCode==200){
         List<dynamic> data=response.data;
         return data.map((account)=>AccountModel.fromJson(account)).toList();
@@ -111,16 +110,15 @@ class AccountRepository{
       };
 
       final response = await accountDio.post('Account/get', data: options);
-      print("response searchAccountList : ${response.data}" );
-      print("request searchAccountList : $options" );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((account) => AccountModel.fromJson(account)).toList();
       } else {
         throw ErrorException('خطا در دریافت اطلاعات');
       }
-    } catch (e) {
-      throw ErrorException('خطا: $e');
+    } catch (e, s) {
+      AppLogger.e('searchAccountList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -168,16 +166,15 @@ class AccountRepository{
       };
 
       final response = await accountDio.post('Account/get', data: options);
-      print("response searchAccountListNew : ${response.data}" );
-      print("request searchAccountListNew : $options" );
       if (response.statusCode == 200) {
         List<dynamic> data = response.data;
         return data.map((account) => AccountModel.fromJson(account)).toList();
       } else {
         throw ErrorException('خطا در دریافت اطلاعات');
       }
-    } catch (e) {
-      throw ErrorException('خطا: $e');
+    } catch (e, s) {
+      AppLogger.e('searchAccountListNew failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -193,13 +190,12 @@ class AccountRepository{
         }
       };
       final response=await accountDio.post('AccountLevel/get',data: options);
-      print("request getAccountLevelList : $options" );
-      print("response getAccountLevelList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((accountLevel) => AccountLevelModel.fromJson(accountLevel)).toList();
 
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getAccountLevelList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -207,19 +203,16 @@ class AccountRepository{
     required int accountLevelId,
   }) async {
     try {
-      print("Request getOneAccountLevel - accountLevelId: $accountLevelId");
       final response = await accountDio.get(
         'AccountLevel/getOne',
         queryParameters: {'id': accountLevelId},
       );
-      print("url getOneAccountLevel : AccountLevel/getOne");
-      print('Status Code getOneAccountLevel: ${response.statusCode}');
-      print('Response Data getOneAccountLevel: ${response.data}');
 
       Map<String, dynamic> data = response.data;
       return AccountLevelModel.fromJson(data);
-    } catch (e) {
-      throw ErrorException('خطا در دریافت جزئیات سطح کاربری: $e');
+    }catch (e, s) {
+      AppLogger.e('getOneAccountLevel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -242,16 +235,13 @@ class AccountRepository{
       };
 
       var response = await accountDio.put('AccountLevel/update', data: accountLevelData);
-      print("url updateAccountLevel : AccountLevel/update");
-      print('request updateAccountLevel: $accountLevelData');
-      print('Status Code updateAccountLevel: ${response.statusCode}');
-      print('Response Data updateAccountLevel: ${response.data}');
       if (response.data is Map<String, dynamic>) {
         return response.data as Map<String, dynamic>;
       }
       return {'data': response.data};
-    } catch (e) {
-      throw ErrorException('خطا در ویرایش سطح کاربری: $e');
+    } catch (e, s) {
+      AppLogger.e('updateAccountLevel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -260,19 +250,16 @@ class AccountRepository{
     required int itemId,
   }) async {
     try {
-      print("Request accountLevelGetOneItem - accountId: $accountId - itemId: $itemId");
       final response = await accountDio.get(
         'AccountLevel/getOneByAccount',
         queryParameters: {'accountId': accountId , 'itemId': itemId},
       );
-      print("url accountLevelGetOneItem : AccountLevel/getOneByAccount");
-      print('Status Code accountLevelGetOneItem: ${response.statusCode}');
-      print('Response Data accountLevelGetOneItem: ${response.data}');
 
       Map<String, dynamic> data = response.data;
       return AccountLevelGetOneItemModel.fromJson(data);
-    } catch (e) {
-      throw ErrorException('خطا در دریافت یک سطح کاربری و یک آیتم: $e');
+    } catch (e, s) {
+      AppLogger.e('accountLevelGetOneItem failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -318,16 +305,15 @@ class AccountRepository{
         }
       };
       final response=await accountDio.post('Account/getCandidateChild',data: options);
-      print("response getCandidateChild : ${response.data}" );
-      print("request getCandidateChild : $options" );
       if(response.statusCode==200){
         return ListUserModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getCandidateChild failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -357,16 +343,15 @@ class AccountRepository{
         "ToIndex": toIndex
       }}};
       final response=await accountDio.post('Account/getWrapper',data: options);
-      print("request getChildList : $options" );
-      print("response getChildList : ${response.data}" );
       if(response.statusCode==200){
         return ListUserModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getChildList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -375,10 +360,10 @@ class AccountRepository{
   }) async {
     try {
       final response = await accountDio.put('Account/addChilds', data: status.map((e)=>toJson(e)).toList() );
-      print(response);
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('addChild failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -387,10 +372,10 @@ class AccountRepository{
   }) async {
     try {
       final response = await accountDio.put('Account/removeChilds', data: status.map((e)=>toJson(e)).toList() );
-      print(response);
       return AccountModel.fromJson(response.data);
-    } catch (e) {
-      throw ErrorException('خطا:$e');
+    } catch (e, s) {
+      AppLogger.e('removeChild failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -399,14 +384,12 @@ class AccountRepository{
   })async{
     try {
       final response = await accountDio.get('Account/checkSocialStatus', queryParameters: {'id': accountId});
-      print('Status Code checkSocialStatus: ${response.statusCode}');
-      print('Response Data checkSocialStatus: ${response.data}');
       return SocialModel.fromJson(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('checkSocialStatus failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
-
 }
 
 

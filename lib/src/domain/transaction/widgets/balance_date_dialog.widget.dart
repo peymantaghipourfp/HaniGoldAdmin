@@ -4,6 +4,7 @@ import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/transaction/controller/balance_date_dialog.controller.dart';
 import 'package:hanigold_admin/src/domain/transaction/model/all_balances.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 class BalanceDateDialog extends StatelessWidget {
@@ -333,10 +334,10 @@ class BalanceDateDialog extends StatelessWidget {
                         balance.unitName == 'ریال' && (balance.balance ?? 0) > 0 ?
                         (balance.balance?.toStringAsFixed(0).seRagham() ?? '0'):
                         ( balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند') && (balance.balance ?? 0) < 0
-                            ? "-${(balance.balance?.toInt().abs().toString().seRagham(separator: ',') ?? '0')}"
+                            ? "-${(balance.balance?.toInt().abs().toDisplayString().seRagham(separator: ',') ?? '0')}"
                             : ( balance.unitName == 'دلار' || balance.unitName == 'یورو' || balance.unitName == 'پوند') && (balance.balance ?? 0) > 0 ?
-                        (balance.balance?.toString().seRagham() ?? '0'):
-                        (balance.balance?.toString() ?? '0'),
+                        (balance.balance?.toDisplayString().seRagham() ?? '0'):
+                        (balance.balance?.toDisplayString() ?? '0'),
                         style: AppTextStyle.bodyText.copyWith(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,

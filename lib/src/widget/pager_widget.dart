@@ -34,7 +34,6 @@ class PagerWidget extends StatelessWidget {
             child: SfDataPager(
               itemPadding: EdgeInsets.all(10),
               onPageNavigationEnd:(value){
-                print(value+1);
                 callBack(value+1);
               },
               delegate: DataPagerDelegate(),

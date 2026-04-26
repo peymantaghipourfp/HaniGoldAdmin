@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
@@ -6,8 +6,6 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../config/repository/url/base_url.dart';
-import '../../home/widget/chat_dialog.widget.dart';
 import '../controller/withdraw.controller.dart';
 import '../model/withdraw.model.dart';
 import '../view/deposit_request_create.view.dart';
@@ -117,7 +115,7 @@ class WithdrawMobileItem extends StatelessWidget {
                             ? Row(children: [
                           Text('دلیل رد: ', style: AppTextStyle.labelText),
                           const SizedBox(width: 3),
-                          Text("`${withdraw.reasonRejection?.name}`" ?? "", style: AppTextStyle.bodyText),
+                          Text("`${withdraw.reasonRejection?.name}`", style: AppTextStyle.bodyText),
                         ])
                             : const Text("")
                       ],
@@ -293,14 +291,14 @@ class WithdrawMobileItem extends StatelessWidget {
                             itemBuilder: (context) => [
                               PopupMenuItem<int>(
                                 height: 18,
-                                labelTextStyle: WidgetStateProperty.all(AppTextStyle.madiumbodyText),
+                                labelTextStyle: WidgetStateProperty.all(AppTextStyle.mediumBodyText),
                                 value: 1,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     withdrawController.isLoading.value
                                         ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor))
-                                        : Text('تایید', style: AppTextStyle.madiumbodyText.copyWith(color: AppColor.primaryColor, fontSize: 14)),
+                                        : Text('تایید', style: AppTextStyle.mediumBodyText.copyWith(color: AppColor.primaryColor, fontSize: 14)),
                                   ],
                                 ),
                               ),
@@ -308,13 +306,13 @@ class WithdrawMobileItem extends StatelessWidget {
                               PopupMenuItem<int>(
                                 height: 18,
                                 value: 2,
-                                labelTextStyle: WidgetStateProperty.all(AppTextStyle.madiumbodyText),
+                                labelTextStyle: WidgetStateProperty.all(AppTextStyle.mediumBodyText),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     withdrawController.isLoading.value
                                         ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor))
-                                        : Text('رد', style: AppTextStyle.madiumbodyText.copyWith(color: AppColor.accentColor, fontSize: 14)),
+                                        : Text('رد', style: AppTextStyle.mediumBodyText.copyWith(color: AppColor.accentColor, fontSize: 14)),
                                   ],
                                 ),
                               ),
@@ -470,7 +468,7 @@ class _DepositRequestListMobile extends StatelessWidget {
                             Row(children: [
                               Text('دلیل رد: ', style: AppTextStyle.labelText),
                               const SizedBox(width: 3),
-                              Text("`${depositRequests.reasonRejection?.name}`" ?? "", style: AppTextStyle.bodyText),
+                              Text("`${depositRequests.reasonRejection?.name}`", style: AppTextStyle.bodyText),
                             ]),
                           Container(
                             alignment: Alignment.centerLeft,
@@ -518,14 +516,14 @@ class _DepositRequestListMobile extends StatelessWidget {
                               itemBuilder: (context) => [
                                 PopupMenuItem<int>(
                                   height: 18,
-                                  labelTextStyle: WidgetStateProperty.all(AppTextStyle.madiumbodyText),
+                                  labelTextStyle: WidgetStateProperty.all(AppTextStyle.mediumBodyText),
                                   value: 1,
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       withdrawController.isLoading.value
                                           ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor))
-                                          : Text('تایید', style: AppTextStyle.madiumbodyText.copyWith(color: AppColor.primaryColor, fontSize: 14)),
+                                          : Text('تایید', style: AppTextStyle.mediumBodyText.copyWith(color: AppColor.primaryColor, fontSize: 14)),
                                     ],
                                   ),
                                 ),
@@ -533,13 +531,13 @@ class _DepositRequestListMobile extends StatelessWidget {
                                 PopupMenuItem<int>(
                                   height: 18,
                                   value: 2,
-                                  labelTextStyle: WidgetStateProperty.all(AppTextStyle.madiumbodyText),
+                                  labelTextStyle: WidgetStateProperty.all(AppTextStyle.mediumBodyText),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       withdrawController.isLoading.value
                                           ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(AppColor.textColor))
-                                          : Text('رد', style: AppTextStyle.madiumbodyText.copyWith(color: AppColor.accentColor, fontSize: 14)),
+                                          : Text('رد', style: AppTextStyle.mediumBodyText.copyWith(color: AppColor.accentColor, fontSize: 14)),
                                     ],
                                   ),
                                 ),

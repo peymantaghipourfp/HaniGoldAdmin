@@ -5,7 +5,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/tools/controller/setting.controller.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class SettingView extends StatelessWidget {
   const SettingView({super.key});

@@ -10,6 +10,7 @@ import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw.controlle
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/view/deposit_request_create.view.dart';
 import 'package:hanigold_admin/src/domain/withdraw/widget/hover_tooltip_balance_withdraw.widget.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -21,8 +22,7 @@ import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
-import '../../order/widget/hover_tooltip_balance.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../widget/withdraw_filter.widget.dart';
 import 'deposit_request_update.view.dart';
 
@@ -376,7 +376,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                           child: ElevatedButton(
                                                             style: ButtonStyle(
                                                                 padding: WidgetStatePropertyAll(
-                                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                    EdgeInsets.symmetric(horizontal: 23)),
                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                 backgroundColor:
                                                                 WidgetStatePropertyAll(AppColor.appBarColor),
@@ -594,7 +594,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                           child: ElevatedButton(
                                                             style: ButtonStyle(
                                                                 padding: WidgetStatePropertyAll(
-                                                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                    EdgeInsets.symmetric(horizontal: 23)),
                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                 backgroundColor:
                                                                 WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1133,7 +1133,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                       EdgeInsets
                                                                                           .symmetric(
                                                                                           horizontal: 23,
-                                                                                          vertical: 19)),
+                                                                                          )),
                                                                                   // elevation: WidgetStatePropertyAll(5),
                                                                                   backgroundColor:
                                                                                   WidgetStatePropertyAll(
@@ -1515,7 +1515,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                       EdgeInsets
                                                                                           .symmetric(
                                                                                           horizontal: 23,
-                                                                                          vertical: 19)),
+                                                                                          )),
                                                                                   // elevation: WidgetStatePropertyAll(5),
                                                                                   backgroundColor:
                                                                                   WidgetStatePropertyAll(
@@ -1684,7 +1684,6 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                             itemCount: withdrawController.withdrawList.length +
                                 (withdrawController.hasMore.value ? 1 : 0),
                             itemBuilder: (context, index) {
-                              print(withdrawController.withdrawList.length);
                               if (index >=
                                   withdrawController.withdrawList.length) {
                                 return withdrawController.hasMore.value
@@ -1770,7 +1769,300 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                               .accentColor,
                                                           size: 20,)
                                                       ],
-                                                    )
+                                                    ),
+                                                    Container(
+                                                      padding: EdgeInsets.symmetric(horizontal: 5,vertical: 3),
+                                                      child: GestureDetector(
+                                                        onTap: () async {
+                                                          await withdrawController.getImage(
+                                                              withdraws.recId ?? "",
+                                                              "WithdrawRequest");
+                                                          Future.delayed(
+                                                              const Duration(milliseconds: 200), () {
+                                                            showDialog(
+                                                              context: context,
+                                                              builder: (BuildContext context) {
+                                                                return Dialog(
+                                                                  backgroundColor: AppColor
+                                                                      .backGroundColor,
+                                                                  shape: RoundedRectangleBorder(
+                                                                    borderRadius: BorderRadius
+                                                                        .circular(
+                                                                        10),
+                                                                  ),
+                                                                  child: Container(
+                                                                    padding: EdgeInsets
+                                                                        .all(
+                                                                        8),
+                                                                    child: Column(
+                                                                      mainAxisSize: MainAxisSize
+                                                                          .min,
+                                                                      children: [
+                                                                        // نمایش اسلایدی عکس‌ها
+                                                                        SizedBox(
+                                                                          width: 500,
+                                                                          height: 500,
+                                                                          child: Stack(
+                                                                            children: [
+                                                                              PageView.builder(
+                                                                                controller: withdrawController
+                                                                                    .pageController,
+                                                                                itemCount: withdrawController
+                                                                                    .imageList.length,
+                                                                                onPageChanged: (
+                                                                                    index) =>
+                                                                                withdrawController
+                                                                                    .currentImagePage
+                                                                                    .value =
+                                                                                    index,
+                                                                                itemBuilder: (context,
+                                                                                    index) {
+                                                                                  final attachment = withdrawController
+                                                                                      .imageList[index];
+                                                                                  return Column(
+                                                                                    children: [
+                                                                                      //if (kIsWeb)
+                                                                                        Padding(
+                                                                                          padding: const EdgeInsets
+                                                                                              .only(
+                                                                                              right: 50),
+                                                                                          child: Row(
+                                                                                            mainAxisAlignment: MainAxisAlignment
+                                                                                                .start,
+                                                                                            children: [
+                                                                                              IconButton(
+                                                                                                icon: Icon(
+                                                                                                    Icons
+                                                                                                        .download,
+                                                                                                    color: AppColor
+                                                                                                        .dividerColor),
+                                                                                                onPressed: () =>
+                                                                                                    withdrawController
+                                                                                                        .downloadImage(
+                                                                                                      attachment,
+                                                                                                    ),
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        ),
+                                                                                      SizedBox(
+                                                                                        width: 450,
+                                                                                        height: 450,
+                                                                                        child: Image.network(
+                                                                                          "${BaseUrl
+                                                                                              .baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                                                          loadingBuilder: (
+                                                                                              context,
+                                                                                              child,
+                                                                                              loadingProgress) {
+                                                                                            if (loadingProgress ==
+                                                                                                null)
+                                                                                              return child;
+                                                                                            return Center(
+                                                                                              child: CircularProgressIndicator(),
+                                                                                            );
+                                                                                          },
+                                                                                          errorBuilder: (
+                                                                                              context,
+                                                                                              error,
+                                                                                              stackTrace) =>
+                                                                                              Icon(
+                                                                                                  Icons
+                                                                                                      .error,
+                                                                                                  color: Colors
+                                                                                                      .red),
+                                                                                          fit: BoxFit
+                                                                                              .contain,
+                                                                                        ),
+                                                                                      ),
+                                                                                    ],
+                                                                                  );
+                                                                                },
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 2,),
+                                                                              Obx(() {
+                                                                                return Positioned(
+                                                                                    left: 10,
+                                                                                    top: 0,
+                                                                                    bottom: 0,
+                                                                                    child: Visibility(
+                                                                                      visible: withdrawController
+                                                                                          .currentImagePage
+                                                                                          .value > 0,
+                                                                                      child: IconButton(
+                                                                                        style: ButtonStyle(
+                                                                                          backgroundColor: WidgetStateProperty
+                                                                                              .all(
+                                                                                              Colors
+                                                                                                  .black54),
+                                                                                          shape: WidgetStateProperty
+                                                                                              .all(
+                                                                                              CircleBorder()),
+                                                                                          padding: WidgetStateProperty
+                                                                                              .all(
+                                                                                              EdgeInsets
+                                                                                                  .all(
+                                                                                                  8)),
+                                                                                        ),
+                                                                                        icon: Icon(
+                                                                                          Icons
+                                                                                              .chevron_left,
+                                                                                          color: Colors
+                                                                                              .white,
+                                                                                          size: 40,
+                                                                                          shadows: [
+                                                                                            Shadow(
+                                                                                              blurRadius: 10,
+                                                                                              color: Colors
+                                                                                                  .black,
+                                                                                              offset: Offset(
+                                                                                                  0,
+                                                                                                  0),
+                                                                                            )
+                                                                                          ],
+                                                                                        ),
+                                                                                        onPressed: () {
+                                                                                          withdrawController
+                                                                                              .pageController
+                                                                                              .previousPage(
+                                                                                            duration: Duration(
+                                                                                                milliseconds: 300),
+                                                                                            curve: Curves
+                                                                                                .easeInOut,
+                                                                                          );
+                                                                                        },
+                                                                                      ),
+                                                                                    )
+                                                                                );
+                                                                              }),
+                                                                              Obx(() {
+                                                                                return Positioned(
+                                                                                    right: 10,
+                                                                                    top: 0,
+                                                                                    bottom: 0,
+                                                                                    child: Visibility(
+                                                                                      visible: withdrawController
+                                                                                          .currentImagePage
+                                                                                          .value <
+                                                                                          (withdrawController
+                                                                                              .imageList
+                                                                                              .length) - 1,
+                                                                                      child: IconButton(
+                                                                                        style: ButtonStyle(
+                                                                                          backgroundColor: WidgetStateProperty
+                                                                                              .all(
+                                                                                              Colors
+                                                                                                  .black54),
+                                                                                          shape: WidgetStateProperty
+                                                                                              .all(
+                                                                                              CircleBorder()),
+                                                                                          padding: WidgetStateProperty
+                                                                                              .all(
+                                                                                              EdgeInsets
+                                                                                                  .all(
+                                                                                                  8)),
+                                                                                        ),
+                                                                                        icon: Icon(
+                                                                                          Icons
+                                                                                              .chevron_right,
+                                                                                          color: Colors
+                                                                                              .white,
+                                                                                          size: 40,
+                                                                                          shadows: [
+                                                                                            Shadow(
+                                                                                              blurRadius: 10,
+                                                                                              color: Colors
+                                                                                                  .black,
+                                                                                              offset: Offset(
+                                                                                                  0,
+                                                                                                  0),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                        onPressed: () {
+                                                                                          withdrawController
+                                                                                              .pageController
+                                                                                              .nextPage(
+                                                                                            duration: Duration(
+                                                                                                milliseconds: 300),
+                                                                                            curve: Curves
+                                                                                                .easeInOut,
+                                                                                          );
+                                                                                        },
+                                                                                      ),
+                                                                                    )
+                                                                                );
+                                                                              }),
+                                                                              SizedBox(
+                                                                                height: 2,),
+                                                                              // نمایش نقاط راهنما
+                                                                              Obx(() =>
+                                                                                  Row(
+                                                                                    mainAxisAlignment: MainAxisAlignment
+                                                                                        .center,
+                                                                                    children: List
+                                                                                        .generate(
+                                                                                      withdrawController
+                                                                                          .imageList
+                                                                                          .length,
+                                                                                          (index) =>
+                                                                                          Container(
+                                                                                            width: 8,
+                                                                                            height: 8,
+                                                                                            margin: EdgeInsets
+                                                                                                .symmetric(
+                                                                                                horizontal: 4),
+                                                                                            decoration: BoxDecoration(
+                                                                                              shape: BoxShape
+                                                                                                  .circle,
+                                                                                              color: withdrawController
+                                                                                                  .currentImagePage
+                                                                                                  .value ==
+                                                                                                  index
+                                                                                                  ? Colors
+                                                                                                  .blue
+                                                                                                  : Colors
+                                                                                                  .grey,
+                                                                                            ),
+                                                                                          ),
+                                                                                    ),
+                                                                                  )),
+                                                                              SizedBox(
+                                                                                  height: 10),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                        TextButton(
+                                                                          onPressed: () =>
+                                                                              Get
+                                                                                  .back(),
+                                                                          child: Text(
+                                                                            "بستن",
+                                                                            style: AppTextStyle
+                                                                                .bodyText,),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  ),
+                                                                );
+                                                              },
+                                                            );
+                                                          });
+                                                        },
+                                                        child: Row(
+                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                          children: [
+                                                            SvgPicture.asset(
+                                                                'assets/svg/picture.svg', height: 24,
+                                                                colorFilter: ColorFilter.mode(
+                                                                  AppColor.textColor,
+                                                                  BlendMode.srcIn,
+                                                                )),
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
                                                 SizedBox(height: 3,),
@@ -1972,7 +2264,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                         SizedBox(width: 3,),
                                                         Text("`${withdraws
                                                             .reasonRejection
-                                                            ?.name}`" ?? "",
+                                                            ?.name}`",
                                                           style: AppTextStyle
                                                               .bodyText.copyWith(color: AppColor.dividerColor),),
                                                       ],
@@ -2206,7 +2498,6 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                               "id": withdraws.id
                                                                   .toString()
                                                             });
-                                                        //print(withdraws.id);
                                                       },
                                                       child: Row(
                                                         children: [
@@ -2921,8 +3212,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                         Text(
                                                                                           "`${depositRequests
                                                                                               .reasonRejection
-                                                                                              ?.name}`" ??
-                                                                                              "",
+                                                                                              ?.name}`",
                                                                                           style: AppTextStyle
                                                                                               .bodyText.copyWith(color: AppColor.dividerColor),),
                                                                                       ],
@@ -5153,7 +5443,6 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
   //                           onTap: () {
   //                             Get.toNamed('/withdrawGetOne',
   //                                 parameters: {"id": withdraw.id.toString()});
-  //                             //print(withdraws.id);
   //                           },
   //                           child: Row(
   //                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -5332,7 +5621,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                             SizedBox(height: 1,),
                             Text(
                               " ( ${withdraws.first.totalAmountPerDay
-                                  .toString()
+                                  ?.toDisplayString()
                                   .seRagham(separator: ',')} )",
                               style: AppTextStyle.bodyText.copyWith(
                                   color: AppColor.accentColor,
@@ -5355,7 +5644,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                     fontWeight: FontWeight.bold)),
                             SizedBox(height: 1,),
                             Text(" ( ${withdraws.first.totalPaidAmountPerDay
-                                .toString().seRagham(separator: ',')} )",
+                                ?.toDisplayString().seRagham(separator: ',')} )",
                               style: AppTextStyle.bodyText.copyWith(
                                   color: Color(0xff2E7D32),
                                   fontWeight: FontWeight.bold,
@@ -5378,7 +5667,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                             SizedBox(height: 1,),
                             Text(" ( ${withdraws.first
                                 .totalDepositRequestAmountPerDay
-                                .toString()
+                                ?.toDisplayString()
                                 .seRagham(separator: ',')} )",
                               style: AppTextStyle.bodyText.copyWith(
                                   color: Color(0xffdc4b00),
@@ -5402,7 +5691,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                             SizedBox(height: 1,),
                             Text(
                               " ( ${withdraws.first.totalUndepositedAmountPerDay
-                                  .toString().seRagham(separator: ',')} )",
+                                  ?.toDisplayString().seRagham(separator: ',')} )",
                               style: AppTextStyle.bodyText.copyWith(
                                   color: Color(0xff1B5E20),
                                   fontWeight: FontWeight.bold,
@@ -5425,7 +5714,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                             SizedBox(height: 1,),
                             Text(
                               " ( ${withdraws.first.totalUndividedAmountPerDay
-                                  .toString().seRagham(separator: ',')} )",
+                                  ?.toDisplayString().seRagham(separator: ',')} )",
                               style: AppTextStyle.bodyText.copyWith(
                                   color: Color(0xffC62828),
                                   fontWeight: FontWeight.bold,
@@ -6147,7 +6436,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                 .imageList[index];
                                                             return Column(
                                                               children: [
-                                                                if (kIsWeb)
+                                                                //if (kIsWeb)
                                                                   Padding(
                                                                     padding: const EdgeInsets
                                                                         .only(
@@ -6274,8 +6563,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                     .value <
                                                                     (withdrawController
                                                                         .imageList
-                                                                        .length ??
-                                                                        1) - 1,
+                                                                        .length) - 1,
                                                                 child: IconButton(
                                                                   style: ButtonStyle(
                                                                     backgroundColor: WidgetStateProperty
@@ -7153,7 +7441,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                               fontSize: 12)),
                                       Text(
                                         "${depositRequest.reasonRejection
-                                            ?.name}" ?? "",
+                                            ?.name}",
                                         style: AppTextStyle.bodyText.copyWith(
                                             fontSize: 12,color: AppColor.dividerColor),
                                         overflow: TextOverflow.ellipsis,

@@ -3,13 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/auth/model/user_login.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/socket.service.dart';
 import '../../../config/repository/auth.repository.dart';
-import '../../../config/repository/url/web_socket_url.dart';
 import '../view/forget_password.view.dart';
 import '../service/credentials_storage.dart';
 
@@ -104,10 +102,6 @@ class AuthController extends GetxController{
         box.write('Authorization', fetch.token);
         box.write('userName', fetch.user.contact.name);
       await _persistRememberedCredentials();
-        print("userName::${fetch.user.contact.name}");
-      print("writeToken:::Bearer ${fetch.token} ");
-      print("userId:::Bearer ${fetch.user.id} ");
-      //print("userId::: ${fetch.token} ");
 
       final socketService = SocketService.to;
       socketService.resetManualDisconnect();
@@ -132,12 +126,11 @@ class AuthController extends GetxController{
     EasyLoading.show(status: 'لطفا منتظر بمانید');
     try{
       isForget.value=false;
-      var fetch=await authRepository.forgetPasswordMobile(mobileController.text.toEnglishDigit());
+      await authRepository.forgetPasswordMobile(mobileController.text.toEnglishDigit());
       isForget.value=true;
        // if(fetch.infos.isNotEmpty){
        //   Get.snackbar(fetch.infos.first["title"].toString(), fetch.infos.first["description"].toString());
        // }
-       print("fffff");
 
 
       update();

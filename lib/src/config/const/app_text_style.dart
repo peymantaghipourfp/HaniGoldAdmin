@@ -30,7 +30,7 @@ class AppTextStyle{
     color: AppColor.textColor,
     fontWeight: FontWeight.bold
   );
-  static const TextStyle madiumbodyText=TextStyle(
+  static const TextStyle mediumBodyText=TextStyle(
     fontSize: 15,
     fontFamily: "IranSansR",
     color: AppColor.textColor,
@@ -41,7 +41,7 @@ class AppTextStyle{
       color: AppColor.textColor,
       fontWeight: FontWeight.bold
   );
-  static const TextStyle largebodyText=TextStyle(
+  static const TextStyle largeBodyText=TextStyle(
     fontSize: 16,
     fontFamily: "IranSansR",
     color: AppColor.textColor,

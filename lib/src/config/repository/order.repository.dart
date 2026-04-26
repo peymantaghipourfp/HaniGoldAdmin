@@ -4,9 +4,12 @@ import 'package:hanigold_admin/src/domain/order/model/list_order_byAccount_repor
 import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:hanigold_admin/src/domain/order/model/total_balance_new.model.dart';
 import '../../domain/order/model/list_order.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 import 'dart:typed_data';
+
+import '../network/error_handler.dart';
 
 class OrderRepository{
   Dio orderDio=Dio();
@@ -63,13 +66,12 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/get',data: options);
-      print("request getOrderList : $options" );
-      print("response getOrderList : ${response.data}" );
         List<dynamic> data=response.data;
         return data.map((order) => OrderModel.fromJson(order)).toList();
 
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOrderList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -180,12 +182,11 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/getWrapper',data: options);
-      print("request getOrderListPager : $options" );
-      print("response getOrderListPager : ${response.data}" );
         return ListOrderModel.fromJson(response.data);
 
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOrderListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -231,11 +232,10 @@ class OrderRepository{
           'Order/getExcel',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request getOrderExcel : $options" );
-      print("response getOrderExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOrderExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -244,12 +244,11 @@ class OrderRepository{
     try {
       final response = await orderDio.get(
           'Order/getOne', queryParameters: {'id': orderId});
-      print('Status Code getOneOrder: ${response.statusCode}');
-      print('Response Data getOneOrder: ${response.data}');
       Map<String, dynamic> data=response.data;
       return OrderModel.fromJson(data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getOneOrder failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -318,18 +317,11 @@ class OrderRepository{
       };
 
       var response=await orderDio.post('Order/insert',data: orderData);
-      print('request insertOrder: $orderData');
-      print('Status Code insertOrder: ${response.statusCode}');
-      print('Response Data insertOrder: ${response.data}');
-      /*if(response.statusCode==200){
-        print('ثبت با موفقیت انجام شد');
-      }else{
-        throw ErrorException('خطا');
-      }*/
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('insertOrder failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -398,20 +390,11 @@ class OrderRepository{
         "isCard":isCard,
       };
       var response=await orderDio.put('Order/update',data: orderData );
-      print('request updateOrder: $orderData');
-      print('Status Code updateOrder: ${response.statusCode}');
-      print('Response Data updateOrder: ${response.data}');
-      // if(response.statusCode==200){
-      //   print('ویرایش با موفقیت انجام شد');
-      //   print(response.data);
-      //   return response.data;
-      // }else{
-      //   throw ErrorException('خطا در ویرایش اطلاعات');
-      // }
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ویرایش اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('updateOrder failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -465,15 +448,12 @@ class OrderRepository{
         "infos": []
       };
 
-      print(orderData);
-
       var response=await orderDio.put('Order/updateStatus',data: orderData);
-      print('Status Code updateStatusOrder: ${response.statusCode}');
-      print('Response Data updateStatusOrder: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در تغییر وضعیت:$e');
+    catch (e, s) {
+      AppLogger.e('updateStatusOrder failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -487,19 +467,16 @@ class OrderRepository{
         "isDeleted" : isDeleted,
       };
 
-      print(orderData);
-
       var response=await orderDio.delete('Order/updateToIsDeleted',data: orderData);
-      print('Status Code deleteOrder: ${response.statusCode}');
-      print('Response Data deleteOrder: ${response.data}');
       if (response.data is List) {
         return response.data;
       } else {
         return [response.data];
       }
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch (e, s) {
+      AppLogger.e('deleteOrder failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -512,15 +489,13 @@ class OrderRepository{
         "registered": registered,
         "id": orderId,
       };
-      print(orderData);
 
       var response=await orderDio.put('Order/updateRegistered',data: orderData);
-      print('Status Code updateRegistered: ${response.statusCode}');
-      print('Response Data updateRegistered: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ریجیستر:$e');
+    catch (e, s) {
+      AppLogger.e('updateRegistered failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -529,8 +504,6 @@ class OrderRepository{
     try{
       final response=await orderDio.get('Order/marketDailyResult');
       //final response=await orderDio.get('Order/OrderBalanceDay');
-      print('Status Code getBalanceList: ${response.statusCode}');
-      print("response getBalanceList : ${response.data}" );
       if (response.data == null) {
         return [];
       }
@@ -538,8 +511,9 @@ class OrderRepository{
       return data.isNotEmpty ? data.map((totalBalance)=>TotalBalanceNewModel.fromJson(totalBalance)).toList() : [];
       //return data.isNotEmpty ? data.map((totalBalance)=>TotalBalanceModel.fromJson(totalBalance)).toList() : [];
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getTotalBalanceList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -594,17 +568,15 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/balanceDayByAccountReport',data: options);
-      print("url getOrderByAccountReportPager : Order/balanceDayByAccountReport" );
-      print("request getOrderByAccountReportPager : $options" );
-      print("response getOrderByAccountReportPager : ${response.data}" );
       if(response.statusCode==200){
         return ListOrderByAccountReportModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getOrderByAccountReportPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -655,12 +627,11 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/balanceDayByAccountPdf',data: options,options: Options(responseType: ResponseType.bytes));
-      print("request getOrderByAccountReportPdf : $options" );
-      print("response getOrderByAccountReportPdf : ${response.data}" );
       return Uint8List.fromList(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getOrderByAccountReportPdf failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -790,17 +761,15 @@ class OrderRepository{
         }
       };
       final response=await orderDio.post('Order/getEditedWrapper',data: options);
-      print("url getOrderEditedReportPager : Order/getEditedWrapper" );
-      print("request getOrderEditedReportPager : $options" );
-      print("response getOrderEditedReportPager : ${response.data}" );
       if(response.statusCode==200){
         return ListOrderModel.fromJson(response.data);
       }else{
         throw ErrorException('خطا');
       }
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getOrderEditedReportPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -809,11 +778,10 @@ class OrderRepository{
   })async{
     try {
       final response = await orderDio.post('Order/sendTelegram', queryParameters: {'orderId': orderId});
-      print('Status Code sendTelegramOrder: ${response.statusCode}');
-      print('Response Data sendTelegramOrder: ${response.data}');
       return response.data;
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('sendTelegramOrder failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

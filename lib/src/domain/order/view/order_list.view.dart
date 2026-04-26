@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order.controller.dart';
-import 'package:hanigold_admin/src/domain/order/model/order.model.dart';
 import 'package:hanigold_admin/src/domain/order/widget/total_balance_new.widget.dart';
 import 'package:hanigold_admin/src/domain/transaction/widgets/balance_date_dialog.widget.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/background_image_total.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:hanigold_admin/src/widget/empty.dart';
@@ -18,8 +17,9 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/item_weight_calculator_dialog.widget.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../transaction/widgets/balance_dialog.widget.dart';
 import '../widget/hover_tooltip_balance.widget.dart';
 import '../widget/order_create_dialog.widget.dart';
@@ -50,7 +50,7 @@ class _OrderListViewState extends State<OrderListView> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
+    //final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     return Obx(() {
       return Scaffold(
         appBar: CustomAppbar1(
@@ -720,7 +720,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                     EdgeInsets
                                                                                         .symmetric(
                                                                                         horizontal: 23,
-                                                                                        vertical: 19)),
+                                                                                        )),
                                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                                 backgroundColor:
                                                                                 WidgetStatePropertyAll(
@@ -1105,7 +1105,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                     EdgeInsets
                                                                                         .symmetric(
                                                                                         horizontal: 23,
-                                                                                        vertical: 19)),
+                                                                                        )),
                                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                                 backgroundColor:
                                                                                 WidgetStatePropertyAll(
@@ -1157,6 +1157,33 @@ class _OrderListViewState extends State<OrderListView> {
                                                         height: 30,
                                                       ),
                                                     ),
+                                                    SizedBox(width: 17,),
+                                                    // تبدیل واحد
+                                                    GestureDetector(
+                                                        onTap: () {
+                                                          showItemWeightCalculatorDialog(
+                                                            context: context,
+                                                            items: orderController.itemList,
+                                                            mesghalPriceNotifier: orderController.mesghalPriceNotifier,
+                                                            onChange: (result) {
+                                                              // Handle real-time changes if needed
+                                                              debugPrint('Total weight: ${result.totalWeight}g');
+                                                            },
+                                                            onConfirm: (result) {
+                                                              // Handle confirmation
+                                                              debugPrint('Confirmed - Total weight: ${result.totalWeight}g');
+                                                              for (var item in result.selectedItems) {
+                                                                debugPrint('${item.name}: ${item.count} x ${item.weight}g = ${item.totalItemWeight}g');
+                                                              }
+                                                            },
+                                                          );
+                                                        },
+                                                        child: Icon(
+                                                          Icons.scale_rounded,
+                                                          size: 30,
+                                                          color: AppColor.buttonColor,
+                                                        ),
+                                                      ),
                                                   ],
                                                 ),
                                                 // فیلتر
@@ -1197,7 +1224,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                         ? Get.height *
                                                                         0.65
                                                                         : Get.height *
-                                                                        0.7,
+                                                                        0.75,
                                                                     padding: EdgeInsets
                                                                         .all(20),
                                                                     child: Column(
@@ -1294,8 +1321,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                 padding: WidgetStatePropertyAll(
                                                                                     EdgeInsets
                                                                                         .symmetric(
-                                                                                        horizontal: 23,
-                                                                                        vertical: 19)),
+                                                                                        horizontal: 23,)),
                                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                                 backgroundColor:
                                                                                 WidgetStatePropertyAll(
@@ -1934,7 +1960,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                                     EdgeInsets
                                                                                                         .symmetric(
                                                                                                         horizontal: 23,
-                                                                                                        vertical: 19)),
+                                                                                                        )),
                                                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                                                 backgroundColor:
                                                                                                 WidgetStatePropertyAll(
@@ -2332,7 +2358,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                                     EdgeInsets
                                                                                                         .symmetric(
                                                                                                         horizontal: 23,
-                                                                                                        vertical: 19)),
+                                                                                                        )),
                                                                                                 // elevation: WidgetStatePropertyAll(5),
                                                                                                 backgroundColor:
                                                                                                 WidgetStatePropertyAll(
@@ -3000,7 +3026,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                                       EdgeInsets
                                                                                                           .symmetric(
                                                                                                           horizontal: 23,
-                                                                                                          vertical: 19)),
+                                                                                                          )),
                                                                                                   // elevation: WidgetStatePropertyAll(5),
                                                                                                   backgroundColor:
                                                                                                   WidgetStatePropertyAll(
@@ -3111,6 +3137,59 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                 .srcIn,
                                                                           )),
                                                                     ),
+                                                                    // تبدیل واحد
+                                                                    const SizedBox(width: 12),
+                                                                    Tooltip(
+                                                                      message: 'تبدیل واحد',
+                                                                      child: GestureDetector(
+                                                                        onTap: () {
+                                                                          showItemWeightCalculatorDialog(
+                                                                            context: context,
+                                                                            items: orderController.itemList,
+                                                                            mesghalPriceNotifier: orderController.mesghalPriceNotifier,
+                                                                            onChange: (result) {
+                                                                              // Handle real-time changes if needed
+                                                                              debugPrint('Total weight: ${result.totalWeight}g');
+                                                                            },
+                                                                            onConfirm: (result) {
+                                                                              // Handle confirmation
+                                                                              debugPrint('Confirmed - Total weight: ${result.totalWeight}g');
+                                                                              for (var item in result.selectedItems) {
+                                                                                debugPrint('${item.name}: ${item.count} x ${item.weight}g = ${item.totalItemWeight}g');
+                                                                              }
+                                                                            },
+                                                                          );
+                                                                        },
+                                                                        child: Container(
+                                                                          padding: const EdgeInsets.all(6),
+                                                                          decoration: BoxDecoration(
+                                                                            color: AppColor.buttonColor.withOpacity(0.15),
+                                                                            borderRadius: BorderRadius.circular(8),
+                                                                            border: Border.all(
+                                                                              color: AppColor.buttonColor.withOpacity(0.3),
+                                                                            ),
+                                                                          ),
+                                                                          child: Row(
+                                                                            mainAxisSize: MainAxisSize.min,
+                                                                            children: [
+                                                                              Icon(
+                                                                                Icons.scale_rounded,
+                                                                                size: 20,
+                                                                                color: AppColor.buttonColor,
+                                                                              ),
+                                                                              const SizedBox(width: 6),
+                                                                              Text(
+                                                                                'تبدیل واحد',
+                                                                                style: AppTextStyle.labelText.copyWith(
+                                                                                  color: AppColor.buttonColor,
+                                                                                  fontWeight: FontWeight.w600,
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                    ),
                                                                   ],
                                                                 ),
                                                               ],
@@ -3193,14 +3272,14 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                        ),
                                                                                        ),
                                                                                        Text(
-                                                                                         (orders.createdBy?.name?.length ?? 0) > 15 ?
-                                                                                         "${orders.createdBy?.name?.substring(0 , 15)}..." :
+                                                                                         (orders.createdBy?.name?.length ?? 0) > 10 ?
+                                                                                         "${orders.createdBy?.name?.substring(0 , 10)}..." :
                                                                                          orders.createdBy?.name ?? "",
                                                                                          style: AppTextStyle.bodyText.copyWith(fontSize: 10, color: AppColor.primaryColor ),
                                                                                        ),
                                                                                      ],
                                                                                    ):
-                                                                               Text('غیر ادمین', style: AppTextStyle.labelText.copyWith(
+                                                                               Text('غیرادمین', style: AppTextStyle.labelText.copyWith(
                                                                                    fontSize: 11,
                                                                                    fontWeight: FontWeight.bold,color: AppColor.accentColor
                                                                                ),),
@@ -3216,12 +3295,34 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                   "نامشخص",size: 11
 
                                                                             ),
-                                                                           funcOrderDetail(
-                                                                              'کاربر:',
-                                                                               (orders.account?.name?.length ?? 0) > 20 ?
-                                                                               "${orders.account?.name?.substring(0 , 20)}..." "(${orders.account?.accountLevel?.name})" :
-                                                                               "${orders.account?.name} " "(${orders.account?.accountLevel?.name})", size: 11
-                                                                            ),
+                                                                           GestureDetector(
+                                                                             onTap: () {
+                                                                               showDialog(
+                                                                                 context: context,
+                                                                                 builder: (context) {
+                                                                                   return AlertDialog(
+                                                                                     title: const Text('نام کامل کاربر'),
+                                                                                     content: Text(
+                                                                                       "${orders.account?.name}" "(${orders.account?.accountLevel?.name})",
+                                                                                       style: const TextStyle(fontSize: 14),
+                                                                                     ),
+                                                                                     actions: [
+                                                                                       TextButton(
+                                                                                         onPressed: () => Navigator.pop(context),
+                                                                                         child: const Text('بستن'),
+                                                                                       ),
+                                                                                     ],
+                                                                                   );
+                                                                                 },
+                                                                               );
+                                                                             },
+                                                                             child: funcOrderDetail(
+                                                                                'کاربر:',
+                                                                                 (orders.account?.name?.length ?? 0) > 11 ?
+                                                                                 "${orders.account?.name?.substring(0 , 11)}..." "(${orders.account?.accountLevel?.name})" :
+                                                                                 "${orders.account?.name} " "(${orders.account?.accountLevel?.name})", size: 11
+                                                                              ),
+                                                                           ),
                                                                         ],
                                                                       ),
                                                                 SizedBox(height: 5,),
@@ -3249,7 +3350,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                       Expanded(
                                                                         child: funcOrderDetail(
                                                                           'مقدار سفارش:',
-                                                                          "${orders.quantity?.toString().seRagham(separator: ",")} ${orders.item?.itemUnit?.name ?? ""}",
+                                                                          "${orders.quantity?.toDisplayString().seRagham(separator: ",")} ${orders.item?.itemUnit?.name ?? ""}",
                                                                           color: (orders.type == 0)
                                                                               ? AppColor.accentColor
                                                                               : AppColor.primaryColor,size: 13
@@ -3292,7 +3393,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                                                   ?.toInt()
                                                                                   .toString()
                                                                                   .seRagham(
-                                                                                  separator: ',')} ریال"
+                                                                                  separator: ',')}"
                                                                                   : "0",color: AppColor.textPrimaryColor,size: 11
                                                                             ),
                                                                           ),
@@ -4045,7 +4146,7 @@ class _OrderListViewState extends State<OrderListView> {
                   key: ValueKey('tooltip_${order.account?.id}_${orderController.refreshCounter.value}'),
                   isNegative:order.account?.isNegative ?? false,
                   accountId: order.account?.id ?? 0,
-                  accountName: "${order.account?.name} (${order.account?.accountLevel?.name})" ?? "",
+                  accountName: "${order.account?.name} (${order.account?.accountLevel?.name})",
                   orderController: orderController,
                 )
                     : Row(
@@ -4055,7 +4156,7 @@ class _OrderListViewState extends State<OrderListView> {
                           style: AppTextStyle.bodyText.copyWith(fontSize: 12, color: order.account?.isNegative==true ? AppColor.errorColor : AppColor.textColor ),
                         ),
                         Text(
-                          " (${order.account?.accountLevel?.name})" ?? "",
+                          " (${order.account?.accountLevel?.name})",
                           style: AppTextStyle.bodyText.copyWith(fontSize: 12,),
                         ),
                       ],
@@ -4102,7 +4203,7 @@ class _OrderListViewState extends State<OrderListView> {
           DataCell(
               Center(
                 child: Text(
-                  "${order.quantity?.toString().seRagham(
+                  "${order.quantity?.toDisplayString().seRagham(
                       separator: ",")} ${order.item?.itemUnit?.name ?? ""}",
                   style:
                   AppTextStyle.bodyText.copyWith(fontSize: 11),

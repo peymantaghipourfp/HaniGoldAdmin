@@ -7,7 +7,6 @@ import 'package:shamsi_date/shamsi_date.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../widget/custom_dropdown.widget.dart';
 
 
 class ProductInventoryQuantityFilterWidget extends StatefulWidget {
@@ -433,7 +432,7 @@ class _ProductInventoryQuantityFilterWidgetState
       child: ElevatedButton(
         style: ButtonStyle(
             padding: WidgetStatePropertyAll(
-                EdgeInsets.symmetric(horizontal: 23, vertical: 19)
+                EdgeInsets.symmetric(horizontal: 23)
             ),
             backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
             shape: WidgetStatePropertyAll(

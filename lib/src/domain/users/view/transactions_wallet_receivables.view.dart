@@ -3,7 +3,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/controller/transactions_wallet_receivables.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -11,10 +10,9 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class TransactionsWalletReceivablesView extends GetView<TransactionsWalletReceivablesController> {
   const TransactionsWalletReceivablesView({super.key});
@@ -108,7 +106,7 @@ class TransactionsWalletReceivablesView extends GetView<TransactionsWalletReceiv
                           ElevatedButton(
                             style: ButtonStyle(
                                 padding: WidgetStatePropertyAll(
-                                    EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                    EdgeInsets.symmetric(horizontal: 23)),
                                 fixedSize: WidgetStatePropertyAll(
                                     Size(100, 40)),
                                 elevation: WidgetStatePropertyAll(
@@ -313,7 +311,7 @@ class TransactionsWalletReceivablesView extends GetView<TransactionsWalletReceiv
                                                   child: ElevatedButton(
                                                     style: ButtonStyle(
                                                         padding: WidgetStatePropertyAll(
-                                                            EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                            EdgeInsets.symmetric(horizontal: 23)),
                                                         // elevation: WidgetStatePropertyAll(5),
                                                         backgroundColor:
                                                         WidgetStatePropertyAll(AppColor.appBarColor),
@@ -542,7 +540,7 @@ class TransactionsWalletReceivablesView extends GetView<TransactionsWalletReceiv
                                                 child:
                                                 ElevatedButton(
                                                   style: ButtonStyle(
-                                                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                      padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                       // elevation: WidgetStatePropertyAll(5),
                                                       backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                       shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),

@@ -6,9 +6,12 @@ import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 
 import '../../domain/remittance/model/list_withdraw.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
 import 'dart:typed_data';
+
+import '../network/error_handler.dart';
 
 class WithdrawRepository{
   Dio withdrawDio=Dio();
@@ -61,14 +64,13 @@ class WithdrawRepository{
         }}
       };
       final response=await withdrawDio.post('WithdrawRequest/get',data: options);
-      print("request getWithdrawList : $options" );
-      print("response getWithdrawList : ${response.data}" );
         List<dynamic> data=response.data;
         return data.map((withdraw)=>WithdrawModel.fromJson(withdraw)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getWithdrawList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 Future<ListWithdrawModel> getWithdrawListPager({
@@ -160,13 +162,12 @@ Future<ListWithdrawModel> getWithdrawListPager({
         }}
       };
       final response=await withdrawDio.post('WithdrawRequest/getWrapper',data: options);
-      print("request getWithdrawListPager : $options" );
-      print("response getWithdrawListPager : ${response.data}" );
         return ListWithdrawModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getWithdrawListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
   Future<ListWithdrawModel> getWithdrawListPendingPager({
@@ -223,13 +224,12 @@ Future<ListWithdrawModel> getWithdrawListPager({
         }}
       };
       final response=await withdrawDio.post('WithdrawRequest/getWrapper',data: options);
-      print("request getWithdrawListPager : $options" );
-      print("response getWithdrawListPager : ${response.data}" );
       return ListWithdrawModel.fromJson(response.data);
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch (e, s) {
+      AppLogger.e('getWithdrawListPendingPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -267,11 +267,10 @@ Future<ListWithdrawModel> getWithdrawListPager({
           'WithdrawRequest/getExcel',
           data: options,
           options: Options(responseType: ResponseType.bytes));
-      print("request getWithdrawExcel : $options" );
-      print("response getWithdrawExcel : ${response.data}" );
       return Uint8List.fromList(response.data);
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('getWithdrawExcel failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -347,15 +346,13 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "description": description,
         "recId": recId,
       };
-      print(withdrawData);
       
       var response=await withdrawDio.post('WithdrawRequest/insert',data: withdrawData);
-      print('Status Code insertWithdraw: ${response.statusCode}');
-      print('Response Data insertWithdraw: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('insertWithdraw failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -433,15 +430,13 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "description": description,
         "recId": recId,
       };
-      print("WithdrawData Update Withdraw:${withdrawData}");
 
       var response=await withdrawDio.put('WithdrawRequest/update',data: withdrawData);
-      print('Status Code Update Withdraw: ${response.statusCode}');
-      print('Response Data Update Withdraw: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    catch (e, s) {
+      AppLogger.e('updateWithdraw failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -505,16 +500,13 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "infos": []
       };
 
-      print(withdrawData);
 
       var response=await withdrawDio.put('WithdrawRequest/updateStatus',data: withdrawData);
-      print('Status Code updateStatusWithdraw: ${response.statusCode}');
-      print('Status Code updateStatusWithdraw: $withdrawData');
-      print('Response Data updateStatusWithdraw: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در تغییر وضعیت:$e');
+    catch (e, s) {
+      AppLogger.e('updateStatusWithdraw failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -528,15 +520,13 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "isDeleted" : isDeleted,
       };
 
-      print(withdrawData);
 
       var response=await withdrawDio.delete('WithdrawRequest/updateToIsDeleted',data: withdrawData);
-      print('Status Code deleteWithdraw: ${response.statusCode}');
-      print('Response Data deleteWithdraw: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch (e, s) {
+      AppLogger.e('deleteWithdraw failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -548,15 +538,13 @@ Future<ListWithdrawModel> getWithdrawListPager({
         "id": withdrawId,
       };
 
-      print(withdrawData);
 
       var response=await withdrawDio.post('WithdrawRequest/insertRefrence',data: withdrawData);
-      print('Status Code updateRequestDateWithdraw: ${response.statusCode}');
-      print('Response Data updateRequestDateWithdraw: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در آپدیت تاریخ:$e');
+    catch (e, s) {
+      AppLogger.e('خطا در آپدیت تاریخ: ', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -565,11 +553,10 @@ Future<ListWithdrawModel> getWithdrawListPager({
   })async{
     try {
       final response = await withdrawDio.post('WithdrawRequest/sendTelegram', queryParameters: {'withdrawRequestId': withdrawRequestId});
-      print('Status Code sendTelegramWithdrawRequest: ${response.statusCode}');
-      print('Response Data sendTelegramWithdrawRequest: ${response.data}');
       return response.data;
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch (e, s) {
+      AppLogger.e('sendTelegramWithdrawRequest failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

@@ -7,8 +7,10 @@ import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/auth/model/user_login.model.dart';
 
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class AuthRepository{
   Dio authDio=Dio();
@@ -32,9 +34,6 @@ class AuthRepository{
           'Content-Type': 'application/json',
         },
       ),);
-      print("request login : $options" );
-      print("response login : ${response.data}" );
-      print("responseHeaderF login : ${response.headers.value('Authorization')}" );
 
       UserLoginModel userLoginModel = UserLoginModel.fromJson(response.data);
 
@@ -52,8 +51,9 @@ class AuthRepository{
       box.write('token', userLoginModel.token);
       return userLoginModel;
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('login failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -65,12 +65,11 @@ class AuthRepository{
           }
       };
       final response=await authDio.post('Login/mobileVerificationForgetPassword',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
       return jsonEncode(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('forgetPasswordMobile failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 Future<Map<String , dynamic>> forgetPasswordVerify(String mobile,String code)async{
@@ -82,13 +81,12 @@ Future<Map<String , dynamic>> forgetPasswordVerify(String mobile,String code)asy
         }
       };
       final response=await authDio.post('Login/checkVerificationForgetPassword',data: options);
-      print("request : $options" );
-      print("response : ${response.data}" );
       return response.data;
       //return UserLoginModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('forgetPasswordVerify failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -105,12 +103,11 @@ Future<Map<String , dynamic>> forgetPasswordVerify(String mobile,String code)asy
         }
       };
       final response = await authDioWithInterceptor.post('Login/changePassword', data: options);
-      print("request : $options");
-      print("response : ${response.data}");
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('changePassword failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

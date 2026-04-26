@@ -4,7 +4,6 @@
 
 import 'package:hanigold_admin/src/domain/inventory/model/inventory.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/paginated.model.dart';
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 

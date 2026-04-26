@@ -10,10 +10,8 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/base/base_controller.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:universal_html/html.dart' as html;
-import 'package:path/path.dart' as path;
 import '../../../config/repository/item.repository.dart';
 import '../../../config/repository/trading_balance.repository.dart';
-import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../product/model/item.model.dart';
 import '../model/balance_trading.model.dart';
 
@@ -166,7 +164,6 @@ class TradingBalanceController extends BaseController{
       } else {
         state.value=PageStateBalance.empty;
       }
-      print("itemList${itemList.length}");
     }
     catch(e){
       state.value=PageStateBalance.err;
@@ -180,16 +177,13 @@ class TradingBalanceController extends BaseController{
 
   // لیست مانده کاربران
   Future<void> getTradingBalanceList(int itemId,String startDate,String endDate) async{
-    print("getTradingBalanceList called with: itemId=$itemId, startDate=$startDate, endDate=$endDate");
     tradingBalanceList.clear();
     try{
       state.value=PageStateBalance.loading;
       var response=await tradingBalanceRepository.getTradingBalanceList(itemId,startDate,endDate);
-      print("Received ${response.length} trading balance records");
       state.value=PageStateBalance.list;
       tradingBalanceList.addAll(response);
       if(tradingBalanceList.isEmpty){
-        print("No trading data found - setting state to empty");
         state.value=PageStateBalance.empty;
       }
       update();
@@ -214,7 +208,7 @@ class TradingBalanceController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', fileName)
           ..click();
         html.Url.revokeObjectUrl(url);

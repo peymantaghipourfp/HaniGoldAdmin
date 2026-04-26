@@ -5,8 +5,6 @@ import 'package:hanigold_admin/src/domain/inventory/controller/inventory.control
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_layout.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_detail_insert_receive.controller.dart';
-
-import '../../../domain/home/controller/home.controller.dart';
 import '../../../domain/inventory/controller/inventory_create_payment.controller.dart';
 import '../../../domain/inventory/controller/inventory_detail_insert_payment.controller.dart';
 import '../../../domain/inventory/controller/inventory_update_payment.controller.dart';

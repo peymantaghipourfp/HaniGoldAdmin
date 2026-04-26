@@ -9,15 +9,9 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
-import '../controller/user_info_detail_transaction.controller.dart';
-import '../controller/user_info_transaction.controller.dart';
-import '../model/account_child.model.dart';
-import '../widgets/balance.widget.dart';
-import '../widgets/tabel_info.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class UserDetailView extends StatefulWidget {
   const UserDetailView({super.key});
@@ -499,7 +493,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                           .bold),
                                                         ),
                                                         Text(
-                                                          "${controller.accountChildList.length ?? 0}",
+                                                          "${controller.accountChildList.length}",
                                                           style: AppTextStyle
                                                               .labelText
                                                               .copyWith(

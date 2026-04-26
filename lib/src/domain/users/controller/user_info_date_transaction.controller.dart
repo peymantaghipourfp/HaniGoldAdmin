@@ -1,11 +1,7 @@
 
 
 import 'dart:async';
-import 'dart:convert';
-import 'package:file_saver/file_saver.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/transaction_info_footer.model.dart';
@@ -15,10 +11,6 @@ import '../model/header_info_user_transaction.model.dart';
 import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
 import '../model/transaction_info_item.model.dart';
-import 'dart:ui' as ui;
-import 'dart:typed_data';
-import 'package:flutter/services.dart';
-import 'package:universal_html/html.dart' as html;
 
 
 enum PageState{loading,err,empty,list}
@@ -212,8 +204,6 @@ class UserInfoDateTransactionController extends GetxController{
   //     currentPageIndex.value++;
   //     currentPage.value+=7;
   //     itemsPerPage.value+=7;
-  //     print(currentPage.value);
-  //     print(itemsPerPage.value);
   //     getListTransactionInfoPager();
   //
   //   }
@@ -224,8 +214,6 @@ class UserInfoDateTransactionController extends GetxController{
   //     currentPageIndex.value--;
   //     currentPage.value-=7;
   //     itemsPerPage.value-=7;
-  //     print(currentPage.value);
-  //     print(itemsPerPage.value);
   //     getListTransactionInfoPager();
   //   }
   // }
@@ -234,7 +222,6 @@ class UserInfoDateTransactionController extends GetxController{
 
   // لیست مانده کاربران
   // Future<void> getListTransactionInfo() async{
-  //   print("getListTransactionInfo : ");
   //   listTransactionInfo.clear();
   //   try{
   //     state.value=PageState.loading;
@@ -254,7 +241,6 @@ class UserInfoDateTransactionController extends GetxController{
 
   // لیست مانده کاربران
   Future<void> getListTransactionInfoDatePager() async{
-    print("getListTransactionInfoDate : ");
     listTransactionInfo.clear();
     try{
       state.value=PageState.loading;
@@ -339,7 +325,6 @@ class UserInfoDateTransactionController extends GetxController{
         name: searchController.text,
       );
       listTransactionInfoFooter.assignAll(response);
-      print("Footer list updated with ${listTransactionInfoFooter.length} items");
       update();
     }
     catch(e){

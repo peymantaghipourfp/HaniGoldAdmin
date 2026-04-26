@@ -9,7 +9,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/deposit.repository.dart';
 import 'package:hanigold_admin/src/config/repository/wallet.repository.dart';
-import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/deposit/model/deposit.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/deposit_request.model.dart';
 import 'package:image_picker/image_picker.dart';
@@ -94,8 +93,6 @@ class DepositCreateController extends GetxController{
       }
     }
     update();
-    print(selectedBankName.value);
-    print( selectedBankId.value);
   }
 
   void changeSelectedBankAccount(BankAccountModel? newValue) {
@@ -106,9 +103,6 @@ class DepositCreateController extends GetxController{
     shebaController.text=selectedBankAccount.value!.sheba.toString();
     ownerNameController.text=selectedBankAccount.value!.ownerName.toString();
 
-    print(selectedBankAccount.value?.bank?.name);
-    print(selectedBankAccount.value?.bank?.id);
-    print(selectedIndex);
   }
   @override
   void onInit() {
@@ -120,7 +114,6 @@ class DepositCreateController extends GetxController{
       fetchWallet(depositRequest.account?.id ?? 0);
       getBalanceList(depositRequest.account?.id ?? 0);
     }
-    print('accountIddddd: ${depositRequest.account?.id}');
     fetchBankList();
 
     var now = Jalali.now();
@@ -209,12 +202,43 @@ class DepositCreateController extends GetxController{
 
   Future<void> pickImageDesktop( ) async {
     try{
-      final List<XFile?> images = await _picker.pickMultiImage();
+      final List<XFile> images = await _picker.pickMultiImage();
       if (images.isNotEmpty) {
-        selectedImagesDesktop.addAll(images);
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+
+        selectedImagesDesktop.value = newList;
       }
     }catch(e){
       throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> pickImageMobile(ImageSource source) async {
+    try {
+      if (source == ImageSource.camera) {
+        final XFile? photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 70,
+        );
+        if (photo == null) return;
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..add(photo);
+
+        selectedImagesDesktop.value = newList;
+
+      }
+      if (source == ImageSource.gallery) {
+        final List<XFile> images = await _picker.pickMultiImage();
+
+        if (images.isEmpty) return;
+
+        final newList = List<XFile>.from(selectedImagesDesktop)
+          ..addAll(images);
+        selectedImagesDesktop.value = newList;
+      }
+    } catch (e) {
+      Get.snackbar('خطا', 'امکان انتخاب تصویر وجود ندارد');
     }
   }
 
@@ -346,7 +370,6 @@ class DepositCreateController extends GetxController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;
@@ -391,7 +414,7 @@ class DepositCreateController extends GetxController{
         if (kIsWeb) {
           final blob = html.Blob([pngBytes], 'image/png');
           final url = html.Url.createObjectUrlFromBlob(blob);
-          final anchor = html.AnchorElement(href: url)
+          html.AnchorElement(href: url)
             ..setAttribute('download', 'user_balance_screenshot_${accountController.text}.png')
             ..click();
           html.Url.revokeObjectUrl(url);

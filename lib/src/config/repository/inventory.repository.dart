@@ -1,17 +1,17 @@
 
 
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/list_forPayment.model.dart';
-import 'package:hanigold_admin/src/domain/wallet/model/wallet.model.dart';
 
 import '../../domain/inventory/model/inventory.model.dart';
 import '../../domain/inventory/model/list_inventory.model.dart';
+import '../logger/app_logger.dart';
 import '../network/dio_Interceptor.dart';
 import '../network/error/network.error.dart';
+import '../network/error_handler.dart';
 
 class InventoryRepository {
   Dio inventoryDio=Dio();
@@ -65,14 +65,13 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getWithFirstRow',data: options);
-      print("request getInventoryList : $options" );
-      print("response getInventoryList : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((inventory)=>InventoryModel.fromJson(inventory)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getInventoryList failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
  Future<ListInventoryModel> getInventoryListPager({
@@ -155,12 +154,11 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getWrapper',data: options);
-      print("request getInventoryListPager : $options" );
-      print("response getInventoryListPager : ${response.data}" );
       return ListInventoryModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getInventoryListPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -234,12 +232,11 @@ class InventoryRepository {
         "infos": [],
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
-      print('Status Code insertInventoryReceive: ${response.statusCode}');
-      print('Response Data insertInventoryReceive: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('insertInventoryReceive failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -353,12 +350,11 @@ class InventoryRepository {
         "infos": [],
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print('Status Code insertDetailInventoryReceive: ${response.statusCode}');
-      print('Response Data insertDetailInventoryReceive: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('insertDetailInventoryReceive failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -457,15 +453,12 @@ class InventoryRepository {
         "infos": [],
         "description": description,
       };
-      print('Request Before Update inventoryData updateDetailInventoryReceive: $inventoryData');
       var response=await inventoryDio.put('Inventory/updateDetail',data: inventoryData);
-      print('Status Code updateDetailInventoryReceive: ${response.statusCode}');
-      print('Response Data updateDetailInventoryReceive: ${response.data}');
-      print('Request inventoryData updateDetailInventoryReceive: $inventoryData');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('updateDetailInventoryReceive failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
   /*Future<Map<String, dynamic>> updateDetailInventoryReceive({
@@ -553,9 +546,6 @@ class InventoryRepository {
         "infos": []
       };
       var response=await inventoryDio.put('Inventory/updateDetail',data: inventoryData);
-      print('Status Code updateDetailInventoryReceive: ${response.statusCode}');
-      print('Response Data updateDetailInventoryReceive: ${response.data}');
-      print('inventoryData updateDetailInventoryReceive: $inventoryData');
       return response.data;
 
     }catch(e){
@@ -566,8 +556,6 @@ class InventoryRepository {
   Future<List<InventoryDetailModel>> getInventoryDetail(int inventoryId)async{
     try{
       final response=await inventoryDio.get('Inventory/getInventoryDetail',queryParameters: {"id":inventoryId});
-      print('Status Code getInventoryDetail: ${response.statusCode}');
-      print('Response Data getInventoryDetail: ${response.data}');
       List<dynamic> data=response.data;
       return data.map((inventoryDetail)=>InventoryDetailModel.fromJson(inventoryDetail)).toList();
     }catch(e){
@@ -578,12 +566,11 @@ class InventoryRepository {
   Future<List<InventoryDetailModel>> getInventoryDetail(int inventoryId)async{
     try{
       final response=await inventoryDio.get('Inventory/getInventoryDetail',queryParameters: {"id":inventoryId});
-      print('Status Code getInventoryDetail: ${response.statusCode}');
-      print('Response Data getInventoryDetail: ${response.data}');
       List<dynamic> data=response.data;
       return data.map((inventoryDetail)=>InventoryDetailModel.fromJson(inventoryDetail)).toList();
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('getInventoryDetail failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -598,15 +585,13 @@ class InventoryRepository {
         "isDeleted" : isDeleted,
       };
 
-      print(inventoryData);
 
       var response=await inventoryDio.delete('Inventory/updateToIsDeleted',data: inventoryData);
-      print('Status Code deleteInventory: ${response.statusCode}');
-      print('Response Data deleteInventory: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در حذف:$e');
+    catch(e,s){
+      AppLogger.e('deleteInventory failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -619,13 +604,11 @@ class InventoryRepository {
         "id": id,
       };
       var response=await inventoryDio.delete('Inventory/updateToIsDeletedDetail',data: inventoryData);
-      print('Request deleteInventoryDetail: $inventoryData');
-      print('Status deleteInventoryDetail: ${response.statusCode}');
-      print('Response deleteInventoryDetail: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('deleteInventoryDetail failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -668,14 +651,13 @@ class InventoryRepository {
         }}
       };
       final response=await inventoryDio.post('Inventory/getForPeyment',data: options);
-      print("request getForPaymentlist : $options" );
-      print("response getForPaymentlist : ${response.data}" );
       List<dynamic> data=response.data;
       return data.map((receive)=>InventoryDetailModel.fromJson(receive)).toList();
 
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getForPaymentlist failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -727,12 +709,11 @@ class InventoryRepository {
             }}
           };*/
       final response=await inventoryDio.post('Inventory/getForPeymentWrapper',data: options);
-      print("request getForPaymentlistPaper : $options" );
-      print("response getForPaymentlistPaper : ${response.data}" );
       return ListForPaymentModel.fromJson(response.data);
     }
-    catch(e){
-      throw ErrorException('خطا:$e');
+    catch(e,s){
+      AppLogger.e('getForPaymentlistPager failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -810,13 +791,11 @@ class InventoryRepository {
         "infos": [],
       };
       var response=await inventoryDio.post('Inventory/insert',data: inventoryData);
-      print('Request Data insertInventoryPayment: $inventoryData');
-      print('Status Code: ${response.statusCode}');
-      print('Response Data insertInventoryPayment: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در درج اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('insertInventoryPayment failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -933,12 +912,11 @@ class InventoryRepository {
         "infos": [],
       };
       var response=await inventoryDio.put('Inventory/update',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data insertDetailInventoryPayment: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('insertDetailInventoryPayment failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -1040,13 +1018,11 @@ class InventoryRepository {
         "description": description ?? null,
       };
       var response=await inventoryDio.put('Inventory/updateDetail',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
-      print('Request Data updateDetailInventoryPayment: $inventoryData');
-      print('Response Data updateDetailInventoryPayment: ${response.data}');
       return response.data;
 
-    }catch(e){
-      throw ErrorException('خطا در آپدیت اطلاعات:$e');
+    }catch(e,s){
+      AppLogger.e('updateDetailInventoryPayment failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -1059,15 +1035,13 @@ class InventoryRepository {
         "registered": registered,
         "id": inventoryId,
       };
-      print(inventoryData);
 
       var response=await inventoryDio.put('Inventory/updateRegistered',data: inventoryData);
-      print('Status Code: ${response.statusCode}');
-      print('Response Data: ${response.data}');
       return response.data;
     }
-    catch(e){
-      throw ErrorException('خطا در ریجیستر:$e');
+    catch(e,s){
+      AppLogger.e('updateRegistered failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -1075,12 +1049,11 @@ class InventoryRepository {
     try {
       final response = await inventoryDio.get(
           'Inventory/getCode', queryParameters: {'accountId': accountId});
-      print('Status Code sendVerificationCode: ${response.statusCode}');
-      print('Response Data sendVerificationCode: ${response.data}');
       //Map<String, dynamic> data=response.data;
       return response.data;
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('sendVerificationCode failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 
@@ -1088,12 +1061,11 @@ class InventoryRepository {
     try {
       final response = await inventoryDio.get(
           'Inventory/checkCode', queryParameters: {'accountId': accountId,'code':code});
-      print('Status Code checkVerificationCode: ${response.statusCode}');
-      print('Response Data checkVerificationCode: ${response.data}');
       //Map<String, dynamic> data=response.data;
       return response.data;
-    }catch(e){
-      throw ErrorException('خطا:$e');
+    }catch(e,s){
+      AppLogger.e('checkVerificationCode failed', e, s);
+      throw ErrorException(ErrorHandler.handle(e));
     }
   }
 

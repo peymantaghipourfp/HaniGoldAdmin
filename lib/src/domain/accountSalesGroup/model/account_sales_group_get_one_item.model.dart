@@ -2,8 +2,6 @@ import 'package:hanigold_admin/src/domain/accountSalesGroup/model/account_sales_
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 
-import '../../product/model/item_price.model.dart';
-
 part 'account_sales_group_get_one_item.model.g.dart';
 
 AccountSalesGroupGetOneItemModel accountSalesGroupGetOneItemModelFromJson(String str) => AccountSalesGroupGetOneItemModel.fromJson(json.decode(str));

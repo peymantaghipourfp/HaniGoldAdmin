@@ -173,8 +173,6 @@ class TransactionsWalletReceivablesController extends GetxController{
   //     currentPageIndex.value++;
   //     currentPage.value+=7;
   //     itemsPerPage.value+=7;
-  //     print(currentPage.value);
-  //     print(itemsPerPage.value);
   //     getListTransactionInfoPager();
   //
   //   }
@@ -185,8 +183,6 @@ class TransactionsWalletReceivablesController extends GetxController{
   //     currentPageIndex.value--;
   //     currentPage.value-=7;
   //     itemsPerPage.value-=7;
-  //     print(currentPage.value);
-  //     print(itemsPerPage.value);
   //     getListTransactionInfoPager();
   //   }
   // }
@@ -195,7 +191,6 @@ class TransactionsWalletReceivablesController extends GetxController{
 
   // لیست مانده کاربران
   // Future<void> getListTransactionInfo() async{
-  //   print("getListTransactionInfo : ");
   //   listTransactionInfo.clear();
   //   try{
   //     state.value=PageState.loading;
@@ -215,7 +210,6 @@ class TransactionsWalletReceivablesController extends GetxController{
 
 
   Future<void> getTransactionsWalletReceivablesListPager() async{
-    print("getTransactionsWalletReceivablesListPager : ");
     listTransactionsWalletReceivables.clear();
     try{
       state.value=PageState.loading;
@@ -293,7 +287,6 @@ class TransactionsWalletReceivablesController extends GetxController{
         name: searchController.text,
       );
       listTransactionInfoFooter.assignAll(response);
-      print("Footer list updated with ${listTransactionInfoFooter.length} items");
       update();
     }
     catch(e){

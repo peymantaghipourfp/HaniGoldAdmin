@@ -447,7 +447,7 @@ class AccountSalesGroupView extends GetView<AccountSalesGroupController> {
     );
   }
 
-  Widget _mobileLine(String label, String value, {String? trailing}) {
+  /*Widget _mobileLine(String label, String value, {String? trailing}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
@@ -465,7 +465,7 @@ class AccountSalesGroupView extends GetView<AccountSalesGroupController> {
         ],
       ),
     );
-  }
+  }*/
 
   void _showDetailsDialog(BuildContext context, int accountSalesGroupId, {required bool isDesktop}) {
     showDialog(
@@ -709,27 +709,52 @@ class AccountSalesGroupView extends GetView<AccountSalesGroupController> {
                                     ),
                                   ],
                                 ),
-                                /*const SizedBox(height: 8),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                const SizedBox(height: 8),
+                                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
-                                      child: _buildPriceInfo(
-                                        'سقف خرید:',
-                                        itemPrice.maxBuy.toString() ?? '0',
-                                        isDesktop,unit: ""
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'وضعیت خرید: ',
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              fontSize: isDesktop ? 12 : 11,
+                                              color: AppColor.textColor.withAlpha(175),
+                                            ),
+                                          ),
+                                          Text(
+                                            itemPrice.buyStatus==true ? "فعال" : "غیر فعال",
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              fontSize: isDesktop ? 13 : 12,fontWeight: FontWeight.bold,
+                                              color: itemPrice.buyStatus==true ? AppColor.primaryColor : AppColor.accentColor,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
-                                    const SizedBox(width: 16),
+                                    const SizedBox(width: 25),
                                     Expanded(
-                                      child: _buildPriceInfo(
-                                        'سقف فروش:',
-                                        itemPrice.maxSell.toString() ?? '0',
-                                        isDesktop,unit: ""
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'وضعیت فروش: ',
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              fontSize: isDesktop ? 12 : 11,
+                                              color: AppColor.textColor.withAlpha(175),
+                                            ),
+                                          ),
+                                          Text(
+                                            itemPrice.sellStatus==true ? "فعال" : "غیر فعال",
+                                            style: AppTextStyle.bodyText.copyWith(
+                                              fontSize: isDesktop ? 13 : 12,fontWeight: FontWeight.bold,
+                                              color: itemPrice.sellStatus==true ? AppColor.primaryColor : AppColor.accentColor,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ],
-                                ),*/
+                                ),
                               ],
                             ),
                           );
@@ -831,7 +856,7 @@ class AccountSalesGroupView extends GetView<AccountSalesGroupController> {
 
 }
 
-class _ColorDot extends StatelessWidget {
+/*class _ColorDot extends StatelessWidget {
   final String? hexColor;
   const _ColorDot({required this.hexColor});
 
@@ -858,6 +883,6 @@ class _ColorDot extends StatelessWidget {
       ),
     );
   }
-}
+}*/
 
 

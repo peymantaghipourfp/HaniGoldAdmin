@@ -1,19 +1,7 @@
-import 'dart:io';
-import 'dart:typed_data';
-import 'package:file_saver/file_saver.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/services.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:hanigold_admin/src/domain/users/model/item_user.model.dart';
-import 'package:hanigold_admin/src/domain/users/model/list_user.model.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:universal_html/html.dart' as html;
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
 import 'dart:async';
-import 'dart:convert';
-import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -21,16 +9,11 @@ import 'package:hanigold_admin/src/domain/remittance/model/balance.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/const/app_color.dart';
-import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
-import '../../account/model/account.model.dart';
-import '../../auth/model/user_login.model.dart';
 import '../model/balance_item.model.dart';
 import '../model/header_info_user_transaction.model.dart';
-import '../model/list_transaction_info_item.model.dart';
 import '../model/paginated.model.dart';
-import '../model/transaction_info_item.model.dart';
 
 enum PageStateUser { loading, err, empty, list }
 
@@ -102,7 +85,6 @@ class PersonListController extends GetxController {
 
   // لیست کاربران
   Future<void> getUserAccountList() async {
-    print("getUserAccountList : 1");
     isOpenMore.value = false;
     userList.clear();
     try {
@@ -120,7 +102,6 @@ class PersonListController extends GetxController {
       paginated = response.paginated;
       // nameFilterController.text="";
       // mobileFilterController.text="";
-      //  print(paginated?.totalCount??0);
       state.value = PageStateUser.list;
       isOpenMore.value = true;
 
@@ -136,7 +117,6 @@ class PersonListController extends GetxController {
       try{
         EasyLoading.show(status: 'لطفا منتظر بمانید');
         var fetch=await userRepository.changePasswordByAdmin(passwordController.text.toEnglishDigit(),id);
-        print(fetch["infos"][0]["title"]);
         if (Get.isDialogOpen!) Get.back();
         Get.back();
         Get.snackbar(fetch["infos"][0]["title"], fetch["infos"][0]["description"]);
@@ -160,7 +140,6 @@ class PersonListController extends GetxController {
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
     );
-    print("updateUserAccount : 1");
     try {
       var response = await userRepository.updateUserAccount(
         mobile: mobileUpdateEndController.text, userName: userNameUpdateEndController.text, id: id, email: emailUpdateEndController.text,
@@ -185,7 +164,6 @@ class PersonListController extends GetxController {
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
     );
-    print("updateUserStatusAccount : 1");
     try {
       var response = await userRepository.updateStatusUserAccount(
         id: id, status: '$status',

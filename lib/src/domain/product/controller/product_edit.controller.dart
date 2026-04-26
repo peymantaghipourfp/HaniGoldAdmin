@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
@@ -129,7 +130,6 @@ class ProductEditController extends GetxController{
 
   /*void _listenToSocket() {
     if (isSocketListening) {
-      print('Socket already listening, skipping duplicate subscription.');
       return;
     }
     isSocketListening = true;
@@ -231,7 +231,6 @@ class ProductEditController extends GetxController{
           differentPrice: different,
           itemUnitId: itemUnitId
       );
-      print(response);
       if (response != null) {
         if (showSnackbar){
           Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
@@ -271,7 +270,6 @@ class ProductEditController extends GetxController{
           price: price,
           itemUnitId: itemUnitId
       );
-      print(response);
       if (response != null) {
         if(showSnackbar){
           Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
@@ -343,7 +341,6 @@ class ProductEditController extends GetxController{
         salesRange: salesRange,
         buyRange: buyRange ,
       );
-      print(response);
       if (response != null) {
         if(showSnackbar){
           Get.snackbar("موفقیت آمیز", "آپدیت با موفقیت آنجام شد",
@@ -380,10 +377,10 @@ class ProductEditController extends GetxController{
       itemNameController.text=getOneItem.value?.name ?? "";
       itemGroupNameController.text=getOneItem.value?.itemGroup?.name ?? '';
       itemUnitNameController.text=getOneItem.value?.itemUnit?.name ?? "";
-      wageController.text=getOneItem.value?.wage?.toStringAsFixed(0).seRagham(separator: ',') ?? '';
-      cardPriceController.text="${getOneItem.value?.cardPrice ?? 0}";
+      wageController.text=getOneItem.value?.wage?.toDisplayString().seRagham(separator: ',') ?? '';
+      cardPriceController.text="${getOneItem.value?.cardPrice?.toDisplayString().seRagham(separator: ',') ?? 0}";
       initBalanceController.text="${getOneItem.value?.initBalance ?? 0}";
-      w750Controller.text="${getOneItem.value?.w750 ?? 0}";
+      w750Controller.text="${getOneItem.value?.w750?.toDisplayString() ?? 0}";
       initSwitches(fetchedGetOne);
       state.value=PageState.list;
       state.value=PageState.empty;

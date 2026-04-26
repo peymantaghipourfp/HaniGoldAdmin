@@ -568,7 +568,7 @@ class _TransactionRow extends StatelessWidget {
                         fontSize: 12,
                       ),
                     ),
-                    Text(Jalali.fromDateTime(trans.date).toJalaliDateTime() ?? "",
+                    Text(Jalali.fromDateTime(trans.date).toJalaliDateTime(),
                       style: AppTextStyle.bodyText.copyWith(
                         color: AppColor.textColor,
                         fontWeight: FontWeight.bold,

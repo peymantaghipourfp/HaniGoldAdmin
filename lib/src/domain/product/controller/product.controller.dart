@@ -2,22 +2,17 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' as html;
 import 'package:flutter/material.dart';
+// Conditional import for BroadcastChannel
+import 'broadcast_channel_stub.dart'
+if (dart.library.html) 'broadcast_channel_web.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/const/socket.service.dart';
-import 'package:hanigold_admin/src/config/repository/web_socket.repository.dart';
-import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:hanigold_admin/src/domain/product/model/socket_item.model.dart';
-import 'package:persian_number_utility/persian_number_utility.dart';
-
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
 import '../../../config/repository/item.repository.dart';
-import '../../../config/repository/url/web_socket_url.dart';
 import '../model/item.model.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import '../../base/base_controller.dart';
 
 enum PageState{loading,err,empty,list}
@@ -54,7 +49,7 @@ class ProductController extends BaseController{
   StreamSubscription? socketSubscription;
   RxBool isRefreshing = false.obs;
   RxInt refreshCounter = 0.obs;
-  html.BroadcastChannel? _statusChangeChannel;
+  BroadcastChannelHandler? _broadcastChannelHandler;
   /*final WebSocketRepository webSocketRepository=WebSocketRepository();
   final RxString _status = 'disconnected'.obs;
   final RxList<String> _messages = <String>[].obs;
@@ -80,37 +75,25 @@ class ProductController extends BaseController{
     super.onInit();
   }
 
-  // Setup BroadcastChannel for cross-tab status change notifications
+  // Setup BroadcastChannel for cross-tab status change notifications (Web only)
   void _setupBroadcastChannel() {
-    try {
-      _statusChangeChannel = html.BroadcastChannel('product_status_changes');
-      _statusChangeChannel!.onMessage.listen((event) {
-        try {
-          final data = json.decode(event.data);
-          if (data['type'] == 'statusChanged') {
-            print('ProductController: Received status change notification from another tab');
-            // Refresh lists to sync with server
-            refreshItemListsSilently();
-          }
-        } catch (e) {
-          Get.log('Error handling broadcast message: $e');
-        }
-      });
-    } catch (e) {
-      // BroadcastChannel might not be available in all environments
-      Get.log('BroadcastChannel not available: $e');
-    }
+    _broadcastChannelHandler = BroadcastChannelHandler();
+    _broadcastChannelHandler!.setup('product_status_changes', (data) {
+      if (data['type'] == 'statusChanged') {
+        // Refresh lists to sync with server
+        refreshItemListsSilently();
+      }
+    });
   }
 
   // Notify other tabs about status changes
   void _notifyOtherTabsOfStatusChange() {
     try {
-      if (_statusChangeChannel != null) {
-        _statusChangeChannel!.postMessage(json.encode({
+      if (_broadcastChannelHandler != null) {
+        _broadcastChannelHandler!.sendMessage('product_status_changes', {
           'type': 'statusChanged',
           'timestamp': DateTime.now().toIso8601String(),
-        }));
-        print('ProductController: Sent status change notification to other tabs');
+        });
       }
     } catch (e) {
       Get.log('Error sending broadcast message: $e');
@@ -120,7 +103,6 @@ class ProductController extends BaseController{
   void _setupSocketReconnectionHandler() {
     ever(isSocketConnected, (bool connected) {
       if (connected) {
-        print('ProductController: Socket reconnected, re-subscribing...');
         _listenToSocket();
       }
     });
@@ -143,14 +125,11 @@ class ProductController extends BaseController{
           Map<String, dynamic>? data;
           if (message is String) {
             data = json.decode(message);
-            print("dataSocketItem::::::${data}");
           } else if (message is Map) {
             data = Map<String, dynamic>.from(message);
-            print("dataSocketItem2222::::::${data}");
           }
           if (data != null && data['channel'] == 'itemPrice') {
             final socketItem = SocketItemModel.fromJson(data);
-            print("socketItemData111111111::::::${socketItem.price}");
             /*Get.snackbar('تغییر قیمت', 'قیمت ${socketItem.name} تغییر کرد.',
               titleText: Text('تغییر قیمت',
                 textAlign: TextAlign.center,
@@ -159,10 +138,9 @@ class ProductController extends BaseController{
                 'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
             );*/
-            /*print(data);
+            /*
             fetchActiveItemList();
             fetchInactiveItemList();*/
-            print('Socket: Item price update received - ID: ${socketItem.id}, Name: ${socketItem.name}');
             // Update the specific item in activeItemList
             final activeIndex = activeItemList.indexWhere((item) => item.id == socketItem.id);
             if (activeIndex != -1) {
@@ -201,7 +179,6 @@ class ProductController extends BaseController{
             refreshItemListsSilently();
           }
           else if (data != null && (data['channel'] == 'item' || data['channel'] == 'itemStatus')) {
-            print('Socket: Item status update received');
             // Perform full refresh to sync status changes across tabs
             refreshItemListsSilently();
           }
@@ -221,7 +198,7 @@ class ProductController extends BaseController{
   @override
   void onClose() {
     socketSubscription?.cancel();
-    _statusChangeChannel?.close();
+    _broadcastChannelHandler?.close();
     super.onClose();
   }
 
@@ -365,7 +342,6 @@ class ProductController extends BaseController{
           differentPrice: different,
           itemUnitId: itemUnitId
       );
-      print(response);
       if (response != null) {
         Map<String, dynamic>? firstInfo;
         final infos = response['infos'];
@@ -539,7 +515,6 @@ class ProductController extends BaseController{
         price: price,
         itemUnitId: itemUnitId
       );
-      print(response);
       if (response != null) {
         if(showSnackbar){
           Get.snackbar("موفقیت آمیز", "درج با موفقیت آنجام شد",
@@ -576,7 +551,6 @@ class ProductController extends BaseController{
         salesRange: salesRange,
         buyRange: buyRange ,
       );
-      print(response);
       if (response != null) {
         if(showSnackbar){
           Get.snackbar("موفقیت آمیز", "آپدیت با موفقیت آنجام شد",
@@ -623,7 +597,6 @@ class ProductController extends BaseController{
   }*/
 
   /*void _handleData(dynamic data) {
-    print("webSocket:::::::::::::::${data}");
     if (data is String) {
       try {
         final decodedData = jsonDecode(data);

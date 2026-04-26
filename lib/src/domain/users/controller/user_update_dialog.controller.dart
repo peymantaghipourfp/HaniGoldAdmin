@@ -12,13 +12,21 @@ import 'package:hanigold_admin/src/domain/accountSalesGroup/model/account_sales_
 import 'package:hanigold_admin/src/domain/users/controller/user_list.controller.dart';
 import 'package:hanigold_admin/src/domain/users/model/city_item.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
+import 'package:uuid/uuid.dart';
+
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/upload.repository.dart';
 
 class UserUpdateDialogController extends GetxController {
   // Dependencies
   final UserRepository userRepository = UserRepository();
   final AccountSalesGroupRepository accountSalesGroupRepository = AccountSalesGroupRepository();
   final AccountRepository accountRepository = AccountRepository();
+  final UploadRepositoryDesktop uploadRepositoryDesktop = UploadRepositoryDesktop();
+  final RemittanceRepository remittanceRepository = RemittanceRepository();
+  final Uuid uuid = Uuid();
 
   // Loading and error states
   var isLoading = false.obs;
@@ -34,6 +42,22 @@ class UserUpdateDialogController extends GetxController {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController addressController = TextEditingController();
+
+  // Image related controllers and state
+  final TextEditingController recIdController = TextEditingController();
+
+  final ImagePicker _pickerNationalCode = ImagePicker();
+  final ImagePicker _pickerBusinessLicense = ImagePicker();
+
+  RxList<XFile?> selectedImagesNationalCodeDesktop = RxList<XFile?>();
+  RxList<XFile?> selectedImagesBusinessLicenseDesktop = RxList<XFile?>();
+  RxList<String> existingImagesNationalCode = RxList<String>();
+  RxList<String> existingImagesBusinessLicense = RxList<String>();
+
+  RxBool isUploadingNationalCodeDesktop = false.obs;
+  RxBool isUploadingBusinessLicenseDesktop = false.obs;
+  RxList<bool> uploadStatusesNationalCodeDesktop = RxList<bool>();
+  RxList<bool> uploadStatusesBusinessLicenseDesktop = RxList<bool>();
 
   // Dropdown data lists
   RxList<StateItemModel> stateList = <StateItemModel>[].obs;
@@ -85,6 +109,7 @@ class UserUpdateDialogController extends GetxController {
     phoneController.dispose();
     emailController.dispose();
     addressController.dispose();
+    recIdController.dispose();
     super.onClose();
   }
 
@@ -141,6 +166,13 @@ class UserUpdateDialogController extends GetxController {
       type.value = accountModel?.type ?? 0;
       code.value = accountModel?.code ?? '';
       hasDeposit.value = accountModel?.hasDeposit ?? false;
+
+      // Load existing images
+      if (accountModel?.recId != null) {
+        recIdController.text = accountModel!.recId!;
+        await getImage(accountModel!.recId!, "NationalCode");
+        await getImage(accountModel!.recId!, "BusinessLicense");
+      }
 
     } catch (e) {
       _setError('خطا در دریافت اطلاعات', 'دریافت اطلاعات کاربر با مشکل مواجه شد');
@@ -205,7 +237,7 @@ class UserUpdateDialogController extends GetxController {
     }
   }
 
-  Future<void> updateUser() async {
+  Future<void> updateUser(String recId) async {
     if (!formKey.currentState!.validate()) {
       return;
     }
@@ -214,7 +246,8 @@ class UserUpdateDialogController extends GetxController {
     clearError();
 
     try {
-      final response = await userRepository.updateUser(
+      if (Get.isDialogOpen!) Get.back();
+      await userRepository.updateUser(
         accountGroupId: selectedAccountGroup.value?.id ?? 0,
         accountSalesGroupId: selectedAccountSalesGroup.value?.id ?? 0,
         accountLevelId: selectedAccountLevel.value?.id ?? 0,
@@ -239,15 +272,15 @@ class UserUpdateDialogController extends GetxController {
         contactInfoId0: contactInfoId0.value,
         contactInfoId1: contactInfoId1.value,
         contactInfoId2: contactInfoId2.value,
+        recId: recId,
       );
-
+      if (Get.isDialogOpen!) Get.back();
+      Get.back(); // Close dialog
       // Refresh user list if controller exists
       if (Get.isRegistered<UserListController>()) {
         final userListController = Get.find<UserListController>();
         userListController.getUserList();
       }
-
-      Get.back(); // Close dialog
 
       // Show success message
       Get.snackbar(
@@ -294,7 +327,18 @@ class UserUpdateDialogController extends GetxController {
     phoneController.clear();
     emailController.clear();
     addressController.clear();
+    recIdController.clear();
     hasDeposit.value = false;
+
+    // Clear image-related state
+    selectedImagesNationalCodeDesktop.clear();
+    selectedImagesBusinessLicenseDesktop.clear();
+    existingImagesNationalCode.clear();
+    existingImagesBusinessLicense.clear();
+    uploadStatusesNationalCodeDesktop.clear();
+    uploadStatusesBusinessLicenseDesktop.clear();
+    isUploadingNationalCodeDesktop.value = false;
+    isUploadingBusinessLicenseDesktop.value = false;
 
     // Reset to defaults
     selectedState.value = null;
@@ -385,4 +429,211 @@ class UserUpdateDialogController extends GetxController {
     }
     return null;
   }
+
+  // Image management methods
+  Future<void> pickImageNationalCodeDesktop() async {
+    try {
+      final List<XFile?> images = await _pickerNationalCode.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesNationalCodeDesktop.addAll(images);
+      }
+    } catch (e) {
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> pickImageBusinessLicenseDesktop() async {
+    try {
+      final List<XFile?> images = await _pickerBusinessLicense.pickMultiImage();
+      if (images.isNotEmpty) {
+        selectedImagesBusinessLicenseDesktop.addAll(images);
+      }
+    } catch (e) {
+      throw Exception('خطا در انتخاب فایل‌ها');
+    }
+  }
+
+  Future<void> handleDroppedFilesNationalCode(List<XFile> files) async {
+    try {
+      // Filter only image files
+      final imageFiles = files.where((file) {
+        final fileName = file.name.toLowerCase();
+        final extension = fileName.contains('.') ? fileName.split('.').last : '';
+
+        // Also check MIME type as a fallback
+        final mimeType = file.mimeType?.toLowerCase() ?? '';
+        final isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+        final isImageByMimeType = mimeType.startsWith('image/');
+
+        return isImageByExtension || isImageByMimeType;
+      }).toList();
+
+      if (imageFiles.isNotEmpty) {
+        selectedImagesNationalCodeDesktop.addAll(imageFiles);
+        Get.snackbar("موفقیت", "${imageFiles.length} تصویر اضافه شد");
+      } else {
+        Get.snackbar("خطا", "فقط فایل‌های تصویری قابل قبول هستند");
+      }
+    } catch (e) {
+      Get.snackbar("خطا", "خطا در پردازش فایل‌های رها شده");
+    }
+  }
+
+  Future<void> handleDroppedFilesBusinessLicense(List<XFile> files) async {
+    try {
+      // Filter only image files
+      final imageFiles = files.where((file) {
+        final fileName = file.name.toLowerCase();
+        final extension = fileName.contains('.') ? fileName.split('.').last : '';
+
+        // Also check MIME type as a fallback
+        final mimeType = file.mimeType?.toLowerCase() ?? '';
+        final isImageByExtension = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'].contains(extension);
+        final isImageByMimeType = mimeType.startsWith('image/');
+
+        return isImageByExtension || isImageByMimeType;
+      }).toList();
+
+      if (imageFiles.isNotEmpty) {
+        selectedImagesBusinessLicenseDesktop.addAll(imageFiles);
+        Get.snackbar("موفقیت", "${imageFiles.length} تصویر اضافه شد");
+      } else {
+        Get.snackbar("خطا", "فقط فایل‌های تصویری قابل قبول هستند");
+      }
+    } catch (e) {
+      Get.snackbar("خطا", "خطا در پردازش فایل‌های رها شده");
+    }
+  }
+
+  Future<void> getImage(String fileName, String type) async {
+    try {
+      var fetch = await remittanceRepository.getImage(fileName: fileName, type: type);
+      if (type == "NationalCode") {
+        existingImagesNationalCode.assignAll(fetch.guidIds);
+      } else if (type == "BusinessLicense") {
+        existingImagesBusinessLicense.assignAll(fetch.guidIds);
+      }
+    } catch (e) {
+      // Handle error silently for existing images
+    }
+  }
+
+  Future<void> deleteImage(String fileName) async {
+    EasyLoading.show(status: 'لطفا منتظر بمانید');
+    try {
+      var fetch = await remittanceRepository.deleteImage(fileName: fileName);
+      if (fetch) {
+        // Refresh images after deletion
+        await getImage(recIdController.text, "NationalCode");
+        await getImage(recIdController.text, "BusinessLicense");
+      }
+    } catch (e) {
+      // Handle error
+    } finally {
+      EasyLoading.dismiss();
+    }
+  }
+
+  Future<void> uploadAllImagesAndUpdateUser() async {
+    // Generate single recordId for all uploads
+    String recordId = uuid.v4();
+
+    final hasNationalCodeImages = selectedImagesNationalCodeDesktop.isNotEmpty;
+    final hasBusinessLicenseImages = selectedImagesBusinessLicenseDesktop.isNotEmpty;
+    final hasAnyImages = hasNationalCodeImages || hasBusinessLicenseImages;
+
+    // If no images selected, update user directly
+    if (!hasAnyImages) {
+      await updateUser(recordId);
+      return;
+    }
+
+    // Set loading states for both image types
+    isUploadingNationalCodeDesktop.value = true;
+    isUploadingBusinessLicenseDesktop.value = true;
+
+    // Initialize status lists
+    uploadStatusesNationalCodeDesktop.assignAll(
+        List.filled(selectedImagesNationalCodeDesktop.length, false)
+    );
+    uploadStatusesBusinessLicenseDesktop.assignAll(
+        List.filled(selectedImagesBusinessLicenseDesktop.length, false)
+    );
+
+    bool allUploadsSuccessful = true;
+
+    try {
+      // Upload national code images first
+      if (hasNationalCodeImages) {
+        for (int i = 0; i < selectedImagesNationalCodeDesktop.length; i++) {
+          final file = selectedImagesNationalCodeDesktop[i];
+          if (file != null) {
+            try {
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recIdController.text,
+                type: "image",
+                entityType: "NationalCode",
+              );
+              uploadStatusesNationalCodeDesktop[i] = success.isNotEmpty;
+            } catch (e) {
+              uploadStatusesNationalCodeDesktop[i] = false;
+              allUploadsSuccessful = false;
+              Get.snackbar("خطا", "خطا در آپلود تصویر کارت ملی ${i + 1}");
+            }
+          }
+        }
+      }
+
+      // Upload business license images
+      if (hasBusinessLicenseImages) {
+        for (int i = 0; i < selectedImagesBusinessLicenseDesktop.length; i++) {
+          final file = selectedImagesBusinessLicenseDesktop[i];
+          if (file != null) {
+            try {
+              final bytes = await file.readAsBytes();
+              String success = await uploadRepositoryDesktop.uploadImageDesktop(
+                imageBytes: bytes,
+                fileName: file.name,
+                recordId: recIdController.text,
+                type: "image",
+                entityType: "BusinessLicense",
+              );
+              uploadStatusesBusinessLicenseDesktop[i] = success.isNotEmpty;
+            } catch (e) {
+              uploadStatusesBusinessLicenseDesktop[i] = false;
+              allUploadsSuccessful = false;
+              Get.snackbar("خطا", "خطا در آپلود تصویر جواز کسب ${i + 1}");
+            }
+          }
+        }
+      }
+
+      // Check if all uploads were successful
+      final nationalCodeSuccess = !hasNationalCodeImages ||
+          uploadStatusesNationalCodeDesktop.every((status) => status);
+      final businessLicenseSuccess = !hasBusinessLicenseImages ||
+          uploadStatusesBusinessLicenseDesktop.every((status) => status);
+
+      if (nationalCodeSuccess && businessLicenseSuccess) {
+        Get.snackbar("موفقیت", "همه تصاویر با موفقیت آپلود شدند");
+        await updateUser(recordId);
+        Get.back();
+      } else {
+        Get.snackbar("خطا", "برخی از آپلودها با شکست مواجه شدند");
+      }
+
+    } finally {
+      // Clear loading states and lists
+      isUploadingNationalCodeDesktop.value = false;
+      isUploadingBusinessLicenseDesktop.value = false;
+      selectedImagesNationalCodeDesktop.clear();
+      selectedImagesBusinessLicenseDesktop.clear();
+      uploadStatusesNationalCodeDesktop.clear();
+      uploadStatusesBusinessLicenseDesktop.clear();
+    }
+  }
+
 }

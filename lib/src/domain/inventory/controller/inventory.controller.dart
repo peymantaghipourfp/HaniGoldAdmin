@@ -9,10 +9,8 @@ import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hanigold_admin/src/domain/base/base_controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/model/inventory_detail.model.dart';
-import 'package:hanigold_admin/src/domain/inventory/model/socket_inventory.model.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
@@ -180,7 +178,7 @@ class InventoryController extends BaseController{
         try {
           final data = json.decode(message);
           if (data['channel'] == 'inventory') {
-            final socketInventory = SocketInventoryModel.fromJson(data);
+            //final socketInventory = SocketInventoryModel.fromJson(data);
 
             getInventoryListPager();
           }
@@ -309,7 +307,6 @@ class InventoryController extends BaseController{
 
   // لیست حواله ها با صفحه بندی
   Future<void> getInventoryListPager() async {
-    print("### getInventoryListPager ###");
     inventoryList.clear();
     isLoading.value=true;
     try {
@@ -647,17 +644,14 @@ class InventoryController extends BaseController{
 
   // لیست عکس ها
   Future<void> getImage(String fileName,String type) async{
-    print('تعداد image:');
     imageList.clear();
     try{
       var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
       imageList.addAll(fetch.guidIds );
       // ذخیره تعداد عکس‌ها برای این fileName
       imageCounts[fileName] = fetch.guidIds.length;
-      print('تعداد image:${imageList.first}');
       imageList.refresh();
       update();
-      print("imageList.length:::::${imageList.length}");
     }
     catch(e){
       //  state.value=PageState.err;
@@ -711,7 +705,6 @@ class InventoryController extends BaseController{
         *//*final dir = await getApplicationDocumentsDirectory();
         final path = '${dir.path}/images_$guidId.png';*//*
         await dio.download(url, savePath);
-        print(savePath);
         Get.snackbar(
           'موفقیت',
           'تصویر با موفقیت ذخیره شد',
@@ -762,7 +755,7 @@ class InventoryController extends BaseController{
           TextCellValue(inventory.account?.name ?? ''),
           TextCellValue(inventory.inventoryDetails?.first.item?.name ?? ''),
           TextCellValue(inventory.inventoryDetails?.first.quantity?.toString().seRagham(separator: ",") ?? ''),
-          TextCellValue(" عیار:${inventory.inventoryDetails?.first.carat ?? 0}| وزن:${inventory.inventoryDetails?.first.weight750 ?? 0}| ناخالصی:${inventory.inventoryDetails?.first.impurity ?? 0}| آزمایشگاه:${inventory.inventoryDetails?.first.laboratory?.name ?? ""}"?? ''),
+          TextCellValue(" عیار:${inventory.inventoryDetails?.first.carat ?? 0}| وزن:${inventory.inventoryDetails?.first.weight750 ?? 0}| ناخالصی:${inventory.inventoryDetails?.first.impurity ?? 0}| آزمایشگاه:${inventory.inventoryDetails?.first.laboratory?.name ?? ""}"),
           TextCellValue(getSellBuyText(inventory.type ?? 0 )),
           TextCellValue(getDetailText(inventory.inventoryDetailsCount ?? 1 )),
           TextCellValue(inventory.balances?.where((e) => e.unitName == "عدد").map((e) => "\u202B${e.balance}\u202C ${e.unitName} ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
@@ -778,7 +771,7 @@ class InventoryController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'inventories_${DateTime.now().millisecondsSinceEpoch}.xlsx')
           ..click();
         html.Url.revokeObjectUrl(url);
@@ -995,7 +988,7 @@ class InventoryController extends BaseController{
         buildDataCell(inventory.balances?.where((e) => e.unitName == "عدد").map((e) => "${e.balance} ${e.unitName} ${e.itemName}").join(", ") ?? "اطلاعاتی موجود نیست"),
         buildDataCell(getDetailText(inventory.inventoryDetailsCount ?? 1 )),
         buildDataCell(getSellBuyText(inventory.type ?? 0 )),
-        buildDataCell(" عیار:${inventory.inventoryDetails?.first.carat ?? 0} وزن:${inventory.inventoryDetails?.first.weight750 ?? 0} ناخالصی:${inventory.inventoryDetails?.first.impurity ?? 0} آزمایشگاه:${inventory.inventoryDetails?.first.laboratory?.name ?? ""}"?? ''),
+        buildDataCell(" عیار:${inventory.inventoryDetails?.first.carat ?? 0} وزن:${inventory.inventoryDetails?.first.weight750 ?? 0} ناخالصی:${inventory.inventoryDetails?.first.impurity ?? 0} آزمایشگاه:${inventory.inventoryDetails?.first.laboratory?.name ?? ""}"),
         buildDataCell(inventory.inventoryDetails?.first.quantity?.toString().seRagham(separator: ",") ?? ''),
         buildDataCell(inventory.inventoryDetails?.first.item?.name ?? ''),
         buildDataCell(inventory.account?.name ?? ''),
@@ -1090,7 +1083,7 @@ class InventoryController extends BaseController{
       if (kIsWeb) {
         final blob = html.Blob([uint8List], 'image/png');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('download', 'row_screenshot_${inventory.id}.png')
           ..click();
         html.Url.revokeObjectUrl(url);

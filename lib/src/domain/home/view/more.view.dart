@@ -12,7 +12,7 @@ class MoreView extends GetView<HomeController> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar: CustomAppBar(
         title: 'بیشتر',

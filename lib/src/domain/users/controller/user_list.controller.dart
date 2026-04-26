@@ -1,9 +1,12 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:dio/dio.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -18,6 +21,8 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/network/error/network.error.dart';
+import '../../../config/repository/remittance.repository.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../config/repository/user.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../account/model/account.model.dart';
@@ -41,6 +46,7 @@ class UserListController extends GetxController {
   UserInfoTransactionRepository userInfoTransactionRepository = UserInfoTransactionRepository();
   UserRepository userRepository = UserRepository();
   WalletRepository walletRepository = WalletRepository();
+  final RemittanceRepository remittanceRepository=RemittanceRepository();
   ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
   final TextEditingController nameFilterController = TextEditingController();
@@ -65,6 +71,11 @@ class UserListController extends GetxController {
   var startDateFilter = ''.obs;
   var endDateFilter = ''.obs;
   var isWalletLoading = false.obs;
+
+  var errorMessage=''.obs;
+  RxList<String> imageList = <String>[].obs;
+  final PageController pageController = PageController();
+  RxInt currentImagePage = 0.obs;
 
   onSortColum(int columnIndex, bool ascending) {
     if (columnIndex > 0) {
@@ -98,8 +109,6 @@ class UserListController extends GetxController {
       currentPageIndex.value++;
       currentPage.value += 7;
       itemsPerPage.value += 7;
-      print(currentPage.value);
-      print(itemsPerPage.value);
       getUserList();
     }
   }
@@ -109,8 +118,6 @@ class UserListController extends GetxController {
       currentPageIndex.value--;
       currentPage.value -= 7;
       itemsPerPage.value -= 7;
-      print(currentPage.value);
-      print(itemsPerPage.value);
       getUserList();
     }
   }
@@ -150,7 +157,6 @@ class UserListController extends GetxController {
 
   // لیست کاربران
   Future<void> getUserList() async {
-    print("getTransactionInfoList : 1");
     isOpenMore.value = false;
     accountList.clear();
     try {
@@ -165,7 +171,6 @@ class UserListController extends GetxController {
       paginated = response.paginated;
       // nameFilterController.text="";
       // mobileFilterController.text="";
-      //  print(paginated?.totalCount??0);
       state.value = PageStateUser.list;
       isOpenMore.value = true;
 
@@ -217,7 +222,7 @@ class UserListController extends GetxController {
           uint8List
         ], 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         final url = html.Url.createObjectUrlFromBlob(blob);
-        final anchor = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute(
               'download', 'users_${DateTime.now().millisecondsSinceEpoch}.xlsx')
           ..click();
@@ -453,7 +458,6 @@ class UserListController extends GetxController {
       status: 'لطفا صبر کنید',
       dismissOnTap: false,
     );
-    print("insertMobileTelegram : 1");
     try {
       if (Get.isDialogOpen!) Get.back();
       var response = await userRepository.insertMobileTelegram(
@@ -536,6 +540,65 @@ class UserListController extends GetxController {
       print('خطا در اضافه کردن آیتم ها: $e');
     } finally {
       EasyLoading.dismiss();
+    }
+  }
+
+  // لیست عکس ها
+  Future<void> getImage(String fileName,String type) async{
+    imageList.clear();
+    try{
+      var fetch=await remittanceRepository.getImage(fileName: fileName, type: type);
+      imageList.addAll(fetch.guidIds );
+      imageList.refresh();
+      update();
+    }
+    catch(e){
+      //  state.value=PageState.err;
+      errorMessage.value=" خطایی هنگام بارگذاری به وجود آمده است ${e.toString()}";
+    }finally{
+    }
+  }
+
+  void downloadImage(String guidId) async {
+    if (kIsWeb){
+      final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+      final anchor = html.AnchorElement(href: url)
+        ..download = "image_$guidId"
+        ..style.display = 'none';
+
+      html.document.body?.children.add(anchor);
+      anchor.click();
+      anchor.remove();
+    }else{
+      try {
+        final status = await Permission.storage.request();
+        if (!status.isGranted) return;
+
+        final dio = Dio();
+        final url = "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guidId";
+        final downloadsDir = await getDownloadsDirectory();
+        if (downloadsDir == null) {
+          throw Exception('Could not access downloads directory');
+        }
+        String fileExtension = path.extension(guidId);
+        if(fileExtension.isEmpty) fileExtension = '.png';
+        final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}$fileExtension';
+        final savePath = path.join(downloadsDir.path, fileName);
+        /*final dir = await getApplicationDocumentsDirectory();
+        final path = '${dir.path}/images_$guidId.png';*/
+        await dio.download(url, savePath);
+        Get.snackbar(
+          'موفقیت',
+          'تصویر با موفقیت ذخیره شد',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      } catch (e) {
+        Get.snackbar(
+          'خطا',
+          'خطا در دانلود تصویر: ${e.toString()}',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      }
     }
   }
 

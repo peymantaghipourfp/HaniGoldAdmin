@@ -1,20 +1,22 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/deposit/controller/deposit_create.controller.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
 import '../widget/image_drop_zone.widget.dart';
 
@@ -33,9 +35,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
   @override
   Widget build(BuildContext context) {
     final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
-    final isMobile = ResponsiveBreakpoints
-        .of(context)
-        .isMobile;
+    final isMobile = ResponsiveBreakpoints.of(context).isMobile;
     return Obx(() {
       return Scaffold(
         appBar:
@@ -47,8 +47,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
             SafeArea(
                 child: SingleChildScrollView(
                   child: Padding(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 40, vertical: 20),
+                      padding: EdgeInsets.symmetric(horizontal:isMobile ? 10 : 40, vertical: 20),
                       child: ResponsiveRowColumn(
                         layout: isDesktop
                             ? ResponsiveRowColumnType.ROW
@@ -91,7 +90,7 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                 ],
                               ),*/
                               child: SizedBox(
-                                width: Get.width * 0.9,
+                                width:isMobile ? Get.width * 0.95 : Get.width * 0.9,
                                 height: Get.height,
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -1004,6 +1003,50 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     // Drag and Drop Zone
+                                                    isMobile ?
+                                                    GestureDetector(
+                                                      onTap: () {
+                                                        showModalBottomSheet(
+                                                          context: context,
+                                                          builder: (_) {
+                                                            return SafeArea(
+                                                              child: Container(
+                                                                decoration: BoxDecoration(
+                                                                    color:AppColor.secondary200Color,
+                                                                    borderRadius: BorderRadius.circular(15)
+                                                                ),
+                                                                child: Wrap(
+                                                                  children: [
+                                                                    ListTile(
+                                                                      leading: Icon(Icons.photo_library,color: AppColor.textColor,),
+                                                                      title: Text('گالری',style: AppTextStyle.bodyText.copyWith(fontSize: 16,fontWeight: FontWeight.w700),),
+                                                                      onTap: () {
+                                                                        Get.back();
+                                                                        depositCreateController
+                                                                            .pickImageMobile(ImageSource.gallery);
+                                                                      },
+                                                                    ),
+                                                                    ListTile(
+                                                                      leading: Icon(Icons.camera_alt,color: AppColor.textColor,),
+                                                                      title: Text('دوربین',style: AppTextStyle.bodyText.copyWith(fontSize: 16,fontWeight: FontWeight.w700),),
+                                                                      onTap: () {
+                                                                        Get.back();
+                                                                        depositCreateController
+                                                                            .pickImageMobile(ImageSource.camera);
+                                                                      },
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            );
+                                                          },
+                                                        );
+                                                      },
+                                                      child: ImageDropZone(
+                                                        controller: depositCreateController,
+                                                        isDesktop: isDesktop,
+                                                      ),
+                                                    ):
                                                     GestureDetector(
                                                       onTap: () => depositCreateController.pickImageDesktop(),
                                                       child: ImageDropZone(
@@ -1080,12 +1123,14 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                                                   borderRadius: BorderRadius.circular(8),
                                                                                   border: Border.all(color: AppColor.textColor),
                                                                                   image: DecorationImage(
-                                                                                    image: NetworkImage(image!.path),
+                                                                                    image: image.path.startsWith('http') || kIsWeb
+                                                                                        ? NetworkImage(image.path)
+                                                                                        : FileImage(File(image.path)) as ImageProvider,
                                                                                     fit: BoxFit.contain,
                                                                                   ),
                                                                                 ),
-                                                                                height: Get.height * 0.8,
-                                                                                width: Get.width * 0.4,
+                                                                                height:isMobile ? Get.height * 0.6 :  Get.height * 0.8,
+                                                                                width:isMobile ? Get.width * 0.8 : Get.width * 0.4,
                                                                               ),
                                                                             ),
                                                                           );
@@ -1109,8 +1154,23 @@ class _DepositCreateViewState extends State<DepositCreateView> {
                                                                       width: 80,
                                                                       child: ClipRRect(
                                                                         borderRadius: BorderRadius.circular(8),
-                                                                        child: Image.network(
-                                                                          image!.path,
+                                                                        child:
+                                                                        image!.path.startsWith('http') || kIsWeb ?
+                                                                        Image.network(
+                                                                          image.path,
+                                                                          fit: BoxFit.cover,
+                                                                          errorBuilder: (context, error, stackTrace) {
+                                                                            return Container(
+                                                                              color: AppColor.textColor.withOpacity(0.1),
+                                                                              child: Icon(
+                                                                                Icons.image,
+                                                                                color: AppColor.textColor.withOpacity(0.5),
+                                                                              ),
+                                                                            );
+                                                                          },
+                                                                        ):
+                                                                        Image.file(
+                                                                          File(image.path),
                                                                           fit: BoxFit.cover,
                                                                           errorBuilder: (context, error, stackTrace) {
                                                                             return Container(

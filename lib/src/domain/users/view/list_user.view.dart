@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -9,12 +10,11 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
-import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/user_list.controller.dart';
 import '../widgets/user_create_dialog.widget.dart';
 import '../widgets/user_update_dialog.widget.dart';
@@ -408,7 +408,7 @@ class UserListView extends GetView<UserListController> {
                                                                             child:
                                                                                 ElevatedButton(
                                                                               style: ButtonStyle(
-                                                                                  padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                                  padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                                                   // elevation: WidgetStatePropertyAll(5),
                                                                                   backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                                                   shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -658,7 +658,7 @@ class UserListView extends GetView<UserListController> {
                                                                             child:
                                                                                 ElevatedButton(
                                                                               style: ButtonStyle(
-                                                                                  padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                                  padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                                                   // elevation: WidgetStatePropertyAll(5),
                                                                                   backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                                                   shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -700,7 +700,7 @@ class UserListView extends GetView<UserListController> {
                                                         WidgetStatePropertyAll(
                                                             EdgeInsets.symmetric(
                                                                 horizontal: 23,
-                                                                vertical: 19)),
+                                                                )),
                                                     // elevation: WidgetStatePropertyAll(5),
                                                     backgroundColor:
                                                         WidgetStatePropertyAll(
@@ -926,7 +926,7 @@ class UserListView extends GetView<UserListController> {
                                                                     child:
                                                                         ElevatedButton(
                                                                       style: ButtonStyle(
-                                                                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                                           // elevation: WidgetStatePropertyAll(5),
                                                                           backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                                           shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -1288,7 +1288,7 @@ class UserListView extends GetView<UserListController> {
                                                                                     child:
                                                                                     ElevatedButton(
                                                                                       style: ButtonStyle(
-                                                                                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                                                           // elevation: WidgetStatePropertyAll(5),
                                                                                           backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                                                           shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -1523,7 +1523,7 @@ class UserListView extends GetView<UserListController> {
                                                                                     child:
                                                                                     ElevatedButton(
                                                                                       style: ButtonStyle(
-                                                                                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                                          padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                                                           // elevation: WidgetStatePropertyAll(5),
                                                                                           backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                                                           shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -1770,7 +1770,7 @@ class UserListView extends GetView<UserListController> {
                                                                                       child:
                                                                                       ElevatedButton(
                                                                                         style: ButtonStyle(
-                                                                                            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23, vertical: 19)),
+                                                                                            padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 23)),
                                                                                             // elevation: WidgetStatePropertyAll(5),
                                                                                             backgroundColor: WidgetStatePropertyAll(AppColor.appBarColor),
                                                                                             shape: WidgetStatePropertyAll(RoundedRectangleBorder(side: BorderSide(color: AppColor.textColor), borderRadius: BorderRadius.circular(5)))),
@@ -1944,7 +1944,6 @@ class UserListView extends GetView<UserListController> {
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
-            print(columnIndex);
             controller.setSort(columnIndex, ascending);
 
             controller.onSortColum(columnIndex, ascending);
@@ -1983,6 +1982,22 @@ class UserListView extends GetView<UserListController> {
           label: Row(
             children: [
               Text('تاریخ ثبت نام',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+            ],
+          ),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: Row(
+            children: [
+              Text('تصویر کارت ملی',
+                  style: AppTextStyle.labelText.copyWith(fontSize: 11)),
+            ],
+          ),
+          headingRowAlignment: MainAxisAlignment.center),
+      DataColumn(
+          label: Row(
+            children: [
+              Text('تصویر جواز',
                   style: AppTextStyle.labelText.copyWith(fontSize: 11)),
             ],
           ),
@@ -2106,6 +2121,475 @@ class UserListView extends GetView<UserListController> {
             ),
           ),
           ),
+          // عکس کارت ملی
+          DataCell(Center(
+            child: SizedBox(
+              child:
+              GestureDetector(
+                onTap: () async{
+                  await controller.getImage(trans.recId ??"", "NationalCode");
+                  Future.delayed(const Duration(milliseconds: 200), () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          backgroundColor: AppColor
+                              .backGroundColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius
+                                .circular(
+                                10),
+                          ),
+                          child: Container(
+                            padding: EdgeInsets
+                                .all(
+                                8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize
+                                  .min,
+                              children: [
+                                // نمایش اسلایدی عکس‌ها
+                                SizedBox(
+                                  width: 500,
+                                  height: 500,
+                                  child: Stack(
+                                    children: [
+                                      PageView.builder(
+                                        controller: controller.pageController,
+                                        itemCount: controller.imageList.length,
+                                        onPageChanged: (index) =>
+                                        controller.currentImagePage.value = index,
+                                        itemBuilder: (context,
+                                            index) {
+                                          final attachment = controller.imageList[index];
+                                          return Column(
+                                            children: [
+                                              if (kIsWeb)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(right: 50),
+                                                  child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [
+                                                      IconButton(
+                                                        icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                        onPressed: () => controller.downloadImage(attachment,),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              SizedBox(
+                                                width: 450,
+                                                height: 450,
+                                                child: Image.network(
+                                                  "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                  loadingBuilder: (context,
+                                                      child,
+                                                      loadingProgress) {
+                                                    if (loadingProgress ==
+                                                        null)
+                                                      return child;
+                                                    return Center(
+                                                      child: CircularProgressIndicator(),
+                                                    );
+                                                  },
+                                                  errorBuilder: (context,
+                                                      error,
+                                                      stackTrace) =>
+                                                      Icon(
+                                                          Icons
+                                                              .error,
+                                                          color: Colors
+                                                              .red),
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                      SizedBox(
+                                        height: 2,),
+                                      Obx(() {
+                                        return Positioned(
+                                            left: 10,
+                                            top: 0,
+                                            bottom: 0,
+                                            child: Visibility(
+                                              visible: controller.currentImagePage.value > 0,
+                                              child: IconButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor: WidgetStateProperty
+                                                      .all(Colors.black54),
+                                                  shape: WidgetStateProperty.all(
+                                                      CircleBorder()),
+                                                  padding: WidgetStateProperty.all(
+                                                      EdgeInsets.all(8)),
+                                                ),
+                                                icon: Icon(Icons.chevron_left,
+                                                  color: Colors.white,
+                                                  size: 40,
+                                                  shadows: [
+                                                    Shadow(
+                                                      blurRadius: 10,
+                                                      color: Colors.black,
+                                                      offset: Offset(0, 0),
+                                                    )
+                                                  ],
+                                                ),
+                                                onPressed: () {
+                                                  controller.pageController.previousPage(
+                                                    duration: Duration(
+                                                        milliseconds: 300),
+                                                    curve: Curves.easeInOut,
+                                                  );
+                                                },
+                                              ),
+                                            )
+                                        );
+                                      }),
+                                      Obx(() {
+                                        return Positioned(
+                                            right: 10,
+                                            top: 0,
+                                            bottom: 0,
+                                            child: Visibility(
+                                              visible: controller.currentImagePage.value <
+                                                  (controller.imageList.length) - 1,
+                                              child: IconButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor: WidgetStateProperty
+                                                      .all(Colors.black54),
+                                                  shape: WidgetStateProperty.all(
+                                                      CircleBorder()),
+                                                  padding: WidgetStateProperty.all(
+                                                      EdgeInsets.all(8)),
+                                                ),
+                                                icon: Icon(Icons.chevron_right,
+                                                  color: Colors.white,
+                                                  size: 40,
+                                                  shadows: [
+                                                    Shadow(
+                                                      blurRadius: 10,
+                                                      color: Colors.black,
+                                                      offset: Offset(0, 0),
+                                                    ),
+                                                  ],
+                                                ),
+                                                onPressed: () {
+                                                  controller.pageController.nextPage(
+                                                    duration: Duration(
+                                                        milliseconds: 300),
+                                                    curve: Curves.easeInOut,
+                                                  );
+                                                },
+                                              ),
+                                            )
+                                        );
+                                      }),
+                                      SizedBox(
+                                        height: 2,),
+                                      // نمایش نقاط راهنما
+                                      Obx(() =>
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment
+                                                .center,
+                                            children: List
+                                                .generate(
+                                              controller.imageList.length,
+                                                  (index) =>
+                                                  Container(
+                                                    width: 8,
+                                                    height: 8,
+                                                    margin: EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 4),
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape
+                                                          .circle,
+                                                      color: controller
+                                                          .currentImagePage
+                                                          .value ==
+                                                          index
+                                                          ? Colors
+                                                          .blue
+                                                          : Colors
+                                                          .grey,
+                                                    ),
+                                                  ),
+                                            ),
+                                          )),
+                                      SizedBox(
+                                          height: 10),
+                                    ],
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      Get
+                                          .back(),
+                                  child: Text(
+                                    "بستن",
+                                    style: AppTextStyle
+                                        .bodyText,),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+
+                  });
+
+
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                        colorFilter: ColorFilter.mode(
+
+                          AppColor.textColor,
+
+                          BlendMode.srcIn,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+          )),
+          // عکس جواز کسب
+          DataCell(Center(
+            child: SizedBox(
+              child: GestureDetector(
+                onTap: () async{
+                  await controller.getImage(trans.recId ??"", "BusinessLicense");
+                  Future.delayed(const Duration(milliseconds: 200), () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return Dialog(
+                          backgroundColor: AppColor
+                              .backGroundColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius
+                                .circular(
+                                10),
+                          ),
+                          child: Container(
+                            padding: EdgeInsets
+                                .all(
+                                8),
+                            child: Column(
+                              mainAxisSize: MainAxisSize
+                                  .min,
+                              children: [
+                                // نمایش اسلایدی عکس‌ها
+                                SizedBox(
+                                  width: 500,
+                                  height: 500,
+                                  child: Stack(
+                                    children: [
+                                      PageView.builder(
+                                        controller: controller.pageController,
+                                        itemCount: controller.imageList.length,
+                                        onPageChanged: (index) =>
+                                        controller.currentImagePage.value = index,
+                                        itemBuilder: (context,
+                                            index) {
+                                          final attachment = controller.imageList[index];
+                                          return Column(
+                                            children: [
+                                              if (kIsWeb)
+                                                Padding(
+                                                  padding: const EdgeInsets.only(right: 50),
+                                                  child: Row(mainAxisAlignment: MainAxisAlignment.start,
+                                                    children: [
+                                                      IconButton(
+                                                        icon: Icon(Icons.download, color: AppColor.dividerColor),
+                                                        onPressed: () => controller.downloadImage(attachment,),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              SizedBox(
+                                                width: 450,
+                                                height: 450,
+                                                child: Image.network(
+                                                  "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
+                                                  loadingBuilder: (context,
+                                                      child,
+                                                      loadingProgress) {
+                                                    if (loadingProgress ==
+                                                        null)
+                                                      return child;
+                                                    return Center(
+                                                      child: CircularProgressIndicator(),
+                                                    );
+                                                  },
+                                                  errorBuilder: (context,
+                                                      error,
+                                                      stackTrace) =>
+                                                      Icon(
+                                                          Icons
+                                                              .error,
+                                                          color: Colors
+                                                              .red),
+                                                  fit: BoxFit.contain,
+                                                ),
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                      SizedBox(
+                                        height: 2,),
+                                      Obx(() {
+                                        return Positioned(
+                                            left: 10,
+                                            top: 0,
+                                            bottom: 0,
+                                            child: Visibility(
+                                              visible: controller.currentImagePage.value > 0,
+                                              child: IconButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor: WidgetStateProperty
+                                                      .all(Colors.black54),
+                                                  shape: WidgetStateProperty.all(
+                                                      CircleBorder()),
+                                                  padding: WidgetStateProperty.all(
+                                                      EdgeInsets.all(8)),
+                                                ),
+                                                icon: Icon(Icons.chevron_left,
+                                                  color: Colors.white,
+                                                  size: 40,
+                                                  shadows: [
+                                                    Shadow(
+                                                      blurRadius: 10,
+                                                      color: Colors.black,
+                                                      offset: Offset(0, 0),
+                                                    )
+                                                  ],
+                                                ),
+                                                onPressed: () {
+                                                  controller.pageController.previousPage(
+                                                    duration: Duration(
+                                                        milliseconds: 300),
+                                                    curve: Curves.easeInOut,
+                                                  );
+                                                },
+                                              ),
+                                            )
+                                        );
+                                      }),
+                                      Obx(() {
+                                        return Positioned(
+                                            right: 10,
+                                            top: 0,
+                                            bottom: 0,
+                                            child: Visibility(
+                                              visible: controller.currentImagePage.value <
+                                                  (controller.imageList.length) - 1,
+                                              child: IconButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor: WidgetStateProperty
+                                                      .all(Colors.black54),
+                                                  shape: WidgetStateProperty.all(
+                                                      CircleBorder()),
+                                                  padding: WidgetStateProperty.all(
+                                                      EdgeInsets.all(8)),
+                                                ),
+                                                icon: Icon(Icons.chevron_right,
+                                                  color: Colors.white,
+                                                  size: 40,
+                                                  shadows: [
+                                                    Shadow(
+                                                      blurRadius: 10,
+                                                      color: Colors.black,
+                                                      offset: Offset(0, 0),
+                                                    ),
+                                                  ],
+                                                ),
+                                                onPressed: () {
+                                                  controller.pageController.nextPage(
+                                                    duration: Duration(
+                                                        milliseconds: 300),
+                                                    curve: Curves.easeInOut,
+                                                  );
+                                                },
+                                              ),
+                                            )
+                                        );
+                                      }),
+                                      SizedBox(
+                                        height: 2,),
+                                      // نمایش نقاط راهنما
+                                      Obx(() =>
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment
+                                                .center,
+                                            children: List
+                                                .generate(
+                                              controller.imageList.length,
+                                                  (index) =>
+                                                  Container(
+                                                    width: 8,
+                                                    height: 8,
+                                                    margin: EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 4),
+                                                    decoration: BoxDecoration(
+                                                      shape: BoxShape
+                                                          .circle,
+                                                      color: controller
+                                                          .currentImagePage
+                                                          .value ==
+                                                          index
+                                                          ? Colors
+                                                          .blue
+                                                          : Colors
+                                                          .grey,
+                                                    ),
+                                                  ),
+                                            ),
+                                          )),
+                                      SizedBox(
+                                          height: 10),
+                                    ],
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () =>
+                                      Get
+                                          .back(),
+                                  child: Text(
+                                    "بستن",
+                                    style: AppTextStyle
+                                        .bodyText,),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+
+                  });
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset('assets/svg/picture.svg',height: 20,
+                        colorFilter: ColorFilter.mode(
+
+                          AppColor.textColor,
+
+                          BlendMode.srcIn,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+          )),
           DataCell(
             Center(
               child: IconButton(
@@ -2394,7 +2878,6 @@ class UserListView extends GetView<UserListController> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      print(trans.id.toString());
                       /*Get.toNamed(
                           "/insertUser", parameters: {"id": trans.id.toString()});*/
                       Get.dialog(UserUpdateDialogWidget(), arguments: {'accountId': trans.id});

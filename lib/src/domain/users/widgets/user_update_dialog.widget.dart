@@ -1,19 +1,17 @@
-import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_group.model.dart';
-import 'package:hanigold_admin/src/domain/account/model/account_level.model.dart';
-import 'package:hanigold_admin/src/domain/accountSalesGroup/model/account_sales_group.model.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_update_dialog.controller.dart';
-import 'package:hanigold_admin/src/domain/users/model/city_item.model.dart';
-import 'package:hanigold_admin/src/domain/users/model/state_item.model.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
-import 'package:hanigold_admin/src/widget/custom_dropdown1.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+
+import '../../../config/repository/url/base_url.dart';
+import 'image_drop_zone_business_license_update.widget.dart';
+import 'image_drop_zone_national_code_update.widget.dart';
 
 class UserUpdateDialogWidget extends StatefulWidget {
   const UserUpdateDialogWidget({super.key});
@@ -62,7 +60,7 @@ class _UserUpdateDialogWidgetState extends State<UserUpdateDialogWidget>
         ),
         onPressed: () async {
           Get.back(); // Close confirm dialog
-          await controller.updateUser();
+          await controller.uploadAllImagesAndUpdateUser();
         },
         child: Text('بروزرسانی', style: AppTextStyle.bodyText),
       ),
@@ -652,6 +650,515 @@ class _UserUpdateDialogWidgetState extends State<UserUpdateDialogWidget>
                 ),
               ),
 
+              // Image sections
+              // Existing Images Display
+              // National Code Images
+              if (controller.existingImagesNationalCode.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLabelCompact('تصاویر کارت ملی موجود'),
+                    SizedBox(height: 4),
+                    Container(
+                      width: double.infinity,
+                      constraints: BoxConstraints(maxHeight: 120),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColor.textFieldColor,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColor.textColor.withOpacity(0.3),
+                        ),
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: controller.existingImagesNationalCode.map((guid) {
+                            return Stack(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    showGeneralDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      barrierLabel: MaterialLocalizations.of(context)
+                                          .modalBarrierDismissLabel,
+                                      barrierColor: Colors.black45,
+                                      transitionDuration: const Duration(milliseconds: 200),
+                                      pageBuilder: (BuildContext buildContext,
+                                          Animation animation,
+                                          Animation secondaryAnimation) {
+                                        return Center(
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: Container(
+                                              margin: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(color: AppColor.textColor),
+                                              ),
+                                              height: Get.height * 0.8,
+                                              width: Get.width * 0.4,
+                                              child: Image.network(
+                                                "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guid",
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: AppColor.textColor),
+                                    ),
+                                    height: 80,
+                                    width: 80,
+                                    child: Image.network(
+                                      "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guid",
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          color: AppColor.textColor.withOpacity(0.1),
+                                          child: Icon(
+                                            Icons.image,
+                                            color: AppColor.textColor.withOpacity(0.5),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () => controller.deleteImage(guid),
+                                    child: CircleAvatar(
+                                      backgroundColor: AppColor.accentColor,
+                                      radius: 12,
+                                      child: Icon(
+                                        Icons.clear,
+                                        color: AppColor.textColor,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+              // Business License Images
+              if (controller.existingImagesBusinessLicense.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildLabelCompact('تصاویر جواز کسب موجود'),
+                    SizedBox(height: 4),
+                    Container(
+                      width: double.infinity,
+                      constraints: BoxConstraints(maxHeight: 120),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: AppColor.textFieldColor,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColor.textColor.withOpacity(0.3),
+                        ),
+                      ),
+                      child: SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          children: controller.existingImagesBusinessLicense.map((guid) {
+                            return Stack(
+                              children: [
+                                GestureDetector(
+                                  onTap: () {
+                                    showGeneralDialog(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      barrierLabel: MaterialLocalizations.of(context)
+                                          .modalBarrierDismissLabel,
+                                      barrierColor: Colors.black45,
+                                      transitionDuration: const Duration(milliseconds: 200),
+                                      pageBuilder: (BuildContext buildContext,
+                                          Animation animation,
+                                          Animation secondaryAnimation) {
+                                        return Center(
+                                          child: Material(
+                                            color: Colors.transparent,
+                                            child: Container(
+                                              margin: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(color: AppColor.textColor),
+                                              ),
+                                              height: Get.height * 0.8,
+                                              width: Get.width * 0.4,
+                                              child: Image.network(
+                                                "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guid",
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Container(
+                                    margin: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: AppColor.textColor),
+                                    ),
+                                    height: 80,
+                                    width: 80,
+                                    child: Image.network(
+                                      "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$guid",
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          color: AppColor.textColor.withOpacity(0.1),
+                                          child: Icon(
+                                            Icons.image,
+                                            color: AppColor.textColor.withOpacity(0.5),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: GestureDetector(
+                                    onTap: () => controller.deleteImage(guid),
+                                    child: CircleAvatar(
+                                      backgroundColor: AppColor.accentColor,
+                                      radius: 12,
+                                      child: Icon(
+                                        Icons.clear,
+                                        color: AppColor.textColor,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+              // New Images Section
+              Row(crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabelCompact('تصویر کارت ملی جدید (اختیاری)'),
+                          SizedBox(height: 4),
+                          // Drag and Drop Zone for National Code
+                          GestureDetector(
+                            onTap: () => controller.pickImageNationalCodeDesktop(),
+                            child: ImageDropZoneNationalCodeUpdate(
+                              controller: controller,
+                              isDesktop: isDesktop,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Selected Images Preview for National Code
+                          Obx(() {
+                            if (controller.isUploadingNationalCodeDesktop.value) {
+                              return Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppColor.textFieldColor,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'در حال بارگزاری عکس',
+                                      style: AppTextStyle.labelText.copyWith(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.normal,
+                                        color: AppColor.textColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const CircularProgressIndicator(),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            if (controller.selectedImagesNationalCodeDesktop.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Container(
+                              height: 100,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColor.textFieldColor,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: AppColor.textColor.withOpacity(0.3),
+                                ),
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: controller.selectedImagesNationalCodeDesktop.map((image) {
+                                    return Stack(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            showGeneralDialog(
+                                              context: context,
+                                              barrierDismissible: true,
+                                              barrierLabel: MaterialLocalizations.of(context)
+                                                  .modalBarrierDismissLabel,
+                                              barrierColor: Colors.black45,
+                                              transitionDuration: const Duration(milliseconds: 200),
+                                              pageBuilder: (BuildContext buildContext,
+                                                  Animation animation,
+                                                  Animation secondaryAnimation) {
+                                                return Center(
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: Container(
+                                                      margin: EdgeInsets.all(10),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        border: Border.all(color: AppColor.textColor),
+                                                      ),
+                                                      height: Get.height * 0.8,
+                                                      width: Get.width * 0.4,
+                                                      child: Image.network(
+                                                        image.path,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: AppColor.textColor),
+                                            ),
+                                            height: 80,
+                                            width: 80,
+                                            child: Image.network(
+                                              image!.path,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return Container(
+                                                  color: AppColor.textColor.withOpacity(0.1),
+                                                  child: Icon(
+                                                    Icons.image,
+                                                    color: AppColor.textColor.withOpacity(0.5),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              controller.selectedImagesNationalCodeDesktop.remove(image);
+                                            },
+                                            child: CircleAvatar(
+                                              backgroundColor: AppColor.accentColor,
+                                              radius: 12,
+                                              child: Icon(
+                                                Icons.clear,
+                                                color: AppColor.textColor,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      )
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabelCompact('تصویر جواز کسب جدید (اختیاری)'),
+                          SizedBox(height: 4),
+                          // Drag and Drop Zone for Business License
+                          GestureDetector(
+                            onTap: () => controller.pickImageBusinessLicenseDesktop(),
+                            child: ImageDropZoneBusinessLicenseUpdate(
+                              controller: controller,
+                              isDesktop: isDesktop,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          // Selected Images Preview for Business License
+                          Obx(() {
+                            if (controller.isUploadingBusinessLicenseDesktop.value) {
+                              return Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: AppColor.textFieldColor,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'در حال بارگزاری عکس',
+                                      style: AppTextStyle.labelText.copyWith(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.normal,
+                                        color: AppColor.textColor,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    const CircularProgressIndicator(),
+                                  ],
+                                ),
+                              );
+                            }
+
+                            if (controller.selectedImagesBusinessLicenseDesktop.isEmpty) {
+                              return const SizedBox.shrink();
+                            }
+
+                            return Container(
+                              height: 100,
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColor.textFieldColor,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: AppColor.textColor.withOpacity(0.3),
+                                ),
+                              ),
+                              child: SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  children: controller.selectedImagesBusinessLicenseDesktop.map((image) {
+                                    return Stack(
+                                      children: [
+                                        GestureDetector(
+                                          onTap: () {
+                                            showGeneralDialog(
+                                              context: context,
+                                              barrierDismissible: true,
+                                              barrierLabel: MaterialLocalizations.of(context)
+                                                  .modalBarrierDismissLabel,
+                                              barrierColor: Colors.black45,
+                                              transitionDuration: const Duration(milliseconds: 200),
+                                              pageBuilder: (BuildContext buildContext,
+                                                  Animation animation,
+                                                  Animation secondaryAnimation) {
+                                                return Center(
+                                                  child: Material(
+                                                    color: Colors.transparent,
+                                                    child: Container(
+                                                      margin: EdgeInsets.all(10),
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        border: Border.all(color: AppColor.textColor),
+                                                      ),
+                                                      height: Get.height * 0.8,
+                                                      width: Get.width * 0.4,
+                                                      child: Image.network(
+                                                        image.path,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
+                                          child: Container(
+                                            margin: const EdgeInsets.all(4),
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(color: AppColor.textColor),
+                                            ),
+                                            height: 80,
+                                            width: 80,
+                                            child: Image.network(
+                                              image!.path,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) {
+                                                return Container(
+                                                  color: AppColor.textColor.withOpacity(0.1),
+                                                  child: Icon(
+                                                    Icons.image,
+                                                    color: AppColor.textColor.withOpacity(0.5),
+                                                  ),
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 0,
+                                          right: 0,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              controller.selectedImagesBusinessLicenseDesktop.remove(image);
+                                            },
+                                            child: CircleAvatar(
+                                              backgroundColor: AppColor.accentColor,
+                                              radius: 12,
+                                              child: Icon(
+                                                Icons.clear,
+                                                color: AppColor.textColor,
+                                                size: 16,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            );
+                          }),
+                        ],
+                      )
+                  ),
+                ],
+              ),
+
               // Has Deposit checkbox
               /*Container(
                 padding: EdgeInsets.only(bottom: 5),
@@ -767,7 +1274,7 @@ class _UserUpdateDialogWidgetState extends State<UserUpdateDialogWidget>
   }
 
   Widget _buildLabelCompact(String text,{Color? textColor}) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Container(
       padding: EdgeInsets.only(bottom: 3, top: 5),
       child: Text(

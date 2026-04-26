@@ -23,8 +23,12 @@ CreditHelperModel _$CreditHelperModelFromJson(Map<String, dynamic> json) =>
       attribute: json['attribute'] as String?,
       recId: json['recId'] as String?,
       infos: json['infos'] as List<dynamic>?,
-      startDate: json['startDate'] == null ? null : DateTime.parse(json['startDate'] as String),
-      endDate: json['endDate'] == null ? null : DateTime.parse(json['endDate'] as String),
+      startDate: json['startDate'] == null
+          ? null
+          : DateTime.parse(json['startDate'] as String),
+      endDate: json['endDate'] == null
+          ? null
+          : DateTime.parse(json['endDate'] as String),
       description: json['description'] as String?,
     );
 
@@ -41,7 +45,7 @@ Map<String, dynamic> _$CreditHelperModelToJson(CreditHelperModel instance) =>
       'attribute': instance.attribute,
       'recId': instance.recId,
       'infos': instance.infos,
-      'startDate': instance.startDate,
-      'endDate': instance.endDate,
+      'startDate': instance.startDate?.toIso8601String(),
+      'endDate': instance.endDate?.toIso8601String(),
       'description': instance.description,
     };

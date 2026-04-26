@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 
 import '../config/const/app_color.dart';
 import '../config/const/app_text_style.dart';
+import '../domain/home/controller/home_tabs.controller.dart';
+import '../domain/home/widget/home_tabs_bar.widget.dart';
 
 class CustomAppbar1 extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -69,10 +71,20 @@ class CustomAppbar1 extends StatelessWidget implements PreferredSizeWidget {
           icon: Icon(Icons.arrow_back, color: AppColor.textColor),
           onPressed: onBackTap
       ),
+      // Desktop-style internal tabs just under the main app bar.
+      bottom: const PreferredSize(
+        preferredSize: Size.fromHeight(40),
+        child: HomeTabsBar(),
+      ),
     );
   }
-
   @override
-  // TODO: implement preferredSize
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+  Size get preferredSize {
+    if (Get.isRegistered<HomeTabsController>()) {
+      final controller = Get.find<HomeTabsController>();
+      final hasTabs = controller.tabs.isNotEmpty;
+      return Size.fromHeight(kToolbarHeight + (hasTabs ? 40 : 0));
+    }
+    return const Size.fromHeight(kToolbarHeight);
+  }
 }

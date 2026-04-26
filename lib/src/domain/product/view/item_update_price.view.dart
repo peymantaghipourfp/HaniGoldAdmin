@@ -1,13 +1,9 @@
-import 'package:data_table_2/data_table_2.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
-import 'package:hanigold_admin/src/domain/product/widget/max_buy.widget.dart';
-import 'package:hanigold_admin/src/domain/product/widget/max_sell.widget.dart';
-import 'package:hanigold_admin/src/domain/product/widget/price_different.widget.dart';
 import 'package:hanigold_admin/src/domain/product/widget/price_sell.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -16,15 +12,10 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
-import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
-import '../../home/widget/chat_dialog.widget.dart';
-import '../model/item.model.dart';
-import '../widget/buy_range.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../widget/buy_status.widget.dart';
-import '../widget/sale_range.widget.dart';
 import '../widget/sell_status.widget.dart';
 
 class ProductUpdatePriceView extends StatefulWidget {
@@ -47,7 +38,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
 
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).isDesktop;
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Scaffold(
       appBar:
       CustomAppbar1(
@@ -149,7 +140,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                         columns: buildDataColumnsActive(),
                                                         rows: buildDataRowsActive(context),
                                                        headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
-                                                        dataRowMaxHeight: 60,
+                                                        dataRowMaxHeight: double.infinity,
                                                         headingRowHeight: 40,
                                                         columnSpacing: 60,
                                                         horizontalMargin: 40,
@@ -183,7 +174,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                       columns: buildDataColumnsInactive(),
                                                       rows: buildDataRowsInactive(context),
                                                       headingRowColor: WidgetStatePropertyAll(AppColor.buttonColor.withAlpha(40)),
-                                                      dataRowMaxHeight: 60,
+                                                      dataRowMaxHeight: double.infinity,
                                                       headingRowHeight: 40,
                                                       columnSpacing: 60,
                                                       horizontalMargin: 40,
@@ -301,6 +292,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                                             productController.activeItemList[index].differentPrice ??
                                                                                 0,
                                                                         id: productController
+                                                                            .activeItemList[index]
+                                                                            .id!,
+                                                                            itemId: productController
                                                                             .activeItemList[index]
                                                                             .id!,
                                                                       );
@@ -466,7 +460,9 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                                                                         id: productController
                                                                             .inactiveItemList[index]
                                                                             .id!,
-
+                                                                            itemId: productController
+                                                                            .inactiveItemList[index]
+                                                                            .id!,
                                                                       );
                                                                     }(),
                                                                   ],
@@ -736,14 +732,14 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           DataCell(
             Text(
               textAlign: TextAlign.center,
-              (((activeList.mesghalPrice?.toDouble() ?? 0)-(activeList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+              (((activeList.mesghalPrice?.toDouble() ?? 0)-(activeList.mesghalDifferentPrice?.toDouble() ?? 0)).toStringAsFixed(0).seRagham(separator: ',')),
               style: AppTextStyle.bodyText,
             ),
           ),
           // price
           DataCell(
                 () {
-              String price = activeList.mesghalPrice.toString().replaceAll(RegExp(r'[^0-9]'), '');
+              String price = activeList.mesghalPrice?.toStringAsFixed(0).replaceAll(RegExp(r'[^0-9]'), '') ?? "";
               List<String> parts = [];
               String remaining = price;
               int count = 0;
@@ -780,19 +776,23 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                   ? parts[2]
                   : '0';
               String price4 = remaining;
-              return PriceSellWidget(
-                price1: price1,
-                price2: price2,
-                price3: price3,
-                price4: price4,
-                mesghalDifferent: activeList
-                    .mesghalDifferentPrice ??
-                    0,
-                id: activeList
-                    .id!,
-                itemUnitId: activeList.itemUnit?.id ?? 0,
-                refrence:activeList.refrence,
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: PriceSellWidget(
+                  price1: price1,
+                  price2: price2,
+                  price3: price3,
+                  price4: price4,
+                  mesghalDifferent: activeList
+                      .mesghalDifferentPrice ??
+                      0,
+                  id: activeList
+                      .id!,
+                  itemUnitId: activeList.itemUnit?.id ?? 0,
+                  itemId: activeList.id!,
+                  refrence:activeList.refrence,
 
+                ),
               );
             }(),
           ),
@@ -967,7 +967,6 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
               child: GestureDetector(
                 onTap: () {
                   Get.toNamed('/productEdit', parameters: {"id": activeList.id.toString()});
-                  print('activeListId:::::::::${activeList.id}');
                 },
                 child: Icon(
                   Icons.edit,
@@ -1164,19 +1163,14 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           DataCell(
             Text(
               textAlign: TextAlign.center,
-              (((inActiveList.mesghalPrice?.toDouble() ?? 0)-(inActiveList.mesghalDifferentPrice?.toDouble() ?? 0)).toString().seRagham(separator: ',')),
+              (((inActiveList.mesghalPrice?.toDouble() ?? 0)-(inActiveList.mesghalDifferentPrice?.toDouble() ?? 0)).toStringAsFixed(0).seRagham(separator: ',')),
               style: AppTextStyle.bodyText,
             ),
           ),
           // price
           DataCell(
                 () {
-              String price = inActiveList
-                  .mesghalPrice.toString()
-                  .replaceAll(
-                  RegExp(
-                      r'[^0-9]'),
-                  '');
+              String price = inActiveList.mesghalPrice?.toStringAsFixed(0).replaceAll(RegExp(r'[^0-9]'), '') ?? "";
               List<String> parts = [
               ];
               String remaining = price;
@@ -1213,18 +1207,22 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                   ? parts[2]
                   : '0';
               String price4 = remaining;
-              return PriceSellWidget(
-                price1: price1,
-                price2: price2,
-                price3: price3,
-                price4: price4,
-                mesghalDifferent: inActiveList
-                    .mesghalDifferentPrice ??
-                    0,
-                id: inActiveList
-                    .id!,
-                itemUnitId: inActiveList.itemUnit?.id ?? 0,
-                refrence:inActiveList.refrence,
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: PriceSellWidget(
+                  price1: price1,
+                  price2: price2,
+                  price3: price3,
+                  price4: price4,
+                  mesghalDifferent: inActiveList
+                      .mesghalDifferentPrice ??
+                      0,
+                  id: inActiveList
+                      .id!,
+                  itemUnitId: inActiveList.itemUnit?.id ?? 0,
+                  itemId: inActiveList.id!,
+                  refrence:inActiveList.refrence,
+                ),
               );
             }(),
           ),
@@ -1549,6 +1547,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                         mesghalDifferent: item.mesghalDifferentPrice ?? 0,
                         id: item.id!,
                         itemUnitId: item.itemUnit?.id ?? 0,
+                        itemId: item.id!,
                         refrence: item.refrence,
                       ),
                     ],
@@ -1604,7 +1603,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
       itemBuilder: (context, index) {
         final item = productController.inactiveItemList[index];
         final buyPrice = (((item.mesghalPrice?.toDouble() ?? 0) - (item.mesghalDifferentPrice?.toDouble() ?? 0))
-            .toString()
+            .toStringAsFixed(0)
             .seRagham(separator: ','));
 
         return Container(
@@ -1686,6 +1685,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                         mesghalDifferent: item.mesghalDifferentPrice ?? 0,
                         id: item.id!,
                         itemUnitId: item.itemUnit?.id ?? 0,
+                        itemId: item.id!,
                         refrence: item.refrence,
                       ),
                     ],

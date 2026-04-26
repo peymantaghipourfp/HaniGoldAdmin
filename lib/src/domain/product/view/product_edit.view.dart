@@ -1,24 +1,21 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
-import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product_edit.controller.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:hanigold_admin/src/domain/product/widget/buy_range.widget.dart';
 import 'package:hanigold_admin/src/domain/product/widget/max_sell.widget.dart';
 import 'package:hanigold_admin/src/domain/product/widget/price_different.widget.dart';
-import 'package:hanigold_admin/src/domain/product/widget/price_sell.widget.dart';
 import 'package:hanigold_admin/src/domain/product/widget/sale_range.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
-import '../../../widget/custom_dropdown.widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../widget/max_buy.widget.dart';
 
 class ProductEditView extends StatefulWidget {
@@ -442,7 +439,7 @@ class _ProductEditViewState extends State<ProductEditView> {
     }
   }
 
-  Widget _buildBuyPriceRow(String label, String value) {
+  /*Widget _buildBuyPriceRow(String label, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -460,7 +457,7 @@ class _ProductEditViewState extends State<ProductEditView> {
         ],
       ),
     );
-  }
+  }*/
 
   /*Widget _buildW750Field(String label, String initialValue1) {
     return Padding(
@@ -611,7 +608,7 @@ class _ProductEditViewState extends State<ProductEditView> {
     );
   }
 
-  Widget _buildReferenceDropdown() {
+  /*Widget _buildReferenceDropdown() {
     return Obx(() {
       if (productEditController.refrenceList.isEmpty) {
         return const Center(child: CircularProgressIndicator());
@@ -625,7 +622,6 @@ class _ProductEditViewState extends State<ProductEditView> {
             final selectedItem = productEditController.refrenceList.firstWhereOrNull((item) => item.name == newValue);
             if (selectedItem != null) {
               productEditController.selectedRefrenceId.value = selectedItem.id;
-              print("selectedReferenceId:::${productEditController.selectedRefrenceId.value}");
             }
           },
           backgroundColor: AppColor
@@ -637,5 +633,5 @@ class _ProductEditViewState extends State<ProductEditView> {
         ),
       );
     });
-  }
+  }*/
 }

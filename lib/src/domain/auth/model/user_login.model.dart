@@ -2,7 +2,6 @@
 //
 //     final userLoginModel = userLoginModelFromJson(jsonString);
 
-import 'package:meta/meta.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
 

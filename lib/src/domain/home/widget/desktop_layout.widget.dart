@@ -1,13 +1,10 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter_exit_app/flutter_exit_app.dart';
-import 'package:get/get.dart';
-import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
 import 'package:hanigold_admin/src/widget/side_menu_fix.widget.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../widget/side_menu.widget.dart';
+import 'home_tabs_bar.widget.dart';
 
 Widget buildDesktopLayout() {
 
@@ -29,6 +26,7 @@ class _MainContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //final HomeTabsController tabsController = Get.put(HomeTabsController());
     return Container(
       padding: const EdgeInsets.all(30),
       decoration: const BoxDecoration(
@@ -41,6 +39,9 @@ class _MainContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Internal tab bar (desktop only)
+          const HomeTabsBar(),
+          const SizedBox(height: 12),
           Text(
             'داشبورد مدیریتی',
             style: AppTextStyle.bodyText.copyWith(

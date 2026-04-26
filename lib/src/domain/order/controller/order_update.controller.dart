@@ -13,16 +13,12 @@ import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/base/base_controller.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
 import 'package:hanigold_admin/src/utils/convert_jalali_to_gregorian_custom_date.component.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:persian_datetime_picker/persian_datetime_picker.dart';
-
-import '../../../config/const/socket.service.dart';
 import '../../../config/repository/account_sales_group.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
-import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../account/model/account_level_get_one_item.model.dart';
 import '../../accountSalesGroup/model/account_sales_group_get_one_item.model.dart';
-import '../../product/model/socket_item.model.dart';
 import '../../users/model/balance_item.model.dart';
 import '../model/order.model.dart';
 import 'order.controller.dart';
@@ -145,7 +141,7 @@ class OrderUpdateController extends BaseController{
         try {
           final data = json.decode(message);
           if (data['channel'] == 'itemPrice') {
-            final socketItem = SocketItemModel.fromJson(data);
+            //final socketItem = SocketItemModel.fromJson(data);
             /*Get.snackbar('تغییر قیمت', 'قیمت ${socketItem.name} تغییر کرد.',
               titleText: Text('تغییر قیمت',
                 textAlign: TextAlign.center,
@@ -154,7 +150,6 @@ class OrderUpdateController extends BaseController{
                 'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
             );*/
-            print("socketItem.mesghalPrice:::${socketItem.mesghalPrice}");
             _fetchAccountSalesGroupForCurrentSelection();
           }
         } catch (e) {
@@ -237,7 +232,6 @@ class OrderUpdateController extends BaseController{
     fetchItemList();
     orderId.value = int.parse(Get.parameters['id']!);
     await fetchGetOneOrder(orderId.value);
-    print(orderId.value);
     if (getOneOrder.value != null) {
       existingOrder=getOneOrder.value!;
       setOrderDetails(existingOrder);
@@ -368,7 +362,6 @@ class OrderUpdateController extends BaseController{
 
 
   Future<OrderModel?> updateOrder() async {
-    //print(priceController.text);
     if(orderId.value==0){
       return null;
     }
@@ -430,7 +423,7 @@ class OrderUpdateController extends BaseController{
     //selectedAccount.value = accountList.firstWhereOrNull((account) => account.id == order.account?.id);
     dateController.text = order.date?.toPersianDate(showTime: true,digitType: NumStrLanguage.English) ?? '';
     priceController.text = order.mesghalPrice?.toStringAsFixed(0).seRagham(separator: ',') ?? '';
-    quantityController.text = order.quantity?.toStringAsFixed(2) ?? '';
+    quantityController.text = order.quantity?.toDisplayString() ?? '';
     totalPriceController.text = order.totalPrice?.toStringAsFixed(0).seRagham(separator: ',') ?? '';
     descriptionController.text = order.description ?? '';
     //isLoadingBalance.value=true;
@@ -447,12 +440,10 @@ class OrderUpdateController extends BaseController{
       _fetchAccountLevelForCurrentSelection();
       _fetchAccountSalesGroupForCurrentSelection();
     }
-    print("تاریخ ست:::${dateController.text}");
   }
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     balanceList.clear();
     try{
       state.value=PageState.loading;

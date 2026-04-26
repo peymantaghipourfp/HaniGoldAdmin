@@ -14,10 +14,9 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 
 class DepositRequestGetOneView extends StatelessWidget {
   DepositRequestGetOneView({super.key});
@@ -460,7 +459,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                               final attachment = depositRequestGetOneController.imageList[index];
                                                                                               return Column(
                                                                                                 children: [
-                                                                                                  if (kIsWeb)
+                                                                                                  //if (kIsWeb)
                                                                                                     Padding(
                                                                                                       padding: const EdgeInsets.only(right: 50),
                                                                                                       child: Row(mainAxisAlignment: MainAxisAlignment.start,
@@ -554,7 +553,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                                 child: Visibility(
                                                                                                   visible: depositRequestGetOneController
                                                                                                       .currentImagePage.value <
-                                                                                                      (depositRequestGetOneController.imageList.length ?? 1) -
+                                                                                                      (depositRequestGetOneController.imageList.length) -
                                                                                                           1,
                                                                                                   child: IconButton(
                                                                                                     style: ButtonStyle(
@@ -1387,7 +1386,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                                   final attachment = depositRequestGetOneController.imageList[index];
                                                                                                   return Column(
                                                                                                     children: [
-                                                                                                      if (kIsWeb)
+                                                                                                      //if (kIsWeb)
                                                                                                         Padding(
                                                                                                           padding: const EdgeInsets.only(right: 50),
                                                                                                           child: Row(mainAxisAlignment: MainAxisAlignment.start,
@@ -1481,7 +1480,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                                     child: Visibility(
                                                                                                       visible: depositRequestGetOneController
                                                                                                           .currentImagePage.value <
-                                                                                                          (depositRequestGetOneController.imageList.length ?? 1) -
+                                                                                                          (depositRequestGetOneController.imageList.length) -
                                                                                                               1,
                                                                                                       child: IconButton(
                                                                                                         style: ButtonStyle(

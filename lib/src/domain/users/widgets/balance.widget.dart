@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/model/balance_item.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../controller/user_info_transaction.controller.dart';
 
 class BalanceWidget extends StatefulWidget {
   final List<BalanceItemModel> listBalance;
@@ -21,7 +19,7 @@ class BalanceWidget extends StatefulWidget {
 class _BalanceWidgetState extends State<BalanceWidget> {
   @override
   Widget build(BuildContext context) {
-    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
+    //final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     return Container(
       width: widget.size,
       //height: controller.isOpenMore.value?300:200,
@@ -85,8 +83,8 @@ class _BalanceWidgetState extends State<BalanceWidget> {
                     ):
                     Text(
                       (e.balance ?? 0.0) < 0 ?
-                      "-${e.balance?.abs().toString().seRagham()??0.0}":
-                      "${e.balance?.abs().toString().seRagham()??0.0}",
+                      "-${e.balance?.abs().toDisplayString().seRagham()??0.0}":
+                      "${e.balance?.abs().toDisplayString().seRagham()??0.0}",
                       style: AppTextStyle.labelText.copyWith(fontSize: 14,
                           //fontWeight: FontWeight.normal,color:e.balance!>0?AppColor.primaryColor: AppColor.accentColor ),textDirection: TextDirection.ltr,
                           fontWeight: FontWeight.normal,color:(e.balance ?? 0.0) > 0?AppColor.primaryColor: (e.balance ?? 0.0) < 0 ? AppColor.accentColor : AppColor.textColor ),textDirection: TextDirection.ltr,

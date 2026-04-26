@@ -34,7 +34,7 @@ class ErrPage extends StatelessWidget {
           ),
           Text(
             title ?? 'خطا در دریافت اطلاعات',
-            style: AppTextStyle.madiumbodyText.copyWith(fontWeight: FontWeight.bold),
+            style: AppTextStyle.mediumBodyText.copyWith(fontWeight: FontWeight.bold),
           ),
           const SizedBox(
             height: 10,
@@ -48,7 +48,7 @@ class ErrPage extends StatelessWidget {
           ),
           if (callback != null)
             GestureDetector(onTap:callback, child: Text('تلاش مجدد',
-            style: AppTextStyle.madiumbodyText.copyWith(color: Colors.blueAccent),))
+            style: AppTextStyle.mediumBodyText.copyWith(color: Colors.blueAccent),))
         ],
       ),
     );

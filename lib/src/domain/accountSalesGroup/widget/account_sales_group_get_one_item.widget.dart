@@ -3,12 +3,12 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hanigold_admin/src/domain/accountSalesGroup/model/account_sales_group_item.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../model/account_sales_group_get_one_item.model.dart';
-import '../../product/model/item_price.model.dart';
 
 class AccountSalesGroupGetOneItemWidget extends StatelessWidget {
   final AccountSalesGroupGetOneItemModel? data;
@@ -30,24 +30,24 @@ class AccountSalesGroupGetOneItemWidget extends StatelessWidget {
     this.onPriceSelected,
   });
 
-  String _formatNumber(num? value, {int fractionDigits = 3}) {
+  String _formatNumber(num? value, /*{int fractionDigits = 3}*/) {
     if (value == null) return "-";
     if (value is int) {
       return value
-          .toString()
+          .toDisplayString()
           .toPersianDigit()
           .seRagham();
     }
     return value
-        .toStringAsFixed(fractionDigits)
+        .toDisplayString()
         .toPersianDigit()
         .seRagham();
   }
 
-  String _safeText(String? value) {
+  /*String _safeText(String? value) {
     if (value == null || value.trim().isEmpty) return "-";
     return value;
-  }
+  }*/
 
   AccountSalesGroupItemModel? _currentItem() {
     if (data?.accountSalesGroupItems == null || data!.accountSalesGroupItems!.isEmpty) {
@@ -127,48 +127,66 @@ class AccountSalesGroupGetOneItemWidget extends StatelessWidget {
           ),*/
           _buildRow(
             label: "قیمت فروش",
-            value: item?.mesghalPrice != null
-                ? _formatNumber(item?.mesghalPrice ?? 0)
+            value: item.mesghalPrice != null
+                ? _formatNumber(item.mesghalPrice ?? 0)
                 : "-",
             valueColor: AppColor.accentColor,
-            showButton: selectedBuySellId == 0 && item?.mesghalPrice != null,
-            onButtonPressed: item?.mesghalPrice != null
+            showButton: selectedBuySellId == 0 && item.mesghalPrice != null,
+            onButtonPressed: item.mesghalPrice != null
                 ? () {
               if (onPriceSelected != null) {
-                onPriceSelected!(item?.mesghalPrice ?? 0);
+                onPriceSelected!(item.mesghalPrice ?? 0);
               }
             }
                 : null,
           ),
           _buildRow(
             label: "قیمت خرید",
-            value: item?.mesghalBuyPrice != null
-                ? _formatNumber(item?.mesghalBuyPrice ?? 0)
+            value: item.mesghalBuyPrice != null
+                ? _formatNumber(item.mesghalBuyPrice ?? 0)
                 : "-",
             valueColor: AppColor.primaryColor,
-            showButton: selectedBuySellId == 1 && item?.mesghalBuyPrice != null,
-            onButtonPressed: item?.mesghalBuyPrice != null
+            showButton: selectedBuySellId == 1 && item.mesghalBuyPrice != null,
+            onButtonPressed: item.mesghalBuyPrice != null
                 ? () {
               if (onPriceSelected != null) {
-                onPriceSelected!(item?.mesghalBuyPrice ?? 0);
+                onPriceSelected!(item.mesghalBuyPrice ?? 0);
               }
             }
                 : null,
           ),
           _buildRow(
             label: "محدوده خرید",
-            value: item?.buyRange != null
-                ? (item?.buyRange ?? 0 ) < 0 ? "- ${item?.buyRange?.abs().toStringAsFixed(0).seRagham() ?? ""}" : item?.buyRange?.toStringAsFixed(0).seRagham() ?? ""
+            value: item.buyRange != null
+                ? (item.buyRange ?? 0 ) < 0 ? "- ${item.buyRange?.abs().toStringAsFixed(0).seRagham() ?? ""}" : item.buyRange?.toStringAsFixed(0).seRagham() ?? ""
                 : "-",
             valueColor: AppColor.textPrimaryColor,
           ),
           _buildRow(
             label: "محدوده فروش",
-            value: item?.salesRange != null
-                ? (item?.salesRange ?? 0 ) < 0 ? "-${item?.salesRange?.abs().toStringAsFixed(0).seRagham() ?? ""}" : item?.salesRange?.toStringAsFixed(0).seRagham() ?? ""
+            value: item.salesRange != null
+                ? (item.salesRange ?? 0 ) < 0 ? "-${item.salesRange?.abs().toStringAsFixed(0).seRagham() ?? ""}" : item.salesRange?.toStringAsFixed(0).seRagham() ?? ""
                 : "-",
             valueColor: AppColor.textAccentColor
           ),
+          Row(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildRow2(
+                  label: "وضعیت خرید",
+                  value: item.buyStatus ==true ? "فعال" : "غیر فعال",
+                  valueColor: item.buyStatus ==true ? AppColor.primaryColor : AppColor.accentColor,
+                ),
+              ),
+              Expanded(
+                child: _buildRow2(
+                    label: "وضعیت فروش",
+                    value: item.sellStatus == true ? "فعال" : "غیر فعال",
+                    valueColor: item.buyStatus ==true ? AppColor.primaryColor : AppColor.accentColor,
+                ),
+              ),
+            ],
+          )
         ],
         ],
       ),
@@ -192,6 +210,85 @@ class AccountSalesGroupGetOneItemWidget extends StatelessWidget {
               CircleAvatar(
                 radius: 4,
                 backgroundColor: AppColor.textColor,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: AppTextStyle.labelText.copyWith(
+                  fontSize: 12,
+                  fontWeight: FontWeight.normal,
+                  color: AppColor.iconViewColor,
+                ),
+              ),
+            ],
+          ),
+          Flexible(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showButton && onButtonPressed != null) ...[
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    height: 28,
+                    child:
+                    Tooltip(
+                      message: "افزودن قیمت",
+                      child: GestureDetector(
+                        onTap: onButtonPressed,
+                        child: Transform.rotate(
+                          angle: math.pi / 2,
+                          child: SvgPicture.asset(
+                            'assets/svg/add-price.svg',
+                            height: 28,
+                            colorFilter: ColorFilter.mode(
+                              AppColor.primaryColor,
+                              BlendMode.srcIn,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                SizedBox(width: 5,),
+                Flexible(
+                  child: Text(
+                    value,
+                    style: AppTextStyle.labelText.copyWith(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: valueColor ?? AppColor.textColor,
+                    ),
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                    textDirection: TextDirection.ltr,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRow2({
+    required String label,
+    required String value,
+    Color? valueColor,
+    bool showButton = false,
+    VoidCallback? onButtonPressed,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 4,
+                backgroundColor: AppColor.dividerColor,
               ),
               const SizedBox(width: 6),
               Text(

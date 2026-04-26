@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/transaction/widgets/filter.widget.dart';
 import 'package:hanigold_admin/src/domain/transaction/model/transaction_item.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -15,10 +16,9 @@ import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
-import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/transaction.controller.dart';
 import '../widgets/balance_dialog_id.widget.dart';
 
@@ -333,7 +333,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                               child: ElevatedButton(
                                                                 style: ButtonStyle(
                                                                     padding: WidgetStatePropertyAll(
-                                                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        EdgeInsets.symmetric(horizontal: 23)),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(AppColor.appBarColor),
@@ -551,7 +551,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                               child: ElevatedButton(
                                                                 style: ButtonStyle(
                                                                     padding: WidgetStatePropertyAll(
-                                                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        EdgeInsets.symmetric(horizontal: 23)),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(AppColor.appBarColor),
@@ -593,7 +593,7 @@ class _TransactionViewState extends State<TransactionView> {
                                 ElevatedButton(
                                   style: ButtonStyle(
                                       padding: WidgetStatePropertyAll(
-                                          EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                          EdgeInsets.symmetric(horizontal: 23)),
                                       // elevation: WidgetStatePropertyAll(5),
                                       backgroundColor:
                                       WidgetStatePropertyAll(AppColor.appBarColor.withOpacity(0.5)),
@@ -886,7 +886,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1178,7 +1178,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                                       child: ElevatedButton(
                                                                         style: ButtonStyle(
                                                                             padding: WidgetStatePropertyAll(
-                                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                                             // elevation: WidgetStatePropertyAll(5),
                                                                             backgroundColor:
                                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1388,7 +1388,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                                       child: ElevatedButton(
                                                                         style: ButtonStyle(
                                                                             padding: WidgetStatePropertyAll(
-                                                                                EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                                EdgeInsets.symmetric(horizontal: 23)),
                                                                             // elevation: WidgetStatePropertyAll(5),
                                                                             backgroundColor:
                                                                             WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1716,7 +1716,7 @@ class _TransactionViewState extends State<TransactionView> {
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -2166,10 +2166,10 @@ class _TransactionViewState extends State<TransactionView> {
                   children: [
                     Text(
                       trans.item?.itemUnit?.id == 1
-                          ? " ${trans.amount} "
+                          ? " ${trans.amount?.toDisplayString()} "
                           : trans.item?.itemUnit?.id == 2
-                          ? "${trans.amount} "
-                          : "${trans.amount.toString().seRagham()}  ",
+                          ? "${trans.amount?.toDisplayString()} "
+                          : "${trans.amount?.toDisplayString().seRagham()}  ",
                       style: AppTextStyle.bodyText.copyWith(
                           color: AppColor.textColor,
                           fontWeight: FontWeight.w700,
@@ -2230,7 +2230,7 @@ class _TransactionViewState extends State<TransactionView> {
                               fontWeight: FontWeight.normal,
                               fontSize: 10),
                         ),
-                        Text("${trans.price ?? 0}".seRagham() + "  ریال  ",
+                        Text("${trans.price?.toStringAsFixed(0) ?? 0}".seRagham() + "  ریال  ",
                             style: AppTextStyle.bodyText.copyWith(
                                 color: AppColor.textColor,
                                 fontWeight: FontWeight.normal,
@@ -2250,7 +2250,7 @@ class _TransactionViewState extends State<TransactionView> {
                               fontSize: 10),
                         ),
                         Text(
-                            "${trans.totalPrice ?? 0}"
+                            "${trans.totalPrice?.toStringAsFixed(0) ?? 0}"
                                 .seRagham() +
                                 "  ریال  ",
                             style: AppTextStyle.bodyText.copyWith(
@@ -2268,9 +2268,6 @@ class _TransactionViewState extends State<TransactionView> {
                   margin: EdgeInsets.symmetric(
                       vertical: 5, horizontal: 20),
                 ),
-                SizedBox(
-                  height: 5,
-                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -2285,6 +2282,7 @@ class _TransactionViewState extends State<TransactionView> {
                     ),
                   ],
                 ),
+                SizedBox(height: 2,),
               ],
             )
                 : Column(
@@ -2348,7 +2346,7 @@ class _TransactionViewState extends State<TransactionView> {
                                     FontWeight.bold),
                               ),
                               Text(
-                                "${e.quantity ?? 0} گرم ",
+                                "${e.quantity?.toDisplayString() ?? 0} گرم ",
                                 style: AppTextStyle.bodyText
                                     .copyWith(
                                     color: AppColor
@@ -2372,7 +2370,7 @@ class _TransactionViewState extends State<TransactionView> {
                                     FontWeight.bold),
                               ),
                               Text(
-                                "${e.impurity ?? 0} گرم ",
+                                "${e.impurity?.toDisplayString() ?? 0} گرم ",
                                 style: AppTextStyle.bodyText
                                     .copyWith(
                                     color: AppColor
@@ -2433,28 +2431,19 @@ class _TransactionViewState extends State<TransactionView> {
               children: [
                 Text(
                   trans.item?.itemUnit?.id == 1
-                      ? "${trans.amount} "
+                      ? "${trans.amount?.toDisplayString()} "
                       : trans.item?.itemUnit?.id == 2
-                      ? "${trans.amount} "
-                      : "${trans.amount.toString().seRagham()} ",
+                      ? "${trans.amount?.toDisplayString()} "
+                      : "${trans.amount?.toDisplayString().seRagham()} ",
                   style: AppTextStyle.bodyText.copyWith(
                       color: AppColor.buttonColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700),
                   textDirection: TextDirection.ltr,
                 ),
+                SizedBox(width: 3,),
                 Text(
-                  trans.item?.itemUnit?.id == 2
-                      ? " گرم "
-                      : trans.item?.itemUnit?.id == 1
-                      ? " عدد "
-                      : trans.item?.itemUnit?.id == 3
-                      ?" ریال "
-                      : trans.item?.itemUnit?.id == 4
-                      ?"دلار"
-                      :trans.item?.itemUnit?.id == 5
-                      ?"یورو"
-                      :"عدد",
+                  trans.item?.itemUnit?.name ?? "",
                   style: AppTextStyle.bodyText.copyWith(
                       color: AppColor.buttonColor,
                       fontSize: 10,

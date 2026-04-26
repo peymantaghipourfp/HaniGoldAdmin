@@ -9,10 +9,9 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
-import '../../../widget/custom_appbar.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/laboratory.controller.dart';
 
 class LaboratoryView extends GetView<LaboratoryController> {
@@ -804,7 +803,6 @@ class LaboratoryView extends GetView<LaboratoryController> {
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
-            print(columnIndex);
             controller.setSort(columnIndex,ascending);
 
             controller.onSortColum(columnIndex, ascending);
@@ -1242,11 +1240,9 @@ class LaboratoryView extends GetView<LaboratoryController> {
 //           child: SfDataPager(
 //             controller:controller.dataPagerController ,
 //             onPageNavigationEnd:(value){
-//               print(value+1);
 //                controller.isChangePage(value+1);
 //             },
 //             onPageNavigationStart: (value){
-//              // print(value);
 //              // controller.getUserList();
 //             },
 //             delegate: DataPagerDelegate(),

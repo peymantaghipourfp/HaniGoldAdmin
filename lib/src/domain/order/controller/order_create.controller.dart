@@ -5,20 +5,17 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 import 'package:hanigold_admin/src/config/repository/account.repository.dart';
 import 'package:hanigold_admin/src/config/repository/item.repository.dart';
 import 'package:hanigold_admin/src/config/repository/order.repository.dart';
 import 'package:hanigold_admin/src/domain/account/model/account.model.dart';
 import 'package:hanigold_admin/src/domain/product/model/item.model.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
-import '../../../config/const/audio.service.dart';
-import '../../../config/const/socket.service.dart';
 import '../../../config/repository/account_sales_group.repository.dart';
 import '../../../config/repository/user_info_transaction.repository.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
@@ -158,9 +155,6 @@ class OrderCreateController extends BaseController{
 
     //maxItemSell.value=newValue!.maxSell!;
     //maxItemBuy.value=newValue.maxBuy!;
-    //print(maxItemSell.value);
-    //print(maxItemBuy.value);
-    print(priceTemp.value);
   }
 
   void _listenToSocket() {
@@ -179,7 +173,6 @@ class OrderCreateController extends BaseController{
                 'قیمت ${socketItem.name} تغییر کرد.', textAlign: TextAlign.center,
                 style: TextStyle(color: AppColor.textColor),),
             );*/
-            print("socketItem.mesghalPrice:::${socketItem.mesghalPrice}");
             changePriceItem(socketItem);
             _fetchAccountSalesGroupForCurrentSelection();
           }
@@ -195,10 +188,10 @@ class OrderCreateController extends BaseController{
   void changePriceItem(SocketItemModel socketItem){
     for(int i=0 ; i<itemList.length ; i++){
       if(itemList[i].id==socketItem.id){
-        itemList[i].baseMesghalPrice=socketItem.mesghalPrice;
-        itemList[i].basePrice=socketItem.price;
-        itemList[i].baseMesghalDifferentPrice = socketItem.mesghalDifferentPrice;
-        itemList[i].baseDifferentPrice = socketItem.differentPrice;
+        itemList[i].baseMesghalPrice=socketItem.baseMesghalPrice;
+        itemList[i].basePrice=socketItem.basePrice;
+        itemList[i].baseMesghalDifferentPrice = socketItem.baseMesghalDifferentPrice;
+        itemList[i].baseDifferentPrice = socketItem.baseDifferentPrice;
 
         if(selectedItem.value?.id == socketItem.id) {
           _updateSocketPriceFromCurrent();
@@ -267,19 +260,19 @@ class OrderCreateController extends BaseController{
         if (item.id == selectedItem.value?.id) {
           if (selectedItem.value?.itemUnit?.name == 'گرم') {
             if (selectedBuySell.value?.id == 0) {
-              socketPrice.value = item.baseMesghalPrice.toString().seRagham(separator: ',');
+              socketPrice.value = item.baseMesghalPrice?.toDisplayString().seRagham(separator: ',') ?? "";
             } else if (selectedBuySell.value?.id == 1) {
-              socketPrice.value = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              socketPrice.value = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
             } else {
-              socketPrice.value = item.baseMesghalPrice.toString().seRagham(separator: ',');
+              socketPrice.value = item.baseMesghalPrice?.toDisplayString().seRagham(separator: ',') ?? "";
             }
           } else {
             if (selectedBuySell.value?.id == 0) {
-              socketPrice.value = item.basePrice.toString().seRagham(separator: ',');
+              socketPrice.value = item.basePrice?.toDisplayString().seRagham(separator: ',') ?? "";
             } else if (selectedBuySell.value?.id == 1) {
-              socketPrice.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              socketPrice.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
             } else {
-              socketPrice.value = item.basePrice.toString().seRagham(separator: ',');
+              socketPrice.value = item.basePrice?.toDisplayString().seRagham(separator: ',') ?? "";
             }
           }
           break;
@@ -358,7 +351,6 @@ class OrderCreateController extends BaseController{
       if(itemList.isEmpty){
         state.value=PageState.empty;
       }
-      print("itemList$itemList");
     }
     catch(e){
       state.value=PageState.err;
@@ -397,7 +389,6 @@ class OrderCreateController extends BaseController{
       if(accountList.isEmpty){
         state.value=PageState.empty;
       }
-      print('تعداد :${accountList.length}');
     }
     catch(e){
       state.value=PageState.err;
@@ -452,7 +443,6 @@ class OrderCreateController extends BaseController{
         manualPrice:true,
         isCard: isCardChecked.value,
       );
-      print(response);
       if (response != null) {
         OrderModel orderResponse=OrderModel.fromJson(response);
         /*Get.snackbar(orderResponse.infos!.first['title'], orderResponse.infos!.first["description"],
@@ -525,7 +515,6 @@ class OrderCreateController extends BaseController{
 
   // لیست بالانس
   Future<void> getBalanceList(int id) async{
-    print("getBalanceList : $id");
     isLoadingBalance.value=false;
     balanceList.clear();
     try{
@@ -655,23 +644,23 @@ class OrderCreateController extends BaseController{
         if (item.id == selectedItem.value?.id) {
           if (selectedItem.value?.itemUnit?.name == 'گرم') {
             if (selectedBuySell.value?.id == 0) {
-              socketPrice.value = item.baseMesghalPrice.toString().seRagham(separator: ',');
-              priceController.text = item.baseMesghalPrice.toString().seRagham(separator: ',');
-              priceTemp.value = item.basePrice.toString().seRagham(separator: ',');
+              socketPrice.value = item.baseMesghalPrice?.toDisplayString().seRagham(separator: ',') ?? "";
+              priceController.text = item.baseMesghalPrice?.toDisplayString().seRagham(separator: ',') ?? "";
+              priceTemp.value = item.basePrice?.toDisplayString().seRagham(separator: ',') ?? "";
             } else if (selectedBuySell.value?.id == 1) {
-              socketPrice.value = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
-              priceController.text = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
-              priceTemp.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              socketPrice.value = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
+              priceController.text = (((item.baseMesghalPrice ?? 0) - (item.baseMesghalDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
+              priceTemp.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
             }
           } else {
             if (selectedBuySell.value?.id == 0) {
-              socketPrice.value = item.basePrice.toString().seRagham(separator: ',');
-              priceController.text = item.basePrice.toString().seRagham(separator: ',');
-              priceTemp.value = item.basePrice.toString().seRagham(separator: ',');
+              socketPrice.value = item.basePrice?.toDisplayString().seRagham(separator: ',') ?? "";
+              priceController.text = item.basePrice?.toDisplayString().seRagham(separator: ',') ?? "";
+              priceTemp.value = item.basePrice?.toDisplayString().seRagham(separator: ',') ?? "";
             } else if (selectedBuySell.value?.id == 1) {
-              socketPrice.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
-              priceController.text = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
-              priceTemp.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toString().seRagham(separator: ',');
+              socketPrice.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
+              priceController.text = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
+              priceTemp.value = (((item.basePrice ?? 0) - (item.baseDifferentPrice ?? 0)).toDouble()).toDisplayString().seRagham(separator: ',');
             }
           }
           updateTotalPrice();

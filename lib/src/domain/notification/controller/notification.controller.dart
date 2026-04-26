@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/repository/notification.repository.dart';
 import 'package:hanigold_admin/src/domain/notification/model/notification.model.dart';
-import 'package:hanigold_admin/src/domain/notification/model/list_notification.model.dart';
 import 'package:hanigold_admin/src/domain/users/model/paginated.model.dart';
-import 'package:hanigold_admin/src/config/const/socket.service.dart';
 import 'package:hanigold_admin/src/config/network/error/network.error.dart';
 
 import '../../../config/const/app_color.dart';
@@ -190,7 +187,6 @@ class NotificationController extends GetxController {
 
   // Get notification list with pagination
   Future<void> getNotificationListPager() async {
-    print("### getNotificationListPager ###");
     isLoading.value = true;
     notificationList.clear();
     announcementList.clear();

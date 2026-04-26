@@ -17,6 +17,10 @@ class AccountSalesGroupItemModel {
   final String? itemIcon;
   @JsonKey(name: "status")
   final bool? status;
+  @JsonKey(name: "sellStatus")
+  final bool? sellStatus;
+  @JsonKey(name: "buyStatus")
+  final bool? buyStatus;
   @JsonKey(name: "mesghalPrice")
   final double? mesghalPrice;
   @JsonKey(name: "mesghalBuyPrice")
@@ -39,6 +43,8 @@ class AccountSalesGroupItemModel {
     required this.itemName,
     required this.itemIcon,
     required this.status,
+    required this.sellStatus,
+    required this.buyStatus,
     required this.mesghalPrice,
     required this.mesghalBuyPrice,
     required this.salesRange,

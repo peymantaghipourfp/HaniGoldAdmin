@@ -1,11 +1,11 @@
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_info_detail_gold_transaction.controller.dart';
 import 'package:hanigold_admin/src/domain/users/widgets/balance_user.widget.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -13,12 +13,11 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
-import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
-import '../../home/widget/chat_dialog.widget.dart';
+import '../../chat/widget/chat_dialog.widget.dart';
 import '../widgets/gold_transaction_filter.widget.dart';
 import '../widgets/tabel_info.widget.dart';
 
@@ -432,7 +431,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                                                   EdgeInsets
                                                                       .symmetric(
                                                                       horizontal: 23,
-                                                                      vertical: 19)),
+                                                                      )),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(
@@ -661,7 +660,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                                         child: ElevatedButton(
                                                           style: ButtonStyle(
                                                               padding: WidgetStatePropertyAll(
-                                                                  EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                  EdgeInsets.symmetric(horizontal: 23)),
                                                               // elevation: WidgetStatePropertyAll(5),
                                                               backgroundColor:
                                                               WidgetStatePropertyAll(AppColor.appBarColor),
@@ -1610,7 +1609,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                                                         EdgeInsets
                                                                             .symmetric(
                                                                             horizontal: 23,
-                                                                            vertical: 19)),
+                                                                            )),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(
@@ -1834,7 +1833,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                                               child: ElevatedButton(
                                                                 style: ButtonStyle(
                                                                     padding: WidgetStatePropertyAll(
-                                                                        EdgeInsets.symmetric(horizontal: 23,vertical: 19)),
+                                                                        EdgeInsets.symmetric(horizontal: 23)),
                                                                     // elevation: WidgetStatePropertyAll(5),
                                                                     backgroundColor:
                                                                     WidgetStatePropertyAll(AppColor.appBarColor),
@@ -2784,7 +2783,6 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
           headingRowAlignment: MainAxisAlignment.center),
       DataColumn(
           onSort: (columnIndex, ascending) {
-            print(columnIndex);
             controller.setSort(columnIndex,ascending);
 
             controller.onSortColum(columnIndex, ascending);
@@ -2967,22 +2965,19 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                 Tooltip(
                   message: "صدور فاکتور بدون مانده",
                   child: Center(
-                    child: SizedBox(
-                      width: 80,
-                      height: 32,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColor.secondary2Color.withGreen(110),
-                          foregroundColor: Colors.white,
-                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          textStyle: TextStyle(fontSize: 10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                          fixedSize: Size(20, 15),
-                        ),
-                        onPressed: () async {
-                          await controller.generateInvoiceForGoldTransactionWithoutBalance(trans);
-                        },
-                        child: Text('فاکتور'),
+                    child: OutlinedButton.icon(
+                      onPressed: () async {
+                        await controller.generateInvoiceForGoldTransactionWithoutBalance(trans);
+                      },
+                      label: Text(
+                        'فاکتور',
+                        style: AppTextStyle
+                            .labelText.copyWith(color: AppColor.textColor,fontSize: 11),
+                      ),
+                      style: ButtonStyle(
+                          padding: WidgetStateProperty.all(EdgeInsets.all(3)),
+                          shape:WidgetStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(5))),
+                          backgroundColor: WidgetStateProperty.all(AppColor.secondary2Color.withGreen(110))
                       ),
                     ),
                   ),
@@ -3097,7 +3092,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                   fontWeight: FontWeight.bold),
                             ),
                             SelectableText(textDirection: TextDirection.ltr,
-                              "${trans.amount ?? ""}",
+                              "${trans.amount?.toDisplayString() ?? ""}",
                               style: AppTextStyle.bodyText.copyWith(
                                   color:trans.amount!>0 ? AppColor.primaryColor :trans.amount!<0 ?AppColor.accentColor:AppColor.textColor,
                                   fontSize: 11,
@@ -3167,7 +3162,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                       fontWeight: FontWeight.bold),
                                 ),
                                 SelectableText(textDirection: TextDirection.ltr,
-                                  "${trans.amount ?? " "}",
+                                  "${trans.amount?.toDisplayString() ?? " "}",
                                   style: AppTextStyle.bodyText.copyWith(
                                       color:trans.amount!>0 ? AppColor.primaryColor : trans.amount!<0 ? AppColor.accentColor :AppColor.textColor,
                                       fontSize: 11,
@@ -3185,7 +3180,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                       fontWeight: FontWeight.bold),
                                 ),
                                 SelectableText(
-                                  trans.amount?.toStringAsFixed(0) ?? "",
+                                  trans.amount?.toStringAsFixed(0).seRagham() ?? "",
                                   style: AppTextStyle.bodyText.copyWith(
                                       color:AppColor.dividerColor,
                                       fontSize: 11,
@@ -3287,7 +3282,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                       fontWeight: FontWeight.bold),
                                 ),
                                 SelectableText(
-                                  "${trans.toAccount?.name ?? ""}",
+                                  trans.toAccount.name ?? "",
                                   style: AppTextStyle.bodyText.copyWith(
                                       color:AppColor.primaryColor,
                                       fontSize: 11,
@@ -3327,7 +3322,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                   fontWeight: FontWeight.bold),
                             ),
                             SelectableText(textDirection: TextDirection.ltr,
-                              "-${trans.amount?.abs().toString().seRagham() ?? ""}",
+                              "-${trans.amount?.abs().toDisplayString().seRagham() ?? ""}",
                               style: AppTextStyle.bodyText.copyWith(
                                   color:trans.amount!>0 ? AppColor.primaryColor :trans.amount!<0 ?AppColor.accentColor:AppColor.textColor,
                                   fontSize: 11,
@@ -3355,7 +3350,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                       fontWeight: FontWeight.bold),
                                 ),
                                 SelectableText(
-                                  "${trans.toAccount?.name ?? ""}",
+                                  trans.toAccount.name ?? "",
                                   style: AppTextStyle.bodyText.copyWith(
                                       color:AppColor.accentColor,
                                       fontSize: 11,
@@ -3414,7 +3409,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                                   fontWeight: FontWeight.bold),
                             ),
                             SelectableText(textDirection: TextDirection.ltr,
-                              "${trans.amount.toString().seRagham() ?? ""}",
+                              "${trans.amount?.toDisplayString().seRagham() ?? ""}",
                               style: AppTextStyle.bodyText.copyWith(
                                   color:trans.amount!>0 ? AppColor.primaryColor :trans.amount!<0 ?AppColor.accentColor:AppColor.textColor,
                                   fontSize: 11,
@@ -3752,9 +3747,9 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                     trans.item?.itemUnit?.id == 1 && trans.amount!<0 ?
                     "(-${trans.amount?.abs().toStringAsFixed(0).seRagham()})"
                         : trans.item?.itemUnit?.id == 2 && trans.amount!>0
-                        ? "${trans.amount?.toString().seRagham()} "
+                        ? "${trans.amount?.toDisplayString().seRagham()} "
                         :trans.item?.itemUnit?.id == 2 && trans.amount!<0 ?
-                    "(-${trans.amount?.abs().toString().seRagham()})"
+                    "(-${trans.amount?.abs().toDisplayString().seRagham()})"
                         :trans.item?.itemUnit?.id == 3 && trans.amount!>0 ?
                     "${trans.amount?.toStringAsFixed(0).seRagham()} " :
                     trans.item?.itemUnit?.id == 3 && trans.amount!<0 ?
@@ -4226,7 +4221,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
     }).toList();
   }
 
-  void _showImageGallery(BuildContext context) {
+  /*void _showImageGallery(BuildContext context) {
     Future.delayed(const Duration(milliseconds: 200), () {
       showDialog(
         context: context,
@@ -4393,7 +4388,7 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
         },
       );
     });
-  }
+  }*/
 
 /*Widget buildPaginationControls() {
     return Obx(() => Padding(
@@ -4587,9 +4582,9 @@ class _UserInfoGoldTransactionViewState extends State<UserInfoGoldTransactionVie
                             trans.item?.itemUnit?.id == 1 && trans.amount!<0 ?
                             "(-${trans.amount?.abs().toStringAsFixed(0).seRagham()})"
                                 : trans.item?.itemUnit?.id == 2 && trans.amount!>0
-                                ? "${trans.amount?.toString().seRagham()} "
+                                ? "${trans.amount?.toDisplayString().seRagham()} "
                                 :trans.item?.itemUnit?.id == 2 && trans.amount!<0 ?
-                            "(-${trans.amount?.abs().toString().seRagham()})"
+                            "(-${trans.amount?.abs().toDisplayString().seRagham()})"
                                 :trans.item?.itemUnit?.id == 3 && trans.amount!>0 ?
                             "${trans.amount?.toStringAsFixed(0).seRagham()} " :
                             trans.item?.itemUnit?.id == 3 && trans.amount!<0 ?

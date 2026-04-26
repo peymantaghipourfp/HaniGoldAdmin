@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -45,7 +44,6 @@ class UserDetailController extends GetxController {
   void onInit() {
     super.onInit();
     idUser.value = int.parse(Get.parameters["accountId"] as String);
-    print(idUser.value);
     idUser.value != 0 ? getOneUser(idUser.value) : null;
     idUser.value != 0 ? fetchAccountList(idUser.value.toString()) : null;
     idUser.value != 0 ? fetchChildList(idUser.value.toString()) : null;
@@ -77,7 +75,6 @@ class UserDetailController extends GetxController {
       element.parent?.id = accountModel.value?.id;
       accountChildModelList.add(element);
     }
-    print(accountChildModelList);
     update();
   }
 
@@ -85,7 +82,6 @@ class UserDetailController extends GetxController {
     element.parent?.id = accountModel.value?.id;
     accountChildModelList.add(element);
     await addChild();
-    print(accountChildModelList);
     update();
   }
 
@@ -95,14 +91,12 @@ class UserDetailController extends GetxController {
     } else {
       accountChildModelListRemove.add(element);
     }
-    print(accountChildModelListRemove);
     update();
   }
 
   setAccountChildRemoveOne(AccountModel element) async {
     accountChildModelListRemove.add(element);
     await removeChild();
-    print(accountChildModelListRemove);
     update();
   }
 
@@ -126,7 +120,6 @@ class UserDetailController extends GetxController {
 
 //   // لیست استان ها
 //   Future<void> getStateList() async {
-//     print("getStateList : 1");
 //     stateList.clear();
 //     try {
 //       // state.value=PageStateUser.loading;
@@ -147,7 +140,6 @@ class UserDetailController extends GetxController {
 //   }
 // // لیست شهر ها
 //   Future<void> getCityList() async {
-//     print("getCityList : 1");
 //     cityList.clear();
 //     try {
 //       // state.value=PageStateUser.loading;
@@ -184,7 +176,6 @@ class UserDetailController extends GetxController {
       if (accountList.isEmpty) {
         //   state.value=PageState.empty;
       }
-      print('تعداد55 :${accountList.length}');
     } catch (e) {
       //  state.value=PageState.err;
     } finally {}
@@ -197,13 +188,11 @@ class UserDetailController extends GetxController {
     );
     try {
       //   state.value=PageState.loading;
-      var fetchedAccountList =
-          await accountRepository.addChild(status: accountChildModelList);
+      await accountRepository.addChild(status: accountChildModelList);
       accountChildModelList.clear();
       fetchAccountList(idUser.value.toString());
       fetchChildList(idUser.value.toString());
       //  state.value=PageState.list;
-      print('تعداد55 :${accountList.length}');
     } catch (e) {
       //  state.value=PageState.err;
     } finally {
@@ -218,13 +207,12 @@ class UserDetailController extends GetxController {
     );
     try {
       //   state.value=PageState.loading;
-      var fetchedAccountList = await accountRepository.removeChild(
+      await accountRepository.removeChild(
           status: accountChildModelListRemove);
       accountChildModelListRemove.clear();
       fetchAccountList(idUser.value.toString());
       fetchChildList(idUser.value.toString());
       //  state.value=PageState.list;
-      print('تعداد55 :${accountList.length}');
     } catch (e) {
       //  state.value=PageState.err;
     } finally {
@@ -245,7 +233,6 @@ class UserDetailController extends GetxController {
       if (accountChildList.isEmpty) {
         //   state.value=PageState.empty;
       }
-      print('تعداد55 :${accountChildList.length}');
     } catch (e) {
       //  state.value=PageState.err;
     } finally {}

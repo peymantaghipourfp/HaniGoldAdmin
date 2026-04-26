@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -20,24 +21,24 @@ class AccountLevelGetOneItemWidget extends StatelessWidget {
     this.isLoading = false,
   });
 
-  String _formatNumber(num? value, {int fractionDigits = 3}) {
+  String _formatNumber(num? value, /*{int fractionDigits = 3}*/) {
     if (value == null) return "-";
     if (value is int) {
       return value
-          .toString()
+          .toDisplayString()
           .toPersianDigit()
           .seRagham();
     }
     return value
-        .toStringAsFixed(fractionDigits)
+        .toDisplayString()
         .toPersianDigit()
         .seRagham();
   }
 
-  String _safeText(String? value) {
+  /*String _safeText(String? value) {
     if (value == null || value.trim().isEmpty) return "-";
     return value;
-  }
+  }*/
 
   AccountLevelItemModel? _currentItem() {
     if (data?.accountLevelItems == null || data!.accountLevelItems!.isEmpty) {
@@ -127,7 +128,7 @@ class AccountLevelGetOneItemWidget extends StatelessWidget {
                _buildRowTwo(
                   label: "حد منفی طلایی",
                   value: data?.negativeGold != null
-                      ? (data?.negativeGold ?? 0 ) < 0 ? "-${data?.negativeGold?.abs().toString() ?? ""}" : data?.negativeGold?.toString() ?? ""
+                      ? (data?.negativeGold ?? 0 ) < 0 ? "-${data?.negativeGold?.abs().toDisplayString() ?? ""}" : data?.negativeGold?.toDisplayString() ?? ""
                       : "-",
                   valueColor: AppColor.textAccentColor
                 ),
@@ -146,7 +147,7 @@ class AccountLevelGetOneItemWidget extends StatelessWidget {
                 child: _buildRowTwo(
                   label: "حداکثر خرید",
                   value: item?.maxBuy != null
-                      ? item?.maxBuy.toString() ?? ""
+                      ? item?.maxBuy?.toDisplayString() ?? ""
                       : "-",
                   valueColor: AppColor.primaryColor
                 ),
@@ -154,7 +155,7 @@ class AccountLevelGetOneItemWidget extends StatelessWidget {
                _buildRowTwo(
                   label: "حداکثر فروش",
                   value: item?.maxSell != null
-                      ? item?.maxSell.toString() ?? ""
+                      ? item?.maxSell?.toDisplayString() ?? ""
                       : "-",
                   valueColor: AppColor.accent2Color
                 ),
