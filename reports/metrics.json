@@ -1,0 +1,17 @@
+{
+  "controllers": 75,
+  "models": 266,
+  "views": 71,
+  "widgets": 126,
+  "repositories": 39,
+  "services": 9,
+  "features": {
+    "chat": 111,
+    "deposit": 16,
+    "inventory": 33,
+    "order": 37,
+    "product": 37,
+    "users": 98,
+    "withdraw": 34
+  }
+}
