@@ -3761,7 +3761,7 @@ class ChatController extends GetxController {
         return;
       }
       if (hasForward) {
-        _outboundForwardSourceByReqId[reqId.value] = forwardSource!;
+        _outboundForwardSourceByReqId[reqId.value] = forwardSource;
       }
 
       final payload = admin_send.SocketChatAdminSendModel(
