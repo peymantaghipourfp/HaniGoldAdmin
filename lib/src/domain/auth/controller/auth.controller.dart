@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:hanigold_admin/src/config/logger/app_logger.dart';
 import 'package:hanigold_admin/src/domain/auth/model/user_login.model.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/socket.service.dart';
 import '../../../config/repository/auth.repository.dart';
+import '../../chat/controller/chat_fab.controller.dart';
 import '../view/forget_password.view.dart';
 import '../service/credentials_storage.dart';
 
@@ -94,14 +96,30 @@ class AuthController extends GetxController{
       if(fetch.infos.isNotEmpty){
         Get.snackbar(fetch.infos.first["title"].toString(), fetch.infos.first["description"].toString());
       }
-      if(fetch.id!=0){
-      Get.offNamed('/home');
-        box.write('id', fetch.user.id);
-        box.write('mobile', mobileController.text);
-        box.write('password', passwordController.text);
-        box.write('Authorization', fetch.token);
-        box.write('userName', fetch.user.contact.name);
-      await _persistRememberedCredentials();
+      if (fetch.id != 0) {
+        await box.write('id', fetch.user.id);
+        await box.write('mobile', mobileController.text);
+        await box.write('password', passwordController.text);
+        await box.write('Authorization', fetch.token);
+        await box.write('userName', fetch.user.contact.name);
+        await box.write(
+          ChatFabController.chatFabUnreadStorageKey,
+          fetch.totalUnreadMessageCount,
+        );
+        await box.write(
+          ChatFabController.chatFabWaitingStorageKey,
+          fetch.waitingChatCount,
+        );
+        Get.find<ChatFabController>().applyChatFabUnreadCount(
+          fetch.totalUnreadMessageCount,
+        );
+        Get.find<ChatFabController>().applyChatFabWaitingCount(
+          fetch.waitingChatCount,
+        );
+        Get.offNamed('/home');
+        AppLogger.d("totalUnreadMessageCount:::::${fetch.totalUnreadMessageCount}");
+        AppLogger.d("waitingChatCount:::::${fetch.waitingChatCount}");
+        await _persistRememberedCredentials();
 
       final socketService = SocketService.to;
       socketService.resetManualDisconnect();
