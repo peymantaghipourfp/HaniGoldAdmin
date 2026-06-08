@@ -50,12 +50,26 @@ class InvoiceGenerationService {
               ),
               if (includeBalance) ...[
                 pw.SizedBox(height: 10),
-                pw.Row(mainAxisAlignment: pw.MainAxisAlignment.start,
+                pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Container(
                         width: 250,
                         child: _buildBalanceWidget(balanceList),
                       ),
+                      pw.Row(
+                        children: [
+                          pw.Text("جمع مقدار 750 : ",
+                            style: pw.TextStyle(fontSize: 8),
+                            textAlign:pw.TextAlign.center,
+                            textDirection: pw.TextDirection.rtl,
+                          ),
+                          pw.Text("${inventory.totalQuantity}" " گرم",
+                            style: pw.TextStyle(fontSize: 10),
+                            textAlign:pw.TextAlign.center,
+                            textDirection: pw.TextDirection.rtl,
+                          ),
+                        ]
+                      )
                     ]
                 ),
                 pw.Container(
@@ -153,7 +167,7 @@ class InvoiceGenerationService {
   pw.TableRow _buildInvoiceDataRow(InventoryDetailModel detail, int index, int type) {
     return pw.TableRow(
       children: [
-        _buildDataCell(detail.item?.id==1  ? " گرم ${detail.weight ?? 0}, آزمایشگاه: ${detail.laboratory?.name ?? '-'}, شماره آزمایشگاه: ${detail.laboratory?.id ?? '-'}, وزن ترازو: ${detail.quantity ?? 0}, عیار: ${detail.carat ?? 0}"  :
+        _buildDataCell(detail.item?.id==1  ? " گرم ${detail.weight ?? 0}, آزمایشگاه: ${detail.laboratory?.name ?? '-'}, انگ: ${detail.receiptNumber ?? '-'}, وزن ترازو: ${detail.quantity ?? 0}, عیار: ${detail.carat ?? 0}"  :
         detail.itemUnit?.id==2 && (detail.item?.id==10 || detail.item?.id==12 || detail.item?.id==13 || detail.item?.id==14 || detail.item?.id==15 || detail.item?.id==16) ? " گرم ${detail.weight ?? 0}, عیار: ${detail.carat ?? 0}, وزن ترازو: ${detail.quantity ?? 0} "
             : detail.quantity?.toString().seRagham(separator: ",") ?? ''),
         _buildDataCell(" (${type == 0 ? 'دریافت' : 'پرداخت'}) ${detail.item?.name ?? '-'}"),
