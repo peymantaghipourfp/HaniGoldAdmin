@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hanigold_admin/src/widget/side_menu_fix.widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
-import '../config/const/app_color.dart';
 
 class MainLayout extends StatelessWidget {
   final Widget child;
@@ -49,23 +48,19 @@ class MainLayout extends StatelessWidget {
   }
 
   Widget _buildDrawer() {
-    return Container(
+    return const SizedBox(
       width: 300,
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topRight: Radius.circular(20),
-          bottomRight: Radius.circular(20),
-        ),
-      ),
       child: Drawer(
-        backgroundColor: AppColor.secondaryColor,
-        shape: const RoundedRectangleBorder(
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
             topRight: Radius.circular(20),
             bottomRight: Radius.circular(20),
           ),
         ),
-        child: const SideMenuFix(),
+        child: SideMenuFix(),
       ),
     );
   }
