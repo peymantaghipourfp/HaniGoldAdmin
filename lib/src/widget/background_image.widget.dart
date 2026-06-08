@@ -9,7 +9,7 @@ class BackgroundImage extends StatelessWidget {
   const BackgroundImage({
     this.imagePath = 'assets/images/bgHaniGold.png',
     this.padding = const EdgeInsets.all(30),
-    this.opacity = 0.06,
+    this.opacity = 0.02,
     this.fit = BoxFit.contain,
     super.key
   });
