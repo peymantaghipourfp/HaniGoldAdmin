@@ -10,6 +10,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
@@ -1098,17 +1099,8 @@ class _InventoryDetailInsertReceiveViewState
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }

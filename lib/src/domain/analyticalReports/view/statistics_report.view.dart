@@ -7,6 +7,7 @@ import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:hanigold_admin/src/widget/background_image_total.widget.dart';
 import 'package:hanigold_admin/src/widget/empty.dart';
 import 'package:hanigold_admin/src/widget/err_page.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
@@ -179,18 +180,7 @@ class _StatisticsReportViewState extends State<StatisticsReportView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'در حال بارگذاری اطلاعات...',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF94A3B8),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          HaniGoldLoadingPage(message: "در حال بارگذاری اطلاعات",)
         ],
       ),
     );

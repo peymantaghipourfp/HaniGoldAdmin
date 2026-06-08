@@ -5,6 +5,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:shamsi_date/shamsi_date.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/pager_widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -334,17 +335,8 @@ class _InvoicePreviewViewState extends State<InvoicePreviewView> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: const Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }
 

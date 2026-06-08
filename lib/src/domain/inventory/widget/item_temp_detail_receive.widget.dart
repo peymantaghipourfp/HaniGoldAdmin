@@ -13,6 +13,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/logger/app_logger.dart';
+import '../../../widget/hanigold_loading.widget.dart';
 import '../model/inventory_detail.model.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -256,23 +257,7 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Flexible(
-                                child: Text(
-                                  'در حال بارگزاری عکس',
-                                  style: AppTextStyle.labelText.copyWith(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.normal,
-                                    color: AppColor.textColor,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              SizedBox(width: 8),
-                              SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(strokeWidth: 2),
-                              ),
+                              const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                             ],
                           ),
                         );
@@ -383,23 +368,7 @@ class _ItemTempDetailWidgetReceive extends State<ItemTempDetailWidgetReceive> {
                         return Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Flexible(
-                              child: Text(
-                                'در حال بارگزاری عکس',
-                                style: AppTextStyle.labelText.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.normal,
-                                  color: AppColor.textColor,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            ),
+                            const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                           ],
                         );
                       }

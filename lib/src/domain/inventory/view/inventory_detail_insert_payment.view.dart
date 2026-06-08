@@ -4,11 +4,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/background_image.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/pager_widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -65,7 +67,7 @@ class _InventoryDetailInsertPaymentViewState
                           child:
                           inventoryDetailInsertPaymentController.balanceList
                               .isEmpty ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(
                             listBalance: inventoryDetailInsertPaymentController
@@ -292,11 +294,7 @@ class _InventoryDetailInsertPaymentViewState
                                                 child: inventoryDetailInsertPaymentController
                                                     .isLoading.value
                                                     ?
-                                                CircularProgressIndicator(
-                                                  valueColor: AlwaysStoppedAnimation<
-                                                      Color>(
-                                                      AppColor.textColor),
-                                                ) :
+                                                HaniGoldLoading() :
                                                 Text(
                                                   'لیست دریافتی ها',
                                                   style: AppTextStyle.bodyText,
@@ -530,13 +528,7 @@ class _InventoryDetailInsertPaymentViewState
                                                         .value) {
                                                       return Row(
                                                         children: [
-                                                          Text(
-                                                            'در حال بارگزاری عکس',
-                                                            style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                                                                fontWeight: FontWeight.normal,color: AppColor.textColor ),
-                                                          ),
-                                                          SizedBox(width: 10,),
-                                                          CircularProgressIndicator(),
+                                                          const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                                                         ],
                                                       );
                                                     }
@@ -665,7 +657,7 @@ class _InventoryDetailInsertPaymentViewState
                           child:
                           inventoryDetailInsertPaymentController.balanceList
                               .isEmpty ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(
                             listBalance: inventoryDetailInsertPaymentController
@@ -679,17 +671,8 @@ class _InventoryDetailInsertPaymentViewState
             ),
           ],
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }
@@ -751,11 +734,7 @@ class _InventoryDetailInsertPaymentViewState
     return Obx(() {
       return
         inventoryDetailInsertPaymentController.isLoading.value ?
-        CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<
-              Color>(
-              AppColor.textColor),
-        ) :
+        HaniGoldLoading() :
         // لیست ForPayment مربوط به هر ولت
         SizedBox(
           height: Get.height * 0.65, // تعیین ارتفاع ثابت

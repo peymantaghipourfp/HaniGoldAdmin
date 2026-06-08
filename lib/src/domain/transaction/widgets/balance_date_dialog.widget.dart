@@ -5,6 +5,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/transaction/controller/balance_date_dialog.controller.dart';
 import 'package:hanigold_admin/src/domain/transaction/model/all_balances.model.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 class BalanceDateDialog extends StatelessWidget {
@@ -118,7 +119,7 @@ class BalanceDateDialog extends StatelessWidget {
             Obx(() {
               if (controller.isLoading.value) {
                 return const Center(
-                  child: CircularProgressIndicator(),
+                  child: HaniGoldLoading(),
                 );
               } else if (controller.error.value.isNotEmpty) {
                 return Container(

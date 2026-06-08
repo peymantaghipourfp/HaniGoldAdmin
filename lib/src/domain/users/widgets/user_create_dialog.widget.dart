@@ -7,6 +7,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_create_dialog.controller.dart';
 import 'package:hanigold_admin/src/domain/users/widgets/image_drop_zone_business_license.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -675,16 +676,7 @@ class _UserCreateDialogWidgetState extends State<UserCreateDialogWidget>
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      'در حال بارگزاری عکس',
-                                      style: AppTextStyle.labelText.copyWith(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.normal,
-                                        color: AppColor.textColor,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const CircularProgressIndicator(),
+                                    const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                                   ],
                                 ),
                               );
@@ -831,16 +823,7 @@ class _UserCreateDialogWidgetState extends State<UserCreateDialogWidget>
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Text(
-                                      'در حال بارگزاری عکس',
-                                      style: AppTextStyle.labelText.copyWith(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.normal,
-                                        color: AppColor.textColor,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 10),
-                                    const CircularProgressIndicator(),
+                                    const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                                   ],
                                 ),
                               );

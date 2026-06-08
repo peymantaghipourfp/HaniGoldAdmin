@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/tools/controller/setting.controller.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 
@@ -23,7 +25,7 @@ class SettingView extends StatelessWidget {
       drawer: const AppDrawer(),
       body: Obx(() {
         if (settingController.setting.value == null) {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: HaniGoldLoading.large());
         }
         return Container(
           decoration: const BoxDecoration(
@@ -87,17 +89,8 @@ class SettingView extends StatelessWidget {
           ),
         );
       }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

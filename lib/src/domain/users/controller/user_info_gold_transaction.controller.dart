@@ -140,6 +140,7 @@ class UserInfoGoldTransactionController extends GetxController{
     currentPage.value = 1;
     itemsPerPage.value=25;
     searchController.clear();
+    hasMore.value=true;
     // Reset sorting to default
     sortAscending.value = false;
     sortColumnIndex.value = null;

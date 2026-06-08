@@ -3,12 +3,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/controller/user_detail.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -37,7 +39,7 @@ class _UserDetailViewState extends State<UserDetailView> {
               SafeArea(
                 child: controller.state.value == PageStateUser.loading
                     ? Center(
-                        child: CircularProgressIndicator(),
+                        child: HaniGoldLoading.large(),
                       )
                     : controller.state.value == PageStateUser.list
                         ? SizedBox(
@@ -768,7 +770,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                             height: Get.height *
                                                                                 0.75,
                                                                             child:
-                                                                                SizedBox(height: 50, child: Center(child: CircularProgressIndicator()))),
+                                                                                SizedBox(height: 50, child: Center(child: HaniGoldLoading()))),
                                                                     Column(
                                                                       mainAxisAlignment:
                                                                           MainAxisAlignment
@@ -1176,7 +1178,7 @@ class _UserDetailViewState extends State<UserDetailView> {
                                                                             height: Get.height *
                                                                                 0.75,
                                                                             child:
-                                                                                SizedBox(height: 50, child: Center(child: CircularProgressIndicator()))),
+                                                                                SizedBox(height: 50, child: Center(child: HaniGoldLoading()))),
                                                                     Column(
                                                                       mainAxisAlignment:
                                                                           MainAxisAlignment
@@ -1262,17 +1264,8 @@ class _UserDetailViewState extends State<UserDetailView> {
               ),
             ],
           ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ));
   }
 }

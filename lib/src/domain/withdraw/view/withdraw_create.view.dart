@@ -10,6 +10,7 @@ import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_create.co
 import 'package:hanigold_admin/src/domain/withdraw/model/bank.model.dart';
 import 'package:hanigold_admin/src/domain/withdraw/widget/image_drop_zone_withdraw.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -18,6 +19,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
 import '../../account/model/account.model.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -69,7 +71,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 return SizedBox.shrink();
                               }
                               if (withdrawCreateController.isLoadingTooltipBalance.value || withdrawCreateController.tooltipTotalBalanceModel.value == null) {
-                                return Center(child: CircularProgressIndicator());
+                                return Center(child: HaniGoldLoading());
                               }
                               return TooltipTotalBalanceWidget(
                                 tooltipTotalBalance: withdrawCreateController.tooltipTotalBalanceModel.value!,
@@ -1100,16 +1102,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                         child: Row(
                                                           mainAxisAlignment: MainAxisAlignment.center,
                                                           children: [
-                                                            Text(
-                                                              'در حال بارگزاری عکس',
-                                                              style: AppTextStyle.labelText.copyWith(
-                                                                fontSize: 12,
-                                                                fontWeight: FontWeight.normal,
-                                                                color: AppColor.textColor,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(width: 10),
-                                                            const CircularProgressIndicator(),
+                                                            HaniGoldLoadingPage(message: "در حال بارگذاری تصویر ...",)
                                                           ],
                                                         ),
                                                       );
@@ -2312,16 +2305,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                                         child: Row(
                                                           mainAxisAlignment: MainAxisAlignment.center,
                                                           children: [
-                                                            Text(
-                                                              'در حال بارگزاری عکس',
-                                                              style: AppTextStyle.labelText.copyWith(
-                                                                fontSize: 12,
-                                                                fontWeight: FontWeight.normal,
-                                                                color: AppColor.textColor,
-                                                              ),
-                                                            ),
-                                                            const SizedBox(width: 10),
-                                                            const CircularProgressIndicator(),
+                                                            HaniGoldLoadingPage(message: "در حال بارگذاری تصویر ...",)
                                                           ],
                                                         ),
                                                       );
@@ -2530,7 +2514,7 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
                                 return SizedBox.shrink();
                               }
                               if (withdrawCreateController.isLoadingTooltipBalance.value || withdrawCreateController.tooltipTotalBalanceModel.value == null) {
-                                return Center(child: CircularProgressIndicator());
+                                return Center(child: HaniGoldLoading());
                               }
                               return Row(mainAxisAlignment: MainAxisAlignment.end,
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -2565,17 +2549,8 @@ class _WithdrawCreateState extends State<WithdrawCreateView> {
             ),
           ],
         ),
-        floatingActionButton: isDesktop ? FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ):SizedBox.shrink(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }

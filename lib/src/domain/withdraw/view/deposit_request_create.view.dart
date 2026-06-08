@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -251,7 +252,7 @@ class _InsertDepositRequestWidgetState extends State<InsertDepositRequestWidget>
                   ),
                 ),
                 withdrawController.isLoadingBalance.value==false ?
-                Center(child: CircularProgressIndicator(),)
+                Center(child: HaniGoldLoading(),)
                     :
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10,horizontal: 10),

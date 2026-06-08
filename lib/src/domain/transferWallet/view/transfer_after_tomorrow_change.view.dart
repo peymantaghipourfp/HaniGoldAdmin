@@ -5,9 +5,11 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/transferWallet/controller/transfer_after_tomorrow_change.controller.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -174,7 +176,7 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
                         return const Center(
                           child: Padding(
                             padding: EdgeInsets.symmetric(vertical: 16.0),
-                            child: CircularProgressIndicator(),
+                            child: HaniGoldLoading.large(),
                           ),
                         );
                       }
@@ -199,7 +201,7 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           child: Center(
                             child: EmptyPage(
-                              tryText: "سفارشی برای نمایش وجود ندارد.",
+                              tryText: "تلاش مجدد!!!",
                               callback: (){
                                 controller.getAfterNotChange();
                               },
@@ -335,17 +337,8 @@ class TransferAfterTomorrowChangeView extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

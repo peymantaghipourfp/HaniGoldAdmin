@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -31,7 +32,7 @@ class AccountSalesGroupView extends GetView<AccountSalesGroupController> {
           BackgroundImageTotal(),
           SafeArea(
             child: controller.state.value == PageState.loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: HaniGoldLoading.large())
                 : controller.state.value == PageState.list
                 ? (isDesktop
                 ? SizedBox(
@@ -481,7 +482,7 @@ class AccountSalesGroupView extends GetView<AccountSalesGroupController> {
                 child: Container(
                   width: isDesktop ? Get.width * 0.5 : Get.width * 0.9,
                   padding: const EdgeInsets.all(40),
-                  child: const Center(child: CircularProgressIndicator()),
+                  child: const Center(child: HaniGoldLoadingPage(message: "در حال دریافت جزئیات...",)),
                 ),
               );
             }

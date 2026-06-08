@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/config/const/app_color.dart';
 import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/tools/controller/setting_telegram.controller.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 
@@ -65,17 +67,8 @@ class SettingTelegramView extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: const Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -100,19 +93,7 @@ class SettingTelegramView extends StatelessWidget {
             return Center(
               child: Column(
                 children: [
-                  const SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      color: AppColor.primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'در حال بررسی وضعیت اتصال...',
-                    style: AppTextStyle.bodyText,
-                  ),
+                  HaniGoldLoadingPage(message: "در حال بررسی وضعیت اتصال...",)
                 ],
               ),
             );

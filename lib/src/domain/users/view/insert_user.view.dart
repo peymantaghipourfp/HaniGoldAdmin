@@ -9,6 +9,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/insert_user.controller.dart';
@@ -1078,17 +1079,8 @@ class InsertUserView extends GetView<InsertUserController> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }
 }

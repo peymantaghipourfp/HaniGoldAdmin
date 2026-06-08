@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/users/controller/person_list.controller.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:hanigold_admin/src/widget/pager_widget1.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -10,6 +11,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -40,12 +42,7 @@ class PersonListView extends GetView<PersonListController> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SizedBox(
-                              height: 50, width: 50,
-                              child: Padding(
-                                padding: const EdgeInsets.all(5),
-                                child: CircularProgressIndicator(),
-                              )),
+                          const HaniGoldLoading.large()
                         ],
                       )),
                 )
@@ -437,17 +434,8 @@ class PersonListView extends GetView<PersonListController> {
               ),
             ],
           ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              Get.dialog(const ChatDialog());
-            },
-            backgroundColor: AppColor.primaryColor,
-            child: Icon(
-              Icons.chat,
-              color: Colors.white,
-            ),
-          ),
-          floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+          floatingActionButton: const ChatFloatingButton(),
+          floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
         ));
   }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -60,7 +61,7 @@ class AccountLevelGetOneItemWidget extends StatelessWidget {
         color: AppColor.secondary100Color.withAlpha(200),
       ),
       child: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: HaniGoldLoading())
           : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

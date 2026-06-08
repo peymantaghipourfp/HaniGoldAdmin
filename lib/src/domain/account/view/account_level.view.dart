@@ -4,6 +4,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/account/controller/account_level.controller.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
@@ -31,7 +32,7 @@ class AccountLevelView extends GetView<AccountLevelController> {
           BackgroundImageTotal(),
           SafeArea(
             child: controller.state.value == PageState.loading
-                ? const Center(child: CircularProgressIndicator())
+                ? const Center(child: HaniGoldLoading.large())
                 : controller.state.value == PageState.list
                 ? (isDesktop
                 ? SizedBox(
@@ -330,7 +331,7 @@ class AccountLevelView extends GetView<AccountLevelController> {
                 child: Container(
                   width: isDesktop ? Get.width * 0.5 : Get.width * 0.9,
                   padding: const EdgeInsets.all(40),
-                  child: const Center(child: CircularProgressIndicator()),
+                  child: const Center(child: HaniGoldLoading()),
                 ),
               );
             }
@@ -691,7 +692,7 @@ class AccountLevelView extends GetView<AccountLevelController> {
                 child: Container(
                   width: isDesktop ? Get.width * 0.5 : Get.width * 0.9,
                   padding: const EdgeInsets.all(40),
-                  child: const Center(child: CircularProgressIndicator()),
+                  child: const Center(child: HaniGoldLoading()),
                 ),
               );
             }

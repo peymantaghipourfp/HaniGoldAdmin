@@ -1,6 +1,7 @@
 
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +13,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
 import '../../account/model/account.model.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -70,7 +72,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                           child:
                           orderUpdateController.isLoadingBalance.value == true
                               ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(title: orderUpdateController.selectedAccount.value?.name,
                             listBalance: orderUpdateController.balanceList,
@@ -1381,7 +1383,7 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
                           child:
                           orderUpdateController.isLoadingBalance.value == true
                               ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(title: orderUpdateController.selectedAccount.value?.name,
                             listBalance: orderUpdateController.balanceList,
@@ -1394,17 +1396,8 @@ class _OrderUpdateViewState extends State<OrderUpdateView> {
             ),
           ],
         ),
-        floatingActionButton: isDesktop ? FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ) : SizedBox.shrink(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }

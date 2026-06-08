@@ -14,7 +14,9 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/err_page.dart';
+import '../../../widget/hanigold_loading.widget.dart';
 import '../../../widget/pager_widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 
@@ -43,7 +45,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
           SafeArea(
             child: controller.state.value == PageState.loading
                 ? Center(
-              child: CircularProgressIndicator(),
+              child: HaniGoldLoading.large(),
             )
                 : controller.state.value == PageState.list
                 ? SizedBox(
@@ -3152,7 +3154,7 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
                                     return Container(
                                       padding: EdgeInsets.all(16),
                                       child: Center(
-                                        child: CircularProgressIndicator(),
+                                        child: HaniGoldLoading(),
                                       ),
                                     );
                                   }
@@ -3210,17 +3212,8 @@ class _OrderEditedReportListViewState extends State<OrderEditedReportListView> {
           ) : SizedBox.shrink(),
         ],
       ),
-      floatingActionButton: isDesktop ? FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ): SizedBox.shrink(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }
 

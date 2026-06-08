@@ -11,6 +11,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
+import '../../../widget/hanigold_loading.widget.dart';
 import '../controller/inventory_create_payment.controller.dart';
 import '../model/inventory_detail.model.dart';
 import 'package:get/get.dart';
@@ -343,20 +344,7 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Text(
-                                  'در حال بارگزاری عکس',
-                                  style: AppTextStyle.labelText.copyWith(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.normal,
-                                    color: AppColor.textColor,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                SizedBox(
-                                  width: 16,
-                                  height: 16,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
+                                const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                               ],
                             ),
                           );
@@ -462,16 +450,7 @@ class _ItemTempDetailWidgetPayment extends State<ItemTempDetailWidgetPayment> {
                         if (inventoryCreatePaymentController.isUploadingDesktop.value) {
                           return Row(
                             children: [
-                              Text(
-                                'در حال بارگزاری عکس',
-                                style: AppTextStyle.labelText.copyWith(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.normal,
-                                  color: AppColor.textColor,
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              CircularProgressIndicator(),
+                              const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                             ],
                           );
                         }

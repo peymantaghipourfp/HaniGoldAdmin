@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -9,6 +10,7 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../../product/model/item.model.dart';
 import '../controller/trading_balance.controller.dart';
@@ -96,17 +98,8 @@ class _TradingBalanceViewState extends State<TradingBalanceView> {
           BackgroundImageTotal(),
           _buildMainContent(isDesktop, isTablet)
         ],),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ),
     );
   }
@@ -116,18 +109,7 @@ class _TradingBalanceViewState extends State<TradingBalanceView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
-          ),
-          SizedBox(height: 16),
-          Text(
-            'در حال بارگذاری اطلاعات...',
-            style: TextStyle(
-              fontSize: 16,
-              color: Color(0xFF94A3B8),
-              fontWeight: FontWeight.w500,
-            ),
-          ),
+          HaniGoldLoadingPage(message: 'در حال بارگذاری اطلاعات...',)
         ],
       ),
     );

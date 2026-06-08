@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:hanigold_admin/src/domain/accountSalesGroup/model/account_sales_group_item.model.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 
 import '../../../config/const/app_color.dart';
@@ -79,7 +80,7 @@ class AccountSalesGroupGetOneItemWidget extends StatelessWidget {
         color: AppColor.circleColor.withAlpha(200),
       ),
       child: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: HaniGoldLoading())
           : Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:shamsi_date/shamsi_date.dart';
@@ -44,7 +45,7 @@ class _CheckResultState extends State<CheckResult> {
         padding: EdgeInsets.all(isDesktop ? 16 : 5),
         child: Obx(() {
           if (controller.isLoading.value) {
-            return Center(child: CircularProgressIndicator());
+            return Center(child: HaniGoldLoading());
           }
 
           final List<CheckResultModel> results = controller.checkResultList;

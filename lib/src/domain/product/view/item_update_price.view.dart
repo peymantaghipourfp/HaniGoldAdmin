@@ -6,12 +6,14 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/product/controller/product.controller.dart';
 import 'package:hanigold_admin/src/domain/product/widget/price_sell.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -101,7 +103,7 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
                             if (productController.state.value == PageState.loading) {
                               //EasyLoading.show(status: 'لطفا منتظر بمانید...');
                               return Center(
-                                  child: CircularProgressIndicator());
+                                  child: HaniGoldLoading.large());
                             } else
                             if (productController.state.value == PageState.empty) {
                               //EasyLoading.dismiss();
@@ -567,17 +569,8 @@ class _ProductUpdatePriceViewState extends State<ProductUpdatePriceView> {
           ),
         ],
       ),
-      floatingActionButton: isDesktop ? FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ) : SizedBox.shrink(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

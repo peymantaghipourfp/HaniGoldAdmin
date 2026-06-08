@@ -8,6 +8,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_update_receive.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -16,6 +17,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
@@ -71,7 +73,7 @@ class _InventoryDetailUpdateReceiveViewState
                           child:
                           inventoryUpdateReceiveController.balanceList
                               .isEmpty ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(
                             listBalance: inventoryUpdateReceiveController
@@ -1086,13 +1088,7 @@ class _InventoryDetailUpdateReceiveViewState
                                                             .value) {
                                                           return Row(
                                                             children: [
-                                                              Text(
-                                                                'در حال بارگزاری عکس',
-                                                                style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                                                                    fontWeight: FontWeight.normal,color: AppColor.textColor ),
-                                                              ),
-                                                              SizedBox(width: 10,),
-                                                              CircularProgressIndicator(),
+                                                              const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                                                             ],
                                                           );
                                                         }
@@ -1254,7 +1250,7 @@ class _InventoryDetailUpdateReceiveViewState
                           child:
                           inventoryUpdateReceiveController.balanceList
                               .isEmpty ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(
                             listBalance: inventoryUpdateReceiveController
@@ -1268,17 +1264,8 @@ class _InventoryDetailUpdateReceiveViewState
             ),
           ],
         ),
-        floatingActionButton: isMobile ? SizedBox.shrink() : FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }

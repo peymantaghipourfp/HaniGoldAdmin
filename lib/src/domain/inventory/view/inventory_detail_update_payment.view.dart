@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:hanigold_admin/src/widget/pager_widget1.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -16,6 +17,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
@@ -101,7 +103,7 @@ class _InventoryDetailUpdatePaymentViewState
                           child:
                           inventoryDetailUpdatePaymentController.balanceList
                               .isEmpty ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(
                             listBalance: inventoryDetailUpdatePaymentController
@@ -1076,13 +1078,7 @@ class _InventoryDetailUpdatePaymentViewState
                                                             .value) {
                                                           return Row(
                                                             children: [
-                                                              Text(
-                                                                'در حال بارگزاری عکس',
-                                                                style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                                                                    fontWeight: FontWeight.normal,color: AppColor.textColor ),
-                                                              ),
-                                                              SizedBox(width: 10,),
-                                                              CircularProgressIndicator(),
+                                                              const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                                                             ],
                                                           );
                                                         }
@@ -1242,7 +1238,7 @@ class _InventoryDetailUpdatePaymentViewState
                           child:
                           inventoryDetailUpdatePaymentController.balanceList
                               .isEmpty ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           BalanceWidget(
                             listBalance: inventoryDetailUpdatePaymentController
@@ -1256,17 +1252,8 @@ class _InventoryDetailUpdatePaymentViewState
             ),
           ],
         ),
-        floatingActionButton: isMobile ? SizedBox.shrink() : FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }
@@ -1330,11 +1317,7 @@ class _InventoryDetailUpdatePaymentViewState
     return Obx(() {
       return
         inventoryDetailUpdatePaymentController.isLoading.value ?
-        CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<
-              Color>(
-              AppColor.textColor),
-        ) :
+        HaniGoldLoading() :
         // لیست ForPayment مربوط به هر ولت
         SizedBox(
           height: ResponsiveBreakpoints.of(context).isMobile ? Get.height * 0.8 : Get.height * 0.65, // تعیین ارتفاع ثابت

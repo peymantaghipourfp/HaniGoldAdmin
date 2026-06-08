@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/transaction/widgets/filter.widget.dart';
 import 'package:hanigold_admin/src/domain/transaction/model/transaction_item.model.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -15,6 +16,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
@@ -74,7 +76,7 @@ class _TransactionViewState extends State<TransactionView> {
           SafeArea(
             child: controller.state.value == PageStateTrans.loading
                 ? Center(
-              child: CircularProgressIndicator(),
+              child: HaniGoldLoading.large(),
             )
                 : controller.state.value == PageStateTrans.list
                 ? SizedBox(
@@ -1832,17 +1834,8 @@ class _TransactionViewState extends State<TransactionView> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }
 
@@ -3682,7 +3675,7 @@ class _TransactionViewState extends State<TransactionView> {
                                     "${BaseUrl.baseUrl}Attachment/downloadAttachment?fileName=$attachment",
                                     loadingBuilder: (context, child, loadingProgress) {
                                       if (loadingProgress == null) return child;
-                                      return Center(child: CircularProgressIndicator());
+                                      return Center(child: HaniGoldLoading());
                                     },
                                     errorBuilder: (context, error, stackTrace) =>
                                         Icon(Icons.error, color: Colors.red),

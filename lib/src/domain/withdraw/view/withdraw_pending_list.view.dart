@@ -9,12 +9,14 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_pending.controller.dart';
 import 'package:hanigold_admin/src/domain/withdraw/model/withdraw.model.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -989,7 +991,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                     Obx(() {
                       if (withdrawController.state.value == PageState.loading) {
                         //  EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-                        return Center(child: CircularProgressIndicator());
+                        return Center(child: HaniGoldLoading.large());
                       } else
                       if (withdrawController.state.value == PageState.empty) {
                         // EasyLoading.dismiss();
@@ -1484,7 +1486,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                             itemBuilder: (context, index) {
                               if (index >= withdrawController.withdrawListStatus.length) {
                                 return withdrawController.hasMore.value
-                                    ? Center(child: CircularProgressIndicator())
+                                    ? Center(child: HaniGoldLoading())
                                     : SizedBox.shrink();
                               }
                               var withdraws = withdrawController
@@ -1996,17 +1998,8 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
           ),)
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -2427,7 +2420,7 @@ class _WithdrawsPendingListViewState extends State<WithdrawsPendingListView> {
                                                           null)
                                                         return child;
                                                       return Center(
-                                                        child: CircularProgressIndicator(),
+                                                        child: HaniGoldLoading(),
                                                       );
                                                     },
                                                     errorBuilder: (context,

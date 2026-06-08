@@ -8,6 +8,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order_update.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -295,7 +296,7 @@ class _OrderUpdateDialogWidgetState extends State<OrderUpdateDialogWidget>
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
                   child: !_isInitialized
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center(child: HaniGoldLoading())
                       : Obx(() {
                     if (isDesktop) {
                       return _buildDesktopLayout();
@@ -331,7 +332,7 @@ class _OrderUpdateDialogWidgetState extends State<OrderUpdateDialogWidget>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   orderUpdateController.isLoadingBalance.value == true
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center(child: HaniGoldLoading())
                       : LayoutBuilder(
                       builder: (context, constraints) {
                           return BalanceWidget(
@@ -382,7 +383,7 @@ class _OrderUpdateDialogWidgetState extends State<OrderUpdateDialogWidget>
     return Column(
       children: [
         orderUpdateController.isLoadingBalance.value == true
-            ? Center(child: CircularProgressIndicator())
+            ? Center(child: HaniGoldLoading())
             : BalanceWidget(
           title: orderUpdateController.selectedAccount.value?.name,
           listBalance: orderUpdateController.balanceList,

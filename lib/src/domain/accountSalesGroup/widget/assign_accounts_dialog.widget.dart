@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -601,7 +602,7 @@ class AssignAccountsDialogState extends State<AssignAccountsDialog> {
   Widget _buildAccountContent(PageState state, List<AccountModel> accounts) {
     switch (state) {
       case PageState.loading:
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: HaniGoldLoading());
       case PageState.err:
         return Center(
           child: Column(

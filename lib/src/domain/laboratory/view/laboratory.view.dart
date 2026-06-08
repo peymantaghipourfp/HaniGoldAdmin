@@ -3,12 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -34,20 +36,7 @@ class LaboratoryView extends GetView<LaboratoryController> {
             child: SafeArea(
                     child: controller.state.value == PageStateLob.loading
                         ? Center(
-                      child: SizedBox(
-                          height: Get.height * 0.8 ,
-                          width: Get.width,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                  height: 50,width: 50,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(5),
-                                    child: CircularProgressIndicator(),
-                                  )),
-                            ],
-                          )),
+                      child: HaniGoldLoading.large()
                     )
                         : controller.state.value == PageStateLob.list
                         ? SizedBox(
@@ -782,17 +771,8 @@ class LaboratoryView extends GetView<LaboratoryController> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }
   List<DataColumn> buildDataColumns() {

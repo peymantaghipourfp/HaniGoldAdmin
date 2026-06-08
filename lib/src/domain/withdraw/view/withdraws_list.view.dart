@@ -12,12 +12,14 @@ import 'package:hanigold_admin/src/domain/withdraw/view/deposit_request_create.v
 import 'package:hanigold_admin/src/domain/withdraw/widget/hover_tooltip_balance_withdraw.widget.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -92,69 +94,135 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                       child: Column(
                         children: [
                           //فیلد جستجو
-                          Row(
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Expanded(
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(
-                                      horizontal: 10, vertical: 10),
-                                  padding: EdgeInsets.symmetric(horizontal: 20),
-                                  color: AppColor.appBarColor.withOpacity(0.5),
-                                  alignment: Alignment.center,
-                                  height: 80,
-                                  child: TextFormField(
-                                    controller: withdrawController
-                                        .searchController,
-                                    style: AppTextStyle.labelText,
-                                    textInputAction: TextInputAction.search,
-                                    onFieldSubmitted: (value) async {
-                                      if (value.isNotEmpty) {
-                                        await withdrawController.searchAccounts(
-                                            value);
-                                        showSearchResults(context);
-                                      } else {
-                                        withdrawController.clearSearch();
-                                      }
-                                    },
-                                    decoration: InputDecoration(
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      filled: true,
-                                      fillColor: AppColor.textFieldColor,
-                                      hintText: "جستجو ... ",
-                                      hintStyle: AppTextStyle.labelText,
-                                      prefixIcon: IconButton(
-                                          onPressed: () async {
-                                            if (withdrawController
-                                                .searchController.text
-                                                .isNotEmpty) {
-                                              await withdrawController
-                                                  .searchAccounts(
-                                                  withdrawController
-                                                      .searchController
-                                                      .text
-                                              );
-                                              showSearchResults(context);
-                                            } else {
-                                              withdrawController.clearSearch();
-                                            }
-                                          },
-                                          icon: Icon(
-                                            Icons.search,
-                                            color: AppColor.textColor,
-                                            size: 30,)
-                                      ),
-                                      suffixIcon: IconButton(
-                                        onPressed: withdrawController
-                                            .clearSearch,
-                                        icon: Icon(
-                                            Icons.close,
-                                            color: AppColor.textColor),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 10),
+                                      padding: EdgeInsets.symmetric(horizontal: 20),
+                                      color: AppColor.appBarColor.withOpacity(0.5),
+                                      alignment: Alignment.center,
+                                      height: 80,
+                                      child: TextFormField(
+                                        controller: withdrawController
+                                            .searchController,
+                                        style: AppTextStyle.labelText,
+                                        textInputAction: TextInputAction.search,
+                                        onFieldSubmitted: (value) async {
+                                          if (value.isNotEmpty) {
+                                            await withdrawController.searchAccounts(
+                                                value);
+                                            showSearchResults(context);
+                                          } else {
+                                            withdrawController.clearSearch();
+                                          }
+                                        },
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          filled: true,
+                                          fillColor: AppColor.textFieldColor,
+                                          hintText: "جستجو ... ",
+                                          hintStyle: AppTextStyle.labelText,
+                                          prefixIcon: IconButton(
+                                              onPressed: () async {
+                                                if (withdrawController
+                                                    .searchController.text
+                                                    .isNotEmpty) {
+                                                  await withdrawController
+                                                      .searchAccounts(
+                                                      withdrawController
+                                                          .searchController
+                                                          .text
+                                                  );
+                                                  showSearchResults(context);
+                                                } else {
+                                                  withdrawController.clearSearch();
+                                                }
+                                              },
+                                              icon: Icon(
+                                                Icons.search,
+                                                color: AppColor.textColor,
+                                                size: 30,)
+                                          ),
+                                          suffixIcon: IconButton(
+                                            onPressed: withdrawController
+                                                .clearSearch,
+                                            icon: Icon(
+                                                Icons.close,
+                                                color: AppColor.textColor),
+                                          ),
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Container(
+                                      margin: EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 4),
+                                      padding: EdgeInsets.symmetric(horizontal: 20),
+                                      color: AppColor.appBarColor.withOpacity(0.5),
+                                      alignment: Alignment.center,
+                                      height: 80,
+                                      child: TextFormField(
+                                        controller: withdrawController
+                                            .depositRequestAccountNameFilterController,
+                                        style: AppTextStyle.labelText,
+                                        textInputAction: TextInputAction.search,
+                                        onFieldSubmitted: (_) {
+                                          withdrawController.currentPage.value = 1;
+                                          withdrawController.itemsPerPage.value = 25;
+                                          withdrawController.getWithdrawListPager();
+                                        },
+                                        decoration: InputDecoration(
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          filled: true,
+                                          fillColor: AppColor.textFieldColor,
+                                          hintText:
+                                          'نام صاحب درخواست واریز ... ',
+                                          hintStyle: AppTextStyle.labelText,
+                                          prefixIcon: IconButton(
+                                            onPressed: () {
+                                              withdrawController.currentPage.value = 1;
+                                              withdrawController.itemsPerPage.value = 25;
+                                              withdrawController.getWithdrawListPager();
+                                            },
+                                            icon: Icon(
+                                              Icons.search,
+                                              color: AppColor.textColor,
+                                              size: 30,
+                                            ),
+                                          ),
+                                          suffixIcon: IconButton(
+                                            onPressed: () {
+                                              withdrawController
+                                                  .depositRequestAccountNameFilterController
+                                                  .clear();
+                                              withdrawController.currentPage.value = 1;
+                                              withdrawController.itemsPerPage.value = 25;
+                                              withdrawController.getWithdrawListPager();
+                                            },
+                                            icon: Icon(
+                                              Icons.close,
+                                              color: AppColor.textColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -691,7 +759,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                     Obx(() {
                       if (withdrawController.state.value == PageState.loading) {
                         //  EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-                        return Center(child: CircularProgressIndicator());
+                        return Center(child: HaniGoldLoading.large());
                       } else
                       if (withdrawController.state.value == PageState.empty) {
                         // EasyLoading.dismiss();
@@ -725,7 +793,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                               child: Row(
                                                 children: [
                                                   Container(
-                                                    width: 400,
+                                                    width: 300,
                                                     child: TextFormField(
                                                       controller: withdrawController.searchController,
                                                       style: AppTextStyle.labelText,
@@ -771,6 +839,64 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                           onPressed: withdrawController.clearSearch,
                                                           icon: Icon(
                                                               Icons.close, color: AppColor.textColor),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  SizedBox(width: 10),
+                                                  Container(
+                                                    width: 300,
+                                                    child: TextFormField(
+                                                      controller: withdrawController
+                                                          .depositRequestAccountNameFilterController,
+                                                      style: AppTextStyle.labelText,
+                                                      textInputAction: TextInputAction.search,
+                                                      onFieldSubmitted: (_) {
+                                                        withdrawController
+                                                            .currentPage.value = 1;
+                                                        withdrawController
+                                                            .itemsPerPage.value = 25;
+                                                        withdrawController
+                                                            .getWithdrawListPager();
+                                                      },
+                                                      decoration: InputDecoration(
+                                                        border: OutlineInputBorder(
+                                                          borderRadius: BorderRadius.circular(10),
+                                                        ),
+                                                        filled: true,
+                                                        fillColor: AppColor.textFieldColor,
+                                                        hintText:
+                                                        'جستجو بر اساس نام صاحب درخواست واریز ... ',
+                                                        hintStyle: AppTextStyle.labelText,
+                                                        prefixIcon: IconButton(
+                                                            onPressed: () {
+                                                              withdrawController
+                                                                  .currentPage.value = 1;
+                                                              withdrawController
+                                                                  .itemsPerPage.value = 25;
+                                                              withdrawController
+                                                                  .getWithdrawListPager();
+                                                            },
+                                                            icon: Icon(
+                                                              Icons.search,
+                                                              color: AppColor.textColor,
+                                                              size: 30,
+                                                            )),
+                                                        suffixIcon: IconButton(
+                                                          onPressed: () {
+                                                            withdrawController
+                                                                .depositRequestAccountNameFilterController
+                                                                .clear();
+                                                            withdrawController
+                                                                .currentPage.value = 1;
+                                                            withdrawController
+                                                                .itemsPerPage.value = 25;
+                                                            withdrawController
+                                                                .getWithdrawListPager();
+                                                          },
+                                                          icon: Icon(
+                                                              Icons.close,
+                                                              color: AppColor.textColor),
                                                         ),
                                                       ),
                                                     ),
@@ -1687,7 +1813,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                               if (index >=
                                   withdrawController.withdrawList.length) {
                                 return withdrawController.hasMore.value
-                                    ? Center(child: CircularProgressIndicator())
+                                    ? Center(child: HaniGoldLoading())
                                     : SizedBox.shrink();
                               }
                               var withdraws = withdrawController
@@ -1859,7 +1985,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                                                 null)
                                                                                               return child;
                                                                                             return Center(
-                                                                                              child: CircularProgressIndicator(),
+                                                                                              child: HaniGoldLoading(),
                                                                                             );
                                                                                           },
                                                                                           errorBuilder: (
@@ -2709,11 +2835,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                         .isLoadingDepositRequestList
                                                                         .value ?
                                                                     Center(
-                                                                      child: CircularProgressIndicator(
-                                                                        valueColor: AlwaysStoppedAnimation<
-                                                                            Color>(
-                                                                            AppColor.textColor),
-                                                                      ),
+                                                                      child: HaniGoldLoading(),
                                                                     ) : withdrawController
                                                                         .depositRequestList
                                                                         .isEmpty
@@ -4308,17 +4430,8 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
               ),)
         ],
       ),
-      floatingActionButton: isMobile ? SizedBox.shrink() : FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -6475,7 +6588,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
                                                                           null)
                                                                         return child;
                                                                       return Center(
-                                                                        child: CircularProgressIndicator(),
+                                                                        child: HaniGoldLoading(),
                                                                       );
                                                                     },
                                                                     errorBuilder: (
@@ -7034,7 +7147,7 @@ class _WithdrawsListViewState extends State<WithdrawsListView> {
       if (withdrawController.isLoadingDepositRequestList.value) {
         return Container(
           padding: EdgeInsets.all(20),
-          child: Center(child: CircularProgressIndicator()),
+          child: Center(child: HaniGoldLoading()),
         );
       }
 

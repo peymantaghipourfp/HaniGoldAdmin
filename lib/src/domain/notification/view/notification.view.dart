@@ -12,11 +12,13 @@ import 'package:hanigold_admin/src/widget/background_image.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:hanigold_admin/src/widget/empty.dart';
 import 'package:hanigold_admin/src/widget/err_page.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/pager_widget.dart';
 
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -91,17 +93,8 @@ class _NotificationViewState extends State<NotificationView> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -734,7 +727,7 @@ class _NotificationViewState extends State<NotificationView> {
   Widget _buildContentSection(BuildContext context, bool isDesktop) {
     return Obx(() {
       if (notificationController.state.value == PageState.loading) {
-        return const Center(child: CircularProgressIndicator());
+        return const Center(child: HaniGoldLoading.large());
       } else if (notificationController.state.value == PageState.empty) {
         return EmptyPage(
           title: notificationController.selectedTabIndex.value == 0
@@ -827,7 +820,7 @@ class _NotificationViewState extends State<NotificationView> {
                           // Loading indicator for pagination
                           if (notificationController.hasMore.value)
                             Obx(() => notificationController.isLoading.value
-                                ? const Center(child: CircularProgressIndicator())
+                                ? const Center(child: HaniGoldLoading())
                                 : const SizedBox.shrink()),
                         ],
                       ),

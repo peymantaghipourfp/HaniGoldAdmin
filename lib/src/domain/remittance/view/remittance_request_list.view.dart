@@ -7,6 +7,7 @@ import 'package:hanigold_admin/src/domain/remittance/controller/remittance_reque
 import 'package:hanigold_admin/src/domain/remittance/widget/hover_tooltip_balance_rem_req.widget.dart';
 import 'package:hanigold_admin/src/utils/num_display.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -15,6 +16,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image_total.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/err_page.dart';
 import '../../../widget/pager_widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -44,7 +46,7 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
           SafeArea(
             child: controller.state.value == PageState.loading
                 ? Center(
-              child: CircularProgressIndicator(),
+              child: HaniGoldLoading.large(),
             )
                 : controller.state.value == PageState.list
                 ? SizedBox(
@@ -1286,17 +1288,8 @@ class _RemittanceRequestListViewState extends State<RemittanceRequestListView> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }
 

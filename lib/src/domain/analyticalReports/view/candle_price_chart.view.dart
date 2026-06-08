@@ -12,6 +12,7 @@ import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
 import 'package:hanigold_admin/src/widget/app_drawer.widget.dart';
 import 'package:hanigold_admin/src/widget/empty.dart';
 import 'package:hanigold_admin/src/widget/err_page.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:intl/intl.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
@@ -647,17 +648,7 @@ class _CandlePriceChartViewState extends State<CandlePriceChartView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'در حال بارگذاری نمودار...',
-            style: AppTextStyle.bodyText.copyWith(
-              fontSize: 14,
-              color: const Color(0xFF94A3B8),
-            ),
-          ),
+          const HaniGoldLoadingPage(message: "در حال بارگذاری نمودار...",)
         ],
       ),
     );
@@ -1090,9 +1081,7 @@ class _CandlePriceChartViewState extends State<CandlePriceChartView> {
     return Obx(() {
       if (controller.itemsState.value == ChartPageState.loading) {
         return const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
-          ),
+          child: HaniGoldLoading()
         );
       }
 
@@ -1136,9 +1125,7 @@ class _CandlePriceChartViewState extends State<CandlePriceChartView> {
     return Obx(() {
       if (controller.itemsState.value == ChartPageState.loading) {
         return const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF3B82F6)),
-          ),
+          child: HaniGoldLoading()
         );
       }
 

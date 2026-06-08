@@ -15,8 +15,10 @@ import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_dropdown.widget.dart';
 import '../../../widget/custom_dropdown1.widget.dart';
+import '../../../widget/hanigold_loading.widget.dart';
 import '../../account/model/account.model.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../../users/widgets/balance.widget.dart';
@@ -645,13 +647,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                             .value) {
                                           return Row(
                                             children: [
-                                              Text(
-                                                'در حال بارگزاری عکس',
-                                                style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                                                    fontWeight: FontWeight.normal,color: AppColor.textColor ),
-                                              ),
-                                              SizedBox(width: 10,),
-                                              CircularProgressIndicator(),
+                                              const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                                             ],
                                           );
                                         }
@@ -1675,13 +1671,7 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
                                             .value) {
                                           return Row(
                                             children: [
-                                              Text(
-                                                'در حال بارگزاری عکس',
-                                                style: AppTextStyle.labelText.copyWith(fontSize: 12,
-                                                    fontWeight: FontWeight.normal,color: AppColor.textColor ),
-                                              ),
-                                              SizedBox(width: 10,),
-                                              CircularProgressIndicator(),
+                                              const HaniGoldLoadingPage(message: 'در حال بارگذاری تصویر...',),
                                             ],
                                           );
                                         }
@@ -1883,17 +1873,8 @@ class _InsertRemittanceViewState extends State<InsertRemittanceView> {
           ),
         ],
       ),
-      floatingActionButton: isDesktop ? FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ) : SizedBox.shrink(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     ));
   }
 }

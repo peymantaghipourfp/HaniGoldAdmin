@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hanigold_admin/src/domain/order/model/tooltip_total_balance.model.dart';
 import 'package:hanigold_admin/src/domain/order/widget/tooltip_total_balance.widget.dart';
 import 'package:hanigold_admin/src/domain/remittance/controller/remittance_request.controller.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
@@ -54,10 +55,7 @@ class _HoverTooltipBalanceRemReqWidgetState extends State<HoverTooltipBalanceRem
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return Container(
                   padding: EdgeInsets.all(8),
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColor.primaryColor),
-                  ),
+                  child: HaniGoldLoading(),
                 );
               } else if (snapshot.hasError) {
                 return Container(

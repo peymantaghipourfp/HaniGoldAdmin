@@ -10,6 +10,7 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/domain/order/controller/order_create.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown.widget.dart';
 import 'package:hanigold_admin/src/widget/custom_dropdown1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -389,7 +390,7 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   orderCreateController.isLoadingBalance.value == false
-                      ? Center(child: CircularProgressIndicator())
+                      ? Center(child: HaniGoldLoading())
                       : LayoutBuilder(
                       builder: (context, constraints) {
                           return BalanceWidget(
@@ -439,7 +440,7 @@ class _OrderCreateDialogWidgetState extends State<OrderCreateDialogWidget>
     return Column(
       children: [
         orderCreateController.isLoadingBalance.value == false
-            ? Center(child: CircularProgressIndicator())
+            ? Center(child: HaniGoldLoading())
             : BalanceWidget(
           title: orderCreateController.selectedAccount.value?.name,
           listBalance: orderCreateController.balanceList,

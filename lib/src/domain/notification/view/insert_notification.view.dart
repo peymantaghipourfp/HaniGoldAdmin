@@ -7,6 +7,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../utils/convert_Jalali_to_gregorian.component.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../controller/notification.controller.dart';
 
@@ -364,17 +365,8 @@ class _InsertNotificationViewState extends State<InsertNotificationView> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
     );
   }

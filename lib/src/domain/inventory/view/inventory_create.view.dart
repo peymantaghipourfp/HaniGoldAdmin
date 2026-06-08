@@ -5,10 +5,12 @@ import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_layout.controller.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_receive.controller.dart';
 import 'package:hanigold_admin/src/widget/background_image.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../config/const/app_text_style.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/custom_appbar1.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 import '../widget/total_balance_gold_value.widget.dart';
@@ -105,7 +107,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
                         )
                             :
                         inventoryCreateLayoutController.isLoadingTooltipBalance.value ?
-                        Center(child: CircularProgressIndicator(),)
+                        Center(child: HaniGoldLoading(),)
                             :
                         TotalBalanceGoldValue(
                             totalBalanceGoldValue: inventoryCreateLayoutController.tooltipTotalBalanceModel.value!,
@@ -331,7 +333,7 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
                           )
                               :
                           inventoryCreateLayoutController.isLoadingTooltipBalance.value ?
-                          Center(child: CircularProgressIndicator(),)
+                          Center(child: HaniGoldLoading(),)
                               :
                           TotalBalanceGoldValue(
                             totalBalanceGoldValue: inventoryCreateLayoutController.tooltipTotalBalanceModel.value!,
@@ -344,17 +346,8 @@ class _InventoryCreateViewState extends State<InventoryCreateView>
             ),
           ],
         ),
-        floatingActionButton:isMobile ? SizedBox.shrink() : FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }

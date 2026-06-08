@@ -6,6 +6,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/deposit_request_getOne.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 
@@ -14,6 +15,7 @@ import '../../../config/const/app_text_style.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -50,10 +52,10 @@ class DepositRequestGetOneView extends StatelessWidget {
                       var getDepositRequest =
                           depositRequestGetOneController.getOneDepositRequest.value;
                       if (depositRequestGetOneController.state.value == PageState.loading) {
-                        EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-                        return Center(child: CircularProgressIndicator());
+                        //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+                        return Center(child: HaniGoldLoadingPage(message: 'دریافت اطلاعات از سرور...',));
                       } else if (depositRequestGetOneController.state.value == PageState.empty) {
-                        EasyLoading.dismiss();
+                        //EasyLoading.dismiss();
                         return EmptyPage(
                           title: 'واریزی وجود ندارد',
                           callback: () {
@@ -62,7 +64,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                           },
                         );
                       } else if (depositRequestGetOneController.state.value == PageState.list) {
-                        EasyLoading.dismiss();
+                        //EasyLoading.dismiss();
                         if (getDepositRequest == null) {
                           return Center(child: Text('اطلاعات واریزی یافت نشد'));
                         }
@@ -485,7 +487,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                                             null)
                                                                                                           return child;
                                                                                                         return Center(
-                                                                                                          child: CircularProgressIndicator(),
+                                                                                                          child: HaniGoldLoading(),
                                                                                                         );
                                                                                                       },
                                                                                                       errorBuilder: (context,
@@ -907,7 +909,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                               depositRequestGetOneController.getOneDepositRequest.value;
                           if (depositRequestGetOneController.state.value ==
                               PageState.loading) {
-                            return Center(child: CircularProgressIndicator());
+                            return Center(child: HaniGoldLoading());
                           } else if (depositRequestGetOneController.state.value ==
                               PageState.empty) {
                             return EmptyPage(
@@ -1412,7 +1414,7 @@ class DepositRequestGetOneView extends StatelessWidget {
                                                                                                                 null)
                                                                                                               return child;
                                                                                                             return Center(
-                                                                                                              child: CircularProgressIndicator(),
+                                                                                                              child: HaniGoldLoading(),
                                                                                                             );
                                                                                                           },
                                                                                                           errorBuilder: (context,
@@ -1732,17 +1734,8 @@ class DepositRequestGetOneView extends StatelessWidget {
           ),
         ],
       ),
-      floatingActionButton: isDesktop ? FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ): SizedBox.shrink(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

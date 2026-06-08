@@ -9,6 +9,7 @@ import 'package:hanigold_admin/src/domain/home/widget/menu_card.widget.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:hanigold_admin/src/widget/background_image_total.widget.dart';
 
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
 
 class HomeView extends GetView<HomeController> {
@@ -478,67 +479,11 @@ class HomeView extends GetView<HomeController> {
           ]
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.buttonColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-      /* bottomNavigationBar: isDesktop
-          ? null
-          : NavigationBar(
-        backgroundColor: AppColor.secondaryColor,
-        surfaceTintColor: AppColor.secondaryColor,
-        indicatorColor: AppColor.primaryColor.withOpacity(0.15),
-        selectedIndex: mobileSelectedIndex,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.list_alt), label: 'سفارشات'),
-          NavigationDestination(icon: Icon(Icons.swap_horiz), label: 'دریافت/پرداخت'),
-          NavigationDestination(icon: Icon(Icons.people_alt), label: 'کاربران'),
-          NavigationDestination(icon: Icon(Icons.settings), label: 'تنظیمات'),
-        ],
-        onDestinationSelected: (index) {
-          switch (index) {
-            case 0:
-              Get.toNamed('/orderList');
-              break;
-            case 1:
-              Get.toNamed('/inventoryList');
-              break;
-            case 2:
-              Get.toNamed('/userList');
-              break;
-            case 3:
-              Get.toNamed('/setting');
-              break;
-          }
-        },
-      ),*/
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
-  /*int _selectedIndexForRoute(String? route) {
-    switch (route) {
-      case '/orderList':
-      case '/orderCreate':
-        return 0;
-      case '/inventoryList':
-      case '/inventoryCreate':
-        return 1;
-      case '/userList':
-      case '/personList':
-      case '/insertUser':
-        return 2;
-      case '/setting':
-        return 3;
-      default:
-        return 0;
-    }
-  }*/
+
   Widget userProfile() {
     final box = GetStorage();
     return Row(

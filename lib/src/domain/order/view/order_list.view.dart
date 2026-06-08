@@ -17,6 +17,8 @@ import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/repository/url/base_url.dart';
 import '../../../widget/app_drawer.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
+import '../../../widget/hanigold_loading.widget.dart';
 import '../../../widget/item_weight_calculator_dialog.widget.dart';
 import '../../../widget/pager_widget.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -86,7 +88,7 @@ class _OrderListViewState extends State<OrderListView> {
                              orderController.stateBalance.value ==
                                 PageState.loading ?
                             Center(
-                            child: CircularProgressIndicator()) :
+                            child: HaniGoldLoading()) :
                             orderController.totalBalanceList.isNotEmpty ?
                               Padding(
                               padding: EdgeInsets.symmetric(horizontal: isDesktop ? 45 : 30 ),
@@ -106,7 +108,7 @@ class _OrderListViewState extends State<OrderListView> {
                                     var totalBalance = orderController.totalBalanceList[index];
                                       if (orderController.stateBalance.value == PageState.loading) {
                                         //   EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-                                        return Center(child: CircularProgressIndicator());
+                                        return Center(child: HaniGoldLoading());
                                       }else if (orderController.stateBalance.value == PageState.empty) {
                                         //  EasyLoading.dismiss();
                                         return EmptyPage(
@@ -160,15 +162,8 @@ class _OrderListViewState extends State<OrderListView> {
                                                 .searchController,
                                             style: AppTextStyle.labelText,
                                             textInputAction: TextInputAction.search,
-                                            onFieldSubmitted: (value) async {
-                                              if (value.isNotEmpty) {
-                                                await orderController
-                                                    .searchAccounts(value);
-                                                showSearchResults(context);
-                                              } else {
-                                                orderController.clearSearch();
-                                              }
-                                            },
+                                            onFieldSubmitted: (value) =>
+                                                _handleUserSearch(context, value),
                                             decoration: InputDecoration(
                                               contentPadding: EdgeInsets.symmetric(
                                                 vertical: isDesktop ? 16 : 12,
@@ -183,20 +178,12 @@ class _OrderListViewState extends State<OrderListView> {
                                               hintText: "جستجوی سفارش ... ",
                                               hintStyle: AppTextStyle.labelText,
                                               prefixIcon: IconButton(
-                                                  onPressed: () async {
-                                                    if (orderController
-                                                        .searchController.text
-                                                        .isNotEmpty) {
-                                                      await orderController
-                                                          .searchAccounts(
-                                                          orderController
-                                                              .searchController.text
-                                                      );
-                                                      showSearchResults(context);
-                                                    } else {
-                                                      orderController.clearSearch();
-                                                    }
-                                                  },
+                                                  onPressed: () =>
+                                                      _handleUserSearch(
+                                                        context,
+                                                        orderController
+                                                            .searchController.text,
+                                                      ),
                                                   icon: Icon(
                                                     Icons.search,
                                                     color: AppColor.textColor,
@@ -226,15 +213,8 @@ class _OrderListViewState extends State<OrderListView> {
                                               style: AppTextStyle.labelText,
                                               textInputAction: TextInputAction
                                                   .search,
-                                              onFieldSubmitted: (value) async {
-                                                if (value.isNotEmpty) {
-                                                  await orderController
-                                                      .searchAccounts(value);
-                                                  showSearchResults(context);
-                                                } else {
-                                                  orderController.clearSearch();
-                                                }
-                                              },
+                                              onFieldSubmitted: (value) =>
+                                                  _handleUserSearch(context, value),
                                               decoration: InputDecoration(
                                                 contentPadding: EdgeInsets
                                                     .symmetric(
@@ -250,22 +230,12 @@ class _OrderListViewState extends State<OrderListView> {
                                                 hintText: "جستجوی سفارش ... ",
                                                 hintStyle: AppTextStyle.labelText,
                                                 prefixIcon: IconButton(
-                                                    onPressed: () async {
-                                                      if (orderController
-                                                          .searchController
-                                                          .text.isNotEmpty) {
-                                                        await orderController
-                                                            .searchAccounts(
-                                                            orderController
-                                                                .searchController
-                                                                .text
-                                                        );
-                                                        showSearchResults(context);
-                                                      } else {
-                                                        orderController
-                                                            .clearSearch();
-                                                      }
-                                                    },
+                                                    onPressed: () =>
+                                                        _handleUserSearch(
+                                                          context,
+                                                          orderController
+                                                              .searchController.text,
+                                                        ),
                                                     icon: Icon(
                                                       Icons.search,
                                                       color: AppColor.textColor,
@@ -1408,7 +1378,7 @@ class _OrderListViewState extends State<OrderListView> {
                               if (orderController.state.value ==
                                   PageState.loading) {
                                 //   EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-                                return Center(child: CircularProgressIndicator());
+                                return Center(child: HaniGoldLoading.large());
                               }
                               else if (orderController.state.value ==
                                   PageState.empty) {
@@ -1469,15 +1439,8 @@ class _OrderListViewState extends State<OrderListView> {
                                                                         .searchController,
                                                                     style: AppTextStyle.labelText,
                                                                     textInputAction: TextInputAction.search,
-                                                                    onFieldSubmitted: (value) async {
-                                                                      if (value.isNotEmpty) {
-                                                                        await orderController
-                                                                            .searchAccounts(value);
-                                                                        showSearchResults(context);
-                                                                      } else {
-                                                                        orderController.clearSearch();
-                                                                      }
-                                                                    },
+                                                                    onFieldSubmitted: (value) =>
+                                                                        _handleUserSearch(context, value),
                                                                     decoration: InputDecoration(
                                                                       contentPadding: EdgeInsets.symmetric(
                                                                         vertical: isDesktop ? 16 : 12,
@@ -1492,20 +1455,12 @@ class _OrderListViewState extends State<OrderListView> {
                                                                       hintText: "جستجوی سفارش ... ",
                                                                       hintStyle: AppTextStyle.labelText,
                                                                       prefixIcon: IconButton(
-                                                                          onPressed: () async {
-                                                                            if (orderController
-                                                                                .searchController.text
-                                                                                .isNotEmpty) {
-                                                                              await orderController
-                                                                                  .searchAccounts(
-                                                                                  orderController
-                                                                                      .searchController.text
-                                                                              );
-                                                                              showSearchResults(context);
-                                                                            } else {
-                                                                              orderController.clearSearch();
-                                                                            }
-                                                                          },
+                                                                          onPressed: () =>
+                                                                              _handleUserSearch(
+                                                                                context,
+                                                                                orderController
+                                                                                    .searchController.text,
+                                                                              ),
                                                                           icon: Icon(
                                                                             Icons.search,
                                                                             color: AppColor.textColor,
@@ -3721,7 +3676,7 @@ class _OrderListViewState extends State<OrderListView> {
                                                 return Container(
                                                   padding: EdgeInsets.all(16),
                                                   child: Center(
-                                                    child: CircularProgressIndicator(),
+                                                    child: HaniGoldLoading(),
                                                   ),
                                                 );
                                               }
@@ -3781,17 +3736,8 @@ class _OrderListViewState extends State<OrderListView> {
                 ),) : SizedBox.shrink()
           ],
         ),
-        floatingActionButton: isDesktop ? FloatingActionButton(
-          onPressed: () {
-            Get.dialog(const ChatDialog());
-          },
-          backgroundColor: AppColor.primaryColor,
-          child: Icon(
-            Icons.chat,
-            color: Colors.white,
-          ),
-        ) : SizedBox.shrink(),
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+        floatingActionButton: const ChatFloatingButton(),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       );
     });
   }
@@ -3816,26 +3762,57 @@ class _OrderListViewState extends State<OrderListView> {
     );
   }
 
+  Future<void> _handleUserSearch(BuildContext context, String value) async {
+    final query = value.trim();
+    if (query.isEmpty) {
+      orderController.clearSearch();
+      return;
+    }
+    await orderController.searchAccounts(query);
+    if (!context.mounted) return;
+    showSearchResults(context);
+  }
+
   void showSearchResults(BuildContext context) {
+    final isDesktop = ResponsiveBreakpoints.of(context).largerThan(TABLET);
     showDialog(
       context: context,
       builder: (context) =>
           AlertDialog(backgroundColor: AppColor.backGroundColor,
-            title: Text('انتخاب کنید', style: AppTextStyle.smallTitleText,),
+            title: Obx(() => Text(
+              orderController.searchedAccounts.isEmpty
+                  ? 'جستجو'
+                  : 'انتخاب کنید',
+              style: AppTextStyle.smallTitleText,
+            )),
             content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: orderController.searchedAccounts.length,
-                itemBuilder: (context, index) {
-                  final account = orderController.searchedAccounts[index];
-                  return ListTile(
-                    title: Text(account.name ?? '',
-                      style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
-                    onTap: () => orderController.selectAccount(account),
+              width:isDesktop ? Get.width*0.5 : Get.width*0.8,
+              child: Obx(() {
+                if (orderController.searchedAccounts.isEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: Text(
+                        'کاربری با این نام وجود ندارد',
+                        style: AppTextStyle.labelText,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
                   );
-                },
-              ),
+                }
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: orderController.searchedAccounts.length,
+                  itemBuilder: (context, index) {
+                    final account = orderController.searchedAccounts[index];
+                    return ListTile(
+                      title: Text(account.name ?? '',
+                        style: AppTextStyle.bodyText.copyWith(fontSize: 15),),
+                      onTap: () => orderController.selectAccount(account),
+                    );
+                  },
+                );
+              }),
             ),
             actions: [
               TextButton(

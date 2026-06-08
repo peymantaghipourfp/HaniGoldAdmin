@@ -9,11 +9,13 @@ import 'package:hanigold_admin/src/config/const/app_text_style.dart';
 import 'package:hanigold_admin/src/config/repository/url/base_url.dart';
 import 'package:hanigold_admin/src/domain/withdraw/controller/withdraw_getOne.controller.dart';
 import 'package:hanigold_admin/src/widget/custom_appbar1.widget.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:persian_number_utility/persian_number_utility.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import '../../../config/const/app_color.dart';
 import '../../../widget/app_drawer.widget.dart';
 import '../../../widget/background_image.widget.dart';
+import '../../../widget/chat_floating_button.widget.dart';
 import '../../../widget/empty.dart';
 import '../../../widget/err_page.dart';
 import '../../chat/widget/chat_dialog.widget.dart';
@@ -93,11 +95,11 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                       padding: const EdgeInsets.all(8.0),
                       child:  Obx(() {
                           if (withdrawGetOneController.state.value == PageState.loading) {
-                            EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
-                            return Center(child: CircularProgressIndicator());
+                            //EasyLoading.show(status: 'دریافت اطلاعات از سرور...');
+                            return Center(child: HaniGoldLoadingPage(message: 'دریافت اطلاعات از سرور...',));
                           }
                           else if (withdrawGetOneController.state.value == PageState.empty) {
-                            EasyLoading.dismiss();
+                            //EasyLoading.dismiss();
                             return EmptyPage(
                               title: 'درخواستی وجود ندارد',
                               callback: () {
@@ -106,7 +108,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                             );
                           }
                           else if (withdrawGetOneController.state.value == PageState.list) {
-                            EasyLoading.dismiss();
+                            //EasyLoading.dismiss();
                             var getWithdraw = withdrawGetOneController.getOneWithdraw.value;
                             if (getWithdraw == null) {
                               return EmptyPage();
@@ -1191,7 +1193,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                                                               null)
                                                                                                                                             return child;
                                                                                                                                           return Center(
-                                                                                                                                            child: CircularProgressIndicator(),
+                                                                                                                                            child: HaniGoldLoading(),
                                                                                                                                           );
                                                                                                                                         },
                                                                                                                                         errorBuilder: (context,
@@ -1545,7 +1547,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                       padding: const EdgeInsets.all(8.0),
                       child:  Obx(() {
                         if (withdrawGetOneController.state.value == PageState.loading) {
-                          return Center(child: CircularProgressIndicator());
+                          return Center(child: HaniGoldLoading());
                         }
                         else if (withdrawGetOneController.state.value == PageState.empty) {
                           return EmptyPage(
@@ -2591,7 +2593,7 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
                                                                                                                       null)
                                                                                                                     return child;
                                                                                                                   return Center(
-                                                                                                                    child: CircularProgressIndicator(),
+                                                                                                                    child: HaniGoldLoading(),
                                                                                                                   );
                                                                                                                 },
                                                                                                                 errorBuilder: (context,
@@ -2936,17 +2938,8 @@ class _WithdrawGetOneViewState extends State<WithdrawGetOneView> with TickerProv
           ),
         ],
       ),
-      floatingActionButton:isDesktop? FloatingActionButton(
-        onPressed: () {
-          Get.dialog(const ChatDialog());
-        },
-        backgroundColor: AppColor.primaryColor,
-        child: Icon(
-          Icons.chat,
-          color: Colors.white,
-        ),
-      ) : SizedBox.shrink(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
+      floatingActionButton: const ChatFloatingButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 

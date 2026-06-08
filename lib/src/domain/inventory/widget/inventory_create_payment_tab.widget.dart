@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:hanigold_admin/src/domain/inventory/controller/inventory_create_payment.controller.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:hanigold_admin/src/widget/pager_widget1.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
@@ -1011,11 +1012,7 @@ class _InventoryCreatePaymentTabWidgetState
     return Obx(() {
       return
         inventoryCreatePaymentController.isLoading.value ?
-        CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<
-              Color>(
-              AppColor.textColor),
-        ) :
+        HaniGoldLoading() :
         // لیست ForPayment مربوط به هر ولت
         SizedBox(
           height: isMobile ? Get.height * 0.8 : Get.height * 0.75, // تعیین ارتفاع ثابت
