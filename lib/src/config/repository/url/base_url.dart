@@ -9,5 +9,5 @@ class BaseUrl{
   static const String baseUrl="http://172.30.25.60:10000/api/";
 
   // testServer
-  //static const String baseUrl="http://10.17.232.18:2000/api/";
+  //static const String baseUrl="https://decombi.ir:3045/api/";
 }
