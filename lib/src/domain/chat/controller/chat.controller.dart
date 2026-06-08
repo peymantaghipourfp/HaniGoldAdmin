@@ -48,6 +48,7 @@ import '../utils/chat_typing_match.dart';
 import '../utils/chat_attachment_utils.dart';
 import '../utils/chat_forward_outbound.dart';
 import '../utils/chat_reply_resolver.dart';
+import '../utils/chat_conversation_unread.dart';
 import '../widget/chat_row.dart';
 import 'chat_fab.controller.dart';
 
@@ -153,11 +154,14 @@ class ChatController extends GetxController {
   // Scroll / composer UX state
   final RxBool isNearBottom = true.obs;
   final RxInt pendingNewMessages = 0.obs;
-  /// Unread count in the open conversation (jump pill); synced from [ChatModel.unreadMessageCount] and `chat.seen` broadcasts.
+  /// Unread count for [JumpToLatestPill]; seeded from [ChatModel.unreadMessageCount], then
+  /// updated locally as the admin scrolls (separate from outgoing double-check / seen ticks).
   final RxInt conversationUnreadCount = 0.obs;
 
   int _adminMarkedSeenSeq = 0;
-  String? _conversationSeenMarkedChatId;
+  int _conversationUnreadAnchorSeq = 0;
+  Timer? _seenScrollDebounce;
+  static const Duration _seenScrollDebounceDelay = Duration(milliseconds: 120);
 
   /// Scroll to [ChatModel.clientSeenSeq] once the message [ListView] has mounted.
   int? _pendingConversationAnchorSeq;
@@ -534,6 +538,7 @@ class ChatController extends GetxController {
     searchController.dispose();
     chatAccountsSearchController.dispose();
     _messageSearchDebounce?.cancel();
+    _seenScrollDebounce?.cancel();
     messagesSearchController.dispose();
     messageFocusNode.dispose();
     super.onClose();
@@ -542,22 +547,80 @@ class ChatController extends GetxController {
   void _onMessagesScrollChanged() {
     if (!messagesScrollController.hasClients) return;
     isNearBottom.value = messagesScrollController.position.pixels < 80;
+    _seenScrollDebounce?.cancel();
+    _seenScrollDebounce = Timer(_seenScrollDebounceDelay, () {
+      unawaited(_syncSeenFromScrollPosition());
+    });
   }
 
-  /// Marks every message in the open thread read once when [ConversationPanel] is shown.
-  Future<void> markConversationSeenOnEnter() async {
+  /// Advances admin read cursor from scroll position (debounced). Unread pill decreases
+  /// as newer messages enter the viewport; does not run on panel open.
+  Future<void> _syncSeenFromScrollPosition() async {
     final chatId = selectedChat.value?.chatId?.trim();
     if (chatId == null || chatId.isEmpty) return;
-    if (isLoadingMessages.value) return;
-    if (_conversationSeenMarkedChatId == chatId) return;
+    if (isLoadingMessages.value || chatMessages.isEmpty) return;
 
-    final upToSeq = _maxLoadedMessageSeq() ?? selectedChat.value?.lastMessageSeq;
-    if (upToSeq == null || upToSeq <= 0) return;
+    final upToSeq = isNearBottom.value
+        ? _maxLoadedMessageSeq()
+        : _maxVisibleMessageSeqInViewport();
+    if (upToSeq == null || upToSeq <= _adminMarkedSeenSeq) return;
 
-    await markMessagesSeenUpTo(upToSeq, force: true);
-    if (_adminMarkedSeenSeq >= upToSeq) {
-      _conversationSeenMarkedChatId = chatId;
+    await markMessagesSeenUpTo(upToSeq);
+  }
+
+  int? _maxVisibleMessageSeqInViewport() {
+    if (!messagesScrollController.hasClients) return null;
+
+    final scrollContext =
+        messagesScrollController.position.context.notificationContext;
+    if (scrollContext == null) return null;
+
+    final viewportRender = scrollContext.findRenderObject() as RenderBox?;
+    if (viewportRender == null || !viewportRender.hasSize) return null;
+
+    final viewportRect = Rect.fromPoints(
+      viewportRender.localToGlobal(Offset.zero),
+      viewportRender.localToGlobal(viewportRender.size.bottomRight(Offset.zero)),
+    );
+
+    final chatId = selectedChat.value?.chatId?.trim();
+    int? maxSeq;
+
+    for (final entry in _messageBubbleScrollKeys.entries) {
+      final bubbleCtx = entry.value.currentContext;
+      if (bubbleCtx == null) continue;
+
+      final box = bubbleCtx.findRenderObject() as RenderBox?;
+      if (box == null || !box.attached || !box.hasSize) continue;
+
+      final bubbleRect = Rect.fromPoints(
+        box.localToGlobal(Offset.zero),
+        box.localToGlobal(box.size.bottomRight(Offset.zero)),
+      );
+      if (!bubbleRect.overlaps(viewportRect)) continue;
+
+      final seq = _seqForBubbleScrollKeyId(entry.key, chatId);
+      if (seq == null) continue;
+      if (maxSeq == null || seq > maxSeq) maxSeq = seq;
     }
+
+    return maxSeq;
+  }
+
+  int? _seqForBubbleScrollKeyId(String keyId, String? chatId) {
+    if (keyId.startsWith('s:')) {
+      final parts = keyId.split(':');
+      if (parts.length != 3) return null;
+      if (chatId != null && parts[1] != chatId) return null;
+      return int.tryParse(parts[2]);
+    }
+
+    for (final m in chatMessages) {
+      if (_bubbleScrollKeyId(m) != keyId) continue;
+      if (chatId != null && m.chatId?.toString().trim() != chatId) continue;
+      return m.seq;
+    }
+    return null;
   }
 
   /// Smoothly scrolls the (reversed) message list to the newest message.
@@ -595,20 +658,24 @@ class ChatController extends GetxController {
     return max;
   }
 
-  int _countMessagesWithSeqAbove(int seq) {
-    var n = 0;
-    for (final m in chatMessages) {
-      final s = m.seq;
-      if (s != null && s > seq) n++;
-    }
-    return n;
-  }
-
   void _syncConversationUnreadFromChat(ChatModel chat) {
     final unread = chat.unreadMessageCount ?? 0;
     conversationUnreadCount.value = unread;
   }
 
+  void _updateConversationUnreadAfterSeen(int upToSeq) {
+    final chat = selectedChat.value;
+    final serverUnread =
+        chat?.unreadMessageCount ?? conversationUnreadCount.value;
+    conversationUnreadCount.value = conversationUnreadAfterSeen(
+      serverUnread: serverUnread,
+      anchorSeenSeq: _conversationUnreadAnchorSeq,
+      newSeenSeq: upToSeq,
+      loadedMessages: chatMessages,
+      lastMessageSeq: chat?.lastMessageSeq ?? 0,
+      maxLoadedSeq: _maxLoadedMessageSeq() ?? 0,
+    );
+  }
 
   Future<void> markMessagesSeenUpTo(int upToSeq, {bool force = false}) async {
     if (upToSeq <= 0) return;
@@ -619,7 +686,7 @@ class ChatController extends GetxController {
 
     final prevMarked = _adminMarkedSeenSeq;
     _adminMarkedSeenSeq = upToSeq;
-    conversationUnreadCount.value = _countMessagesWithSeqAbove(upToSeq);
+    _updateConversationUnreadAfterSeen(upToSeq);
 
     final sent = await sendSeenChatRequest(chatId, upToSeq);
     if (!sent) {
@@ -1054,6 +1121,7 @@ class ChatController extends GetxController {
         scrollToLatest(animate: false);
       }
       _completeInitialScrollSession(chatId);
+      await _syncSeenFromScrollPosition();
       return;
     }
 
@@ -1084,6 +1152,7 @@ class ChatController extends GetxController {
     }
 
     _completeInitialScrollSession(chatId);
+    await _syncSeenFromScrollPosition();
   }
 
   void _prepareConversationState(ChatModel chat) {
@@ -1094,10 +1163,11 @@ class ChatController extends GetxController {
     replyToMessage.value = null;
     messageController.clear();
     pendingNewMessages.value = 0;
-    _conversationSeenMarkedChatId = null;
+    _seenScrollDebounce?.cancel();
 
     final lastSeen = chat.clientSeenSeq ?? 0;
     _adminMarkedSeenSeq = lastSeen;
+    _conversationUnreadAnchorSeq = lastSeen;
     _syncConversationUnreadFromChat(chat);
     _scheduleInitialConversationScroll(chat);
 
@@ -1506,8 +1576,7 @@ class ChatController extends GetxController {
           }
         } else {
           pendingNewMessages.value++;
-          conversationUnreadCount.value =
-              _countMessagesWithSeqAbove(_adminMarkedSeenSeq);
+          _updateConversationUnreadAfterSeen(_adminMarkedSeenSeq);
         }
       } else {
         final exists = chatMessages.any((m) =>
@@ -1543,8 +1612,7 @@ class ChatController extends GetxController {
             }
           } else {
             pendingNewMessages.value++;
-            conversationUnreadCount.value =
-                _countMessagesWithSeqAbove(_adminMarkedSeenSeq);
+            _updateConversationUnreadAfterSeen(_adminMarkedSeenSeq);
           }
         } else {
           debugMessageListAction = 'duplicate-skipped';
@@ -3834,7 +3902,8 @@ class ChatController extends GetxController {
     conversationUnreadCount.value = 0;
     isNearBottom.value = true;
     _adminMarkedSeenSeq = 0;
-    _conversationSeenMarkedChatId = null;
+    _conversationUnreadAnchorSeq = 0;
+    _seenScrollDebounce?.cancel();
     _pendingConversationAnchorSeq = null;
     _initialScrollAppliedChatId = null;
     _initialScrollRetryCount = 0;
@@ -3966,7 +4035,8 @@ class ChatController extends GetxController {
     pendingNewMessages.value = 0;
     conversationUnreadCount.value = 0;
     _adminMarkedSeenSeq = 0;
-    _conversationSeenMarkedChatId = null;
+    _conversationUnreadAnchorSeq = 0;
+    _seenScrollDebounce?.cancel();
     _pendingConversationAnchorSeq = null;
     _initialScrollAppliedChatId = null;
     _initialScrollRetryCount = 0;

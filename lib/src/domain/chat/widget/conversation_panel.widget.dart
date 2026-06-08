@@ -44,7 +44,6 @@ class ConversationPanel extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: Column(
         children: [
-          _ConversationSeenOnEnter(controller: controller),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -303,47 +302,6 @@ class ConversationPanel extends StatelessWidget {
 
   }
 
-}
-
-/// Sends one `chat.seen` with the latest [seq] when the panel opens (not on scroll).
-class _ConversationSeenOnEnter extends StatefulWidget {
-  const _ConversationSeenOnEnter({required this.controller});
-
-  final ChatController controller;
-
-  @override
-  State<_ConversationSeenOnEnter> createState() =>
-      _ConversationSeenOnEnterState();
-}
-
-class _ConversationSeenOnEnterState extends State<_ConversationSeenOnEnter> {
-  late final Worker _seenOnEnterWorker;
-
-  @override
-  void initState() {
-    super.initState();
-    _seenOnEnterWorker = everAll(
-      [
-        widget.controller.isLoadingMessages,
-        widget.controller.selectedChat,
-      ],
-          (_) => _tryMarkSeen(),
-    );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _tryMarkSeen());
-  }
-
-  @override
-  void dispose() {
-    _seenOnEnterWorker.dispose();
-    super.dispose();
-  }
-
-  void _tryMarkSeen() {
-    unawaited(widget.controller.markConversationSeenOnEnter());
-  }
-
-  @override
-  Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
 /// Message list with initial scroll-to-last-read after the first frame.

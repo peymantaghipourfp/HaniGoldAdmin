@@ -16,9 +16,7 @@ class JumpToLatestPill extends StatelessWidget {
     return GestureDetector(
       onTap: () => controller.jumpToLatestAndMarkAllRead(),
       child: Obx(() {
-        final unread = controller.conversationUnreadCount.value;
-        final pending = controller.pendingNewMessages.value;
-        final badgeCount = unread;
+        final badgeCount = controller.conversationUnreadCount.value;
         /*final label = pending > 0
             ? '$pending پیام جدید'
             : null;*/
