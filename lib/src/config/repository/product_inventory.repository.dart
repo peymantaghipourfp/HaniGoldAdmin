@@ -266,7 +266,7 @@ class ProductInventoryRepository{
                   {
                     "fieldName": "Id",
                     "filterValue": itemId,
-                    "filterType": 5,
+                    "filterType": 4,
                     "RefTable": "Item"
                   },
               ]
