@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -18,8 +19,6 @@ import '../../../config/const/toast.service.dart';
 import '../../../config/repository/account.repository.dart';
 import '../../../config/repository/auth.repository.dart';
 import '../../auth/model/user_login.model.dart';
-import '../../chat/controller/chat.controller.dart';
-import '../../chat/model/socket_chat.model.dart';
 import '../../order/model/socket_order.model.dart';
 import '../../product/model/socket_item.model.dart';
 
@@ -41,6 +40,7 @@ class HomeController extends GetxController{
     {'text':'تنظیمات','route':'/tools'},
   ];*/
 
+
   SocketService socketService = Get.find<SocketService>();
   StreamSubscription? _socketSubscription;
   final AudioService _audioService = AudioService();
@@ -59,6 +59,7 @@ class HomeController extends GetxController{
   var isSocketConnected = false.obs;
   RxBool showPasswordOld = true.obs;
   RxBool showPasswordNew = true.obs;
+
 
   @override
   void onInit() {
@@ -149,12 +150,12 @@ class HomeController extends GetxController{
             Get.find<NotificationController>().getNotificationListPager();
           }
           break;
-        case 'message':
+        /*case 'chat.message':
         // Refresh chat data if controller exists
           if (Get.isRegistered<ChatController>()) {
             Get.find<ChatController>().loadChatAccountList(refresh: true);
           }
-          break;
+          break;*/
       }
     } catch (e) {
       Get.log('Error refreshing data for channel $channel: $e');
@@ -169,6 +170,7 @@ class HomeController extends GetxController{
       await socketService.ensureConnected();
     }
   }
+
 
   void listenToSocket() {
     _socketSubscription?.cancel();
@@ -290,7 +292,7 @@ class HomeController extends GetxController{
           else if(data['channel'] == 'notification'){
             final socketNotification = NotificationModel.fromJson(data);
             playNotificationSoundAll();
-            toastService.show(' اعلان جدید ${socketNotification.title} ');
+            //toastService.show(' اعلان جدید ${socketNotification.title} ');
             /*Fluttertoast.showToast(
               msg: ' اعلان جدید ${socketNotification.title} ',
               toastLength: Toast.LENGTH_SHORT,
@@ -302,23 +304,12 @@ class HomeController extends GetxController{
               webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
                 webPosition: "center"
             );*/
-          }else if(data['channel'] == 'message'){
-            final socketChat = SocketChatModel.fromJson(data);
-            toastService.show(' پیام جدید از ${socketChat.userName} ');
-            /*Fluttertoast.showToast(
-              msg: ' پیام جدید از ${socketChat.userName} ',
-              toastLength: Toast.LENGTH_SHORT,
-              gravity: ToastGravity.TOP,
-              timeInSecForIosWeb: 3,
-              backgroundColor: AppColor.appBarColor,
-              textColor: AppColor.textColor,
-              fontSize: 15,
-              webBgColor: "linear-gradient(to right, 0xff243748, 0xff4b749f)",
-                webPosition: "center"
-            );*/
-          }
-          else{
-            print(data['channel']);
+          } else if (data['channel'] == 'ack' ||
+              (data['channel'] is String &&
+                  (data['channel'] as String).startsWith('chat.'))) {
+            // Handled by [ChatFabController] (ack totals + chat fan-out).
+          } else {
+            debugPrint('Unhandled socket channel: ${data['channel']}');
           }
           //_socketSubscription?.cancel();
         } catch (e) {
