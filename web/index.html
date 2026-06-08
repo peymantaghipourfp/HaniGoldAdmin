@@ -1,121 +1,159 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 
-  <!-- iOS meta tags & icons -->
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="hanigold_admin">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
+  <title>Hanigold</title>
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>hanigold_admin</title>
-  <link rel="manifest" href="manifest.json">
-  <!-- Audio preload for web -->
-  <script>
-    // Global audio context for web audio support
-    let audioContext = null;
-    let audioEnabled = false;
+  <!-- 🎨 LOADING STYLE -->
+  <style>
+    body {
+      margin: 0;
+      background: #000;
+      overflow: hidden;
+      font-family: sans-serif;
+      font-display: swap;
+    }
 
-    // Function to enable audio context (called on user interaction)
-    function enableAudio() {
-      if (audioEnabled) return;
+    #loader {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, #111, #000);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
 
-      try {
-        // Create audio context on first user interaction
-        if (!audioContext) {
-          audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        }
+    /* Logo */
+    .logo-img {
+      width: 150px;
+      margin-bottom: 25px;
+      animation: glow 2s ease-in-out infinite alternate;
+      will-change: filter;
+    }
 
-        // Resume audio context if suspended
-        if (audioContext.state === 'suspended') {
-          audioContext.resume();
-        }
-
-        audioEnabled = true;
-        console.log('Web audio enabled successfully');
-
-        // Store in localStorage to remember user preference
-        localStorage.setItem('audioEnabled', 'true');
-      } catch (error) {
-        console.error('Error enabling web audio:', error);
+    @keyframes glow {
+      from {
+        filter: drop-shadow(0 0 10px #d4af37);
+      }
+      to {
+        filter: drop-shadow(0 0 30px #FFD700);
       }
     }
-    // Preload all audio assets for better web performance
-    window.addEventListener('load', function() {
-      // List of all sound files in the sounds folder
-      const soundFiles = [
-        'assets/sounds/notification.mp3',
-        'assets/sounds/notificationAll.mp3'
-        // Add more sound files here as needed:
-        // 'assets/sounds/other-sound.mp3',
-        // 'assets/sounds/another-sound.mp3'
-      ];
 
-      // Preload all sound files
-      soundFiles.forEach(function(soundFile) {
-        const audio = new Audio();
-        audio.preload = 'auto';
-        audio.src = soundFile;
+    /* Circular Loader */
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 215, 0, 0.2);
+      border-top: 4px solid #FFD700;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      will-change: transform;
+    }
 
-        // Handle preload events
-        audio.addEventListener('canplaythrough', function() {
-          console.log('Audio preloaded successfully:', soundFile);
-        });
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
 
-        audio.addEventListener('error', function(e) {
-          console.warn('Audio preload failed:', soundFile, e);
-        });
-      });
+    /* Fade out */
+    .fade-out {
+      opacity: 0;
+      transition: 0.6s ease;
+    }
+  </style>
+</head>
 
-      // Check if audio was previously enabled
-      if (localStorage.getItem('audioEnabled') === 'true') {
-        enableAudio();
+<body>
+
+<div id="loader">
+
+  <!-- لوگو -->
+  <img src="HaniGold.png" class="logo-img" loading="eager"/>
+
+  <!-- لودینگ دایره‌ای -->
+  <div class="spinner"></div>
+
+</div>
+
+<script>
+  // Flutter ready → hide loader
+  window.addEventListener('flutter-first-frame', () => {
+    const loader = document.getElementById("loader");
+    loader.classList.add("fade-out");
+
+    setTimeout(() => {
+      loader.remove();
+    }, 600);
+  });
+</script>
+<!-- 🔊 AUDIO (بدون تغییر) -->
+<script>
+  let audioContext = null;
+  let audioEnabled = false;
+
+  function enableAudio() {
+    if (audioEnabled) return;
+    try {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
       }
-    });
-
-    // Enable audio on any user interaction
-    document.addEventListener('click', enableAudio, { once: true });
-    document.addEventListener('touchstart', enableAudio, { once: true });
-    document.addEventListener('keydown', enableAudio, { once: true });
-
-    // Handle page visibility changes
-    document.addEventListener('visibilitychange', function() {
-      if (!document.hidden && audioContext && audioContext.state === 'suspended') {
+      if (audioContext.state === 'suspended') {
         audioContext.resume();
       }
-    });
-  </script>
-</head>
-<body>
-<script>
-  window.addEventListener('wheel', function(event) {
-    if (event.ctrlKey) {
-      event.preventDefault();
+      audioEnabled = true;
+      localStorage.setItem('audioEnabled', 'true');
+    } catch (error) {
+      console.error(error);
     }
-  }, { passive: false });
+  }
+
+  function preloadSounds() {
+    const files = [
+      'assets/sounds/notification.mp3',
+      'assets/sounds/notificationAll.mp3'
+    ];
+
+    files.forEach(src => {
+      const audio = new Audio();
+      audio.preload = 'auto';
+      audio.src = src;
+    });
+  }
+
+  document.addEventListener('click', function () {
+      enableAudio();
+      preloadSounds();
+        }, { once: true });
+  document.addEventListener('touchstart', function () {
+      enableAudio();
+      preloadSounds();
+        }, { once: true });
+  document.addEventListener('keydown', function () {
+      enableAudio();
+      preloadSounds();
+        }, { once: true });
 </script>
-<script src="flutter_bootstrap.js" async></script>
+<script>
+  {{flutter_js}}
+  {{flutter_build_config}}
+
+  if (typeof _flutter !== 'undefined') {
+    _flutter.loader.load({
+      config: {
+        canvasKitBaseUrl: "/canvaskit/"
+      }
+    });
+  }
+</script>
+
 </body>
 </html>
