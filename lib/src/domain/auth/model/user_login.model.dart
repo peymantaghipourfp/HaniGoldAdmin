@@ -25,6 +25,10 @@ class UserLoginModel {
   final int id;
   @JsonKey(name: "token")
   String? token;
+  @JsonKey(name: "totalUnreadMessageCount")
+  final int totalUnreadMessageCount;
+  @JsonKey(name: "waitingChatCount")
+  final int waitingChatCount;
   @JsonKey(name: "infos")
   final List<dynamic> infos;
 
@@ -35,6 +39,8 @@ class UserLoginModel {
     required this.rowNum,
     required this.id,
     this.token,
+    required this.totalUnreadMessageCount,
+    required this.waitingChatCount,
     required this.infos,
   });
 
@@ -44,6 +50,8 @@ class UserLoginModel {
     String? themeName,
     int? rowNum,
     int? id,
+    int? totalUnreadMessageCount,
+    int? waitingChatCount,
     String? token,
     List<dynamic>? infos,
   }) {
@@ -54,6 +62,8 @@ class UserLoginModel {
       rowNum: rowNum ?? this.rowNum,
       id: id ?? this.id,
       token: token ?? this.token,
+      totalUnreadMessageCount: totalUnreadMessageCount ?? this.totalUnreadMessageCount,
+      waitingChatCount: waitingChatCount ?? this.waitingChatCount,
       infos: infos ?? this.infos,
     );
   }

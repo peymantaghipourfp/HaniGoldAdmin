@@ -14,6 +14,8 @@ UserLoginModel _$UserLoginModelFromJson(Map<String, dynamic> json) =>
       rowNum: (json['rowNum'] as num).toInt(),
       id: (json['id'] as num).toInt(),
       token: json['token'] as String?,
+      totalUnreadMessageCount: (json['totalUnreadMessageCount'] as num).toInt(),
+      waitingChatCount: (json['waitingChatCount'] as num).toInt(),
       infos: json['infos'] as List<dynamic>,
     );
 
@@ -25,6 +27,8 @@ Map<String, dynamic> _$UserLoginModelToJson(UserLoginModel instance) =>
       'rowNum': instance.rowNum,
       'id': instance.id,
       'token': instance.token,
+      'totalUnreadMessageCount': instance.totalUnreadMessageCount,
+      'waitingChatCount': instance.waitingChatCount,
       'infos': instance.infos,
     };
 
