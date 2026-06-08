@@ -106,7 +106,6 @@ class OrderController extends BaseController{
   }
 
   void setError(String message){
-    state.value=PageState.err;
     errorMessage.value=message;
   }
 
@@ -367,17 +366,19 @@ class OrderController extends BaseController{
     }
   }
 
-  Future<void> searchAccounts(String name) async {
+  Future<bool> searchAccounts(String name) async {
     try {
       if (name.isEmpty) {
         searchedAccounts.clear();
-        return;
+        return false;
       }
 
-      final accounts = await accountRepository.searchAccountList(name,"");
+      final accounts = await accountRepository.searchAccountList(name, "");
       searchedAccounts.assignAll(accounts);
+      return accounts.isNotEmpty;
     } catch (e) {
       setError("خطا در جستجوی کاربران: ${e.toString()}");
+      return false;
     }
   }
 
@@ -394,6 +395,7 @@ class OrderController extends BaseController{
     currentPage.value = 1;
     itemsPerPage.value=25;
     selectedAccountId.value = 0;
+    hasMore.value=true;
     searchController.clear();
     searchedAccounts.clear();
     getOrderListPager();
