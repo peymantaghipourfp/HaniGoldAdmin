@@ -10,7 +10,9 @@ import 'package:hanigold_admin/src/config/const/socket.service.dart';
 import 'package:hanigold_admin/src/config/logger/app_logger.dart';
 import 'package:hanigold_admin/src/config/routes/route_page.dart';
 import 'package:hanigold_admin/src/config/tear_off_context.dart';
+import 'package:hanigold_admin/src/domain/chat/controller/chat_fab.controller.dart';
 import 'package:hanigold_admin/src/domain/home/controller/home.controller.dart';
+import 'package:hanigold_admin/src/widget/hanigold_loading.widget.dart';
 import 'package:hanigold_admin/src/widget/zoom_wrapper.dart';
 import 'package:persian_datetime_picker/persian_datetime_picker.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -23,6 +25,7 @@ void main(List<String> args) async {
   configLoading();
   await Get.putAsync(() async => SocketService(),permanent: true);
   Get.put(HomeController(), permanent: true);
+  Get.put(ChatFabController(), permanent: true);
 
   String initialRoute = '/splash';
   for (final arg in args) {
@@ -162,6 +165,33 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             selectionColor: Colors.white.withAlpha(100),
           ),
       ),
+      /*theme: () {
+        final t = ThemeData.dark(useMaterial3: true);
+        return t.copyWith(
+          colorScheme: ColorScheme.dark(
+            //primary: AppColor.baseColor,
+            primaryContainer: AppColor.secondary200Color,
+            secondary: AppColor.secondary3Color,
+            onSecondary: AppColor.backGroundColor1,
+            surface: AppColor.backGroundColor1,
+            surfaceContainerHighest: AppColor.secondary10Color,
+            surfaceContainerHigh: AppColor.secondary50Color,
+            surfaceContainer: AppColor.textFieldColor,
+            outlineVariant: AppColor.secondaryColor,
+            error: AppColor.errorColor,
+          ),
+          textTheme: t.textTheme.apply(fontFamily: 'IranSansR'),
+          appBarTheme: AppBarTheme(backgroundColor: AppColor.backGroundColor),
+          scaffoldBackgroundColor: AppColor.backGroundColor1,
+          iconTheme: IconThemeData(color: AppColor.textColor),
+          scrollbarTheme: ScrollbarThemeData().copyWith(
+            thumbColor: WidgetStateProperty.all(AppColor.secondaryColor.withAlpha(200)),
+          ),
+          textSelectionTheme: TextSelectionThemeData(
+            selectionColor: Colors.white.withAlpha(100),
+          ),
+        );
+      }(),*/
       debugShowCheckedModeBanner: false,
       getPages: RoutePage.routePage,
       initialRoute: widget.initialRoute,
@@ -183,6 +213,41 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 }
 void configLoading() {
+  const overlayIndicatorSize = 45.0;
+  EasyLoading.instance
+    ..displayDuration = const Duration(milliseconds: 2000)
+    ..loadingStyle = EasyLoadingStyle.custom
+    ..indicatorSize = overlayIndicatorSize
+    ..indicatorWidget = const HaniGoldLoading(size: overlayIndicatorSize)
+    ..radius = 10.0
+    ..progressColor = AppColor.dividerColor
+    ..backgroundColor = Colors.transparent
+    ..errorWidget = Container(
+      padding: const EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: AppColor.errorColor,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: const Icon(
+        Icons.error,
+        color: AppColor.appBarColor,
+        size: 38,
+      ),
+    )
+    ..successWidget = Icon(
+        Icons.check,
+        color: AppColor.primaryColor.withAlpha(200),
+        size: 38,
+      )
+    ..indicatorColor = AppColor.backGroundColor1
+    ..textColor = AppColor.backGroundColor1
+    ..maskColor = AppColor.secondary200Color.withAlpha(60)
+    ..textStyle=AppTextStyle.bodyText.copyWith(color: AppColor.dividerColor,fontWeight: FontWeight.bold)
+    ..userInteractions = true
+    ..dismissOnTap = true;
+}
+
+/*void configLoading() {
   EasyLoading.instance
     ..displayDuration = const Duration(milliseconds: 2000)
     ..indicatorType = EasyLoadingIndicatorType.cubeGrid
@@ -209,4 +274,4 @@ void configLoading() {
     ..textStyle=AppTextStyle.bodyText.copyWith(color: AppColor.backGroundColor1,fontWeight: FontWeight.bold)
     ..userInteractions = true
     ..dismissOnTap = true;
-}
+}*/
