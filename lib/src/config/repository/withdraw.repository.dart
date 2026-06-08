@@ -82,6 +82,7 @@ Future<ListWithdrawModel> getWithdrawListPager({
   required String name,
   required String ownerName,
   required String amountFilter,
+  required String depositRequestAccountName,
 })async{
     try{
       Map<String , dynamic> options=
@@ -119,6 +120,13 @@ Future<ListWithdrawModel> getWithdrawListPager({
                       "filterValue": ownerName,
                       "filterType": 0,
                       "RefTable": "WithdrawRequest"
+                    },
+                  if(depositRequestAccountName!="")
+                    {
+                      "fieldName": "DepositRequestAccountName",
+                      "filterValue": depositRequestAccountName,
+                      "filterType": 0,
+                      "RefTable": "Custom"
                     },
               ],
             },
