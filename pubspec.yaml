@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+6
+version: 1.0.0+8
 
 environment:
   sdk: ^3.6.0
@@ -45,6 +45,9 @@ dependencies:
   flutter_localization: ^0.3.3
   flutter_lints: ^6.0.0
   image_picker: ^1.2.0
+  file_picker: ^10.3.4
+  cross_file: ^0.3.5+2
+  desktop_drop: ^0.7.1
   permission_handler: ^12.0.1
   flutter_exit_app: ^2.0.0
   responsive_framework: ^1.5.1
@@ -55,6 +58,7 @@ dependencies:
   path_provider: ^2.1.5
   universal_html: ^2.2.4
   path: ^1.9.1
+  characters: ^1.4.1
   syncfusion_flutter_datagrid:
   excel: ^4.0.6
   file_saver: ^0.3.1
@@ -72,6 +76,8 @@ dependencies:
   syncfusion_flutter_charts: ^31.2.16
   flutter_smart_dialog: ^4.9.8
   logger: ^2.6.2
+  lottie: ^3.1.2
+  record: ^7.0.0
 
 
 dev_dependencies:
@@ -94,7 +100,7 @@ msix_config:
   publisher_display_name: Hanigold
   identity_name: com.Hanigold.myapp
   publisher: CN=Hanigold, O=Hanigold, C=IR
-  msix_version: 1.0.0.6
+  msix_version: 1.0.0.8
   logo_path: assets/icon/haniGold.png
   architecture: x64
   capabilities: internetClient, internetClientServer, privateNetworkClientServer, location, microphone, webcam, bluetooth, serialCommunication, usb, removableStorage, documentsLibrary, picturesLibrary, videosLibrary, musicLibrary
