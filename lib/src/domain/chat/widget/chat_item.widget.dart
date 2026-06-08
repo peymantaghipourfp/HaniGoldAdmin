@@ -111,7 +111,7 @@ class ChatItem extends StatelessWidget {
                 onPressed: () =>
                     showForwardChatDialog(context, controller, chat),
               ),
-            if (isOpen && !isFreeTopic && chat.unreadMessageCount == 0)
+            if (isOpen && !isFreeTopic)
               IconButton(
                 padding: EdgeInsets.zero,
                 tooltip: 'بستن چت',
