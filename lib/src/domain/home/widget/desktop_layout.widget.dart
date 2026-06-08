@@ -29,13 +29,13 @@ class _MainContent extends StatelessWidget {
     //final HomeTabsController tabsController = Get.put(HomeTabsController());
     return Container(
       padding: const EdgeInsets.all(30),
-      decoration: const BoxDecoration(
+      /*decoration: const BoxDecoration(
         image: DecorationImage(
           image: AssetImage('assets/images/bgHaniGold.png'),
           fit: BoxFit.fill,
           opacity: 0.1,
         ),
-      ),
+      ),*/
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -78,7 +78,7 @@ Widget _buildStatCard(String title, String value, IconData icon) {
   return Container(
     decoration: BoxDecoration(
       gradient: LinearGradient(
-        colors: [AppColor.secondary100Color, AppColor.secondaryColor],
+        colors: [AppColor.secondary100Color, AppColor.backGroundColor1],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       ),
