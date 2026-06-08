@@ -72,6 +72,7 @@ class WithdrawController extends BaseController{
   final TextEditingController ownerNameFilterController=TextEditingController();
   final TextEditingController amountFilterController=TextEditingController();
   final TextEditingController mobileFilterController=TextEditingController();
+  final TextEditingController depositRequestAccountNameFilterController = TextEditingController();
   RxList<WithdrawModel> withdrawList = RxList([]);
   RxList<WithdrawModel> withdrawListStatus = RxList([]);
   var depositRequestList=<DepositRequestModel>[].obs;
@@ -243,6 +244,7 @@ class WithdrawController extends BaseController{
           name: nameFilterController.text,
           ownerName: ownerNameFilterController.text,
           amountFilter: amountFilterController.text.replaceAll(',', ''),
+          depositRequestAccountName: depositRequestAccountNameFilterController.text,
         );
         if (fetchedWithdrawList.withdrawRequests!.isNotEmpty) {
           withdrawList.addAll(fetchedWithdrawList.withdrawRequests ?? []);
@@ -433,6 +435,7 @@ class WithdrawController extends BaseController{
         name: nameFilterController.text,
         ownerName: ownerNameFilterController.text,
         amountFilter: amountFilterController.text.replaceAll(',', ''),
+        depositRequestAccountName: depositRequestAccountNameFilterController.text,
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
@@ -458,6 +461,7 @@ class WithdrawController extends BaseController{
         name: nameFilterController.text,
         ownerName: ownerNameFilterController.text,
         amountFilter: amountFilterController.text.replaceAll(',', ''),
+        depositRequestAccountName: depositRequestAccountNameFilterController.text,
         toIndex: itemsPerPage.value, startDate: startDateFilter.value, endDate: endDateFilter.value,
       );
       isLoading.value=false;
@@ -1134,6 +1138,7 @@ class WithdrawController extends BaseController{
   void clearFilter() {
     nameFilterController.clear();
     ownerNameFilterController.clear();
+    depositRequestAccountNameFilterController.clear();
     amountFilterController.clear();
     dateStartController.clear();
     dateEndController.clear();
