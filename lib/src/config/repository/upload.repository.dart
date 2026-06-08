@@ -1,5 +1,3 @@
-
-
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
@@ -23,22 +21,22 @@ class UploadRepository{
     required String entityType,
   }) async {
 
-      String fileName = imageFile.path.split('/').last;
+    String fileName = imageFile.path.split('/').last;
 
-      FormData formData = FormData.fromMap({
-        "file": await MultipartFile.fromFile(imageFile.path, filename: fileName),
-      });
-      final response = await uploadDio.post("Attachment/uploadAttachment", data: formData,
-        options: Options(headers: {
+    FormData formData = FormData.fromMap({
+      "file": await MultipartFile.fromFile(imageFile.path, filename: fileName),
+    });
+    final response = await uploadDio.post("Attachment/uploadAttachment", data: formData,
+      options: Options(headers: {
         "Content-Type": "multipart/form-data","recordId": recordId, "type": type, "entityType": entityType,
-        },
+      },
       ),
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return response.data;
-      } else {
-        throw Exception("خطا در ارسال تصویر: ${response.statusMessage}");
-      }
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return response.data;
+    } else {
+      throw Exception("خطا در ارسال تصویر: ${response.statusMessage}");
+    }
   }
 }
 
