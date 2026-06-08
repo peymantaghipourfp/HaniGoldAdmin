@@ -61,7 +61,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
       child: Form(
         key: formKey,
         child: AlertDialog(
-          backgroundColor: AppColor.secondaryColor,
+          backgroundColor: AppColor.backGroundColor1,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20)),
           title: Text('فراموشی رمز عبور',
