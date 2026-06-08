@@ -31,4 +31,5 @@ class AppColor{
   static const Color textErrorColor=Color(0xffecc29c);
   //static const Color filterColor=Color(0xFF6200EA);
   static const Color filterColor=Color(0xFFAA00FF);
+  static const Color baseColor=Color(0xFFC66FF6);
 }
