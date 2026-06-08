@@ -31,6 +31,10 @@ class ChatModel {
   final String? accountName;
   @JsonKey(name: "lastMessageSeq")
   final int? lastMessageSeq;
+  @JsonKey(name: "lastSeenSeq")
+  final int? lastSeenSeq;
+  @JsonKey(name: "clientSeenSeq")
+  final int? clientSeenSeq;
   @JsonKey(name: "lastMessagePreview")
   final String? lastMessagePreview;
   @JsonKey(name: "lastMessageOn")
@@ -51,6 +55,10 @@ class ChatModel {
   final String? assignedAdminName;
   @JsonKey(name: "userId")
   final int? userId;
+  @JsonKey(name: "adminRole")
+  final int? adminRole;
+  @JsonKey(name: "adminRoleTitle")
+  final String? adminRoleTitle;
 
   ChatModel({
     required this.rowNum,
@@ -64,6 +72,8 @@ class ChatModel {
     required this.lastActivity,
     required this.accountName,
     required this.lastMessageSeq,
+    required this.lastSeenSeq,
+    required this.clientSeenSeq,
     required this.lastMessagePreview,
     required this.lastMessageOn,
     required this.totalMessageCount,
@@ -74,6 +84,8 @@ class ChatModel {
     required this.closedOn,
     required this.assignedAdminName,
     required this.userId,
+    required this.adminRole,
+    required this.adminRoleTitle,
   });
 
   factory ChatModel.fromJson(Map<String, dynamic> json) => _$ChatModelFromJson(json);

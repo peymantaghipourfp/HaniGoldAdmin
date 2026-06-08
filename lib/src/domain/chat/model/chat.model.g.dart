@@ -22,6 +22,8 @@ ChatModel _$ChatModelFromJson(Map<String, dynamic> json) => ChatModel(
           : DateTime.parse(json['lastActivity'] as String),
       accountName: json['accountName'] as String?,
       lastMessageSeq: (json['lastMessageSeq'] as num?)?.toInt(),
+      lastSeenSeq: (json['lastSeenSeq'] as num?)?.toInt(),
+      clientSeenSeq: (json['clientSeenSeq'] as num?)?.toInt(),
       lastMessagePreview: json['lastMessagePreview'] as String?,
       lastMessageOn: json['lastMessageOn'] == null
           ? null
@@ -36,6 +38,8 @@ ChatModel _$ChatModelFromJson(Map<String, dynamic> json) => ChatModel(
           : DateTime.parse(json['closedOn'] as String),
       assignedAdminName: json['assignedAdminName'] as String?,
       userId: (json['userId'] as num?)?.toInt(),
+      adminRole: (json['adminRole'] as num?)?.toInt(),
+      adminRoleTitle: json['adminRoleTitle'] as String?,
     );
 
 Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
@@ -50,6 +54,8 @@ Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
       'lastActivity': instance.lastActivity?.toIso8601String(),
       'accountName': instance.accountName,
       'lastMessageSeq': instance.lastMessageSeq,
+      'lastSeenSeq': instance.lastSeenSeq,
+      'clientSeenSeq': instance.clientSeenSeq,
       'lastMessagePreview': instance.lastMessagePreview,
       'lastMessageOn': instance.lastMessageOn?.toIso8601String(),
       'totalMessageCount': instance.totalMessageCount,
@@ -60,4 +66,6 @@ Map<String, dynamic> _$ChatModelToJson(ChatModel instance) => <String, dynamic>{
       'closedOn': instance.closedOn?.toIso8601String(),
       'assignedAdminName': instance.assignedAdminName,
       'userId': instance.userId,
+      'adminRole': instance.adminRole,
+      'adminRoleTitle': instance.adminRoleTitle,
     };
