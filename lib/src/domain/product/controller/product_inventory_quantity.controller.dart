@@ -237,7 +237,8 @@ class ProductInventoryQuantityController extends GetxController{
 
       Uint8List excelBytes = await productInventoryRepository.getInventoryQuantityExcel();
 
-      String fileName = 'ProductInventoryQuantity_${DateTime.now().toIso8601String()}.xlsx';
+      String fileName =
+          'ProductInventoryQuantity_${_safeTimestampForFileName()}.xlsx';
 
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
@@ -278,7 +279,8 @@ class ProductInventoryQuantityController extends GetxController{
       EasyLoading.show(status: 'دریافت فایل PDF...');
 
       var response = await productInventoryRepository.getInventoryQuantityPdf();
-      final fileName = 'product_inventory_quantity_${DateTime.now().toIso8601String()}.pdf';
+      final fileName =
+          'product_inventory_quantity_${_safeTimestampForFileName()}.pdf';
       if (kIsWeb) {
         final blob = html.Blob([response], 'application/pdf');
         final url = html.Url.createObjectUrlFromBlob(blob);
@@ -311,7 +313,8 @@ class ProductInventoryQuantityController extends GetxController{
         itemId: itemId,
       );
 
-      String fileName = 'RecieptRemaindedList_${DateTime.now().toIso8601String()}.xlsx';
+      String fileName =
+          'RecieptRemaindedList_${_safeTimestampForFileName()}.xlsx';
 
       if (kIsWeb) {
         final blob = html.Blob([excelBytes], 'application/vnd.ms-excel');
@@ -354,7 +357,8 @@ class ProductInventoryQuantityController extends GetxController{
       Uint8List response = await productInventoryRepository.getRemaindedListPdf(
         itemId: itemId,
       );
-      String fileName = "product_inventory_remainded_${DateTime.now().toIso8601String()}.pdf";
+      String fileName =
+          'product_inventory_remainded_${_safeTimestampForFileName()}.pdf';
       if (kIsWeb) {
         final blob = html.Blob([response], 'application/pdf');
         final url = html.Url.createObjectUrlFromBlob(blob);
@@ -380,3 +384,8 @@ class ProductInventoryQuantityController extends GetxController{
   }
 
 }
+
+/// ISO-8601 strings contain `:` which are invalid in Windows file names
+/// (breaks [Printing.sharePdf] / temp paths on desktop).
+String _safeTimestampForFileName() =>
+    DateTime.now().toIso8601String().replaceAll(':', '-');
