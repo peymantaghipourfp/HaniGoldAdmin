@@ -67,15 +67,15 @@ class AccountLevelController extends GetxController {
 
   // دریافت جزئیات یک سطح کاربر
   Future<AccountLevelModel?> getOneAccountLevel(int accountLevelId) async {
-    EasyLoading.show(status: 'در حال دریافت جزئیات...');
+    //EasyLoading.show(status: 'در حال دریافت جزئیات...');
     try {
       var response = await accountRepository.getOneAccountLevel(
         accountLevelId: accountLevelId,
       );
-      EasyLoading.dismiss();
+     // EasyLoading.dismiss();
       return response;
     } catch (e) {
-      EasyLoading.dismiss();
+      //EasyLoading.dismiss();
       Get.snackbar(
         'خطا',
         'خطا در دریافت جزئیات سطح کاربری: $e',

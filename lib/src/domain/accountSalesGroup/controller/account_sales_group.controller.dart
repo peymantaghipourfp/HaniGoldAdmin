@@ -51,15 +51,15 @@ class AccountSalesGroupController extends GetxController {
 
   // دریافت جزئیات یک زیرگروه
   Future<AccountSalesGroupModel?> getOneAccountSalesGroup(int accountSalesGroupId) async {
-    EasyLoading.show(status: 'در حال دریافت جزئیات...');
+    //EasyLoading.show(status: 'در حال دریافت جزئیات...');
     try {
       var response = await accountSalesGroupRepository.getOneAccountSalesGroup(
         accountSalesGroupId: accountSalesGroupId,
       );
-      EasyLoading.dismiss();
+     // EasyLoading.dismiss();
       return response;
     } catch (e) {
-      EasyLoading.dismiss();
+      //EasyLoading.dismiss();
       Get.snackbar(
         'خطا',
         'خطا در دریافت جزئیات زیرگروه قیمت گذاری: $e',
